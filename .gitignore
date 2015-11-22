@@ -1,0 +1,6 @@
+.DS_Store
+.tup/
+bin/
+build/
+vendor/reaper*.h
+vendor/WDL/

@@ -1,0 +1,14 @@
+CXX := c++
+
+CXXFLAGS := -Wall -Wextra -Werror -Wno-unused-parameter -pipe -fPIC
+CXXFLAGS += -fdiagnostics-color
+CXXFLAGS += -O2 -std=c++14
+CXXFLAGS += -Ivendor/ -Ivendor/WDL/WDL/
+
+LDFLAGS := -shared
+
+!build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
+!link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
+
+: foreach src/*.cpp |> !build |> build/%B.o
+: build/*.o |> !link |> bin/reapack.dylib
