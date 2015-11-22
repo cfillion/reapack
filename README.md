@@ -23,5 +23,5 @@ vendor
 ### OS X
 
 1. Install [tup](http://gittup.org/tup/) and Xcode Command Line Tools
-2. Run `tup` from this directory
-3. Copy or link bin/reapack.dylib to REAPER's extension directory
+2. Run `tup --quiet` from this directory
+3. Copy or link `bin/reaper_reapack.dylib` to REAPER's extension directory
