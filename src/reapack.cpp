@@ -1,6 +1,34 @@
 #include "reapack.hpp"
 
-ReaPack::ReaPack()
+#include "reaper_plugin_functions.h"
+
+void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
-  action.desc = "ReaPack: Package Manager";
+  m_instance = instance;
+  m_rec = rec;
+  m_mainHandle = GetMainHwnd();
+}
+
+void ReaPack::setupAction(const char *name, const char *desc,
+  gaccel_register_t *action, ReaPackCallback callback)
+{
+  action->desc = desc;
+  action->accel.cmd = m_rec->Register("command_id", (void *)name);
+
+  m_rec->Register("gaccel", action);
+  m_actions[action->accel.cmd] = callback;
+}
+
+bool ReaPack::execActions(const int id, const int)
+{
+  if(!m_actions.count(id))
+    return false;
+
+  m_actions.at(id)();
+  return true;
+}
+
+void ReaPack::toggleWindow()
+{
+  ShowMessageBox("Hello World!", "Test", 0);
 }
