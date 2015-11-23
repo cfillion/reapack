@@ -4,6 +4,7 @@ CXXFLAGS := -Wall -Wextra -Werror -Wno-unused-parameter -pipe -fPIC
 CXXFLAGS += -fdiagnostics-color
 CXXFLAGS += -O2 -std=c++14
 CXXFLAGS += -Ivendor/ -Ivendor/WDL/ -Ivendor/WDL/WDL/
+CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
 
 LDFLAGS := -dynamiclib
 

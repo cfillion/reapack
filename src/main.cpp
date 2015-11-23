@@ -1,13 +1,13 @@
-#include "global.hpp"
+#include "reapack.hpp"
 
 #define REAPERAPI_IMPLEMENT
 #include "reaper_plugin_functions.h"
 
-static Global global;
+static ReaPack reapack;
 
 bool commandHook(const int command, const int flag)
 {
-  if(command != global.action.accel.cmd)
+  if(command != reapack.actionId())
     return false;
 
   ShowMessageBox("Hello World!", "Test", 0);
@@ -17,8 +17,7 @@ bool commandHook(const int command, const int flag)
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
-  global.instance = instance;
-  global.action.desc = "ReaPack: Package Manager";
+  reapack.instance = instance;
 
   if(!rec || rec->caller_version != REAPER_PLUGIN_VERSION || !rec->GetFunc)
     return 0;
@@ -28,8 +27,8 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   rec->Register("hookcommand", (void *)commandHook);
 
-  global.action.accel.cmd = rec->Register("command_id", (void *)"REAPACKMGR");
-  rec->Register("gaccel", &global.action);
+  reapack.setActionId(rec->Register("command_id", (void *)"REAPACKMGR"));
+  rec->Register("gaccel", &reapack.action);
 
   return 1;
 }
