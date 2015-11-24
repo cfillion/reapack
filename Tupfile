@@ -1,6 +1,6 @@
 CXX := c++
 
-CXXFLAGS := -Wall -Wextra -Wno-unused-parameter -pipe -fPIC
+CXXFLAGS := -Wall -Wextra -Werror -Wno-unused-parameter -pipe -fPIC
 CXXFLAGS += -fdiagnostics-color
 CXXFLAGS += -O2 -std=c++14
 CXXFLAGS += -Ivendor/ -Ivendor/WDL/ -Ivendor/WDL/WDL/
@@ -19,5 +19,5 @@ WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
 !link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
 
 : foreach src/*.cpp |> !build |> build/%B.o
-: foreach $(WDLSOURCE) |> !build -std=c++98 |> build/wdl_%B.o
+: foreach $(WDLSOURCE) |> !build -std=c++98 -w |> build/wdl_%B.o
 : build/*.o |> !link |> bin/reaper_reapack.dylib
