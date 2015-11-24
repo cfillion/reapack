@@ -10,9 +10,11 @@ std::vector<Download *> Download::s_active;
 static const int DOWNLOAD_TIMEOUT = 10;
 
 Download::Download(const char *url)
-  : m_threadHandle(0), m_aborted(false), m_finished(false), m_status(0)
+  : m_threadHandle(0), m_contents(0)
 {
   m_url = url;
+
+  reset();
 }
 
 Download::~Download()
@@ -23,6 +25,21 @@ Download::~Download()
   // call stop after removing from the active list to prevent
   // bad access from timeTick -> execCallbacks
   stop();
+
+  // free the content buffer
+  reset();
+}
+
+void Download::reset()
+{
+  m_aborted = false;
+  m_finished = false;
+  m_status = 0;
+
+  if(m_contents) {
+    delete[] m_contents;
+    m_contents = 0;
+  }
 }
 
 void Download::addCallback(const DownloadCallback &callback)
@@ -58,9 +75,7 @@ Download::StartCode Download::start()
   if(m_threadHandle)
     return AlreadyRunning;
 
-  m_finished = false;
-  m_status = 0;
-  m_contents.clear();
+  reset();
 
   s_active.push_back(this);
   plugin_register("timer", (void*)timerTick);
@@ -79,6 +94,9 @@ void Download::stop()
   WaitForSingleObject(m_threadHandle, INFINITE);
   CloseHandle(m_threadHandle);
   m_threadHandle = 0;
+
+  // do not call reset() here, m_finished must stay to true
+  // otherwise the callback will not be called
 };
 
 DWORD WINAPI Download::worker(void *ptr) // static
@@ -96,12 +114,12 @@ DWORD WINAPI Download::worker(void *ptr) // static
 
   while(agent.run() == 0) {
     if(download->isAborted()) {
-      download->finish(-2, "aborted");
+      download->finish(-2, strdup("aborted"));
       JNL::close_socketlib();
       return 1;
     }
     else if(time(NULL) - startTime >= DOWNLOAD_TIMEOUT) {
-      download->finish(-3, "timeout");
+      download->finish(-3, strdup("timeout"));
       JNL::close_socketlib();
       return 1;
     }
@@ -112,23 +130,21 @@ DWORD WINAPI Download::worker(void *ptr) // static
   const int status = agent.getreplycode();
   const int size = agent.bytes_available();
 
-  if(status) {
+  if(status == 200) {
     char *buffer = new char[size];
     agent.get_bytes(buffer, size);
 
     download->finish(status, buffer);
-
-    delete[] buffer;
   }
   else
-    download->finish(status, agent.geterrorstr());
+    download->finish(status, strdup(agent.geterrorstr()));
 
   JNL::close_socketlib();
 
   return 0;
 }
 
-void Download::finish(const int status, const std::string &contents)
+void Download::finish(const int status, const char *contents)
 {
   WDL_MutexLock lock(&m_mutex);
 
@@ -160,7 +176,7 @@ int Download::status()
   return m_status;
 }
 
-const std::string &Download::contents()
+const char *Download::contents()
 {
   WDL_MutexLock lock(&m_mutex);
 

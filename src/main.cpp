@@ -1,6 +1,8 @@
 #include "reapack.hpp"
 #include "download.hpp"
 
+#include <cstdlib>
+
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
 
@@ -20,9 +22,14 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(REAPERAPI_LoadAPI(rec->GetFunc) > 0)
     return 0;
 
-  Download *down = new Download("http://cfillion.tk/");
-  down->addCallback([=](const int status, const std::string &contents) {
-    ShowMessageBox(contents.c_str(), std::to_string(status).c_str(), 0);
+  printf("%s\n", GetResourcePath());
+
+  Download *down = new Download("http://perdu.com/3");
+  down->addCallback([=](const int status, const char *contents) {
+    char strStatus[3];
+    sprintf(strStatus, "%d", status);
+
+    ShowMessageBox(contents, strStatus, 0);
     delete down;
   });
   down->start();
