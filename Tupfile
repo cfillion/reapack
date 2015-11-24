@@ -9,11 +9,16 @@ CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
 LDFLAGS := -dynamiclib -framework Cocoa -framework Carbon
 
 WDL := vendor/WDL/WDL
-SWELL := $(WDL)/swell
 
+SWELL := $(WDL)/swell
 WDLSOURCE := $(SWELL)/swell.cpp $(SWELL)/swell-ini.cpp
 WDLSOURCE += $(SWELL)/swell-gdi.mm $(SWELL)/swell-kb.mm $(SWELL)/swell-menu.mm
 WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
+
+JNETLIB := $(WDL)/jnetlib
+WDLSOURCE += $(JNETLIB)/util.cpp $(JNETLIB)/httpget.cpp
+WDLSOURCE += $(JNETLIB)/connection.cpp $(JNETLIB)/asyncdns.cpp
+
 
 !build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
 !link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>

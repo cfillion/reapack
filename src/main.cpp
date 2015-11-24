@@ -1,7 +1,8 @@
 #include "reapack.hpp"
+#include "download.hpp"
 
 #define REAPERAPI_IMPLEMENT
-#include "reaper_plugin_functions.h"
+#include <reaper_plugin_functions.h>
 
 static ReaPack reapack;
 
@@ -18,6 +19,13 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   if(REAPERAPI_LoadAPI(rec->GetFunc) > 0)
     return 0;
+
+  Download *down = new Download("http://cfillion.tk/");
+  down->addCallback([=](const int status, const std::string &contents) {
+    ShowMessageBox(contents.c_str(), std::to_string(status).c_str(), 0);
+    delete down;
+  });
+  down->start();
 
   reapack.init(instance, rec);
 
