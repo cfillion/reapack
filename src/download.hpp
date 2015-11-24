@@ -26,7 +26,7 @@ public:
   const char *url() const { return m_url; }
 
   bool isFinished();
-  bool isCancelled();
+  bool isAborted();
   int status();
   const std::string &contents();
 
@@ -42,9 +42,10 @@ private:
 
   void finish(const int status, const std::string &contents);
   void execCallbacks();
+  void abort();
 
   HANDLE m_threadHandle;
-  bool m_stop;
+  bool m_aborted;
   bool m_finished;
   int m_status;
   std::string m_contents;
