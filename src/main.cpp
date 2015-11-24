@@ -26,7 +26,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   Download *down = new Download("http://cfillion.tk/");
   down->addCallback([=](const int status, const char *contents) {
-    char strStatus[3];
+    char strStatus[5];
     sprintf(strStatus, "%zu", strlen(contents));
 
     ShowMessageBox(contents, strStatus, 0);
