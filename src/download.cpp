@@ -133,7 +133,7 @@ DWORD WINAPI Download::worker(void *ptr) // static
     char *buffer = new char[size + 1];
     agent.get_bytes(buffer, size);
 
-    // get_bytes doesn't zero-terminate the string
+    // get_bytes doesn't put a null byte at the end of the string
     // without the next line strlen(buffer) cound be anything
     buffer[size] = '\0';
 
