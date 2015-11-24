@@ -24,13 +24,13 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   printf("%s\n", GetResourcePath());
 
-  Download *down = new Download("http://perdu.com/3");
+  Download *down = new Download("http://cfillion.tk/");
   down->addCallback([=](const int status, const char *contents) {
     char strStatus[3];
-    sprintf(strStatus, "%d", status);
+    sprintf(strStatus, "%zu", strlen(contents));
 
     ShowMessageBox(contents, strStatus, 0);
-    delete down;
+    down->start();
   });
   down->start();
 

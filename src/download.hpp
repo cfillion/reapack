@@ -26,8 +26,6 @@ public:
 
   bool isFinished();
   bool isAborted();
-  int status();
-  const char *contents();
 
   void addCallback(const DownloadCallback &);
   StartCode start();

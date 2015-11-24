@@ -69,7 +69,6 @@ void Download::timerTick() // static
     plugin_register("-timer", (void*)timerTick);
 }
 
-
 Download::StartCode Download::start()
 {
   if(m_threadHandle)
@@ -131,8 +130,12 @@ DWORD WINAPI Download::worker(void *ptr) // static
   const int size = agent.bytes_available();
 
   if(status == 200) {
-    char *buffer = new char[size];
+    char *buffer = new char[size + 1];
     agent.get_bytes(buffer, size);
+
+    // get_bytes doesn't zero-terminate the string
+    // without the next line strlen(buffer) cound be anything
+    buffer[size] = '\0';
 
     download->finish(status, buffer);
   }
@@ -166,21 +169,7 @@ void Download::execCallbacks()
   }
 
   for(DownloadCallback callback : m_callback)
-    callback(status(), contents());
-}
-
-int Download::status()
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  return m_status;
-}
-
-const char *Download::contents()
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  return m_contents;
+    callback(m_status, m_contents);
 }
 
 bool Download::isFinished()
