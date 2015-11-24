@@ -19,7 +19,6 @@ JNETLIB := $(WDL)/jnetlib
 WDLSOURCE += $(JNETLIB)/util.cpp $(JNETLIB)/httpget.cpp
 WDLSOURCE += $(JNETLIB)/connection.cpp $(JNETLIB)/asyncdns.cpp
 
-
 !build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
 !link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
 
