@@ -10,7 +10,7 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 }
 
 void ReaPack::setupAction(const char *name, const char *desc,
-  gaccel_register_t *action, ReaPackCallback callback)
+  gaccel_register_t *action, ActionCallback callback)
 {
   action->desc = desc;
   action->accel.cmd = m_rec->Register("command_id", (void *)name);
