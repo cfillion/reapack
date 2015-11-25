@@ -29,7 +29,7 @@ bool ReaPack::execActions(const int id, const int)
   return true;
 }
 
-void ReaPack::toggleWindow()
+void ReaPack::toggleBrowser()
 {
   ShowMessageBox("Hello World!", "Test", 0);
 }

@@ -18,7 +18,7 @@ public:
     gaccel_register_t *action, ActionCallback callback);
   bool execActions(const int id, const int);
 
-  void toggleWindow();
+  void toggleBrowser();
 
 private:
   std::map<int, ActionCallback> m_actions;
