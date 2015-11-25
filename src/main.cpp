@@ -1,5 +1,5 @@
 #include "reapack.hpp"
-#include "download.hpp"
+#include "database.hpp"
 
 #include <cstdlib>
 
@@ -24,20 +24,14 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   printf("%s\n", GetResourcePath());
 
-  Download *down = new Download("http://cfillion.tk/");
-  down->addCallback([=](const int status, const char *contents) {
-    char strStatus[5];
-    sprintf(strStatus, "%zu", strlen(contents));
-
-    ShowMessageBox(contents, strStatus, 0);
-    down->start();
-  });
-  down->start();
+  const char *error = 0;
+  DatabasePtr db = Database::load("/Users/cfillion/Programs/reapack/reapack.xml", &error);
+  printf("%s\n", error);
 
   reapack.init(instance, rec);
 
   reapack.setupAction("REAPACKMGR", "ReaPack: Package Manager",
-    &reapack.action, std::bind(&ReaPack::toggleWindow, reapack));
+    &reapack.action, std::bind(&ReaPack::toggleBrowser, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
 
