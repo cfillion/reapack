@@ -2,5 +2,5 @@
 .tup/
 bin/
 build/
-vendor/reaper*.h
+vendor/*.h*
 vendor/WDL/

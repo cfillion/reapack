@@ -2,7 +2,7 @@
 
 ## Build Setup
 
-Download [reaper_plugin.h](http://www.reaper.fm/sdk/plugin/reaper_plugin.h), save reaper_plugin_functions.h ([developer] Write C++ API functions header) and clone [WDL](http://www-dev.cockos.com/wdl/WDL.git) in the `vendor` directory.
+Download [reaper_plugin.h](http://www.reaper.fm/sdk/plugin/reaper_plugin.h), [catch.hpp](https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp), save reaper_plugin_functions.h ([developer] Write C++ API functions header) and clone [WDL](http://www-dev.cockos.com/wdl/WDL.git). All in the `vendor` directory.
 
 The `vendor` directory structure should be as follow:
 
@@ -16,6 +16,7 @@ vendor
 │       ├── adpcm_encode.h
 │       ├── assocarray.h
 │       └── ...
+├── catch.hpp
 ├── reaper_plugin.h
 └── reaper_plugin_functions.h
 ```
@@ -23,5 +24,5 @@ vendor
 ### OS X
 
 1. Install [tup](http://gittup.org/tup/) and Xcode Command Line Tools
-2. Run `tup --quiet` from this directory
+2. Run `tup --quiet && bin/test` from this directory
 3. Copy or link `bin/reaper_reapack.dylib` to REAPER's extension directory
