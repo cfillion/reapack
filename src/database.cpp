@@ -2,8 +2,6 @@
 
 #include <WDL/tinyxml/tinyxml.h>
 
-#include <cstdio>
-
 DatabasePtr Database::load(const char *file, const char **error)
 {
   TiXmlDocument doc(file);
@@ -38,12 +36,34 @@ DatabasePtr Database::load(const char *file, const char **error)
   }
 }
 
-Database::Database()
+void Database::addCategory(CategoryPtr cat)
 {
-  printf("constructed\n");
+  m_categories.push_back(cat);
 }
 
-Database::~Database()
+Category::Category(const std::string &name)
+  : m_name(name)
 {
-  printf("destructed\n");
+}
+
+void Category::addPackage(PackagePtr pack)
+{
+  pack->setCategory(this);
+  m_packages.push_back(pack);
+}
+
+Package::Type Package::convertType(const char *type)
+{
+  if(!type)
+    return UnknownType;
+
+  if(!strcmp(type, "script"))
+    return ScriptType;
+
+  return UnknownType;
+}
+
+Package::Package()
+  : m_category(0)
+{
 }
