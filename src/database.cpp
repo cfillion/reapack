@@ -1,38 +1,33 @@
 #include "database.hpp"
 
+#include "errors.hpp"
+
 #include <WDL/tinyxml/tinyxml.h>
 
-DatabasePtr Database::load(const char *file, const char **error)
+DatabasePtr Database::load(const char *file)
 {
   TiXmlDocument doc(file);
 
-  if(!doc.LoadFile()) {
-    *error = "failed to read database";
-    return 0;
-  }
+  if(!doc.LoadFile())
+    throw database_error("failed to read database");
 
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();
 
-  if(strcmp(root->Value(), "index")) {
-    *error = "invalid database";
-    return 0;
-  }
+  if(strcmp(root->Value(), "index"))
+    throw database_error("invalid database");
 
   int version = 0;
   root->Attribute("version", &version);
 
-  if(!version) {
-    *error = "invalid version";
-    return 0;
-  }
+  if(!version)
+    throw database_error("invalid version");
 
   switch(version) {
   case 1:
-    return loadV1(root, error);
+    return loadV1(root);
   default:
-    *error = "unsupported version";
-    return 0;
+    throw database_error("unsupported version");
   }
 }
 

@@ -18,7 +18,7 @@ typedef std::shared_ptr<Package> PackagePtr;
 
 class Database {
 public:
-  static DatabasePtr load(const char *, const char **error);
+  static DatabasePtr load(const char *);
 
   void addCategory(CategoryPtr cat);
   const std::vector<CategoryPtr> &categories() const { return m_categories; }
@@ -26,7 +26,7 @@ public:
 
 private:
   friend Category;
-  static DatabasePtr loadV1(TiXmlElement *, const char **);
+  static DatabasePtr loadV1(TiXmlElement *);
 
   std::vector<CategoryPtr> m_categories;
 };
@@ -43,8 +43,8 @@ public:
 
 private:
   friend Package;
-  friend DatabasePtr Database::loadV1(TiXmlElement *, const char **);
-  static CategoryPtr loadV1(TiXmlElement *, const char **);
+  friend DatabasePtr Database::loadV1(TiXmlElement *);
+  static CategoryPtr loadV1(TiXmlElement *);
 
   std::string m_name;
   std::vector<PackagePtr> m_packages;
@@ -65,8 +65,8 @@ public:
   Category *category() const { return m_category; }
 
 private:
-  friend CategoryPtr Category::loadV1(TiXmlElement *, const char **);
-  static PackagePtr loadV1(TiXmlElement *, const char **);
+  friend CategoryPtr Category::loadV1(TiXmlElement *);
+  static PackagePtr loadV1(TiXmlElement *);
 
   Category *m_category;
 };

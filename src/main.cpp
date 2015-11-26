@@ -24,9 +24,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   printf("%s\n", GetResourcePath());
 
-  const char *error = 0;
-  DatabasePtr db = Database::load("/Users/cfillion/Programs/reapack/reapack.xml", &error);
-  printf("%s\n", error);
+  DatabasePtr db = Database::load("/Users/cfillion/Programs/reapack/reapack.xml");
 
   reapack.init(instance, rec);
 
