@@ -28,9 +28,7 @@ CategoryPtr Category::loadV1(TiXmlElement *catNode)
     throw database_error("not a category");
 
   const char *name = catNode->Attribute("name");
-
-  if(!name || !strlen(name))
-    throw database_error("missing category name");
+  if(!name) name = "";
 
   CategoryPtr cat = make_shared<Category>(name);
 
@@ -51,20 +49,13 @@ PackagePtr Package::loadV1(TiXmlElement *packNode)
     throw database_error("not a package");
 
   const char *name = packNode->Attribute("name");
+  if(!name) name = "";
 
-  if(!name || !strlen(name))
-    throw database_error("missing package name");
-
-  const char *typeStr = packNode->Attribute("type");
-  const Package::Type type = Package::convertType(typeStr);
-
-  if(type == Package::UnknownType)
-    throw database_error("unsupported package type");
+  const char *type = packNode->Attribute("type");
+  if(!type) type = "";
 
   const char *author = packNode->Attribute("author");
+  if(!author) author = "";
 
-  if(!author || !strlen(author))
-    throw database_error("package is anonymous");
-
-  return 0;
+  return make_shared<Package>(Package::convertType(type), name, author);
 }

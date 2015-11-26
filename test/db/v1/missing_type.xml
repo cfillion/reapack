@@ -1,6 +1,5 @@
 <index version="1">
   <category name="test">
     <reapack name="a" />
-    <reapack name="c" type="yoyo" />
   </category>
 </index>

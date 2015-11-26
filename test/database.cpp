@@ -71,7 +71,7 @@ TEST_CASE("add category to database", M) {
 }
 
 TEST_CASE("add package to category", M) {
-  PackagePtr pack = make_shared<Package>();
+  PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
 
   Category cat("a");
   CHECK(cat.packages().size() == 0);
@@ -84,15 +84,51 @@ TEST_CASE("add package to category", M) {
 }
 
 TEST_CASE("package type from string", M) {
-  SECTION("null") {
-    REQUIRE(Package::convertType(0) == Package::UnknownType);
-  }
-
   SECTION("unknown") {
     REQUIRE(Package::convertType("yoyo") == Package::UnknownType);
   }
 
   SECTION("script") {
     REQUIRE(Package::convertType("script") == Package::ScriptType);
+  }
+}
+
+TEST_CASE("empty category name", M) {
+  try {
+    Category cat{string()};
+    FAIL();
+  }
+  catch(const database_error &e) {
+    REQUIRE(string(e.what()) == "empty category name");
+  }
+}
+
+TEST_CASE("unknown package type", M) {
+  try {
+    Package pack(Package::UnknownType, "a", "b");
+    FAIL();
+  }
+  catch(const database_error &e) {
+    REQUIRE(string(e.what()) == "unsupported package type");
+  }
+}
+
+TEST_CASE("empty package name", M) {
+  try {
+    Package pack(Package::ScriptType, string(), "a");
+    FAIL();
+  }
+  catch(const database_error &e) {
+    REQUIRE(string(e.what()) == "empty package name");
+  }
+}
+
+TEST_CASE("empty package author", M) {
+  try {
+    Package pack(Package::ScriptType, "a", string());
+    FAIL();
+  }
+  catch(const database_error &e) {
+    REQUIRE(string(e.what()) == "empty package author");
   }
 }

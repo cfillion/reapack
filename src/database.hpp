@@ -59,7 +59,7 @@ public:
 
   static Type convertType(const char *);
 
-  Package();
+  Package(const Type, const std::string &name, const std::string &author);
 
   void setCategory(Category *cat) { m_category = cat; }
   Category *category() const { return m_category; }
@@ -69,6 +69,9 @@ private:
   static PackagePtr loadV1(TiXmlElement *);
 
   Category *m_category;
+  Type m_type;
+  std::string m_name;
+  std::string m_author;
 };
 
 #endif

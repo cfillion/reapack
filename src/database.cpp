@@ -39,6 +39,8 @@ void Database::addCategory(CategoryPtr cat)
 Category::Category(const std::string &name)
   : m_name(name)
 {
+  if(m_name.empty())
+    throw database_error("empty category name");
 }
 
 void Category::addPackage(PackagePtr pack)
@@ -49,16 +51,23 @@ void Category::addPackage(PackagePtr pack)
 
 Package::Type Package::convertType(const char *type)
 {
-  if(!type)
-    return UnknownType;
-
   if(!strcmp(type, "script"))
     return ScriptType;
-
-  return UnknownType;
+  else
+    return UnknownType;
 }
 
-Package::Package()
-  : m_category(0)
+Package::Package(const Type type,
+    const std::string &name, const std::string &author)
+  : m_category(0), m_type(type), m_name(name), m_author(author)
 {
+  if(m_type == Package::UnknownType)
+    throw database_error("unsupported package type");
+
+  if(m_name.empty())
+    throw database_error("empty package name");
+
+  if(m_author.empty())
+    throw database_error("empty package author");
+
 }

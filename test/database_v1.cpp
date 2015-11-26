@@ -17,7 +17,7 @@ TEST_CASE("unnamed category", M) {
     FAIL();
   }
   catch(const database_error &e) {
-    REQUIRE(string(e.what()) == "missing category name");
+    REQUIRE(string(e.what()) == "empty category name");
   }
 }
 
@@ -39,19 +39,19 @@ TEST_CASE("invalid category tag", M) {
   }
 }
 
-TEST_CASE("unnamed package", M) {
+TEST_CASE("null package name", M) {
   try {
     Database::load(DBPATH "unnamed_package.xml");
     FAIL();
   }
   catch(const database_error &e) {
-    REQUIRE(string(e.what()) == "missing package name");
+    REQUIRE(string(e.what()) == "empty package name");
   }
 }
 
-TEST_CASE("invalid package type", M) {
+TEST_CASE("null package type", M) {
   try {
-    Database::load(DBPATH "invalid_type.xml");
+    Database::load(DBPATH "missing_type.xml");
     FAIL();
   }
   catch(const database_error &e) {
@@ -59,12 +59,12 @@ TEST_CASE("invalid package type", M) {
   }
 }
 
-TEST_CASE("anonymous package", M) {
+TEST_CASE("null author", M) {
   try {
     Database::load(DBPATH "anonymous_package.xml");
     FAIL();
   }
   catch(const database_error &e) {
-    REQUIRE(string(e.what()) == "package is anonymous");
+    REQUIRE(string(e.what()) == "empty package author");
   }
 }

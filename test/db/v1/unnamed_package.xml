@@ -1,6 +1,5 @@
 <index version="1">
   <category name="test">
-    <reapack />
-    <reapack name="" />
+    <reapack type="script" />
   </category>
 </index>
