@@ -9,14 +9,14 @@
 
 using namespace std;
 
-static const char *M = "[database_v1]";
+static const char *M = "[reapack_v1]";
 
 TEST_CASE("unnamed category", M) {
   try {
     Database::load(DBPATH "unnamed_category.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty category name");
   }
 }
@@ -34,8 +34,18 @@ TEST_CASE("invalid category tag", M) {
     Database::load(DBPATH "wrong_category_tag.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "not a category");
+  }
+}
+
+TEST_CASE("invalid package tag", M) {
+  try {
+    Database::load(DBPATH "wrong_package_tag.xml");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "not a package");
   }
 }
 
@@ -44,7 +54,7 @@ TEST_CASE("null package name", M) {
     Database::load(DBPATH "unnamed_package.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty package name");
   }
 }
@@ -54,7 +64,7 @@ TEST_CASE("null package type", M) {
     Database::load(DBPATH "missing_type.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "unsupported package type");
   }
 }
@@ -64,7 +74,29 @@ TEST_CASE("null author", M) {
     Database::load(DBPATH "anonymous_package.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty package author");
   }
 }
+
+TEST_CASE("invalid version tag", M) {
+  try {
+    Database::load(DBPATH "wrong_version_tag.xml");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "not a version");
+  }
+}
+
+
+TEST_CASE("null package version", M) {
+  try {
+    Database::load(DBPATH "missing_version.xml");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "invalid version name");
+  }
+}
+

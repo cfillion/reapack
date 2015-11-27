@@ -3,9 +3,9 @@
 
 #include <stdexcept>
 
-class database_error : public std::runtime_error {
+class reapack_error : public std::runtime_error {
 public:
-  database_error(const char *what) : std::runtime_error(what) {}
+  reapack_error(const char *what) : std::runtime_error(what) {}
 };
 
 #endif

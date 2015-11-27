@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "version.hpp"
+
 class TiXmlElement;
 
 class Database;
@@ -25,7 +27,6 @@ public:
   CategoryPtr category(const int i) const { return m_categories[i]; }
 
 private:
-  friend Category;
   static DatabasePtr loadV1(TiXmlElement *);
 
   std::vector<CategoryPtr> m_categories;
@@ -42,10 +43,6 @@ public:
   PackagePtr package(const int i) const { return m_packages[i]; }
 
 private:
-  friend Package;
-  friend DatabasePtr Database::loadV1(TiXmlElement *);
-  static CategoryPtr loadV1(TiXmlElement *);
-
   std::string m_name;
   std::vector<PackagePtr> m_packages;
 };
@@ -64,14 +61,19 @@ public:
   void setCategory(Category *cat) { m_category = cat; }
   Category *category() const { return m_category; }
 
-private:
-  friend CategoryPtr Category::loadV1(TiXmlElement *);
-  static PackagePtr loadV1(TiXmlElement *);
+  Type type() const { return m_type; }
+  const std::string &name() const { return m_name; }
+  const std::string &author() const { return m_author; }
 
+  void addVersion(VersionPtr ver);
+  const VersionSet &versions() const { return m_versions; }
+
+private:
   Category *m_category;
   Type m_type;
   std::string m_name;
   std::string m_author;
+  VersionSet m_versions;
 };
 
 #endif

@@ -1,5 +1,4 @@
 #include "reapack.hpp"
-#include "database.hpp"
 
 #include <cstdlib>
 
@@ -23,8 +22,6 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
     return 0;
 
   printf("%s\n", GetResourcePath());
-
-  DatabasePtr db = Database::load("/Users/cfillion/Programs/reapack/reapack.xml");
 
   reapack.init(instance, rec);
 

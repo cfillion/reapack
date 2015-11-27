@@ -16,7 +16,7 @@ TEST_CASE("file not found", M) {
     Database::load(DBPATH "404.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "failed to read database");
   }
 }
@@ -26,7 +26,7 @@ TEST_CASE("broken xml", M) {
     Database::load(DBPATH "broken.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "failed to read database");
   }
 }
@@ -36,7 +36,7 @@ TEST_CASE("wrong root tag name", M) {
     Database::load(DBPATH "wrong_root.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "invalid database");
   }
 }
@@ -46,7 +46,7 @@ TEST_CASE("invalid version", M) {
     Database::load(DBPATH "invalid_version.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "invalid version");
   }
 }
@@ -56,7 +56,7 @@ TEST_CASE("future version", M) {
     Database::load(DBPATH "future_version.xml");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "unsupported version");
   }
 }
@@ -98,7 +98,7 @@ TEST_CASE("empty category name", M) {
     Category cat{string()};
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty category name");
   }
 }
@@ -108,7 +108,7 @@ TEST_CASE("unknown package type", M) {
     Package pack(Package::UnknownType, "a", "b");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "unsupported package type");
   }
 }
@@ -118,7 +118,7 @@ TEST_CASE("empty package name", M) {
     Package pack(Package::ScriptType, string(), "a");
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty package name");
   }
 }
@@ -128,7 +128,24 @@ TEST_CASE("empty package author", M) {
     Package pack(Package::ScriptType, "a", string());
     FAIL();
   }
-  catch(const database_error &e) {
+  catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty package author");
   }
+}
+
+TEST_CASE("package versions are sorted", M) {
+  Package pack(Package::ScriptType, "a", "b");
+  CHECK(pack.versions().size() == 0);
+
+  pack.addVersion(make_shared<Version>("1"));
+  CHECK(pack.versions().size() == 1);
+
+  pack.addVersion(make_shared<Version>("0.1"));
+  CHECK(pack.versions().size() == 2);
+
+  const VersionSet &versions = pack.versions();
+  auto it = versions.begin();
+
+  REQUIRE(it->get()->name() == "0.1");
+  REQUIRE((++it)->get()->name() == "1");
 }

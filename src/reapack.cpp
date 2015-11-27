@@ -1,5 +1,8 @@
 #include "reapack.hpp"
 
+#include "errors.hpp"
+#include "database.hpp"
+
 #include "reaper_plugin_functions.h"
 
 void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
@@ -31,5 +34,11 @@ bool ReaPack::execActions(const int id, const int)
 
 void ReaPack::toggleBrowser()
 {
-  ShowMessageBox("Hello World!", "Test", 0);
+  try {
+    Database::load("/Users/cfillion/Programs/reapack/reapack.xml");
+    ShowMessageBox("Hello World!", "Test", 0);
+  }
+  catch(const reapack_error &e) {
+    ShowMessageBox(e.what(), "Database Error", 0);
+  }
 }

@@ -9,25 +9,25 @@ DatabasePtr Database::load(const char *file)
   TiXmlDocument doc(file);
 
   if(!doc.LoadFile())
-    throw database_error("failed to read database");
+    throw reapack_error("failed to read database");
 
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();
 
   if(strcmp(root->Value(), "index"))
-    throw database_error("invalid database");
+    throw reapack_error("invalid database");
 
   int version = 0;
   root->Attribute("version", &version);
 
   if(!version)
-    throw database_error("invalid version");
+    throw reapack_error("invalid version");
 
   switch(version) {
   case 1:
     return loadV1(root);
   default:
-    throw database_error("unsupported version");
+    throw reapack_error("unsupported version");
   }
 }
 
@@ -40,7 +40,7 @@ Category::Category(const std::string &name)
   : m_name(name)
 {
   if(m_name.empty())
-    throw database_error("empty category name");
+    throw reapack_error("empty category name");
 }
 
 void Category::addPackage(PackagePtr pack)
@@ -62,12 +62,16 @@ Package::Package(const Type type,
   : m_category(0), m_type(type), m_name(name), m_author(author)
 {
   if(m_type == Package::UnknownType)
-    throw database_error("unsupported package type");
+    throw reapack_error("unsupported package type");
 
   if(m_name.empty())
-    throw database_error("empty package name");
+    throw reapack_error("empty package name");
 
   if(m_author.empty())
-    throw database_error("empty package author");
+    throw reapack_error("empty package author");
+}
 
+void Package::addVersion(VersionPtr ver)
+{
+  m_versions.insert(ver);
 }
