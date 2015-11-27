@@ -62,8 +62,11 @@ TEST_CASE("future version", M) {
 }
 
 TEST_CASE("add category", M) {
+  VersionPtr ver = make_shared<Version>("1");
+  ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
+
   PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
-  pack->addVersion(make_shared<Version>("1"));
+  pack->addVersion(ver);
 
   CategoryPtr cat = make_shared<Category>("a");
   cat->addPackage(pack);
@@ -76,21 +79,19 @@ TEST_CASE("add category", M) {
   REQUIRE(db.categories().size() == 1);
 }
 
-TEST_CASE("add empty category", M) {
+TEST_CASE("drop empty category", M) {
   Database db;
+  db.addCategory(make_shared<Category>("a"));
 
-  try {
-    db.addCategory(make_shared<Category>("a"));
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty category");
-  }
+  REQUIRE(db.categories().empty());
 }
 
 TEST_CASE("add a package", M) {
+  VersionPtr ver = make_shared<Version>("1");
+  ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
+
   PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
-  pack->addVersion(make_shared<Version>("1"));
+  pack->addVersion(ver);
 
   Category cat("a");
   CHECK(cat.packages().size() == 0);
@@ -102,16 +103,11 @@ TEST_CASE("add a package", M) {
   REQUIRE(pack->category() == &cat);
 }
 
-TEST_CASE("add empty package", M) {
+TEST_CASE("drop empty package", M) {
   Category cat("a");
+  cat.addPackage(make_shared<Package>(Package::ScriptType, "a", "b"));
 
-  try {
-    cat.addPackage(make_shared<Package>(Package::ScriptType, "a", "b"));
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty package");
-  }
+  REQUIRE(cat.packages().empty());
 }
 
 TEST_CASE("drop unknown package", M) {
@@ -165,12 +161,27 @@ TEST_CASE("package versions are sorted", M) {
   Package pack(Package::ScriptType, "a", "b");
   CHECK(pack.versions().size() == 0);
 
-  pack.addVersion(make_shared<Version>("1"));
+  SourcePtr source = make_shared<Source>(Source::GenericPlatform, "google.com");
+
+  VersionPtr final = make_shared<Version>("1");
+  final->addSource(source);
+
+  VersionPtr alpha = make_shared<Version>("0.1");
+  alpha->addSource(source);
+
+  pack.addVersion(final);
   CHECK(pack.versions().size() == 1);
 
-  pack.addVersion(make_shared<Version>("0.1"));
+  pack.addVersion(alpha);
   CHECK(pack.versions().size() == 2);
 
-  REQUIRE(pack.version(0)->name() == "0.1");
-  REQUIRE(pack.version(1)->name() == "1");
+  REQUIRE(pack.version(0) == alpha);
+  REQUIRE(pack.version(1) == final);
+}
+
+TEST_CASE("drop empty version", M) {
+  Package pack(Package::ScriptType, "a", "b");
+  pack.addVersion(make_shared<Version>("1"));
+
+  REQUIRE(pack.versions().empty());
 }

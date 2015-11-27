@@ -34,7 +34,7 @@ DatabasePtr Database::load(const char *file)
 void Database::addCategory(CategoryPtr cat)
 {
   if(cat->packages().empty())
-    throw reapack_error("empty category");
+    return;
 
   m_categories.push_back(cat);
 }
@@ -51,7 +51,7 @@ void Category::addPackage(PackagePtr pack)
   if(pack->type() == Package::UnknownType)
     return; // silently discard unknown package types
   else if(pack->versions().empty())
-    throw reapack_error("empty package");
+    return;
 
   pack->setCategory(this);
   m_packages.push_back(pack);
@@ -78,6 +78,9 @@ Package::Package(const Type type,
 
 void Package::addVersion(VersionPtr ver)
 {
+  if(ver->sources().empty())
+    return;
+
   m_versions.insert(ver);
 }
 

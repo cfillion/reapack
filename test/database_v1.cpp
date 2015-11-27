@@ -27,13 +27,9 @@ TEST_CASE("invalid category tag", M) {
 }
 
 TEST_CASE("invalid package tag", M) {
-  try {
-    Database::load(DBPATH "wrong_package_tag.xml");
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty category");
-  }
+  DatabasePtr db = Database::load(DBPATH "wrong_package_tag.xml");
+  REQUIRE(db->categories().empty());
+
 }
 
 TEST_CASE("null package name", M) {
@@ -66,13 +62,9 @@ TEST_CASE("null author", M) {
 }
 
 TEST_CASE("invalid version tag", M) {
-  try {
-    Database::load(DBPATH "wrong_version_tag.xml");
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty package");
-  }
+  DatabasePtr db = Database::load(DBPATH "wrong_version_tag.xml");
+
+  REQUIRE(db->categories().empty());
 }
 
 TEST_CASE("null package version", M) {
