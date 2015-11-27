@@ -61,17 +61,36 @@ TEST_CASE("future version", M) {
   }
 }
 
-TEST_CASE("add category to database", M) {
+TEST_CASE("add category", M) {
+  PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
+  pack->addVersion(make_shared<Version>("1"));
+
+  CategoryPtr cat = make_shared<Category>("a");
+  cat->addPackage(pack);
+
   Database db;
   CHECK(db.categories().size() == 0);
 
-  db.addCategory(make_shared<Category>("a"));
+  db.addCategory(cat);
 
   REQUIRE(db.categories().size() == 1);
 }
 
-TEST_CASE("add package to category", M) {
+TEST_CASE("add empty category", M) {
+  Database db;
+
+  try {
+    db.addCategory(make_shared<Category>("a"));
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "empty category");
+  }
+}
+
+TEST_CASE("add a package", M) {
   PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
+  pack->addVersion(make_shared<Version>("1"));
 
   Category cat("a");
   CHECK(cat.packages().size() == 0);
@@ -81,6 +100,18 @@ TEST_CASE("add package to category", M) {
 
   REQUIRE(cat.packages().size() == 1);
   REQUIRE(pack->category() == &cat);
+}
+
+TEST_CASE("add empty package", M) {
+  Category cat("a");
+
+  try {
+    cat.addPackage(make_shared<Package>(Package::ScriptType, "a", "b"));
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "empty package");
+  }
 }
 
 TEST_CASE("package type from string", M) {

@@ -21,22 +21,9 @@ TEST_CASE("unnamed category", M) {
   }
 }
 
-TEST_CASE("empty category", M) {
-  DatabasePtr db = Database::load(DBPATH "empty_category.xml");
-
-  REQUIRE(db->categories().size() == 1);
-  REQUIRE(db->category(0)->name() == "Hello World");
-  REQUIRE(db->category(0)->packages().empty());
-}
-
 TEST_CASE("invalid category tag", M) {
-  try {
-    Database::load(DBPATH "wrong_category_tag.xml");
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "not a category");
-  }
+  DatabasePtr db = Database::load(DBPATH "wrong_category_tag.xml");
+  REQUIRE(db->categories().empty());
 }
 
 TEST_CASE("invalid package tag", M) {
@@ -45,7 +32,7 @@ TEST_CASE("invalid package tag", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "not a package");
+    REQUIRE(string(e.what()) == "empty category");
   }
 }
 
@@ -85,7 +72,7 @@ TEST_CASE("invalid version tag", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "not a version");
+    REQUIRE(string(e.what()) == "empty package");
   }
 }
 

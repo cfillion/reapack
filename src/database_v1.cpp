@@ -14,13 +14,12 @@ DatabasePtr Database::loadV1(TiXmlElement *root)
 {
   DatabasePtr db = make_shared<Database>();
 
-  // read categories
-  TiXmlElement *catNode = root->FirstChildElement();
+  TiXmlElement *catNode = root->FirstChildElement("category");
 
   while(catNode) {
     db->addCategory(LoadCategoryV1(catNode));
 
-    catNode = catNode->NextSiblingElement();
+    catNode = catNode->NextSiblingElement("category");
   }
 
   return db;
@@ -28,20 +27,17 @@ DatabasePtr Database::loadV1(TiXmlElement *root)
 
 CategoryPtr LoadCategoryV1(TiXmlElement *catNode)
 {
-  if(strcmp(catNode->Value(), "category"))
-    throw reapack_error("not a category");
-
   const char *name = catNode->Attribute("name");
   if(!name) name = "";
 
   CategoryPtr cat = make_shared<Category>(name);
 
-  TiXmlElement *packNode = catNode->FirstChildElement();
+  TiXmlElement *packNode = catNode->FirstChildElement("reapack");
 
   while(packNode) {
     cat->addPackage(LoadPackageV1(packNode));
 
-    packNode = packNode->NextSiblingElement();
+    packNode = packNode->NextSiblingElement("reapack");
   }
 
   return cat;
@@ -49,9 +45,6 @@ CategoryPtr LoadCategoryV1(TiXmlElement *catNode)
 
 PackagePtr LoadPackageV1(TiXmlElement *packNode)
 {
-  if(strcmp(packNode->Value(), "reapack"))
-    throw reapack_error("not a package");
-
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
@@ -64,12 +57,12 @@ PackagePtr LoadPackageV1(TiXmlElement *packNode)
   PackagePtr pack = make_shared<Package>(
     Package::convertType(type), name, author);
 
-  TiXmlElement *verNode = packNode->FirstChildElement();
+  TiXmlElement *verNode = packNode->FirstChildElement("version");
 
   while(verNode) {
     pack->addVersion(LoadVersionV1(verNode));
 
-    verNode = verNode->NextSiblingElement();
+    verNode = verNode->NextSiblingElement("version");
   }
 
   return pack;
@@ -77,9 +70,6 @@ PackagePtr LoadPackageV1(TiXmlElement *packNode)
 
 VersionPtr LoadVersionV1(TiXmlElement *verNode)
 {
-  if(strcmp(verNode->Value(), "version"))
-    throw reapack_error("not a version");
-
   const char *name = verNode->Attribute("name");
   if(!name) name = "";
 

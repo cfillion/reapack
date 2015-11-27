@@ -33,6 +33,9 @@ DatabasePtr Database::load(const char *file)
 
 void Database::addCategory(CategoryPtr cat)
 {
+  if(cat->packages().empty())
+    throw reapack_error("empty category");
+
   m_categories.push_back(cat);
 }
 
@@ -45,6 +48,9 @@ Category::Category(const std::string &name)
 
 void Category::addPackage(PackagePtr pack)
 {
+  if(pack->versions().empty())
+    throw reapack_error("empty package");
+
   pack->setCategory(this);
   m_packages.push_back(pack);
 }
