@@ -171,9 +171,6 @@ TEST_CASE("package versions are sorted", M) {
   pack.addVersion(make_shared<Version>("0.1"));
   CHECK(pack.versions().size() == 2);
 
-  const VersionSet &versions = pack.versions();
-  auto it = versions.begin();
-
-  REQUIRE(it->get()->name() == "0.1");
-  REQUIRE((++it)->get()->name() == "1");
+  REQUIRE(pack.version(0)->name() == "0.1");
+  REQUIRE(pack.version(1)->name() == "1");
 }

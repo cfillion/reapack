@@ -80,3 +80,13 @@ void Package::addVersion(VersionPtr ver)
 {
   m_versions.insert(ver);
 }
+
+VersionPtr Package::version(const int index) const
+{
+  auto it = m_versions.begin();
+
+  for(int i = 0; i < index; i++)
+    it++;
+
+  return *it;
+}

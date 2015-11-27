@@ -67,6 +67,7 @@ public:
 
   void addVersion(VersionPtr ver);
   const VersionSet &versions() const { return m_versions; }
+  VersionPtr version(const int i) const;
 
 private:
   Category *m_category;
