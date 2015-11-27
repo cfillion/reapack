@@ -48,7 +48,9 @@ Category::Category(const std::string &name)
 
 void Category::addPackage(PackagePtr pack)
 {
-  if(pack->versions().empty())
+  if(pack->type() == Package::UnknownType)
+    return; // silently discard unknown package types
+  else if(pack->versions().empty())
     throw reapack_error("empty package");
 
   pack->setCategory(this);
@@ -67,9 +69,6 @@ Package::Package(const Type type,
     const std::string &name, const std::string &author)
   : m_category(0), m_type(type), m_name(name), m_author(author)
 {
-  if(m_type == Package::UnknownType)
-    throw reapack_error("unsupported package type");
-
   if(m_name.empty())
     throw reapack_error("empty package name");
 

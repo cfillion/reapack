@@ -114,6 +114,13 @@ TEST_CASE("add empty package", M) {
   }
 }
 
+TEST_CASE("drop unknown package", M) {
+  Category cat("a");
+  cat.addPackage(make_shared<Package>(Package::UnknownType, "a", "b"));
+
+  REQUIRE(cat.packages().size() == 0);
+}
+
 TEST_CASE("package type from string", M) {
   SECTION("unknown") {
     REQUIRE(Package::convertType("yoyo") == Package::UnknownType);
@@ -131,16 +138,6 @@ TEST_CASE("empty category name", M) {
   }
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "empty category name");
-  }
-}
-
-TEST_CASE("unknown package type", M) {
-  try {
-    Package pack(Package::UnknownType, "a", "b");
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "unsupported package type");
   }
 }
 
