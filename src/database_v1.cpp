@@ -89,5 +89,14 @@ VersionPtr LoadVersionV1(TiXmlElement *verNode)
     node = node->NextSiblingElement("source");
   }
 
+  node = verNode->FirstChildElement("changelog");
+
+  if(node) {
+    const char *changelog = node->GetText();
+
+    if(changelog)
+      ver->setChangelog(changelog);
+  }
+
   return ver;
 }

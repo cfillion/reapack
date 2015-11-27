@@ -62,6 +62,11 @@ void Version::addSource(SourcePtr source)
   m_sources.push_back(source);
 }
 
+void Version::setChangelog(const std::string &changelog)
+{
+  m_changelog = changelog;
+}
+
 bool Version::operator<(const Version &o)
 {
   return m_code < o.code();

@@ -1,0 +1,12 @@
+<index version="1">
+  <category name="hello">
+    <reapack name="a" type="script" author="abc">
+      <version name="1">
+        <source platform="all">http://google.com</source>
+        <changelog><![CDATA[Hello
+World]]>
+        </changelog>
+      </version>
+    </reapack>
+  </category>
+</index>

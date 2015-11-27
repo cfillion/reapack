@@ -101,3 +101,10 @@ TEST_CASE("default platform", M) {
   REQUIRE(db->category(0)->package(0)->version(0)->source(0)->platform()
     == Source::GenericPlatform);
 }
+
+TEST_CASE("version changelog", M) {
+  DatabasePtr db = Database::load(DBPATH "changelog.xml");
+
+  REQUIRE(db->category(0)->package(0)->version(0)->changelog()
+    == "Hello\nWorld");
+}

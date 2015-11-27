@@ -18,6 +18,9 @@ public:
   const std::string &name() const { return m_name; }
   int code() const { return m_code; }
 
+  void setChangelog(const std::string &);
+  const std::string &changelog() const { return m_changelog; }
+
   void addSource(SourcePtr source);
   const std::vector<SourcePtr> &sources() const { return m_sources; }
   SourcePtr source(const int i) const { return m_sources[i]; }
@@ -27,6 +30,8 @@ public:
 private:
   std::string m_name;
   int m_code;
+
+  std::string m_changelog;
   std::vector<SourcePtr> m_sources;
 };
 
