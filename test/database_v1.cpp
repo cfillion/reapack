@@ -97,6 +97,34 @@ TEST_CASE("default platform", M) {
 TEST_CASE("version changelog", M) {
   DatabasePtr db = Database::load(DBPATH "changelog.xml");
 
+  CHECK_FALSE(db->categories().empty());
+  CHECK_FALSE(db->category(0)->packages().empty());
+  CHECK_FALSE(db->category(0)->package(0)->versions().empty());
+
   REQUIRE(db->category(0)->package(0)->version(0)->changelog()
     == "Hello\nWorld");
+}
+
+TEST_CASE("full database", M) {
+  DatabasePtr db = Database::load(DBPATH "full_database.xml");
+  REQUIRE(db->categories().size() == 1);
+
+  CategoryPtr cat = db->category(0);
+  REQUIRE(cat->name() == "Category Name");
+  REQUIRE(cat->packages().size() == 1);
+
+  PackagePtr pack = cat->package(0);
+  REQUIRE(pack->type() == Package::ScriptType);
+  REQUIRE(pack->name() == "Hello World.lua");
+  REQUIRE(pack->author() == "cfillion");
+  REQUIRE(pack->versions().size() == 1);
+
+  VersionPtr ver = pack->version(0);
+  REQUIRE(ver->name() == "1.0");
+  REQUIRE(ver->sources().size() == 1);
+  REQUIRE(ver->changelog() == "Fixed a division by zero error.");
+
+  SourcePtr source = ver->source(0);
+  REQUIRE(source->platform() == Source::GenericPlatform);
+  REQUIRE(source->url() == "https://google.com/");
 }
