@@ -1,0 +1,9 @@
+<index version="1">
+  <category name="hello">
+    <reapack name="a" type="script" author="abc">
+      <version name="1">
+        <source>hello</source>
+      </version>
+    </reapack>
+  </category>
+</index>

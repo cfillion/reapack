@@ -75,5 +75,19 @@ VersionPtr LoadVersionV1(TiXmlElement *verNode)
 
   VersionPtr ver = make_shared<Version>(name);
 
+  TiXmlElement *node = verNode->FirstChildElement("source");
+
+  while(node) {
+    const char *platform = node->Attribute("platform");
+    if(!platform) platform = "all";
+
+    const char *url = node->GetText();
+    if(!url) url = "";
+
+    ver->addSource(make_shared<Source>(Source::convertPlatform(platform), url));
+
+    node = node->NextSiblingElement("source");
+  }
+
   return ver;
 }

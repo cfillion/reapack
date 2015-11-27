@@ -3,9 +3,13 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 class Version;
 typedef std::shared_ptr<Version> VersionPtr;
+
+class Source;
+typedef std::shared_ptr<Source> SourcePtr;
 
 class Version {
 public:
@@ -14,11 +18,16 @@ public:
   const std::string &name() const { return m_name; }
   int code() const { return m_code; }
 
+  void addSource(SourcePtr source);
+  const std::vector<SourcePtr> &sources() const { return m_sources; }
+  SourcePtr source(const int i) const { return m_sources[i]; }
+
   bool operator<(const Version &);
 
 private:
   std::string m_name;
   int m_code;
+  std::vector<SourcePtr> m_sources;
 };
 
 class VersionCompare {
@@ -30,5 +39,34 @@ public:
 };
 
 typedef std::set<VersionPtr, VersionCompare> VersionSet;
+
+class Source {
+public:
+  enum Platform {
+    UnknownPlatform,
+    GenericPlatform,
+
+    // windows
+    WindowsPlatform,
+    Win32Platform,
+    Win64Platform,
+
+    // os x
+    DarwinPlatform,
+    Darwin32Platform,
+    Darwin64Platform,
+  };
+
+  static Platform convertPlatform(const char *);
+
+  Source(const Platform, const std::string &source);
+
+  Platform platform() const { return m_platform; }
+  const std::string &url() const { return m_url; }
+
+private:
+  Platform m_platform;
+  std::string m_url;
+};
 
 #endif

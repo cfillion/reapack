@@ -85,3 +85,19 @@ TEST_CASE("null package version", M) {
   }
 }
 
+TEST_CASE("null source url", M) {
+  try {
+    Database::load(DBPATH "missing_source_url.xml");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "empty source url");
+  }
+}
+
+TEST_CASE("default platform", M) {
+  DatabasePtr db = Database::load(DBPATH "missing_platform.xml");
+
+  REQUIRE(db->category(0)->package(0)->version(0)->source(0)->platform()
+    == Source::GenericPlatform);
+}
