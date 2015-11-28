@@ -72,18 +72,12 @@ void ReaPack::installPackage(PackagePtr pkg)
       return;
     }
 
+    InstallLocation loc = pkg->targetLocation();
+    loc.setPrefix(m_resourcePath);
 
-    const Location loc = scriptLocation(pkg);
-    switch(pkg->type()) {
-    case Package::ScriptType:
-      break;
-    default:
-      return;
-    };
+    RecursiveCreateDirectory(loc.directory().c_str(), 0);
 
-    RecursiveCreateDirectory(loc.directory.c_str(), 0);
-
-    ofstream file(loc.path());
+    ofstream file(loc.fullPath());
     if(file.bad()) {
       ShowMessageBox(strerror(errno), pkg->name().c_str(), 0);
       return;
@@ -92,16 +86,6 @@ void ReaPack::installPackage(PackagePtr pkg)
     file << contents;
     file.close();
   });
-}
-
-Location ReaPack::scriptLocation(PackagePtr pkg)
-{
-  string path = string(m_resourcePath)
-    .append("/Scripts/ReaScripts")
-    .append("/" + pkg->category()->name())
-  ;
-
-  return {path, pkg->name()};
 }
 
 void ReaPack::queuedDownload(const char *url, DownloadCallback cb)

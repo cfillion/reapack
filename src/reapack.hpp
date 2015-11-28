@@ -10,13 +10,6 @@
 
 #include "reaper_plugin.h"
 
-struct Location {
-  std::string path() const { return directory + "/" + filename; }
-
-  std::string directory;
-  std::string filename;
-};
-
 typedef std::function<void()> ActionCallback;
 
 class ReaPack {
@@ -36,8 +29,6 @@ public:
   void queuedDownload(const char *url, DownloadCallback cb);
 
 private:
-  Location scriptLocation(PackagePtr pkg);
-
   std::map<int, ActionCallback> m_actions;
   DatabasePtr m_database;
   std::queue<Download *> m_downloadQueue;
