@@ -16,7 +16,7 @@ public:
   Version(const std::string &);
 
   const std::string &name() const { return m_name; }
-  int code() const { return m_code; }
+  unsigned long code() const { return m_code; }
 
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
@@ -29,7 +29,7 @@ public:
 
 private:
   std::string m_name;
-  int m_code;
+  unsigned long m_code;
 
   std::string m_changelog;
   std::vector<SourcePtr> m_sources;

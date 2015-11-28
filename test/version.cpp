@@ -22,31 +22,42 @@ TEST_CASE("invalid", M) {
 TEST_CASE("major minor patch version", M) {
   Version ver("1.2.3");
   REQUIRE(ver.name() == "1.2.3");
-  REQUIRE(ver.code() == 1002003);
+  REQUIRE(ver.code() == 1002003000);
 }
 
 TEST_CASE("major minor version", M) {
   Version ver("1.2");
   REQUIRE(ver.name() == "1.2");
-  REQUIRE(ver.code() == 1002000);
+  REQUIRE(ver.code() == 1002000000);
 }
 
 TEST_CASE("major version", M) {
   Version ver("1");
   REQUIRE(ver.name() == "1");
-  REQUIRE(ver.code() == 1000000);
+  REQUIRE(ver.code() == 1000000000);
 }
 
 TEST_CASE("version with string suffix", M) {
   Version ver("1.2pre3");
   REQUIRE(ver.name() == "1.2pre3");
-  REQUIRE(ver.code() == 1002003);
+  REQUIRE(ver.code() == 1002003000);
 }
 
-TEST_CASE("version with extra integer", M) {
+TEST_CASE("version with 4 components", M) {
   Version ver("1.2.3.4");
   REQUIRE(ver.name() == "1.2.3.4");
   REQUIRE(ver.code() == 1002003004);
+  REQUIRE(ver < Version("1.2.4"));
+}
+
+TEST_CASE("version with 5 components", M) {
+  try {
+    Version ver("1.2.3.4.5");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "invalid version name");
+  }
 }
 
 TEST_CASE("convert platforms", M) {
