@@ -1,7 +1,6 @@
 #include "reapack.hpp"
 
 #include "errors.hpp"
-#include "resource.hpp"
 
 #include <fstream>
 
