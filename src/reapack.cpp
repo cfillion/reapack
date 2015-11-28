@@ -73,7 +73,7 @@ void ReaPack::installPackage(PackagePtr pkg)
     }
 
     InstallLocation loc = pkg->targetLocation();
-    loc.setPrefix(m_resourcePath);
+    loc.prependDir(m_resourcePath);
 
     RecursiveCreateDirectory(loc.directory().c_str(), 0);
 

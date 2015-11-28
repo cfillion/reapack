@@ -49,8 +49,19 @@ InstallLocation Package::targetLocation() const
 {
   switch(m_type) {
   case ScriptType:
-    return {"/Scripts/ReaScripts/" + category()->name(), name()};
+    return scriptLocation();
   default:
     throw reapack_error("unsupported package type");
   }
+}
+
+InstallLocation Package::scriptLocation() const
+{
+  // TODO: use actual database name instead of hard-coded "ReaScripts"
+  InstallLocation loc("/Scripts/ReaScripts", name());
+
+  if(m_category)
+    loc.appendDir("/" + category()->name());
+
+  return loc;
 }

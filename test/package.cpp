@@ -74,11 +74,16 @@ TEST_CASE("set install location prefix", M) {
   REQUIRE(loc.filename() == "world");
   REQUIRE(loc.fullPath() == "/hello/world");
 
-  loc.setPrefix("/root");
+  loc.prependDir("/root");
 
   REQUIRE(loc.directory() == "/root/hello");
-  REQUIRE(loc.filename() == "world");
   REQUIRE(loc.fullPath() == "/root/hello/world");
+
+  loc.appendDir("/to");
+
+  REQUIRE(loc.directory() == "/root/hello/to");
+  REQUIRE(loc.filename() == "world");
+  REQUIRE(loc.fullPath() == "/root/hello/to/world");
 }
 
 TEST_CASE("unknown target location", M) {
@@ -102,4 +107,12 @@ TEST_CASE("script target location", M) {
   const InstallLocation loc = pack.targetLocation();
   REQUIRE(loc ==
     InstallLocation("/Scripts/ReaScripts/Category Name", "file.name"));
+}
+
+TEST_CASE("script target location without category", M) {
+  Package pack(Package::ScriptType, "file.name", "author");
+
+  const InstallLocation loc = pack.targetLocation();
+  REQUIRE(loc ==
+    InstallLocation("/Scripts/ReaScripts", "file.name"));
 }

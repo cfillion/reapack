@@ -14,7 +14,9 @@ public:
     : m_directory(d), m_filename(f)
   {}
 
-  void setPrefix(const std::string &p) { m_directory.insert(0, p); }
+  void prependDir(const std::string &p) { m_directory.insert(0, p); }
+  void appendDir(const std::string &p) { m_directory.append(p); }
+
   const std::string directory() const { return m_directory; }
   const std::string filename() const { return m_filename; }
 
@@ -61,6 +63,8 @@ public:
   InstallLocation targetLocation() const;
 
 private:
+  InstallLocation scriptLocation() const;
+
   Category *m_category;
   Type m_type;
   std::string m_name;
