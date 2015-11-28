@@ -37,6 +37,9 @@ void Database::addCategory(CategoryPtr cat)
     return;
 
   m_categories.push_back(cat);
+
+  m_packages.insert(m_packages.end(),
+    cat->packages().begin(), cat->packages().end());
 }
 
 Category::Category(const std::string &name)
@@ -92,4 +95,9 @@ VersionPtr Package::version(const int index) const
     it++;
 
   return *it;
+}
+
+VersionPtr Package::lastVersion() const
+{
+  return *prev(m_versions.end());
 }

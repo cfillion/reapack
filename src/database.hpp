@@ -26,10 +26,13 @@ public:
   const std::vector<CategoryPtr> &categories() const { return m_categories; }
   CategoryPtr category(const int i) const { return m_categories[i]; }
 
+  const std::vector<PackagePtr> &packages() const { return m_packages; }
+
 private:
   static DatabasePtr loadV1(TiXmlElement *);
 
   std::vector<CategoryPtr> m_categories;
+  std::vector<PackagePtr> m_packages;
 };
 
 class Category {
@@ -68,6 +71,7 @@ public:
   void addVersion(VersionPtr ver);
   const VersionSet &versions() const { return m_versions; }
   VersionPtr version(const int i) const;
+  VersionPtr lastVersion() const;
 
 private:
   Category *m_category;

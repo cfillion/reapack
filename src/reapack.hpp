@@ -3,13 +3,26 @@
 
 #include <functional>
 #include <map>
+#include <queue>
+
+#include "database.hpp"
+#include "download.hpp"
 
 #include "reaper_plugin.h"
+
+struct Location {
+  std::string path() const { return directory + "/" + filename; }
+
+  std::string directory;
+  std::string filename;
+};
 
 typedef std::function<void()> ActionCallback;
 
 class ReaPack {
 public:
+  ~ReaPack();
+
   gaccel_register_t action;
 
   void init(REAPER_PLUGIN_HINSTANCE, reaper_plugin_info_t *);
@@ -18,14 +31,21 @@ public:
     gaccel_register_t *action, ActionCallback callback);
   bool execActions(const int id, const int);
 
-  void toggleBrowser();
+  void synchronize();
+  void installPackage(PackagePtr pkg);
+  void queuedDownload(const char *url, DownloadCallback cb);
 
 private:
+  Location scriptLocation(PackagePtr pkg);
+
   std::map<int, ActionCallback> m_actions;
+  DatabasePtr m_database;
+  std::queue<Download *> m_downloadQueue;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   reaper_plugin_info_t *m_rec;
   HWND m_mainHandle;
+  const char *m_resourcePath;
 };
 
 #endif

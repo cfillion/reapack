@@ -1,7 +1,5 @@
 #include "reapack.hpp"
 
-#include <cstdlib>
-
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
 
@@ -21,12 +19,10 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(REAPERAPI_LoadAPI(rec->GetFunc) > 0)
     return 0;
 
-  printf("%s\n", GetResourcePath());
-
   reapack.init(instance, rec);
 
-  reapack.setupAction("REAPACKMGR", "ReaPack: Package Manager",
-    &reapack.action, std::bind(&ReaPack::toggleBrowser, reapack));
+  reapack.setupAction("REAPACKSYNC", "ReaPack: Synchronize Packages",
+    &reapack.action, std::bind(&ReaPack::synchronize, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
 

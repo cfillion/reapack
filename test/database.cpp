@@ -60,7 +60,6 @@ TEST_CASE("future version", M) {
     REQUIRE(string(e.what()) == "unsupported version");
   }
 }
-
 TEST_CASE("add category", M) {
   VersionPtr ver = make_shared<Version>("1");
   ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
@@ -77,6 +76,7 @@ TEST_CASE("add category", M) {
   db.addCategory(cat);
 
   REQUIRE(db.categories().size() == 1);
+  REQUIRE(db.packages() == cat->packages());
 }
 
 TEST_CASE("drop empty category", M) {
@@ -177,6 +177,7 @@ TEST_CASE("package versions are sorted", M) {
 
   REQUIRE(pack.version(0) == alpha);
   REQUIRE(pack.version(1) == final);
+  REQUIRE(pack.lastVersion() == final);
 }
 
 TEST_CASE("drop empty version", M) {
