@@ -3,12 +3,13 @@
 
 #include <functional>
 #include <vector>
+#include <string>
 
 #include <WDL/mutex.h>
 
 #include <reaper_plugin.h>
 
-typedef std::function<void(int, const char *)> DownloadCallback;
+typedef std::function<void(int, const std::string &)> DownloadCallback;
 
 class Download {
 public:
@@ -34,10 +35,11 @@ public:
 private:
   static std::vector<Download *> s_active;
 
-  static void timerTick();
-  static DWORD WINAPI worker(void *ptr);
+  static void TimerTick();
+  static size_t WriteData(char *, size_t, size_t, void *);
+  static DWORD WINAPI Worker(void *ptr);
 
-  void finish(const int status, const char *contents);
+  void finish(const int status, const std::string &contents);
   void execCallbacks();
   void abort();
   void reset();
@@ -46,7 +48,7 @@ private:
   bool m_aborted;
   bool m_finished;
   int m_status;
-  const char *m_contents;
+  std::string m_contents;
 
   const char *m_url;
   std::vector<DownloadCallback> m_callback;

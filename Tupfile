@@ -6,7 +6,7 @@ CXXFLAGS += -O2 -std=c++14
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
 
-LDFLAGS := -framework Cocoa -framework Carbon
+LDFLAGS := -framework Cocoa -framework Carbon -lcurl
 SOFLAGS := -dynamiclib
 
 WDL := vendor/WDL/WDL
@@ -15,10 +15,6 @@ SWELL := $(WDL)/swell
 WDLSOURCE := $(SWELL)/swell.cpp $(SWELL)/swell-ini.cpp
 WDLSOURCE += $(SWELL)/swell-gdi.mm $(SWELL)/swell-kb.mm $(SWELL)/swell-menu.mm
 WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
-
-JNETLIB := $(WDL)/jnetlib
-WDLSOURCE += $(JNETLIB)/util.cpp $(JNETLIB)/httpget.cpp
-WDLSOURCE += $(JNETLIB)/connection.cpp $(JNETLIB)/asyncdns.cpp
 
 TINYXML := $(WDL)/tinyxml
 WDLSOURCE += $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp

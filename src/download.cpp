@@ -1,16 +1,17 @@
 #include "download.hpp"
 
-#include <WDL/jnetlib/httpget.h>
-#include <WDL/jnetlib/jnetlib.h>
+#include <curl/curl.h>
 
 #include <reaper_plugin_functions.h>
 
-std::vector<Download *> Download::s_active;
+using namespace std;
 
-static const int DOWNLOAD_TIMEOUT = 10;
+vector<Download *> Download::s_active;
+
+static const int DOWNLOAD_TIMEOUT = 5;
 
 Download::Download(const char *url)
-  : m_threadHandle(0), m_contents(0)
+  : m_threadHandle(0)
 {
   m_url = url;
 
@@ -20,7 +21,7 @@ Download::Download(const char *url)
 Download::~Download()
 {
   if(!isFinished())
-    s_active.erase(std::remove(s_active.begin(), s_active.end(), this));
+    s_active.erase(remove(s_active.begin(), s_active.end(), this));
 
   // call stop after removing from the active list to prevent
   // bad access from timeTick -> execCallbacks
@@ -35,11 +36,7 @@ void Download::reset()
   m_aborted = false;
   m_finished = false;
   m_status = 0;
-
-  if(m_contents) {
-    delete[] m_contents;
-    m_contents = 0;
-  }
+  m_contents.clear();
 }
 
 void Download::addCallback(const DownloadCallback &callback)
@@ -47,9 +44,9 @@ void Download::addCallback(const DownloadCallback &callback)
   m_callback.push_back(callback);
 }
 
-void Download::timerTick() // static
+void Download::TimerTick()
 {
-  std::vector<Download *> &activeDownloads = Download::s_active;
+  vector<Download *> &activeDownloads = Download::s_active;
   const int size = activeDownloads.size();
 
   for(int i = 0; i < size; i++) {
@@ -66,7 +63,7 @@ void Download::timerTick() // static
   }
 
   if(Download::s_active.empty())
-    plugin_register("-timer", (void*)timerTick);
+    plugin_register("-timer", (void*)TimerTick);
 }
 
 Download::StartCode Download::start()
@@ -77,9 +74,9 @@ Download::StartCode Download::start()
   reset();
 
   s_active.push_back(this);
-  plugin_register("timer", (void*)timerTick);
+  plugin_register("timer", (void*)TimerTick);
 
-  m_threadHandle = CreateThread(NULL, 0, worker, (void *)this, 0, 0);
+  m_threadHandle = CreateThread(NULL, 0, Worker, (void *)this, 0, 0);
   return Started;
 }
 
@@ -98,56 +95,72 @@ void Download::stop()
   // otherwise the callback will not be called
 };
 
-DWORD WINAPI Download::worker(void *ptr) // static
+DWORD WINAPI Download::Worker(void *ptr)
 {
-  JNL::open_socketlib();
-
   Download *download = static_cast<Download *>(ptr);
 
-  JNL_HTTPGet agent;
-  agent.addheader("Accept: */*");
-  agent.addheader("User-Agent: ReaPack (REAPER)");
-  agent.connect(download->url());
+  string contents;
 
-  const time_t startTime = time(NULL);
+  CURL *curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_URL, download->url());
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "ReaPack/1.0 (REAPER)");
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, DOWNLOAD_TIMEOUT);
 
-  while(agent.run() == 0) {
-    if(download->isAborted()) {
-      download->finish(-2, strdup("aborted"));
-      JNL::close_socketlib();
-      return 1;
-    }
-    else if(time(NULL) - startTime >= DOWNLOAD_TIMEOUT) {
-      download->finish(-3, strdup("timeout"));
-      JNL::close_socketlib();
-      return 1;
-    }
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 1);
 
-    Sleep(50);
+  curl_easy_setopt(curl, CURLOPT_HEADER, true);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
+
+  const CURLcode res = curl_easy_perform(curl);
+
+  if(download->isAborted()) {
+    download->finish(-2, "aborted");
+    curl_easy_cleanup(curl);
+    return 1;
+  }
+  else if(res != CURLE_OK) {
+    download->finish(0, curl_easy_strerror(res));
+    curl_easy_cleanup(curl);
+    return 1;
   }
 
-  const int status = agent.getreplycode();
-  const int size = agent.bytes_available();
+  int status = 0;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
 
   if(status == 200) {
-    char *buffer = new char[size + 1];
-    agent.get_bytes(buffer, size);
+    // strip headers
+    long headerSize = 0;
+    curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
+    contents.erase(0, headerSize);
 
-    // get_bytes doesn't put a null byte at the end of the string
-    // without the next line strlen(buffer) cound be anything
-    buffer[size] = '\0';
-
-    download->finish(status, buffer);
+    download->finish(status, contents);
   }
-  else
-    download->finish(status, strdup(agent.geterrorstr()));
+  else {
+    // strip body
+    contents.erase(contents.find("\n"));
 
-  JNL::close_socketlib();
+    download->finish(status, contents);
+  }
+
+  curl_easy_cleanup(curl);
 
   return 0;
 }
 
-void Download::finish(const int status, const char *contents)
+size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
+{
+  const size_t size = rawsize * nmemb;
+
+  string *str = static_cast<string *>(data);
+  str->append(ptr, size);
+
+  return size;
+}
+
+
+void Download::finish(const int status, const string &contents)
 {
   WDL_MutexLock lock(&m_mutex);
 
