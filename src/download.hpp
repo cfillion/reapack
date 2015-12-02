@@ -14,13 +14,6 @@ typedef std::function<void(int, const std::string &)> DownloadCallback;
 
 class Download {
 public:
-  enum StartCode {
-    Started,
-    AlreadyRunning,
-    FileExists,
-    WriteError,
-  };
-
   Download(const std::string &url);
   ~Download();
 
@@ -30,7 +23,8 @@ public:
   bool isAborted();
 
   void addCallback(const DownloadCallback &);
-  StartCode start();
+
+  void start();
   void stop();
 
 private:

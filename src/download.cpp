@@ -64,10 +64,10 @@ void Download::TimerTick()
     plugin_register("-timer", (void*)TimerTick);
 }
 
-Download::StartCode Download::start()
+void Download::start()
 {
   if(m_threadHandle)
-    return AlreadyRunning;
+    return;
 
   reset();
 
@@ -75,7 +75,6 @@ Download::StartCode Download::start()
   plugin_register("timer", (void*)TimerTick);
 
   m_threadHandle = CreateThread(NULL, 0, Worker, (void *)this, 0, 0);
-  return Started;
 }
 
 void Download::stop()
