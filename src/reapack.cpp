@@ -95,6 +95,8 @@ void ReaPack::synchronize(Database *database)
     ShowMessageBox("The package database is empty, nothing to do!",
       "ReaPack", 0);
 
+    delete database;
+
     return;
   }
 
