@@ -10,8 +10,8 @@ vector<Download *> Download::s_active;
 
 static const int DOWNLOAD_TIMEOUT = 5;
 
-Download::Download(const std::string &url)
-  : m_threadHandle(0), m_url(url)
+Download::Download(const std::string &name, const std::string &url)
+  : m_threadHandle(0), m_name(name), m_url(url)
 {
   reset();
 }
@@ -179,7 +179,7 @@ void Download::execCallbacks()
   }
 
   for(DownloadCallback callback : m_callback)
-    callback(m_status, m_contents);
+    callback(this);
 }
 
 bool Download::isFinished()
@@ -214,14 +214,15 @@ DownloadQueue::~DownloadQueue()
   }
 }
 
-void DownloadQueue::push(const std::string &url, DownloadCallback cb)
+void DownloadQueue::push(const string &name,
+  const string &url, DownloadCallback cb)
 {
-  Download *download = new Download(url);
+  Download *download = new Download(name, url);
   download->addCallback(cb);
 
-  download->addCallback([=](const int, const string &) {
+  download->addCallback([=](Download *dl) {
     m_queue.pop();
-    delete download;
+    delete dl;
 
     if(!m_queue.empty())
       m_queue.front()->start();

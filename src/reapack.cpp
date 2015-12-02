@@ -68,9 +68,9 @@ void ReaPack::synchronizeAll()
 
 void ReaPack::synchronize(const Repository &repo)
 {
-  m_downloadQueue.push(repo.url(), [=](const int code, const string &data) {
-    if(code != 200) {
-      ShowMessageBox(data.c_str(), repo.name().c_str(), 0);
+  m_downloadQueue.push(repo.name(), repo.url(), [=](Download *dl) {
+    if(dl->status() != 200) {
+      ShowMessageBox(dl->contents().c_str(), repo.name().c_str(), 0);
       return;
     }
 
@@ -82,14 +82,14 @@ void ReaPack::synchronize(const Repository &repo)
       return;
     }
 
-    file << data;
+    file << dl->contents();
     file.close();
 
     synchronize(Database::load(path.cjoin()));
   });
 }
 
-void ReaPack::synchronize(DatabasePtr database)
+void ReaPack::synchronize(Database *database)
 {
   if(database->packages().empty()) {
     ShowMessageBox("The package database is empty, nothing to do!",
@@ -98,7 +98,7 @@ void ReaPack::synchronize(DatabasePtr database)
     return;
   }
 
-  for(PackagePtr pkg : database->packages()) {
+  for(Package *pkg : database->packages()) {
     try {
       installPackage(pkg);
     }
@@ -108,13 +108,16 @@ void ReaPack::synchronize(DatabasePtr database)
   }
 }
 
-void ReaPack::installPackage(PackagePtr pkg)
+void ReaPack::installPackage(Package *pkg)
 {
   const std::string &url = pkg->lastVersion()->source(0)->url();
 
-  m_downloadQueue.push(url, [=](const int code, const string &data) {
-    if(code != 200) {
-      ShowMessageBox(data.c_str(), pkg->name().c_str(), 0);
+  m_downloadQueue.push(pkg->name(), url, [=](Download *dl) {
+    if(m_downloadQueue.size() == 1)
+      delete pkg->category()->database();
+
+    if(dl->status() != 200) {
+      ShowMessageBox(dl->contents().c_str(), dl->name().c_str(), 0);
       return;
     }
 
@@ -123,11 +126,11 @@ void ReaPack::installPackage(PackagePtr pkg)
 
     ofstream file(path.join());
     if(file.bad()) {
-      ShowMessageBox(strerror(errno), pkg->name().c_str(), 0);
+      ShowMessageBox(strerror(errno), dl->name().c_str(), 0);
       return;
     }
 
-    file << data;
+    file << dl->contents();
     file.close();
   });
 }

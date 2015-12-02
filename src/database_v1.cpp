@@ -4,15 +4,21 @@
 
 #include <WDL/tinyxml/tinyxml.h>
 
+#include <memory>
+
 using namespace std;
 
-static CategoryPtr LoadCategoryV1(TiXmlElement *);
-static PackagePtr LoadPackageV1(TiXmlElement *);
-static VersionPtr LoadVersionV1(TiXmlElement *);
+static Category *LoadCategoryV1(TiXmlElement *);
+static Package *LoadPackageV1(TiXmlElement *);
+static Version *LoadVersionV1(TiXmlElement *);
 
-DatabasePtr Database::loadV1(TiXmlElement *root)
+Database *Database::loadV1(TiXmlElement *root)
 {
-  DatabasePtr db = make_shared<Database>();
+  Database *db = new Database;
+
+  // ensure the memory is released if an exception is
+  // thrown during the loading process
+  unique_ptr<Database> ptr(db);
 
   TiXmlElement *catNode = root->FirstChildElement("category");
 
@@ -22,15 +28,17 @@ DatabasePtr Database::loadV1(TiXmlElement *root)
     catNode = catNode->NextSiblingElement("category");
   }
 
+  ptr.release();
   return db;
 }
 
-CategoryPtr LoadCategoryV1(TiXmlElement *catNode)
+Category *LoadCategoryV1(TiXmlElement *catNode)
 {
   const char *name = catNode->Attribute("name");
   if(!name) name = "";
 
-  CategoryPtr cat = make_shared<Category>(name);
+  Category *cat = new Category(name);
+  unique_ptr<Category> ptr(cat);
 
   TiXmlElement *packNode = catNode->FirstChildElement("reapack");
 
@@ -40,10 +48,11 @@ CategoryPtr LoadCategoryV1(TiXmlElement *catNode)
     packNode = packNode->NextSiblingElement("reapack");
   }
 
+  ptr.release();
   return cat;
 }
 
-PackagePtr LoadPackageV1(TiXmlElement *packNode)
+Package *LoadPackageV1(TiXmlElement *packNode)
 {
   const char *type = packNode->Attribute("type");
   if(!type) type = "";
@@ -51,7 +60,8 @@ PackagePtr LoadPackageV1(TiXmlElement *packNode)
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
-  PackagePtr pack = make_shared<Package>(Package::convertType(type), name);
+  Package *pack = new Package(Package::convertType(type), name);
+  unique_ptr<Package> ptr(pack);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");
 
@@ -61,15 +71,17 @@ PackagePtr LoadPackageV1(TiXmlElement *packNode)
     verNode = verNode->NextSiblingElement("version");
   }
 
+  ptr.release();
   return pack;
 }
 
-VersionPtr LoadVersionV1(TiXmlElement *verNode)
+Version *LoadVersionV1(TiXmlElement *verNode)
 {
   const char *name = verNode->Attribute("name");
   if(!name) name = "";
 
-  VersionPtr ver = make_shared<Version>(name);
+  Version *ver = new Version(name);
+  unique_ptr<Version> ptr(ver);
 
   TiXmlElement *node = verNode->FirstChildElement("source");
 
@@ -80,7 +92,7 @@ VersionPtr LoadVersionV1(TiXmlElement *verNode)
     const char *url = node->GetText();
     if(!url) url = "";
 
-    ver->addSource(make_shared<Source>(Source::convertPlatform(platform), url));
+    ver->addSource(new Source(Source::convertPlatform(platform), url));
 
     node = node->NextSiblingElement("source");
   }
@@ -94,5 +106,6 @@ VersionPtr LoadVersionV1(TiXmlElement *verNode)
       ver->setChangelog(changelog);
   }
 
+  ptr.release();
   return ver;
 }

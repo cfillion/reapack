@@ -10,14 +10,18 @@
 
 #include <reaper_plugin.h>
 
-typedef std::function<void(int, const std::string &)> DownloadCallback;
+class Download;
+typedef std::function<void(Download *)> DownloadCallback;
 
 class Download {
 public:
-  Download(const std::string &url);
+  Download(const std::string &name, const std::string &url);
   ~Download();
 
+  const std::string &name() const { return m_name; }
   const std::string &url() const { return m_url; }
+  int status() const { return m_status; }
+  const std::string &contents() const { return m_contents; }
 
   bool isFinished();
   bool isAborted();
@@ -45,6 +49,7 @@ private:
   int m_status;
   std::string m_contents;
 
+  std::string m_name;
   std::string m_url;
   std::vector<DownloadCallback> m_callback;
 
@@ -55,7 +60,8 @@ class DownloadQueue {
 public:
   ~DownloadQueue();
 
-  void push(const std::string &url, DownloadCallback);
+  void push(const std::string &name, const std::string &url, DownloadCallback);
+  int size() const { return m_queue.size(); }
 
 private:
   std::queue<Download *> m_queue;

@@ -18,7 +18,13 @@ Package::Package(const Type type, const std::string &name)
     throw reapack_error("empty package name");
 }
 
-void Package::addVersion(VersionPtr ver)
+Package::~Package()
+{
+  for(Version *ver : m_versions)
+    delete ver;
+}
+
+void Package::addVersion(Version *ver)
 {
   if(ver->sources().empty())
     return;
@@ -26,7 +32,7 @@ void Package::addVersion(VersionPtr ver)
   m_versions.insert(ver);
 }
 
-VersionPtr Package::version(const int index) const
+Version *Package::version(const int index) const
 {
   auto it = m_versions.begin();
 
@@ -36,7 +42,7 @@ VersionPtr Package::version(const int index) const
   return *it;
 }
 
-VersionPtr Package::lastVersion() const
+Version *Package::lastVersion() const
 {
   return *prev(m_versions.end());
 }
@@ -58,10 +64,10 @@ Path Package::scriptLocation() const
   path.append("Scripts");
   path.append("ReaScripts");
 
-  if(category())
-    path.append(category()->name());
+  if(m_category)
+    path.append(m_category->name());
 
-  path.append(name());
+  path.append(m_name);
 
   return path;
 }

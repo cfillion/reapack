@@ -5,15 +5,12 @@
 #include <string>
 #include <vector>
 
-class Version;
-typedef std::shared_ptr<Version> VersionPtr;
-
 class Source;
-typedef std::shared_ptr<Source> SourcePtr;
 
 class Version {
 public:
   Version(const std::string &);
+  ~Version();
 
   const std::string &name() const { return m_name; }
   unsigned long code() const { return m_code; }
@@ -21,29 +18,29 @@ public:
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
 
-  void addSource(SourcePtr source);
-  const std::vector<SourcePtr> &sources() const { return m_sources; }
-  SourcePtr source(const int i) const { return m_sources[i]; }
+  void addSource(Source *source);
+  const std::vector<Source *> &sources() const { return m_sources; }
+  Source *source(const int i) const { return m_sources[i]; }
 
-  bool operator<(const Version &);
+  bool operator<(const Version &) const;
 
 private:
   std::string m_name;
   unsigned long m_code;
 
   std::string m_changelog;
-  std::vector<SourcePtr> m_sources;
+  std::vector<Source *> m_sources;
 };
 
 class VersionCompare {
 public:
-  constexpr bool operator() (const VersionPtr &l, const VersionPtr &r) const
+  constexpr bool operator()(const Version *l, const Version *r) const
   {
-    return *l.get() < *r.get();
+    return *l < *r;
   }
 };
 
-typedef std::set<VersionPtr, VersionCompare> VersionSet;
+typedef std::set<Version *, VersionCompare> VersionSet;
 
 class Source {
 public:

@@ -26,13 +26,14 @@ TEST_CASE("package versions are sorted", M) {
   Package pack(Package::ScriptType, "a");
   CHECK(pack.versions().size() == 0);
 
-  SourcePtr source = make_shared<Source>(Source::GenericPlatform, "google.com");
+  Source *sourceA = new Source(Source::GenericPlatform, "google.com");
+  Source *sourceB = new Source(Source::GenericPlatform, "google.com");
 
-  VersionPtr final = make_shared<Version>("1");
-  final->addSource(source);
+  Version *final = new Version("1");
+  final->addSource(sourceA);
 
-  VersionPtr alpha = make_shared<Version>("0.1");
-  alpha->addSource(source);
+  Version *alpha = new Version("0.1");
+  alpha->addSource(sourceB);
 
   pack.addVersion(final);
   CHECK(pack.versions().size() == 1);
@@ -47,7 +48,7 @@ TEST_CASE("package versions are sorted", M) {
 
 TEST_CASE("drop empty version", M) {
   Package pack(Package::ScriptType, "a");
-  pack.addVersion(make_shared<Version>("1"));
+  pack.addVersion(new Version("1"));
 
   REQUIRE(pack.versions().empty());
 }
@@ -65,10 +66,10 @@ TEST_CASE("unknown target location", M) {
 }
 
 TEST_CASE("script target location", M) {
-  CategoryPtr cat = make_shared<Category>("Category Name");
+  Category cat("Category Name");
 
   Package pack(Package::ScriptType, "file.name");
-  pack.setCategory(cat);
+  pack.setCategory(&cat);
 
   const Path path = pack.targetLocation();
 

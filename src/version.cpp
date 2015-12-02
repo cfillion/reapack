@@ -31,7 +31,13 @@ Version::Version(const std::string &str)
   }
 }
 
-void Version::addSource(SourcePtr source)
+Version::~Version()
+{
+  for(Source *source : m_sources)
+    delete source;
+}
+
+void Version::addSource(Source *source)
 {
   const Source::Platform p = source->platform();
 
@@ -67,7 +73,7 @@ void Version::setChangelog(const std::string &changelog)
   m_changelog = changelog;
 }
 
-bool Version::operator<(const Version &o)
+bool Version::operator<(const Version &o) const
 {
   return m_code < o.code();
 }

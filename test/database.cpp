@@ -6,6 +6,7 @@
 #include <string>
 
 #define DBPATH "test/db/"
+#define DBPTR(ptr) unique_ptr<Database> dbptr(ptr)
 
 using namespace std;
 
@@ -13,7 +14,8 @@ static const char *M = "[database]";
 
 TEST_CASE("file not found", M) {
   try {
-    Database::load(DBPATH "404.xml");
+    Database *db = Database::load(DBPATH "404.xml");
+    DBPTR(db);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -23,7 +25,8 @@ TEST_CASE("file not found", M) {
 
 TEST_CASE("broken xml", M) {
   try {
-    Database::load(DBPATH "broken.xml");
+    Database *db = Database::load(DBPATH "broken.xml");
+    DBPTR(db);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -33,7 +36,8 @@ TEST_CASE("broken xml", M) {
 
 TEST_CASE("wrong root tag name", M) {
   try {
-    Database::load(DBPATH "wrong_root.xml");
+    Database *db = Database::load(DBPATH "wrong_root.xml");
+    DBPTR(db);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -43,7 +47,8 @@ TEST_CASE("wrong root tag name", M) {
 
 TEST_CASE("invalid version", M) {
   try {
-    Database::load(DBPATH "invalid_version.xml");
+    Database *db = Database::load(DBPATH "invalid_version.xml");
+    DBPTR(db);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -53,7 +58,8 @@ TEST_CASE("invalid version", M) {
 
 TEST_CASE("future version", M) {
   try {
-    Database::load(DBPATH "future_version.xml");
+    Database *db = Database::load(DBPATH "future_version.xml");
+    DBPTR(db);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -61,13 +67,13 @@ TEST_CASE("future version", M) {
   }
 }
 TEST_CASE("add category", M) {
-  VersionPtr ver = make_shared<Version>("1");
-  ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
+  Version *ver = new Version("1");
+  ver->addSource(new Source(Source::GenericPlatform, "google.com"));
 
-  PackagePtr pack = make_shared<Package>(Package::ScriptType, "name");
+  Package *pack = new Package(Package::ScriptType, "name");
   pack->addVersion(ver);
 
-  CategoryPtr cat = make_shared<Category>("a");
+  Category *cat = new Category("a");
   cat->addPackage(pack);
 
   Database db;
@@ -81,38 +87,38 @@ TEST_CASE("add category", M) {
 
 TEST_CASE("drop empty category", M) {
   Database db;
-  db.addCategory(make_shared<Category>("a"));
+  db.addCategory(new Category("a"));
 
   REQUIRE(db.categories().empty());
 }
 
 TEST_CASE("add a package", M) {
-  VersionPtr ver = make_shared<Version>("1");
-  ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
+  Version *ver = new Version("1");
+  ver->addSource(new Source(Source::GenericPlatform, "google.com"));
 
-  PackagePtr pack = make_shared<Package>(Package::ScriptType, "name");
+  Package *pack = new Package(Package::ScriptType, "name");
   pack->addVersion(ver);
 
-  CategoryPtr cat = make_shared<Category>("a");
-  CHECK(cat->packages().size() == 0);
+  Category cat("a");
+  CHECK(cat.packages().size() == 0);
   CHECK_FALSE(pack->category());
 
-  cat->addPackage(pack);
+  cat.addPackage(pack);
 
-  REQUIRE(cat->packages().size() == 1);
-  REQUIRE(pack->category().get() == cat.get());
+  REQUIRE(cat.packages().size() == 1);
+  REQUIRE(pack->category() == &cat);
 }
 
 TEST_CASE("drop empty package", M) {
   Category cat("a");
-  cat.addPackage(make_shared<Package>(Package::ScriptType, "name"));
+  cat.addPackage(new Package(Package::ScriptType, "name"));
 
   REQUIRE(cat.packages().empty());
 }
 
 TEST_CASE("drop unknown package", M) {
   Category cat("a");
-  cat.addPackage(make_shared<Package>(Package::UnknownType, "name"));
+  cat.addPackage(new Package(Package::UnknownType, "name"));
 
   REQUIRE(cat.packages().size() == 0);
 }

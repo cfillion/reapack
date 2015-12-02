@@ -4,7 +4,7 @@
 
 #include <WDL/tinyxml/tinyxml.h>
 
-DatabasePtr Database::load(const char *file)
+Database *Database::load(const char *file)
 {
   TiXmlDocument doc(file);
 
@@ -31,11 +31,18 @@ DatabasePtr Database::load(const char *file)
   }
 }
 
-void Database::addCategory(CategoryPtr cat)
+Database::~Database()
+{
+  for(Category *cat : m_categories)
+    delete cat;
+}
+
+void Database::addCategory(Category *cat)
 {
   if(cat->packages().empty())
     return;
 
+  cat->setDatabase(this);
   m_categories.push_back(cat);
 
   m_packages.insert(m_packages.end(),
@@ -49,13 +56,19 @@ Category::Category(const std::string &name)
     throw reapack_error("empty category name");
 }
 
-void Category::addPackage(PackagePtr pack)
+Category::~Category()
+{
+  for(Package *pack : m_packages)
+    delete pack;
+}
+
+void Category::addPackage(Package *pack)
 {
   if(pack->type() == Package::UnknownType)
     return; // silently discard unknown package types
   else if(pack->versions().empty())
     return;
 
-  pack->setCategory(shared_from_this());
+  pack->setCategory(this);
   m_packages.push_back(pack);
 }

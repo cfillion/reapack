@@ -25,8 +25,8 @@ public:
 
   void synchronizeAll();
   void synchronize(const Repository &);
-  void synchronize(DatabasePtr);
-  void installPackage(PackagePtr);
+  void synchronize(Database *);
+  void installPackage(Package *);
 
 private:
   std::map<int, ActionCallback> m_actions;

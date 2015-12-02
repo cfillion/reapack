@@ -106,7 +106,7 @@ TEST_CASE("empty source url", M) {
 
 TEST_CASE("drow sources for unknown platforms") {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::UnknownPlatform, "a"));
+  ver.addSource(new Source(Source::UnknownPlatform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
@@ -114,9 +114,9 @@ TEST_CASE("drow sources for unknown platforms") {
 #ifdef __APPLE__
 TEST_CASE("drop windows sources on os x", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::WindowsPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::Win32Platform, "a"));
-  ver.addSource(make_shared<Source>(Source::Win64Platform, "a"));
+  ver.addSource(new Source(Source::WindowsPlatform, "a"));
+  ver.addSource(new Source(Source::Win32Platform, "a"));
+  ver.addSource(new Source(Source::Win64Platform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
@@ -124,32 +124,32 @@ TEST_CASE("drop windows sources on os x", M) {
 #ifdef __x86_64__
 TEST_CASE("drop 32-bit sources on os x 64-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::Darwin32Platform, "a"));
+  ver.addSource(new Source(Source::Darwin32Platform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
 
 TEST_CASE("valid sources for os x 64-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::GenericPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::DarwinPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::Darwin64Platform, "a"));
+  ver.addSource(new Source(Source::GenericPlatform, "a"));
+  ver.addSource(new Source(Source::DarwinPlatform, "a"));
+  ver.addSource(new Source(Source::Darwin64Platform, "a"));
 
   REQUIRE(ver.sources().size() == 3);
 }
 #else
 TEST_CASE("drop 64-bit sources on os x 32-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::Darwin64Platform, "a"));
+  ver.addSource(new Source(Source::Darwin64Platform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
 
 TEST_CASE("valid sources for os x 32-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::GenericPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::DarwinPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::Darwin32Platform, "a"));
+  ver.addSource(new Source(Source::GenericPlatform, "a"));
+  ver.addSource(new Source(Source::DarwinPlatform, "a"));
+  ver.addSource(new Source(Source::Darwin32Platform, "a"));
 
   REQUIRE(ver.sources().size() == 3);
 }
@@ -158,9 +158,9 @@ TEST_CASE("valid sources for os x 32-bit", M) {
 #elif _WIN32
 TEST_CASE("drop os x sources on windows", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::DarwinPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::Darwin32Platform, "a"));
-  ver.addSource(make_shared<Source>(Source::Darwin64Platform, "a"));
+  ver.addSource(new Source(Source::DarwinPlatform, "a"));
+  ver.addSource(new Source(Source::Darwin32Platform, "a"));
+  ver.addSource(new Source(Source::Darwin64Platform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
@@ -168,32 +168,32 @@ TEST_CASE("drop os x sources on windows", M) {
 #ifdef _WIN64
 TEST_CASE("drop 32-bit sources on windows 64-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::Win32Platform, "a"));
+  ver.addSource(new Source(Source::Win32Platform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
 
 TEST_CASE("valid sources for windows 64-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::GenericPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::WindowsPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::Win64Platform, "a"));
+  ver.addSource(new Source(Source::GenericPlatform, "a"));
+  ver.addSource(new Source(Source::WindowsPlatform, "a"));
+  ver.addSource(new Source(Source::Win64Platform, "a"));
 
   REQUIRE(ver.sources().size() == 3);
 }
 #else
 TEST_CASE("drop 64-bit sources on windows 32-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::Win64Platform, "a"));
+  ver.addSource(new Source(Source::Win64Platform, "a"));
 
   REQUIRE(ver.sources().size() == 0);
 }
 
 TEST_CASE("valid sources for windows 32-bit", M) {
   Version ver("1");
-  ver.addSource(make_shared<Source>(Source::GenericPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::WindowsPlatform, "a"));
-  ver.addSource(make_shared<Source>(Source::Win32Platform, "a"));
+  ver.addSource(new Source(Source::GenericPlatform, "a"));
+  ver.addSource(new Source(Source::WindowsPlatform, "a"));
+  ver.addSource(new Source(Source::Win32Platform, "a"));
 
   REQUIRE(ver.sources().size() == 3);
 }
