@@ -13,7 +13,13 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   m_instance = instance;
   m_rec = rec;
   m_mainHandle = GetMainHwnd();
-  m_resourcePath = GetResourcePath();
+  m_resourcePath.append(GetResourcePath());
+
+  m_config.read(m_resourcePath + "reapack.ini");
+
+  m_dbPath = m_resourcePath + "ReaPack";
+
+  RecursiveCreateDirectory(m_dbPath.cjoin(), 0);
 }
 
 void ReaPack::setupAction(const char *name, const char *desc,
@@ -36,17 +42,62 @@ bool ReaPack::execActions(const int id, const int)
   return true;
 }
 
-void ReaPack::synchronize()
+void ReaPack::synchronizeAll()
 {
-  try {
-    m_database = Database::load("/Users/cfillion/Programs/reapack/reapack.xml");
+  RepositoryList repos = m_config.repositories();
 
-    for(PackagePtr pkg : m_database->packages()) {
-      installPackage(pkg);
+  if(repos.empty()) {
+    ShowMessageBox("No repository configured, nothing to do!", "ReaPack", 0);
+    return;
+  }
+
+  for(const Repository &repo : repos) {
+    try {
+      synchronize(repo);
+    }
+    catch(const reapack_error &e) {
+      ShowMessageBox(e.what(), repo.name().c_str(), 0);
     }
   }
-  catch(const reapack_error &e) {
-    ShowMessageBox(e.what(), "Database Error", 0);
+}
+
+void ReaPack::synchronize(const Repository &repo)
+{
+  m_downloadQueue.push(repo.url(), [=](const int status, const string &contents) {
+    if(status != 200)
+      return;
+
+    const Path path = m_dbPath + (repo.name() + ".xml");
+
+    ofstream file(path.join());
+    if(file.bad()) {
+      ShowMessageBox(strerror(errno), repo.name().c_str(), 0);
+      return;
+    }
+
+    file << contents;
+    file.close();
+
+    synchronize(Database::load(path.cjoin()));
+  });
+}
+
+void ReaPack::synchronize(DatabasePtr database)
+{
+  if(database->packages().empty()) {
+    ShowMessageBox("The package database is empty, nothing to do!",
+      "ReaPack", 0);
+
+    return;
+  }
+
+  for(PackagePtr pkg : database->packages()) {
+    try {
+      installPackage(pkg);
+    }
+    catch(const reapack_error &e) {
+      ShowMessageBox(e.what(), "Package Error", 0);
+    }
   }
 }
 
@@ -60,12 +111,10 @@ void ReaPack::installPackage(PackagePtr pkg)
       return;
     }
 
-    InstallLocation loc = pkg->targetLocation();
-    loc.prependDir(m_resourcePath);
+    const Path path = m_resourcePath + pkg->targetLocation();
+    RecursiveCreateDirectory(path.cdirname(), 0);
 
-    RecursiveCreateDirectory(loc.directory().c_str(), 0);
-
-    ofstream file(loc.fullPath());
+    ofstream file(path.join());
     if(file.bad()) {
       ShowMessageBox(strerror(errno), pkg->name().c_str(), 0);
       return;

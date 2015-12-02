@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 
+#include "config.hpp"
 #include "database.hpp"
 #include "download.hpp"
 
@@ -21,18 +22,22 @@ public:
     gaccel_register_t *action, ActionCallback callback);
   bool execActions(const int id, const int);
 
-  void synchronize();
-  void installPackage(PackagePtr pkg);
+  void synchronizeAll();
+  void synchronize(const Repository &);
+  void synchronize(DatabasePtr);
+  void installPackage(PackagePtr);
 
 private:
   std::map<int, ActionCallback> m_actions;
-  DatabasePtr m_database;
+
+  Config m_config;
   DownloadQueue m_downloadQueue;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   reaper_plugin_info_t *m_rec;
   HWND m_mainHandle;
-  const char *m_resourcePath;
+  Path m_resourcePath;
+  Path m_dbPath;
 };
 
 #endif

@@ -28,4 +28,5 @@ WDLSOURCE += $(TINYXML)/tinyxmlparser.cpp $(TINYXML)/tinyxmlerror.cpp
 : build/*.o |> !link $(SOFLAGS) |> bin/reaper_reapack.dylib
 
 : foreach test/*.cpp |> !build -Isrc |> build/test/%B.o
+: test/helper/*.cpp |> !build -Isrc |> build/test/helper_%B.o
 : build/*.o build/test/*.o |> !link |> bin/test

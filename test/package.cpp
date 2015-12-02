@@ -1,5 +1,7 @@
 #include <catch.hpp>
 
+#include "helper/io.hpp"
+
 #include <database.hpp>
 #include <errors.hpp>
 #include <package.hpp>
@@ -50,32 +52,6 @@ TEST_CASE("drop empty version", M) {
   REQUIRE(pack.versions().empty());
 }
 
-TEST_CASE("different install location", M) {
-  const InstallLocation a{"/hello", "/world"};
-  const InstallLocation b{"/chunky", "/bacon"};
-
-  REQUIRE_FALSE(a == b);
-}
-
-TEST_CASE("set install location prefix", M) {
-  InstallLocation loc{"/hello", "world"};
-
-  REQUIRE(loc.directory() == "/hello");
-  REQUIRE(loc.filename() == "world");
-  REQUIRE(loc.fullPath() == "/hello/world");
-
-  loc.prependDir("/root");
-
-  REQUIRE(loc.directory() == "/root/hello");
-  REQUIRE(loc.fullPath() == "/root/hello/world");
-
-  loc.appendDir("/to");
-
-  REQUIRE(loc.directory() == "/root/hello/to");
-  REQUIRE(loc.filename() == "world");
-  REQUIRE(loc.fullPath() == "/root/hello/to/world");
-}
-
 TEST_CASE("unknown target location", M) {
   Package pack(Package::UnknownType, "a");
 
@@ -94,15 +70,26 @@ TEST_CASE("script target location", M) {
   Package pack(Package::ScriptType, "file.name");
   pack.setCategory(&cat);
 
-  const InstallLocation loc = pack.targetLocation();
-  REQUIRE(loc ==
-    InstallLocation("/Scripts/ReaScripts/Category Name", "file.name"));
+  const Path path = pack.targetLocation();
+
+  Path expected;
+  expected.append("Scripts");
+  expected.append("ReaScripts");
+  expected.append("Category Name");
+  expected.append("file.name");
+
+  REQUIRE(path == expected);
 }
 
 TEST_CASE("script target location without category", M) {
   Package pack(Package::ScriptType, "file.name");
 
-  const InstallLocation loc = pack.targetLocation();
-  REQUIRE(loc ==
-    InstallLocation("/Scripts/ReaScripts", "file.name"));
+  const Path path = pack.targetLocation();
+
+  Path expected;
+  expected.append("Scripts");
+  expected.append("ReaScripts");
+  expected.append("file.name");
+
+  REQUIRE(path == expected);
 }

@@ -41,7 +41,7 @@ VersionPtr Package::lastVersion() const
   return *prev(m_versions.end());
 }
 
-InstallLocation Package::targetLocation() const
+Path Package::targetLocation() const
 {
   switch(m_type) {
   case ScriptType:
@@ -51,13 +51,17 @@ InstallLocation Package::targetLocation() const
   }
 }
 
-InstallLocation Package::scriptLocation() const
+Path Package::scriptLocation() const
 {
   // TODO: use actual database name instead of hard-coded "ReaScripts"
-  InstallLocation loc("/Scripts/ReaScripts", name());
+  Path path;
+  path.append("Scripts");
+  path.append("ReaScripts");
 
   if(m_category)
-    loc.appendDir("/" + category()->name());
+    path.append(category()->name());
 
-  return loc;
+  path.append(m_name);
+
+  return path;
 }
