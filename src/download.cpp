@@ -10,11 +10,9 @@ vector<Download *> Download::s_active;
 
 static const int DOWNLOAD_TIMEOUT = 5;
 
-Download::Download(const char *url)
-  : m_threadHandle(0)
+Download::Download(const std::string &url)
+  : m_threadHandle(0), m_url(url)
 {
-  m_url = url;
-
   reset();
 }
 
@@ -102,7 +100,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   string contents;
 
   CURL *curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, download->url());
+  curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "ReaPack/1.0 (REAPER)");
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, DOWNLOAD_TIMEOUT);
 
@@ -217,7 +215,7 @@ DownloadQueue::~DownloadQueue()
   }
 }
 
-void DownloadQueue::push(const char *url, DownloadCallback cb)
+void DownloadQueue::push(const std::string &url, DownloadCallback cb)
 {
   Download *download = new Download(url);
   download->addCallback(cb);

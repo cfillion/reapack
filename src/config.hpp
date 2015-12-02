@@ -4,17 +4,18 @@
 #include <string>
 #include <vector>
 
-struct Repository {
-  Repository(const std::string &name, const char *url)
+class Repository {
+public:
+  Repository(const std::string &name, const std::string &url)
     : m_name(name), m_url(url)
   {}
 
   const std::string &name() const { return m_name; }
-  const char *url() const { return m_url; }
+  const std::string &url() const { return m_url; }
 
 private:
-  const std::string &m_name;
-  const char *m_url;
+  std::string m_name;
+  std::string m_url;
 };
 
 typedef std::vector<Repository> RepositoryList;
@@ -31,8 +32,12 @@ public:
   const RepositoryList &repositories() const { return m_repositories; }
 
 private:
-  const char *m_path;
+  void fillDefaults();
 
+  std::string m_path;
+
+  void readRepositories();
+  void writeRepositories() const;
   RepositoryList m_repositories;
 };
 

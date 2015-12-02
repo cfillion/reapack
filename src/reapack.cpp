@@ -4,7 +4,7 @@
 
 #include <fstream>
 
-#include "reaper_plugin_functions.h"
+#include <reaper_plugin_functions.h>
 
 using namespace std;
 
@@ -20,6 +20,11 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   m_dbPath = m_resourcePath + "ReaPack";
 
   RecursiveCreateDirectory(m_dbPath.cjoin(), 0);
+}
+
+void ReaPack::cleanup()
+{
+  m_config.write();
 }
 
 void ReaPack::setupAction(const char *name, const char *desc,
@@ -63,9 +68,11 @@ void ReaPack::synchronizeAll()
 
 void ReaPack::synchronize(const Repository &repo)
 {
-  m_downloadQueue.push(repo.url(), [=](const int status, const string &contents) {
-    if(status != 200)
+  m_downloadQueue.push(repo.url(), [=](const int code, const string &data) {
+    if(code != 200) {
+      ShowMessageBox(data.c_str(), repo.name().c_str(), 0);
       return;
+    }
 
     const Path path = m_dbPath + (repo.name() + ".xml");
 
@@ -75,7 +82,7 @@ void ReaPack::synchronize(const Repository &repo)
       return;
     }
 
-    file << contents;
+    file << data;
     file.close();
 
     synchronize(Database::load(path.cjoin()));
@@ -105,9 +112,9 @@ void ReaPack::installPackage(PackagePtr pkg)
 {
   const char *url = pkg->lastVersion()->source(0)->url().c_str();
 
-  m_downloadQueue.push(url, [=](const int status, const string &contents) {
-    if(status != 200) {
-      ShowMessageBox(contents.c_str(), "Download failure (debug)", 0);
+  m_downloadQueue.push(url, [=](const int code, const string &data) {
+    if(code != 200) {
+      ShowMessageBox(data.c_str(), pkg->name().c_str(), 0);
       return;
     }
 
@@ -120,7 +127,7 @@ void ReaPack::installPackage(PackagePtr pkg)
       return;
     }
 
-    file << contents;
+    file << data;
     file.close();
   });
 }

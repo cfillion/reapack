@@ -8,7 +8,7 @@
 #include "database.hpp"
 #include "download.hpp"
 
-#include "reaper_plugin.h"
+#include <reaper_plugin.h>
 
 typedef std::function<void()> ActionCallback;
 
@@ -17,6 +17,7 @@ public:
   gaccel_register_t action;
 
   void init(REAPER_PLUGIN_HINSTANCE, reaper_plugin_info_t *);
+  void cleanup();
 
   void setupAction(const char *name, const char *desc,
     gaccel_register_t *action, ActionCallback callback);

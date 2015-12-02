@@ -21,10 +21,10 @@ public:
     WriteError,
   };
 
-  Download(const char *url);
+  Download(const std::string &url);
   ~Download();
 
-  const char *url() const { return m_url; }
+  const std::string &url() const { return m_url; }
 
   bool isFinished();
   bool isAborted();
@@ -51,7 +51,7 @@ private:
   int m_status;
   std::string m_contents;
 
-  const char *m_url;
+  std::string m_url;
   std::vector<DownloadCallback> m_callback;
 
   WDL_Mutex m_mutex;
@@ -61,7 +61,7 @@ class DownloadQueue {
 public:
   ~DownloadQueue();
 
-  void push(const char *, DownloadCallback);
+  void push(const std::string &url, DownloadCallback);
 
 private:
   std::queue<Download *> m_queue;
