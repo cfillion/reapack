@@ -16,17 +16,6 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   m_resourcePath = GetResourcePath();
 }
 
-ReaPack::~ReaPack()
-{
-  while(!m_downloadQueue.empty()) {
-    Download *download = m_downloadQueue.front();
-    download->stop();
-    // delete in the stop callback
-
-    m_downloadQueue.pop();
-  }
-}
-
 void ReaPack::setupAction(const char *name, const char *desc,
   gaccel_register_t *action, ActionCallback callback)
 {
@@ -65,7 +54,7 @@ void ReaPack::installPackage(PackagePtr pkg)
 {
   const char *url = pkg->lastVersion()->source(0)->url().c_str();
 
-  queuedDownload(url, [=](const int status, const string &contents) {
+  m_downloadQueue.push(url, [=](const int status, const string &contents) {
     if(status != 200) {
       ShowMessageBox(contents.c_str(), "Download failure (debug)", 0);
       return;
@@ -85,22 +74,4 @@ void ReaPack::installPackage(PackagePtr pkg)
     file << contents;
     file.close();
   });
-}
-
-void ReaPack::queuedDownload(const char *url, DownloadCallback cb)
-{
-  Download *download = new Download(url);
-  download->addCallback(cb);
-  download->addCallback([=](const int, const string &) {
-    m_downloadQueue.pop();
-    delete download;
-
-    if(!m_downloadQueue.empty())
-      m_downloadQueue.front()->start();
-  });
-
-  m_downloadQueue.push(download);
-
-  if(m_downloadQueue.size() == 1)
-    download->start();
 }

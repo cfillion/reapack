@@ -205,3 +205,33 @@ void Download::abort()
 
   m_aborted = true;
 }
+
+DownloadQueue::~DownloadQueue()
+{
+  while(!m_queue.empty()) {
+    Download *download = m_queue.front();
+    download->stop();
+    // delete called in the stop callback
+
+    m_queue.pop();
+  }
+}
+
+void DownloadQueue::push(const char *url, DownloadCallback cb)
+{
+  Download *download = new Download(url);
+  download->addCallback(cb);
+
+  download->addCallback([=](const int, const string &) {
+    m_queue.pop();
+    delete download;
+
+    if(!m_queue.empty())
+      m_queue.front()->start();
+  });
+
+  m_queue.push(download);
+
+  if(m_queue.size() == 1)
+    download->start();
+}

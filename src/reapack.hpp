@@ -3,7 +3,6 @@
 
 #include <functional>
 #include <map>
-#include <queue>
 
 #include "database.hpp"
 #include "download.hpp"
@@ -14,8 +13,6 @@ typedef std::function<void()> ActionCallback;
 
 class ReaPack {
 public:
-  ~ReaPack();
-
   gaccel_register_t action;
 
   void init(REAPER_PLUGIN_HINSTANCE, reaper_plugin_info_t *);
@@ -26,12 +23,11 @@ public:
 
   void synchronize();
   void installPackage(PackagePtr pkg);
-  void queuedDownload(const char *url, DownloadCallback cb);
 
 private:
   std::map<int, ActionCallback> m_actions;
   DatabasePtr m_database;
-  std::queue<Download *> m_downloadQueue;
+  DownloadQueue m_downloadQueue;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   reaper_plugin_info_t *m_rec;

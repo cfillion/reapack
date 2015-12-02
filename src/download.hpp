@@ -2,8 +2,9 @@
 #define REAPACK_DOWNLOAD_HPP
 
 #include <functional>
-#include <vector>
+#include <queue>
 #include <string>
+#include <vector>
 
 #include <WDL/mutex.h>
 
@@ -54,6 +55,16 @@ private:
   std::vector<DownloadCallback> m_callback;
 
   WDL_Mutex m_mutex;
+};
+
+class DownloadQueue {
+public:
+  ~DownloadQueue();
+
+  void push(const char *, DownloadCallback);
+
+private:
+  std::queue<Download *> m_queue;
 };
 
 #endif
