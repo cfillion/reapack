@@ -9,13 +9,8 @@ using namespace std;
 static const char *M = "[path]";
 
 TEST_CASE("compare paths", M) {
-  Path a;
-  a.append("hello");
-  a.append("world");
-
-  Path b;
-  b.append("chunky");
-  b.append("bacon");
+  const Path a = Path() + "hello" + "world";
+  const Path b = Path() + "chunky" + "bacon";
 
   REQUIRE_FALSE(a == b);
   REQUIRE(a != b);

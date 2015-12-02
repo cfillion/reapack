@@ -24,6 +24,8 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 
 void ReaPack::cleanup()
 {
+  // for some reasons ~ReaPack() is called many times during startup
+  // and two times during shutdown on osx... cleanup() is called only once
   m_config.write();
 }
 
