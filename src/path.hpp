@@ -12,14 +12,9 @@ public:
   bool empty() const { return m_parts.empty(); }
   int size() const { return m_parts.size(); }
 
-  std::string dirname() const { return join(true); }
-  const char *cdirname() const { return dirname().c_str(); }
-
   const std::string &basename() const { return m_parts.back(); }
-  const char *cbasename() const { return basename().c_str(); }
-
+  std::string dirname() const { return join(true); }
   std::string join() const { return join(false); }
-  const char *cjoin() const { return join().c_str(); }
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;

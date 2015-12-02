@@ -19,7 +19,7 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 
   m_dbPath = m_resourcePath + "ReaPack";
 
-  RecursiveCreateDirectory(m_dbPath.cjoin(), 0);
+  RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
 }
 
 void ReaPack::cleanup()
@@ -85,7 +85,7 @@ void ReaPack::synchronize(const Repository &repo)
     file << dl->contents();
     file.close();
 
-    synchronize(Database::load(path.cjoin()));
+    synchronize(Database::load(path.join().c_str()));
   });
 }
 
@@ -122,7 +122,7 @@ void ReaPack::installPackage(Package *pkg)
     }
 
     const Path path = m_resourcePath + pkg->targetLocation();
-    RecursiveCreateDirectory(path.cdirname(), 0);
+    RecursiveCreateDirectory(path.dirname().c_str(), 0);
 
     ofstream file(path.join());
     if(file.bad()) {
