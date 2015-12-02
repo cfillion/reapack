@@ -58,10 +58,10 @@ Path Package::scriptLocation() const
   path.append("Scripts");
   path.append("ReaScripts");
 
-  if(m_category)
+  if(category())
     path.append(category()->name());
 
-  path.append(m_name);
+  path.append(name());
 
   return path;
 }

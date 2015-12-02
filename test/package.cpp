@@ -65,10 +65,10 @@ TEST_CASE("unknown target location", M) {
 }
 
 TEST_CASE("script target location", M) {
-  Category cat("Category Name");
+  CategoryPtr cat = make_shared<Category>("Category Name");
 
   Package pack(Package::ScriptType, "file.name");
-  pack.setCategory(&cat);
+  pack.setCategory(cat);
 
   const Path path = pack.targetLocation();
 

@@ -32,7 +32,7 @@ private:
   std::vector<PackagePtr> m_packages;
 };
 
-class Category {
+class Category : public std::enable_shared_from_this<Category> {
 public:
   Category(const std::string &name);
 

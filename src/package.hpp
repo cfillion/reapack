@@ -8,6 +8,7 @@ class Package;
 typedef std::shared_ptr<Package> PackagePtr;
 
 class Category;
+typedef std::shared_ptr<Category> CategoryPtr;
 
 class Package {
 public:
@@ -20,8 +21,8 @@ public:
 
   Package(const Type, const std::string &name);
 
-  void setCategory(Category *cat) { m_category = cat; }
-  Category *category() const { return m_category; }
+  void setCategory(CategoryPtr cat) { m_category = cat; }
+  CategoryPtr category() const { return m_category; }
 
   Type type() const { return m_type; }
   const std::string &name() const { return m_name; }
@@ -36,7 +37,7 @@ public:
 private:
   Path scriptLocation() const;
 
-  Category *m_category;
+  CategoryPtr m_category;
   Type m_type;
   std::string m_name;
   VersionSet m_versions;

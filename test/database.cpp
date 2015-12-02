@@ -93,14 +93,14 @@ TEST_CASE("add a package", M) {
   PackagePtr pack = make_shared<Package>(Package::ScriptType, "name");
   pack->addVersion(ver);
 
-  Category cat("a");
-  CHECK(cat.packages().size() == 0);
+  CategoryPtr cat = make_shared<Category>("a");
+  CHECK(cat->packages().size() == 0);
   CHECK_FALSE(pack->category());
 
-  cat.addPackage(pack);
+  cat->addPackage(pack);
 
-  REQUIRE(cat.packages().size() == 1);
-  REQUIRE(pack->category() == &cat);
+  REQUIRE(cat->packages().size() == 1);
+  REQUIRE(pack->category().get() == cat.get());
 }
 
 TEST_CASE("drop empty package", M) {

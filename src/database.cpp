@@ -56,6 +56,6 @@ void Category::addPackage(PackagePtr pack)
   else if(pack->versions().empty())
     return;
 
-  pack->setCategory(this);
+  pack->setCategory(shared_from_this());
   m_packages.push_back(pack);
 }

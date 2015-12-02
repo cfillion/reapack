@@ -103,14 +103,14 @@ void ReaPack::synchronize(DatabasePtr database)
       installPackage(pkg);
     }
     catch(const reapack_error &e) {
-      ShowMessageBox(e.what(), "Package Error", 0);
+      ShowMessageBox(e.what(), pkg->name().c_str(), 0);
     }
   }
 }
 
 void ReaPack::installPackage(PackagePtr pkg)
 {
-  const char *url = pkg->lastVersion()->source(0)->url().c_str();
+  const std::string &url = pkg->lastVersion()->source(0)->url();
 
   m_downloadQueue.push(url, [=](const int code, const string &data) {
     if(code != 200) {
