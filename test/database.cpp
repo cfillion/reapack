@@ -64,7 +64,7 @@ TEST_CASE("add category", M) {
   VersionPtr ver = make_shared<Version>("1");
   ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
 
-  PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
+  PackagePtr pack = make_shared<Package>(Package::ScriptType, "name");
   pack->addVersion(ver);
 
   CategoryPtr cat = make_shared<Category>("a");
@@ -90,7 +90,7 @@ TEST_CASE("add a package", M) {
   VersionPtr ver = make_shared<Version>("1");
   ver->addSource(make_shared<Source>(Source::GenericPlatform, "google.com"));
 
-  PackagePtr pack = make_shared<Package>(Package::ScriptType, "a", "b");
+  PackagePtr pack = make_shared<Package>(Package::ScriptType, "name");
   pack->addVersion(ver);
 
   Category cat("a");
@@ -105,14 +105,14 @@ TEST_CASE("add a package", M) {
 
 TEST_CASE("drop empty package", M) {
   Category cat("a");
-  cat.addPackage(make_shared<Package>(Package::ScriptType, "a", "b"));
+  cat.addPackage(make_shared<Package>(Package::ScriptType, "name"));
 
   REQUIRE(cat.packages().empty());
 }
 
 TEST_CASE("drop unknown package", M) {
   Category cat("a");
-  cat.addPackage(make_shared<Package>(Package::UnknownType, "a", "b"));
+  cat.addPackage(make_shared<Package>(Package::UnknownType, "name"));
 
   REQUIRE(cat.packages().size() == 0);
 }

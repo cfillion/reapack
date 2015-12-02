@@ -1,6 +1,6 @@
 <index version="1">
   <category name="Category Name">
-    <reapack name="Hello World.lua" author="cfillion" type="script">
+    <reapack name="Hello World.lua" type="script">
       <version name="1.0">
         <source platform="all">https://google.com/</source>
         <changelog>Fixed a division by zero error.</changelog>

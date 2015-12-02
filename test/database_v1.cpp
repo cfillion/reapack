@@ -51,16 +51,6 @@ TEST_CASE("null package type", M) {
   }
 }
 
-TEST_CASE("null author", M) {
-  try {
-    Database::load(DBPATH "anonymous_package.xml");
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty package author");
-  }
-}
-
 TEST_CASE("invalid version tag", M) {
   DatabasePtr db = Database::load(DBPATH "wrong_version_tag.xml");
 
@@ -116,7 +106,6 @@ TEST_CASE("full database", M) {
   PackagePtr pack = cat->package(0);
   REQUIRE(pack->type() == Package::ScriptType);
   REQUIRE(pack->name() == "Hello World.lua");
-  REQUIRE(pack->author() == "cfillion");
   REQUIRE(pack->versions().size() == 1);
 
   VersionPtr ver = pack->version(0);

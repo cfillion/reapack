@@ -12,7 +12,7 @@ static const char *M = "[package]";
 
 TEST_CASE("empty package name", M) {
   try {
-    Package pack(Package::ScriptType, string(), "a");
+    Package pack(Package::ScriptType, string());
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -20,18 +20,8 @@ TEST_CASE("empty package name", M) {
   }
 }
 
-TEST_CASE("empty package author", M) {
-  try {
-    Package pack(Package::ScriptType, "a", string());
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty package author");
-  }
-}
-
 TEST_CASE("package versions are sorted", M) {
-  Package pack(Package::ScriptType, "a", "b");
+  Package pack(Package::ScriptType, "a");
   CHECK(pack.versions().size() == 0);
 
   SourcePtr source = make_shared<Source>(Source::GenericPlatform, "google.com");
@@ -54,7 +44,7 @@ TEST_CASE("package versions are sorted", M) {
 }
 
 TEST_CASE("drop empty version", M) {
-  Package pack(Package::ScriptType, "a", "b");
+  Package pack(Package::ScriptType, "a");
   pack.addVersion(make_shared<Version>("1"));
 
   REQUIRE(pack.versions().empty());
@@ -87,7 +77,7 @@ TEST_CASE("set install location prefix", M) {
 }
 
 TEST_CASE("unknown target location", M) {
-  Package pack(Package::UnknownType, "a", "b");
+  Package pack(Package::UnknownType, "a");
 
   try {
     pack.targetLocation();
@@ -101,7 +91,7 @@ TEST_CASE("unknown target location", M) {
 TEST_CASE("script target location", M) {
   Category cat("Category Name");
 
-  Package pack(Package::ScriptType, "file.name", "author");
+  Package pack(Package::ScriptType, "file.name");
   pack.setCategory(&cat);
 
   const InstallLocation loc = pack.targetLocation();
@@ -110,7 +100,7 @@ TEST_CASE("script target location", M) {
 }
 
 TEST_CASE("script target location without category", M) {
-  Package pack(Package::ScriptType, "file.name", "author");
+  Package pack(Package::ScriptType, "file.name");
 
   const InstallLocation loc = pack.targetLocation();
   REQUIRE(loc ==

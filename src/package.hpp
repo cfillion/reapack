@@ -46,14 +46,13 @@ public:
 
   static Type convertType(const char *);
 
-  Package(const Type, const std::string &name, const std::string &author);
+  Package(const Type, const std::string &name);
 
   void setCategory(Category *cat) { m_category = cat; }
   Category *category() const { return m_category; }
 
   Type type() const { return m_type; }
   const std::string &name() const { return m_name; }
-  const std::string &author() const { return m_author; }
 
   void addVersion(VersionPtr ver);
   const VersionSet &versions() const { return m_versions; }
@@ -68,7 +67,6 @@ private:
   Category *m_category;
   Type m_type;
   std::string m_name;
-  std::string m_author;
   VersionSet m_versions;
 };
 

@@ -45,17 +45,13 @@ CategoryPtr LoadCategoryV1(TiXmlElement *catNode)
 
 PackagePtr LoadPackageV1(TiXmlElement *packNode)
 {
-  const char *name = packNode->Attribute("name");
-  if(!name) name = "";
-
   const char *type = packNode->Attribute("type");
   if(!type) type = "";
 
-  const char *author = packNode->Attribute("author");
-  if(!author) author = "";
+  const char *name = packNode->Attribute("name");
+  if(!name) name = "";
 
-  PackagePtr pack = make_shared<Package>(
-    Package::convertType(type), name, author);
+  PackagePtr pack = make_shared<Package>(Package::convertType(type), name);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");
 

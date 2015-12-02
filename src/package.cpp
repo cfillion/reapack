@@ -11,15 +11,11 @@ Package::Type Package::convertType(const char *type)
     return UnknownType;
 }
 
-Package::Package(const Type type,
-    const std::string &name, const std::string &author)
-  : m_category(0), m_type(type), m_name(name), m_author(author)
+Package::Package(const Type type, const std::string &name)
+  : m_category(0), m_type(type), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");
-
-  if(m_author.empty())
-    throw reapack_error("empty package author");
 }
 
 void Package::addVersion(VersionPtr ver)
