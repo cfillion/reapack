@@ -23,6 +23,8 @@ vendor
 
 ### OS X
 
-1. Install [tup](http://gittup.org/tup/) and Xcode Command Line Tools
-2. Run `tup --quiet && bin/test` from this directory
-3. Copy or link `bin/reaper_reapack.dylib` to REAPER's extension directory
+1. Install [Homebrew](http://brew.sh/) and Xcode Command Line Tools
+2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
+     `brew install tup boost`
+3. Run `tup --quiet && bin/test` from this directory
+4. Copy or link `bin/reaper_reapack.dylib` to REAPER's extension directory
