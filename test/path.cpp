@@ -70,3 +70,11 @@ TEST_CASE("concatenate paths", M) {
   REQUIRE(a + b == c);
   REQUIRE(a + "world" == c);
 }
+
+TEST_CASE("empty components", M) {
+  Path a;
+  a.append(string());
+  a.prepend(string());
+
+  REQUIRE(a.size() == 0);
+}

@@ -87,7 +87,10 @@ void ReaPack::synchronize(const Repository &repo)
     file << dl->contents();
     file.close();
 
-    synchronize(Database::load(path.join().c_str()));
+    Database *db = Database::load(path.join().c_str());
+    db->setName(repo.name());
+
+    synchronize(db);
   });
 }
 

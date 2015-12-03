@@ -17,6 +17,9 @@ public:
 
   ~Database();
 
+  void setName(const std::string &name) { m_name = name; }
+  const std::string &name() const { return m_name; }
+
   void addCategory(Category *cat);
   const std::vector<Category *> &categories() const { return m_categories; }
   Category *category(const int i) const { return m_categories[i]; }
@@ -26,6 +29,7 @@ public:
 private:
   static Database *loadV1(TiXmlElement *);
 
+  std::string m_name;
   std::vector<Category *> m_categories;
   std::vector<Package *> m_packages;
 };

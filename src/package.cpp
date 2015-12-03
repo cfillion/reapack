@@ -59,14 +59,14 @@ Path Package::targetLocation() const
 
 Path Package::scriptLocation() const
 {
-  // TODO: use actual database name instead of hard-coded "ReaScripts"
   Path path;
   path.append("Scripts");
-  path.append("ReaScripts");
 
-  if(m_category)
-    path.append(m_category->name());
+  if(!m_category || !m_category->database())
+    throw reapack_error("category or database is unset");
 
+  path.append(m_category->database()->name());
+  path.append(m_category->name());
   path.append(m_name);
 
   return path;

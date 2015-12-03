@@ -66,7 +66,11 @@ TEST_CASE("unknown target location", M) {
 }
 
 TEST_CASE("script target location", M) {
+  Database db;
+  db.setName("Database Name");
+
   Category cat("Category Name");
+  cat.setDatabase(&db);
 
   Package pack(Package::ScriptType, "file.name");
   pack.setCategory(&cat);
@@ -75,7 +79,7 @@ TEST_CASE("script target location", M) {
 
   Path expected;
   expected.append("Scripts");
-  expected.append("ReaScripts");
+  expected.append("Database Name");
   expected.append("Category Name");
   expected.append("file.name");
 
@@ -85,12 +89,11 @@ TEST_CASE("script target location", M) {
 TEST_CASE("script target location without category", M) {
   Package pack(Package::ScriptType, "file.name");
 
-  const Path path = pack.targetLocation();
-
-  Path expected;
-  expected.append("Scripts");
-  expected.append("ReaScripts");
-  expected.append("file.name");
-
-  REQUIRE(path == expected);
+  try {
+    pack.targetLocation();
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "category or database is unset");
+  }
 }

@@ -10,12 +10,14 @@ static const char SEPARATOR = '\\';
 
 void Path::prepend(const string &part)
 {
-  m_parts.push_front(part);
+  if(!part.empty())
+    m_parts.push_front(part);
 }
 
 void Path::append(const string &part)
 {
-  m_parts.push_back(part);
+  if(!part.empty())
+    m_parts.push_back(part);
 }
 
 string Path::join(const bool skipLast) const
