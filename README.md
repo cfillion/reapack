@@ -2,7 +2,16 @@
 
 ## Build Setup
 
-Download [reaper_plugin.h](http://www.reaper.fm/sdk/plugin/reaper_plugin.h), [catch.hpp](https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp), save reaper_plugin_functions.h ([developer] Write C++ API functions header) and clone [WDL](http://www-dev.cockos.com/wdl/WDL.git). All in the `vendor` directory.
+Download these files into the `vendor` directory:
+
+1. reaper_plugin.h from
+  [reaper.fm](http://www.reaper.fm/sdk/plugin/reaper_plugin.h)
+2. catch.hpp from
+  [github.com](https://github.com/philsquared/Catch/raw/master/single_include/catch.hpp)
+3. [WDL](http://www.cockos.com/wdl/) from Cockos:
+  `git clone http://www-dev.cockos.com/wdl/WDL.git vendor/WDL`
+4. reaper_plugin_functions.h from the REAPER action
+  "[developer] Write C++ API functions header"
 
 The `vendor` directory structure should be as follow:
 
