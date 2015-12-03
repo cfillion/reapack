@@ -5,16 +5,19 @@
 #include <map>
 
 #include "config.hpp"
-#include "database.hpp"
-#include "download.hpp"
+#include "path.hpp"
 
 #include <reaper_plugin.h>
 
 typedef std::function<void()> ActionCallback;
 
+class Transaction;
+
 class ReaPack {
 public:
   gaccel_register_t action;
+
+  ReaPack();
 
   void init(REAPER_PLUGIN_HINSTANCE, reaper_plugin_info_t *);
   void cleanup();
@@ -23,22 +26,18 @@ public:
     gaccel_register_t *action, ActionCallback callback);
   bool execActions(const int id, const int);
 
-  void synchronizeAll();
-  void synchronize(const Repository &);
-  void synchronize(Database *);
-  void installPackage(Package *);
+  void synchronize();
 
 private:
   std::map<int, ActionCallback> m_actions;
 
   Config m_config;
-  DownloadQueue m_downloadQueue;
+  Transaction *m_transaction;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   reaper_plugin_info_t *m_rec;
   HWND m_mainHandle;
   Path m_resourcePath;
-  Path m_dbPath;
 };
 
 #endif

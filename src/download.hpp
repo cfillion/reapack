@@ -1,20 +1,20 @@
 #ifndef REAPACK_DOWNLOAD_HPP
 #define REAPACK_DOWNLOAD_HPP
 
-#include <functional>
 #include <queue>
 #include <string>
 #include <vector>
 
+#include <boost/signals2.hpp>
 #include <WDL/mutex.h>
 
 #include <reaper_plugin.h>
 
-class Download;
-typedef std::function<void(Download *)> DownloadCallback;
-
 class Download {
 public:
+  typedef boost::signals2::signal<void ()> Signal;
+  typedef Signal::slot_type Callback;
+
   Download(const std::string &name, const std::string &url);
   ~Download();
 
@@ -26,7 +26,7 @@ public:
   bool isFinished();
   bool isAborted();
 
-  void addCallback(const DownloadCallback &);
+  void addCallback(const Callback &);
 
   void start();
   void stop();
@@ -51,7 +51,8 @@ private:
 
   std::string m_name;
   std::string m_url;
-  std::vector<DownloadCallback> m_callback;
+
+  Signal m_onFinish;
 
   WDL_Mutex m_mutex;
 };
@@ -60,8 +61,9 @@ class DownloadQueue {
 public:
   ~DownloadQueue();
 
-  void push(const std::string &name, const std::string &url, DownloadCallback);
+  void push(Download *);
   int size() const { return m_queue.size(); }
+  bool empty() const { return m_queue.empty(); }
 
 private:
   std::queue<Download *> m_queue;

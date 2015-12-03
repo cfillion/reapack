@@ -6,6 +6,7 @@
 #include <vector>
 
 class Source;
+typedef std::vector<Source *> SourceList;
 
 class Version {
 public:
@@ -19,7 +20,7 @@ public:
   const std::string &changelog() const { return m_changelog; }
 
   void addSource(Source *source);
-  const std::vector<Source *> &sources() const { return m_sources; }
+  const SourceList &sources() const { return m_sources; }
   Source *source(const int i) const { return m_sources[i]; }
 
   bool operator<(const Version &) const;
@@ -29,7 +30,7 @@ private:
   unsigned long m_code;
 
   std::string m_changelog;
-  std::vector<Source *> m_sources;
+  SourceList m_sources;
 };
 
 class VersionCompare {

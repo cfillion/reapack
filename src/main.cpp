@@ -27,7 +27,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack.init(instance, rec);
 
   reapack.setupAction("REAPACKSYNC", "ReaPack: Synchronize Packages",
-    &reapack.action, std::bind(&ReaPack::synchronizeAll, reapack));
+    &reapack.action, std::bind(&ReaPack::synchronize, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
 

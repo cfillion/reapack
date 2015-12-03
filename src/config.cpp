@@ -8,15 +8,15 @@
 
 using namespace std;
 
-static const char *REPOS_GROUP = "repositories";
+static const char *REMOTES_GROUP = "remotes";
 
-static string RepoNameKey(const int i)
+static string RemoteNameKey(const int i)
 {
   static const string key = "name";
   return key + to_string(i);
 }
 
-static string RepoUrlKey(const int i)
+static string RemoteUrlKey(const int i)
 {
   static const string key = "url";
   return key + to_string(i);
@@ -24,13 +24,9 @@ static string RepoUrlKey(const int i)
 
 static const int URL_SIZE = 2083;
 
-Config::Config()
-{
-}
-
 void Config::fillDefaults()
 {
-  m_repositories.push_back({"ReaScripts",
+  m_remotes.push_back({"ReaScripts",
     "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"});
 }
 
@@ -44,45 +40,45 @@ void Config::read(const Path &path)
     return;
   }
 
-  readRepositories();
+  readRemotes();
 }
 
 void Config::write() const
 {
-  writeRepositories();
+  writeRemotes();
 }
 
-void Config::readRepositories()
+void Config::readRemotes()
 {
   int i = 0;
 
   do {
     char name[URL_SIZE];
-    GetPrivateProfileString(REPOS_GROUP, RepoNameKey(i).c_str(),
+    GetPrivateProfileString(REMOTES_GROUP, RemoteNameKey(i).c_str(),
       "", name, sizeof(name), m_path.c_str());
 
     char url[URL_SIZE];
-    GetPrivateProfileString(REPOS_GROUP, RepoUrlKey(i).c_str(),
+    GetPrivateProfileString(REMOTES_GROUP, RemoteUrlKey(i).c_str(),
       "", url, sizeof(url), m_path.c_str());
 
     if(!strlen(name) || !strlen(url))
       break;
 
-    m_repositories.push_back({name, url});
+    m_remotes.push_back({name, url});
   } while(++i);
 }
 
-void Config::writeRepositories() const
+void Config::writeRemotes() const
 {
-  const int size = m_repositories.size();
+  const int size = m_remotes.size();
 
   for(int i = 0; i < size; i++) {
-    const Repository &repo = m_repositories[i];
+    const Remote &remote = m_remotes[i];
 
-    WritePrivateProfileString(REPOS_GROUP, RepoNameKey(i).c_str(),
-      repo.name().c_str(), m_path.c_str());
+    WritePrivateProfileString(REMOTES_GROUP, RemoteNameKey(i).c_str(),
+      remote.name().c_str(), m_path.c_str());
 
-    WritePrivateProfileString(REPOS_GROUP, RepoUrlKey(i).c_str(),
-      repo.url().c_str(), m_path.c_str());
+    WritePrivateProfileString(REMOTES_GROUP, RemoteUrlKey(i).c_str(),
+      remote.url().c_str(), m_path.c_str());
   }
 }

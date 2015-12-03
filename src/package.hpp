@@ -4,8 +4,11 @@
 #include "path.hpp"
 #include "version.hpp"
 
-class Category;
 class Database;
+class Category;
+
+class Package;
+typedef std::vector<Package *> PackageList;
 
 class Package {
 public:
