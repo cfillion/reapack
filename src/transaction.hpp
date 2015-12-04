@@ -4,6 +4,7 @@
 #include "database.hpp"
 #include "download.hpp"
 #include "path.hpp"
+#include "registry.hpp"
 #include "remote.hpp"
 
 #include <boost/signals2.hpp>
@@ -15,7 +16,7 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
-  Transaction(const Path &root);
+  Transaction(Registry *reg, const Path &root);
   ~Transaction();
 
   void onReady(const Callback &callback) { m_onReady.connect(callback); }
@@ -28,9 +29,13 @@ public:
   void run();
   void finish();
 
+  const PackageList &packages() const { return m_packages; }
+
 private:
   void install(Package *);
   void addError(const std::string &, const std::string &);
+
+  Registry *m_registry;
 
   DatabaseList m_databases;
   PackageList m_packages;

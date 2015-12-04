@@ -33,11 +33,9 @@ public:
   Version *version(const int i) const;
   Version *lastVersion() const;
 
-  Path targetLocation() const;
+  Path targetPath() const;
 
 private:
-  Path scriptLocation() const;
-
   Category *m_category;
 
   Type m_type;

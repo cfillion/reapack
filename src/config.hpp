@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "registry.hpp"
 #include "remote.hpp"
 
 class Path;
@@ -13,8 +14,12 @@ public:
   void write() const;
 
   const RemoteList &remotes() const { return m_remotes; }
+  Registry *registry() { return &m_registry; }
 
 private:
+  std::string getString(const char *, const std::string &) const;
+  void setString(const char *, const std::string &, const std::string &) const;
+
   void fillDefaults();
 
   std::string m_path;
@@ -22,6 +27,10 @@ private:
   void readRemotes();
   void writeRemotes() const;
   RemoteList m_remotes;
+
+  void readRegistry();
+  void writeRegistry() const;
+  Registry m_registry;
 };
 
 #endif

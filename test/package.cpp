@@ -53,11 +53,16 @@ TEST_CASE("drop empty version", M) {
   REQUIRE(pack.versions().empty());
 }
 
-TEST_CASE("unknown target location", M) {
+TEST_CASE("unknown target path", M) {
+  Database db;
+  Category cat("name");
+  cat.setDatabase(&db);
+
   Package pack(Package::UnknownType, "a");
+  pack.setCategory(&cat);
 
   try {
-    pack.targetLocation();
+    pack.targetPath();
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -65,7 +70,7 @@ TEST_CASE("unknown target location", M) {
   }
 }
 
-TEST_CASE("script target location", M) {
+TEST_CASE("script target path", M) {
   Database db;
   db.setName("Database Name");
 
@@ -75,7 +80,7 @@ TEST_CASE("script target location", M) {
   Package pack(Package::ScriptType, "file.name");
   pack.setCategory(&cat);
 
-  const Path path = pack.targetLocation();
+  const Path path = pack.targetPath();
 
   Path expected;
   expected.append("Scripts");
@@ -86,11 +91,11 @@ TEST_CASE("script target location", M) {
   REQUIRE(path == expected);
 }
 
-TEST_CASE("script target location without category", M) {
+TEST_CASE("script target path without category", M) {
   Package pack(Package::ScriptType, "file.name");
 
   try {
-    pack.targetLocation();
+    pack.targetPath();
     FAIL();
   }
   catch(const reapack_error &e) {

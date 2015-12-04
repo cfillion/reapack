@@ -62,7 +62,7 @@ void ReaPack::synchronize()
     return;
   }
 
-  m_transaction = new Transaction(m_resourcePath);
+  m_transaction = new Transaction(m_config.registry(), m_resourcePath);
 
   m_transaction->onReady([=] {
     // TODO: display the package list with the changelogs
@@ -72,6 +72,8 @@ void ReaPack::synchronize()
   m_transaction->onFinish([=] {
     delete m_transaction;
     m_transaction = 0;
+
+    m_config.write();
   });
 
   m_transaction->fetch(remotes);

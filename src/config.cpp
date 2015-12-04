@@ -8,21 +8,35 @@
 
 using namespace std;
 
-static const char *REMOTES_GROUP = "remotes";
+static const char *REMOTES_GRP = "remotes";
+static const char *NAME_KEY    = "name";
+static const char *URL_KEY     = "url";
 
-static string RemoteNameKey(const int i)
+static const char *REGISTRY_GRP = "registry";
+static const char *PACK_KEY     = "reapack";
+static const char *VER_KEY      = "version";
+
+static string ArrayKey(const string &key, const int i)
 {
-  static const string key = "name";
   return key + to_string(i);
 }
 
-static string RemoteUrlKey(const int i)
+static const int BUFFER_SIZE = 2083;
+
+string Config::getString(const char *group, const string &key) const
 {
-  static const string key = "url";
-  return key + to_string(i);
+  char buffer[BUFFER_SIZE];
+  GetPrivateProfileString(group, key.c_str(), "",
+    buffer, sizeof(buffer), m_path.c_str());
+
+  return buffer;
 }
 
-static const int URL_SIZE = 2083;
+void Config::setString(const char *group,
+  const string &key, const string &val) const
+{
+  WritePrivateProfileString(group, key.c_str(), val.c_str(), m_path.c_str());
+}
 
 void Config::fillDefaults()
 {
@@ -41,11 +55,13 @@ void Config::read(const Path &path)
   }
 
   readRemotes();
+  readRegistry();
 }
 
 void Config::write() const
 {
   writeRemotes();
+  writeRegistry();
 }
 
 void Config::readRemotes()
@@ -53,15 +69,10 @@ void Config::readRemotes()
   int i = 0;
 
   do {
-    char name[URL_SIZE];
-    GetPrivateProfileString(REMOTES_GROUP, RemoteNameKey(i).c_str(),
-      "", name, sizeof(name), m_path.c_str());
+    const string name = getString(REMOTES_GRP, ArrayKey(NAME_KEY, i));
+    const string url = getString(REMOTES_GRP, ArrayKey(URL_KEY, i));
 
-    char url[URL_SIZE];
-    GetPrivateProfileString(REMOTES_GROUP, RemoteUrlKey(i).c_str(),
-      "", url, sizeof(url), m_path.c_str());
-
-    if(!strlen(name) || !strlen(url))
+    if(name.empty() || url.empty())
       break;
 
     m_remotes.push_back({name, url});
@@ -75,10 +86,32 @@ void Config::writeRemotes() const
   for(int i = 0; i < size; i++) {
     const Remote &remote = m_remotes[i];
 
-    WritePrivateProfileString(REMOTES_GROUP, RemoteNameKey(i).c_str(),
-      remote.name().c_str(), m_path.c_str());
+    setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), remote.name());
+    setString(REMOTES_GRP, ArrayKey(URL_KEY, i), remote.url());
+  }
+}
 
-    WritePrivateProfileString(REMOTES_GROUP, RemoteUrlKey(i).c_str(),
-      remote.url().c_str(), m_path.c_str());
+void Config::readRegistry()
+{
+  int i = 0;
+
+  do {
+    const string pack = getString(REGISTRY_GRP, ArrayKey(PACK_KEY, i));
+    const string ver = getString(REGISTRY_GRP, ArrayKey(VER_KEY, i));
+
+    if(pack.empty() || ver.empty())
+      break;
+
+    m_registry.push(pack, ver);
+  } while(++i);
+}
+
+void Config::writeRegistry() const
+{
+  int i = 0;
+
+  for(auto it = m_registry.begin(); it != m_registry.end(); it++, i++) {
+    setString(REGISTRY_GRP, ArrayKey(PACK_KEY, i), it->first);
+    setString(REGISTRY_GRP, ArrayKey(VER_KEY, i), it->second);
   }
 }

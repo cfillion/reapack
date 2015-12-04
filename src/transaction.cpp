@@ -8,8 +8,8 @@
 
 using namespace std;
 
-Transaction::Transaction(const Path &root)
-  : m_root(root)
+Transaction::Transaction(Registry *reg, const Path &root)
+  : m_registry(reg), m_root(root)
 {
   m_dbPath = m_root + "ReaPack";
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
@@ -36,7 +36,7 @@ void Transaction::fetch(const Remote &remote)
       return;
     }
 
-    const Path path = m_dbPath + (remote.name() + ".xml");
+    const Path path = m_dbPath + ("remote_" + remote.name() + ".xml");
     ofstream file(path.join());
 
     if(file.bad()) {
@@ -65,8 +65,12 @@ void Transaction::prepare()
   if(!m_queue.empty())
     return;
 
-  // TODO: make a list of uninstalled or out of date packages only
-  m_packages = m_databases[0]->packages();
+  for(Database *db : m_databases) {
+    for(Package *pkg : db->packages()) {
+      if(m_registry->versionOf(pkg) != pkg->lastVersion()->name())
+        m_packages.push_back(pkg);
+    }
+  }
 
   if(m_packages.empty()) {
     ShowMessageBox("Nothing to do!", "ReaPack", 0);
@@ -92,7 +96,7 @@ void Transaction::run()
 void Transaction::install(Package *pkg)
 {
   const string &url = pkg->lastVersion()->source(0)->url();
-  const Path path = m_root + pkg->targetLocation();
+  const Path path = m_root + pkg->targetPath();
 
   Download *dl = new Download(pkg->name(), url);
   dl->addCallback([=] {
@@ -111,6 +115,8 @@ void Transaction::install(Package *pkg)
 
     file << dl->contents();
     file.close();
+
+    m_registry->push(pkg);
   });
 
   m_queue.push(dl);
