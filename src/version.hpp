@@ -14,20 +14,20 @@ public:
   ~Version();
 
   const std::string &name() const { return m_name; }
-  unsigned long code() const { return m_code; }
+  size_t code() const { return m_code; }
 
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
 
   void addSource(Source *source);
   const SourceList &sources() const { return m_sources; }
-  Source *source(const int i) const { return m_sources[i]; }
+  Source *source(const size_t i) const { return m_sources[i]; }
 
   bool operator<(const Version &) const;
 
 private:
   std::string m_name;
-  unsigned long m_code;
+  size_t m_code;
 
   std::string m_changelog;
   SourceList m_sources;
@@ -35,7 +35,7 @@ private:
 
 class VersionCompare {
 public:
-  constexpr bool operator()(const Version *l, const Version *r) const
+  bool operator()(const Version *l, const Version *r) const
   {
     return *l < *r;
   }

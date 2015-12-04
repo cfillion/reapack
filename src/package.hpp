@@ -30,7 +30,7 @@ public:
 
   void addVersion(Version *ver);
   const VersionSet &versions() const { return m_versions; }
-  Version *version(const int i) const;
+  Version *version(const size_t i) const;
   Version *lastVersion() const;
 
   Path targetPath() const;

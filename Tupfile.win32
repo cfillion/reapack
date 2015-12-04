@@ -1,0 +1,18 @@
+CXX := cl
+LD := link
+
+CXXFLAGS := /nologo /W3 /WX /wd4996 /O2 /EHsc /MD
+CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
+CXXFLAGS += /Ivendor/libcurl/include
+CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
+CXXFLAGS += /DCURL_STATICLIB
+
+LDFLAGS := /nologo vendor/libcurl/lib/libcurl_a.lib
+SOFLAGS := /DLL /OUT:bin/reaper_reapack.dll
+
+LIB_TARGET = bin/reaper_reapack.dll
+LIB_TARGET += bin/reaper_reapack.lib bin/reaper_reapack.exp
+TEST_TARGET = bin/test.exe bin/test.lib bin/test.exp
+
+!build = |> $(CXX) $(CXXFLAGS) /c %f /Fo%o |>
+!link = |> $(LD) $(LDFLAGS) %f /OUT:bin/test.exe |>

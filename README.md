@@ -37,3 +37,20 @@ vendor
      `brew install tup boost`
 3. Run `tup --quiet && bin/test` from this directory
 4. Copy or link `bin/reaper_reapack.dylib` to REAPER's extension directory
+
+### Windows
+
+1. Install [tup](http://gittup.org/tup/) and
+     [Visual Studio Express 2013 for Desktop](https://www.microsoft.com/en-ca/download/details.aspx?id=44914)
+2. Download the latest [boost](http://www.boost.org/) and copy the
+     `boost` subdirectory into `<reapack>\vendor`
+3. Download the latest [curl](http://curl.haxx.se/download.html) source
+     code and extract it on your computer
+4. Launch "Developer Command Prompt for VS2013" and run
+     `VC\vcvarsall x86_amd64` (or x86 for 32-bit)
+5. Navigate to `<curl directory>\winbuild` and run
+     `nmake /f Makefile.vc mode=static MACHINE=x64` (or x86)
+6. Copy `..\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
+     to `<reapack directory>\vendor` as `libcurl`
+7. Navigate to `<reapack directory>` and run `tup --quiet`
+8. Run `bin\test` and copy `bin\reaper_reapack.dll` to your REAPER plugin folder

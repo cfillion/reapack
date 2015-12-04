@@ -10,9 +10,9 @@ public:
   void append(const std::string &part);
 
   bool empty() const { return m_parts.empty(); }
-  int size() const { return m_parts.size(); }
+  size_t size() const { return m_parts.size(); }
 
-  const std::string &basename() const { return m_parts.back(); }
+  std::string basename() const;
   std::string dirname() const { return join(true); }
   std::string join() const { return join(false); }
 

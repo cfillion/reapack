@@ -26,7 +26,7 @@ public:
 
   void addCategory(Category *cat);
   const CategoryList &categories() const { return m_categories; }
-  Category *category(const int i) const { return m_categories[i]; }
+  Category *category(const size_t i) const { return m_categories[i]; }
 
   const PackageList &packages() const { return m_packages; }
 
@@ -50,7 +50,7 @@ public:
 
   void addPackage(Package *pack);
   const PackageList &packages() const { return m_packages; }
-  Package *package(const int i) const { return m_packages[i]; }
+  Package *package(const size_t i) const { return m_packages[i]; }
 
 private:
   Database *m_database;

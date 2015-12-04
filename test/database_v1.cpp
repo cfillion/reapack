@@ -54,7 +54,7 @@ TEST_CASE("null package type", M) {
     Database *db = Database::load(DBPATH "missing_type.xml");
     DBPTR(db);
   }
-  catch(const reapack_error &e) {
+  catch(const reapack_error &) {
     // no segfault -> test passes!
   }
 }

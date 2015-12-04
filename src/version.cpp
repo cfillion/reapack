@@ -18,16 +18,16 @@ Version::Version(const std::string &str)
 
   // set the major version by default
   // even if there are less than 4 numeric components in the string
-  const int size = std::max(4L, distance(begin, end));
+  const size_t size = max((size_t)4, (size_t)distance(begin, end));
 
   if(begin == end || size > 4L)
     throw reapack_error("invalid version name");
 
   for(sregex_iterator it = begin; it != end; it++) {
     const smatch match = *it;
-    const int index = distance(begin, it);
+    const size_t index = distance(begin, it);
 
-    m_code += stoi(match[1]) * pow(1000, size - index - 1);
+    m_code += stoi(match[1]) * (size_t)pow(1000, size - index - 1);
   }
 }
 

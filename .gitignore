@@ -2,5 +2,5 @@
 .tup/
 bin/
 build/
-vendor/*.h*
-vendor/WDL/
+vendor/
+!vendor/.gitkeep

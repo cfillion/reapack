@@ -16,7 +16,7 @@ static const char *REGISTRY_GRP = "registry";
 static const char *PACK_KEY     = "reapack";
 static const char *VER_KEY      = "version";
 
-static string ArrayKey(const string &key, const int i)
+static string ArrayKey(const string &key, const size_t i)
 {
   return key + to_string(i);
 }
@@ -66,7 +66,7 @@ void Config::write() const
 
 void Config::readRemotes()
 {
-  int i = 0;
+  size_t i = 0;
 
   do {
     const string name = getString(REMOTES_GRP, ArrayKey(NAME_KEY, i));
@@ -81,9 +81,9 @@ void Config::readRemotes()
 
 void Config::writeRemotes() const
 {
-  const int size = m_remotes.size();
+  const size_t size = m_remotes.size();
 
-  for(int i = 0; i < size; i++) {
+  for(size_t i = 0; i < size; i++) {
     const Remote &remote = m_remotes[i];
 
     setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), remote.name());
@@ -93,7 +93,7 @@ void Config::writeRemotes() const
 
 void Config::readRegistry()
 {
-  int i = 0;
+  size_t i = 0;
 
   do {
     const string pack = getString(REGISTRY_GRP, ArrayKey(PACK_KEY, i));
@@ -108,7 +108,7 @@ void Config::readRegistry()
 
 void Config::writeRegistry() const
 {
-  int i = 0;
+  size_t i = 0;
 
   for(auto it = m_registry.begin(); it != m_registry.end(); it++, i++) {
     setString(REGISTRY_GRP, ArrayKey(PACK_KEY, i), it->first);

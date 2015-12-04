@@ -62,7 +62,7 @@ public:
   ~DownloadQueue();
 
   void push(Download *);
-  int size() const { return m_queue.size(); }
+  size_t size() const { return m_queue.size(); }
   bool empty() const { return m_queue.empty(); }
 
 private:

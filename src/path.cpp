@@ -20,6 +20,14 @@ void Path::append(const string &part)
     m_parts.push_back(part);
 }
 
+string Path::basename() const
+{
+  if(m_parts.empty())
+    return string();
+
+  return m_parts.back();
+}
+
 string Path::join(const bool skipLast) const
 {
   string path;

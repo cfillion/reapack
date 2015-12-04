@@ -45,10 +45,10 @@ void Download::addCallback(const Download::Callback &callback)
 void Download::TimerTick()
 {
   vector<Download *> &activeDownloads = Download::s_active;
-  const int size = activeDownloads.size();
+  const size_t size = activeDownloads.size();
   const auto begin = activeDownloads.begin();
 
-  for(int i = 0; i < size; i++) {
+  for(size_t i = 0; i < size; i++) {
     Download *download = activeDownloads[i];
 
     if(!download->isFinished())

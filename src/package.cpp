@@ -32,11 +32,11 @@ void Package::addVersion(Version *ver)
   m_versions.insert(ver);
 }
 
-Version *Package::version(const int index) const
+Version *Package::version(const size_t index) const
 {
   auto it = m_versions.begin();
 
-  for(int i = 0; i < index; i++)
+  for(size_t i = 0; i < index; i++)
     it++;
 
   return *it;
