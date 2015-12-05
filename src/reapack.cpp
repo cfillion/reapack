@@ -101,7 +101,9 @@ void ReaPack::synchronize()
     return;
   }
 
-  m_transaction->fetch(remotes);
+  Transaction *t = createTransaction();
+  if(t)
+    m_transaction->fetch(remotes);
 }
 
 void ReaPack::importRemote()
