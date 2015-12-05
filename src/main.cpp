@@ -1,3 +1,4 @@
+#include "menu.hpp"
 #include "reapack.hpp"
 
 #define REAPERAPI_IMPLEMENT
@@ -5,9 +6,23 @@
 
 static ReaPack reapack;
 
-bool commandHook(const int id, const int flag)
+static bool commandHook(const int id, const int flag)
 {
   return reapack.execActions(id, flag);
+}
+
+static void menuHook(const char *name, HMENU handle, int f)
+{
+  if(strcmp(name, "Main extensions") || f != 0)
+    return;
+
+  Menu menu = Menu(handle).addMenu("ReaPack");
+
+  menu.addAction("Synchronize packages",
+    NamedCommandLookup("_REAPACK_SYNC"));
+
+  menu.addAction("Import remote repository...",
+    NamedCommandLookup("_REAPACK_IMPORT"));
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
@@ -26,10 +41,13 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   reapack.init(instance, rec);
 
-  reapack.setupAction("REAPACKSYNC", "ReaPack: Synchronize Packages",
+  reapack.setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
     &reapack.action, std::bind(&ReaPack::synchronize, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
+  rec->Register("hookcustommenu", (void *)menuHook);
+
+  AddExtensionsMainMenu();
 
   return 1;
 }
