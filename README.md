@@ -40,8 +40,8 @@ vendor
 
 ### Windows
 
-1. Install [tup](http://gittup.org/tup/) and
-     [Visual Studio Express 2013 for Desktop](https://www.microsoft.com/en-ca/download/details.aspx?id=44914)
+1. Install [tup](http://gittup.org/tup/) and [Visual Studio Express 2013 for
+     Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=48131)
 2. Download the latest [boost](http://www.boost.org/) and copy the
      `boost` subdirectory into `<reapack>\vendor`
 3. Download the latest [curl](http://curl.haxx.se/download.html) source
