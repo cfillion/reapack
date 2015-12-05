@@ -3,15 +3,16 @@
 Menu::Menu(HMENU handle)
   : m_handle(handle)
 {
-  m_index = GetMenuItemCount(m_handle);
+  m_size = GetMenuItemCount(m_handle);
 
-  if(m_index)
+  if(!empty())
     addSeparator();
 }
 
 void Menu::addAction(const char *label, const int commandId)
 {
   MENUITEMINFO mii{};
+  mii.cbSize = sizeof(MENUITEMINFO);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
@@ -26,6 +27,8 @@ void Menu::addAction(const char *label, const int commandId)
 void Menu::addSeparator()
 {
   MENUITEMINFO mii{};
+  mii.cbSize = sizeof(MENUITEMINFO);
+
   mii.fMask = MIIM_TYPE;
   mii.fType = MFT_SEPARATOR;
 
@@ -35,6 +38,7 @@ void Menu::addSeparator()
 Menu Menu::addMenu(const char *label)
 {
   MENUITEMINFO mii{};
+  mii.cbSize = sizeof(MENUITEMINFO);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
@@ -50,5 +54,5 @@ Menu Menu::addMenu(const char *label)
 
 void Menu::append(MENUITEMINFO &mii)
 {
-  InsertMenuItem(m_handle, m_index++, true, &mii);
+  InsertMenuItem(m_handle, m_size++, true, &mii);
 }
