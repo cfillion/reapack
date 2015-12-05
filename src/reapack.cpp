@@ -121,10 +121,10 @@ void ReaPack::importRemote()
   }
 
   string name;
-  file >> name;
+  getline(file, name);
 
   string url;
-  file >> url;
+  getline(file, url);
 
   file.close();
 
