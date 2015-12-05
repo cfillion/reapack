@@ -2,7 +2,11 @@
 
 #include "path.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <swell/swell.h>
+#endif
 
 #include <reaper_plugin_functions.h>
 

@@ -8,6 +8,7 @@ CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
 CXXFLAGS += /DCURL_STATICLIB
 
 LDFLAGS := /nologo vendor/libcurl/lib/libcurl_a.lib
+LDFLAGS += user32.lib
 SOFLAGS := /DLL /OUT:bin/reaper_reapack.dll
 
 LIB_TARGET = bin/reaper_reapack.dll
