@@ -9,8 +9,6 @@
 
 #include <boost/signals2.hpp>
 
-class Remote;
-
 class Transaction {
 public:
   typedef boost::signals2::signal<void ()> Signal;
@@ -22,7 +20,7 @@ public:
   void onReady(const Callback &callback) { m_onReady.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
 
-  void fetch(const RemoteList &);
+  void fetch(const RemoteMap &);
   void fetch(const Remote &);
 
   void prepare();

@@ -21,7 +21,7 @@ Transaction::~Transaction()
     delete db;
 }
 
-void Transaction::fetch(const RemoteList &remotes)
+void Transaction::fetch(const RemoteMap &remotes)
 {
   for(const Remote &remote : remotes)
     fetch(remote);
@@ -29,18 +29,18 @@ void Transaction::fetch(const RemoteList &remotes)
 
 void Transaction::fetch(const Remote &remote)
 {
-  Download *dl = new Download(remote.name(), remote.url());
+  Download *dl = new Download(remote.first, remote.second);
   dl->addCallback([=]() {
     if(dl->status() != 200) {
-      addError(dl->contents(), remote.name());
+      addError(dl->contents(), dl->name());
       return;
     }
 
-    const Path path = m_dbPath + ("remote_" + remote.name() + ".xml");
+    const Path path = m_dbPath + ("remote_" + dl->name() + ".xml");
     ofstream file(path.join());
 
     if(file.bad()) {
-      addError(strerror(errno), remote.name());
+      addError(strerror(errno), dl->name());
       return;
     }
 
@@ -48,7 +48,7 @@ void Transaction::fetch(const Remote &remote)
     file.close();
 
     Database *db = Database::load(path.join().c_str());
-    db->setName(remote.name());
+    db->setName(dl->name());
 
     m_databases.push_back(db);
   });

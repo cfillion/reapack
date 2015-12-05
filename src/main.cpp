@@ -42,7 +42,10 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack.init(instance, rec);
 
   reapack.setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
-    &reapack.action, std::bind(&ReaPack::synchronize, reapack));
+    &reapack.syncAction, std::bind(&ReaPack::synchronize, reapack));
+
+  reapack.setupAction("REAPACK_IMPORT",
+    std::bind(&ReaPack::importRemote, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
   rec->Register("hookcustommenu", (void *)menuHook);

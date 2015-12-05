@@ -15,23 +15,27 @@ class Transaction;
 
 class ReaPack {
 public:
-  gaccel_register_t action;
+  gaccel_register_t syncAction;
 
   ReaPack();
 
   void init(REAPER_PLUGIN_HINSTANCE, reaper_plugin_info_t *);
   void cleanup();
 
-  void setupAction(const char *name, const char *desc,
-    gaccel_register_t *action, ActionCallback callback);
+  int setupAction(const char *name, const ActionCallback &);
+  int setupAction(const char *name, const char *desc,
+    gaccel_register_t *action, const ActionCallback &);
   bool execActions(const int id, const int);
 
   void synchronize();
+  void importRemote();
 
 private:
+  Transaction *createTransaction();
+
   std::map<int, ActionCallback> m_actions;
 
-  Config m_config;
+  Config *m_config;
   Transaction *m_transaction;
 
   REAPER_PLUGIN_HINSTANCE m_instance;

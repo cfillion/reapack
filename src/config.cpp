@@ -18,7 +18,7 @@ static const char *VER_KEY      = "version";
 
 static string ArrayKey(const string &key, const size_t i)
 {
-  return key + to_string(i);
+  return to_string(i) + key;
 }
 
 static const int BUFFER_SIZE = 2083;
@@ -40,7 +40,7 @@ void Config::setString(const char *group,
 
 void Config::fillDefaults()
 {
-  m_remotes.push_back({"ReaScripts",
+  addRemote({"ReaScripts",
     "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"});
 }
 
@@ -64,6 +64,11 @@ void Config::write() const
   writeRegistry();
 }
 
+void Config::addRemote(Remote remote)
+{
+  m_remotes[remote.first] = remote.second;
+}
+
 void Config::readRemotes()
 {
   size_t i = 0;
@@ -75,19 +80,17 @@ void Config::readRemotes()
     if(name.empty() || url.empty())
       break;
 
-    m_remotes.push_back({name, url});
+    addRemote({name, url});
   } while(++i);
 }
 
 void Config::writeRemotes() const
 {
-  const size_t size = m_remotes.size();
+  size_t i = 0;
 
-  for(size_t i = 0; i < size; i++) {
-    const Remote &remote = m_remotes[i];
-
-    setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), remote.name());
-    setString(REMOTES_GRP, ArrayKey(URL_KEY, i), remote.url());
+  for(auto it = m_remotes.begin(); it != m_remotes.end(); it++, i++) {
+    setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), it->first);
+    setString(REMOTES_GRP, ArrayKey(URL_KEY, i), it->second);
   }
 }
 

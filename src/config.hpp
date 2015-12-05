@@ -13,7 +13,8 @@ public:
   void read(const Path &);
   void write() const;
 
-  const RemoteList &remotes() const { return m_remotes; }
+  void addRemote(Remote);
+  const RemoteMap &remotes() const { return m_remotes; }
   Registry *registry() { return &m_registry; }
 
 private:
@@ -26,7 +27,7 @@ private:
 
   void readRemotes();
   void writeRemotes() const;
-  RemoteList m_remotes;
+  RemoteMap m_remotes;
 
   void readRegistry();
   void writeRegistry() const;
