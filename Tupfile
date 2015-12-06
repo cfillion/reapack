@@ -14,7 +14,7 @@ else
   endif
 endif
 
-: foreach src/*.cpp |> !build |> build/%B.o
+: foreach src/*.cpp | $(PREDEPS) |> !build |> build/%B.o
 : foreach $(WDLSOURCE) |> !build $(WDLFLAGS) |> build/wdl_%B.o
 : build/*.o |> !link $(SOFLAGS) |> $(SOTARGET)
 

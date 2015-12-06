@@ -23,15 +23,18 @@ public:
   void fetch(const RemoteMap &);
   void fetch(const Remote &);
 
-  void prepare();
   void run();
-  void finish();
+  void cancel();
 
   const PackageList &packages() const { return m_packages; }
+  DownloadQueue *downloadQueue() { return &m_queue; }
 
 private:
+  void prepare();
+  void finish();
+
   void install(Package *);
-  void addError(const std::string &, const std::string &);
+  void addError(const std::string &msg, const std::string &title);
 
   Registry *m_registry;
 

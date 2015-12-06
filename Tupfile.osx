@@ -1,8 +1,10 @@
 CXX := c++
 
-CXXFLAGS := -Wall -Wextra -Werror -Wno-unused-parameter -pipe -fPIC
+CXXFLAGS := -Wall -Wextra -Werror
+CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
+CXXFLAGS += -Wno-unused-function
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong
-CXXFLAGS += -O2 -std=c++14
+CXXFLAGS += -pipe -fPIC -O2 -std=c++14
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
 
@@ -21,3 +23,6 @@ TSTARGET := bin/test
 
 !build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
 !link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
+
+PREDEPS := src/resource.rc_mac_menu src/resource.rc_mac_dlg
+: src/resource.rc |> php $(SWELL)/mac_resgen.php %f |> $(PREDEPS)

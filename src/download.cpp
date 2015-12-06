@@ -22,7 +22,7 @@ Download::~Download()
     s_active.erase(remove(s_active.begin(), s_active.end(), this));
 
   // call stop after removing from the active list to prevent
-  // bad access from timeTick -> execCallbacks
+  // bad access from timeTick -> finishInMainThread
   stop();
 
   // free the content buffer
@@ -37,11 +37,6 @@ void Download::reset()
   m_contents.clear();
 }
 
-void Download::addCallback(const Download::Callback &callback)
-{
-  m_onFinish.connect(callback);
-}
-
 void Download::TimerTick()
 {
   vector<Download *> &activeDownloads = Download::s_active;
@@ -54,11 +49,11 @@ void Download::TimerTick()
     if(!download->isFinished())
       continue;
 
-    // this need to be done before execCallback in case one of the callback
-    // deletes the download object
+    // this need to be done before finishInMainThread in case one
+    // of the callbacks deletes the download object
     activeDownloads.erase(begin + i);
 
-    download->execCallbacks();
+    download->finishInMainThread();
   }
 
   if(Download::s_active.empty())
@@ -73,6 +68,8 @@ void Download::start()
   reset();
 
   s_active.push_back(this);
+  m_onStart();
+
   plugin_register("timer", (void*)TimerTick);
 
   m_threadHandle = CreateThread(NULL, 0, Worker, (void *)this, 0, 0);
@@ -168,7 +165,7 @@ void Download::finish(const int status, const string &contents)
   m_contents = contents;
 }
 
-void Download::execCallbacks()
+void Download::finishInMainThread()
 {
   WDL_MutexLock lock(&m_mutex);
 
@@ -216,7 +213,9 @@ DownloadQueue::~DownloadQueue()
 
 void DownloadQueue::push(Download *dl)
 {
-  dl->addCallback([=]() {
+  m_onPush(dl);
+
+  dl->onFinish([=]() {
     m_queue.pop();
     delete dl;
 

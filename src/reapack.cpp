@@ -1,5 +1,7 @@
 #include "reapack.hpp"
 
+#include "config.hpp"
+#include "progress.hpp"
 #include "transaction.hpp"
 
 #include <reaper_plugin_functions.h>
@@ -9,7 +11,7 @@
 using namespace std;
 
 ReaPack::ReaPack()
-  : m_transaction(0)
+  : m_config(0), m_transaction(0), m_progress(0)
 {
 }
 
@@ -17,13 +19,13 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
   m_instance = instance;
   m_rec = rec;
-  m_mainHandle = GetMainHwnd();
+  m_mainWindow = GetMainHwnd();
   m_resourcePath.append(GetResourcePath());
 
-  // wtf? If m_config is a member object different instances will be used
-  // in importRemote(), synchronize() and cleanup()
   m_config = new Config;
   m_config->read(m_resourcePath + "reapack.ini");
+
+  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
 }
 
 void ReaPack::cleanup()
@@ -32,6 +34,8 @@ void ReaPack::cleanup()
   // and two times during shutdown on osx... cleanup() is called only once
   m_config->write();
   delete m_config;
+
+  Dialog::Destroy(m_progress);
 }
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)
@@ -65,33 +69,8 @@ bool ReaPack::execActions(const int id, const int)
   return true;
 }
 
-Transaction *ReaPack::createTransaction()
-{
-  if(m_transaction)
-    return 0;
-
-  m_transaction = new Transaction(m_config->registry(), m_resourcePath);
-
-  m_transaction->onReady([=] {
-    // TODO: display the package list with the changelogs
-    m_transaction->run();
-  });
-
-  m_transaction->onFinish([=] {
-    delete m_transaction;
-    m_transaction = 0;
-
-    m_config->write();
-  });
-
-  return m_transaction;
-}
-
 void ReaPack::synchronize()
 {
-  if(m_transaction)
-    return;
-
   RemoteMap remotes = m_config->remotes();
 
   if(remotes.empty()) {
@@ -140,4 +119,32 @@ void ReaPack::importRemote()
   Transaction *t = createTransaction();
   if(t)
     t->fetch(remote);
+}
+
+Transaction *ReaPack::createTransaction()
+{
+  if(m_transaction)
+    return 0;
+
+  m_transaction = new Transaction(m_config->registry(), m_resourcePath);
+
+  m_transaction->onReady([=] {
+    // TODO: display the package list with the changelogs
+    m_transaction->run();
+  });
+
+  m_transaction->onFinish([=] {
+    m_progress->setTransaction(0);
+    m_progress->hide();
+
+    delete m_transaction;
+    m_transaction = 0;
+
+    m_config->write();
+  });
+
+  m_progress->setTransaction(m_transaction);
+  m_progress->show();
+
+  return m_transaction;
 }

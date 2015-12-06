@@ -4,6 +4,8 @@
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
 
+using namespace std;
+
 static ReaPack reapack;
 
 static bool commandHook(const int id, const int flag)
@@ -42,10 +44,10 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack.init(instance, rec);
 
   reapack.setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
-    &reapack.syncAction, std::bind(&ReaPack::synchronize, reapack));
+    &reapack.syncAction, bind(&ReaPack::synchronize, reapack));
 
   reapack.setupAction("REAPACK_IMPORT",
-    std::bind(&ReaPack::importRemote, reapack));
+    bind(&ReaPack::importRemote, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
   rec->Register("hookcustommenu", (void *)menuHook);
@@ -54,3 +56,13 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   return 1;
 }
+
+#ifdef __APPLE__
+#include "resource.hpp"
+
+#include <swell/swell-dlggen.h>
+#include "resource.rc_mac_dlg"
+
+#include <swell/swell-menugen.h>
+#include "resource.rc_mac_menu"
+#endif

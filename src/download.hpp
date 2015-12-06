@@ -26,7 +26,8 @@ public:
   bool isFinished();
   bool isAborted();
 
-  void addCallback(const Callback &);
+  void onStart(const Callback &callback) { m_onStart.connect(callback); }
+  void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
 
   void start();
   void stop();
@@ -39,7 +40,7 @@ private:
   static DWORD WINAPI Worker(void *ptr);
 
   void finish(const int status, const std::string &contents);
-  void execCallbacks();
+  void finishInMainThread();
   void abort();
   void reset();
 
@@ -52,6 +53,7 @@ private:
   std::string m_name;
   std::string m_url;
 
+  Signal m_onStart;
   Signal m_onFinish;
 
   WDL_Mutex m_mutex;
@@ -59,14 +61,24 @@ private:
 
 class DownloadQueue {
 public:
+  typedef boost::signals2::signal<void (Download *)> Signal;
+  typedef Signal::slot_type Callback;
+
+  DownloadQueue() {}
+  DownloadQueue(const DownloadQueue &) = delete;
   ~DownloadQueue();
 
   void push(Download *);
+
   size_t size() const { return m_queue.size(); }
   bool empty() const { return m_queue.empty(); }
 
+  void onPush(const Callback &callback) { m_onPush.connect(callback); }
+
 private:
   std::queue<Download *> m_queue;
+
+  Signal m_onPush;
 };
 
 #endif

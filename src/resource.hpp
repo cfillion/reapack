@@ -1,0 +1,11 @@
+#ifndef REAPACK_RESOURCE_HPP
+#define REAPACK_RESOURCE_HPP
+
+#define PROGRESS_CLASS "msctls_progress32"
+
+#define IDD_PROGRESS_DIALOG 100
+
+#define IDC_LABEL 200
+#define IDC_PROGRESS 201
+
+#endif

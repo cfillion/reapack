@@ -2,5 +2,6 @@
 .tup/
 bin/
 build/
+src/resource.rc_mac*
 vendor/
 !vendor/.gitkeep

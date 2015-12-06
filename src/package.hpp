@@ -4,7 +4,6 @@
 #include "path.hpp"
 #include "version.hpp"
 
-class Database;
 class Category;
 
 class Package;

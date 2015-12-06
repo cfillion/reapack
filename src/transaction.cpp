@@ -30,7 +30,7 @@ void Transaction::fetch(const RemoteMap &remotes)
 void Transaction::fetch(const Remote &remote)
 {
   Download *dl = new Download(remote.first, remote.second);
-  dl->addCallback([=]() {
+  dl->onFinish([=]() {
     if(dl->status() != 200) {
       addError(dl->contents(), dl->name());
       return;
@@ -47,17 +47,22 @@ void Transaction::fetch(const Remote &remote)
     file << dl->contents();
     file.close();
 
-    Database *db = Database::load(path.join().c_str());
-    db->setName(dl->name());
+    try {
+      Database *db = Database::load(path.join().c_str());
+      db->setName(dl->name());
 
-    m_databases.push_back(db);
+      m_databases.push_back(db);
+    }
+    catch(const reapack_error &e) {
+      addError(e.what(), dl->name());
+    }
   });
 
   m_queue.push(dl);
 
   // execute prepare after the download is deleted, in case finish is called
   // the queue will also not contain the download anymore
-  dl->addCallback(bind(&Transaction::prepare, this));
+  dl->onFinish(bind(&Transaction::prepare, this));
 }
 
 void Transaction::prepare()
@@ -93,13 +98,19 @@ void Transaction::run()
   }
 }
 
+void Transaction::cancel()
+{
+  ShowMessageBox("Not Implemented", "Cancel transaction", 0);
+}
+
 void Transaction::install(Package *pkg)
 {
   const string &url = pkg->lastVersion()->source(0)->url();
   const Path path = m_root + pkg->targetPath();
+  const string dbName = pkg->category()->database()->name();
 
-  Download *dl = new Download(pkg->name(), url);
-  dl->addCallback([=] {
+  Download *dl = new Download(dbName + "/" + pkg->name(), url);
+  dl->onFinish([=] {
     if(dl->status() != 200) {
       addError(dl->contents(), dl->name());
       return;
@@ -123,7 +134,7 @@ void Transaction::install(Package *pkg)
 
   // execute finish after the download is deleted
   // this prevents the download queue from being deleted before the download
-  dl->addCallback(bind(&Transaction::finish, this));
+  dl->onFinish(bind(&Transaction::finish, this));
 }
 
 void Transaction::finish()
@@ -136,5 +147,5 @@ void Transaction::finish()
 
 void Transaction::addError(const string &message, const string &title)
 {
-  ShowMessageBox(message.c_str(), title.c_str(), 0);
+  // ShowMessageBox(message.c_str(), title.c_str(), 0);
 }
