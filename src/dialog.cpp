@@ -14,12 +14,19 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_INITDIALOG:
     dlg = (Dialog *)lParam;
     dlg->m_handle = handle;
+
+    // necessary if something in onInit triggers another event
+    // otherwhise dlg would be null then
     Dialog::s_instances[handle] = dlg;
 
     dlg->onInit();
     break;
   case WM_SHOWWINDOW:
     if(wParam) {
+      // this makes possible to call onHide when destroying the window
+      // but only if was visible before the destruction request
+      // (destruction might be caused by the application exiting,
+      // in which case IsWindowVisible would be false but m_isVisible == true)
       dlg->m_isVisible = true;
       dlg->onShow();
     }
@@ -45,6 +52,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 Dialog::Dialog(const int templateId)
   : m_template(templateId), m_parent(0), m_handle(0), m_isVisible(false)
 {
+  // can't call reimplemented virtual methods here during object construction
 }
 
 void Dialog::init(REAPER_PLUGIN_HINSTANCE instance, HWND parent)
