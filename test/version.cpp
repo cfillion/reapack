@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static const char *M = "[database]";
+static const char *M = "[version]";
 
 TEST_CASE("invalid", M) {
   try {

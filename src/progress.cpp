@@ -10,7 +10,8 @@ using namespace std;
 
 Progress::Progress()
   : Dialog(IDD_PROGRESS_DIALOG),
-    m_transaction(0), m_done(0), m_total(0), m_label(0), m_progress(0)
+    m_transaction(0), m_current(0), m_label(0), m_progress(0),
+    m_done(0), m_total(0)
 {
 }
 
@@ -53,19 +54,28 @@ void Progress::addDownload(Download *dl)
   updateProgress();
 
   dl->onStart([=] {
-    const string text = "Downloading: " + dl->name() + "\n" + dl->url();
-    SetWindowText(m_label, text.c_str());
+    m_current = dl;
+    updateProgress();
   });
 
   dl->onFinish([=] {
     m_done++;
     updateProgress();
+    m_current = 0;
   });
 }
 
 void Progress::updateProgress()
 {
-  const double pos = m_done / m_total;
+  if(m_current) {
+    const string text = "Downloading " +
+      to_string(m_done + 1) + " of " + to_string(m_total) + ": " +
+      m_current->name() + "\n" + m_current->url();
+
+    SetWindowText(m_label, text.c_str());
+  }
+
+  const double pos = (double)m_done / m_total;
   const int percent = (int)(pos * 100);
   const string title = string(TITLE) + " (" + to_string(percent) + "%)";
 

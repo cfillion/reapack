@@ -44,6 +44,9 @@ Version *Package::version(const size_t index) const
 
 Version *Package::lastVersion() const
 {
+  if(m_versions.empty())
+    return 0;
+
   return *prev(m_versions.end());
 }
 

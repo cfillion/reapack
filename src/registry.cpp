@@ -7,12 +7,17 @@ using namespace std;
 
 void Registry::push(Package *pkg)
 {
-  push(pkg->targetPath().join(), pkg->lastVersion()->name());
+  Version *lastVer = pkg->lastVersion();
+
+  if(!lastVer)
+    return;
+
+  push(pkg->targetPath().join(), lastVer->name());
 }
 
 void Registry::push(const std::string &key, const std::string &value)
 {
-  m_map.insert({key, value});
+  m_map[key] = value;
 }
 
 string Registry::versionOf(Package *pkg) const

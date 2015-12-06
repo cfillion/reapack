@@ -51,6 +51,7 @@ TEST_CASE("drop empty version", M) {
   pack.addVersion(new Version("1"));
 
   REQUIRE(pack.versions().empty());
+  REQUIRE(pack.lastVersion() == 0);
 }
 
 TEST_CASE("unknown target path", M) {
