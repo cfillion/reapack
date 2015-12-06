@@ -65,5 +65,5 @@ void Progress::addDownload(Download *dl)
 void Progress::updateProgress()
 {
   const double pos = m_done / m_total;
-  SendMessage(m_progress, PBM_SETPOS, pos * 100, 0);
+  SendMessage(m_progress, PBM_SETPOS, (int)(pos * 100), 0);
 }

@@ -1,5 +1,6 @@
 CXX := cl
 LD := link
+RC := rc
 
 CXXFLAGS := /nologo /W3 /WX /wd4996 /O2 /EHsc /MD
 CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
@@ -8,7 +9,7 @@ CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
 CXXFLAGS += /DCURL_STATICLIB
 
 LDFLAGS := /nologo
-LDFLAGS += user32.lib vendor/libcurl/lib/libcurl_a.lib
+LDFLAGS += user32.lib vendor/libcurl/lib/libcurl_a.lib src/resource.res
 
 SOFLAGS := /DLL /OUT:bin/reaper_reapack.dll
 SOTARGET := bin/reaper_reapack.dll
@@ -17,5 +18,9 @@ SOTARGET += bin/reaper_reapack.lib bin/reaper_reapack.exp
 TSFLAGS := /OUT:bin/test.exe
 TSTARGET := bin/test.exe bin/test.lib bin/test.exp
 
+LINKDEPS := src/resource.res
+
 !build = |> $(CXX) $(CXXFLAGS) /c %f /Fo%o |>
 !link = |> $(LD) $(LDFLAGS) %f |>
+
+: src/resource.rc |> $(RC) /nologo %f |> src/resource.res

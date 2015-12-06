@@ -83,17 +83,18 @@ void Dialog::hide()
 
 void Dialog::center()
 {
-  RECT dialogRect, rect;
+  RECT dialogRect, parentRect;
 
   GetWindowRect(m_handle, &dialogRect);
-  GetWindowRect(m_parent, &rect);
+  GetWindowRect(m_parent, &parentRect);
 
-  OffsetRect(&dialogRect, -dialogRect.left, -dialogRect.top);
-  OffsetRect(&rect, -(dialogRect.right / 2), 0);
-  OffsetRect(&rect, 0, -(dialogRect.bottom / 2));
+  int left = parentRect.right / 2;
+  left -= (dialogRect.right - dialogRect.left) / 2;
 
-  SetWindowPos(m_handle, HWND_TOP, rect.right / 2, rect.bottom / 1.4,
-    0, 0, SWP_NOSIZE);
+  int top = parentRect.bottom / 2;
+  top -= (dialogRect.bottom - dialogRect.top) / 2;
+
+  SetWindowPos(m_handle, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
 }
 
 void Dialog::onInit()

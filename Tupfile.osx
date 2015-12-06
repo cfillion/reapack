@@ -24,5 +24,5 @@ TSTARGET := bin/test
 !build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
 !link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
 
-PREDEPS := src/resource.rc_mac_menu src/resource.rc_mac_dlg
-: src/resource.rc |> php $(SWELL)/mac_resgen.php %f |> $(PREDEPS)
+BUILDDEPS := src/resource.rc_mac_menu src/resource.rc_mac_dlg
+: src/resource.rc |> php $(SWELL)/mac_resgen.php %f |> $(BUILDDEPS)
