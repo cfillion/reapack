@@ -142,7 +142,6 @@ Transaction *ReaPack::createTransaction()
       ShowMessageBox("Synchronization complete!", "ReaPack", 0);
 
     m_progress->setEnabled(true);
-
     m_progress->setTransaction(0);
     m_progress->hide();
 
