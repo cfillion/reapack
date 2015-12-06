@@ -21,12 +21,13 @@ private:
   void updateProgress();
 
   Transaction *m_transaction;
-
-  int m_done;
-  double m_total;
+  Download *m_current;
 
   HWND m_label;
   HWND m_progress;
+
+  int m_done;
+  int m_total;
 };
 
 #endif
