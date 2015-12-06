@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static const char *M = "[database]";
+static const char *M = "[version]";
 
 TEST_CASE("invalid", M) {
   try {
@@ -22,32 +22,48 @@ TEST_CASE("invalid", M) {
 TEST_CASE("major minor patch version", M) {
   Version ver("1.2.3");
   REQUIRE(ver.name() == "1.2.3");
-  REQUIRE(ver.code() == 1002003000);
+  REQUIRE(ver.code() == 1000200030000);
 }
 
 TEST_CASE("major minor version", M) {
   Version ver("1.2");
   REQUIRE(ver.name() == "1.2");
-  REQUIRE(ver.code() == 1002000000);
+  REQUIRE(ver.code() == 1000200000000);
 }
 
 TEST_CASE("major version", M) {
   Version ver("1");
   REQUIRE(ver.name() == "1");
-  REQUIRE(ver.code() == 1000000000);
+  REQUIRE(ver.code() == 1000000000000);
 }
 
 TEST_CASE("version with string suffix", M) {
   Version ver("1.2pre3");
   REQUIRE(ver.name() == "1.2pre3");
-  REQUIRE(ver.code() == 1002003000);
+  REQUIRE(ver.code() == 1000200030000);
 }
 
 TEST_CASE("version with 4 components", M) {
   Version ver("1.2.3.4");
   REQUIRE(ver.name() == "1.2.3.4");
-  REQUIRE(ver.code() == 1002003004);
+  REQUIRE(ver.code() == 1000200030004);
   REQUIRE(ver < Version("1.2.4"));
+}
+
+TEST_CASE("4 digits version component", M) {
+  Version ver("0.2015.12.25");
+  REQUIRE(ver.name() == "0.2015.12.25");
+  REQUIRE(ver.code() == 201500120025);
+}
+
+TEST_CASE("5 digits version component", M) {
+  try {
+    Version ver("12345.1");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "version component overflow");
+  }
 }
 
 TEST_CASE("version with 5 components", M) {
