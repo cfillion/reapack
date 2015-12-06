@@ -6,27 +6,23 @@
 
 using namespace std;
 
-vector<Download *> Download::s_active;
+Download::Queue Download::s_finished;
+WDL_Mutex Download::s_mutex;
 
 static const int DOWNLOAD_TIMEOUT = 5;
 
 Download::Download(const string &name, const string &url)
-  : m_threadHandle(0), m_name(name), m_url(url)
+  : m_name(name), m_url(url), m_threadHandle(0)
 {
   reset();
 }
 
 Download::~Download()
 {
-  if(!isFinished())
-    s_active.erase(remove(s_active.begin(), s_active.end(), this));
-
-  // call stop after removing from the active list to prevent
-  // bad access from timeTick -> finishInMainThread
-  stop();
-
-  // free the content buffer
-  reset();
+  if(m_threadHandle) {
+    WaitForSingleObject(m_threadHandle, INFINITE);
+    CloseHandle(m_threadHandle);
+  }
 }
 
 void Download::reset()
@@ -39,25 +35,14 @@ void Download::reset()
 
 void Download::TimerTick()
 {
-  vector<Download *> &activeDownloads = Download::s_active;
-  const size_t size = activeDownloads.size();
-  const auto begin = activeDownloads.begin();
+  Download *dl = Download::NextFinished();
 
-  for(size_t i = 0; i < size; i++) {
-    Download *download = activeDownloads[i];
-
-    if(!download->isFinished())
-      continue;
-
-    // this need to be done before finishInMainThread in case one
-    // of the callbacks deletes the download object
-    activeDownloads.erase(begin + i);
-
-    download->finishInMainThread();
+  if(!dl) {
+    plugin_register("-timer", (void*)TimerTick);
+    return;
   }
 
-  if(Download::s_active.empty())
-    plugin_register("-timer", (void*)TimerTick);
+  dl->finishInMainThread();
 }
 
 void Download::start()
@@ -67,28 +52,10 @@ void Download::start()
 
   reset();
 
-  s_active.push_back(this);
   m_onStart();
-
-  plugin_register("timer", (void*)TimerTick);
 
   m_threadHandle = CreateThread(NULL, 0, Worker, (void *)this, 0, 0);
 }
-
-void Download::stop()
-{
-  if(!m_threadHandle)
-    return;
-
-  abort();
-
-  WaitForSingleObject(m_threadHandle, INFINITE);
-  CloseHandle(m_threadHandle);
-  m_threadHandle = 0;
-
-  // do not call reset() here, m_finished must stay to true
-  // otherwise the callback will not be called
-};
 
 DWORD WINAPI Download::Worker(void *ptr)
 {
@@ -154,24 +121,51 @@ size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
   return size;
 }
 
+void Download::MarkAsFinished(Download *dl)
+{
+  WDL_MutexLock lock(&s_mutex);
+
+  // I hope it's OK to call plugin_register from another thread
+  // if it's not this call should be moved to start() and
+  // we should unregister the timer in finishInMainThread()
+  // instead of TimerTick()
+  if(s_finished.empty())
+    plugin_register("timer", (void*)TimerTick);
+
+  s_finished.push(dl);
+}
+
+Download *Download::NextFinished()
+{
+  WDL_MutexLock lock(&s_mutex);
+
+  if(s_finished.empty())
+    return 0;
+
+  Download *dl = s_finished.front();
+  s_finished.pop();
+
+  return dl;
+}
 
 void Download::finish(const int status, const string &contents)
 {
+  // called from the worker thread
+
   WDL_MutexLock lock(&m_mutex);
 
-  // called from the worker thread
   m_finished = true;
   m_status = status;
   m_contents = contents;
+
+  MarkAsFinished(this);
 }
 
 void Download::finishInMainThread()
 {
   WDL_MutexLock lock(&m_mutex);
 
-  // always called from the main thread from timerTick when m_finished is true
-
-  if(m_threadHandle && m_finished) {
+  if(m_threadHandle) {
     CloseHandle(m_threadHandle);
     m_threadHandle = 0;
   }
@@ -204,8 +198,7 @@ DownloadQueue::~DownloadQueue()
 {
   while(!m_queue.empty()) {
     Download *download = m_queue.front();
-    download->stop();
-    // delete called in the stop callback
+    delete download;
 
     m_queue.pop();
   }

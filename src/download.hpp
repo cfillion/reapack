@@ -3,7 +3,6 @@
 
 #include <queue>
 #include <string>
-#include <vector>
 
 #include <boost/signals2.hpp>
 #include <WDL/mutex.h>
@@ -12,6 +11,7 @@
 
 class Download {
 public:
+  typedef std::queue<Download *> Queue;
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
@@ -30,10 +30,13 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
 
   void start();
-  void stop();
+  void abort();
 
 private:
-  static std::vector<Download *> s_active;
+  static WDL_Mutex s_mutex;
+  static Queue s_finished;
+  static Download *NextFinished();
+  static void MarkAsFinished(Download *);
 
   static void TimerTick();
   static size_t WriteData(char *, size_t, size_t, void *);
@@ -41,8 +44,12 @@ private:
 
   void finish(const int status, const std::string &contents);
   void finishInMainThread();
-  void abort();
   void reset();
+
+  std::string m_name;
+  std::string m_url;
+
+  WDL_Mutex m_mutex;
 
   HANDLE m_threadHandle;
   bool m_aborted;
@@ -50,13 +57,8 @@ private:
   int m_status;
   std::string m_contents;
 
-  std::string m_name;
-  std::string m_url;
-
   Signal m_onStart;
   Signal m_onFinish;
-
-  WDL_Mutex m_mutex;
 };
 
 class DownloadQueue {
@@ -76,7 +78,7 @@ public:
   void onPush(const Callback &callback) { m_onPush.connect(callback); }
 
 private:
-  std::queue<Download *> m_queue;
+  Download::Queue m_queue;
 
   Signal m_onPush;
 };
