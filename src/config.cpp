@@ -91,7 +91,7 @@ void Config::writeRemotes()
   cleanupArray(REMOTES_GRP, NAME_KEY, i, m_remotesIniSize);
   cleanupArray(REMOTES_GRP, URL_KEY, i, m_remotesIniSize);
 
-  setUInt(REGISTRY_GRP, SIZE_KEY, m_remotesIniSize = i);
+  setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
 void Config::readRegistry()
