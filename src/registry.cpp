@@ -17,7 +17,7 @@ void Registry::push(Package *pkg)
 
 void Registry::push(const std::string &key, const std::string &value)
 {
-  m_map.insert({key, value});
+  m_map[key] = value;
 }
 
 string Registry::versionOf(Package *pkg) const
