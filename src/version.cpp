@@ -24,10 +24,13 @@ Version::Version(const std::string &str)
     throw reapack_error("invalid version name");
 
   for(sregex_iterator it = begin; it != end; it++) {
-    const smatch match = *it;
+    const string match = it->str(1);
     const size_t index = distance(begin, it);
 
-    m_code += stoi(match[1]) * (size_t)pow(1000, size - index - 1);
+    if(match.size() > 4)
+      throw reapack_error("version component overflow");
+
+    m_code += stoi(match) * (size_t)pow(10000, size - index - 1);
   }
 }
 
