@@ -72,7 +72,10 @@ void Transaction::prepare()
 
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
-      if(m_registry->versionOf(pkg) != pkg->lastVersion()->name())
+      bool hasLatest = m_registry->versionOf(pkg) == pkg->lastVersion()->name();
+      bool exists = file_exists(installPath(pkg).join().c_str());
+
+      if(!hasLatest || !exists)
         m_packages.push_back(pkg);
     }
   }
@@ -106,7 +109,7 @@ void Transaction::cancel()
 void Transaction::install(Package *pkg)
 {
   const string &url = pkg->lastVersion()->source(0)->url();
-  const Path path = m_root + pkg->targetPath();
+  const Path path = installPath(pkg);
   const string dbName = pkg->category()->database()->name();
 
   Download *dl = new Download(dbName + "/" + pkg->name(), url);
@@ -135,6 +138,11 @@ void Transaction::install(Package *pkg)
   // execute finish after the download is deleted
   // this prevents the download queue from being deleted before the download
   dl->onFinish(bind(&Transaction::finish, this));
+}
+
+Path Transaction::installPath(Package *pkg) const
+{
+  return m_root + pkg->targetPath();
 }
 
 void Transaction::finish()

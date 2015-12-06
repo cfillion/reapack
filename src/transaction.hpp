@@ -35,6 +35,7 @@ private:
 
   void install(Package *);
   void addError(const std::string &msg, const std::string &title);
+  Path installPath(Package *) const;
 
   Registry *m_registry;
 
