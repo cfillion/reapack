@@ -19,10 +19,7 @@ Download::Download(const string &name, const string &url)
 
 Download::~Download()
 {
-  if(m_threadHandle) {
-    WaitForSingleObject(m_threadHandle, INFINITE);
-    CloseHandle(m_threadHandle);
-  }
+  wait();
 }
 
 void Download::reset()
@@ -31,6 +28,14 @@ void Download::reset()
   m_finished = false;
   m_status = 0;
   m_contents.clear();
+}
+
+void Download::wait()
+{
+  if(m_threadHandle) {
+    WaitForSingleObject(m_threadHandle, INFINITE);
+    CloseHandle(m_threadHandle);
+  }
 }
 
 void Download::TimerTick()
@@ -194,14 +199,14 @@ void Download::abort()
   m_aborted = true;
 }
 
+DownloadQueue::DownloadQueue()
+  : m_current(0)
+{
+}
+
 DownloadQueue::~DownloadQueue()
 {
-  while(!m_queue.empty()) {
-    Download *download = m_queue.front();
-    delete download;
-
-    m_queue.pop();
-  }
+  abort();
 }
 
 void DownloadQueue::push(Download *dl)
@@ -209,15 +214,44 @@ void DownloadQueue::push(Download *dl)
   m_onPush(dl);
 
   dl->onFinish([=]() {
-    m_queue.pop();
+    m_current = 0;
     delete dl;
 
-    if(!m_queue.empty())
-      m_queue.front()->start();
+    start();
   });
 
   m_queue.push(dl);
 
-  if(m_queue.size() == 1)
-    dl->start();
+  start();
+}
+
+void DownloadQueue::start()
+{
+  if(m_queue.empty())
+    return;
+
+  if(!m_current) {
+    m_current = m_queue.front();
+    m_queue.pop();
+
+    m_current->start();
+  }
+}
+
+void DownloadQueue::abort()
+{
+  if(m_current)
+    m_current->abort();
+
+  clear();
+}
+
+void DownloadQueue::clear()
+{
+  while(!m_queue.empty()) {
+    Download *download = m_queue.front();
+    delete download;
+
+    m_queue.pop();
+  }
 }

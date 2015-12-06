@@ -31,6 +31,7 @@ public:
 
   void start();
   void abort();
+  void wait();
 
 private:
   static WDL_Mutex s_mutex;
@@ -66,19 +67,23 @@ public:
   typedef boost::signals2::signal<void (Download *)> Signal;
   typedef Signal::slot_type Callback;
 
-  DownloadQueue() {}
+  DownloadQueue();
   DownloadQueue(const DownloadQueue &) = delete;
   ~DownloadQueue();
 
   void push(Download *);
+  void start();
+  void abort();
 
-  size_t size() const { return m_queue.size(); }
-  bool empty() const { return m_queue.empty(); }
+  bool idle() const { return m_queue.empty() && !m_current; }
 
   void onPush(const Callback &callback) { m_onPush.connect(callback); }
 
 private:
+  void clear();
+
   Download::Queue m_queue;
+  Download *m_current;
 
   Signal m_onPush;
 };

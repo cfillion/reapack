@@ -67,7 +67,7 @@ void Transaction::fetch(const Remote &remote)
 
 void Transaction::prepare()
 {
-  if(!m_queue.empty())
+  if(!m_queue.idle())
     return;
 
   for(Database *db : m_databases) {
@@ -102,7 +102,7 @@ void Transaction::run()
 
 void Transaction::cancel()
 {
-  ShowMessageBox("Not Implemented", "Cancel transaction", 0);
+  m_queue.abort();
 }
 
 void Transaction::install(Package *pkg)
@@ -146,7 +146,7 @@ Path Transaction::installPath(Package *pkg) const
 
 void Transaction::finish()
 {
-  if(!m_queue.empty())
+  if(!m_queue.idle())
     return;
 
   m_onFinish();
