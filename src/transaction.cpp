@@ -81,7 +81,6 @@ void Transaction::prepare()
   }
 
   if(m_packages.empty()) {
-    ShowMessageBox("Nothing to do!", "ReaPack", 0);
     finish();
     return;
   }
