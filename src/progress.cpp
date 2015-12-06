@@ -4,6 +4,8 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
+static const char *TITLE = "ReaPack: Download in progress";
+
 using namespace std;
 
 Progress::Progress()
@@ -64,5 +66,9 @@ void Progress::addDownload(Download *dl)
 void Progress::updateProgress()
 {
   const double pos = m_done / m_total;
-  SendMessage(m_progress, PBM_SETPOS, (int)(pos * 100), 0);
+  const int percent = (int)(pos * 100);
+  const string title = string(TITLE) + " (" + to_string(percent) + "%)";
+
+  SendMessage(m_progress, PBM_SETPOS, percent, 0);
+  SetWindowText(handle(), title.c_str());
 }
