@@ -69,7 +69,7 @@ void Progress::updateProgress()
 {
   if(m_current) {
     const string text = "Downloading " +
-      to_string(m_done + 1) + " of " + to_string(m_total) + ": " +
+      to_string(min(m_done + 1, m_total)) + " of " + to_string(m_total) + ": " +
       m_current->name() + "\n" + m_current->url();
 
     SetWindowText(m_label, text.c_str());
