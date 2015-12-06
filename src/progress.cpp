@@ -16,14 +16,13 @@ void Progress::setTransaction(Transaction *t)
 {
   m_transaction = t;
 
-  SetWindowText(m_label, "");
-
   m_done = 0;
   m_total = 0;
-  SendMessage(m_progress, PBM_SETPOS, m_done, 0);
 
   if(!m_transaction)
     return;
+
+  SetWindowText(m_label, "Initializing...");
 
   m_transaction->downloadQueue()->onPush(
     bind(&Progress::addDownload, this, placeholders::_1));

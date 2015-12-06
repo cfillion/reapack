@@ -6,7 +6,7 @@
 
 IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 260, 85
 STYLE DS_MODALFRAME | DS_SHELLFONT | WS_POPUP | WS_SYSMENU | WS_CAPTION
-CAPTION "ReaPack: Download Progress"
+CAPTION "ReaPack: Download in progress"
 FONT 8, "MS Shell Dlg"
 BEGIN
   LTEXT "File Name", IDC_LABEL, 5, 5, 250, 30
