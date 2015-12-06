@@ -111,7 +111,7 @@ void Transaction::install(Package *pkg)
   const Path path = installPath(pkg);
   const string dbName = pkg->category()->database()->name();
 
-  Download *dl = new Download(dbName + "/" + pkg->name(), url);
+  Download *dl = new Download("[" + dbName + "] " + pkg->name(), url);
   dl->onFinish([=] {
     if(dl->status() != 200) {
       addError(dl->contents(), dl->name());
