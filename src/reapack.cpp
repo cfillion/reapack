@@ -134,10 +134,14 @@ Transaction *ReaPack::createTransaction()
   });
 
   m_transaction->onFinish([=] {
+    m_progress->setEnabled(false);
+
     if(m_transaction->packages().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       ShowMessageBox("Synchronization complete!", "ReaPack", 0);
+
+    m_progress->setEnabled(true);
 
     m_progress->setTransaction(0);
     m_progress->hide();

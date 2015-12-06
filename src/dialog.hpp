@@ -25,7 +25,9 @@ public:
   void init(REAPER_PLUGIN_HINSTANCE, HWND);
 
   HWND handle() const { return m_handle; }
+
   bool isVisible() const { return m_isVisible; }
+  void setEnabled(const bool);
 
   void show();
   void hide();

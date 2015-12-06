@@ -97,6 +97,11 @@ void Dialog::center()
   SetWindowPos(m_handle, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
 }
 
+void Dialog::setEnabled(const bool enabled)
+{
+  EnableWindow(m_handle, enabled);
+}
+
 void Dialog::onInit()
 {
 }
