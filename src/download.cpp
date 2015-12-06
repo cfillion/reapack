@@ -10,6 +10,7 @@ Download::Queue Download::s_finished;
 WDL_Mutex Download::s_mutex;
 
 static const int DOWNLOAD_TIMEOUT = 5;
+static const int CONCURRENT_DOWNLOADS = 3;
 
 Download::Download(const string &name, const string &url)
   : m_name(name), m_url(url), m_threadHandle(0)
@@ -199,11 +200,6 @@ void Download::abort()
   m_aborted = true;
 }
 
-DownloadQueue::DownloadQueue()
-  : m_current(0)
-{
-}
-
 DownloadQueue::~DownloadQueue()
 {
   abort();
@@ -214,7 +210,7 @@ void DownloadQueue::push(Download *dl)
   m_onPush(dl);
 
   dl->onFinish([=]() {
-    m_current = 0;
+    m_running.erase(remove(m_running.begin(), m_running.end(), dl));
     delete dl;
 
     start();
@@ -227,21 +223,19 @@ void DownloadQueue::push(Download *dl)
 
 void DownloadQueue::start()
 {
-  if(m_queue.empty())
-    return;
-
-  if(!m_current) {
-    m_current = m_queue.front();
+  while(m_running.size() < CONCURRENT_DOWNLOADS && !m_queue.empty()) {
+    Download *dl = m_queue.front();
     m_queue.pop();
 
-    m_current->start();
+    m_running.push_back(dl);
+    dl->start();
   }
 }
 
 void DownloadQueue::abort()
 {
-  if(m_current)
-    m_current->abort();
+  for(Download *dl : m_running)
+    dl->abort();
 
   clear();
 }

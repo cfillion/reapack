@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <string>
+#include <vector>
 
 #include <boost/signals2.hpp>
 #include <WDL/mutex.h>
@@ -67,7 +68,7 @@ public:
   typedef boost::signals2::signal<void (Download *)> Signal;
   typedef Signal::slot_type Callback;
 
-  DownloadQueue();
+  DownloadQueue() {}
   DownloadQueue(const DownloadQueue &) = delete;
   ~DownloadQueue();
 
@@ -75,7 +76,7 @@ public:
   void start();
   void abort();
 
-  bool idle() const { return m_queue.empty() && !m_current; }
+  bool idle() const { return m_queue.empty() && m_running.empty(); }
 
   void onPush(const Callback &callback) { m_onPush.connect(callback); }
 
@@ -83,7 +84,7 @@ private:
   void clear();
 
   Download::Queue m_queue;
-  Download *m_current;
+  std::vector<Download *> m_running;
 
   Signal m_onPush;
 };
