@@ -107,11 +107,13 @@ void Transaction::cancel()
 
 void Transaction::install(Package *pkg)
 {
-  const string &url = pkg->lastVersion()->source(0)->url();
   const Path path = installPath(pkg);
+  const string &url = pkg->lastVersion()->source(0)->url();
   const string dbName = pkg->category()->database()->name();
+  const string name = dbName + "\n" + pkg->name() +
+    " v" + pkg->lastVersion()->name();
 
-  Download *dl = new Download("[" + dbName + "] " + pkg->name(), url);
+  Download *dl = new Download(name, url);
   dl->onFinish([=] {
     if(dl->status() != 200) {
       addError(dl->contents(), dl->name());
