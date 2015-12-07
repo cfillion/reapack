@@ -58,20 +58,30 @@ void Report::formatNewPackages(ostringstream &text)
 {
   text << NL << SEP << " New packages: " << SEP << NL;
 
-  for(Package *pkg : m_transaction->newPackages())
-    text << NL << "- " << pkg->lastVersion()->fullName() << NL;
+  for(const Transaction::PackageEntry &entry : m_transaction->newPackages())
+    text << NL << "- " << entry.first->lastVersion()->fullName() << NL;
 }
 
 void Report::formatUpdates(ostringstream &text)
 {
   text << NL << SEP << " Updates: " << SEP << NL;
 
-  for(Package *pkg : m_transaction->updates()) {
-    Version *ver = pkg->lastVersion();
-    text << NL << "- " << ver->fullName() << NL;
-    
-    if(!ver->changelog().empty())
-      text << ver->changelog() << NL;
+  for(const Transaction::PackageEntry &entry : m_transaction->updates()) {
+    Package *pkg = entry.first;
+    const Registry::QueryResult &regEntry = entry.second;
+    const VersionSet &versions = pkg->versions();
+
+    for(auto it = versions.rbegin(); it != versions.rend(); it++) {
+      Version *ver = *it;
+
+      if(ver->code() <= regEntry.versionCode)
+        break;
+
+      text << NL << "- " << ver->fullName() << NL;
+
+      if(!ver->changelog().empty())
+        text << ver->changelog() << NL;
+    }
   }
 }
 

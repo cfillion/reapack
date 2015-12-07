@@ -16,7 +16,7 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
-  typedef std::pair<Package *, Registry::Status> PackageEntry;
+  typedef std::pair<Package *, const Registry::QueryResult> PackageEntry;
   typedef std::vector<PackageEntry> PackageEntryList;
 
   Transaction(Registry *reg, const Path &root);
@@ -34,8 +34,8 @@ public:
   DownloadQueue *downloadQueue() { return &m_queue; }
 
   const PackageEntryList &packages() const { return m_packages; }
-  const PackageList &newPackages() const { return m_new; }
-  const PackageList &updates() const { return m_updates; }
+  const PackageEntryList &newPackages() const { return m_new; }
+  const PackageEntryList &updates() const { return m_updates; }
   const ErrorList &errors() const { return m_errors; }
 
 private:
@@ -54,10 +54,9 @@ private:
   DatabaseList m_databases;
   DownloadQueue m_queue;
   PackageEntryList m_packages;
-  PackageList m_new;
-  PackageList m_updates;
+  PackageEntryList m_new;
+  PackageEntryList m_updates;
   ErrorList m_errors;
-
 
   Signal m_onReady;
   Signal m_onFinish;

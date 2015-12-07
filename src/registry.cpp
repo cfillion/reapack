@@ -1,5 +1,6 @@
 #include "registry.hpp"
 
+#include "errors.hpp"
 #include "package.hpp"
 #include "path.hpp"
 
@@ -20,13 +21,27 @@ void Registry::push(const std::string &key, const std::string &value)
   m_map[key] = value;
 }
 
-Registry::Status Registry::query(Package *pkg) const
+Registry::QueryResult Registry::query(Package *pkg) const
 {
   const string key = pkg->targetPath().join();
-
   const auto it = m_map.find(key);
-  if(it == m_map.end())
-    return Uninstalled;
 
-  return it->second == pkg->lastVersion()->name() ? UpToDate : UpdateAvailable;
+  if(it == m_map.end())
+    return {Uninstalled, 0};
+
+  Version *lastVer = pkg->lastVersion();
+  const Status status = it->second == lastVer->name()
+    ? UpToDate : UpdateAvailable;
+
+  size_t versionCode = 0;
+
+  try {
+    if(status == UpdateAvailable)
+      versionCode = Version(it->second).code();
+    else
+      versionCode = lastVer->code();
+  }
+  catch(const reapack_error &) {}
+
+  return {status, versionCode};
 }

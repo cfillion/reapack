@@ -24,7 +24,10 @@ TEST_CASE("query uninstalled package", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE(reg.query(&pkg) == Registry::Uninstalled);
+
+  const Registry::QueryResult res = reg.query(&pkg);
+  REQUIRE(res.status == Registry::Uninstalled);
+  REQUIRE(res.versionCode == 0);
 }
 
 TEST_CASE("query up to date pacakge", M) {
@@ -32,7 +35,10 @@ TEST_CASE("query up to date pacakge", M) {
 
   Registry reg;
   reg.push(&pkg);
-  REQUIRE(reg.query(&pkg) == Registry::UpToDate);
+
+  const Registry::QueryResult res = reg.query(&pkg);
+  REQUIRE(res.status == Registry::UpToDate);
+  REQUIRE(res.versionCode == Version("1.0").code());
 }
 
 TEST_CASE("bump version", M) {
@@ -44,7 +50,24 @@ TEST_CASE("bump version", M) {
   Registry reg;
   reg.push(&pkg);
   pkg.addVersion(ver2);
-  REQUIRE(reg.query(&pkg) == Registry::UpdateAvailable);
+
+  const Registry::QueryResult res1 = reg.query(&pkg);
+  REQUIRE(res1.status == Registry::UpdateAvailable);
+  REQUIRE(res1.versionCode == Version("1.0").code());
+
   reg.push(&pkg);
-  REQUIRE(reg.query(&pkg) == Registry::UpToDate);
+  const Registry::QueryResult res2 = reg.query(&pkg);
+  REQUIRE(res2.status == Registry::UpToDate);
+  REQUIRE(res2.versionCode == Version("2.0").code());
+}
+
+TEST_CASE("query invalid registry", M) {
+  MAKE_PACKAGE
+
+  Registry reg;
+  reg.push(pkg.targetPath().join(), "bb");
+
+  // no exception should be thrown
+  const Registry::QueryResult res = reg.query(&pkg);
+  REQUIRE(res.versionCode == 0);
 }

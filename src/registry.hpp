@@ -16,11 +16,16 @@ public:
     Uninstalled,
   };
 
+  struct QueryResult {
+    Status status;
+    size_t versionCode;
+  };
+
   void push(Package *pkg);
   void push(const std::string &key, const std::string &value);
 
   size_t size() const { return m_map.size(); }
-  Status query(Package *pkg) const;
+  QueryResult query(Package *pkg) const;
 
   Map::const_iterator begin() const { return m_map.begin(); }
   Map::const_iterator end() const { return m_map.end(); }

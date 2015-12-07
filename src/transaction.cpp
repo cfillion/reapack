@@ -72,13 +72,13 @@ void Transaction::prepare()
 
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
-      Registry::Status status = m_registry->query(pkg);
+      Registry::QueryResult entry = m_registry->query(pkg);
       bool exists = file_exists(installPath(pkg).join().c_str());
 
-      if(status == Registry::UpToDate && exists)
+      if(entry.status == Registry::UpToDate && exists)
         continue;
 
-      m_packages.push_back({pkg, status});
+      m_packages.push_back({pkg, entry});
     }
   }
 
@@ -111,7 +111,7 @@ void Transaction::install(const PackageEntry &pkgEntry)
   Version *ver = pkg->lastVersion();
 
   const Path path = installPath(pkg);
-  const Registry::Status status = pkgEntry.second;
+  const Registry::QueryResult regEntry = pkgEntry.second;
 
   Download *dl = new Download(ver->fullName(), ver->source(0)->url());
   dl->onFinish([=] {
@@ -131,10 +131,10 @@ void Transaction::install(const PackageEntry &pkgEntry)
     file << dl->contents();
     file.close();
 
-    if(status == Registry::UpdateAvailable)
-      m_updates.push_back(pkg);
+    if(regEntry.status == Registry::UpdateAvailable)
+      m_updates.push_back(pkgEntry);
     else
-      m_new.push_back(pkg);
+      m_new.push_back(pkgEntry);
 
     m_registry->push(pkg);
   });
