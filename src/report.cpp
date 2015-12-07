@@ -8,6 +8,7 @@
 using namespace std;
 
 static const string SEP(10, '=');
+static const char *NL = "\r\n";
 
 Report::Report(Transaction *transaction)
   : Dialog(IDD_REPORT_DIALOG), m_transaction(transaction)
@@ -26,14 +27,14 @@ void Report::onInit()
     << newPacks << " new packages, "
     << updates << " updates and "
     << errors << " errors"
-    << "\n"
+    << NL
   ;
 
   if(errors)
     formatErrors(text);
 
   if(newPacks)
-    formatErrors(text);
+    formatNewPackages(text);
 
   if(updates)
     formatUpdates(text);
@@ -55,29 +56,29 @@ void Report::onCommand(WPARAM wParam, LPARAM)
 
 void Report::formatNewPackages(ostringstream &text)
 {
-  text << "\n" << SEP << " New packages: " << SEP << "\n";
+  text << NL << SEP << " New packages: " << SEP << NL;
 
   for(Package *pkg : m_transaction->newPackages())
-    text << "\n- " << pkg->lastVersion()->fullName() << "\n";
+    text << NL << "- " << pkg->lastVersion()->fullName() << NL;
 }
 
 void Report::formatUpdates(ostringstream &text)
 {
-  text << "\n" << SEP << " Updates: " << SEP << "\n";
+  text << NL << SEP << " Updates: " << SEP << NL;
 
   for(Package *pkg : m_transaction->updates()) {
     Version *ver = pkg->lastVersion();
-    text << "\n- " << ver->fullName() << "\n";
+    text << NL << "- " << ver->fullName() << NL;
     
     if(!ver->changelog().empty())
-      text << ver->changelog() << "\n";
+      text << ver->changelog() << NL;
   }
 }
 
 void Report::formatErrors(ostringstream &text)
 {
-  text << "\n" << SEP << " Errors: " << SEP << "\n";
+  text << NL << SEP << " Errors: " << SEP << NL;
 
   for(const string &msg : m_transaction->errors())
-    text << "\n- " << msg << "\n";
+    text << NL << "- " << msg << NL;
 }
