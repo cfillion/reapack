@@ -29,6 +29,7 @@ void Progress::setTransaction(Transaction *t)
 
   m_transaction->downloadQueue()->onPush(
     bind(&Progress::addDownload, this, placeholders::_1));
+  m_transaction->onFinish([=] { m_current = nullptr; });
 }
 
 void Progress::onInit()
@@ -61,7 +62,6 @@ void Progress::addDownload(Download *dl)
   dl->onFinish([=] {
     m_done++;
     updateProgress();
-    m_current = nullptr;
   });
 }
 

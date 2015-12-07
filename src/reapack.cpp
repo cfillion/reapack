@@ -129,6 +129,9 @@ Transaction *ReaPack::createTransaction()
 
   m_transaction = new Transaction(m_config->registry(), m_resourcePath);
 
+  m_progress->setTransaction(m_transaction);
+  m_progress->show();
+
   m_transaction->onReady([=] {
     // TODO: display the package list with the changelogs
     m_transaction->run();
@@ -151,9 +154,6 @@ Transaction *ReaPack::createTransaction()
 
     m_config->write();
   });
-
-  m_progress->setTransaction(m_transaction);
-  m_progress->show();
 
   return m_transaction;
 }
