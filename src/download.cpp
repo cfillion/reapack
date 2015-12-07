@@ -8,6 +8,7 @@ using namespace std;
 
 Download::Queue Download::s_finished;
 WDL_Mutex Download::s_mutex;
+size_t Download::s_running = 0;
 
 static const int DOWNLOAD_TIMEOUT = 5;
 static const int CONCURRENT_DOWNLOADS = 3;
@@ -43,12 +44,8 @@ void Download::TimerTick()
 {
   Download *dl = Download::NextFinished();
 
-  if(!dl) {
-    plugin_register("-timer", (void*)TimerTick);
-    return;
-  }
-
-  dl->finishInMainThread();
+  if(dl)
+    dl->finishInMainThread();
 }
 
 void Download::start()
@@ -60,6 +57,7 @@ void Download::start()
 
   m_onStart();
 
+  RegisterStart();
   m_threadHandle = CreateThread(nullptr, 0, Worker, (void *)this, 0, nullptr);
 }
 
@@ -127,16 +125,17 @@ size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
   return size;
 }
 
-void Download::MarkAsFinished(Download *dl)
+void Download::RegisterStart()
 {
   WDL_MutexLock lock(&s_mutex);
 
-  // I hope it's OK to call plugin_register from another thread
-  // if it's not this call should be moved to start() and
-  // we should unregister the timer in finishInMainThread()
-  // instead of TimerTick()
-  if(s_finished.empty())
-    plugin_register("timer", (void*)TimerTick);
+  s_running++;
+  plugin_register("timer", (void*)TimerTick);
+}
+
+void Download::MarkAsFinished(Download *dl)
+{
+  WDL_MutexLock lock(&s_mutex);
 
   s_finished.push(dl);
 }
@@ -145,11 +144,16 @@ Download *Download::NextFinished()
 {
   WDL_MutexLock lock(&s_mutex);
 
+  if(!s_running)
+    plugin_register("-timer", (void*)TimerTick);
+
   if(s_finished.empty())
     return nullptr;
 
   Download *dl = s_finished.front();
   s_finished.pop();
+
+  s_running--;
 
   return dl;
 }

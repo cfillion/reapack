@@ -37,6 +37,8 @@ public:
 private:
   static WDL_Mutex s_mutex;
   static Queue s_finished;
+  static size_t s_running;
+  static void RegisterStart();
   static Download *NextFinished();
   static void MarkAsFinished(Download *);
 
