@@ -66,9 +66,9 @@ private:
   static DialogMap s_instances;
 
   const int m_template;
+  bool m_isVisible;
+
   HWND m_parent;
   HWND m_handle;
-
-  bool m_isVisible;
 };
 #endif

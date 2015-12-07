@@ -13,7 +13,7 @@ static const int DOWNLOAD_TIMEOUT = 5;
 static const int CONCURRENT_DOWNLOADS = 3;
 
 Download::Download(const string &name, const string &url)
-  : m_name(name), m_url(url), m_threadHandle(0)
+  : m_name(name), m_url(url), m_threadHandle(nullptr)
 {
   reset();
 }
@@ -60,7 +60,7 @@ void Download::start()
 
   m_onStart();
 
-  m_threadHandle = CreateThread(NULL, 0, Worker, (void *)this, 0, 0);
+  m_threadHandle = CreateThread(nullptr, 0, Worker, (void *)this, 0, nullptr);
 }
 
 DWORD WINAPI Download::Worker(void *ptr)
@@ -146,7 +146,7 @@ Download *Download::NextFinished()
   WDL_MutexLock lock(&s_mutex);
 
   if(s_finished.empty())
-    return 0;
+    return nullptr;
 
   Download *dl = s_finished.front();
   s_finished.pop();
@@ -173,7 +173,7 @@ void Download::finishInMainThread()
 
   if(m_threadHandle) {
     CloseHandle(m_threadHandle);
-    m_threadHandle = 0;
+    m_threadHandle = nullptr;
   }
 
   m_onFinish();

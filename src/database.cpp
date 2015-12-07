@@ -52,7 +52,7 @@ void Database::addCategory(Category *cat)
 }
 
 Category::Category(const string &name)
-  : m_database(0), m_name(name)
+  : m_database(nullptr), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty category name");

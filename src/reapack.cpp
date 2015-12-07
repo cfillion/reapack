@@ -12,7 +12,7 @@
 using namespace std;
 
 ReaPack::ReaPack()
-  : m_config(0), m_transaction(0), m_progress(0)
+  : m_config(nullptr), m_transaction(nullptr), m_progress(nullptr)
 {
 }
 
@@ -125,7 +125,7 @@ void ReaPack::importRemote()
 Transaction *ReaPack::createTransaction()
 {
   if(m_transaction)
-    return 0;
+    return nullptr;
 
   m_transaction = new Transaction(m_config->registry(), m_resourcePath);
 
@@ -143,11 +143,11 @@ Transaction *ReaPack::createTransaction()
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
     m_progress->setEnabled(true);
-    m_progress->setTransaction(0);
+    m_progress->setTransaction(nullptr);
     m_progress->hide();
 
     delete m_transaction;
-    m_transaction = 0;
+    m_transaction = nullptr;
 
     m_config->write();
   });

@@ -16,7 +16,7 @@ Package::Type Package::convertType(const char *type)
 }
 
 Package::Package(const Type type, const string &name)
-  : m_category(0), m_type(type), m_name(name)
+  : m_category(nullptr), m_type(type), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");
@@ -55,7 +55,7 @@ Version *Package::version(const size_t index) const
 Version *Package::lastVersion() const
 {
   if(m_versions.empty())
-    return 0;
+    return nullptr;
 
   return *prev(m_versions.end());
 }

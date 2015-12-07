@@ -4,7 +4,7 @@ DialogMap Dialog::s_instances;
 
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-  Dialog *dlg = 0;
+  Dialog *dlg = nullptr;
 
   const auto it = Dialog::s_instances.find(handle);
   if(it != Dialog::s_instances.end())
@@ -50,7 +50,8 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 Dialog::Dialog(const int templateId)
-  : m_template(templateId), m_parent(0), m_handle(0), m_isVisible(false)
+  : m_template(templateId), m_isVisible(false),
+    m_parent(nullptr), m_handle(nullptr)
 {
   // can't call reimplemented virtual methods here during object construction
 }

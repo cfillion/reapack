@@ -10,7 +10,7 @@
 using namespace std;
 
 Version::Version(const std::string &str)
-  : m_name(str), m_code(0), m_package(0)
+  : m_name(str), m_code(0), m_package(nullptr)
 {
   static const regex pattern("(\\d+)");
 

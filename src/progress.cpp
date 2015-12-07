@@ -10,8 +10,8 @@ using namespace std;
 
 Progress::Progress()
   : Dialog(IDD_PROGRESS_DIALOG),
-    m_transaction(0), m_current(0), m_label(0), m_progress(0),
-    m_done(0), m_total(0)
+    m_transaction(nullptr), m_current(nullptr), m_label(nullptr),
+    m_progress(nullptr), m_done(0), m_total(0)
 {
 }
 
@@ -61,7 +61,7 @@ void Progress::addDownload(Download *dl)
   dl->onFinish([=] {
     m_done++;
     updateProgress();
-    m_current = 0;
+    m_current = nullptr;
   });
 }
 
