@@ -20,19 +20,19 @@ static const char *M = "[registry]";
   ver->addSource(src); \
   pkg.addVersion(ver);
 
-TEST_CASE("version of uninstalled", M) {
+TEST_CASE("query uninstalled package", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE(reg.versionOf(&pkg) == string());
+  REQUIRE(reg.query(&pkg) == Registry::Uninstalled);
 }
 
-TEST_CASE("version of installed", M) {
+TEST_CASE("query up to date pacakge", M) {
   MAKE_PACKAGE
 
   Registry reg;
   reg.push(&pkg);
-  REQUIRE(reg.versionOf(&pkg) == "1.0");
+  REQUIRE(reg.query(&pkg) == Registry::UpToDate);
 }
 
 TEST_CASE("bump version", M) {
@@ -44,6 +44,7 @@ TEST_CASE("bump version", M) {
   Registry reg;
   reg.push(&pkg);
   pkg.addVersion(ver2);
+  REQUIRE(reg.query(&pkg) == Registry::UpdateAvailable);
   reg.push(&pkg);
-  REQUIRE(reg.versionOf(&pkg) == "2.0");
+  REQUIRE(reg.query(&pkg) == Registry::UpToDate);
 }

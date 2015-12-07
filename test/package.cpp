@@ -36,6 +36,7 @@ TEST_CASE("package versions are sorted", M) {
   alpha->addSource(sourceB);
 
   pack.addVersion(final);
+  REQUIRE(final->package() == &pack);
   CHECK(pack.versions().size() == 1);
 
   pack.addVersion(alpha);
@@ -102,4 +103,20 @@ TEST_CASE("script target path without category", M) {
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "category or database is unset");
   }
+}
+
+TEST_CASE("full name", M) {
+  Database db;
+  db.setName("Database Name");
+
+  Category cat("Category Name");
+
+  Package pack(Package::ScriptType, "file.name");
+  REQUIRE(pack.fullName() == "file.name");
+
+  pack.setCategory(&cat);
+  REQUIRE(pack.fullName() == "Category Name/file.name");
+
+  cat.setDatabase(&db);
+  REQUIRE(pack.fullName() == "Database Name/Category Name/file.name");
 }

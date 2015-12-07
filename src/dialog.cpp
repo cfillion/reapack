@@ -55,12 +55,21 @@ Dialog::Dialog(const int templateId)
   // can't call reimplemented virtual methods here during object construction
 }
 
-void Dialog::init(REAPER_PLUGIN_HINSTANCE instance, HWND parent)
+INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 {
   m_parent = parent;
 
-  CreateDialogParam(instance, MAKEINTRESOURCE(m_template),
-    m_parent, Proc, (LPARAM)this);
+  switch(mode) {
+  case Modeless:
+    CreateDialogParam(inst, MAKEINTRESOURCE(m_template),
+      m_parent, Proc, (LPARAM)this);
+    return true;
+  case Modal:
+    return DialogBoxParam(inst, MAKEINTRESOURCE(m_template),
+      m_parent, Proc, (LPARAM)this);
+  }
+
+  return false; // makes MSVC happy.
 }
 
 void Dialog::Destroy(Dialog *dlg)
@@ -108,6 +117,11 @@ void Dialog::center()
 void Dialog::setEnabled(const bool enabled)
 {
   EnableWindow(m_handle, enabled);
+}
+
+HWND Dialog::getItem(const int idc)
+{
+  return GetDlgItem(m_handle, idc);
 }
 
 void Dialog::onInit()

@@ -26,6 +26,7 @@ public:
 
   Type type() const { return m_type; }
   const std::string &name() const { return m_name; }
+  std::string fullName() const;
 
   void addVersion(Version *ver);
   const VersionSet &versions() const { return m_versions; }

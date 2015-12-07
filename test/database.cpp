@@ -142,3 +142,13 @@ TEST_CASE("empty category name", M) {
     REQUIRE(string(e.what()) == "empty category name");
   }
 }
+
+TEST_CASE("category full name", M) {
+  Category cat("Category Name");
+  REQUIRE(cat.fullName() == "Category Name");
+
+  Database db;
+  db.setName("Database Name");
+  cat.setDatabase(&db);
+  REQUIRE(cat.fullName() == "Database Name/Category Name");
+}

@@ -20,13 +20,13 @@ void Registry::push(const std::string &key, const std::string &value)
   m_map[key] = value;
 }
 
-string Registry::versionOf(Package *pkg) const
+Registry::Status Registry::query(Package *pkg) const
 {
   const string key = pkg->targetPath().join();
 
   const auto it = m_map.find(key);
   if(it == m_map.end())
-    return std::string();
+    return Uninstalled;
 
-  return it->second;
+  return it->second == pkg->lastVersion()->name() ? UpToDate : UpdateAvailable;
 }

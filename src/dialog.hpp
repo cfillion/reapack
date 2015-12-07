@@ -11,18 +11,33 @@ typedef std::map<HWND, Dialog *> DialogMap;
 
 class Dialog {
 public:
-  template<typename T>
+  enum Modality {
+    Modeless,
+    Modal,
+  };
+
+  template<class T>
   static T *Create(REAPER_PLUGIN_HINSTANCE instance, HWND parent)
   {
     Dialog *dlg = new T();
-    dlg->init(instance, parent);
+    dlg->init(instance, parent, Dialog::Modeless);
 
     return dynamic_cast<T *>(dlg);
   }
 
+  template<class T, class... Args>
+  static INT_PTR Show(REAPER_PLUGIN_HINSTANCE i, HWND parent, Args&&... args)
+  {
+    Dialog *dlg = new T(args...);
+    INT_PTR ret = dlg->init(i, parent, Dialog::Modal);
+    Destroy(dlg);
+
+    return ret;
+  }
+
   static void Destroy(Dialog *);
 
-  void init(REAPER_PLUGIN_HINSTANCE, HWND);
+  INT_PTR init(REAPER_PLUGIN_HINSTANCE, HWND, const Modality);
 
   HWND handle() const { return m_handle; }
 
@@ -36,6 +51,8 @@ public:
 protected:
   Dialog(const int templateId);
   virtual ~Dialog();
+
+  HWND getItem(const int idc);
 
   virtual void onInit();
   virtual void onShow();

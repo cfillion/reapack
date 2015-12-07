@@ -2,6 +2,7 @@
 
 #include "config.hpp"
 #include "progress.hpp"
+#include "report.hpp"
 #include "transaction.hpp"
 
 #include <reaper_plugin_functions.h>
@@ -139,7 +140,7 @@ Transaction *ReaPack::createTransaction()
     if(m_transaction->packages().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
-      ShowMessageBox("Synchronization complete!", "ReaPack", 0);
+      Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
     m_progress->setEnabled(true);
     m_progress->setTransaction(0);

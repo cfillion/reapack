@@ -1,7 +1,10 @@
 #include <catch.hpp>
 
-#include <errors.hpp>
 #include <version.hpp>
+
+#include <database.hpp>
+#include <errors.hpp>
+#include <package.hpp>
 
 #include <string>
 
@@ -74,6 +77,24 @@ TEST_CASE("version with 5 components", M) {
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "invalid version name");
   }
+}
+
+TEST_CASE("version full name", M) {
+  Version ver("1.0");
+  REQUIRE(ver.fullName() == "v1.0");
+
+  Package pkg(Package::UnknownType, "file.name");
+  ver.setPackage(&pkg);
+  REQUIRE(ver.fullName() == "file.name v1.0");
+
+  Category cat("Category Name");
+  pkg.setCategory(&cat);
+  REQUIRE(ver.fullName() == "Category Name/file.name v1.0");
+
+  Database db;
+  db.setName("Database Name");
+  cat.setDatabase(&db);
+  REQUIRE(ver.fullName() == "Database Name/Category Name/file.name v1.0");
 }
 
 TEST_CASE("convert platforms", M) {

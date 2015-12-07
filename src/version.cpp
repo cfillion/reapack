@@ -1,6 +1,7 @@
 #include "version.hpp"
 
 #include "errors.hpp"
+#include "package.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -9,7 +10,7 @@
 using namespace std;
 
 Version::Version(const std::string &str)
-  : m_name(str), m_code(0)
+  : m_name(str), m_code(0), m_package(0)
 {
   static const regex pattern("(\\d+)");
 
@@ -38,6 +39,12 @@ Version::~Version()
 {
   for(Source *source : m_sources)
     delete source;
+}
+
+string Version::fullName() const
+{
+  const string fName = "v" + m_name;
+  return m_package ? m_package->fullName() + " " + fName : fName;
 }
 
 void Version::addSource(Source *source)

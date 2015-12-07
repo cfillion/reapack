@@ -3,6 +3,10 @@
 #include "database.hpp"
 #include "errors.hpp"
 
+#include <sstream>
+
+using namespace std;
+
 Package::Type Package::convertType(const char *type)
 {
   if(!strcmp(type, "script"))
@@ -11,11 +15,16 @@ Package::Type Package::convertType(const char *type)
     return UnknownType;
 }
 
-Package::Package(const Type type, const std::string &name)
+Package::Package(const Type type, const string &name)
   : m_category(0), m_type(type), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");
+}
+
+string Package::fullName() const
+{
+  return m_category ? m_category->fullName() + "/" + m_name : m_name;
 }
 
 Package::~Package()
@@ -29,6 +38,7 @@ void Package::addVersion(Version *ver)
   if(ver->sources().empty())
     return;
 
+  ver->setPackage(this);
   m_versions.insert(ver);
 }
 

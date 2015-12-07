@@ -9,10 +9,15 @@
 
 #include <boost/signals2.hpp>
 
+typedef std::vector<std::string> ErrorList;
+
 class Transaction {
 public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
+
+  typedef std::pair<Package *, Registry::Status> PackageEntry;
+  typedef std::vector<PackageEntry> PackageEntryList;
 
   Transaction(Registry *reg, const Path &root);
   ~Transaction();
@@ -26,26 +31,33 @@ public:
   void run();
   void cancel();
 
-  const PackageList &packages() const { return m_packages; }
   DownloadQueue *downloadQueue() { return &m_queue; }
+
+  const PackageEntryList &packages() const { return m_packages; }
+  const PackageList &newPackages() const { return m_new; }
+  const PackageList &updates() const { return m_updates; }
+  const ErrorList &errors() const { return m_errors; }
 
 private:
   void prepare();
   void finish();
 
-  void install(Package *);
+  void install(const PackageEntry &);
   void addError(const std::string &msg, const std::string &title);
   Path installPath(Package *) const;
 
   Registry *m_registry;
 
-  DatabaseList m_databases;
-  PackageList m_packages;
-
-  DownloadQueue m_queue;
-
   Path m_root;
   Path m_dbPath;
+
+  DatabaseList m_databases;
+  DownloadQueue m_queue;
+  PackageEntryList m_packages;
+  PackageList m_new;
+  PackageList m_updates;
+  ErrorList m_errors;
+
 
   Signal m_onReady;
   Signal m_onFinish;

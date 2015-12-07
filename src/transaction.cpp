@@ -9,7 +9,7 @@
 using namespace std;
 
 Transaction::Transaction(Registry *reg, const Path &root)
-  : m_registry(reg), m_root(root)
+  : m_registry(reg), m_root(root), m_new(0), m_updates(0)
 {
   m_dbPath = m_root + "ReaPack";
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
@@ -32,7 +32,7 @@ void Transaction::fetch(const Remote &remote)
   Download *dl = new Download(remote.first, remote.second);
   dl->onFinish([=]() {
     if(dl->status() != 200) {
-      addError(dl->contents(), dl->name());
+      addError(dl->contents(), dl->url());
       return;
     }
 
@@ -40,7 +40,7 @@ void Transaction::fetch(const Remote &remote)
     ofstream file(path.join());
 
     if(file.bad()) {
-      addError(strerror(errno), dl->name());
+      addError(strerror(errno), path.join());
       return;
     }
 
@@ -54,7 +54,7 @@ void Transaction::fetch(const Remote &remote)
       m_databases.push_back(db);
     }
     catch(const reapack_error &e) {
-      addError(e.what(), dl->name());
+      addError(e.what(), dl->url());
     }
   });
 
@@ -72,30 +72,30 @@ void Transaction::prepare()
 
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
-      bool hasLatest = m_registry->versionOf(pkg) == pkg->lastVersion()->name();
+      Registry::Status status = m_registry->query(pkg);
       bool exists = file_exists(installPath(pkg).join().c_str());
 
-      if(!hasLatest || !exists)
-        m_packages.push_back(pkg);
+      if(status == Registry::UpToDate && exists)
+        continue;
+
+      m_packages.push_back({pkg, status});
     }
   }
 
-  if(m_packages.empty()) {
+  if(m_packages.empty())
     finish();
-    return;
-  }
-
-  m_onReady();
+  else
+    m_onReady();
 }
 
 void Transaction::run()
 {
-  for(Package *pkg : m_packages) {
+  for(const PackageEntry &pkg : m_packages) {
     try {
       install(pkg);
     }
     catch(const reapack_error &e) {
-      addError(e.what(), pkg->name());
+      addError(e.what(), pkg.first->fullName());
     }
   }
 }
@@ -105,18 +105,18 @@ void Transaction::cancel()
   m_queue.abort();
 }
 
-void Transaction::install(Package *pkg)
+void Transaction::install(const PackageEntry &pkgEntry)
 {
-  const Path path = installPath(pkg);
-  const string &url = pkg->lastVersion()->source(0)->url();
-  const string dbName = pkg->category()->database()->name();
-  const string name = dbName + "\n" + pkg->name() +
-    " v" + pkg->lastVersion()->name();
+  Package *pkg = pkgEntry.first;
+  Version *ver = pkg->lastVersion();
 
-  Download *dl = new Download(name, url);
+  const Path path = installPath(pkg);
+  const Registry::Status status = pkgEntry.second;
+
+  Download *dl = new Download(ver->fullName(), ver->source(0)->url());
   dl->onFinish([=] {
     if(dl->status() != 200) {
-      addError(dl->contents(), dl->name());
+      addError(dl->contents(), dl->url());
       return;
     }
 
@@ -124,12 +124,17 @@ void Transaction::install(Package *pkg)
 
     ofstream file(path.join());
     if(file.bad()) {
-      addError(strerror(errno), dl->name());
+      addError(strerror(errno), path.join());
       return;
     }
 
     file << dl->contents();
     file.close();
+
+    if(status == Registry::UpdateAvailable)
+      m_updates.push_back(pkg);
+    else
+      m_new.push_back(pkg);
 
     m_registry->push(pkg);
   });
@@ -137,7 +142,7 @@ void Transaction::install(Package *pkg)
   m_queue.push(dl);
 
   // execute finish after the download is deleted
-  // this prevents the download queue from being deleted before the download
+  // this prevents the download queue from being deleted before the download is
   dl->onFinish(bind(&Transaction::finish, this));
 }
 
@@ -156,5 +161,5 @@ void Transaction::finish()
 
 void Transaction::addError(const string &message, const string &title)
 {
-  // ShowMessageBox(message.c_str(), title.c_str(), 0);
+  m_errors.push_back(title + ":\n" + message);
 }

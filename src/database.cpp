@@ -4,6 +4,8 @@
 
 #include <WDL/tinyxml/tinyxml.h>
 
+using namespace std;
+
 Database *Database::load(const char *file)
 {
   TiXmlDocument doc(file);
@@ -49,7 +51,7 @@ void Database::addCategory(Category *cat)
     cat->packages().begin(), cat->packages().end());
 }
 
-Category::Category(const std::string &name)
+Category::Category(const string &name)
   : m_database(0), m_name(name)
 {
   if(m_name.empty())
@@ -60,6 +62,11 @@ Category::~Category()
 {
   for(Package *pack : m_packages)
     delete pack;
+}
+
+string Category::fullName() const
+{
+  return m_database ? m_database->name() + "/" + m_name : m_name;
 }
 
 void Category::addPackage(Package *pack)

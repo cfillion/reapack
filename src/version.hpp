@@ -8,13 +8,19 @@
 class Source;
 typedef std::vector<Source *> SourceList;
 
+class Package;
+
 class Version {
 public:
   Version(const std::string &);
   ~Version();
 
   const std::string &name() const { return m_name; }
+  std::string fullName() const;
   size_t code() const { return m_code; }
+
+  void setPackage(Package *pkg) { m_package = pkg; }
+  Package *package() const { return m_package; }
 
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
@@ -28,6 +34,8 @@ public:
 private:
   std::string m_name;
   size_t m_code;
+
+  Package *m_package;
 
   std::string m_changelog;
   SourceList m_sources;
