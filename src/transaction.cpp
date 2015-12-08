@@ -161,5 +161,5 @@ void Transaction::finish()
 
 void Transaction::addError(const string &message, const string &title)
 {
-  m_errors.push_back(title + ":\n" + message);
+  m_errors.push_back({message, title});
 }

@@ -9,8 +9,6 @@
 
 #include <boost/signals2.hpp>
 
-typedef std::vector<std::string> ErrorList;
-
 class Transaction {
 public:
   typedef boost::signals2::signal<void ()> Signal;
@@ -18,6 +16,14 @@ public:
 
   typedef std::pair<Package *, const Registry::QueryResult> PackageEntry;
   typedef std::vector<PackageEntry> PackageEntryList;
+
+  struct Error {
+    std::string message;
+    std::string title;
+  };
+
+  typedef std::vector<const Error> ErrorList;
+
 
   Transaction(Registry *reg, const Path &root);
   ~Transaction();

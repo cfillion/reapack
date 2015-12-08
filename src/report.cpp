@@ -89,6 +89,6 @@ void Report::formatErrors(ostringstream &text)
 {
   text << NL << SEP << " Errors: " << SEP << NL;
 
-  for(const string &msg : m_transaction->errors())
-    text << NL << "- " << msg << NL;
+  for(const Transaction::Error &err : m_transaction->errors())
+    text << NL << err.title << ":" << NL << err.message << NL;
 }
