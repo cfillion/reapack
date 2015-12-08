@@ -10,8 +10,8 @@ using namespace std;
 
 Progress::Progress()
   : Dialog(IDD_PROGRESS_DIALOG),
-    m_transaction(nullptr), m_current(nullptr), m_label(nullptr),
-    m_progress(nullptr), m_done(0), m_total(0)
+    m_transaction(nullptr), m_label(nullptr), m_progress(nullptr),
+    m_done(0), m_total(0)
 {
 }
 
@@ -21,6 +21,7 @@ void Progress::setTransaction(Transaction *t)
 
   m_done = 0;
   m_total = 0;
+  m_currentName.clear();
 
   if(!m_transaction)
     return;
@@ -29,7 +30,6 @@ void Progress::setTransaction(Transaction *t)
 
   m_transaction->downloadQueue()->onPush(
     bind(&Progress::addDownload, this, placeholders::_1));
-  m_transaction->onFinish([=] { m_current = nullptr; });
 }
 
 void Progress::onInit()
@@ -60,7 +60,7 @@ void Progress::addDownload(Download *dl)
   updateProgress();
 
   dl->onStart([=] {
-    m_current = dl;
+    m_currentName = dl->name();
     updateProgress();
   });
 
@@ -72,13 +72,11 @@ void Progress::addDownload(Download *dl)
 
 void Progress::updateProgress()
 {
-  if(m_current) {
-    const string text = "Downloading " +
-      to_string(min(m_done + 1, m_total)) + " of " +
-      to_string(m_total) + ": " + m_current->name();
+  const string text = "Downloading " +
+    to_string(min(m_done + 1, m_total)) + " of " +
+    to_string(m_total) + ": " + m_currentName;
 
-    SetWindowText(m_label, text.c_str());
-  }
+  SetWindowText(m_label, text.c_str());
 
   const double pos = (double)m_done / m_total;
   const int percent = (int)(pos * 100);

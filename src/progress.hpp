@@ -3,6 +3,8 @@
 
 #include "dialog.hpp"
 
+#include <string>
+
 class Download;
 class Transaction;
 
@@ -21,7 +23,7 @@ private:
   void updateProgress();
 
   Transaction *m_transaction;
-  Download *m_current;
+  std::string m_currentName;
 
   HWND m_label;
   HWND m_progress;
