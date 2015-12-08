@@ -33,12 +33,11 @@ public:
 
   void fetch(const RemoteMap &);
   void fetch(const Remote &);
-
   void run();
   void cancel();
 
+  bool isCancelled() const { return m_isCancelled; }
   DownloadQueue *downloadQueue() { return &m_queue; }
-
   const PackageEntryList &packages() const { return m_packages; }
   const PackageEntryList &newPackages() const { return m_new; }
   const PackageEntryList &updates() const { return m_updates; }
@@ -56,6 +55,7 @@ private:
 
   Path m_root;
   Path m_dbPath;
+  bool m_isCancelled;
 
   DatabaseList m_databases;
   DownloadQueue m_queue;

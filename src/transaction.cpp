@@ -9,7 +9,7 @@
 using namespace std;
 
 Transaction::Transaction(Registry *reg, const Path &root)
-  : m_registry(reg), m_root(root), m_new(0), m_updates(0)
+  : m_registry(reg), m_root(root), m_isCancelled(false)
 {
   m_dbPath = m_root + "ReaPack";
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
@@ -102,6 +102,7 @@ void Transaction::run()
 
 void Transaction::cancel()
 {
+  m_isCancelled = true;
   m_queue.abort();
 }
 

@@ -138,6 +138,9 @@ Transaction *ReaPack::createTransaction()
   });
 
   m_transaction->onFinish([=] {
+    if(m_transaction->isCancelled())
+      return;
+
     m_progress->setEnabled(false);
 
     if(m_transaction->packages().empty())
@@ -146,8 +149,11 @@ Transaction *ReaPack::createTransaction()
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
     m_progress->setEnabled(true);
-    m_progress->setTransaction(nullptr);
     m_progress->hide();
+  });
+
+  m_transaction->onFinish([=] {
+    m_progress->setTransaction(nullptr);
 
     delete m_transaction;
     m_transaction = nullptr;

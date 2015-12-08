@@ -44,7 +44,12 @@ void Progress::onCommand(WPARAM wParam, LPARAM)
 
   switch(commandId) {
   case IDCANCEL:
-    m_transaction->cancel();
+    if(m_transaction)
+      m_transaction->cancel();
+
+    // don't wait until the current downloads are finished
+    // before getting out of the user way
+    hide();
     break;
   }
 }
