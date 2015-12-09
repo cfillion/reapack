@@ -8,6 +8,7 @@
 #include <reaper_plugin_functions.h>
 
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
@@ -107,6 +108,16 @@ void ReaPack::importRemote()
   getline(file, url);
 
   file.close();
+
+  static const regex namePattern("^[\\w\\s]+$");
+
+  smatch nameMatch;
+  regex_match(name, nameMatch, namePattern);
+
+  if(nameMatch.empty() || url.empty()) {
+    ShowMessageBox("Invalid .ReaPackRemote file!", title, 0);
+    return;
+  }
 
   if(m_config->remotes().count({name})) {
     ShowMessageBox("This remote is already configured.", title, 0);
