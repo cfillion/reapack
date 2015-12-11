@@ -3,10 +3,8 @@
 
 #include <set>
 #include <string>
-#include <vector>
 
-class Source;
-typedef std::vector<Source *> SourceList;
+#include "source.hpp"
 
 class Package;
 
@@ -50,34 +48,5 @@ public:
 };
 
 typedef std::set<Version *, VersionCompare> VersionSet;
-
-class Source {
-public:
-  enum Platform {
-    UnknownPlatform,
-    GenericPlatform,
-
-    // windows
-    WindowsPlatform,
-    Win32Platform,
-    Win64Platform,
-
-    // os x
-    DarwinPlatform,
-    Darwin32Platform,
-    Darwin64Platform,
-  };
-
-  static Platform convertPlatform(const char *);
-
-  Source(const Platform, const std::string &source);
-
-  Platform platform() const { return m_platform; }
-  const std::string &url() const { return m_url; }
-
-private:
-  Platform m_platform;
-  std::string m_url;
-};
 
 #endif

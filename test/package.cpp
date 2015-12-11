@@ -12,6 +12,16 @@ using namespace std;
 
 static const char *M = "[package]";
 
+TEST_CASE("package type from string", M) {
+  SECTION("unknown") {
+    REQUIRE(Package::ConvertType("yoyo") == Package::UnknownType);
+  }
+
+  SECTION("script") {
+    REQUIRE(Package::ConvertType("script") == Package::ScriptType);
+  }
+}
+
 TEST_CASE("empty package name", M) {
   try {
     Package pack(Package::ScriptType, string());

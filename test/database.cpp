@@ -123,16 +123,6 @@ TEST_CASE("drop unknown package", M) {
   REQUIRE(cat.packages().size() == 0);
 }
 
-TEST_CASE("package type from string", M) {
-  SECTION("unknown") {
-    REQUIRE(Package::convertType("yoyo") == Package::UnknownType);
-  }
-
-  SECTION("script") {
-    REQUIRE(Package::convertType("script") == Package::ScriptType);
-  }
-}
-
 TEST_CASE("empty category name", M) {
   try {
     Category cat{string()};

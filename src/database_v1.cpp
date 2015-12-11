@@ -60,7 +60,7 @@ Package *LoadPackageV1(TiXmlElement *packNode)
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
-  Package *pack = new Package(Package::convertType(type), name);
+  Package *pack = new Package(Package::ConvertType(type), name);
   unique_ptr<Package> ptr(pack);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");
@@ -92,7 +92,7 @@ Version *LoadVersionV1(TiXmlElement *verNode)
     const char *url = node->GetText();
     if(!url) url = "";
 
-    ver->addSource(new Source(Source::convertPlatform(platform), url));
+    ver->addSource(new Source(Source::ConvertPlatform(platform), url));
 
     node = node->NextSiblingElement("source");
   }

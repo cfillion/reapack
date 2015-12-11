@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Package::Type Package::convertType(const char *type)
+Package::Type Package::ConvertType(const char *type)
 {
   if(!strcmp(type, "script"))
     return ScriptType;

@@ -16,7 +16,7 @@ public:
     ScriptType,
   };
 
-  static Type convertType(const char *);
+  static Type ConvertType(const char *);
 
   Package(const Type, const std::string &name);
   ~Package();

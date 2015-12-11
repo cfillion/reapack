@@ -6,8 +6,6 @@
 #include <errors.hpp>
 #include <package.hpp>
 
-#include <string>
-
 using namespace std;
 
 static const char *M = "[version]";
@@ -97,51 +95,7 @@ TEST_CASE("version full name", M) {
   REQUIRE(ver.fullName() == "Database Name/Category Name/file.name v1.0");
 }
 
-TEST_CASE("convert platforms", M) {
-  SECTION("unknown") {
-    REQUIRE(Source::convertPlatform("hello") == Source::UnknownPlatform);
-  }
-
-  SECTION("generic") {
-    REQUIRE(Source::convertPlatform("all") == Source::GenericPlatform);
-  }
-
-  SECTION("generic windows") {
-    REQUIRE(Source::convertPlatform("windows") == Source::WindowsPlatform);
-  }
-
-  SECTION("windows 32-bit") {
-    REQUIRE(Source::convertPlatform("win32") == Source::Win32Platform);
-  }
-
-  SECTION("windows 64-bit") {
-    REQUIRE(Source::convertPlatform("win64") == Source::Win64Platform);
-  }
-
-  SECTION("generic os x") {
-    REQUIRE(Source::convertPlatform("darwin") == Source::DarwinPlatform);
-  }
-
-  SECTION("os x 32-bit") {
-    REQUIRE(Source::convertPlatform("darwin32") == Source::Darwin32Platform);
-  }
-
-  SECTION("os x 64-bit") {
-    REQUIRE(Source::convertPlatform("darwin64") == Source::Darwin64Platform);
-  }
-}
-
-TEST_CASE("empty source url", M) {
-  try {
-    Source source(Source::UnknownPlatform, string());
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty source url");
-  }
-}
-
-TEST_CASE("drow sources for unknown platforms") {
+TEST_CASE("drop sources for unknown platforms") {
   Version ver("1");
   ver.addSource(new Source(Source::UnknownPlatform, "a"));
 
