@@ -4,8 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "path.hpp"
+
 class Source;
 typedef std::vector<Source *> SourceList;
+
+class Package;
+class Version;
 
 class Source {
 public:
@@ -31,9 +36,17 @@ public:
   Platform platform() const { return m_platform; }
   const std::string &url() const { return m_url; }
 
+  void setVersion(Version *ver) { m_version = ver; }
+  Version *version() const { return m_version; }
+  Package *package() const;
+
+  std::string fullName() const;
+  Path targetPath() const;
+
 private:
   Platform m_platform;
   std::string m_url;
+  Version *m_version;
 };
 
 #endif

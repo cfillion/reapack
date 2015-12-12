@@ -75,6 +75,8 @@ void Version::addSource(Source *source)
     return;
 #endif
 #endif
+
+  source->setVersion(this);
   m_sources.push_back(source);
 }
 

@@ -95,7 +95,19 @@ TEST_CASE("version full name", M) {
   REQUIRE(ver.fullName() == "Database Name/Category Name/file.name v1.0");
 }
 
-TEST_CASE("drop sources for unknown platforms") {
+TEST_CASE("add source", M) {
+  Source *src = new Source(Source::GenericPlatform, "a");
+
+  Version ver("1");
+  CHECK(ver.sources().size() == 0);
+  ver.addSource(src);
+  CHECK(ver.sources().size() == 1);
+
+  REQUIRE(src->version() == &ver);
+  REQUIRE(ver.source(0) == src);
+}
+
+TEST_CASE("drop sources for unknown platforms", M) {
   Version ver("1");
   ver.addSource(new Source(Source::UnknownPlatform, "a"));
 

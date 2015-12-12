@@ -9,6 +9,8 @@
 
 #include <boost/signals2.hpp>
 
+class PackageTransaction;
+
 class Transaction {
 public:
   typedef boost::signals2::signal<void ()> Signal;
@@ -23,7 +25,6 @@ public:
   };
 
   typedef std::vector<const Error> ErrorList;
-
 
   Transaction(Registry *reg, const Path &root);
   ~Transaction();
@@ -44,12 +45,14 @@ public:
   const ErrorList &errors() const { return m_errors; }
 
 private:
+  friend PackageTransaction;
+
   void prepare();
   void finish();
 
-  void install(const PackageEntry &);
+  void saveDatabase(Download *);
+  bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
-  Path installPath(Package *) const;
 
   Registry *m_registry;
 
@@ -64,7 +67,35 @@ private:
   PackageEntryList m_updates;
   ErrorList m_errors;
 
+  std::vector<PackageTransaction *> m_transactions;
+
   Signal m_onReady;
+  Signal m_onFinish;
+};
+
+class PackageTransaction {
+public:
+  static bool isInstalled(Version *, const Path &root);
+
+  typedef boost::signals2::signal<void ()> Signal;
+  typedef Signal::slot_type Callback;
+
+  PackageTransaction(Transaction *parent);
+
+  void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
+
+  void install(Version *ver);
+  void abort();
+
+private:
+  void saveSource(Download *, Source *);
+  Path installPath(Source *) const;
+
+  void finish();
+
+  Transaction *m_transaction;
+  std::vector<Download *> m_remaining;
+
   Signal m_onFinish;
 };
 

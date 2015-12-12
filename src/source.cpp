@@ -1,6 +1,10 @@
 #include "source.hpp"
 
 #include "errors.hpp"
+#include "package.hpp"
+#include "version.hpp"
+
+using namespace std;
 
 Source::Platform Source::ConvertPlatform(const char *platform)
 {
@@ -23,8 +27,25 @@ Source::Platform Source::ConvertPlatform(const char *platform)
 }
 
 Source::Source(const Platform platform, const std::string &url)
-  : m_platform(platform), m_url(url)
+  : m_platform(platform), m_url(url), m_version(nullptr)
 {
   if(m_url.empty())
     throw reapack_error("empty source url");
+}
+
+Package *Source::package() const
+{
+  return m_version ? m_version->package() : nullptr;
+}
+
+string Source::fullName() const
+{
+  // TODO
+  return m_version->fullName();
+}
+
+Path Source::targetPath() const
+{
+  // TODO
+  return package()->targetPath();
 }

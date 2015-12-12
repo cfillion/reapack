@@ -17,6 +17,9 @@ Transaction::Transaction(Registry *reg, const Path &root)
 
 Transaction::~Transaction()
 {
+  for(PackageTransaction *tr : m_transactions)
+    delete tr;
+
   for(Database *db : m_databases)
     delete db;
 }
@@ -30,39 +33,31 @@ void Transaction::fetch(const RemoteMap &remotes)
 void Transaction::fetch(const Remote &remote)
 {
   Download *dl = new Download(remote.first, remote.second);
-  dl->onFinish([=]() {
-    if(dl->status() != 200) {
-      addError(dl->contents(), dl->url());
-      return;
-    }
-
-    const Path path = m_dbPath + ("remote_" + dl->name() + ".xml");
-    ofstream file(path.join());
-
-    if(file.bad()) {
-      addError(strerror(errno), path.join());
-      return;
-    }
-
-    file << dl->contents();
-    file.close();
-
-    try {
-      Database *db = Database::load(path.join().c_str());
-      db->setName(dl->name());
-
-      m_databases.push_back(db);
-    }
-    catch(const reapack_error &e) {
-      addError(e.what(), dl->url());
-    }
-  });
+  dl->onFinish(bind(&Transaction::saveDatabase, this, dl));
 
   m_queue.push(dl);
 
   // execute prepare after the download is deleted, in case finish is called
   // the queue will also not contain the download anymore
   dl->onFinish(bind(&Transaction::prepare, this));
+}
+
+void Transaction::saveDatabase(Download *dl)
+{
+  const Path path = m_dbPath + ("remote_" + dl->name() + ".xml");
+
+  if(!saveFile(dl, path))
+    return;
+
+  try {
+    Database *db = Database::load(path.join().c_str());
+    db->setName(dl->name());
+
+    m_databases.push_back(db);
+  }
+  catch(const reapack_error &e) {
+    addError(e.what(), dl->url());
+  }
 }
 
 void Transaction::prepare()
@@ -73,7 +68,7 @@ void Transaction::prepare()
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
       Registry::QueryResult entry = m_registry->query(pkg);
-      bool exists = file_exists(installPath(pkg).join().c_str());
+      bool exists = PackageTransaction::isInstalled(pkg->lastVersion(), m_root);
 
       if(entry.status == Registry::UpToDate && exists)
         continue;
@@ -90,12 +85,30 @@ void Transaction::prepare()
 
 void Transaction::run()
 {
-  for(const PackageEntry &pkg : m_packages) {
+  for(const PackageEntry &entry : m_packages) {
+    Package *pkg = entry.first;
+    Registry::QueryResult regEntry = entry.second;
+
+    PackageTransaction *tr = new PackageTransaction(this);
+
     try {
-      install(pkg);
+      tr->install(entry.first->lastVersion());
+      tr->onFinish([=] {
+        if(regEntry.status == Registry::UpdateAvailable)
+          m_updates.push_back(entry);
+        else
+          m_new.push_back(entry);
+
+        m_registry->push(pkg);
+
+        finish();
+      });
+
+      m_transactions.push_back(tr);
     }
     catch(const reapack_error &e) {
-      addError(e.what(), pkg.first->fullName());
+      addError(e.what(), pkg->fullName());
+      delete tr;
     }
   }
 }
@@ -106,50 +119,27 @@ void Transaction::cancel()
   m_queue.abort();
 }
 
-void Transaction::install(const PackageEntry &pkgEntry)
+bool Transaction::saveFile(Download *dl, const Path &path)
 {
-  Package *pkg = pkgEntry.first;
-  Version *ver = pkg->lastVersion();
+  if(dl->status() != 200) {
+    addError(dl->contents(), dl->url());
+    return false;
+  }
 
-  const Path path = installPath(pkg);
-  const Registry::QueryResult regEntry = pkgEntry.second;
+  RecursiveCreateDirectory(path.dirname().c_str(), 0);
 
-  Download *dl = new Download(ver->fullName(), ver->source(0)->url());
-  dl->onFinish([=] {
-    if(dl->status() != 200) {
-      addError(dl->contents(), dl->url());
-      return;
-    }
+  const string strPath = path.join();
+  ofstream file(strPath);
 
-    RecursiveCreateDirectory(path.dirname().c_str(), 0);
+  if(file.bad()) {
+    addError(strerror(errno), strPath);
+    return false;
+  }
 
-    ofstream file(path.join());
-    if(file.bad()) {
-      addError(strerror(errno), path.join());
-      return;
-    }
+  file << dl->contents();
+  file.close();
 
-    file << dl->contents();
-    file.close();
-
-    if(regEntry.status == Registry::UpdateAvailable)
-      m_updates.push_back(pkgEntry);
-    else
-      m_new.push_back(pkgEntry);
-
-    m_registry->push(pkg);
-  });
-
-  m_queue.push(dl);
-
-  // execute finish after the download is deleted
-  // this prevents the download queue from being deleted before the download is
-  dl->onFinish(bind(&Transaction::finish, this));
-}
-
-Path Transaction::installPath(Package *pkg) const
-{
-  return m_root + pkg->targetPath();
+  return true;
 }
 
 void Transaction::finish()
@@ -163,4 +153,66 @@ void Transaction::finish()
 void Transaction::addError(const string &message, const string &title)
 {
   m_errors.push_back({message, title});
+}
+
+bool PackageTransaction::isInstalled(Version *ver, const Path &root)
+{
+  // TODO
+  // file_exists(installPath(pkg).join().c_str());
+  return true;
+}
+
+PackageTransaction::PackageTransaction(Transaction *transaction)
+  : m_transaction(transaction), m_remaining(0)
+{
+}
+
+void PackageTransaction::install(Version *ver)
+{
+  const size_t sourcesSize = ver->sources().size();
+
+  for(size_t i = 0; i < sourcesSize; i++) {
+    Source *src = ver->source(i);
+
+    Download *dl = new Download(src->fullName(), src->url());
+    dl->onFinish(bind(&PackageTransaction::saveSource, this, dl, src));
+
+    m_remaining.push_back(dl);
+    m_transaction->downloadQueue()->push(dl);
+
+    // executing finish after the download is deleted
+    // prevents the download queue from being deleted before the download is
+    dl->onFinish(bind(&PackageTransaction::finish, this));
+  }
+}
+
+void PackageTransaction::saveSource(Download *dl, Source *src)
+{
+  m_remaining.erase(remove(m_remaining.begin(), m_remaining.end(), dl));
+
+  const Path path = installPath(src);
+
+  if(!m_transaction->saveFile(dl, path)) {
+    abort();
+    return;
+  }
+}
+
+void PackageTransaction::finish()
+{
+  if(!m_remaining.empty())
+    return;
+
+  m_onFinish();
+}
+
+void PackageTransaction::abort()
+{
+  for(Download *dl : m_remaining)
+    dl->abort();
+}
+
+Path PackageTransaction::installPath(Source *src) const
+{
+  return m_transaction->m_root + src->targetPath();
 }
