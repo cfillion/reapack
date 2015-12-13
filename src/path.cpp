@@ -20,6 +20,11 @@ void Path::append(const string &part)
     m_parts.push_back(part);
 }
 
+void Path::clear()
+{
+  m_parts.clear();
+}
+
 string Path::basename() const
 {
   if(m_parts.empty())
@@ -73,4 +78,14 @@ Path Path::operator+(const Path &o) const
   path.m_parts.insert(path.m_parts.end(), o.m_parts.begin(), o.m_parts.end());
 
   return path;
+}
+
+string &Path::operator[](const size_t index)
+{
+  auto it = m_parts.begin();
+
+  for(size_t i = 0; i < index; i++)
+    it++;
+
+  return *it;
 }

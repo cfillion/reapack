@@ -78,3 +78,20 @@ TEST_CASE("empty components", M) {
 
   REQUIRE(a.size() == 0);
 }
+
+TEST_CASE("clear path", M) {
+  Path a;
+  a.append("test");
+
+  CHECK(a.size() == 1);
+  a.clear();
+  REQUIRE(a.size() == 0);
+}
+
+TEST_CASE("modify path", M) {
+  Path a;
+  a.append("hello");
+
+  a[0] = "world";
+  REQUIRE(a.join() == "world");
+}

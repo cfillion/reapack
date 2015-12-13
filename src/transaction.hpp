@@ -8,6 +8,7 @@
 #include "remote.hpp"
 
 #include <boost/signals2.hpp>
+#include <queue>
 
 class PackageTransaction;
 
@@ -53,6 +54,7 @@ private:
   void saveDatabase(Download *);
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
+  Path prefixPath(const Path &) const;
 
   Registry *m_registry;
 
@@ -85,16 +87,21 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
 
   void install(Version *ver);
-  void abort();
+  void apply();
+  void cancel();
 
 private:
-  void saveSource(Download *, Source *);
-  Path installPath(Source *) const;
+  typedef std::pair<Path, Path> PathPair;
 
   void finish();
+  void rollback();
+
+  void saveSource(Download *, Source *);
 
   Transaction *m_transaction;
+  bool m_isCancelled;
   std::vector<Download *> m_remaining;
+  std::queue<PathPair> m_files;
 
   Signal m_onFinish;
 };

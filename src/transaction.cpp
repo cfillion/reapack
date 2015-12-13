@@ -2,6 +2,7 @@
 
 #include "errors.hpp"
 
+#include <cstdio>
 #include <fstream>
 
 #include <reaper_plugin_functions.h>
@@ -12,6 +13,7 @@ Transaction::Transaction(Registry *reg, const Path &root)
   : m_registry(reg), m_root(root), m_isCancelled(false)
 {
   m_dbPath = m_root + "ReaPack";
+
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
 }
 
@@ -116,6 +118,10 @@ void Transaction::run()
 void Transaction::cancel()
 {
   m_isCancelled = true;
+
+  for(PackageTransaction *tr : m_transactions)
+    tr->cancel();
+
   m_queue.abort();
 }
 
@@ -147,12 +153,22 @@ void Transaction::finish()
   if(!m_queue.idle())
     return;
 
+  if(!m_isCancelled) {
+    for(PackageTransaction *tr : m_transactions)
+      tr->apply();
+  }
+
   m_onFinish();
 }
 
 void Transaction::addError(const string &message, const string &title)
 {
   m_errors.push_back({message, title});
+}
+
+Path Transaction::prefixPath(const Path &input) const
+{
+  return m_root + input;
 }
 
 bool PackageTransaction::isInstalled(Version *ver, const Path &root)
@@ -163,7 +179,7 @@ bool PackageTransaction::isInstalled(Version *ver, const Path &root)
 }
 
 PackageTransaction::PackageTransaction(Transaction *transaction)
-  : m_transaction(transaction), m_remaining(0)
+  : m_transaction(transaction), m_isCancelled(false)
 {
 }
 
@@ -190,10 +206,19 @@ void PackageTransaction::saveSource(Download *dl, Source *src)
 {
   m_remaining.erase(remove(m_remaining.begin(), m_remaining.end(), dl));
 
-  const Path path = installPath(src);
+  if(m_isCancelled)
+    return;
+
+  const Path targetPath = src->targetPath();
+  Path tmpPath = targetPath;
+  tmpPath[tmpPath.size() - 1] += ".new";
+
+  m_files.push({tmpPath, targetPath});
+
+  const Path path = m_transaction->prefixPath(tmpPath);
 
   if(!m_transaction->saveFile(dl, path)) {
-    abort();
+    cancel();
     return;
   }
 }
@@ -206,13 +231,39 @@ void PackageTransaction::finish()
   m_onFinish();
 }
 
-void PackageTransaction::abort()
+void PackageTransaction::cancel()
 {
+  m_isCancelled = true;
+
   for(Download *dl : m_remaining)
     dl->abort();
+
+  rollback();
 }
 
-Path PackageTransaction::installPath(Source *src) const
+void PackageTransaction::apply()
 {
-  return m_transaction->m_root + src->targetPath();
+  while(!m_files.empty()) {
+    const PathPair paths = m_files.front();
+    m_files.pop();
+
+    const string tempPath = m_transaction->prefixPath(paths.first).join();
+    const string targetPath = m_transaction->prefixPath(paths.second).join();
+
+    if(rename(tempPath.c_str(), targetPath.c_str()))
+      m_transaction->addError(strerror(errno), targetPath);
+  }
+}
+
+void PackageTransaction::rollback()
+{
+  while(!m_files.empty()) {
+    const PathPair paths = m_files.front();
+    m_files.pop();
+
+    const string tempPath = m_transaction->prefixPath(paths.first).join();
+
+    if(remove(tempPath.c_str()))
+      m_transaction->addError(strerror(errno), tempPath);
+  }
 }
