@@ -95,16 +95,15 @@ void Transaction::run()
 
     try {
       tr->install(entry.first->lastVersion());
-      tr->onFinish([=] {
+      tr->onCommit([=] {
         if(regEntry.status == Registry::UpdateAvailable)
           m_updates.push_back(entry);
         else
           m_new.push_back(entry);
 
         m_registry->push(pkg);
-
-        finish();
       });
+      tr->onFinish(bind(&Transaction::finish, this));
 
       m_transactions.push_back(tr);
     }
@@ -155,7 +154,7 @@ void Transaction::finish()
 
   if(!m_isCancelled) {
     for(PackageTransaction *tr : m_transactions)
-      tr->apply();
+      tr->commit();
   }
 
   m_onFinish();
@@ -213,7 +212,7 @@ void PackageTransaction::saveSource(Download *dl, Source *src)
   Path tmpPath = targetPath;
   tmpPath[tmpPath.size() - 1] += ".new";
 
-  m_files.push({tmpPath, targetPath});
+  m_files.push_back({tmpPath, targetPath});
 
   const Path path = m_transaction->prefixPath(tmpPath);
 
@@ -241,29 +240,31 @@ void PackageTransaction::cancel()
   rollback();
 }
 
-void PackageTransaction::apply()
+void PackageTransaction::commit()
 {
-  while(!m_files.empty()) {
-    const PathPair paths = m_files.front();
-    m_files.pop();
-
+  for(const PathPair &paths : m_files) {
     const string tempPath = m_transaction->prefixPath(paths.first).join();
     const string targetPath = m_transaction->prefixPath(paths.second).join();
 
-    if(rename(tempPath.c_str(), targetPath.c_str()))
+    if(rename(tempPath.c_str(), targetPath.c_str())) {
       m_transaction->addError(strerror(errno), targetPath);
+      rollback();
+      return;
+    }
   }
+
+  m_files.clear();
+  m_onCommit();
 }
 
 void PackageTransaction::rollback()
 {
-  while(!m_files.empty()) {
-    const PathPair paths = m_files.front();
-    m_files.pop();
-
+  for(const PathPair &paths : m_files) {
     const string tempPath = m_transaction->prefixPath(paths.first).join();
 
     if(remove(tempPath.c_str()))
       m_transaction->addError(strerror(errno), tempPath);
   }
+
+  m_files.clear();
 }

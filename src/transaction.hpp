@@ -8,7 +8,7 @@
 #include "remote.hpp"
 
 #include <boost/signals2.hpp>
-#include <queue>
+#include <vector>
 
 class PackageTransaction;
 
@@ -84,10 +84,11 @@ public:
 
   PackageTransaction(Transaction *parent);
 
+  void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
 
   void install(Version *ver);
-  void apply();
+  void commit();
   void cancel();
 
 private:
@@ -101,8 +102,9 @@ private:
   Transaction *m_transaction;
   bool m_isCancelled;
   std::vector<Download *> m_remaining;
-  std::queue<PathPair> m_files;
+  std::vector<PathPair> m_files;
 
+  Signal m_onCommit;
   Signal m_onFinish;
 };
 
