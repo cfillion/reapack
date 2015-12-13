@@ -70,7 +70,7 @@ void Transaction::prepare()
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
       Registry::QueryResult entry = m_registry->query(pkg);
-      bool exists = PackageTransaction::isInstalled(pkg->lastVersion(), m_root);
+      bool exists = PackageTransaction::isInstalled(pkg->lastVersion(), this);
 
       if(entry.status == Registry::UpToDate && exists)
         continue;

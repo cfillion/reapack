@@ -6,12 +6,17 @@
 #include <cerrno>
 #include <cstdio>
 
+#include <reaper_plugin_functions.h>
+
 using namespace std;
 
-bool PackageTransaction::isInstalled(Version *ver, const Path &root)
+bool PackageTransaction::isInstalled(Version *ver, Transaction *tr)
 {
-  // TODO
-  // file_exists(installPath(pkg).join().c_str());
+  for(Source *src : ver->sources()) {
+    if(!file_exists(tr->prefixPath(src->targetPath()).join().c_str()))
+      return false;
+  }
+
   return true;
 }
 
