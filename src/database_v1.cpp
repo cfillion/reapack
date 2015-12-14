@@ -89,10 +89,13 @@ Version *LoadVersionV1(TiXmlElement *verNode)
     const char *platform = node->Attribute("platform");
     if(!platform) platform = "all";
 
+    const char *file = node->Attribute("file");
+    if(!file) file = "";
+
     const char *url = node->GetText();
     if(!url) url = "";
 
-    ver->addSource(new Source(Source::ConvertPlatform(platform), url));
+    ver->addSource(new Source(Source::ConvertPlatform(platform), file, url));
 
     node = node->NextSiblingElement("source");
   }

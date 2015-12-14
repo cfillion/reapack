@@ -68,7 +68,7 @@ TEST_CASE("future version", M) {
 }
 TEST_CASE("add category", M) {
   Version *ver = new Version("1");
-  ver->addSource(new Source(Source::GenericPlatform, "google.com"));
+  ver->addSource(new Source(Source::GenericPlatform, string(), "google.com"));
 
   Package *pack = new Package(Package::ScriptType, "name");
   pack->addVersion(ver);
@@ -94,7 +94,7 @@ TEST_CASE("drop empty category", M) {
 
 TEST_CASE("add a package", M) {
   Version *ver = new Version("1");
-  ver->addSource(new Source(Source::GenericPlatform, "google.com"));
+  ver->addSource(new Source(Source::GenericPlatform, string(), "google.com"));
 
   Package *pack = new Package(Package::ScriptType, "name");
   pack->addVersion(ver);

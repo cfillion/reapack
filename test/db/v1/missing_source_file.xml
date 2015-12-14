@@ -1,0 +1,9 @@
+<index version="1">
+  <category name="hello">
+    <reapack name="a" type="script">
+      <version name="1">
+        <source platform="all">https://encrypted.google.com/</source>
+      </version>
+    </reapack>
+  </category>
+</index>

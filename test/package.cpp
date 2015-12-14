@@ -36,8 +36,8 @@ TEST_CASE("package versions are sorted", M) {
   Package pack(Package::ScriptType, "a");
   CHECK(pack.versions().size() == 0);
 
-  Source *sourceA = new Source(Source::GenericPlatform, "google.com");
-  Source *sourceB = new Source(Source::GenericPlatform, "google.com");
+  Source *sourceA = new Source(Source::GenericPlatform, string(), "google.com");
+  Source *sourceB = new Source(Source::GenericPlatform, string(), "google.com");
 
   Version *final = new Version("1");
   final->addSource(sourceA);
@@ -92,15 +92,12 @@ TEST_CASE("script target path", M) {
   Package pack(Package::ScriptType, "file.name");
   pack.setCategory(&cat);
 
-  const Path path = pack.targetPath();
-
   Path expected;
   expected.append("Scripts");
   expected.append("Database Name");
   expected.append("Category Name");
-  expected.append("file.name");
 
-  REQUIRE(path == expected);
+  REQUIRE(pack.targetPath() == expected);
 }
 
 TEST_CASE("script target path without category", M) {

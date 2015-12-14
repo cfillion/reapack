@@ -26,8 +26,8 @@ Source::Platform Source::ConvertPlatform(const char *platform)
     return UnknownPlatform;
 }
 
-Source::Source(const Platform platform, const std::string &url)
-  : m_platform(platform), m_url(url), m_version(nullptr)
+Source::Source(const Platform platform, const string &file, const string &url)
+  : m_platform(platform), m_file(file), m_url(url), m_version(nullptr)
 {
   if(m_url.empty())
     throw reapack_error("empty source url");
@@ -38,14 +38,38 @@ Package *Source::package() const
   return m_version ? m_version->package() : nullptr;
 }
 
+const string &Source::file() const
+{
+  if(!m_file.empty())
+    return m_file;
+
+  Package *pkg = package();
+
+  if(pkg)
+    return pkg->name();
+  else
+    throw reapack_error("empty file name and no package");
+}
+
 string Source::fullName() const
 {
-  // TODO
-  return m_version->fullName();
+  if(!m_version)
+    return file();
+  else if(m_file.empty())
+    return m_version->fullName();
+
+  return m_version->fullName() + " (" + m_file + ")";
 }
 
 Path Source::targetPath() const
 {
-  // TODO
-  return package()->targetPath();
+  Package *pkg = package();
+
+  if(!pkg)
+    throw reapack_error("no package associated with the source");
+
+  Path path = pkg->targetPath();
+  path.append(file());
+
+  return path;
 }

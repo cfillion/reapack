@@ -67,13 +67,11 @@ Path Package::targetPath() const
   if(!m_category || !m_category->database())
     throw reapack_error("category or database is unset");
 
-  path.append(m_category->database()->name());
-  path.append(m_category->name());
-  path.append(m_name);
-
   switch(m_type) {
   case ScriptType:
-    path.prepend("Scripts");
+    path.append("Scripts");
+    path.append(m_category->database()->name());
+    path.append(m_category->name());
     break;
   default:
     throw reapack_error("unsupported package type");

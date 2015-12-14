@@ -16,7 +16,7 @@ static const char *M = "[registry]";
   Package pkg(Package::ScriptType, "Hello"); \
   pkg.setCategory(&cat); \
   Version *ver = new Version("1.0"); \
-  Source *src = new Source(Source::GenericPlatform, "https://..."); \
+  Source *src = new Source(Source::GenericPlatform, "file", "url"); \
   ver->addSource(src); \
   pkg.addVersion(ver);
 
@@ -45,7 +45,7 @@ TEST_CASE("bump version", M) {
   MAKE_PACKAGE
 
   Version *ver2 = new Version("2.0");
-  ver2->addSource(new Source(Source::GenericPlatform, "https://..."));
+  ver2->addSource(new Source(Source::GenericPlatform, "file", "url"));
 
   Registry reg;
   reg.push(&pkg);

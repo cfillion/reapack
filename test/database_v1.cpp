@@ -88,6 +88,14 @@ TEST_CASE("null source url", M) {
   }
 }
 
+TEST_CASE("null source file", M) {
+  Database *db = Database::load(DBPATH "missing_source_file.xml");
+  DBPTR(db);
+
+  Package *pkg = db->category(0)->package(0);
+  REQUIRE(pkg->version(0)->source(0)->file() == pkg->name());
+}
+
 TEST_CASE("default platform", M) {
   Database *db = Database::load(DBPATH "missing_platform.xml");
   DBPTR(db);
@@ -130,5 +138,6 @@ TEST_CASE("full database", M) {
 
   Source *source = ver->source(0);
   REQUIRE(source->platform() == Source::GenericPlatform);
+  REQUIRE(source->file() == "test.lua");
   REQUIRE(source->url() == "https://google.com/");
 }
