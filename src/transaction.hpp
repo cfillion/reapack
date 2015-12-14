@@ -54,6 +54,8 @@ private:
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
   Path prefixPath(const Path &) const;
+  bool allFilesExists(const std::vector<Path> &) const;
+  void registerFiles(const std::vector<Path> &);
 
   Registry *m_registry;
 
@@ -69,6 +71,7 @@ private:
   ErrorList m_errors;
 
   std::vector<PackageTransaction *> m_transactions;
+  std::vector<Path> m_files;
 
   Signal m_onReady;
   Signal m_onFinish;

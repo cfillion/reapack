@@ -67,43 +67,21 @@ void Transaction::prepare()
   if(!m_queue.idle())
     return;
 
-  vector<Path> allFiles;
-
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
-      vector<Path> files = pkg->lastVersion()->files();
-      allFiles.insert(allFiles.end(), files.begin(), files.end());
-
-      const auto uniqueIt = unique(allFiles.begin(), allFiles.end());
-      if(uniqueIt != allFiles.end()) {
-        for(auto it = uniqueIt; it != allFiles.end(); it++) {
-          addError("Conflict: This file is created by more than one package",
-            it->join());
-        }
-
-        finish();
-        return;
-      }
-
-      bool exists = true;
-
-      for(const Path &path : files) {
-        if(!file_exists(prefixPath(path).join().c_str())) {
-          exists = false;
-          break;
-        }
-      }
-
       Registry::QueryResult entry = m_registry->query(pkg);
 
-      if(entry.status == Registry::UpToDate && exists)
+      vector<Path> files = pkg->lastVersion()->files();
+      registerFiles(files);
+
+      if(entry.status == Registry::UpToDate && allFilesExists(files))
         continue;
 
       m_packages.push_back({pkg, entry});
     }
   }
 
-  if(m_packages.empty())
+  if(m_packages.empty() || m_errors.size())
     finish();
   else
     m_onReady();
@@ -192,4 +170,26 @@ void Transaction::addError(const string &message, const string &title)
 Path Transaction::prefixPath(const Path &input) const
 {
   return m_root + input;
+}
+
+bool Transaction::allFilesExists(const vector<Path> &list) const
+{
+  for(const Path &path : list) {
+    if(!file_exists(prefixPath(path).join().c_str()))
+      return false;
+  }
+
+  return true;
+}
+
+void Transaction::registerFiles(const vector<Path> &list)
+{
+  m_files.insert(m_files.end(), list.begin(), list.end());
+
+  const auto uniqueIt = unique(m_files.begin(), m_files.end());
+
+  for(auto it = uniqueIt; it != m_files.end(); it++) {
+    addError("Conflict: This file is created by more than one package",
+      it->join());
+  }
 }
