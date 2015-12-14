@@ -67,10 +67,34 @@ void Transaction::prepare()
   if(!m_queue.idle())
     return;
 
+  vector<Path> allFiles;
+
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
+      vector<Path> files = pkg->lastVersion()->files();
+      allFiles.insert(allFiles.end(), files.begin(), files.end());
+
+      const auto uniqueIt = unique(allFiles.begin(), allFiles.end());
+      if(uniqueIt != allFiles.end()) {
+        for(auto it = uniqueIt; it != allFiles.end(); it++) {
+          addError("Conflict: This file is created by more than one package",
+            it->join());
+        }
+
+        finish();
+        return;
+      }
+
+      bool exists = true;
+
+      for(const Path &path : files) {
+        if(!file_exists(prefixPath(path).join().c_str())) {
+          exists = false;
+          break;
+        }
+      }
+
       Registry::QueryResult entry = m_registry->query(pkg);
-      bool exists = PackageTransaction::isInstalled(pkg->lastVersion(), this);
 
       if(entry.status == Registry::UpToDate && exists)
         continue;

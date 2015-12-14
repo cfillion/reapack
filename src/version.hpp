@@ -27,6 +27,8 @@ public:
   const SourceList &sources() const { return m_sources; }
   Source *source(const size_t i) const { return m_sources[i]; }
 
+  std::vector<Path> files() const;
+
   bool operator<(const Version &) const;
 
 private:

@@ -85,6 +85,18 @@ void Version::setChangelog(const std::string &changelog)
   m_changelog = changelog;
 }
 
+vector<Path> Version::files() const
+{
+  const size_t size = m_sources.size();
+
+  vector<Path> list(size);
+
+  for(size_t i = 0; i < size; i++)
+    list[i] = m_sources[i]->targetPath();
+
+  return list;
+}
+
 bool Version::operator<(const Version &o) const
 {
   return m_code < o.code();

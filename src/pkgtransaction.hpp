@@ -12,8 +12,6 @@ class Version;
 
 class PackageTransaction {
 public:
-  static bool isInstalled(Version *, Transaction *);
-
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 

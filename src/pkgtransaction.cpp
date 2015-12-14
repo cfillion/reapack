@@ -6,19 +6,7 @@
 #include <cerrno>
 #include <cstdio>
 
-#include <reaper_plugin_functions.h>
-
 using namespace std;
-
-bool PackageTransaction::isInstalled(Version *ver, Transaction *tr)
-{
-  for(Source *src : ver->sources()) {
-    if(!file_exists(tr->prefixPath(src->targetPath()).join().c_str()))
-      return false;
-  }
-
-  return true;
-}
 
 PackageTransaction::PackageTransaction(Transaction *transaction)
   : m_transaction(transaction), m_isCancelled(false)

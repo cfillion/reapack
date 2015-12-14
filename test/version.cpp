@@ -107,6 +107,32 @@ TEST_CASE("add source", M) {
   REQUIRE(ver.source(0) == src);
 }
 
+TEST_CASE("list files", M) {
+  Source *src1 = new Source(Source::GenericPlatform, "file", "url");
+
+  Version ver("1");
+  ver.addSource(src1);
+
+  Package pkg(Package::ScriptType, "name");
+  ver.setPackage(&pkg);
+
+  Category cat("Category Name");
+  pkg.setCategory(&cat);
+
+  Database db;
+  db.setName("Database Name");
+  cat.setDatabase(&db);
+
+  Path path1;
+  path1.append("Scripts");
+  path1.append("Database Name");
+  path1.append("Category Name");
+  path1.append("file");
+
+  const vector<Path> expected{path1};
+  REQUIRE(ver.files() == expected);
+}
+
 TEST_CASE("drop sources for unknown platforms", M) {
   Version ver("1");
   ver.addSource(new Source(Source::UnknownPlatform, "a", "b"));
