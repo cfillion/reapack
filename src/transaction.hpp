@@ -72,6 +72,7 @@ private:
 
   std::vector<PackageTransaction *> m_transactions;
   std::vector<Path> m_files;
+  bool m_hasConflicts;
 
   Signal m_onReady;
   Signal m_onFinish;

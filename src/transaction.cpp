@@ -10,7 +10,7 @@
 using namespace std;
 
 Transaction::Transaction(Registry *reg, const Path &root)
-  : m_registry(reg), m_root(root), m_isCancelled(false)
+  : m_registry(reg), m_root(root), m_isCancelled(false), m_hasConflicts(false)
 {
   m_dbPath = m_root + "ReaPack";
 
@@ -81,7 +81,7 @@ void Transaction::prepare()
     }
   }
 
-  if(m_packages.empty() || m_errors.size())
+  if(m_packages.empty() || m_hasConflicts)
     finish();
   else
     m_onReady();
@@ -186,12 +186,20 @@ void Transaction::registerFiles(const vector<Path> &list)
 {
   m_files.insert(m_files.end(), list.begin(), list.end());
 
-  const auto uniqueIt = unique(m_files.begin(), m_files.end());
+  const auto dupBegin = unique(m_files.begin(), m_files.end());
 
-  for(auto it = uniqueIt; it != m_files.end(); it++) {
+  if(dupBegin == m_files.end())
+    return;
+
+  auto it = dupBegin;
+
+  do {
     addError("Conflict: This file is part of more than one package",
       it->join());
-  }
 
-  m_files.erase(uniqueIt, m_files.end());
+    it++;
+  } while(it != m_files.end());
+
+  m_files.erase(dupBegin, m_files.end());
+  m_hasConflicts = true;
 }
