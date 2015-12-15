@@ -49,7 +49,7 @@ vendor
 4. Launch "Developer Command Prompt for VS2013" and run
      `VC\vcvarsall x86_amd64` (or x86 for 32-bit)
 5. Navigate to `<curl directory>\winbuild` and run
-     `nmake /f Makefile.vc mode=static MACHINE=x64` (or x86)
+     `nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x64` (or x86)
 6. Copy `..\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
      to `<reapack directory>\vendor` as `libcurl`
 7. Navigate to `<reapack directory>` and run `tup --quiet`

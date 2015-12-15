@@ -2,7 +2,7 @@ CXX := cl
 LD := link
 RC := rc
 
-CXXFLAGS := /nologo /W3 /WX /wd4996 /O2 /EHsc /MD
+CXXFLAGS := /nologo /W3 /WX /wd4996 /O2 /EHsc /MT
 CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
 CXXFLAGS += /Ivendor/libcurl/include
 CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
