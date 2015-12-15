@@ -154,7 +154,7 @@ Transaction *ReaPack::createTransaction()
 
     m_progress->setEnabled(false);
 
-    if(m_transaction->packages().empty())
+    if(m_transaction->packages().empty() && m_transaction->errors().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
