@@ -36,8 +36,8 @@ Config::Config()
 
 void Config::fillDefaults()
 {
-  addRemote({"ReaScripts",
-    "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"});
+  addRemote({"ReaPack",
+    "https://github.com/cfillion/reapack/raw/master/index.xml"});
 }
 
 void Config::read(const Path &path)
