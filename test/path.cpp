@@ -95,3 +95,11 @@ TEST_CASE("modify path", M) {
   a[0] = "world";
   REQUIRE(a.join() == "world");
 }
+
+TEST_CASE("custom separator", M) {
+  Path a;
+  a.append("hello");
+  a.append("world");
+
+  REQUIRE(a.join('-') == "hello-world");
+}

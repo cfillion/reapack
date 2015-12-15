@@ -33,7 +33,7 @@ string Path::basename() const
   return m_parts.back();
 }
 
-string Path::join(const bool skipLast) const
+string Path::join(const bool skipLast, const char sep) const
 {
   string path;
 
@@ -46,7 +46,7 @@ string Path::join(const bool skipLast) const
     const string &part = *it;
 
     if(!path.empty())
-      path.insert(path.end(), SEPARATOR);
+      path.insert(path.end(), sep ? sep : SEPARATOR);
 
     path.append(part);
   }

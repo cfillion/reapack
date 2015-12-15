@@ -91,7 +91,7 @@ void Transaction::run()
 {
   for(const PackageEntry &entry : m_packages) {
     Package *pkg = entry.first;
-    Registry::QueryResult regEntry = entry.second;
+    const Registry::QueryResult regEntry = entry.second;
 
     PackageTransaction *tr = new PackageTransaction(this);
 

@@ -13,7 +13,8 @@ void Registry::push(Package *pkg)
   if(!lastVer)
     return;
 
-  push(pkg->targetPath().join(), lastVer->name());
+  const Path id = pkg->targetPath() + pkg->name();
+  push(id.join('/'), lastVer->name());
 }
 
 void Registry::push(const std::string &key, const std::string &value)
@@ -23,8 +24,8 @@ void Registry::push(const std::string &key, const std::string &value)
 
 Registry::QueryResult Registry::query(Package *pkg) const
 {
-  const string key = pkg->targetPath().join();
-  const auto it = m_map.find(key);
+  const Path id = pkg->targetPath() + pkg->name();
+  const auto it = m_map.find(id.join('/'));
 
   if(it == m_map.end())
     return {Uninstalled, 0};
