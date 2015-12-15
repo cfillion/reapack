@@ -77,6 +77,8 @@ void PackageTransaction::commit()
     const string tempPath = m_transaction->prefixPath(paths.first).join();
     const string targetPath = m_transaction->prefixPath(paths.second).join();
 
+    remove(targetPath.c_str());
+
     if(rename(tempPath.c_str(), targetPath.c_str())) {
       m_transaction->addError(strerror(errno), targetPath);
       rollback();
