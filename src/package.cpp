@@ -57,7 +57,7 @@ Version *Package::lastVersion() const
   if(m_versions.empty())
     return nullptr;
 
-  return *prev(m_versions.end());
+  return *m_versions.rbegin();
 }
 
 Path Package::targetPath() const
