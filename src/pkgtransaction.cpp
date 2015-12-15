@@ -73,6 +73,9 @@ void PackageTransaction::cancel()
 
 void PackageTransaction::commit()
 {
+  if(m_isCancelled)
+    return;
+
   for(const PathPair &paths : m_files) {
     const string tempPath = m_transaction->prefixPath(paths.first).join();
     const string targetPath = m_transaction->prefixPath(paths.second).join();
