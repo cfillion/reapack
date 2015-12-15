@@ -189,7 +189,9 @@ void Transaction::registerFiles(const vector<Path> &list)
   const auto uniqueIt = unique(m_files.begin(), m_files.end());
 
   for(auto it = uniqueIt; it != m_files.end(); it++) {
-    addError("Conflict: This file is created by more than one package",
+    addError("Conflict: This file is part of more than one package",
       it->join());
   }
+
+  m_files.erase(uniqueIt, m_files.end());
 }
