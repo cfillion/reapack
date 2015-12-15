@@ -136,9 +136,9 @@ bool Transaction::saveFile(Download *dl, const Path &path)
   RecursiveCreateDirectory(path.dirname().c_str(), 0);
 
   const string strPath = path.join();
-  ofstream file(strPath);
+  ofstream file(strPath, ios_base::binary);
 
-  if(file.bad()) {
+  if(!file) {
     addError(strerror(errno), strPath);
     return false;
   }
