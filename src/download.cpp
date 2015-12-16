@@ -130,8 +130,10 @@ void Download::RegisterStart()
 {
   WDL_MutexLock lock(&s_mutex);
 
+  if(!s_running)
+    plugin_register("timer", (void*)TimerTick);
+
   s_running++;
-  plugin_register("timer", (void*)TimerTick);
 }
 
 void Download::MarkAsFinished(Download *dl)
