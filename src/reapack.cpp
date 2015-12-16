@@ -90,6 +90,7 @@ void ReaPack::synchronize()
 void ReaPack::importRemote()
 {
   char path[4096];
+  memset(path, 0, sizeof(path));
 
   const char *title = "ReaPack: Import remote repository";
   if(!GetUserFileNameForRead(path, title, "ReaPackRemote"))
