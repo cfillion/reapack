@@ -163,15 +163,15 @@ Transaction *ReaPack::createTransaction()
 
     m_progress->setEnabled(true);
     m_progress->hide();
+
+    m_config->write();
   });
 
-  m_transaction->onFinish([=] {
+  m_transaction->onDestroy([=] {
     m_progress->setTransaction(nullptr);
 
     delete m_transaction;
     m_transaction = nullptr;
-
-    m_config->write();
   });
 
   return m_transaction;

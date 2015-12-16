@@ -184,6 +184,7 @@ void Download::finishInMainThread()
   }
 
   m_onFinish();
+  m_onDestroy();
 }
 
 bool Download::isFinished()
@@ -216,11 +217,14 @@ void DownloadQueue::push(Download *dl)
 {
   m_onPush(dl);
 
-  dl->onFinish([=]() {
+  dl->onFinish([=] {
     m_running.erase(remove(m_running.begin(), m_running.end(), dl));
-    delete dl;
 
     start();
+  });
+
+  dl->onDestroy([=] {
+     delete dl;
   });
 
   m_queue.push(dl);

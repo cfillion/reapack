@@ -160,6 +160,7 @@ void Transaction::finish()
   }
 
   m_onFinish();
+  m_onDestroy();
 }
 
 void Transaction::addError(const string &message, const string &title)

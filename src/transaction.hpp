@@ -31,6 +31,7 @@ public:
 
   void onReady(const Callback &callback) { m_onReady.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
+  void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
   void fetch(const RemoteMap &);
   void fetch(const Remote &);
@@ -76,6 +77,7 @@ private:
 
   Signal m_onReady;
   Signal m_onFinish;
+  Signal m_onDestroy;
 };
 
 #endif

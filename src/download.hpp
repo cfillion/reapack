@@ -29,6 +29,7 @@ public:
 
   void onStart(const Callback &callback) { m_onStart.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
+  void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
   void start();
   void abort();
@@ -63,6 +64,7 @@ private:
 
   Signal m_onStart;
   Signal m_onFinish;
+  Signal m_onDestroy;
 };
 
 class DownloadQueue {
