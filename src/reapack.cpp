@@ -97,7 +97,8 @@ void ReaPack::importRemote()
     return;
 
   ifstream file(path);
-  if(!file.good()) {
+
+  if(!file) {
     ShowMessageBox(strerror(errno), title, 0);
     return;
   }
