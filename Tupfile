@@ -4,15 +4,7 @@ TINYXML := $(WDL)/tinyxml
 WDLSOURCE := $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp
 WDLSOURCE += $(TINYXML)/tinyxmlparser.cpp $(TINYXML)/tinyxmlerror.cpp
 
-ifeq (@(TUP_PLATFORM),macosx)
-  include Tupfile.osx
-else
-  ifeq (@(TUP_PLATFORM),win32)
-    include Tupfile.win32
-  else
-    error Unsupported platform.
-  endif
-endif
+include @(TUP_PLATFORM).tup
 
 : foreach src/*.cpp | $(BUILDDEPS) |> !build |> build/%B.o
 : foreach $(WDLSOURCE) |> !build $(WDLFLAGS) |> build/wdl_%B.o
