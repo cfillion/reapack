@@ -34,7 +34,7 @@ Registry::QueryResult Registry::query(Package *pkg) const
   const Status status = it->second == lastVer->name()
     ? UpToDate : UpdateAvailable;
 
-  size_t versionCode = 0;
+  uint64_t versionCode = 0;
 
   try {
     if(status == UpdateAvailable)

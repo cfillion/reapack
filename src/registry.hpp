@@ -1,6 +1,7 @@
 #ifndef REAPACK_REGISTRY_HPP
 #define REAPACK_REGISTRY_HPP
 
+#include <cstdint>
 #include <map>
 #include <string>
 
@@ -18,7 +19,7 @@ public:
 
   struct QueryResult {
     Status status;
-    size_t versionCode;
+    uint64_t versionCode;
   };
 
   void push(Package *pkg);

@@ -1,6 +1,7 @@
 #ifndef REAPACK_VERSION_HPP
 #define REAPACK_VERSION_HPP
 
+#include <cstdint>
 #include <set>
 #include <string>
 
@@ -15,7 +16,7 @@ public:
 
   const std::string &name() const { return m_name; }
   std::string fullName() const;
-  size_t code() const { return m_code; }
+  uint64_t code() const { return m_code; }
 
   void setPackage(Package *pkg) { m_package = pkg; }
   Package *package() const { return m_package; }
@@ -33,7 +34,7 @@ public:
 
 private:
   std::string m_name;
-  size_t m_code;
+  uint64_t m_code;
 
   Package *m_package;
 

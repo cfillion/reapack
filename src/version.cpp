@@ -31,7 +31,7 @@ Version::Version(const std::string &str)
     if(match.size() > 4)
       throw reapack_error("version component overflow");
 
-    m_code += stoi(match) * (size_t)pow(10000, size - index - 1);
+    m_code += stoi(match) * (uint64_t)pow(10000, size - index - 1);
   }
 }
 
