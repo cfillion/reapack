@@ -6,3 +6,7 @@ src/resource.rc_mac*
 src/resource.res
 vendor/
 !vendor/.gitkeep
+x64/
+!x64/tup.config
+x86/
+!x86/tup.config
