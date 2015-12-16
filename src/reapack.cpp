@@ -89,14 +89,22 @@ void ReaPack::synchronize()
 
 void ReaPack::importRemote()
 {
-  char path[4096];
-  memset(path, 0, sizeof(path));
+  static const int PATH_SIZE = 4096;
+  char path[PATH_SIZE] = {0};
 
   const char *title = "ReaPack: Import remote repository";
   if(!GetUserFileNameForRead(path, title, "ReaPackRemote"))
     return;
 
+#ifdef _WIN32
+  // fixes unicode path like "C:\Users\Test\Downloads\Новая папка" on Windows
+  wchar_t wpath[PATH_SIZE];
+  MultiByteToWideChar(CP_UTF8, 0, path, sizeof(path), wpath, PATH_SIZE);
+
+  ifstream file(wpath);
+#else
   ifstream file(path);
+#endif
 
   if(!file) {
     ShowMessageBox(strerror(errno), title, 0);
