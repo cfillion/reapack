@@ -35,7 +35,7 @@ vendor
 1. Install [Homebrew](http://brew.sh/) and Xcode Command Line Tools
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
-3. Run `tup --quiet && x64/bin/test` from this directory
+3. Run `tup --quiet` from this directory
 4. Copy or link `x64/bin/reaper_reapack_x64.dylib` to REAPER's extension
   directory (replace x64 with x86 for 32-bit)
 
@@ -64,7 +64,7 @@ vendor
   to `<reapack directory>\vendor` as `libcurl_x64`
 6. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
   to `<reapack directory>\vendor` as `libcurl_x86`
-7. Run `tup --quiet && x64\bin\test` from this directory using
+7. Run `tup --quiet` from this directory using
   "Developer Command Prompt for VS2013"
 8. Copy `x64\bin\reaper_reapack_x64.dll` to your REAPER
   plugin folder (replace x64 with x86 for 32-bit)

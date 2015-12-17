@@ -21,7 +21,8 @@ SOFLAGS := /DLL /OUT:$(TUP_VARIANTDIR)/bin/reaper_reapack_@(WINARCH).dll
 SOTARGET := bin/reaper_reapack_@(WINARCH).dll
 SOTARGET += bin/reaper_reapack_@(WINARCH).lib bin/reaper_reapack_@(WINARCH).exp
 
-TSFLAGS := /OUT:$(TUP_VARIANTDIR)/bin/test.exe
+TEST := $(TUP_VARIANTDIR)/bin/test.exe
+TSFLAGS := /OUT:$(TEST)
 TSTARGET := bin/test.exe bin/test.lib bin/test.exp
 
 LINKDEPS := src/resource.res

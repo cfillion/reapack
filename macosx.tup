@@ -20,7 +20,9 @@ LDFLAGS := -framework Cocoa -framework Carbon -lcurl
 
 SOFLAGS := -dynamiclib
 SOTARGET := bin/reaper_reapack_@(OSXARCH).dylib
-TSTARGET := bin/test
+
+TEST := bin/test
+TSTARGET := $(TEST)
 
 !build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
 !link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
