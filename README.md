@@ -41,7 +41,10 @@ vendor
 
 ### Windows
 
-1. Install [tup](http://gittup.org/tup/) and [Visual Studio Express 2013 for
+1. Install [tup](http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip)
+  (explicit-variant branch, see [this
+  thread](https://groups.google.com/d/topic/tup-users/UNUSE15PQdA/discussion))
+  and [Visual Studio Express 2013 for
   Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=48131)
 2. Download the latest [boost](http://www.boost.org/) and copy the
   `boost` subdirectory into `<reapack>\vendor`
