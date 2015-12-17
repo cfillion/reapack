@@ -1,3 +1,32 @@
+#!/usr/bin/env ruby
+
+Signal.trap('INT') { abort }
+
+REGEX = /\A\/\*(.+\n[^\n])+?\*\/\n/.freeze
+PREAMBLE = DATA.read.freeze
+
+def process(input)
+  if input[0] == '/'
+   output = input.sub REGEX, PREAMBLE
+  else
+   output = "%s\n%s" % [PREAMBLE, input]
+  end
+  
+  input == output ? nil : output
+end
+
+ARGV.each do |path|
+ File.open path, 'r+t' do |file|
+   output = process file.read
+   next unless output
+
+   file.rewind
+   file.write output
+   file.truncate file.pos
+ end
+end
+
+__END__
 /* ReaPack: Package manager for REAPER
  * Copyright (C) 2015  Christian Fillion
  *
@@ -14,42 +43,3 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef REAPACK_REGISTRY_HPP
-#define REAPACK_REGISTRY_HPP
-
-#include <cstdint>
-#include <map>
-#include <string>
-
-class Package;
-
-class Registry {
-public:
-  typedef std::map<std::string, std::string> Map;
-
-  enum Status {
-    UpToDate,
-    UpdateAvailable,
-    Uninstalled,
-  };
-
-  struct QueryResult {
-    Status status;
-    uint64_t versionCode;
-  };
-
-  void push(Package *pkg);
-  void push(const std::string &key, const std::string &value);
-
-  size_t size() const { return m_map.size(); }
-  QueryResult query(Package *pkg) const;
-
-  Map::const_iterator begin() const { return m_map.begin(); }
-  Map::const_iterator end() const { return m_map.end(); }
-
-private:
-  Map m_map;
-};
-
-#endif
