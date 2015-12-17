@@ -64,6 +64,7 @@ vendor
   to `<reapack directory>\vendor` as `libcurl_x64`
 6. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
   to `<reapack directory>\vendor` as `libcurl_x86`
-7. Navigate to `<reapack directory>` and run `tup --quiet`
-8. Run `x64\bin\test` and copy `x64\bin\reaper_reapack.dll` to your REAPER
+7. Run `tup --quiet && x64\bin\test` from this directory using
+  "Developer Command Prompt for VS2013"
+8. Copy `x64\bin\reaper_reapack.dll` to your REAPER
   plugin folder (replace x64 with x86 for 32-bit)
