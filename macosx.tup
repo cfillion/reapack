@@ -19,7 +19,7 @@ WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
 LDFLAGS := -framework Cocoa -framework Carbon -lcurl
 
 SOFLAGS := -dynamiclib
-SOTARGET := bin/reaper_reapack.dylib
+SOTARGET := bin/reaper_reapack_@(OSXARCH).dylib
 TSTARGET := bin/test
 
 !build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>

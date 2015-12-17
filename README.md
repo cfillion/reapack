@@ -36,8 +36,8 @@ vendor
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Run `tup --quiet && x64/bin/test` from this directory
-4. Copy or link `x64/bin/reaper_reapack.dylib` to REAPER's extension directory
-  (replace x64 with x86 for 32-bit)
+4. Copy or link `x64/bin/reaper_reapack_x64.dylib` to REAPER's extension
+  directory (replace x64 with x86 for 32-bit)
 
 ### Windows
 
@@ -66,5 +66,5 @@ vendor
   to `<reapack directory>\vendor` as `libcurl_x86`
 7. Run `tup --quiet && x64\bin\test` from this directory using
   "Developer Command Prompt for VS2013"
-8. Copy `x64\bin\reaper_reapack.dll` to your REAPER
+8. Copy `x64\bin\reaper_reapack_x64.dll` to your REAPER
   plugin folder (replace x64 with x86 for 32-bit)
