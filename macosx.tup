@@ -7,7 +7,7 @@ CXXFLAGS += -fdiagnostics-color -fstack-protector-strong
 CXXFLAGS += -pipe -fPIC -O2 -std=c++14
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
-CXXFLAGS += -arch @(ARCH)
+CXXFLAGS += -arch @(OSXARCH)
 
 WDLFLAGS := -std=c++98 -w
 

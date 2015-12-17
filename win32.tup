@@ -1,21 +1,27 @@
-CXX := cl
-LD := link
-RC := rc
+# wrapper.bat selects which compiler to execute depending on the architecture
+WRAP := cmd /C wrapper.bat @(WINARCH)
+
+CXX := $(WRAP) cl
 
 CXXFLAGS := /nologo /W3 /WX /wd4996 /O2 /EHsc /MT
 CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
-CXXFLAGS += /Ivendor/libcurl/include
+CXXFLAGS += /Ivendor/libcurl_@(WINARCH)/include
 CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
 CXXFLAGS += /DCURL_STATICLIB
 
-LDFLAGS := /nologo
-LDFLAGS += user32.lib vendor/libcurl/lib/libcurl_a.lib src/resource.res
+LD := $(WRAP) link
+LDFLAGS := /nologo user32.lib
+LDFLAGS += vendor/libcurl_@(WINARCH)/lib/libcurl_a.lib
+LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
 
-SOFLAGS := /DLL /OUT:bin/reaper_reapack.dll
-SOTARGET := bin/reaper_reapack.dll
-SOTARGET += bin/reaper_reapack.lib bin/reaper_reapack.exp
+RC := rc
+RCFLAGS += /nologo /fo $(TUP_VARIANTDIR)/src/resource.res
 
-TSFLAGS := /OUT:bin/test.exe
+SOFLAGS := /DLL /OUT:$(TUP_VARIANTDIR)/bin/reaper_reapack_@(WINARCH).dll
+SOTARGET := bin/reaper_reapack_@(WINARCH).dll
+SOTARGET += bin/reaper_reapack_@(WINARCH).lib bin/reaper_reapack_@(WINARCH).exp
+
+TSFLAGS := /OUT:$(TUP_VARIANTDIR)/bin/test.exe
 TSTARGET := bin/test.exe bin/test.lib bin/test.exp
 
 LINKDEPS := src/resource.res
@@ -23,4 +29,4 @@ LINKDEPS := src/resource.res
 !build = |> $(CXX) $(CXXFLAGS) /c %f /Fo%o |>
 !link = |> $(LD) $(LDFLAGS) %f |>
 
-: src/resource.rc |> $(RC) /nologo %f |> src/resource.res
+: src/resource.rc |> $(RC) $(RCFLAGS) %f |> src/resource.res
