@@ -6,6 +6,6 @@ using namespace std;
 
 ostream &operator<<(ostream &os, const Path &path)
 {
-  os << "\"" + path.join() + '"';
+  os << "\"" << path.join() << '"';
   return os;
 }

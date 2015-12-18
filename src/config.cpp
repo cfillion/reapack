@@ -20,6 +20,7 @@
 #include "path.hpp"
 
 #ifdef _WIN32
+#undef UNICODE
 #include <windows.h>
 #else
 #include <swell/swell.h>

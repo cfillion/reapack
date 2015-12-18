@@ -113,15 +113,7 @@ void ReaPack::importRemote()
   if(!GetUserFileNameForRead(path, title, "ReaPackRemote"))
     return;
 
-#ifdef _WIN32
-  // fixes unicode path like "C:\Users\Test\Downloads\Новая папка" on Windows
-  wchar_t wpath[PATH_SIZE];
-  MultiByteToWideChar(CP_UTF8, 0, path, sizeof(path), wpath, PATH_SIZE);
-
-  ifstream file(wpath);
-#else
-  ifstream file(path);
-#endif
+  ifstream file(make_autostring(path));
 
   if(!file) {
     ShowMessageBox(strerror(errno), title, 0);

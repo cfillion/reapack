@@ -17,6 +17,7 @@
 
 #include "pkgtransaction.hpp"
 
+#include "encoding.hpp"
 #include "path.hpp"
 #include "transaction.hpp"
 
@@ -97,9 +98,9 @@ void PackageTransaction::commit()
     const string tempPath = m_transaction->prefixPath(paths.first).join();
     const string targetPath = m_transaction->prefixPath(paths.second).join();
 
-    remove(targetPath.c_str());
+    RemoveFile(targetPath);
 
-    if(rename(tempPath.c_str(), targetPath.c_str())) {
+    if(RenameFile(tempPath, targetPath)) {
       m_transaction->addError(strerror(errno), targetPath);
       rollback();
       return;
@@ -115,9 +116,27 @@ void PackageTransaction::rollback()
   for(const PathPair &paths : m_files) {
     const string tempPath = m_transaction->prefixPath(paths.first).join();
 
-    if(remove(tempPath.c_str()))
+    if(RemoveFile(tempPath))
       m_transaction->addError(strerror(errno), tempPath);
   }
 
   m_files.clear();
+}
+
+int PackageTransaction::RemoveFile(const std::string &path)
+{
+#ifdef _WIN32
+  return _wremove(make_autostring(path).c_str());
+#else
+  return remove(path.c_str());
+#endif
+}
+
+int PackageTransaction::RenameFile(const std::string &from, const std::string &to)
+{
+#ifdef _WIN32
+  return _wrename(make_autostring(from).c_str(), make_autostring(to).c_str());
+#else
+  return rename(from.c_str(), to.c_str());
+#endif
 }

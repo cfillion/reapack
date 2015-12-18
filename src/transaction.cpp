@@ -17,6 +17,7 @@
 
 #include "transaction.hpp"
 
+#include "encoding.hpp"
 #include "errors.hpp"
 #include "pkgtransaction.hpp"
 
@@ -153,7 +154,7 @@ bool Transaction::saveFile(Download *dl, const Path &path)
   RecursiveCreateDirectory(path.dirname().c_str(), 0);
 
   const string strPath = path.join();
-  ofstream file(strPath, ios_base::binary);
+  ofstream file(make_autostring(strPath), ios_base::binary);
 
   if(!file) {
     addError(strerror(errno), strPath);
@@ -212,7 +213,7 @@ void Transaction::registerFiles(const vector<Path> &list)
   auto it = dupBegin;
 
   do {
-    addError("Conflict: This file is part of more than one package",
+    addError("Conflict: This file is owned by more than one package",
       it->join());
 
     it++;

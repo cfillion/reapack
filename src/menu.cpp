@@ -17,6 +17,12 @@
 
 #include "menu.hpp"
 
+#ifdef _WIN32
+#define MENUITEMINFO MENUITEMINFOA
+#undef InsertMenuItem
+#define InsertMenuItem InsertMenuItemA
+#endif
+
 Menu::Menu(HMENU handle)
   : m_handle(handle)
 {

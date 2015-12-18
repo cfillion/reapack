@@ -15,35 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_MENU_HPP
-#define REAPACK_MENU_HPP
+#ifndef REAPACK_ENCODING_HPP
+#define REAPACK_ENCODING_HPP
+
+// This whole file is a huge hack to support unicode on Windows
+// MultiByteToWideChar is required to make file path like
+// "C:\Users\Test\Downloads\Новая папка" work on Windows...
+
+#include <string>
 
 #ifdef _WIN32
-#include <windows.h>
+
+typedef wchar_t auto_char;
+typedef std::wstring auto_string;
+
+#define AUTO_STR(text) L##text
+#define to_autostring std::to_wstring
+auto_string make_autostring(const std::string &);
+
 #else
-#include <swell/swell.h>
+
+typedef char auto_char;
+typedef std::string auto_string;
+
+#define AUTO_STR(text) text
+#define to_autostring std::to_string
+#define make_autostring(string) string
+
 #endif
-
-class Menu {
-public:
-  Menu(HMENU handle);
-
-  unsigned int size() { return m_size; }
-  bool empty() const { return m_size == 0; }
-
-  void addAction(const char *label, const int commandId);
-  void addSeparator();
-  Menu addMenu(const char *label);
-
-private:
-#ifdef _WIN32
-  void append(MENUITEMINFOA &);
-#else
-  void append(MENUITEMINFO &);
-#endif
-
-  HMENU m_handle;
-  unsigned int m_size;
-};
 
 #endif

@@ -20,7 +20,7 @@
 
 #include "dialog.hpp"
 
-#include <string>
+#include "encoding.hpp"
 
 class Download;
 class Transaction;
@@ -40,7 +40,7 @@ private:
   void updateProgress();
 
   Transaction *m_transaction;
-  std::string m_currentName;
+  auto_string m_currentName;
 
   HWND m_label;
   HWND m_progress;

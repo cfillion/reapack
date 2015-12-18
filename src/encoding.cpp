@@ -15,35 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_MENU_HPP
-#define REAPACK_MENU_HPP
+#include "encoding.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
-#else
-#include <swell/swell.h>
-#endif
 
-class Menu {
-public:
-  Menu(HMENU handle);
+auto_string make_autostring(const std::string &input)
+{
+  const char *cstr = input.c_str();
+  const int size = MultiByteToWideChar(CP_UTF8, 0, cstr, -1, nullptr, 0);
 
-  unsigned int size() { return m_size; }
-  bool empty() const { return m_size == 0; }
+  wchar_t *output = new wchar_t[size];
+  MultiByteToWideChar(CP_UTF8, 0, cstr, -1, output, size);
 
-  void addAction(const char *label, const int commandId);
-  void addSeparator();
-  Menu addMenu(const char *label);
+  auto_string string(output);
+  delete[] output;
 
-private:
-#ifdef _WIN32
-  void append(MENUITEMINFOA &);
-#else
-  void append(MENUITEMINFO &);
-#endif
-
-  HMENU m_handle;
-  unsigned int m_size;
-};
-
+  return string;
+}
 #endif

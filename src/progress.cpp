@@ -21,7 +21,7 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
-static const char *TITLE = "ReaPack: Download in progress";
+static const auto_char *TITLE = AUTO_STR("ReaPack: Download in progress");
 
 using namespace std;
 
@@ -43,7 +43,7 @@ void Progress::setTransaction(Transaction *t)
   if(!m_transaction)
     return;
 
-  SetWindowText(m_label, "Initializing...");
+  SetWindowText(m_label, AUTO_STR("Initializing..."));
 
   m_transaction->downloadQueue()->onPush(
     bind(&Progress::addDownload, this, placeholders::_1));
@@ -77,7 +77,7 @@ void Progress::addDownload(Download *dl)
   updateProgress();
 
   dl->onStart([=] {
-    m_currentName = dl->name();
+    m_currentName = make_autostring(dl->name());
     updateProgress();
   });
 
@@ -89,15 +89,17 @@ void Progress::addDownload(Download *dl)
 
 void Progress::updateProgress()
 {
-  const string text = "Downloading " +
-    to_string(min(m_done + 1, m_total)) + " of " +
-    to_string(m_total) + ": " + m_currentName;
+  const auto_string text = AUTO_STR("Downloading ") +
+    to_autostring(min(m_done + 1, m_total)) + AUTO_STR(" of ") +
+    to_autostring(m_total) + AUTO_STR(": ") + m_currentName;
 
   SetWindowText(m_label, text.c_str());
 
   const double pos = (double)m_done / m_total;
   const int percent = (int)(pos * 100);
-  const string title = string(TITLE) + " (" + to_string(percent) + "%)";
+
+  const auto_string title = auto_string(TITLE) +
+    AUTO_STR(" (") + to_autostring(percent) + AUTO_STR("%)");
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
   SetWindowText(handle(), title.c_str());

@@ -17,6 +17,7 @@
 
 #include "report.hpp"
 
+#include "encoding.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
 
@@ -56,7 +57,8 @@ void Report::onInit()
   if(updates)
     formatUpdates(text);
 
-  SetDlgItemText(handle(), IDC_REPORT, text.str().c_str());
+  auto_string str = make_autostring(text.str());
+  SetDlgItemText(handle(), IDC_REPORT, str.c_str());
 }
 
 void Report::onCommand(WPARAM wParam, LPARAM)

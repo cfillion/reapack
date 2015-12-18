@@ -45,7 +45,7 @@ void Path::clear()
 string Path::basename() const
 {
   if(m_parts.empty())
-    return string();
+    return {};
 
   return m_parts.back();
 }

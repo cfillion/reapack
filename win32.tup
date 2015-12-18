@@ -7,7 +7,7 @@ CXXFLAGS := /nologo /W3 /WX /wd4996 /O2 /EHsc /MT
 CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
 CXXFLAGS += /Ivendor/libcurl_@(WINARCH)/include
 CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
-CXXFLAGS += /DCURL_STATICLIB
+CXXFLAGS += /DCURL_STATICLIB /DUNICODE
 
 LD := $(WRAP) link
 LDFLAGS := /nologo user32.lib

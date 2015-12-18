@@ -42,6 +42,9 @@ public:
   void cancel();
 
 private:
+  static int RemoveFile(const std::string &);
+  static int RenameFile(const std::string &, const std::string &);
+
   typedef std::pair<Path, Path> PathPair;
 
   void finish();
