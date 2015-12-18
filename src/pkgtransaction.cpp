@@ -101,7 +101,10 @@ void PackageTransaction::commit()
     RemoveFile(targetPath);
 
     if(RenameFile(tempPath, targetPath)) {
-      m_transaction->addError(strerror(errno), targetPath);
+      m_transaction->addError(strerror(errno), tempPath);
+
+      // it's a bit late to rollback here as some files might already have been
+      // overwritten. at least we can delete the temporary files
       rollback();
       return;
     }
@@ -116,8 +119,7 @@ void PackageTransaction::rollback()
   for(const PathPair &paths : m_files) {
     const string tempPath = m_transaction->prefixPath(paths.first).join();
 
-    if(RemoveFile(tempPath))
-      m_transaction->addError(strerror(errno), tempPath);
+    RemoveFile(tempPath);
   }
 
   m_files.clear();
