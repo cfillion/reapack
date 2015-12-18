@@ -19,6 +19,7 @@
 #define REAPACK_VERSION_HPP
 
 #include <cstdint>
+#include <map>
 #include <set>
 #include <string>
 
@@ -28,7 +29,7 @@ class Package;
 
 class Version {
 public:
-  Version(const std::string &);
+  Version(const std::string &, Package * = nullptr);
   ~Version();
 
   const std::string &name() const { return m_name; }
@@ -42,10 +43,10 @@ public:
   const std::string &changelog() const { return m_changelog; }
 
   void addSource(Source *source);
-  const SourceList &sources() const { return m_sources; }
-  Source *source(const size_t i) const { return m_sources[i]; }
+  const std::multimap<Path, Source *> &sources() const { return m_sources; }
+  Source *source(const size_t) const;
 
-  std::vector<Path> files() const;
+  const std::set<Path> &files() const { return m_files; }
 
   bool operator<(const Version &) const;
 
@@ -56,7 +57,8 @@ private:
   Package *m_package;
 
   std::string m_changelog;
-  SourceList m_sources;
+  std::multimap<Path, Source *> m_sources;
+  std::set<Path> m_files;
 };
 
 class VersionCompare {

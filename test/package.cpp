@@ -33,16 +33,19 @@ TEST_CASE("empty package name", M) {
 }
 
 TEST_CASE("package versions are sorted", M) {
-  Package pack(Package::ScriptType, "a");
+  Database db("Database Name");
+  Category cat("Category Name", &db);
+
+  Package pack(Package::ScriptType, "a", &cat);
   CHECK(pack.versions().size() == 0);
 
   Source *sourceA = new Source(Source::GenericPlatform, string(), "google.com");
   Source *sourceB = new Source(Source::GenericPlatform, string(), "google.com");
 
-  Version *final = new Version("1");
+  Version *final = new Version("1", &pack);
   final->addSource(sourceA);
 
-  Version *alpha = new Version("0.1");
+  Version *alpha = new Version("0.1", &pack);
   alpha->addSource(sourceB);
 
   pack.addVersion(final);
@@ -66,7 +69,7 @@ TEST_CASE("drop empty version", M) {
 }
 
 TEST_CASE("unknown target path", M) {
-  Database db;
+  Database db("name");
   Category cat("name");
   cat.setDatabase(&db);
 
@@ -83,8 +86,7 @@ TEST_CASE("unknown target path", M) {
 }
 
 TEST_CASE("script target path", M) {
-  Database db;
-  db.setName("Database Name");
+  Database db("Database Name");
 
   Category cat("Category Name");
   cat.setDatabase(&db);
@@ -113,8 +115,7 @@ TEST_CASE("script target path without category", M) {
 }
 
 TEST_CASE("full name", M) {
-  Database db;
-  db.setName("Database Name");
+  Database db("Database Name");
 
   Category cat("Category Name");
 

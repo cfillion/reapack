@@ -81,6 +81,11 @@ bool Path::operator!=(const Path &o) const
   return !(*this == o);
 }
 
+bool Path::operator<(const Path &o) const
+{
+  return m_parts < o.m_parts;
+}
+
 Path Path::operator+(const string &part) const
 {
   Path path(*this);

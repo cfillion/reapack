@@ -70,8 +70,7 @@ void Transaction::saveDatabase(Download *dl)
     return;
 
   try {
-    Database *db = Database::load(path.join().c_str());
-    db->setName(dl->name());
+    Database *db = Database::load(dl->name(), path.join().c_str());
 
     m_databases.push_back(db);
   }
@@ -89,7 +88,7 @@ void Transaction::prepare()
     for(Package *pkg : db->packages()) {
       Registry::QueryResult entry = m_registry->query(pkg);
 
-      vector<Path> files = pkg->lastVersion()->files();
+      set<Path> files = pkg->lastVersion()->files();
       registerFiles(files);
 
       if(entry.status == Registry::UpToDate && allFilesExists(files))
@@ -191,7 +190,7 @@ Path Transaction::prefixPath(const Path &input) const
   return m_root + input;
 }
 
-bool Transaction::allFilesExists(const vector<Path> &list) const
+bool Transaction::allFilesExists(const set<Path> &list) const
 {
   for(const Path &path : list) {
     if(!file_exists(prefixPath(path).join().c_str()))
@@ -201,24 +200,17 @@ bool Transaction::allFilesExists(const vector<Path> &list) const
   return true;
 }
 
-void Transaction::registerFiles(const vector<Path> &list)
+void Transaction::registerFiles(const set<Path> &list)
 {
-  m_files.insert(m_files.end(), list.begin(), list.end());
+  for(const Path &path : list) {
+    if(!m_files.count(path))
+      continue;
 
-  const auto dupBegin = unique(m_files.begin(), m_files.end());
-
-  if(dupBegin == m_files.end())
-    return;
-
-  auto it = dupBegin;
-
-  do {
     addError("Conflict: This file is owned by more than one package",
-      it->join());
+      path.join());
 
-    it++;
-  } while(it != m_files.end());
+    m_hasConflicts = true;
+  }
 
-  m_files.erase(dupBegin, m_files.end());
-  m_hasConflicts = true;
+  m_files.insert(list.begin(), list.end());
 }

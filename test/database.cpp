@@ -14,7 +14,7 @@ static const char *M = "[database]";
 
 TEST_CASE("file not found", M) {
   try {
-    Database *db = Database::load(DBPATH "404.xml");
+    Database *db = Database::load("a", DBPATH "404.xml");
     DBPTR(db);
     FAIL();
   }
@@ -25,7 +25,7 @@ TEST_CASE("file not found", M) {
 
 TEST_CASE("broken xml", M) {
   try {
-    Database *db = Database::load(DBPATH "broken.xml");
+    Database *db = Database::load("a", DBPATH "broken.xml");
     DBPTR(db);
     FAIL();
   }
@@ -36,7 +36,7 @@ TEST_CASE("broken xml", M) {
 
 TEST_CASE("wrong root tag name", M) {
   try {
-    Database *db = Database::load(DBPATH "wrong_root.xml");
+    Database *db = Database::load("a", DBPATH "wrong_root.xml");
     DBPTR(db);
     FAIL();
   }
@@ -47,7 +47,7 @@ TEST_CASE("wrong root tag name", M) {
 
 TEST_CASE("invalid version", M) {
   try {
-    Database *db = Database::load(DBPATH "invalid_version.xml");
+    Database *db = Database::load("a", DBPATH "invalid_version.xml");
     DBPTR(db);
     FAIL();
   }
@@ -58,7 +58,7 @@ TEST_CASE("invalid version", M) {
 
 TEST_CASE("future version", M) {
   try {
-    Database *db = Database::load(DBPATH "future_version.xml");
+    Database *db = Database::load("a", DBPATH "future_version.xml");
     DBPTR(db);
     FAIL();
   }
@@ -66,17 +66,28 @@ TEST_CASE("future version", M) {
     REQUIRE(string(e.what()) == "unsupported version");
   }
 }
+
+TEST_CASE("empty database name", M) {
+  try {
+    Database cat{string()};
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "empty database name");
+  }
+}
+
 TEST_CASE("add category", M) {
-  Version *ver = new Version("1");
-  ver->addSource(new Source(Source::GenericPlatform, string(), "google.com"));
+  Database db("a");
+  Category *cat = new Category("a", &db);
+  Package *pack = new Package(Package::ScriptType, "name", cat);
+  Source *source = new Source(Source::GenericPlatform, string(), "google.com");
+  Version *ver = new Version("1", pack);
 
-  Package *pack = new Package(Package::ScriptType, "name");
+  ver->addSource(source);
   pack->addVersion(ver);
-
-  Category *cat = new Category("a");
   cat->addPackage(pack);
 
-  Database db;
   CHECK(db.categories().size() == 0);
 
   db.addCategory(cat);
@@ -86,27 +97,29 @@ TEST_CASE("add category", M) {
 }
 
 TEST_CASE("drop empty category", M) {
-  Database db;
+  Database db("a");
   db.addCategory(new Category("a"));
 
   REQUIRE(db.categories().empty());
 }
 
 TEST_CASE("add a package", M) {
-  Version *ver = new Version("1");
+  Database db("a");
+  Category cat1("a", &db);
+  Package *pack = new Package(Package::ScriptType, "name", &cat1);
+  Version *ver = new Version("1", pack);
   ver->addSource(new Source(Source::GenericPlatform, string(), "google.com"));
-
-  Package *pack = new Package(Package::ScriptType, "name");
   pack->addVersion(ver);
 
-  Category cat("a");
-  CHECK(cat.packages().size() == 0);
-  CHECK_FALSE(pack->category());
+  CHECK(pack->category() == &cat1);
 
-  cat.addPackage(pack);
+  Category cat2("b");
+  CHECK(cat2.packages().size() == 0);
 
-  REQUIRE(cat.packages().size() == 1);
-  REQUIRE(pack->category() == &cat);
+  cat2.addPackage(pack);
+
+  REQUIRE(cat2.packages().size() == 1);
+  REQUIRE(pack->category() == &cat2);
 }
 
 TEST_CASE("drop empty package", M) {
@@ -137,8 +150,7 @@ TEST_CASE("category full name", M) {
   Category cat("Category Name");
   REQUIRE(cat.fullName() == "Category Name");
 
-  Database db;
-  db.setName("Database Name");
+  Database db("Database Name");
   cat.setDatabase(&db);
   REQUIRE(cat.fullName() == "Database Name/Category Name");
 }

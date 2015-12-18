@@ -15,7 +15,7 @@ static const char *M = "[reapack_v1]";
 
 TEST_CASE("unnamed category", M) {
   try {
-    Database *db = Database::load(DBPATH "unnamed_category.xml");
+    Database *db = Database::load("a", DBPATH "unnamed_category.xml");
     DBPTR(db);
     FAIL();
   }
@@ -25,14 +25,14 @@ TEST_CASE("unnamed category", M) {
 }
 
 TEST_CASE("invalid category tag", M) {
-  Database *db = Database::load(DBPATH "wrong_category_tag.xml");
+  Database *db = Database::load("a", DBPATH "wrong_category_tag.xml");
   DBPTR(db);
 
   REQUIRE(db->categories().empty());
 }
 
 TEST_CASE("invalid package tag", M) {
-  Database *db = Database::load(DBPATH "wrong_package_tag.xml");
+  Database *db = Database::load("a", DBPATH "wrong_package_tag.xml");
   DBPTR(db);
   REQUIRE(db->categories().empty());
 
@@ -40,7 +40,7 @@ TEST_CASE("invalid package tag", M) {
 
 TEST_CASE("null package name", M) {
   try {
-    Database *db = Database::load(DBPATH "unnamed_package.xml");
+    Database *db = Database::load("a", DBPATH "unnamed_package.xml");
     DBPTR(db);
     FAIL();
   }
@@ -51,7 +51,7 @@ TEST_CASE("null package name", M) {
 
 TEST_CASE("null package type", M) {
   try {
-    Database *db = Database::load(DBPATH "missing_type.xml");
+    Database *db = Database::load("a", DBPATH "missing_type.xml");
     DBPTR(db);
   }
   catch(const reapack_error &) {
@@ -60,7 +60,7 @@ TEST_CASE("null package type", M) {
 }
 
 TEST_CASE("invalid version tag", M) {
-  Database *db = Database::load(DBPATH "wrong_version_tag.xml");
+  Database *db = Database::load("a", DBPATH "wrong_version_tag.xml");
   DBPTR(db);
 
   REQUIRE(db->categories().empty());
@@ -68,7 +68,7 @@ TEST_CASE("invalid version tag", M) {
 
 TEST_CASE("null package version", M) {
   try {
-    Database *db = Database::load(DBPATH "missing_version.xml");
+    Database *db = Database::load("a", DBPATH "missing_version.xml");
     DBPTR(db);
     FAIL();
   }
@@ -79,7 +79,7 @@ TEST_CASE("null package version", M) {
 
 TEST_CASE("null source url", M) {
   try {
-    Database *db = Database::load(DBPATH "missing_source_url.xml");
+    Database *db = Database::load("a", DBPATH "missing_source_url.xml");
     DBPTR(db);
     FAIL();
   }
@@ -89,7 +89,7 @@ TEST_CASE("null source url", M) {
 }
 
 TEST_CASE("null source file", M) {
-  Database *db = Database::load(DBPATH "missing_source_file.xml");
+  Database *db = Database::load("a", DBPATH "missing_source_file.xml");
   DBPTR(db);
 
   Package *pkg = db->category(0)->package(0);
@@ -97,7 +97,7 @@ TEST_CASE("null source file", M) {
 }
 
 TEST_CASE("default platform", M) {
-  Database *db = Database::load(DBPATH "missing_platform.xml");
+  Database *db = Database::load("a", DBPATH "missing_platform.xml");
   DBPTR(db);
 
   REQUIRE(db->category(0)->package(0)->version(0)->source(0)->platform()
@@ -105,7 +105,7 @@ TEST_CASE("default platform", M) {
 }
 
 TEST_CASE("version changelog", M) {
-  Database *db = Database::load(DBPATH "changelog.xml");
+  Database *db = Database::load("a", DBPATH "changelog.xml");
   DBPTR(db);
 
   CHECK_FALSE(db->categories().empty());
@@ -117,7 +117,7 @@ TEST_CASE("version changelog", M) {
 }
 
 TEST_CASE("full database", M) {
-  Database *db = Database::load(DBPATH "full_database.xml");
+  Database *db = Database::load("a", DBPATH "full_database.xml");
   DBPTR(db);
 
   REQUIRE(db->categories().size() == 1);

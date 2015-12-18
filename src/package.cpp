@@ -32,8 +32,8 @@ Package::Type Package::ConvertType(const char *type)
     return UnknownType;
 }
 
-Package::Package(const Type type, const string &name)
-  : m_category(nullptr), m_type(type), m_name(name)
+Package::Package(const Type type, const string &name, Category *cat)
+  : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");

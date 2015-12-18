@@ -72,8 +72,8 @@ private:
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
   Path prefixPath(const Path &) const;
-  bool allFilesExists(const std::vector<Path> &) const;
-  void registerFiles(const std::vector<Path> &);
+  bool allFilesExists(const std::set<Path> &) const;
+  void registerFiles(const std::set<Path> &);
 
   Registry *m_registry;
 
@@ -89,7 +89,7 @@ private:
   ErrorList m_errors;
 
   std::vector<PackageTransaction *> m_transactions;
-  std::vector<Path> m_files;
+  std::set<Path> m_files;
   bool m_hasConflicts;
 
   Signal m_onReady;

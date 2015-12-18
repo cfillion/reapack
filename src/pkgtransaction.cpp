@@ -33,10 +33,11 @@ PackageTransaction::PackageTransaction(Transaction *transaction)
 
 void PackageTransaction::install(Version *ver)
 {
-  const size_t sourcesSize = ver->sources().size();
+  const auto &sources = ver->sources();
 
-  for(size_t i = 0; i < sourcesSize; i++) {
-    Source *src = ver->source(i);
+  for(auto it = sources.begin(); it != sources.end();) {
+    const Path &path = it->first;
+    Source *src = it->second;
 
     Download *dl = new Download(src->fullName(), src->url());
     dl->onFinish(bind(&PackageTransaction::saveSource, this, dl, src));
@@ -47,6 +48,9 @@ void PackageTransaction::install(Version *ver)
     // executing finish after the download is deleted
     // prevents the download queue from being deleted before the download is
     dl->onFinish(bind(&PackageTransaction::finish, this));
+
+    // skip duplicate files
+    do { it++; } while(it != sources.end() && path == it->first);
   }
 }
 

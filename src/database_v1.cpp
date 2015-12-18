@@ -25,13 +25,13 @@
 
 using namespace std;
 
-static Category *LoadCategoryV1(TiXmlElement *);
-static Package *LoadPackageV1(TiXmlElement *);
-static Version *LoadVersionV1(TiXmlElement *);
+static void LoadCategoryV1(TiXmlElement *, Database *db);
+static void LoadPackageV1(TiXmlElement *, Category *cat);
+static void LoadVersionV1(TiXmlElement *, Package *pkg);
 
-Database *Database::loadV1(TiXmlElement *root)
+Database *Database::loadV1(TiXmlElement *root, const string &name)
 {
-  Database *db = new Database;
+  Database *db = new Database(name);
 
   // ensure the memory is released if an exception is
   // thrown during the loading process
@@ -40,7 +40,7 @@ Database *Database::loadV1(TiXmlElement *root)
   TiXmlElement *catNode = root->FirstChildElement("category");
 
   while(catNode) {
-    db->addCategory(LoadCategoryV1(catNode));
+    LoadCategoryV1(catNode, db);
 
     catNode = catNode->NextSiblingElement("category");
   }
@@ -49,27 +49,28 @@ Database *Database::loadV1(TiXmlElement *root)
   return db;
 }
 
-Category *LoadCategoryV1(TiXmlElement *catNode)
+void LoadCategoryV1(TiXmlElement *catNode, Database *db)
 {
   const char *name = catNode->Attribute("name");
   if(!name) name = "";
 
-  Category *cat = new Category(name);
+  Category *cat = new Category(name, db);
   unique_ptr<Category> ptr(cat);
 
   TiXmlElement *packNode = catNode->FirstChildElement("reapack");
 
   while(packNode) {
-    cat->addPackage(LoadPackageV1(packNode));
+    LoadPackageV1(packNode, cat);
 
     packNode = packNode->NextSiblingElement("reapack");
   }
 
+  db->addCategory(cat);
+
   ptr.release();
-  return cat;
 }
 
-Package *LoadPackageV1(TiXmlElement *packNode)
+void LoadPackageV1(TiXmlElement *packNode, Category *cat)
 {
   const char *type = packNode->Attribute("type");
   if(!type) type = "";
@@ -77,27 +78,28 @@ Package *LoadPackageV1(TiXmlElement *packNode)
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
-  Package *pack = new Package(Package::ConvertType(type), name);
+  Package *pack = new Package(Package::ConvertType(type), name, cat);
   unique_ptr<Package> ptr(pack);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");
 
   while(verNode) {
-    pack->addVersion(LoadVersionV1(verNode));
+    LoadVersionV1(verNode, pack);
 
     verNode = verNode->NextSiblingElement("version");
   }
 
+  cat->addPackage(pack);
+
   ptr.release();
-  return pack;
 }
 
-Version *LoadVersionV1(TiXmlElement *verNode)
+void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
 {
   const char *name = verNode->Attribute("name");
   if(!name) name = "";
 
-  Version *ver = new Version(name);
+  Version *ver = new Version(name, pkg);
   unique_ptr<Version> ptr(ver);
 
   TiXmlElement *node = verNode->FirstChildElement("source");
@@ -126,6 +128,7 @@ Version *LoadVersionV1(TiXmlElement *verNode)
       ver->setChangelog(changelog);
   }
 
+  pkg->addVersion(ver);
+
   ptr.release();
-  return ver;
 }

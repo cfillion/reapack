@@ -35,7 +35,7 @@ public:
 
   static Type ConvertType(const char *);
 
-  Package(const Type, const std::string &name);
+  Package(const Type, const std::string &name, Category * = nullptr);
   ~Package();
 
   void setCategory(Category *cat) { m_category = cat; }

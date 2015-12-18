@@ -34,11 +34,11 @@ typedef std::vector<Category *> CategoryList;
 
 class Database {
 public:
-  static Database *load(const char *);
+  static Database *load(const std::string &name, const char *url);
 
+  Database(const std::string &name);
   ~Database();
 
-  void setName(const std::string &name) { m_name = name; }
   const std::string &name() const { return m_name; }
 
   void addCategory(Category *cat);
@@ -48,7 +48,7 @@ public:
   const PackageList &packages() const { return m_packages; }
 
 private:
-  static Database *loadV1(TiXmlElement *);
+  static Database *loadV1(TiXmlElement *, const std::string &);
 
   std::string m_name;
   CategoryList m_categories;
@@ -57,7 +57,7 @@ private:
 
 class Category {
 public:
-  Category(const std::string &name);
+  Category(const std::string &name, Database * = nullptr);
   ~Category();
 
   const std::string &name() const { return m_name; }

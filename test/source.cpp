@@ -103,8 +103,7 @@ TEST_CASE("full name with version", M) {
 }
 
 TEST_CASE("source target path", M) {
-  Database db;
-  db.setName("Database Name");
+  Database db("Database Name");
 
   Category cat("Category Name");
   cat.setDatabase(&db);

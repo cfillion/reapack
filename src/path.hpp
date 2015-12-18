@@ -36,6 +36,7 @@ public:
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;
+  bool operator<(const Path &) const;
   Path operator+(const std::string &) const;
   Path operator+(const Path &) const;
   std::string &operator[](const size_t index);

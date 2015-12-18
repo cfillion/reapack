@@ -26,8 +26,8 @@
 
 using namespace std;
 
-Version::Version(const std::string &str)
-  : m_name(str), m_code(0), m_package(nullptr)
+Version::Version(const std::string &str, Package *pkg)
+  : m_name(str), m_code(0), m_package(pkg)
 {
   static const regex pattern("(\\d+)");
 
@@ -54,8 +54,8 @@ Version::Version(const std::string &str)
 
 Version::~Version()
 {
-  for(Source *source : m_sources)
-    delete source;
+  for(auto pair : m_sources)
+    delete pair.second;
 }
 
 string Version::fullName() const
@@ -94,7 +94,10 @@ void Version::addSource(Source *source)
 #endif
 
   source->setVersion(this);
-  m_sources.push_back(source);
+
+  const Path path = source->targetPath();
+  m_files.insert(path);
+  m_sources.insert({path, source});
 }
 
 void Version::setChangelog(const std::string &changelog)
@@ -102,16 +105,14 @@ void Version::setChangelog(const std::string &changelog)
   m_changelog = changelog;
 }
 
-vector<Path> Version::files() const
+Source *Version::source(const size_t index) const
 {
-  const size_t size = m_sources.size();
+  auto it = m_sources.begin();
 
-  vector<Path> list(size);
+  for(size_t i = 0; i < index; i++)
+    it++;
 
-  for(size_t i = 0; i < size; i++)
-    list[i] = m_sources[i]->targetPath();
-
-  return list;
+  return it->second;
 }
 
 bool Version::operator<(const Version &o) const

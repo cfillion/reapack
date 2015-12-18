@@ -23,7 +23,7 @@
 
 using namespace std;
 
-Database *Database::load(const char *file)
+Database *Database::load(const string &name, const char *file)
 {
   TiXmlDocument doc(file);
 
@@ -44,10 +44,17 @@ Database *Database::load(const char *file)
 
   switch(version) {
   case 1:
-    return loadV1(root);
+    return loadV1(root, name);
   default:
     throw reapack_error("unsupported version");
   }
+}
+
+Database::Database(const string &name)
+  : m_name(name)
+{
+  if(m_name.empty())
+    throw reapack_error("empty database name");
 }
 
 Database::~Database()
@@ -68,8 +75,8 @@ void Database::addCategory(Category *cat)
     cat->packages().begin(), cat->packages().end());
 }
 
-Category::Category(const string &name)
-  : m_database(nullptr), m_name(name)
+Category::Category(const string &name, Database *db)
+  : m_database(db), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty category name");
