@@ -34,6 +34,7 @@ private:
   void formatNewPackages(std::ostringstream &);
   void formatUpdates(std::ostringstream &);
   void formatErrors(std::ostringstream &);
+  void formatChangelog(const std::string &, std::ostringstream &);
 
   Transaction *m_transaction;
 };

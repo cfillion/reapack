@@ -78,7 +78,7 @@ void Report::formatNewPackages(ostringstream &text)
   text << NL << SEP << " New packages: " << SEP << NL;
 
   for(const Transaction::PackageEntry &entry : m_transaction->newPackages())
-    text << NL << "- " << entry.first->lastVersion()->fullName() << NL;
+    text << NL << entry.first->lastVersion()->fullName() << NL;
 }
 
 void Report::formatUpdates(ostringstream &text)
@@ -96,12 +96,21 @@ void Report::formatUpdates(ostringstream &text)
       if(ver->code() <= regEntry.versionCode)
         break;
 
-      text << NL << "- " << ver->fullName() << NL;
+      text << NL << ver->fullName() << NL;
 
       if(!ver->changelog().empty())
-        text << ver->changelog() << NL;
+        formatChangelog(ver->changelog(), text);
     }
   }
+}
+
+void Report::formatChangelog(const string &changelog, ostringstream &output)
+{
+  istringstream input(changelog);
+  string line;
+
+  while(getline(input, line, '\n'))
+    output << "  " << line.substr(line.find_first_not_of('\x20')) << NL;
 }
 
 void Report::formatErrors(ostringstream &text)
