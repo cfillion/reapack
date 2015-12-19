@@ -48,13 +48,13 @@ public:
 
   static Platform ConvertPlatform(const char *);
 
-  Source(const Platform, const std::string &file, const std::string &url);
+  Source(const Platform, const std::string &file,
+    const std::string &url, Version * = nullptr);
 
   Platform platform() const { return m_platform; }
   const std::string &file() const;
   const std::string &url() const { return m_url; }
 
-  void setVersion(Version *ver) { m_version = ver; }
   Version *version() const { return m_version; }
   Package *package() const;
 

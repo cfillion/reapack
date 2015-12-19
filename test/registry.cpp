@@ -10,11 +10,10 @@ static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
   Database db("Hello"); \
-  Category cat("Hello"); \
-  cat.setDatabase(&db); \
+  Category cat("Hello", &db); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version *ver = new Version("1.0", &pkg); \
-  Source *src = new Source(Source::GenericPlatform, "file", "url"); \
+  Source *src = new Source(Source::GenericPlatform, "file", "url", ver); \
   ver->addSource(src); \
   pkg.addVersion(ver);
 
@@ -42,9 +41,8 @@ TEST_CASE("query up to date pacakge", M) {
 TEST_CASE("bump version", M) {
   MAKE_PACKAGE
 
-  Version *ver2 = new Version("2.0");
-  ver2->setPackage(&pkg);
-  ver2->addSource(new Source(Source::GenericPlatform, "file", "url"));
+  Version *ver2 = new Version("2.0", &pkg);
+  ver2->addSource(new Source(Source::GenericPlatform, "file", "url", ver2));
 
   Registry reg;
   reg.push(&pkg);

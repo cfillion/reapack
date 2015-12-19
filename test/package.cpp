@@ -39,14 +39,11 @@ TEST_CASE("package versions are sorted", M) {
   Package pack(Package::ScriptType, "a", &cat);
   CHECK(pack.versions().size() == 0);
 
-  Source *sourceA = new Source(Source::GenericPlatform, string(), "google.com");
-  Source *sourceB = new Source(Source::GenericPlatform, string(), "google.com");
-
   Version *final = new Version("1", &pack);
-  final->addSource(sourceA);
+  final->addSource(new Source(Source::GenericPlatform, {}, "google.com", final));
 
   Version *alpha = new Version("0.1", &pack);
-  alpha->addSource(sourceB);
+  alpha->addSource(new Source(Source::GenericPlatform, {}, "google.com", alpha));
 
   pack.addVersion(final);
   REQUIRE(final->package() == &pack);
@@ -62,19 +59,33 @@ TEST_CASE("package versions are sorted", M) {
 
 TEST_CASE("drop empty version", M) {
   Package pack(Package::ScriptType, "a");
-  pack.addVersion(new Version("1"));
+  pack.addVersion(new Version("1", &pack));
 
   REQUIRE(pack.versions().empty());
   REQUIRE(pack.lastVersion() == nullptr);
 }
 
+TEST_CASE("add owned version", M) {
+  Package pack1(Package::ScriptType, "a");
+  Package pack2(Package::ScriptType, "a");
+
+  Version *ver = new Version("1", &pack1);
+
+  try {
+    pack2.addVersion(ver);
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    delete ver;
+    REQUIRE(string(e.what()) == "version belongs to another package");
+  }
+}
+
 TEST_CASE("unknown target path", M) {
   Database db("name");
-  Category cat("name");
-  cat.setDatabase(&db);
+  Category cat("name", &db);
 
-  Package pack(Package::UnknownType, "a");
-  pack.setCategory(&cat);
+  Package pack(Package::UnknownType, "a", &cat);
 
   try {
     pack.targetPath();
@@ -87,12 +98,9 @@ TEST_CASE("unknown target path", M) {
 
 TEST_CASE("script target path", M) {
   Database db("Database Name");
+  Category cat("Category Name", &db);
 
-  Category cat("Category Name");
-  cat.setDatabase(&db);
-
-  Package pack(Package::ScriptType, "file.name");
-  pack.setCategory(&cat);
+  Package pack(Package::ScriptType, "file.name", &cat);
 
   Path expected;
   expected.append("Scripts");
@@ -115,16 +123,22 @@ TEST_CASE("script target path without category", M) {
 }
 
 TEST_CASE("full name", M) {
-  Database db("Database Name");
+  SECTION("no category") {
+    Package pack(Package::ScriptType, "file.name");
+    REQUIRE(pack.fullName() == "file.name");
+  }
 
-  Category cat("Category Name");
+  SECTION("with category") {
+    Category cat("Category Name");
+    Package pack(Package::ScriptType, "file.name", &cat);
+    REQUIRE(pack.fullName() == "Category Name/file.name");
+  }
 
-  Package pack(Package::ScriptType, "file.name");
-  REQUIRE(pack.fullName() == "file.name");
+  SECTION("with database") {
+    Database db("Database Name");
+    Category cat("Category Name", &db);
+    Package pack(Package::ScriptType, "file.name", &cat);
 
-  pack.setCategory(&cat);
-  REQUIRE(pack.fullName() == "Category Name/file.name");
-
-  cat.setDatabase(&db);
-  REQUIRE(pack.fullName() == "Database Name/Category Name/file.name");
+    REQUIRE(pack.fullName() == "Database Name/Category Name/file.name");
+  }
 }

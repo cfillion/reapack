@@ -87,16 +87,14 @@ TEST_CASE("full name without version", M) {
 TEST_CASE("full name with version", M) {
   SECTION("with source name") {
     Version ver("1.0");
-    Source source(Source::UnknownPlatform, "a", "b");
-    source.setVersion(&ver);
+    Source source(Source::UnknownPlatform, "a", "b", &ver);
 
     REQUIRE(source.fullName() == "v1.0 (a)");
   }
 
   SECTION("with source name") {
     Version ver("1.0");
-    Source source(Source::UnknownPlatform, string(), "b");
-    source.setVersion(&ver);
+    Source source(Source::UnknownPlatform, string(), "b", &ver);
 
     REQUIRE(source.fullName() == ver.fullName());
   }
@@ -104,18 +102,11 @@ TEST_CASE("full name with version", M) {
 
 TEST_CASE("source target path", M) {
   Database db("Database Name");
+  Category cat("Category Name", &db);
+  Package pack(Package::ScriptType, "package name", &cat);
+  Version ver("1.0", &pack);
 
-  Category cat("Category Name");
-  cat.setDatabase(&db);
-
-  Package pack(Package::ScriptType, "package name");
-  pack.setCategory(&cat);
-
-  Version ver("1.0");
-  ver.setPackage(&pack);
-
-  Source source(Source::GenericPlatform, "file.name", "https://google.com");
-  source.setVersion(&ver);
+  Source source(Source::GenericPlatform, "file.name", "url", &ver);
 
   Path expected;
   expected.append("Scripts");

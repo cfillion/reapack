@@ -43,8 +43,9 @@ Source::Platform Source::ConvertPlatform(const char *platform)
     return UnknownPlatform;
 }
 
-Source::Source(const Platform platform, const string &file, const string &url)
-  : m_platform(platform), m_file(file), m_url(url), m_version(nullptr)
+Source::Source(const Platform platform, const string &file,
+    const string &url, Version *ver)
+  : m_platform(platform), m_file(file), m_url(url), m_version(ver)
 {
   if(m_url.empty())
     throw reapack_error("empty source url");

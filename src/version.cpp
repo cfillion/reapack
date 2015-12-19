@@ -93,7 +93,8 @@ void Version::addSource(Source *source)
 #endif
 #endif
 
-  source->setVersion(this);
+  if(source->version() != this)
+    throw reapack_error("source belongs to another version");
 
   const Path path = source->targetPath();
   m_files.insert(path);

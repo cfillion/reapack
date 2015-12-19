@@ -36,9 +36,7 @@ public:
   std::string fullName() const;
   uint64_t code() const { return m_code; }
 
-  void setPackage(Package *pkg) { m_package = pkg; }
   Package *package() const { return m_package; }
-
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
 

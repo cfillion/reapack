@@ -52,10 +52,12 @@ Package::~Package()
 
 void Package::addVersion(Version *ver)
 {
+  if(ver->package() != this)
+    throw reapack_error("version belongs to another package");
+
   if(ver->sources().empty())
     return;
 
-  ver->setPackage(this);
   m_versions.insert(ver);
 }
 

@@ -65,10 +65,12 @@ Database::~Database()
 
 void Database::addCategory(Category *cat)
 {
+  if(cat->database() != this)
+    throw reapack_error("category belongs to another database");
+
   if(cat->packages().empty())
     return;
 
-  cat->setDatabase(this);
   m_categories.push_back(cat);
 
   m_packages.insert(m_packages.end(),
@@ -93,13 +95,15 @@ string Category::fullName() const
   return m_database ? m_database->name() + "/" + m_name : m_name;
 }
 
-void Category::addPackage(Package *pack)
+void Category::addPackage(Package *pkg)
 {
-  if(pack->type() == Package::UnknownType)
+  if(pkg->category() != this)
+    throw reapack_error("package belongs to another category");
+
+  if(pkg->type() == Package::UnknownType)
     return; // silently discard unknown package types
-  else if(pack->versions().empty())
+  else if(pkg->versions().empty())
     return;
 
-  pack->setCategory(this);
-  m_packages.push_back(pack);
+  m_packages.push_back(pkg);
 }

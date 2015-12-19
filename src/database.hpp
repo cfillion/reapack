@@ -60,11 +60,9 @@ public:
   Category(const std::string &name, Database * = nullptr);
   ~Category();
 
+  Database *database() const { return m_database; }
   const std::string &name() const { return m_name; }
   std::string fullName() const;
-
-  void setDatabase(Database *db) { m_database = db; }
-  Database *database() const { return m_database; }
 
   void addPackage(Package *pack);
   const PackageList &packages() const { return m_packages; }

@@ -38,9 +38,7 @@ public:
   Package(const Type, const std::string &name, Category * = nullptr);
   ~Package();
 
-  void setCategory(Category *cat) { m_category = cat; }
   Category *category() const { return m_category; }
-
   Type type() const { return m_type; }
   const std::string &name() const { return m_name; }
   std::string fullName() const;
