@@ -91,8 +91,12 @@ void Transaction::prepare()
       set<Path> files = pkg->lastVersion()->files();
       registerFiles(files);
 
-      if(entry.status == Registry::UpToDate && allFilesExists(files))
-        continue;
+      if(entry.status == Registry::UpToDate) {
+        if(allFilesExists(files))
+          continue;
+        else
+          entry.status = Registry::Uninstalled;
+      }
 
       m_packages.push_back({pkg, entry});
     }
