@@ -1,13 +1,15 @@
-SOURCES = FileList['src/*.{h,c}pp']
-
 task :default => [:prepare, :build]
 
 task :prepare do
-  ruby 'prepare.rb', *SOURCES, :verbose => false
+  sources = FileList['src/*.{h,c}pp']
+  ruby 'prepare.rb', *sources, :verbose => false
 end
 
-task :build do
-  sh 'tup', :verbose => false
+task :build, [:variants] do |_, args|
+  vars = Array(args[:variants]) + args.extras
+  vars.reject &:empty?
+
+  sh 'tup', *vars, :verbose => false
 end
 
 task :test do
