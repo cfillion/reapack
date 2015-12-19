@@ -68,7 +68,7 @@ void Report::onCommand(WPARAM wParam, LPARAM)
   switch(commandId) {
   case IDOK:
   case IDCANCEL:
-    EndDialog(handle(), true);
+    close();
     break;
   }
 }

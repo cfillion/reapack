@@ -73,6 +73,12 @@ Dialog::Dialog(const int templateId)
   // can't call reimplemented virtual methods here during object construction
 }
 
+Dialog::~Dialog()
+{
+  DestroyWindow(m_handle);
+  s_instances.erase(m_handle);
+}
+
 INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 {
   m_parent = parent;
@@ -98,12 +104,6 @@ void Dialog::Destroy(Dialog *dlg)
   delete dlg;
 }
 
-Dialog::~Dialog()
-{
-  DestroyWindow(m_handle);
-  s_instances.erase(m_handle);
-}
-
 void Dialog::show()
 {
   center();
@@ -114,6 +114,11 @@ void Dialog::show()
 void Dialog::hide()
 {
   ShowWindow(m_handle, SW_HIDE);
+}
+
+void Dialog::close(const INT_PTR result)
+{
+  EndDialog(m_handle, result);
 }
 
 void Dialog::center()

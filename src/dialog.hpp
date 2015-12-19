@@ -63,6 +63,7 @@ public:
 
   void show();
   void hide();
+  void close(const INT_PTR = 0);
   void center();
 
 protected:
