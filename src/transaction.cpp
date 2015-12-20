@@ -19,7 +19,7 @@
 
 #include "encoding.hpp"
 #include "errors.hpp"
-#include "pkgtransaction.hpp"
+#include "task.hpp"
 
 #include <fstream>
 
@@ -37,8 +37,8 @@ Transaction::Transaction(Registry *reg, const Path &root)
 
 Transaction::~Transaction()
 {
-  for(PackageTransaction *tr : m_transactions)
-    delete tr;
+  for(Task *task : m_tasks)
+    delete task;
 
   for(Database *db : m_databases)
     delete db;
@@ -114,11 +114,11 @@ void Transaction::run()
     Package *pkg = entry.first;
     const Registry::QueryResult regEntry = entry.second;
 
-    PackageTransaction *tr = new PackageTransaction(this);
+    Task *task = new Task(this);
 
     try {
-      tr->install(entry.first->lastVersion());
-      tr->onCommit([=] {
+      task->install(entry.first->lastVersion());
+      task->onCommit([=] {
         if(regEntry.status == Registry::UpdateAvailable)
           m_updates.push_back(entry);
         else
@@ -126,13 +126,13 @@ void Transaction::run()
 
         m_registry->push(pkg);
       });
-      tr->onFinish(bind(&Transaction::finish, this));
+      task->onFinish(bind(&Transaction::finish, this));
 
-      m_transactions.push_back(tr);
+      m_tasks.push_back(task);
     }
     catch(const reapack_error &e) {
       addError(e.what(), pkg->fullName());
-      delete tr;
+      delete task;
     }
   }
 }
@@ -141,8 +141,8 @@ void Transaction::cancel()
 {
   m_isCancelled = true;
 
-  for(PackageTransaction *tr : m_transactions)
-    tr->cancel();
+  for(Task *task : m_tasks)
+    task->cancel();
 
   m_queue.abort();
 }
@@ -176,8 +176,8 @@ void Transaction::finish()
     return;
 
   if(!m_isCancelled) {
-    for(PackageTransaction *tr : m_transactions)
-      tr->commit();
+    for(Task *task : m_tasks)
+      task->commit();
   }
 
   m_onFinish();

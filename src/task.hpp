@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_PKG_TRANSACTION_HPP
-#define REAPACK_PKG_TRANSACTION_HPP
+#ifndef REAPACK_TASK_HPP
+#define REAPACK_TASK_HPP
 
 #include <boost/signals2.hpp>
 #include <vector>
@@ -27,12 +27,12 @@ class Transaction;
 class Path;
 class Version;
 
-class PackageTransaction {
+class Task {
 public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
-  PackageTransaction(Transaction *parent);
+  Task(Transaction *parent);
 
   void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }

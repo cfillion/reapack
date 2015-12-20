@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pkgtransaction.hpp"
+#include "task.hpp"
 
 #include "encoding.hpp"
 #include "path.hpp"
@@ -26,12 +26,12 @@
 
 using namespace std;
 
-PackageTransaction::PackageTransaction(Transaction *transaction)
+Task::Task(Transaction *transaction)
   : m_transaction(transaction), m_isCancelled(false)
 {
 }
 
-void PackageTransaction::install(Version *ver)
+void Task::install(Version *ver)
 {
   const auto &sources = ver->sources();
 
@@ -40,21 +40,21 @@ void PackageTransaction::install(Version *ver)
     Source *src = it->second;
 
     Download *dl = new Download(src->fullName(), src->url());
-    dl->onFinish(bind(&PackageTransaction::saveSource, this, dl, src));
+    dl->onFinish(bind(&Task::saveSource, this, dl, src));
 
     m_remaining.push_back(dl);
     m_transaction->downloadQueue()->push(dl);
 
     // executing finish after the download is deleted
     // prevents the download queue from being deleted before the download is
-    dl->onFinish(bind(&PackageTransaction::finish, this));
+    dl->onFinish(bind(&Task::finish, this));
 
     // skip duplicate files
     do { it++; } while(it != sources.end() && path == it->first);
   }
 }
 
-void PackageTransaction::saveSource(Download *dl, Source *src)
+void Task::saveSource(Download *dl, Source *src)
 {
   m_remaining.erase(remove(m_remaining.begin(), m_remaining.end(), dl));
 
@@ -75,7 +75,7 @@ void PackageTransaction::saveSource(Download *dl, Source *src)
   }
 }
 
-void PackageTransaction::finish()
+void Task::finish()
 {
   if(!m_remaining.empty())
     return;
@@ -83,7 +83,7 @@ void PackageTransaction::finish()
   m_onFinish();
 }
 
-void PackageTransaction::cancel()
+void Task::cancel()
 {
   m_isCancelled = true;
 
@@ -93,7 +93,7 @@ void PackageTransaction::cancel()
   rollback();
 }
 
-void PackageTransaction::commit()
+void Task::commit()
 {
   if(m_isCancelled)
     return;
@@ -118,7 +118,7 @@ void PackageTransaction::commit()
   m_onCommit();
 }
 
-void PackageTransaction::rollback()
+void Task::rollback()
 {
   for(const PathPair &paths : m_files) {
     const string tempPath = m_transaction->prefixPath(paths.first).join();
@@ -129,7 +129,7 @@ void PackageTransaction::rollback()
   m_files.clear();
 }
 
-int PackageTransaction::RemoveFile(const std::string &path)
+int Task::RemoveFile(const std::string &path)
 {
 #ifdef _WIN32
   return _wremove(make_autostring(path).c_str());
@@ -138,7 +138,7 @@ int PackageTransaction::RemoveFile(const std::string &path)
 #endif
 }
 
-int PackageTransaction::RenameFile(const std::string &from, const std::string &to)
+int Task::RenameFile(const std::string &from, const std::string &to)
 {
 #ifdef _WIN32
   return _wrename(make_autostring(from).c_str(), make_autostring(to).c_str());

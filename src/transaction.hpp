@@ -26,7 +26,7 @@
 
 #include <boost/signals2.hpp>
 
-class PackageTransaction;
+class Task;
 
 class Transaction {
 public:
@@ -63,7 +63,7 @@ public:
   const ErrorList &errors() const { return m_errors; }
 
 private:
-  friend PackageTransaction;
+  friend Task;
 
   void prepare();
   void finish();
@@ -88,7 +88,7 @@ private:
   PackageEntryList m_updates;
   ErrorList m_errors;
 
-  std::vector<PackageTransaction *> m_transactions;
+  std::vector<Task *> m_tasks;
   std::set<Path> m_files;
   bool m_hasConflicts;
 
