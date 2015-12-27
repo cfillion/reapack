@@ -128,7 +128,7 @@ void ReaPack::importRemote()
 
   file.close();
 
-  static const regex namePattern("^[\\w\\s]+$");
+  static const regex namePattern("^[^~#%&*{}\\\\:<>?/+|\"]+$");
 
   smatch nameMatch;
   regex_match(name, nameMatch, namePattern);
