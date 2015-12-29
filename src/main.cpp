@@ -42,6 +42,9 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   menu.addAction("Import remote repository...",
     NamedCommandLookup("_REAPACK_IMPORT"));
+
+  menu.addAction("Manage remotes...",
+    NamedCommandLookup("_REAPACK_MANAGE"));
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
@@ -65,6 +68,9 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   reapack.setupAction("REAPACK_IMPORT",
     bind(&ReaPack::importRemote, reapack));
+
+  reapack.setupAction("REAPACK_MANAGE",
+    bind(&ReaPack::manageRemotes, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
   rec->Register("hookcustommenu", (void *)menuHook);

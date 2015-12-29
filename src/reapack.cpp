@@ -18,6 +18,7 @@
 #include "reapack.hpp"
 
 #include "config.hpp"
+#include "manager.hpp"
 #include "progress.hpp"
 #include "report.hpp"
 #include "transaction.hpp"
@@ -45,6 +46,7 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   m_config->read(m_resourcePath + "reapack.ini");
 
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
+  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow);
 }
 
 void ReaPack::cleanup()
@@ -150,6 +152,16 @@ void ReaPack::importRemote()
   Transaction *t = createTransaction();
   if(t)
     t->fetch(remote);
+}
+
+void ReaPack::manageRemotes()
+{
+  m_manager->refresh();
+
+  if(m_manager->isVisible())
+    m_manager->setFocus();
+  else
+    m_manager->show();
 }
 
 Transaction *ReaPack::createTransaction()

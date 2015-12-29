@@ -57,9 +57,7 @@ void Progress::onInit()
 
 void Progress::onCommand(WPARAM wParam, LPARAM)
 {
-  const int commandId = LOWORD(wParam);
-
-  switch(commandId) {
+  switch(LOWORD(wParam)) {
   case IDCANCEL:
     if(m_transaction)
       m_transaction->cancel();

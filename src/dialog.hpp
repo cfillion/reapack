@@ -65,6 +65,7 @@ public:
   void hide();
   void close(const INT_PTR = 0);
   void center();
+  void setFocus();
 
 protected:
   Dialog(const int templateId);
@@ -72,7 +73,7 @@ protected:
 
   HWND getItem(const int idc);
 
-  virtual void onInit();
+  virtual void onInit() = 0;
   virtual void onShow();
   virtual void onHide();
   virtual void onTimer();

@@ -137,6 +137,11 @@ void Dialog::center()
   SetWindowPos(m_handle, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
 }
 
+void Dialog::setFocus()
+{
+  SetFocus(m_handle);
+}
+
 void Dialog::setEnabled(const bool enabled)
 {
   EnableWindow(m_handle, enabled);
@@ -145,10 +150,6 @@ void Dialog::setEnabled(const bool enabled)
 HWND Dialog::getItem(const int idc)
 {
   return GetDlgItem(m_handle, idc);
-}
-
-void Dialog::onInit()
-{
 }
 
 void Dialog::onShow()

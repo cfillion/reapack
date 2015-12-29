@@ -63,9 +63,7 @@ void Report::onInit()
 
 void Report::onCommand(WPARAM wParam, LPARAM)
 {
-  const int commandId = LOWORD(wParam);
-
-  switch(commandId) {
+  switch(LOWORD(wParam)) {
   case IDOK:
   case IDCANCEL:
     close();

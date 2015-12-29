@@ -15,28 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_RESOURCE_HPP
-#define REAPACK_RESOURCE_HPP
+#ifndef REAPACK_MANAGER_HPP
+#define REAPACK_MANAGER_HPP
 
-#ifndef _WIN32
-#define PROGRESS_CLASS "msctls_progress32"
-#define WC_LISTVIEW "SysListView32"
-#else
-#include <commctrl.h>
-#endif
+#include "dialog.hpp"
 
-#define DIALOG_STYLE \
-  DS_MODALFRAME | DS_SHELLFONT | WS_POPUP | WS_SYSMENU | WS_CAPTION
-#define DIALOG_FONT 8, "MS Shell Dlg"
+#include "listview.hpp"
 
-#define IDD_PROGRESS_DIALOG 100
-#define IDD_REPORT_DIALOG   101
-#define IDD_CONFIG_DIALOG   102
+class Manager : public Dialog {
+public:
+  Manager();
+  ~Manager();
 
-#define IDC_LABEL    200
-#define IDC_PROGRESS 201
-#define IDC_REPORT   202
-#define IDC_LIST     203
-#define IDC_IMPORT   204
+  void refresh();
+
+protected:
+  void onInit() override;
+  void onCommand(WPARAM, LPARAM) override;
+
+private:
+  void apply();
+
+  ListView *m_list;
+};
 
 #endif

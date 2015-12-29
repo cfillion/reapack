@@ -15,28 +15,50 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_RESOURCE_HPP
-#define REAPACK_RESOURCE_HPP
+#include "manager.hpp"
 
-#ifndef _WIN32
-#define PROGRESS_CLASS "msctls_progress32"
-#define WC_LISTVIEW "SysListView32"
-#else
-#include <commctrl.h>
-#endif
+#include "encoding.hpp"
+#include "resource.hpp"
 
-#define DIALOG_STYLE \
-  DS_MODALFRAME | DS_SHELLFONT | WS_POPUP | WS_SYSMENU | WS_CAPTION
-#define DIALOG_FONT 8, "MS Shell Dlg"
+const auto_char *NAME = AUTO_STR("Name");
+const auto_char *URL = AUTO_STR("URL");
 
-#define IDD_PROGRESS_DIALOG 100
-#define IDD_REPORT_DIALOG   101
-#define IDD_CONFIG_DIALOG   102
+Manager::Manager()
+  : Dialog(IDD_CONFIG_DIALOG), m_list(0)
+{
+}
 
-#define IDC_LABEL    200
-#define IDC_PROGRESS 201
-#define IDC_REPORT   202
-#define IDC_LIST     203
-#define IDC_IMPORT   204
+Manager::~Manager()
+{
+  delete m_list;
+}
 
-#endif
+void Manager::onInit()
+{
+  m_list = new ListView({
+    {AUTO_STR("Name"), 130},
+    {AUTO_STR("URL"), 350},
+  }, getItem(IDC_LIST));
+}
+
+void Manager::onCommand(WPARAM wParam, LPARAM)
+{
+  switch(LOWORD(wParam)) {
+  case IDOK:
+    apply();
+  case IDCANCEL:
+    hide();
+    break;
+  }
+}
+
+void Manager::refresh()
+{
+  m_list->clear();
+  m_list->addRow({"Hello", "http://hello.com/index.xml"});
+  m_list->addRow({"World", "http://world.com/index.xml"});
+}
+
+void Manager::apply()
+{
+}

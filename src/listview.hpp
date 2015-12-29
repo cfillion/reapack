@@ -15,28 +15,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_RESOURCE_HPP
-#define REAPACK_RESOURCE_HPP
+#ifndef REAPACK_LISTVIEW_HPP
+#define REAPACK_LISTVIEW_HPP
 
-#ifndef _WIN32
-#define PROGRESS_CLASS "msctls_progress32"
-#define WC_LISTVIEW "SysListView32"
+#ifdef _WIN32
+#include <windows.h>
 #else
-#include <commctrl.h>
+#include <swell/swell.h>
 #endif
 
-#define DIALOG_STYLE \
-  DS_MODALFRAME | DS_SHELLFONT | WS_POPUP | WS_SYSMENU | WS_CAPTION
-#define DIALOG_FONT 8, "MS Shell Dlg"
+#include <vector>
 
-#define IDD_PROGRESS_DIALOG 100
-#define IDD_REPORT_DIALOG   101
-#define IDD_CONFIG_DIALOG   102
+#include "encoding.hpp"
 
-#define IDC_LABEL    200
-#define IDC_PROGRESS 201
-#define IDC_REPORT   202
-#define IDC_LIST     203
-#define IDC_IMPORT   204
+class ListView {
+public:
+  typedef std::pair<const auto_char *, const int> Column;
+  typedef std::vector<const Column> Columns;
+  typedef std::vector<const auto_char *> Row;
+
+  ListView(const Columns &, HWND handle);
+
+  void addRow(const Row &);
+  void clear();
+
+private:
+  void addColumn(const auto_char *text, const int width);
+
+  HWND m_handle;
+  size_t m_columnSize;
+  size_t m_rowSize;
+};
 
 #endif

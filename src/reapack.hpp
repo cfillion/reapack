@@ -28,8 +28,9 @@
 typedef std::function<void()> ActionCallback;
 
 class Config;
-class Transaction;
+class Manager;
 class Progress;
+class Transaction;
 
 class ReaPack {
 public:
@@ -47,6 +48,7 @@ public:
 
   void synchronize();
   void importRemote();
+  void manageRemotes();
 
 private:
   Transaction *createTransaction();
@@ -56,6 +58,7 @@ private:
   Config *m_config;
   Transaction *m_transaction;
   Progress *m_progress;
+  Manager *m_manager;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   reaper_plugin_info_t *m_rec;
