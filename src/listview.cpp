@@ -17,7 +17,9 @@
 
 #include "listview.hpp"
 
+#ifdef _WIN32
 #include <commctrl.h>
+#endif
 
 using namespace std;
 
@@ -26,6 +28,10 @@ ListView::ListView(const Columns &columns, HWND handle)
 {
   for(const Column &col : columns)
     addColumn(col.first, col.second);
+
+  // For some reason FULLROWSELECT doesn't work from the resource file
+  ListView_SetExtendedListViewStyleEx(m_handle,
+    LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 }
 
 void ListView::addColumn(const auto_char *text, const int width)
