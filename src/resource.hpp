@@ -38,5 +38,6 @@
 #define IDC_REPORT   202
 #define IDC_LIST     203
 #define IDC_IMPORT   204
+#define IDC_REMOVE   205
 
 #endif
