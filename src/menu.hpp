@@ -24,6 +24,8 @@
 #include <swell/swell.h>
 #endif
 
+#include "encoding.hpp"
+
 class Menu {
 public:
   Menu(HMENU handle);
@@ -31,16 +33,12 @@ public:
   unsigned int size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  void addAction(const char *label, const int commandId);
+  void addAction(const auto_char *label, const int commandId);
   void addSeparator();
-  Menu addMenu(const char *label);
+  Menu addMenu(const auto_char *label);
 
 private:
-#ifdef _WIN32
-  void append(MENUITEMINFOA &);
-#else
   void append(MENUITEMINFO &);
-#endif
 
   HMENU m_handle;
   unsigned int m_size;

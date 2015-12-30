@@ -35,15 +35,15 @@ static void menuHook(const char *name, HMENU handle, int f)
   if(strcmp(name, "Main extensions") || f != 0)
     return;
 
-  Menu menu = Menu(handle).addMenu("ReaPack");
+  Menu menu = Menu(handle).addMenu(AUTO_STR("ReaPack"));
 
-  menu.addAction("Synchronize packages",
+  menu.addAction(AUTO_STR("Synchronize packages"),
     NamedCommandLookup("_REAPACK_SYNC"));
 
-  menu.addAction("Import remote repository...",
+  menu.addAction(AUTO_STR("Import remote repository..."),
     NamedCommandLookup("_REAPACK_IMPORT"));
 
-  menu.addAction("Manage remotes...",
+  menu.addAction(AUTO_STR("Manage remotes..."),
     NamedCommandLookup("_REAPACK_MANAGE"));
 }
 
