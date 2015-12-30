@@ -55,8 +55,8 @@ void Manager::onCommand(WPARAM wParam, LPARAM)
 void Manager::refresh()
 {
   m_list->clear();
-  m_list->addRow({"Hello", "http://hello.com/index.xml"});
-  m_list->addRow({"World", "http://world.com/index.xml"});
+  m_list->addRow({AUTO_STR("Hello"), AUTO_STR("http://hello.com/index.xml")});
+  m_list->addRow({AUTO_STR("World"), AUTO_STR("http://world.com/index.xml")});
 }
 
 void Manager::apply()

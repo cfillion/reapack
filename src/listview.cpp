@@ -17,6 +17,8 @@
 
 #include "listview.hpp"
 
+#include <commctrl.h>
+
 using namespace std;
 
 ListView::ListView(const Columns &columns, HWND handle)
@@ -42,14 +44,16 @@ void ListView::addColumn(const auto_char *text, const int width)
 void ListView::addRow(const Row &content)
 {
   LVITEM item = {0};
-  item.iItem = m_rowSize++;
+  item.iItem = (int)m_rowSize++;
 
   ListView_InsertItem(m_handle, &item);
 
-  const size_t contentSize = min(m_columnSize, content.size());
+  const size_t cols = min(m_columnSize, content.size());
 
-  for(size_t i = 0; i < contentSize; i++)
-    ListView_SetItemText(m_handle, item.iItem, i, content[i]);
+  for(size_t i = 0; i < cols; i++) {
+    auto_char *text = const_cast<auto_char *>(content[i]);
+    ListView_SetItemText(m_handle, item.iItem, (int)i, text);
+  }
 }
 
 void ListView::clear()

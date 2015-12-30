@@ -30,7 +30,7 @@
 
 class ListView {
 public:
-  typedef std::pair<const auto_char *, const int> Column;
+  typedef std::pair<const auto_char *, int> Column;
   typedef std::vector<const Column> Columns;
   typedef std::vector<const auto_char *> Row;
 
