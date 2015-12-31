@@ -21,8 +21,6 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
-static const auto_char *TITLE = AUTO_STR("ReaPack: Download in progress");
-
 using namespace std;
 
 Progress::Progress()
@@ -96,7 +94,9 @@ void Progress::updateProgress()
   const double pos = (double)m_done / m_total;
   const int percent = (int)(pos * 100);
 
-  const auto_string title = auto_string(TITLE) +
+  static const auto_string TITLE = AUTO_STR("ReaPack: Download in progress");
+
+  const auto_string title = TITLE +
     AUTO_STR(" (") + to_autostring(percent) + AUTO_STR("%)");
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
