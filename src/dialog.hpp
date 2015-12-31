@@ -33,10 +33,10 @@ public:
     Modal,
   };
 
-  template<class T>
-  static T *Create(REAPER_PLUGIN_HINSTANCE instance, HWND parent)
+  template<class T, class... Args>
+  static T *Create(REAPER_PLUGIN_HINSTANCE instance, HWND parent, Args&&... args)
   {
-    Dialog *dlg = new T();
+    Dialog *dlg = new T(args...);
     dlg->init(instance, parent, Dialog::Modeless);
 
     return dynamic_cast<T *>(dlg);

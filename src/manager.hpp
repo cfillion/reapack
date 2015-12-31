@@ -22,9 +22,11 @@
 
 #include "listview.hpp"
 
+class ReaPack;
+
 class Manager : public Dialog {
 public:
-  Manager();
+  Manager(ReaPack *);
   ~Manager();
 
   void refresh();
@@ -36,6 +38,7 @@ protected:
 private:
   void apply();
 
+  ReaPack *m_reapack;
   ListView *m_list;
 };
 

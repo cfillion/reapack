@@ -17,14 +17,16 @@
 
 #include "manager.hpp"
 
+#include "config.hpp"
 #include "encoding.hpp"
+#include "reapack.hpp"
 #include "resource.hpp"
 
 const auto_char *NAME = AUTO_STR("Name");
 const auto_char *URL = AUTO_STR("URL");
 
-Manager::Manager()
-  : Dialog(IDD_CONFIG_DIALOG), m_list(0)
+Manager::Manager(ReaPack *reapack)
+  : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
 {
 }
 
@@ -36,14 +38,22 @@ Manager::~Manager()
 void Manager::onInit()
 {
   m_list = new ListView({
-    {AUTO_STR("Name"), 130},
-    {AUTO_STR("URL"), 350},
+    {AUTO_STR("Name"), 100},
+    {AUTO_STR("URL"), 360},
+    {AUTO_STR("State"), 60},
   }, getItem(IDC_LIST));
 }
 
 void Manager::onCommand(WPARAM wParam, LPARAM)
 {
   switch(LOWORD(wParam)) {
+  case IDC_IMPORT:
+    m_reapack->importRemote();
+    break;
+  case IDC_UNINSTALL:
+    MessageBox(handle(), AUTO_STR("Not Implemented"),
+      AUTO_STR("Uninstall"), MB_OK);
+    break;
   case IDOK:
     apply();
   case IDCANCEL:
@@ -55,8 +65,14 @@ void Manager::onCommand(WPARAM wParam, LPARAM)
 void Manager::refresh()
 {
   m_list->clear();
-  m_list->addRow({AUTO_STR("Hello"), AUTO_STR("http://hello.com/index.xml")});
-  m_list->addRow({AUTO_STR("World"), AUTO_STR("http://world.com/index.xml")});
+
+  const RemoteMap remotes = m_reapack->config()->remotes();
+  for(auto it = remotes.begin(); it != remotes.end(); it++) {
+    const auto_string &name = make_autostring(it->first);
+    const auto_string &url = make_autostring(it->second);
+
+    m_list->addRow({name.c_str(), url.c_str(), AUTO_STR("Enabled")});
+  }
 }
 
 void Manager::apply()

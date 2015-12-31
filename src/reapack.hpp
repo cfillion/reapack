@@ -50,6 +50,8 @@ public:
   void importRemote();
   void manageRemotes();
 
+  Config *config() const { return m_config; }
+
 private:
   Transaction *createTransaction();
 

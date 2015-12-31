@@ -46,7 +46,7 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   m_config->read(m_resourcePath + "reapack.ini");
 
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
-  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow);
+  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
 }
 
 void ReaPack::cleanup()
@@ -57,6 +57,7 @@ void ReaPack::cleanup()
   delete m_config;
 
   Dialog::Destroy(m_progress);
+  Dialog::Destroy(m_manager);
 }
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)
