@@ -58,6 +58,9 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_COMMAND:
     dlg->onCommand(wParam, lParam);
     break;
+  case WM_NOTIFY:
+    dlg->onNotify((LPNMHDR)lParam, lParam);
+    break;
   case WM_DESTROY:
     dlg->onDestroy();
     break;
@@ -142,9 +145,19 @@ void Dialog::setFocus()
   SetFocus(m_handle);
 }
 
-void Dialog::setEnabled(const bool enabled)
+void Dialog::enable(HWND handle)
 {
-  EnableWindow(m_handle, enabled);
+  setEnabled(true, handle);
+}
+
+void Dialog::disable(HWND handle)
+{
+  setEnabled(false, handle);
+}
+
+void Dialog::setEnabled(const bool enabled, HWND handle)
+{
+  EnableWindow(handle ? handle : m_handle, enabled);
 }
 
 HWND Dialog::getItem(const int idc)
@@ -165,6 +178,10 @@ void Dialog::onTimer()
 }
 
 void Dialog::onCommand(WPARAM, LPARAM)
+{
+}
+
+void Dialog::onNotify(LPNMHDR, LPARAM)
 {
 }
 

@@ -59,7 +59,9 @@ public:
   HWND handle() const { return m_handle; }
 
   bool isVisible() const { return m_isVisible; }
-  void setEnabled(const bool);
+  void enable(HWND = 0);
+  void disable(HWND = 0);
+  void setEnabled(const bool, HWND = 0);
 
   void show();
   void hide();
@@ -78,6 +80,7 @@ protected:
   virtual void onHide();
   virtual void onTimer();
   virtual void onCommand(WPARAM, LPARAM);
+  virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onDestroy();
 
 private:

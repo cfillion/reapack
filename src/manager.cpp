@@ -22,8 +22,7 @@
 #include "reapack.hpp"
 #include "resource.hpp"
 
-const auto_char *NAME = AUTO_STR("Name");
-const auto_char *URL = AUTO_STR("URL");
+using namespace std;
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
@@ -42,6 +41,10 @@ void Manager::onInit()
     {AUTO_STR("URL"), 360},
     {AUTO_STR("State"), 60},
   }, getItem(IDC_LIST));
+
+  m_list->onSelect(bind(&Manager::selectionChanged, this));
+
+  disable(m_uninstall = getItem(IDC_UNINSTALL));
 }
 
 void Manager::onCommand(WPARAM wParam, LPARAM)
@@ -51,13 +54,21 @@ void Manager::onCommand(WPARAM wParam, LPARAM)
     m_reapack->importRemote();
     break;
   case IDC_UNINSTALL:
-    MessageBox(handle(), AUTO_STR("Not Implemented"),
-      AUTO_STR("Uninstall"), MB_OK);
+    uninstall();
     break;
   case IDOK:
     apply();
   case IDCANCEL:
     hide();
+    break;
+  }
+}
+
+void Manager::onNotify(LPNMHDR info, LPARAM lParam)
+{
+  switch(info->idFrom) {
+  case IDC_LIST:
+    m_list->onNotify(info, lParam);
     break;
   }
 }
@@ -73,6 +84,22 @@ void Manager::refresh()
 
     m_list->addRow({name.c_str(), url.c_str(), AUTO_STR("Enabled")});
   }
+}
+
+void Manager::selectionChanged()
+{
+  setEnabled(m_list->selectedIndex() > -1, m_uninstall);
+}
+
+void Manager::uninstall()
+{
+  const int index = m_list->selectedIndex();
+
+  if(index < 0)
+    return;
+
+  MessageBox(handle(), to_autostring(index).c_str(),
+    AUTO_STR("Uninstall"), MB_OK);
 }
 
 void Manager::apply()

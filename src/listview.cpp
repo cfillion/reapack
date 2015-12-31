@@ -69,3 +69,17 @@ void ListView::clear()
 
   m_rowSize = 0;
 }
+
+int ListView::selectedIndex() const
+{
+  return ListView_GetNextItem(m_handle, -1, LVNI_SELECTED);
+}
+
+void ListView::onNotify(LPNMHDR info, LPARAM)
+{
+  switch(info->code) {
+  case LVN_ITEMCHANGED:
+    m_onSelect();
+    break;
+  };
+}

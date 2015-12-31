@@ -34,12 +34,16 @@ public:
 protected:
   void onInit() override;
   void onCommand(WPARAM, LPARAM) override;
+  void onNotify(LPNMHDR, LPARAM) override;
 
 private:
+  void selectionChanged();
+  void uninstall();
   void apply();
 
   ReaPack *m_reapack;
   ListView *m_list;
+  HWND m_uninstall;
 };
 
 #endif

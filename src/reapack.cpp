@@ -184,14 +184,14 @@ Transaction *ReaPack::createTransaction()
     if(m_transaction->isCancelled())
       return;
 
-    m_progress->setEnabled(false);
+    m_progress->disable();
 
     if(m_transaction->packages().empty() && m_transaction->errors().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
-    m_progress->setEnabled(true);
+    m_progress->enable();
     m_progress->hide();
 
     m_config->write();

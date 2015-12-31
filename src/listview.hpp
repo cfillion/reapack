@@ -24,6 +24,7 @@
 #include <swell/swell.h>
 #endif
 
+#include <boost/signals2.hpp>
 #include <vector>
 
 #include "encoding.hpp"
@@ -34,10 +35,20 @@ public:
   typedef std::vector<const Column> Columns;
   typedef std::vector<const auto_char *> Row;
 
+  typedef boost::signals2::signal<void ()> Signal;
+  typedef Signal::slot_type Callback;
+
   ListView(const Columns &, HWND handle);
+
+  HWND handle() const { return m_handle; }
 
   void addRow(const Row &);
   void clear();
+
+  int selectedIndex() const;
+
+  void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
+  void onNotify(LPNMHDR, LPARAM);
 
 private:
   void addColumn(const auto_char *text, const int width);
@@ -45,6 +56,8 @@ private:
   HWND m_handle;
   size_t m_columnSize;
   size_t m_rowSize;
+
+  Signal m_onSelect;
 };
 
 #endif
