@@ -22,6 +22,7 @@
 
 #include "listview.hpp"
 
+class Menu;
 class ReaPack;
 
 class Manager : public Dialog {
@@ -35,6 +36,7 @@ protected:
   void onInit() override;
   void onCommand(WPARAM, LPARAM) override;
   void onNotify(LPNMHDR, LPARAM) override;
+  void onContextMenu(HWND, LPARAM) override;
 
 private:
   void selectionChanged();

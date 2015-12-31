@@ -20,13 +20,16 @@
 Menu::Menu(HMENU handle)
   : m_handle(handle)
 {
+  if(!handle)
+    m_handle = CreatePopupMenu();
+
   m_size = GetMenuItemCount(m_handle);
 
   if(!empty())
     addSeparator();
 }
 
-void Menu::addAction(const auto_char *label, const int commandId)
+UINT Menu::addAction(const auto_char *label, const int commandId)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
@@ -38,7 +41,9 @@ void Menu::addAction(const auto_char *label, const int commandId)
   mii.fMask |= MIIM_ID;
   mii.wID = commandId;
 
+  const int index = m_size;
   append(mii);
+  return index;
 }
 
 void Menu::addSeparator()
@@ -72,4 +77,49 @@ Menu Menu::addMenu(const auto_char *label)
 void Menu::append(MENUITEMINFO &mii)
 {
   InsertMenuItem(m_handle, m_size++, true, &mii);
+}
+
+void Menu::show(const int x, const int y, HWND parent) const
+{
+  TrackPopupMenu(m_handle, TPM_BOTTOMALIGN | TPM_LEFTALIGN,
+    x, y, 0, parent, nullptr);
+}
+
+void Menu::disable()
+{
+  setEnabled(false);
+}
+
+void Menu::disable(const UINT index)
+{
+  setEnabled(false, index);
+}
+
+void Menu::enable()
+{
+  setEnabled(true);
+}
+
+void Menu::enable(const UINT index)
+{
+  setEnabled(true, index);
+}
+
+void Menu::setEnabled(const bool enabled)
+{
+  for(UINT i = 0; i < m_size; i++)
+    setEnabled(enabled, i);
+}
+
+void Menu::setEnabled(const bool enabled, const UINT index)
+{
+  MENUITEMINFO mii{};
+  mii.cbSize = sizeof(MENUITEMINFO);
+
+  GetMenuItemInfo(m_handle, index, true, &mii);
+
+  mii.fMask |= MIIM_STATE;
+  mii.fState |= enabled ? MFS_ENABLED : MFS_DISABLED;
+
+  SetMenuItemInfo(m_handle, index, true, &mii);
 }

@@ -28,20 +28,29 @@
 
 class Menu {
 public:
-  Menu(HMENU handle);
+  Menu(HMENU handle = 0);
 
   unsigned int size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  void addAction(const auto_char *label, const int commandId);
+  UINT addAction(const auto_char *label, const int commandId);
   void addSeparator();
   Menu addMenu(const auto_char *label);
+
+  void show(const int x, const int y, HWND parent) const;
+
+  void enable();
+  void enable(const UINT);
+  void disable();
+  void disable(const UINT);
+  void setEnabled(const bool);
+  void setEnabled(const bool, const UINT);
 
 private:
   void append(MENUITEMINFO &);
 
   HMENU m_handle;
-  unsigned int m_size;
+  UINT m_size;
 };
 
 #endif

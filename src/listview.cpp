@@ -70,7 +70,12 @@ void ListView::clear()
   m_rowSize = 0;
 }
 
-int ListView::selectedIndex() const
+bool ListView::hasSelection() const
+{
+  return currentIndex() > -1;
+}
+
+int ListView::currentIndex() const
 {
   return ListView_GetNextItem(m_handle, -1, LVNI_SELECTED);
 }

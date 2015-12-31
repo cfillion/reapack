@@ -19,8 +19,12 @@
 
 #include "config.hpp"
 #include "encoding.hpp"
+#include "menu.hpp"
 #include "reapack.hpp"
 #include "resource.hpp"
+
+static const int ACTION_ENABLE = 300;
+static const int ACTION_DISABLE = 301;
 
 using namespace std;
 
@@ -73,6 +77,34 @@ void Manager::onNotify(LPNMHDR info, LPARAM lParam)
   }
 }
 
+void Manager::onContextMenu(HWND target, LPARAM lParam)
+{
+  if(target != m_list->handle())
+    return;
+
+  Menu menu;
+
+  menu.addAction(AUTO_STR("Enable"), ACTION_ENABLE);
+  const UINT disableAction =
+    menu.addAction(AUTO_STR("Disable"), ACTION_DISABLE);
+
+  menu.addSeparator();
+
+  const UINT uninstallAction =
+    menu.addAction(AUTO_STR("Uninstall"), IDC_UNINSTALL);
+
+  menu.disable();
+
+  const int index = m_list->currentIndex();
+
+  if(index > -1) {
+    menu.enable(disableAction);
+    menu.enable(uninstallAction);
+  }
+
+  menu.show(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), handle());
+}
+
 void Manager::refresh()
 {
   m_list->clear();
@@ -88,12 +120,12 @@ void Manager::refresh()
 
 void Manager::selectionChanged()
 {
-  setEnabled(m_list->selectedIndex() > -1, m_uninstall);
+  setEnabled(m_list->hasSelection(), m_uninstall);
 }
 
 void Manager::uninstall()
 {
-  const int index = m_list->selectedIndex();
+  const int index = m_list->currentIndex();
 
   if(index < 0)
     return;

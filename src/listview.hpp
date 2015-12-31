@@ -45,7 +45,8 @@ public:
   void addRow(const Row &);
   void clear();
 
-  int selectedIndex() const;
+  bool hasSelection() const;
+  int currentIndex() const;
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
   void onNotify(LPNMHDR, LPARAM);

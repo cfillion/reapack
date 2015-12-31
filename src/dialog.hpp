@@ -81,6 +81,7 @@ protected:
   virtual void onTimer();
   virtual void onCommand(WPARAM, LPARAM);
   virtual void onNotify(LPNMHDR, LPARAM);
+  virtual void onContextMenu(HWND, LPARAM);
   virtual void onDestroy();
 
 private:
