@@ -81,7 +81,7 @@ void Menu::append(MENUITEMINFO &mii)
 
 void Menu::show(const int x, const int y, HWND parent) const
 {
-  TrackPopupMenu(m_handle, TPM_BOTTOMALIGN | TPM_LEFTALIGN,
+  TrackPopupMenu(m_handle, TPM_TOPALIGN | TPM_LEFTALIGN,
     x, y, 0, parent, nullptr);
 }
 
