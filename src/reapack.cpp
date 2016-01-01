@@ -142,13 +142,19 @@ void ReaPack::importRemote()
   }
 
   if(m_config->remotes().count({name})) {
-    ShowMessageBox("This remote is already configured.", title, 0);
-    return;
+    const int button = ShowMessageBox(
+      "Do you want to overwrite the current remote?",
+      "This remote is already configured", MB_YESNO);
+
+    if(button != IDYES)
+      return;
   }
 
   const Remote remote{name, url};
   m_config->addRemote(remote);
   m_config->write();
+
+  m_manager->refresh();
 
   Transaction *t = createTransaction();
   if(t)
