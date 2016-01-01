@@ -62,7 +62,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onNotify((LPNMHDR)lParam, lParam);
     break;
   case WM_CONTEXTMENU:
-    dlg->onContextMenu((HWND)wParam, lParam);
+    dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
     break;
   case WM_DESTROY:
     dlg->onDestroy();
@@ -188,7 +188,7 @@ void Dialog::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-void Dialog::onContextMenu(HWND, LPARAM)
+void Dialog::onContextMenu(HWND, int, int)
 {
 }
 

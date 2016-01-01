@@ -77,7 +77,7 @@ void Manager::onNotify(LPNMHDR info, LPARAM lParam)
   }
 }
 
-void Manager::onContextMenu(HWND target, LPARAM lParam)
+void Manager::onContextMenu(HWND target, const int x, const int y)
 {
   if(target != m_list->handle())
     return;
@@ -102,7 +102,7 @@ void Manager::onContextMenu(HWND target, LPARAM lParam)
     menu.enable(uninstallAction);
   }
 
-  menu.show(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), handle());
+  menu.show(x, y, handle());
 }
 
 void Manager::refresh()
