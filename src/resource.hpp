@@ -33,11 +33,10 @@
 #define IDD_REPORT_DIALOG   101
 #define IDD_CONFIG_DIALOG   102
 
-#define IDC_LABEL     200
-#define IDC_PROGRESS  201
-#define IDC_REPORT    202
-#define IDC_LIST      203
-#define IDC_IMPORT    204
-#define IDC_UNINSTALL 205
+#define IDC_LABEL    200
+#define IDC_PROGRESS 201
+#define IDC_REPORT   202
+#define IDC_LIST     203
+#define IDC_IMPORT   204
 
 #endif

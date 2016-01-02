@@ -22,15 +22,23 @@
 
 auto_string make_autostring(const std::string &input)
 {
-  const char *cstr = input.c_str();
-  const int size = MultiByteToWideChar(CP_UTF8, 0, cstr, -1, nullptr, 0);
+  const int size = MultiByteToWideChar(CP_UTF8, 0, &input[0], -1, nullptr, 0);
 
-  wchar_t *output = new wchar_t[size];
-  MultiByteToWideChar(CP_UTF8, 0, cstr, -1, output, size);
+  auto_string output(size, 0);
+  MultiByteToWideChar(CP_UTF8, 0, &input[0], -1, &output[0], size);
 
-  auto_string string(output);
-  delete[] output;
+  return output;
+}
 
-  return string;
+std::string from_autostring(const auto_string &input)
+{
+  const int size = WideCharToMultiByte(CP_UTF8, 0,
+    &input[0], -1, nullptr, 0, nullptr, nullptr);
+
+  std::string output(size, 0);
+  WideCharToMultiByte(CP_UTF8, 0,
+    &input[0], -1, &output[0], size, nullptr, nullptr);
+
+  return output;
 }
 #endif

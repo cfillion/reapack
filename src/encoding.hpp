@@ -32,6 +32,7 @@ typedef std::wstring auto_string;
 #define AUTO_STR(text) L##text
 #define to_autostring std::to_wstring
 auto_string make_autostring(const std::string &);
+std::string from_autostring(const auto_string &);
 
 #else
 
@@ -41,6 +42,7 @@ typedef std::string auto_string;
 #define AUTO_STR(text) text
 #define to_autostring std::to_string
 #define make_autostring(string) string
+#define from_autostring(string) string
 
 #endif
 

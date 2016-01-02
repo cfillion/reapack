@@ -32,7 +32,7 @@ public:
   void read(const Path &);
   void write();
 
-  void addRemote(Remote);
+  void addRemote(const Remote &);
   const RemoteMap &remotes() const { return m_remotes; }
   Registry *registry() { return &m_registry; }
 

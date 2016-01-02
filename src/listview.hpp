@@ -31,9 +31,9 @@
 
 class ListView {
 public:
-  typedef std::pair<const auto_char *, int> Column;
-  typedef std::vector<const Column> Columns;
-  typedef std::vector<const auto_char *> Row;
+  typedef std::pair<auto_string, int> Column;
+  typedef std::vector<Column> Columns;
+  typedef std::vector<auto_string> Row;
 
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
@@ -42,7 +42,9 @@ public:
 
   HWND handle() const { return m_handle; }
 
-  void addRow(const Row &);
+  int addRow(const Row &);
+  Row getRow(const int index) const;
+  void replaceRow(const int index, const Row &);
   void clear();
 
   bool hasSelection() const;
@@ -52,11 +54,11 @@ public:
   void onNotify(LPNMHDR, LPARAM);
 
 private:
-  void addColumn(const auto_char *text, const int width);
+  void addColumn(const auto_string &text, const int width);
 
   HWND m_handle;
-  size_t m_columnSize;
-  size_t m_rowSize;
+  int m_columnSize;
+  int m_rowSize;
 
   Signal m_onSelect;
 };

@@ -34,37 +34,60 @@ ListView::ListView(const Columns &columns, HWND handle)
     LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 }
 
-void ListView::addColumn(const auto_char *text, const int width)
+void ListView::addColumn(const auto_string &text, const int width)
 {
-  LVCOLUMN col = {0};
+  LVCOLUMN col{};
 
   col.mask |= LVCF_WIDTH;
   col.cx = width;
 
   col.mask |= LVCF_TEXT;
-  col.pszText = const_cast<auto_char *>(text);
+  col.pszText = const_cast<auto_char *>(text.c_str());
 
   ListView_InsertColumn(m_handle, m_columnSize++, &col);
 }
 
-void ListView::addRow(const Row &content)
+int ListView::addRow(const Row &content)
 {
-  LVITEM item = {0};
-  item.iItem = (int)m_rowSize++;
+  LVITEM item{};
+  item.iItem = m_rowSize++;
 
   ListView_InsertItem(m_handle, &item);
 
-  const size_t cols = min(m_columnSize, content.size());
+  replaceRow(item.iItem, content);
 
-  for(size_t i = 0; i < cols; i++) {
-    auto_char *text = const_cast<auto_char *>(content[i]);
-    ListView_SetItemText(m_handle, item.iItem, (int)i, text);
+  return item.iItem;
+}
+
+void ListView::replaceRow(const int index, const Row &content)
+{
+  LVITEM item{};
+  item.iItem = index;
+
+  const int cols = min(m_columnSize, (int)content.size());
+
+  for(int i = 0; i < cols; i++) {
+    auto_char *text = const_cast<auto_char *>(content[i].c_str());
+    ListView_SetItemText(m_handle, item.iItem, i, text);
   }
+}
+
+ListView::Row ListView::getRow(const int rowIndex) const
+{
+  Row row(m_columnSize);
+
+  for(int i = 0; i < m_columnSize; i++) {
+    auto_char buf[4096];
+    ListView_GetItemText(m_handle, rowIndex, i, buf, sizeof(buf));
+    row[i] = buf;
+  }
+
+  return row;
 }
 
 void ListView::clear()
 {
-  for(size_t i = 0; i < m_rowSize; i++)
+  for(int i = 0; i < m_rowSize; i++)
     ListView_DeleteItem(m_handle, 0);
 
   m_rowSize = 0;

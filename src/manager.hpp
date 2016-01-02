@@ -21,6 +21,7 @@
 #include "dialog.hpp"
 
 #include "listview.hpp"
+#include "remote.hpp"
 
 class Menu;
 class ReaPack;
@@ -39,8 +40,16 @@ protected:
   void onContextMenu(HWND, int x, int y) override;
 
 private:
+  static ListView::Row makeRow(const Remote &remote);
+
+  enum Action {
+    Enable = 300,
+    Disable = 301,
+    Uninstall = 302,
+  };
+
   void selectionChanged();
-  void uninstall();
+  void markFor(Action action);
   void apply();
 
   ReaPack *m_reapack;

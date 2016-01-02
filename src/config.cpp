@@ -78,7 +78,7 @@ void Config::write()
   writeRegistry();
 }
 
-void Config::addRemote(Remote remote)
+void Config::addRemote(const Remote &remote)
 {
   m_remotes[remote.first] = remote.second;
 }
