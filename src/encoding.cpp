@@ -22,7 +22,8 @@
 
 auto_string make_autostring(const std::string &input)
 {
-  const int size = MultiByteToWideChar(CP_UTF8, 0, &input[0], -1, nullptr, 0);
+  const int size = MultiByteToWideChar(CP_UTF8, 0,
+    &input[0], -1, nullptr, 0) -1;
 
   auto_string output(size, 0);
   MultiByteToWideChar(CP_UTF8, 0, &input[0], -1, &output[0], size);
@@ -33,7 +34,7 @@ auto_string make_autostring(const std::string &input)
 std::string from_autostring(const auto_string &input)
 {
   const int size = WideCharToMultiByte(CP_UTF8, 0,
-    &input[0], -1, nullptr, 0, nullptr, nullptr);
+    &input[0], -1, nullptr, 0, nullptr, nullptr) - 1;
 
   std::string output(size, 0);
   WideCharToMultiByte(CP_UTF8, 0,
