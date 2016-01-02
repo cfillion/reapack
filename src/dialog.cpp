@@ -148,19 +148,9 @@ void Dialog::setFocus()
   SetFocus(m_handle);
 }
 
-void Dialog::enable(HWND handle)
-{
-  setEnabled(true, handle);
-}
-
-void Dialog::disable(HWND handle)
-{
-  setEnabled(false, handle);
-}
-
 void Dialog::setEnabled(const bool enabled, HWND handle)
 {
-  EnableWindow(handle ? handle : m_handle, enabled);
+  EnableWindow(handle, enabled);
 }
 
 HWND Dialog::getItem(const int idc)

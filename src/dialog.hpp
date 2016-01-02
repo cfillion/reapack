@@ -59,9 +59,13 @@ public:
   HWND handle() const { return m_handle; }
 
   bool isVisible() const { return m_isVisible; }
-  void enable(HWND = 0);
-  void disable(HWND = 0);
-  void setEnabled(const bool, HWND = 0);
+
+  void enable() { enable(m_handle); }
+  void enable(HWND handle) { setEnabled(true, handle); }
+  void disable() { disable(m_handle); }
+  void disable(HWND handle) { setEnabled(false, handle); }
+  void setEnabled(const bool enable) { setEnabled(enable, m_handle); }
+  void setEnabled(const bool, HWND);
 
   void show();
   void hide();
