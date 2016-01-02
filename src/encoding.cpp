@@ -23,7 +23,7 @@
 auto_string make_autostring(const std::string &input)
 {
   const int size = MultiByteToWideChar(CP_UTF8, 0,
-    &input[0], -1, nullptr, 0) -1;
+    &input[0], -1, nullptr, 0) - 1;
 
   auto_string output(size, 0);
   MultiByteToWideChar(CP_UTF8, 0, &input[0], -1, &output[0], size);
