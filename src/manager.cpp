@@ -118,9 +118,15 @@ void Manager::markFor(const Action action)
   if(index < 0)
     return;
 
-  const string &remoteName = from_autostring(m_list->getRow(index)[0]);
-  const Remote remote =
-    {"aaaaaaa", m_reapack->config()->remotes().at(remoteName)};
+  const string remoteName = from_autostring(m_list->getRow(index)[0]);
+
+  const RemoteMap &remotes = m_reapack->config()->remotes();
+  const auto it = remotes.find(remoteName);
+
+  if(it == remotes.end())
+    return;
+
+  const Remote remote = {"aaaaaaa", it->second};
 
   MessageBox(handle(), to_autostring(action).c_str(),
     m_list->getRow(index)[0].c_str(), MB_OK);
