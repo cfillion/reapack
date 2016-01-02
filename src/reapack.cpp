@@ -143,8 +143,9 @@ void ReaPack::importRemote()
 
   if(m_config->remotes().count({name})) {
     const int button = ShowMessageBox(
-      "Do you want to overwrite the current remote?",
-      "This remote is already configured", MB_YESNO);
+      "This remote is already configured.\r\n"
+      "Do you want to overwrite the current remote?"
+      , title, MB_YESNO);
 
     if(button != IDYES)
       return;
