@@ -8,18 +8,20 @@ CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
 CXXFLAGS += /Ivendor/libcurl_@(WINARCH)/include
 CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
 CXXFLAGS += /DCURL_STATICLIB /DUNICODE
+CXXFLAGS += /Z7 /Zo
 
 LD := $(WRAP) link
 LDFLAGS := /nologo user32.lib
 LDFLAGS += vendor/libcurl_@(WINARCH)/lib/libcurl_a.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
+LDFLAGS += /DEBUG /OPT:REF /PDBALTPATH:%_PDB%
 
 RC := rc
 RCFLAGS += /nologo /fo $(TUP_VARIANTDIR)/src/resource.res
 
-SOFLAGS := /DLL /OUT:$(TUP_VARIANTDIR)/bin/reaper_reapack_@(WINARCH).dll
-SOTARGET := bin/reaper_reapack_@(WINARCH).dll
-SOTARGET += bin/reaper_reapack_@(WINARCH).lib bin/reaper_reapack_@(WINARCH).exp
+TARGET := bin/reaper_reapack_@(WINARCH)
+SOFLAGS := /DLL /OUT:$(TUP_VARIANTDIR)/$(TARGET).dll
+SOTARGET := $(TARGET).dll $(TARGET).lib $(TARGET).exp
 
 TEST := $(TUP_VARIANTDIR)/bin/test.exe
 TSFLAGS := /OUT:$(TEST)
