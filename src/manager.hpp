@@ -48,13 +48,11 @@ private:
     Uninstall = 302,
   };
 
-  void selectionChanged();
   void markFor(Action action);
   void apply();
 
   ReaPack *m_reapack;
   ListView *m_list;
-  HWND m_uninstall;
 };
 
 #endif
