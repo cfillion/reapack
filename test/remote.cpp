@@ -15,7 +15,7 @@ TEST_CASE("construct remote", M) {
   REQUIRE(remote.name() == "name");
   REQUIRE(remote.url() == "url");
   REQUIRE(remote.isEnabled());
-  REQUIRE_FALSE(remote.isFrozen());
+  REQUIRE_FALSE(remote.isProtected());
 }
 
 TEST_CASE("construct invalid remote", M) {
@@ -97,12 +97,12 @@ TEST_CASE("null remote", M) {
   }
 }
 
-TEST_CASE("freeze remote", M) {
+TEST_CASE("protect remote", M) {
   Remote remote;
-  REQUIRE_FALSE(remote.isFrozen());
+  REQUIRE_FALSE(remote.isProtected());
 
-  remote.freeze();
-  REQUIRE(remote.isFrozen());
+  remote.protect();
+  REQUIRE(remote.isProtected());
 }
 
 TEST_CASE("add remotes to list", M) {

@@ -54,8 +54,6 @@ Config::Config()
 
 void Config::fillDefaults()
 {
-  m_remotes.add({"ReaPack",
-    "https://github.com/cfillion/reapack/raw/master/index.xml"});
 }
 
 void Config::read(const Path &path)
@@ -70,12 +68,27 @@ void Config::read(const Path &path)
 
   readRemotes();
   readRegistry();
+
+  restoreSelfRemote();
 }
 
 void Config::write()
 {
   writeRemotes();
   writeRegistry();
+}
+
+void Config::restoreSelfRemote()
+{
+  const char *name = "ReaPack";
+  const char *url = "https://github.com/cfillion/reapack/raw/master/index.xml";
+
+  Remote remote = m_remotes.get(name);
+  remote.setName(name);
+  remote.setUrl(url);
+  remote.protect();
+
+  m_remotes.add(remote);
 }
 
 void Config::readRemotes()

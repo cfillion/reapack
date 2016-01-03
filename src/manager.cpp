@@ -107,7 +107,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
     else
       menu.enable(enableAction);
 
-    if(!remote.isFrozen())
+    if(!remote.isProtected())
       menu.enable(uninstallAction);
   }
 

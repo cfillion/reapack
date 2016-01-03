@@ -52,14 +52,14 @@ public:
   void setEnabled(const bool enabled) { m_enabled = enabled; }
   bool isEnabled() const { return m_enabled; }
 
-  void freeze() { m_frozen = true; }
-  bool isFrozen() const { return m_frozen; }
+  void protect() { m_protected = true; }
+  bool isProtected() const { return m_protected; }
 
 private:
   std::string m_name;
   std::string m_url;
   bool m_enabled;
-  bool m_frozen;
+  bool m_protected;
 };
 
 class RemoteList {

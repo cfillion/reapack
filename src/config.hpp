@@ -49,6 +49,7 @@ private:
   std::string m_path;
 
   void readRemotes();
+  void restoreSelfRemote();
   void writeRemotes();
   RemoteList m_remotes;
   size_t m_remotesIniSize;

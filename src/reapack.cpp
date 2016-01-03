@@ -131,7 +131,13 @@ void ReaPack::importRemote()
   const Remote existing = remotes->get(remote.name());
 
   if(!existing.isNull()) {
-    if(existing.url() == remote.url()) {
+    if(existing.isProtected()) {
+      ShowMessageBox(
+        "This remote is protected and cannot be overwritten.", title, MB_OK);
+
+      return;
+    }
+    else if(existing.url() == remote.url()) {
       ShowMessageBox(
         "This remote is already configured.\r\n"
         "Nothing to do!"

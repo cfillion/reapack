@@ -68,12 +68,12 @@ auto Remote::fromFile(const string &path, Remote *remote) -> ReadCode
 }
 
 Remote::Remote()
-  : m_enabled(true), m_frozen(false)
+  : m_enabled(true), m_protected(false)
 {
 }
 
 Remote::Remote(const string &name, const string &url, const bool enabled)
-  : m_enabled(enabled), m_frozen(false)
+  : m_enabled(enabled), m_protected(false)
 {
   setName(name);
   setUrl(url);
