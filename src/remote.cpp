@@ -17,7 +17,55 @@
 
 #include "remote.hpp"
 
+#include <fstream>
+#include <regex>
+
+#include "encoding.hpp"
+#include "errors.hpp"
+
 using namespace std;
+
+static bool ValidateName(const string &name)
+{
+  static const regex pattern("^[^~#%&*{}\\\\:<>?/+|\"]+$");
+
+  smatch match;
+  regex_match(name, match, pattern);
+
+  return !match.empty();
+}
+
+static bool ValidateUrl(const string &url)
+{
+  return !url.empty();
+}
+
+auto Remote::fromFile(const string &path, Remote *remote) -> ReadCode
+{
+  ifstream file(make_autostring(path));
+
+  if(!file)
+    return ReadFailure;
+
+  string name;
+  getline(file, name);
+
+  string url;
+  getline(file, url);
+
+  file.close();
+
+
+  if(!ValidateName(name))
+    return InvalidName;
+  else if(!ValidateUrl(url))
+    return InvalidUrl;
+
+  remote->setName(name);
+  remote->setUrl(url);
+
+  return Success;
+}
 
 Remote::Remote()
   : m_enabled(true), m_frozen(false)
@@ -25,13 +73,31 @@ Remote::Remote()
 }
 
 Remote::Remote(const string &name, const string &url, const bool enabled)
-  : m_name(name), m_url(url), m_enabled(enabled), m_frozen(false)
+  : m_enabled(enabled), m_frozen(false)
 {
+  setName(name);
+  setUrl(url);
+}
+
+void Remote::setName(const string &name)
+{
+  if(!ValidateName(name))
+    throw reapack_error("invalid name");
+  else
+    m_name = name;
+}
+
+void Remote::setUrl(const string &url)
+{
+  if(!ValidateUrl(url))
+    throw reapack_error("invalid url");
+  else
+    m_url = url;
 }
 
 void RemoteList::add(const Remote &remote)
 {
-  if(remote.isNull())
+  if(!remote.isValid())
     return;
 
   m_remotes[remote.name()] = remote;

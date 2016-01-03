@@ -130,7 +130,6 @@ void Manager::setRemoteEnabled(const bool enabled)
     return;
 
   m_enableOverrides[remote.name()] = enabled;
-
   m_list->replaceRow(m_list->currentIndex(), makeRow(remote));
 }
 

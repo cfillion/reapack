@@ -25,17 +25,27 @@
 
 class Remote {
 public:
+  enum ReadCode {
+    Success,
+    ReadFailure,
+    InvalidName,
+    InvalidUrl,
+  };
+
+  static ReadCode fromFile(const std::string &path, Remote *remote);
+
   Remote();
   Remote(const std::string &name, const std::string &url,
     const bool enabled = true);
 
-  void setName(const std::string &name) { m_name = name; }
+  void setName(const std::string &name);
   const std::string &name() const { return m_name; }
 
-  void setUrl(const std::string &url) { m_url = url; }
+  void setUrl(const std::string &url);
   const std::string &url() const { return m_url; }
 
   bool isNull() const { return m_name.empty() || m_url.empty(); }
+  bool isValid() const { return !isNull(); }
 
   void enable() { setEnabled(true); }
   void disable() { setEnabled(false); }

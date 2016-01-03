@@ -25,9 +25,6 @@
 
 #include <reaper_plugin_functions.h>
 
-#include <fstream>
-#include <regex>
-
 using namespace std;
 
 ReaPack::ReaPack()
@@ -109,43 +106,31 @@ void ReaPack::synchronize()
 
 void ReaPack::importRemote()
 {
-  static const int PATH_SIZE = 4096;
-  char path[PATH_SIZE] = {0};
+  static const char *title = "ReaPack: Import remote repository";
 
-  const char *title = "ReaPack: Import remote repository";
-  if(!GetUserFileNameForRead(path, title, "ReaPackRemote"))
+  string path(4096, 0);
+  if(!GetUserFileNameForRead(&path[0], title, "ReaPackRemote"))
     return;
 
-  ifstream file(make_autostring(path));
+  Remote remote;
 
-  if(!file) {
+  switch(Remote::fromFile(path, &remote)) {
+  case Remote::ReadFailure:
     ShowMessageBox(strerror(errno), title, 0);
     return;
-  }
-
-  string name;
-  getline(file, name);
-
-  string url;
-  getline(file, url);
-
-  file.close();
-
-  static const regex namePattern("^[^~#%&*{}\\\\:<>?/+|\"]+$");
-
-  smatch nameMatch;
-  regex_match(name, nameMatch, namePattern);
-
-  if(nameMatch.empty() || url.empty()) {
+  case Remote::InvalidName:
+  case Remote::InvalidUrl:
     ShowMessageBox("Invalid .ReaPackRemote file!", title, 0);
     return;
-  }
+  default:
+    break;
+  };
 
   RemoteList *remotes = m_config->remotes();
 
-  Remote remote = remotes->get(name);
+  const Remote existing = remotes->get(remote.name());
 
-  if(!remote.isNull()) {
+  if(!existing.isNull()) {
     const int button = ShowMessageBox(
       "This remote is already configured.\r\n"
       "Do you want to overwrite the current remote?"
@@ -154,9 +139,6 @@ void ReaPack::importRemote()
     if(button != IDYES)
       return;
   }
-
-  remote.setName(name);
-  remote.setUrl(url);
 
   remotes->add(remote);
   m_config->write();
