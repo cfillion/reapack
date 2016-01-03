@@ -33,8 +33,7 @@ using namespace std;
 static const char *SIZE_KEY = "size";
 
 static const char *REMOTES_GRP = "remotes";
-static const char *NAME_KEY    = "name";
-static const char *URL_KEY     = "url";
+static const char *REMOTE_KEY  = "remote";
 
 static const char *REGISTRY_GRP = "registry";
 static const char *PACK_KEY     = "reapack";
@@ -96,11 +95,9 @@ void Config::readRemotes()
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
 
   for(size_t i = 0; i < m_remotesIniSize; i++) {
-    const string name = getString(REMOTES_GRP, ArrayKey(NAME_KEY, i));
-    const string url = getString(REMOTES_GRP, ArrayKey(URL_KEY, i));
+    const string data = getString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i));
 
-    if(!name.empty() && !url.empty())
-      m_remotes.add({name, url});
+    m_remotes.add(Remote::fromString(data));
   }
 }
 
@@ -110,12 +107,10 @@ void Config::writeRemotes()
   m_remotesIniSize = max(m_remotes.size(), m_remotesIniSize);
 
   for(auto it = m_remotes.begin(); it != m_remotes.end(); it++, i++) {
-    setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), it->name());
-    setString(REMOTES_GRP, ArrayKey(URL_KEY, i), it->url());
+    setString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i), it->toString());
   }
 
-  cleanupArray(REMOTES_GRP, NAME_KEY, i, m_remotesIniSize);
-  cleanupArray(REMOTES_GRP, URL_KEY, i, m_remotesIniSize);
+  cleanupArray(REMOTES_GRP, REMOTE_KEY, i, m_remotesIniSize);
 
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }

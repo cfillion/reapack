@@ -121,6 +121,13 @@ TEST_CASE("add remotes to list", M) {
   REQUIRE(list.hasUrl("url"));
 }
 
+TEST_CASE("add invalid remote to list", M) {
+  RemoteList list;
+  list.add({});
+
+  REQUIRE(list.empty());
+}
+
 TEST_CASE("replace remote", M) {
   RemoteList list;
 
@@ -180,3 +187,44 @@ TEST_CASE("remote from file", M) {
     REQUIRE(code == Remote::Success);
   }
 };
+
+TEST_CASE("unserialize remote", M) {
+  SECTION("invalid name") {
+    Remote::ReadCode code;
+    REQUIRE(Remote::fromString("&", &code).isNull());
+    REQUIRE(code == Remote::InvalidName);
+  }
+
+  SECTION("invalid name") {
+    Remote::ReadCode code;
+    REQUIRE(Remote::fromString("name||false", &code).isNull());
+    REQUIRE(code == Remote::InvalidUrl);
+  }
+
+  SECTION("valid enabled") {
+    Remote::ReadCode code;
+    Remote remote = Remote::fromString("name|url|1", &code);
+    REQUIRE(code == Remote::Success);
+
+    REQUIRE(remote.name() == "name");
+    REQUIRE(remote.url() == "url");
+    REQUIRE(remote.isEnabled());
+  }
+
+  SECTION("valid disabled") {
+    Remote remote = Remote::fromString("name|url|0");
+    REQUIRE(remote.name() == "name");
+    REQUIRE(remote.url() == "url");
+    REQUIRE_FALSE(remote.isEnabled());
+  }
+}
+
+TEST_CASE("serialize remote", M) {
+  SECTION("enabled") {
+    REQUIRE(Remote("name", "url", true).toString() == "name|url|1");
+  }
+
+  SECTION("disabled") {
+    REQUIRE(Remote("name", "url", false).toString() == "name|url|0");
+  }
+}

@@ -33,10 +33,13 @@ public:
   };
 
   static ReadCode fromFile(const std::string &path, Remote *remote);
+  static Remote fromString(const std::string &data, ReadCode *code = nullptr);
 
   Remote();
   Remote(const std::string &name, const std::string &url,
     const bool enabled = true);
+
+  std::string toString() const;
 
   void setName(const std::string &name);
   const std::string &name() const { return m_name; }

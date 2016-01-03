@@ -19,11 +19,14 @@
 
 #include <fstream>
 #include <regex>
+#include <sstream>
 
 #include "encoding.hpp"
 #include "errors.hpp"
 
 using namespace std;
+
+static char DATA_DELIMITER = '|';
 
 static bool ValidateName(const string &name)
 {
@@ -67,6 +70,37 @@ auto Remote::fromFile(const string &path, Remote *remote) -> ReadCode
   return Success;
 }
 
+Remote Remote::fromString(const string &data, ReadCode *code)
+{
+  istringstream stream(data);
+
+  string name;
+  getline(stream, name, DATA_DELIMITER);
+
+  string url;
+  getline(stream, url, DATA_DELIMITER);
+
+  string enabled;
+  getline(stream, enabled, DATA_DELIMITER);
+
+  if(!ValidateName(name)) {
+    if(code)
+      *code = InvalidName;
+  }
+  else if(!ValidateUrl(url)) {
+    if(code)
+      *code = InvalidUrl;
+  }
+  else {
+    if(code)
+      *code = Success;
+
+    return {name, url, enabled == "1"};
+  }
+
+  return {};
+}
+
 Remote::Remote()
   : m_enabled(true), m_protected(false)
 {
@@ -93,6 +127,11 @@ void Remote::setUrl(const string &url)
     throw reapack_error("invalid url");
   else
     m_url = url;
+}
+
+string Remote::toString() const
+{
+  return m_name + DATA_DELIMITER + m_url + DATA_DELIMITER + to_string(m_enabled);
 }
 
 void RemoteList::add(const Remote &remote)
