@@ -131,6 +131,15 @@ void ReaPack::importRemote()
   const Remote existing = remotes->get(remote.name());
 
   if(!existing.isNull()) {
+    if(existing.url() == remote.url()) {
+      ShowMessageBox(
+        "This remote is already configured.\r\n"
+        "Nothing to do!"
+      , title, MB_OK);
+
+      return;
+    }
+
     const int button = ShowMessageBox(
       "This remote is already configured.\r\n"
       "Do you want to overwrite the current remote?"
