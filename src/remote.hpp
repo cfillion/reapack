@@ -18,10 +18,60 @@
 #ifndef REAPACK_REMOTE_HPP
 #define REAPACK_REMOTE_HPP
 
+#include <boost/optional.hpp>
+#include <boost/range/adaptor/map.hpp>
 #include <map>
 #include <string>
 
-typedef std::map<std::string, std::string> RemoteMap;
-typedef RemoteMap::value_type Remote;
+class Remote {
+public:
+  Remote();
+  Remote(const std::string &name, const std::string &url,
+    const bool enabled = true);
+
+  void setName(const std::string &name) { m_name = name; }
+  const std::string &name() const { return m_name; }
+
+  void setUrl(const std::string &url) { m_url = url; }
+  const std::string &url() const { return m_url; }
+
+  bool isNull() const { return m_name.empty() || m_url.empty(); }
+
+  void enable() { setEnabled(true); }
+  void disable() { setEnabled(false); }
+  void setEnabled(const bool enabled) { m_enabled = enabled; }
+  bool isEnabled() const { return m_enabled; }
+
+  void freeze() { m_frozen = true; }
+  bool isFrozen() const { return m_frozen; }
+
+private:
+  std::string m_name;
+  std::string m_url;
+  bool m_enabled;
+  bool m_frozen;
+};
+
+class RemoteList {
+private:
+  std::map<std::string, Remote> m_remotes;
+
+public:
+  void add(const Remote &);
+
+  bool empty() const { return m_remotes.empty(); }
+  size_t size() const { return m_remotes.size(); }
+  bool hasName(const std::string &name) const
+  { return m_remotes.count(name) > 0; }
+  bool hasUrl(const std::string &url) const;
+
+  auto begin() const -> decltype(boost::adaptors::values(m_remotes).begin())
+  { return boost::adaptors::values(m_remotes).begin(); }
+
+  auto end() const -> decltype(boost::adaptors::values(m_remotes).end())
+  { return boost::adaptors::values(m_remotes).end(); }
+
+  Remote get(const std::string &name) const;
+};
 
 #endif

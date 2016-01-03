@@ -93,9 +93,9 @@ bool ReaPack::execActions(const int id, const int)
 
 void ReaPack::synchronize()
 {
-  RemoteMap remotes = m_config->remotes();
+  const RemoteList *remotes = m_config->remotes();
 
-  if(remotes.empty()) {
+  if(remotes->empty()) {
     ShowMessageBox("No remote repository configured, nothing to do!",
       "ReaPack", 0);
 
@@ -141,7 +141,11 @@ void ReaPack::importRemote()
     return;
   }
 
-  if(m_config->remotes().count({name})) {
+  RemoteList *remotes = m_config->remotes();
+
+  Remote remote = remotes->get(name);
+
+  if(!remote.isNull()) {
     const int button = ShowMessageBox(
       "This remote is already configured.\r\n"
       "Do you want to overwrite the current remote?"
@@ -151,8 +155,10 @@ void ReaPack::importRemote()
       return;
   }
 
-  const Remote remote{name, url};
-  m_config->addRemote(remote);
+  remote.setName(name);
+  remote.setUrl(url);
+
+  remotes->add(remote);
   m_config->write();
 
   m_manager->refresh();

@@ -15,45 +15,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_MANAGER_HPP
-#define REAPACK_MANAGER_HPP
-
-#include "dialog.hpp"
-
-#include "listview.hpp"
 #include "remote.hpp"
 
-#include <map>
+using namespace std;
 
-class ReaPack;
+Remote::Remote()
+  : m_enabled(true), m_frozen(false)
+{
+}
 
-class Manager : public Dialog {
-public:
-  Manager(ReaPack *);
-  ~Manager();
+Remote::Remote(const string &name, const string &url, const bool enabled)
+  : m_name(name), m_url(url), m_enabled(enabled), m_frozen(false)
+{
+}
 
-  void refresh();
+void RemoteList::add(const Remote &remote)
+{
+  if(remote.isNull())
+    return;
 
-protected:
-  void onInit() override;
-  void onCommand(WPARAM, LPARAM) override;
-  void onNotify(LPNMHDR, LPARAM) override;
-  void onContextMenu(HWND, int x, int y) override;
+  m_remotes[remote.name()] = remote;
+}
 
-private:
-  ListView::Row makeRow(const Remote &remote) const;
+Remote RemoteList::get(const string &name) const
+{
+  const auto it = m_remotes.find(name);
 
-  Remote currentRemote() const;
-  void setRemoteEnabled(const bool);
-  bool isRemoteEnabled(const Remote &remote) const;
+  if(it == m_remotes.end())
+    return {};
+  else
+    return it->second;
+}
 
-  void apply();
-  void reset();
+bool RemoteList::hasUrl(const string &url) const
+{
+  for(const Remote &r : m_remotes | boost::adaptors::map_values) {
+    if(r.url() == url)
+      return true;
+  }
 
-  ReaPack *m_reapack;
-  ListView *m_list;
-
-  std::map<std::string, bool> m_enableOverrides;
-};
-
-#endif
+  return false;
+}

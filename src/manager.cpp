@@ -23,6 +23,10 @@
 #include "reapack.hpp"
 #include "resource.hpp"
 
+static const int ACTION_ENABLE = 300;
+static const int ACTION_DISABLE = 301;
+static const int ACTION_UNINSTALL = 302;
+
 using namespace std;
 
 Manager::Manager(ReaPack *reapack)
@@ -46,20 +50,22 @@ void Manager::onInit()
 
 void Manager::onCommand(WPARAM wParam, LPARAM)
 {
-  const int cmdId = LOWORD(wParam);
-
   switch(LOWORD(wParam)) {
   case IDC_IMPORT:
     m_reapack->importRemote();
     break;
-  case Enable:
-  case Disable:
-  case Uninstall:
-    markFor(static_cast<Action>(cmdId));
+  case ACTION_ENABLE:
+    setRemoteEnabled(true);
+    break;
+  case ACTION_DISABLE:
+    setRemoteEnabled(false);
+    break;
+  case ACTION_UNINSTALL:
     break;
   case IDOK:
     apply();
   case IDCANCEL:
+    reset();
     hide();
     break;
   }
@@ -81,22 +87,28 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
   Menu menu;
 
-  menu.addAction(AUTO_STR("Enable"), Enable);
+  const UINT enableAction =
+    menu.addAction(AUTO_STR("Enable"), ACTION_ENABLE);
   const UINT disableAction =
-    menu.addAction(AUTO_STR("Disable"), Disable);
+    menu.addAction(AUTO_STR("Disable"), ACTION_DISABLE);
 
   menu.addSeparator();
 
   const UINT uninstallAction =
-    menu.addAction(AUTO_STR("Uninstall"), Uninstall);
+    menu.addAction(AUTO_STR("Uninstall"), ACTION_UNINSTALL);
 
   menu.disable();
 
-  const int index = m_list->currentIndex();
+  const Remote remote = currentRemote();
 
-  if(index > -1) {
-    menu.enable(disableAction);
-    menu.enable(uninstallAction);
+  if(!remote.isNull()) {
+    if(isRemoteEnabled(remote))
+      menu.enable(disableAction);
+    else
+      menu.enable(enableAction);
+
+    if(!remote.isFrozen())
+      menu.enable(uninstallAction);
   }
 
   menu.show(x, y, handle());
@@ -106,42 +118,58 @@ void Manager::refresh()
 {
   m_list->clear();
 
-  const RemoteMap remotes = m_reapack->config()->remotes();
-  for(auto it = remotes.begin(); it != remotes.end(); it++)
-    m_list->addRow(makeRow(*it));
+  for(const Remote &remote : *m_reapack->config()->remotes())
+    m_list->addRow(makeRow(remote));
 }
 
-void Manager::markFor(const Action action)
+void Manager::setRemoteEnabled(const bool enabled)
 {
-  const int index = m_list->currentIndex();
+  Remote remote = currentRemote();
 
-  if(index < 0)
+  if(remote.isNull())
     return;
 
-  const string remoteName = from_autostring(m_list->getRow(index)[0]);
+  m_enableOverrides[remote.name()] = enabled;
 
-  const RemoteMap &remotes = m_reapack->config()->remotes();
-  const auto it = remotes.find(remoteName);
+  m_list->replaceRow(m_list->currentIndex(), makeRow(remote));
+}
 
-  if(it == remotes.end())
-    return;
+bool Manager::isRemoteEnabled(const Remote &remote) const
+{
+  const auto it = m_enableOverrides.find(remote.name());
 
-  const Remote remote = {"aaaaaaa", it->second};
-
-  MessageBox(handle(), to_autostring(action).c_str(),
-    m_list->getRow(index)[0].c_str(), MB_OK);
-
-  m_list->replaceRow(index, makeRow(remote));
+  if(it == m_enableOverrides.end())
+    return remote.isEnabled();
+  else
+    return it->second;
 }
 
 void Manager::apply()
 {
 }
 
-ListView::Row Manager::makeRow(const Remote &remote)
+void Manager::reset()
 {
-  const auto_string name = make_autostring(remote.first);
-  const auto_string url = make_autostring(remote.second);
+  m_enableOverrides.clear();
+}
 
-  return {name, url, AUTO_STR("Enabled")};
+ListView::Row Manager::makeRow(const Remote &remote) const
+{
+  const auto_string name = make_autostring(remote.name());
+  const auto_string url = make_autostring(remote.url());
+
+  return {name, url, isRemoteEnabled(remote) ?
+    AUTO_STR("Enabled") : AUTO_STR("Disabled")};
+}
+
+Remote Manager::currentRemote() const
+{
+  const int index = m_list->currentIndex();
+
+  if(index < 0)
+    return {};
+
+  const string remoteName = from_autostring(m_list->getRow(index)[0]);
+
+  return m_reapack->config()->remotes()->get(remoteName);
 }

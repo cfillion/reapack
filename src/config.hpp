@@ -32,8 +32,7 @@ public:
   void read(const Path &);
   void write();
 
-  void addRemote(const Remote &);
-  const RemoteMap &remotes() const { return m_remotes; }
+  RemoteList *remotes() { return &m_remotes; }
   Registry *registry() { return &m_registry; }
 
 private:
@@ -51,7 +50,7 @@ private:
 
   void readRemotes();
   void writeRemotes();
-  RemoteMap m_remotes;
+  RemoteList m_remotes;
   size_t m_remotesIniSize;
 
   void readRegistry();

@@ -44,15 +44,15 @@ Transaction::~Transaction()
     delete db;
 }
 
-void Transaction::fetch(const RemoteMap &remotes)
+void Transaction::fetch(const RemoteList *remotes)
 {
-  for(const Remote &remote : remotes)
+  for(const Remote &remote : *remotes)
     fetch(remote);
 }
 
 void Transaction::fetch(const Remote &remote)
 {
-  Download *dl = new Download(remote.first, remote.second);
+  Download *dl = new Download(remote.name(), remote.url());
   dl->onFinish(bind(&Transaction::saveDatabase, this, dl));
 
   m_queue.push(dl);

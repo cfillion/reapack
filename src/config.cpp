@@ -54,7 +54,7 @@ Config::Config()
 
 void Config::fillDefaults()
 {
-  addRemote({"ReaPack",
+  m_remotes.add({"ReaPack",
     "https://github.com/cfillion/reapack/raw/master/index.xml"});
 }
 
@@ -78,11 +78,6 @@ void Config::write()
   writeRegistry();
 }
 
-void Config::addRemote(const Remote &remote)
-{
-  m_remotes[remote.first] = remote.second;
-}
-
 void Config::readRemotes()
 {
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
@@ -92,7 +87,7 @@ void Config::readRemotes()
     const string url = getString(REMOTES_GRP, ArrayKey(URL_KEY, i));
 
     if(!name.empty() && !url.empty())
-      addRemote({name, url});
+      m_remotes.add({name, url});
   }
 }
 
@@ -102,8 +97,8 @@ void Config::writeRemotes()
   m_remotesIniSize = max(m_remotes.size(), m_remotesIniSize);
 
   for(auto it = m_remotes.begin(); it != m_remotes.end(); it++, i++) {
-    setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), it->first);
-    setString(REMOTES_GRP, ArrayKey(URL_KEY, i), it->second);
+    setString(REMOTES_GRP, ArrayKey(NAME_KEY, i), it->name());
+    setString(REMOTES_GRP, ArrayKey(URL_KEY, i), it->url());
   }
 
   cleanupArray(REMOTES_GRP, NAME_KEY, i, m_remotesIniSize);

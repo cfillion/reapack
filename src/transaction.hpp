@@ -50,7 +50,7 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
-  void fetch(const RemoteMap &);
+  void fetch(const RemoteList *);
   void fetch(const Remote &);
   void run();
   void cancel();
