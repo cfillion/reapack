@@ -67,6 +67,11 @@ TEST_CASE("future version", M) {
   }
 }
 
+TEST_CASE("unicode database path", M) {
+  Database *db = Database::load("a", DBPATH "Новая папка.xml");
+  DBPTR(db);
+}
+
 TEST_CASE("empty database name", M) {
   try {
     Database cat{string()};
