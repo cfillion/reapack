@@ -162,13 +162,3 @@ Remote RemoteList::get(const string &name) const
   else
     return it->second;
 }
-
-bool RemoteList::hasUrl(const string &url) const
-{
-  for(const Remote &r : m_remotes | boost::adaptors::map_values) {
-    if(r.url() == url)
-      return true;
-  }
-
-  return false;
-}

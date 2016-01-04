@@ -111,14 +111,12 @@ TEST_CASE("add remotes to list", M) {
   REQUIRE(list.empty());
   REQUIRE(list.size() == 0);
   REQUIRE_FALSE(list.hasName("name"));
-  REQUIRE_FALSE(list.hasUrl("url"));
 
   list.add({"name", "url"});
 
   REQUIRE_FALSE(list.empty());
   REQUIRE(list.size() == 1);
   REQUIRE(list.hasName("name"));
-  REQUIRE(list.hasUrl("url"));
 }
 
 TEST_CASE("add invalid remote to list", M) {
@@ -135,8 +133,7 @@ TEST_CASE("replace remote", M) {
   list.add({"name", "url2"});
 
   REQUIRE(list.size() == 1);
-  REQUIRE_FALSE(list.hasUrl("url1"));
-  REQUIRE(list.hasUrl("url2"));
+  REQUIRE(list.get("name").url() == "url2");
 };
 
 TEST_CASE("get remote by name", M) {

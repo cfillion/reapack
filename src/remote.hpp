@@ -76,7 +76,6 @@ public:
   size_t size() const { return m_remotes.size(); }
   bool hasName(const std::string &name) const
   { return m_remotes.count(name) > 0; }
-  bool hasUrl(const std::string &url) const;
 
   auto begin() const -> decltype(boost::adaptors::values(m_remotes).begin())
   { return boost::adaptors::values(m_remotes).begin(); }
