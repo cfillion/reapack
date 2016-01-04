@@ -43,12 +43,16 @@ static bool ValidateUrl(const string &url)
   return !url.empty();
 }
 
-auto Remote::fromFile(const string &path, Remote *remote) -> ReadCode
+Remote Remote::fromFile(const string &path, ReadCode *code)
 {
   ifstream file(make_autostring(path));
 
-  if(!file)
-    return ReadFailure;
+  if(!file) {
+    if(code)
+      *code = ReadFailure;
+
+    return {};
+  }
 
   string name;
   getline(file, name);
@@ -58,16 +62,23 @@ auto Remote::fromFile(const string &path, Remote *remote) -> ReadCode
 
   file.close();
 
+  if(!ValidateName(name)) {
+    if(code)
+      *code = InvalidName;
 
-  if(!ValidateName(name))
-    return InvalidName;
-  else if(!ValidateUrl(url))
-    return InvalidUrl;
+    return {};
+  }
+  else if(!ValidateUrl(url)) {
+    if(code)
+      *code = InvalidUrl;
 
-  remote->setName(name);
-  remote->setUrl(url);
+    return {};
+  }
 
-  return Success;
+  if(code)
+    *code = Success;
+
+  return {name, url};
 }
 
 Remote Remote::fromString(const string &data, ReadCode *code)

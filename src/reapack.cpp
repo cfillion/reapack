@@ -112,15 +112,18 @@ void ReaPack::importRemote()
   if(!GetUserFileNameForRead(&path[0], title, "ReaPackRemote"))
     return;
 
-  Remote remote;
+  Remote::ReadCode code;
+  const Remote remote = Remote::fromFile(path, &code);
 
-  switch(Remote::fromFile(path, &remote)) {
+  switch(code) {
   case Remote::ReadFailure:
     ShowMessageBox(strerror(errno), title, 0);
     return;
   case Remote::InvalidName:
+    ShowMessageBox("Invalid .ReaPackRemote file (invalid name)!", title, 0);
+    return;
   case Remote::InvalidUrl:
-    ShowMessageBox("Invalid .ReaPackRemote file!", title, 0);
+    ShowMessageBox("Invalid .ReaPackRemote file (invalid url)!", title, 0);
     return;
   default:
     break;

@@ -32,7 +32,7 @@ public:
     InvalidUrl,
   };
 
-  static ReadCode fromFile(const std::string &path, Remote *remote);
+  static Remote fromFile(const std::string &path, ReadCode *code = nullptr);
   static Remote fromString(const std::string &data, ReadCode *code = nullptr);
 
   Remote();

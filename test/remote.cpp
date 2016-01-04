@@ -151,13 +151,15 @@ TEST_CASE("remote from file", M) {
   Remote remote;
 
   SECTION("not found") {
-    const auto code = Remote::fromFile(RPATH "404.ReaPackRemote", &remote);
+    Remote::ReadCode code;
+    const Remote remote = Remote::fromFile(RPATH "404.ReaPackRemote", &code);
     REQUIRE(code == Remote::ReadFailure);
     REQUIRE_FALSE(remote.isValid());
   }
 
   SECTION("valid") {
-    const auto code = Remote::fromFile(RPATH "test.ReaPackRemote", &remote);
+    Remote::ReadCode code;
+    const Remote remote = Remote::fromFile(RPATH "test.ReaPackRemote", &code);
     REQUIRE(code == Remote::Success);
     REQUIRE(remote.isValid());
     REQUIRE(remote.name() == "name");
@@ -165,24 +167,26 @@ TEST_CASE("remote from file", M) {
   }
 
   SECTION("invalid name") {
-    const auto code = Remote::fromFile(
-      RPATH "invalid_name.ReaPackRemote", &remote);
+    Remote::ReadCode code;
+    const Remote remote = Remote::fromFile(
+      RPATH "invalid_name.ReaPackRemote", &code);
 
     REQUIRE(code == Remote::InvalidName);
     REQUIRE_FALSE(remote.isValid());
   }
 
   SECTION("invalid url") {
-    const auto code = Remote::fromFile(
-      RPATH "missing_url.ReaPackRemote", &remote);
+    Remote::ReadCode code;
+    const Remote remote = Remote::fromFile(
+      RPATH "missing_url.ReaPackRemote", &code);
 
     REQUIRE(code == Remote::InvalidUrl);
     REQUIRE_FALSE(remote.isValid());
   }
 
   SECTION("unicode name") {
-    const auto code = Remote::fromFile(
-      RPATH "Новая папка.ReaPackRemote", &remote);
+    Remote::ReadCode code;
+    Remote::fromFile(RPATH "Новая папка.ReaPackRemote", &code);
 
     REQUIRE(code == Remote::Success);
   }
