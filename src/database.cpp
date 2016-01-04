@@ -17,17 +17,36 @@
 
 #include "database.hpp"
 
+#include "encoding.hpp"
 #include "errors.hpp"
 
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;
 
-Database *Database::load(const string &name, const char *file)
+static FILE *OpenFile(const char *path)
 {
-  TiXmlDocument doc(file);
+  #ifdef _WIN32
+  FILE *file = nullptr;
+  _wfopen_s(&file, make_autostring(path).c_str(), L"rb");
+  return file;
+  #else
+  return fopen(path, "rb");
+  #endif
+}
 
-  if(!doc.LoadFile())
+Database *Database::load(const string &name, const char *path)
+{
+  TiXmlDocument doc;
+
+  FILE *file = OpenFile(path);
+
+  const bool success = doc.LoadFile(file);
+
+  if(file)
+    fclose(file);
+
+  if(!success)
     throw reapack_error("failed to read database");
 
   TiXmlHandle docHandle(&doc);
