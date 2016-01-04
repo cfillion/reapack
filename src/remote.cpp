@@ -40,7 +40,16 @@ static bool ValidateName(const string &name)
 
 static bool ValidateUrl(const string &url)
 {
-  return !url.empty();
+  using namespace std::regex_constants;
+
+  // see http://tools.ietf.org/html/rfc3986#section-2
+  static const regex pattern(
+    "^(?:[a-z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+$", icase);
+
+  smatch match;
+  regex_match(url, match, pattern);
+
+  return !match.empty();
 }
 
 Remote Remote::fromFile(const string &path, ReadCode *code)

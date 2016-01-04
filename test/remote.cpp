@@ -48,6 +48,16 @@ TEST_CASE("construct invalid remote", M) {
       REQUIRE(string(e.what()) == "invalid url");
     }
   }
+
+  SECTION("invalid url") {
+    try {
+      Remote remote("name", "hello world");
+      FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "invalid url");
+    }
+  }
 }
 
 TEST_CASE("set invalid values", M) {
@@ -65,13 +75,23 @@ TEST_CASE("set invalid values", M) {
 
   SECTION("url") {
     try {
-      remote.setUrl({});
+      remote.setUrl("http://google.com/hello?invalid=|");
       FAIL();
     }
     catch(const reapack_error &e) {
       REQUIRE(string(e.what()) == "invalid url");
     }
   }
+}
+
+TEST_CASE("valide remote urls", M) {
+  Remote remote;
+
+  SECTION("uppercase")
+    remote.setUrl("https://google.com/AAA");
+
+  SECTION("escape sequence")
+    remote.setUrl("https://google.com/?q=hello%20world");
 }
 
 TEST_CASE("null remote", M) {
@@ -175,7 +195,7 @@ TEST_CASE("remote from file", M) {
   SECTION("invalid url") {
     Remote::ReadCode code;
     const Remote remote = Remote::fromFile(
-      RPATH "missing_url.ReaPackRemote", &code);
+      RPATH "invalid_url.ReaPackRemote", &code);
 
     REQUIRE(code == Remote::InvalidUrl);
     REQUIRE_FALSE(remote.isValid());
