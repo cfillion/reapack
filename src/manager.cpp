@@ -145,6 +145,18 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 
 void Manager::apply()
 {
+  RemoteList *list = m_reapack->config()->remotes();
+
+  for(auto it = m_enableOverrides.begin(); it != m_enableOverrides.end(); it++) {
+    const string &name = it->first;
+    const bool enable = it->second;
+
+    Remote remote = list->get(name);
+    remote.setEnabled(enable);
+    list->add(remote);
+  }
+
+  m_reapack->config()->write();
 }
 
 void Manager::reset()
