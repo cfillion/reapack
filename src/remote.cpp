@@ -171,3 +171,17 @@ Remote RemoteList::get(const string &name) const
   else
     return it->second;
 }
+
+vector<Remote> RemoteList::getEnabled() const
+{
+  vector<Remote> list;
+
+  for(const auto &pair : m_remotes) {
+    const Remote &remote = pair.second;
+
+    if(remote.isEnabled())
+      list.push_back(remote);
+  }
+
+  return list;
+}

@@ -44,12 +44,6 @@ Transaction::~Transaction()
     delete db;
 }
 
-void Transaction::fetch(const RemoteList *remotes)
-{
-  for(const Remote &remote : *remotes)
-    fetch(remote);
-}
-
 void Transaction::fetch(const Remote &remote)
 {
   Download *dl = new Download(remote.name(), remote.url());

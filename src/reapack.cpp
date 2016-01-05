@@ -90,18 +90,22 @@ bool ReaPack::execActions(const int id, const int)
 
 void ReaPack::synchronize()
 {
-  const RemoteList *remotes = m_config->remotes();
+  const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
-  if(remotes->empty()) {
-    ShowMessageBox("No remote repository configured, nothing to do!",
+  if(remotes.empty()) {
+    ShowMessageBox("No remote repository enabled, nothing to do!",
       "ReaPack", 0);
 
     return;
   }
 
   Transaction *t = createTransaction();
-  if(t)
-    m_transaction->fetch(remotes);
+
+  if(!t)
+    return;
+
+  for(const Remote &remote : remotes)
+    t->fetch(remote);
 }
 
 void ReaPack::importRemote()

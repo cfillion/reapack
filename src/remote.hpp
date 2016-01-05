@@ -18,10 +18,10 @@
 #ifndef REAPACK_REMOTE_HPP
 #define REAPACK_REMOTE_HPP
 
-#include <boost/optional.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <map>
 #include <string>
+#include <vector>
 
 class Remote {
 public:
@@ -84,6 +84,7 @@ public:
   { return boost::adaptors::values(m_remotes).end(); }
 
   Remote get(const std::string &name) const;
+  std::vector<Remote> getEnabled() const;
 };
 
 #endif

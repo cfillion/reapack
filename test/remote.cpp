@@ -249,3 +249,14 @@ TEST_CASE("serialize remote", M) {
     REQUIRE(Remote("name", "url", false).toString() == "name|url|0");
   }
 }
+
+TEST_CASE("get enabled remotes", M) {
+  RemoteList list;
+  list.add({"hello", "url1", true});
+  list.add({"world", "url2", false});
+
+  const vector<Remote> array = list.getEnabled();
+
+  REQUIRE(array.size() == 1);
+  REQUIRE(array[0].name() == "hello");
+}
