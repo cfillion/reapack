@@ -135,7 +135,7 @@ void ReaPack::importRemote()
 
   RemoteList *remotes = m_config->remotes();
 
-  const Remote existing = remotes->get(remote.name());
+  const Remote &existing = remotes->get(remote.name());
 
   if(!existing.isNull()) {
     if(existing.isProtected()) {

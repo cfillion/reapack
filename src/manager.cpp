@@ -99,7 +99,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
   menu.disable();
 
-  const Remote remote = currentRemote();
+  const Remote &remote = currentRemote();
 
   if(!remote.isNull()) {
     if(isRemoteEnabled(remote))
@@ -124,7 +124,7 @@ void Manager::refresh()
 
 void Manager::setRemoteEnabled(const bool enabled)
 {
-  Remote remote = currentRemote();
+  const Remote &remote = currentRemote();
 
   if(remote.isNull())
     return;
@@ -147,9 +147,9 @@ void Manager::apply()
 {
   RemoteList *list = m_reapack->config()->remotes();
 
-  for(auto it = m_enableOverrides.begin(); it != m_enableOverrides.end(); it++) {
-    const string &name = it->first;
-    const bool enable = it->second;
+  for(const auto &pair : m_enableOverrides) {
+    const string &name = pair.first;
+    const bool enable = pair.second;
 
     Remote remote = list->get(name);
     remote.setEnabled(enable);
@@ -166,8 +166,8 @@ void Manager::reset()
 
 ListView::Row Manager::makeRow(const Remote &remote) const
 {
-  const auto_string name = make_autostring(remote.name());
-  const auto_string url = make_autostring(remote.url());
+  const auto_string &name = make_autostring(remote.name());
+  const auto_string &url = make_autostring(remote.url());
 
   return {name, url, isRemoteEnabled(remote) ?
     AUTO_STR("Enabled") : AUTO_STR("Disabled")};
@@ -180,7 +180,7 @@ Remote Manager::currentRemote() const
   if(index < 0)
     return {};
 
-  const string remoteName = from_autostring(m_list->getRow(index)[0]);
+  const string &remoteName = from_autostring(m_list->getRow(index)[0]);
 
   return m_reapack->config()->remotes()->get(remoteName);
 }

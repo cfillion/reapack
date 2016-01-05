@@ -21,6 +21,7 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
+#include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
 using namespace std;
@@ -57,7 +58,7 @@ void Report::onInit()
   if(updates)
     formatUpdates(text);
 
-  auto_string str = make_autostring(text.str());
+  const auto_string &str = make_autostring(text.str());
   SetDlgItemText(handle(), IDC_REPORT, str.c_str());
 }
 
@@ -88,9 +89,7 @@ void Report::formatUpdates(ostringstream &text)
     const Registry::QueryResult &regEntry = entry.second;
     const VersionSet &versions = pkg->versions();
 
-    for(auto it = versions.rbegin(); it != versions.rend(); it++) {
-      Version *ver = *it;
-
+    for(Version *ver : versions | boost::adaptors::reversed) {
       if(ver->code() <= regEntry.versionCode)
         break;
 
