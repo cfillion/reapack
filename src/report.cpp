@@ -76,8 +76,10 @@ void Report::formatNewPackages(ostringstream &text)
 {
   text << NL << SEP << " New packages: " << SEP << NL;
 
-  for(const Transaction::PackageEntry &entry : m_transaction->newPackages())
-    text << NL << entry.first->lastVersion()->fullName() << NL;
+  for(const Transaction::PackageEntry &entry : m_transaction->newPackages()) {
+    Version *ver = entry.first;
+    text << NL << ver->fullName() << NL;
+  }
 }
 
 void Report::formatUpdates(ostringstream &text)
@@ -85,7 +87,7 @@ void Report::formatUpdates(ostringstream &text)
   text << NL << SEP << " Updates: " << SEP << NL;
 
   for(const Transaction::PackageEntry &entry : m_transaction->updates()) {
-    Package *pkg = entry.first;
+    Package *pkg = entry.first->package();
     const Registry::QueryResult &regEntry = entry.second;
     const VersionSet &versions = pkg->versions();
 

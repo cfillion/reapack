@@ -52,6 +52,8 @@ public:
     const std::string &url, Version * = nullptr);
 
   Platform platform() const { return m_platform; }
+
+  bool isMain() const { return m_file.empty(); }
   const std::string &file() const;
   const std::string &url() const { return m_url; }
 

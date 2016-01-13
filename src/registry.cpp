@@ -23,18 +23,18 @@
 
 using namespace std;
 
-void Registry::push(Package *pkg)
+void Registry::push(Version *ver)
 {
-  Version *lastVer = pkg->lastVersion();
+  Package *pkg = ver->package();
 
-  if(!lastVer)
+  if(!pkg)
     return;
 
   const Path id = pkg->targetPath() + pkg->name();
-  push(id.join('/'), lastVer->name());
+  push(id.join('/'), ver->name());
 }
 
-void Registry::push(const std::string &key, const std::string &value)
+void Registry::push(const string &key, const string &value)
 {
   m_map[key] = value;
 }

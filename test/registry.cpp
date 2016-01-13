@@ -31,7 +31,7 @@ TEST_CASE("query up to date pacakge", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  reg.push(&pkg);
+  reg.push(ver);
 
   const Registry::QueryResult res = reg.query(&pkg);
   REQUIRE(res.status == Registry::UpToDate);
@@ -45,14 +45,14 @@ TEST_CASE("bump version", M) {
   ver2->addSource(new Source(Source::GenericPlatform, "file", "url", ver2));
 
   Registry reg;
-  reg.push(&pkg);
+  reg.push(ver);
   pkg.addVersion(ver2);
 
   const Registry::QueryResult res1 = reg.query(&pkg);
   REQUIRE(res1.status == Registry::UpdateAvailable);
   REQUIRE(res1.versionCode == Version("1.0").code());
 
-  reg.push(&pkg);
+  reg.push(ver2);
   const Registry::QueryResult res2 = reg.query(&pkg);
   REQUIRE(res2.status == Registry::UpToDate);
   REQUIRE(res2.versionCode == Version("2.0").code());

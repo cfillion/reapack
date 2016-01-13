@@ -82,7 +82,9 @@ void Transaction::prepare()
     for(Package *pkg : db->packages()) {
       Registry::QueryResult entry = m_registry->query(pkg);
 
-      set<Path> files = pkg->lastVersion()->files();
+      Version *ver = pkg->lastVersion();
+
+      set<Path> files = ver->files();
       registerFiles(files);
 
       if(entry.status == Registry::UpToDate) {
@@ -92,7 +94,7 @@ void Transaction::prepare()
           entry.status = Registry::Uninstalled;
       }
 
-      m_packages.push_back({pkg, entry});
+      m_packages.push_back({ver, entry});
     }
   }
 
@@ -105,27 +107,27 @@ void Transaction::prepare()
 void Transaction::run()
 {
   for(const PackageEntry &entry : m_packages) {
-    Package *pkg = entry.first;
+    Version *ver = entry.first;
     const Registry::QueryResult regEntry = entry.second;
 
     Task *task = new Task(this);
 
     try {
-      task->install(entry.first->lastVersion());
+      task->install(ver);
       task->onCommit([=] {
         if(regEntry.status == Registry::UpdateAvailable)
           m_updates.push_back(entry);
         else
           m_new.push_back(entry);
 
-        m_registry->push(pkg);
+        m_registry->push(ver);
       });
       task->onFinish(bind(&Transaction::finish, this));
 
       m_tasks.push_back(task);
     }
     catch(const reapack_error &e) {
-      addError(e.what(), pkg->fullName());
+      addError(e.what(), ver->fullName());
       delete task;
     }
   }

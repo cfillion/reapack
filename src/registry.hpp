@@ -23,6 +23,7 @@
 #include <string>
 
 class Package;
+class Version;
 
 class Registry {
 public:
@@ -39,11 +40,11 @@ public:
     uint64_t versionCode;
   };
 
-  void push(Package *pkg);
+  void push(Version *);
   void push(const std::string &key, const std::string &value);
 
   size_t size() const { return m_map.size(); }
-  QueryResult query(Package *pkg) const;
+  QueryResult query(Package *) const;
 
   Map::const_iterator begin() const { return m_map.begin(); }
   Map::const_iterator end() const { return m_map.end(); }
