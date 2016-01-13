@@ -5,9 +5,9 @@
 Download these files into the `vendor` directory:
 
 1. reaper_plugin.h from
-  [reaper.fm](http://www.reaper.fm/sdk/plugin/reaper_plugin.h)
+  [Jeff0S/sws](https://github.com/Jeff0S/sws/raw/master/reaper/reaper_plugin.h)
 2. catch.hpp from
-  [github.com](https://github.com/philsquared/Catch/raw/master/single_include/catch.hpp)
+  [philsquared/Catch](https://github.com/philsquared/Catch/raw/master/single_include/catch.hpp)
 3. [WDL](http://www.cockos.com/wdl/) from Cockos:
   `git clone http://www-dev.cockos.com/wdl/WDL.git vendor/WDL`
 4. reaper_plugin_functions.h from the REAPER action

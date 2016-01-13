@@ -5,7 +5,7 @@ CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -Wno-unused-function
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong
 CXXFLAGS += -pipe -fPIC -O2 -std=c++14
-CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL
+CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
 CXXFLAGS += -arch @(OSXARCH)
 
