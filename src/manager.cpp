@@ -180,7 +180,8 @@ Remote Manager::currentRemote() const
   if(index < 0)
     return {};
 
-  const string &remoteName = from_autostring(m_list->getRow(index)[0]);
+  const ListView::Row &row = m_list->getRow(index);
+  const string &remoteName = from_autostring(row[0]);
 
   return m_reapack->config()->remotes()->get(remoteName);
 }
