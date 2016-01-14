@@ -23,6 +23,7 @@
 #include <string>
 
 class Package;
+class Path;
 class Version;
 
 class Registry {
@@ -42,6 +43,8 @@ public:
 
   void push(Version *);
   void push(const std::string &key, const std::string &value);
+
+  bool addToREAPER(Version *ver, const Path &root);
 
   size_t size() const { return m_map.size(); }
   QueryResult query(Package *) const;

@@ -121,6 +121,13 @@ void Transaction::run()
           m_new.push_back(entry);
 
         m_registry->push(ver);
+
+        if(!m_registry->addToREAPER(ver, m_root)) {
+          addError(
+            "Cannot register the package in REAPER. "
+            "Are you using REAPER v5.12 or more recent?", ver->fullName()
+          );
+        }
       });
       task->onFinish(bind(&Transaction::finish, this));
 

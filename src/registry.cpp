@@ -21,6 +21,8 @@
 #include "package.hpp"
 #include "path.hpp"
 
+#include <reaper_plugin_functions.h>
+
 using namespace std;
 
 void Registry::push(Version *ver)
@@ -62,4 +64,23 @@ Registry::QueryResult Registry::query(Package *pkg) const
   catch(const reapack_error &) {}
 
   return {status, versionCode};
+}
+
+bool Registry::addToREAPER(Version *ver, const Path &root)
+{
+  if(ver->package()->type() != Package::ScriptType)
+    return false;
+
+  Source *src = ver->mainSource();
+
+  if(!src)
+    return false;
+
+  const int section = 0; // 0 = main section
+  const string &path = (root + src->targetPath()).join();
+
+  custom_action_register_t ca{section, nullptr, path.c_str()};
+  const int id = plugin_register("custom_action", (void *)&ca);
+
+  return id > 0;
 }

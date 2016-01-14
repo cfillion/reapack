@@ -122,6 +122,7 @@ TEST_CASE("add source", M) {
   Source *src = new Source(Source::GenericPlatform, "a", "b", &ver);
   ver.addSource(src);
 
+  CHECK(ver.mainSource() == nullptr);
   CHECK(ver.sources().size() == 1);
 
   REQUIRE(src->version() == &ver);
@@ -142,6 +143,15 @@ TEST_CASE("add owned source", M) {
     delete src;
     REQUIRE(string(e.what()) == "source belongs to another version");
   }
+}
+
+TEST_CASE("add main source", M) {
+  MAKE_VERSION
+
+  Source *src = new Source(Source::GenericPlatform, string(), "b", &ver);
+  ver.addSource(src);
+
+  REQUIRE(ver.mainSource() == src);
 }
 
 TEST_CASE("list files", M) {

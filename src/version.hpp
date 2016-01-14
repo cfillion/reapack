@@ -43,6 +43,7 @@ public:
   void addSource(Source *source);
   const std::multimap<Path, Source *> &sources() const { return m_sources; }
   Source *source(const size_t) const;
+  Source *mainSource() const { return m_mainSource; }
 
   const std::set<Path> &files() const { return m_files; }
 
@@ -53,6 +54,7 @@ private:
   uint64_t m_code;
 
   Package *m_package;
+  Source *m_mainSource;
 
   std::string m_changelog;
   std::multimap<Path, Source *> m_sources;

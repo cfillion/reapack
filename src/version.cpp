@@ -27,7 +27,7 @@
 using namespace std;
 
 Version::Version(const std::string &str, Package *pkg)
-  : m_name(str), m_code(0), m_package(pkg)
+  : m_name(str), m_code(0), m_package(pkg), m_mainSource(nullptr)
 {
   static const regex pattern("(\\d+)");
 
@@ -99,6 +99,9 @@ void Version::addSource(Source *source)
   const Path path = source->targetPath();
   m_files.insert(path);
   m_sources.insert({path, source});
+
+  if(source->isMain())
+    m_mainSource = source;
 }
 
 void Version::setChangelog(const std::string &changelog)
