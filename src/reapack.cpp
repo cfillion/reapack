@@ -44,6 +44,8 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
+
+  Download::Init();
 }
 
 void ReaPack::cleanup()
@@ -55,6 +57,8 @@ void ReaPack::cleanup()
 
   Dialog::Destroy(m_progress);
   Dialog::Destroy(m_manager);
+
+  Download::Cleanup();
 }
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)

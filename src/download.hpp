@@ -33,6 +33,9 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
+  static void Init();
+  static void Cleanup();
+
   Download(const std::string &name, const std::string &url);
   ~Download();
 

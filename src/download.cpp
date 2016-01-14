@@ -30,6 +30,16 @@ size_t Download::s_running = 0;
 static const int DOWNLOAD_TIMEOUT = 5;
 static const int CONCURRENT_DOWNLOADS = 3;
 
+void Download::Init()
+{
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+}
+
+void Download::Cleanup()
+{
+  curl_global_cleanup();
+}
+
 Download::Download(const string &name, const string &url)
   : m_name(name), m_url(url), m_threadHandle(nullptr)
 {
