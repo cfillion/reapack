@@ -46,12 +46,11 @@ public:
   Transaction(Registry *reg, const Path &root);
   ~Transaction();
 
-  void onReady(const Callback &callback) { m_onReady.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
-  void fetch(const Remote &);
-  void run();
+  void synchronize(const Remote &);
+  void install();
   void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
@@ -62,9 +61,16 @@ public:
   const ErrorList &errors() const { return m_errors; }
 
 private:
+  enum Step
+  {
+    Unknown,
+    Synchronize,
+    Install,
+  };
+
   friend Task;
 
-  void prepare();
+  void updateAll();
   void finish();
 
   void saveDatabase(Download *);
@@ -78,6 +84,7 @@ private:
 
   Path m_root;
   Path m_dbPath;
+  Step m_step;
   bool m_isCancelled;
 
   DatabaseList m_databases;
@@ -91,7 +98,6 @@ private:
   std::set<Path> m_files;
   bool m_hasConflicts;
 
-  Signal m_onReady;
   Signal m_onFinish;
   Signal m_onDestroy;
 };

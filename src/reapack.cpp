@@ -109,7 +109,7 @@ void ReaPack::synchronize()
     return;
 
   for(const Remote &remote : remotes)
-    t->fetch(remote);
+    t->synchronize(remote);
 }
 
 void ReaPack::importRemote()
@@ -173,7 +173,7 @@ void ReaPack::importRemote()
 
   Transaction *t = createTransaction();
   if(t)
-    t->fetch(remote);
+    t->synchronize(remote);
 }
 
 void ReaPack::manageRemotes()
@@ -195,11 +195,6 @@ Transaction *ReaPack::createTransaction()
 
   m_progress->setTransaction(m_transaction);
   m_progress->show();
-
-  m_transaction->onReady([=] {
-    // TODO: display the package list with the changelogs
-    m_transaction->run();
-  });
 
   m_transaction->onFinish([=] {
     if(m_transaction->isCancelled())

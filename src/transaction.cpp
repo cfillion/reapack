@@ -28,11 +28,21 @@
 using namespace std;
 
 Transaction::Transaction(Registry *reg, const Path &root)
-  : m_registry(reg), m_root(root), m_isCancelled(false), m_hasConflicts(false)
+  : m_registry(reg), m_root(root), m_step(Unknown),
+    m_isCancelled(false), m_hasConflicts(false)
 {
   m_dbPath = m_root + "ReaPack";
 
-  m_queue.onDone(bind(&Transaction::finish, this));
+  m_queue.onDone([=](void *) {
+    switch(m_step) {
+    case Synchronize:
+      updateAll();
+      break;
+    default:
+      finish();
+      break;
+    }
+  });
 
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
 }
@@ -46,16 +56,14 @@ Transaction::~Transaction()
     delete db;
 }
 
-void Transaction::fetch(const Remote &remote)
+void Transaction::synchronize(const Remote &remote)
 {
+  m_step = Synchronize;
+
   Download *dl = new Download(remote.name(), remote.url());
   dl->onFinish(bind(&Transaction::saveDatabase, this, dl));
 
   m_queue.push(dl);
-
-  // execute prepare after the download is deleted, in case finish is called
-  // the queue will also not contain the download anymore
-  dl->onFinish(bind(&Transaction::prepare, this));
 }
 
 void Transaction::saveDatabase(Download *dl)
@@ -75,11 +83,8 @@ void Transaction::saveDatabase(Download *dl)
   }
 }
 
-void Transaction::prepare()
+void Transaction::updateAll()
 {
-  if(!m_queue.idle())
-    return;
-
   for(Database *db : m_databases) {
     for(Package *pkg : db->packages()) {
       Registry::QueryResult entry = m_registry->query(pkg);
@@ -103,11 +108,13 @@ void Transaction::prepare()
   if(m_packages.empty() || m_hasConflicts)
     finish();
   else
-    m_onReady();
+    install();
 }
 
-void Transaction::run()
+void Transaction::install()
 {
+  m_step = Install;
+
   for(const PackageEntry &entry : m_packages) {
     Version *ver = entry.first;
     const Registry::QueryResult regEntry = entry.second;
