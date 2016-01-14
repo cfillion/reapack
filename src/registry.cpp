@@ -76,10 +76,10 @@ bool Registry::addToREAPER(Version *ver, const Path &root)
   if(!src)
     return false;
 
-  const int section = 0; // 0 = main section
+  enum { MainSection = 0 };
   const string &path = (root + src->targetPath()).join();
 
-  custom_action_register_t ca{section, nullptr, path.c_str()};
+  custom_action_register_t ca{MainSection, nullptr, path.c_str()};
   const int id = plugin_register("custom_action", (void *)&ca);
 
   return id > 0;

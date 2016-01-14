@@ -112,8 +112,6 @@ void Dialog::Destroy(Dialog *dlg)
 
 void Dialog::show()
 {
-  center();
-
   ShowWindow(m_handle, SW_SHOW);
 }
 
@@ -160,6 +158,7 @@ HWND Dialog::getItem(const int idc)
 
 void Dialog::onShow()
 {
+  center();
 }
 
 void Dialog::onHide()
