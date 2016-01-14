@@ -32,6 +32,8 @@ Transaction::Transaction(Registry *reg, const Path &root)
 {
   m_dbPath = m_root + "ReaPack";
 
+  m_queue.onDone(bind(&Transaction::finish, this));
+
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
 }
 
@@ -129,7 +131,6 @@ void Transaction::run()
           );
         }
       });
-      task->onFinish(bind(&Transaction::finish, this));
 
       m_tasks.push_back(task);
     }
@@ -175,8 +176,7 @@ bool Transaction::saveFile(Download *dl, const Path &path)
 
 void Transaction::finish()
 {
-  if(!m_queue.idle())
-    return;
+  // called when the download queue is done, or if there is nothing to do
 
   if(!m_isCancelled) {
     for(Task *task : m_tasks)

@@ -44,7 +44,7 @@ Download::~Download()
 void Download::reset()
 {
   m_aborted = false;
-  m_finished = false;
+  m_running = false;
   m_status = 0;
   m_contents.clear();
 }
@@ -72,6 +72,7 @@ void Download::start()
 
   reset();
 
+  m_running = true;
   m_onStart();
 
   RegisterStart();
@@ -184,7 +185,7 @@ void Download::finish(const int status, const string &contents)
 
   WDL_MutexLock lock(&m_mutex);
 
-  m_finished = true;
+  m_running = false;
   m_status = status;
   m_contents = contents;
 
@@ -204,11 +205,11 @@ void Download::finishInMainThread()
   m_onDestroy();
 }
 
-bool Download::isFinished()
+bool Download::isRunning()
 {
   WDL_MutexLock lock(&m_mutex);
 
-  return m_finished;
+  return m_running;
 }
 
 bool Download::isAborted()
@@ -242,6 +243,9 @@ void DownloadQueue::push(Download *dl)
 
   dl->onDestroy([=] {
      delete dl;
+
+    if(idle())
+      m_onDone(nullptr);
   });
 
   m_queue.push(dl);

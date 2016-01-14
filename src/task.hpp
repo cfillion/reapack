@@ -35,7 +35,6 @@ public:
   Task(Transaction *parent);
 
   void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
-  void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
 
   void install(Version *ver);
   void commit();
@@ -54,11 +53,9 @@ private:
 
   Transaction *m_transaction;
   bool m_isCancelled;
-  std::vector<Download *> m_remaining;
   std::vector<PathPair> m_files;
 
   Signal m_onCommit;
-  Signal m_onFinish;
 };
 
 #endif

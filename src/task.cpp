@@ -42,12 +42,7 @@ void Task::install(Version *ver)
     Download *dl = new Download(src->fullName(), src->url());
     dl->onFinish(bind(&Task::saveSource, this, dl, src));
 
-    m_remaining.push_back(dl);
     m_transaction->downloadQueue()->push(dl);
-
-    // executing finish after the download is deleted
-    // prevents the download queue from being deleted before the download is
-    dl->onFinish(bind(&Task::finish, this));
 
     // skip duplicate files
     do { it++; } while(it != sources.end() && path == it->first);
@@ -56,8 +51,6 @@ void Task::install(Version *ver)
 
 void Task::saveSource(Download *dl, Source *src)
 {
-  m_remaining.erase(remove(m_remaining.begin(), m_remaining.end(), dl));
-
   if(m_isCancelled)
     return;
 
@@ -75,20 +68,11 @@ void Task::saveSource(Download *dl, Source *src)
   }
 }
 
-void Task::finish()
-{
-  if(!m_remaining.empty())
-    return;
-
-  m_onFinish();
-}
-
 void Task::cancel()
 {
   m_isCancelled = true;
 
-  for(Download *dl : m_remaining)
-    dl->abort();
+  // it's the transaction queue's job to abort the running downloads, not ours
 
   rollback();
 }

@@ -41,7 +41,7 @@ public:
   int status() const { return m_status; }
   const std::string &contents() const { return m_contents; }
 
-  bool isFinished();
+  bool isRunning();
   bool isAborted();
 
   void onStart(const Callback &callback) { m_onStart.connect(callback); }
@@ -75,7 +75,7 @@ private:
 
   HANDLE m_threadHandle;
   bool m_aborted;
-  bool m_finished;
+  bool m_running;
   int m_status;
   std::string m_contents;
 
@@ -100,6 +100,7 @@ public:
   bool idle() const { return m_queue.empty() && m_running.empty(); }
 
   void onPush(const Callback &callback) { m_onPush.connect(callback); }
+  void onDone(const Callback &callback) { m_onDone.connect(callback); }
 
 private:
   void clear();
@@ -108,6 +109,7 @@ private:
   std::vector<Download *> m_running;
 
   Signal m_onPush;
+  Signal m_onDone;
 };
 
 #endif
