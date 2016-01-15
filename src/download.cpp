@@ -176,7 +176,7 @@ Download *Download::NextFinished()
   WDL_MutexLock lock(&s_mutex);
 
   if(!s_running)
-    plugin_register("-timer", (void*)TimerTick);
+    plugin_register("-timer", (void *)TimerTick);
 
   if(s_finished.empty())
     return nullptr;
@@ -204,8 +204,6 @@ void Download::finish(const int status, const string &contents)
 
 void Download::finishInMainThread()
 {
-  WDL_MutexLock lock(&m_mutex);
-
   if(m_threadHandle) {
     CloseHandle(m_threadHandle);
     m_threadHandle = nullptr;
