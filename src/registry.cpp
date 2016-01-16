@@ -25,6 +25,30 @@
 
 using namespace std;
 
+Registry::Registry(const std::string &filename)
+  : m_db(filename)
+{
+  m_db.query(
+    "PRAGMA foreign_keys = ON;"
+
+    "CREATE TABLE IF NOT EXISTS entries ("
+    "  package TEXT NOT NULL UNIQUE,"
+    "  version INTEGER NOT NULL"
+    ");"
+  );
+
+  m_insertEntry = m_db.prepare(
+    "INSERT OR REPLACE INTO entries "
+    "VALUES(?, ?);"
+  );
+
+  m_findEntry = m_db.prepare(
+    "SELECT rowid, version FROM entries "
+    "WHERE package = ? "
+    "LIMIT 1"
+  );
+}
+
 void Registry::push(Version *ver)
 {
   Package *pkg = ver->package();
@@ -32,38 +56,30 @@ void Registry::push(Version *ver)
   if(!pkg)
     return;
 
-  const Path id = pkg->targetPath() + pkg->name();
-  push(id.join('/'), ver->name());
-}
-
-void Registry::push(const string &key, const string &value)
-{
-  m_map[key] = value;
+  m_insertEntry->bind(1, hash(pkg).c_str());
+  m_insertEntry->bind(2, ver->code());
+  m_insertEntry->exec();
 }
 
 Registry::QueryResult Registry::query(Package *pkg) const
 {
-  const Path id = pkg->targetPath() + pkg->name();
-  const auto it = m_map.find(id.join('/'));
+  bool exists = false;
+  uint64_t version = 0;
 
-  if(it == m_map.end())
+  m_findEntry->bind(1, hash(pkg).c_str());
+  m_findEntry->exec([&] {
+    version = m_findEntry->uint64Column(1);
+    exists = true;
+    return false;
+  });
+
+  if(!exists)
     return {Uninstalled, 0};
 
   Version *lastVer = pkg->lastVersion();
-  const Status status = it->second == lastVer->name()
-    ? UpToDate : UpdateAvailable;
 
-  uint64_t versionCode = 0;
-
-  try {
-    if(status == UpdateAvailable)
-      versionCode = Version(it->second).code();
-    else
-      versionCode = lastVer->code();
-  }
-  catch(const reapack_error &) {}
-
-  return {status, versionCode};
+  const Status status = version == lastVer->code() ? UpToDate : UpdateAvailable;
+  return {status, version};
 }
 
 bool Registry::addToREAPER(Version *ver, const Path &root)
@@ -83,4 +99,9 @@ bool Registry::addToREAPER(Version *ver, const Path &root)
   const int id = plugin_register("custom_action", (void *)&ca);
 
   return id > 0;
+}
+
+string Registry::hash(Package *pkg) const
+{
+  return (pkg->targetPath() + pkg->name()).join('\30');
 }

@@ -1,0 +1,113 @@
+/* ReaPack: Package manager for REAPER
+ * Copyright (C) 2015-2016  Christian Fillion
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "sqlite.hpp"
+
+#include "errors.hpp"
+
+#include <sqlite3.h>
+
+using namespace std;
+using namespace SQLite;
+
+Database::Database(const string &filename)
+{
+  if(sqlite3_open(filename.c_str(), &m_db)) {
+    const auto &error = lastError();
+    sqlite3_close(m_db);
+
+    throw error;
+  }
+}
+
+Database::~Database()
+{
+  for(Statement *stmt : m_statements)
+    delete stmt;
+
+  sqlite3_close(m_db);
+}
+
+SQLite::Statement *Database::prepare(const char *sql)
+{
+  Statement *stmt = new Statement(sql, this);
+  m_statements.push_back(stmt);
+
+  return stmt;
+}
+
+void Database::query(const char *sql)
+{
+  if(sqlite3_exec(m_db, sql, nullptr, nullptr, nullptr) != SQLITE_OK)
+    throw lastError();
+}
+
+reapack_error Database::lastError() const
+{
+  return reapack_error(sqlite3_errmsg(m_db));
+}
+
+Statement::Statement(const char *sql, Database *db)
+  : m_db(db)
+{
+  if(sqlite3_prepare_v2(db->m_db, sql, -1, &m_stmt, nullptr) != SQLITE_OK)
+    throw m_db->lastError();
+}
+
+Statement::~Statement()
+{
+  sqlite3_finalize(m_stmt);
+}
+
+void Statement::bind(const int index, const char *text)
+{
+  if(sqlite3_bind_text(m_stmt, index, text, -1, SQLITE_TRANSIENT))
+    throw m_db->lastError();
+}
+
+void Statement::bind(const int index, const uint64_t integer)
+{
+  if(sqlite3_bind_int64(m_stmt, index, (sqlite3_int64)integer))
+    throw m_db->lastError();
+}
+
+void Statement::exec()
+{
+  exec([=] { return false; });
+}
+
+void Statement::exec(const ExecCallback &callback)
+{
+  while(true) {
+    switch(sqlite3_step(m_stmt)) {
+    case SQLITE_ROW:
+      if(callback())
+        break;
+    case SQLITE_DONE:
+      sqlite3_reset(m_stmt);
+      return;
+    default:
+      sqlite3_reset(m_stmt);
+      throw m_db->lastError();
+    };
+  }
+}
+
+uint64_t Statement::uint64Column(const int index) const
+{
+  return (uint64_t)sqlite3_column_int64(m_stmt, index);
+}

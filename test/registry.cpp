@@ -57,14 +57,3 @@ TEST_CASE("bump version", M) {
   REQUIRE(res2.status == Registry::UpToDate);
   REQUIRE(res2.versionCode == Version("2.0").code());
 }
-
-TEST_CASE("query invalid registry", M) {
-  MAKE_PACKAGE
-
-  Registry reg;
-  reg.push(pkg.targetPath().join(), "bb");
-
-  // no exception should be thrown
-  const Registry::QueryResult res = reg.query(&pkg);
-  REQUIRE(res.versionCode == 0);
-}

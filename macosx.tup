@@ -16,7 +16,7 @@ WDLSOURCE += $(SWELL)/swell.cpp $(SWELL)/swell-ini.cpp $(SWELL)/swell-miscdlg.mm
 WDLSOURCE += $(SWELL)/swell-gdi.mm $(SWELL)/swell-kb.mm $(SWELL)/swell-menu.mm
 WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
 
-LDFLAGS := -framework Cocoa -framework Carbon -lcurl
+LDFLAGS := -framework Cocoa -framework Carbon -lcurl -lsqlite3
 
 SOFLAGS := -dynamiclib
 SOTARGET := bin/reaper_reapack_@(OSXARCH).dylib

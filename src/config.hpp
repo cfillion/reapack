@@ -33,7 +33,6 @@ public:
   void write();
 
   RemoteList *remotes() { return &m_remotes; }
-  Registry *registry() { return &m_registry; }
 
 private:
   std::string getString(const char *, const std::string &) const;
@@ -53,11 +52,6 @@ private:
   void writeRemotes();
   RemoteList m_remotes;
   size_t m_remotesIniSize;
-
-  void readRegistry();
-  void writeRegistry();
-  Registry m_registry;
-  size_t m_registryIniSize;
 };
 
 #endif

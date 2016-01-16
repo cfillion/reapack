@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "errors.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 
@@ -61,7 +62,13 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(REAPERAPI_LoadAPI(rec->GetFunc) > 0)
     return 0;
 
-  reapack.init(instance, rec);
+  try {
+    reapack.init(instance, rec);
+  }
+  catch(const reapack_error &e) {
+    ShowMessageBox(e.what(), "ReaPack Initialization Failure", 0);
+    return 0;
+  }
 
   reapack.setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
     &reapack.syncAction, bind(&ReaPack::synchronize, reapack));

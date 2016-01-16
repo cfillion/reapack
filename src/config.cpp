@@ -35,10 +35,6 @@ static const char *SIZE_KEY = "size";
 static const char *REMOTES_GRP = "remotes";
 static const char *REMOTE_KEY  = "remote";
 
-static const char *REGISTRY_GRP = "registry";
-static const char *PACK_KEY     = "reapack";
-static const char *VER_KEY      = "version";
-
 static string ArrayKey(const string &key, const size_t i)
 {
   return key + to_string(i);
@@ -47,7 +43,7 @@ static string ArrayKey(const string &key, const size_t i)
 static const int BUFFER_SIZE = 2083;
 
 Config::Config()
-  : m_remotesIniSize(0), m_registryIniSize(0)
+  : m_remotesIniSize(0)
 {
 }
 
@@ -66,7 +62,6 @@ void Config::read(const Path &path)
   }
 
   readRemotes();
-  readRegistry();
 
   restoreSelfRemote();
 }
@@ -74,7 +69,6 @@ void Config::read(const Path &path)
 void Config::write()
 {
   writeRemotes();
-  writeRegistry();
 }
 
 void Config::restoreSelfRemote()
@@ -113,35 +107,6 @@ void Config::writeRemotes()
   cleanupArray(REMOTES_GRP, REMOTE_KEY, i, m_remotesIniSize);
 
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
-}
-
-void Config::readRegistry()
-{
-  m_registryIniSize = getUInt(REGISTRY_GRP, SIZE_KEY);
-
-  for(size_t i = 0; i < m_registryIniSize; i++) {
-    const string pack = getString(REGISTRY_GRP, ArrayKey(PACK_KEY, i));
-    const string ver = getString(REGISTRY_GRP, ArrayKey(VER_KEY, i));
-
-    if(!pack.empty() && !ver.empty())
-      m_registry.push(pack, ver);
-  }
-}
-
-void Config::writeRegistry()
-{
-  size_t i = 0;
-  m_registryIniSize = max(m_registry.size(), m_registryIniSize);
-
-  for(auto it = m_registry.begin(); it != m_registry.end(); it++, i++) {
-    setString(REGISTRY_GRP, ArrayKey(PACK_KEY, i), it->first);
-    setString(REGISTRY_GRP, ArrayKey(VER_KEY, i), it->second);
-  }
-
-  cleanupArray(REGISTRY_GRP, PACK_KEY, i, m_registryIniSize);
-  cleanupArray(REGISTRY_GRP, VER_KEY, i, m_registryIniSize);
-
-  setUInt(REGISTRY_GRP, SIZE_KEY, m_registryIniSize = i);
 }
 
 string Config::getString(const char *group, const string &key) const

@@ -19,8 +19,9 @@
 #define REAPACK_REGISTRY_HPP
 
 #include <cstdint>
-#include <map>
 #include <string>
+
+#include "sqlite.hpp"
 
 class Package;
 class Path;
@@ -28,7 +29,7 @@ class Version;
 
 class Registry {
 public:
-  typedef std::map<std::string, std::string> Map;
+  Registry(const std::string &filename = ":memory:");
 
   enum Status {
     UpToDate,
@@ -42,18 +43,17 @@ public:
   };
 
   void push(Version *);
-  void push(const std::string &key, const std::string &value);
 
   bool addToREAPER(Version *ver, const Path &root);
 
-  size_t size() const { return m_map.size(); }
   QueryResult query(Package *) const;
 
-  Map::const_iterator begin() const { return m_map.begin(); }
-  Map::const_iterator end() const { return m_map.end(); }
-
 private:
-  Map m_map;
+  std::string keyOf(Package *) const;
+
+  SQLite::Database m_db;
+  SQLite::Statement *m_insertEntry;
+  SQLite::Statement *m_findEntry;
 };
 
 #endif
