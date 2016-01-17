@@ -22,7 +22,7 @@
 #include <string>
 
 #include "path.hpp"
-#include "sqlite.hpp"
+#include "database.hpp"
 
 class Package;
 class Path;
@@ -50,11 +50,9 @@ public:
   QueryResult query(Package *) const;
 
 private:
-  std::string hashPackage(Package *) const;
-
-  SQLite::Database m_db;
-  SQLite::Statement *m_insertEntry;
-  SQLite::Statement *m_findEntry;
+  Database m_db;
+  Statement *m_insertEntry;
+  Statement *m_findEntry;
 };
 
 #endif

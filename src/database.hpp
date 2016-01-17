@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_SQLITE_HPP
-#define REAPACK_SQLITE_HPP
+#ifndef REAPACK_DATABASE_HPP
+#define REAPACK_DATABASE_HPP
 
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
@@ -27,46 +28,45 @@ class reapack_error;
 struct sqlite3;
 struct sqlite3_stmt;
 
-namespace SQLite {
-  class Statement;
+class Statement;
 
-  class Database {
-  public:
-    Database(const std::string &filename = std::string());
-    ~Database();
+class Database {
+public:
+  Database(const std::string &filename = std::string());
+  ~Database();
 
-    Statement *prepare(const char *sql);
-    void query(const char *sql);
+  Statement *prepare(const char *sql);
+  void exec(const char *sql);
 
-  private:
-    friend Statement;
+private:
+  friend Statement;
 
-    reapack_error lastError() const;
+  reapack_error lastError() const;
 
-    sqlite3 *m_db;
-    std::vector<Statement *> m_statements;
-  };
+  sqlite3 *m_db;
+  std::vector<Statement *> m_statements;
+};
 
-  class Statement {
-  public:
-    typedef std::function<bool (void)> ExecCallback;
+class Statement {
+public:
+  typedef std::function<bool (void)> ExecCallback;
 
-    void bind(const int index, const char *text);
-    void bind(const int index, const uint64_t integer);
-    void exec();
-    void exec(const ExecCallback &);
+  void bind(const int index, const std::string &text);
+  void bind(const int index, const uint64_t integer);
+  void exec();
+  void exec(const ExecCallback &);
 
-    uint64_t uint64Column(const int index) const;
+  uint64_t uint64Column(const int index) const;
+  std::string stringColumn(const int index) const;
 
-  private:
-    friend Database;
+private:
+  friend Database;
 
-    Statement(const char *sql, Database *db);
-    ~Statement();
+  Statement(const char *sql, Database *db);
+  ~Statement();
 
-    Database *m_db;
-    sqlite3_stmt *m_stmt;
-  };
+  Database *m_db;
+  sqlite3_stmt *m_stmt;
 };
 
 #endif

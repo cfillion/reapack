@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sqlite.hpp"
+#include "database.hpp"
 
 #include "errors.hpp"
 
 #include <sqlite3.h>
 
 using namespace std;
-using namespace SQLite;
 
 Database::Database(const string &filename)
 {
@@ -47,7 +46,7 @@ Database::~Database()
   sqlite3_close(m_db);
 }
 
-SQLite::Statement *Database::prepare(const char *sql)
+Statement *Database::prepare(const char *sql)
 {
   Statement *stmt = new Statement(sql, this);
   m_statements.push_back(stmt);
@@ -55,7 +54,7 @@ SQLite::Statement *Database::prepare(const char *sql)
   return stmt;
 }
 
-void Database::query(const char *sql)
+void Database::exec(const char *sql)
 {
   if(sqlite3_exec(m_db, sql, nullptr, nullptr, nullptr) != SQLITE_OK)
     throw lastError();
@@ -78,9 +77,9 @@ Statement::~Statement()
   sqlite3_finalize(m_stmt);
 }
 
-void Statement::bind(const int index, const char *text)
+void Statement::bind(const int index, const string &text)
 {
-  if(sqlite3_bind_text(m_stmt, index, text, -1, SQLITE_TRANSIENT))
+  if(sqlite3_bind_text(m_stmt, index, text.c_str(), -1, SQLITE_STATIC))
     throw m_db->lastError();
 }
 
@@ -103,9 +102,11 @@ void Statement::exec(const ExecCallback &callback)
       if(callback())
         break;
     case SQLITE_DONE:
+      sqlite3_clear_bindings(m_stmt);
       sqlite3_reset(m_stmt);
       return;
     default:
+      sqlite3_clear_bindings(m_stmt);
       sqlite3_reset(m_stmt);
       throw m_db->lastError();
     };
@@ -115,4 +116,9 @@ void Statement::exec(const ExecCallback &callback)
 uint64_t Statement::uint64Column(const int index) const
 {
   return (uint64_t)sqlite3_column_int64(m_stmt, index);
+}
+
+string Statement::stringColumn(const int index) const
+{
+  return (char *)sqlite3_column_text(m_stmt, index);
 }
