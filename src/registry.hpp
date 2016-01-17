@@ -44,6 +44,7 @@ public:
   };
 
   void push(Version *);
+  void commit();
 
   bool addToREAPER(Version *ver, const Path &root);
 

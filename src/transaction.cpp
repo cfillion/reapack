@@ -192,6 +192,8 @@ void Transaction::finish()
   if(!m_isCancelled) {
     for(Task *task : m_tasks)
       task->commit();
+
+    m_registry->commit();
   }
 
   m_onFinish();

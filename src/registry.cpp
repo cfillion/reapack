@@ -51,6 +51,9 @@ Registry::Registry(const Path &path)
     "WHERE remote = ? AND category = ? AND package = ? "
     "LIMIT 1"
   );
+
+  // lock the database
+  m_db.exec("BEGIN EXCLUSIVE TRANSACTION");
 }
 
 void Registry::push(Version *ver)
@@ -91,6 +94,11 @@ Registry::QueryResult Registry::query(Package *pkg) const
 
   const Status status = version == lastVer->code() ? UpToDate : UpdateAvailable;
   return {status, version};
+}
+
+void Registry::commit()
+{
+  m_db.exec("COMMIT TRANSACTION");
 }
 
 bool Registry::addToREAPER(Version *ver, const Path &root)
