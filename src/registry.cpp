@@ -56,7 +56,7 @@ void Registry::push(Version *ver)
   if(!pkg)
     return;
 
-  m_insertEntry->bind(1, hash(pkg).c_str());
+  m_insertEntry->bind(1, hashPackage(pkg).c_str());
   m_insertEntry->bind(2, ver->code());
   m_insertEntry->exec();
 }
@@ -66,7 +66,7 @@ Registry::QueryResult Registry::query(Package *pkg) const
   bool exists = false;
   uint64_t version = 0;
 
-  m_findEntry->bind(1, hash(pkg).c_str());
+  m_findEntry->bind(1, hashPackage(pkg).c_str());
   m_findEntry->exec([&] {
     version = m_findEntry->uint64Column(1);
     exists = true;
@@ -101,7 +101,7 @@ bool Registry::addToREAPER(Version *ver, const Path &root)
   return id > 0;
 }
 
-string Registry::hash(Package *pkg) const
+string Registry::hashPackage(Package *pkg) const
 {
   return (pkg->targetPath() + pkg->name()).join('\30');
 }

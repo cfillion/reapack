@@ -49,7 +49,7 @@ public:
   QueryResult query(Package *) const;
 
 private:
-  std::string keyOf(Package *) const;
+  std::string hashPackage(Package *) const;
 
   SQLite::Database m_db;
   SQLite::Statement *m_insertEntry;
