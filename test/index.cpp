@@ -1,54 +1,54 @@
 #include <catch.hpp>
 
-#include <database.hpp>
 #include <errors.hpp>
+#include <index.hpp>
 
 #include <string>
 
-#define DBPATH "test/db/"
-#define DBPTR(ptr) unique_ptr<Database> dbptr(ptr)
+#define RIPATH "test/indexes/"
+#define RIPTR(ptr) unique_ptr<RemoteIndex> riptr(ptr)
 
 using namespace std;
 
-static const char *M = "[database]";
+static const char *M = "[index]";
 
 TEST_CASE("file not found", M) {
   try {
-    Database *db = Database::load("a", DBPATH "404.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "404.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "failed to read database");
+    REQUIRE(string(e.what()) == "failed to read index");
   }
 }
 
 TEST_CASE("broken xml", M) {
   try {
-    Database *db = Database::load("a", DBPATH "broken.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "broken.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "failed to read database");
+    REQUIRE(string(e.what()) == "failed to read index");
   }
 }
 
 TEST_CASE("wrong root tag name", M) {
   try {
-    Database *db = Database::load("a", DBPATH "wrong_root.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_root.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid database");
+    REQUIRE(string(e.what()) == "invalid index");
   }
 }
 
 TEST_CASE("invalid version", M) {
   try {
-    Database *db = Database::load("a", DBPATH "invalid_version.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "invalid_version.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -58,8 +58,8 @@ TEST_CASE("invalid version", M) {
 
 TEST_CASE("future version", M) {
   try {
-    Database *db = Database::load("a", DBPATH "future_version.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "future_version.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -67,24 +67,24 @@ TEST_CASE("future version", M) {
   }
 }
 
-TEST_CASE("unicode database path", M) {
-  Database *db = Database::load("a", DBPATH "Новая папка.xml");
-  DBPTR(db);
+TEST_CASE("unicode index path", M) {
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "Новая папка.xml");
+  RIPTR(ri);
 }
 
-TEST_CASE("empty database name", M) {
+TEST_CASE("empty index name", M) {
   try {
-    Database cat{string()};
+    RemoteIndex cat{string()};
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty database name");
+    REQUIRE(string(e.what()) == "empty index name");
   }
 }
 
 TEST_CASE("add category", M) {
-  Database db("a");
-  Category *cat = new Category("a", &db);
+  RemoteIndex ri("a");
+  Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
   Version *ver = new Version("1", pack);
   Source *source = new Source(Source::GenericPlatform, {}, "google.com", ver);
@@ -93,40 +93,40 @@ TEST_CASE("add category", M) {
   pack->addVersion(ver);
   cat->addPackage(pack);
 
-  CHECK(db.categories().size() == 0);
+  CHECK(ri.categories().size() == 0);
 
-  db.addCategory(cat);
+  ri.addCategory(cat);
 
-  REQUIRE(db.categories().size() == 1);
-  REQUIRE(db.packages() == cat->packages());
+  REQUIRE(ri.categories().size() == 1);
+  REQUIRE(ri.packages() == cat->packages());
 }
 
 TEST_CASE("add owned category", M) {
-  Database db1("a");
-  Database db2("b");
+  RemoteIndex ri1("a");
+  RemoteIndex ri2("b");
 
-  Category *cat = new Category("name", &db1);
+  Category *cat = new Category("name", &ri1);
 
   try {
-    db2.addCategory(cat);
+    ri2.addCategory(cat);
     FAIL();
   }
   catch(const reapack_error &e) {
     delete cat;
-    REQUIRE(string(e.what()) == "category belongs to another database");
+    REQUIRE(string(e.what()) == "category belongs to another index");
   }
 }
 
 TEST_CASE("drop empty category", M) {
-  Database db("a");
-  db.addCategory(new Category("a", &db));
+  RemoteIndex ri("a");
+  ri.addCategory(new Category("a", &ri));
 
-  REQUIRE(db.categories().empty());
+  REQUIRE(ri.categories().empty());
 }
 
 TEST_CASE("add a package", M) {
-  Database db("a");
-  Category cat("a", &db);
+  RemoteIndex ri("a");
+  Category cat("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", &cat);
   Version *ver = new Version("1", pack);
   ver->addSource(new Source(Source::GenericPlatform, {}, "google.com", ver));
@@ -183,7 +183,7 @@ TEST_CASE("category full name", M) {
   Category cat1("Category Name");
   REQUIRE(cat1.fullName() == "Category Name");
 
-  Database db("Database Name");
-  Category cat2("Category Name", &db);
-  REQUIRE(cat2.fullName() == "Database Name/Category Name");
+  RemoteIndex ri("Remote Name");
+  Category cat2("Category Name", &ri);
+  REQUIRE(cat2.fullName() == "Remote Name/Category Name");
 }

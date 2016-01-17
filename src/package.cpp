@@ -17,8 +17,8 @@
 
 #include "package.hpp"
 
-#include "database.hpp"
 #include "errors.hpp"
+#include "index.hpp"
 
 #include <sstream>
 
@@ -83,13 +83,13 @@ Path Package::targetPath() const
 {
   Path path;
 
-  if(!m_category || !m_category->database())
-    throw reapack_error("category or database is unset");
+  if(!m_category || !m_category->index())
+    throw reapack_error("category or index is unset");
 
   switch(m_type) {
   case ScriptType:
     path.append("Scripts");
-    path.append(m_category->database()->name());
+    path.append(m_category->index()->name());
     path.append(m_category->name());
     break;
   default:

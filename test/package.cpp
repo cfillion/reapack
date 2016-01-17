@@ -2,8 +2,8 @@
 
 #include "helper/io.hpp"
 
-#include <database.hpp>
 #include <errors.hpp>
+#include <index.hpp>
 #include <package.hpp>
 
 #include <string>
@@ -33,8 +33,8 @@ TEST_CASE("empty package name", M) {
 }
 
 TEST_CASE("package versions are sorted", M) {
-  Database db("Database Name");
-  Category cat("Category Name", &db);
+  RemoteIndex ri("Remote Name");
+  Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "a", &cat);
   CHECK(pack.versions().size() == 0);
@@ -82,8 +82,8 @@ TEST_CASE("add owned version", M) {
 }
 
 TEST_CASE("unknown target path", M) {
-  Database db("name");
-  Category cat("name", &db);
+  RemoteIndex ri("name");
+  Category cat("name", &ri);
 
   Package pack(Package::UnknownType, "a", &cat);
 
@@ -97,14 +97,14 @@ TEST_CASE("unknown target path", M) {
 }
 
 TEST_CASE("script target path", M) {
-  Database db("Database Name");
-  Category cat("Category Name", &db);
+  RemoteIndex ri("Remote Name");
+  Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "file.name", &cat);
 
   Path expected;
   expected.append("Scripts");
-  expected.append("Database Name");
+  expected.append("Remote Name");
   expected.append("Category Name");
 
   REQUIRE(pack.targetPath() == expected);
@@ -118,7 +118,7 @@ TEST_CASE("script target path without category", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "category or database is unset");
+    REQUIRE(string(e.what()) == "category or index is unset");
   }
 }
 
@@ -134,11 +134,11 @@ TEST_CASE("full name", M) {
     REQUIRE(pack.fullName() == "Category Name/file.name");
   }
 
-  SECTION("with database") {
-    Database db("Database Name");
-    Category cat("Category Name", &db);
+  SECTION("with index") {
+    RemoteIndex ri("Remote Name");
+    Category cat("Category Name", &ri);
     Package pack(Package::ScriptType, "file.name", &cat);
 
-    REQUIRE(pack.fullName() == "Database Name/Category Name/file.name");
+    REQUIRE(pack.fullName() == "Remote Name/Category Name/file.name");
   }
 }

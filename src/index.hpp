@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_DATABASE_HPP
-#define REAPACK_DATABASE_HPP
+#ifndef REAPACK_INDEX_HPP
+#define REAPACK_INDEX_HPP
 
 #include <memory>
 #include <string>
@@ -26,18 +26,15 @@
 
 class TiXmlElement;
 
-class Database;
-typedef std::vector<Database *> DatabaseList;
-
 class Category;
 typedef std::vector<Category *> CategoryList;
 
-class Database {
+class RemoteIndex {
 public:
-  static Database *load(const std::string &name, const char *url);
+  static RemoteIndex *load(const std::string &name, const char *url);
 
-  Database(const std::string &name);
-  ~Database();
+  RemoteIndex(const std::string &name);
+  ~RemoteIndex();
 
   const std::string &name() const { return m_name; }
 
@@ -48,7 +45,7 @@ public:
   const PackageList &packages() const { return m_packages; }
 
 private:
-  static Database *loadV1(TiXmlElement *, const std::string &);
+  static RemoteIndex *loadV1(TiXmlElement *, const std::string &);
 
   std::string m_name;
   CategoryList m_categories;
@@ -57,10 +54,10 @@ private:
 
 class Category {
 public:
-  Category(const std::string &name, Database * = nullptr);
+  Category(const std::string &name, RemoteIndex * = nullptr);
   ~Category();
 
-  Database *database() const { return m_database; }
+  RemoteIndex *index() const { return m_index; }
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 
@@ -69,7 +66,7 @@ public:
   Package *package(const size_t i) const { return m_packages[i]; }
 
 private:
-  Database *m_database;
+  RemoteIndex *m_index;
 
   std::string m_name;
   PackageList m_packages;

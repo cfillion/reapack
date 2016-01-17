@@ -19,6 +19,8 @@
 
 #include "encoding.hpp"
 #include "errors.hpp"
+#include "index.hpp"
+#include "remote.hpp"
 #include "task.hpp"
 
 #include <fstream>
@@ -52,8 +54,8 @@ Transaction::~Transaction()
   for(Task *task : m_tasks)
     delete task;
 
-  for(Database *db : m_databases)
-    delete db;
+  for(RemoteIndex *ri : m_remoteIndexes)
+    delete ri;
 }
 
 void Transaction::synchronize(const Remote &remote)
@@ -61,12 +63,12 @@ void Transaction::synchronize(const Remote &remote)
   m_step = Synchronize;
 
   Download *dl = new Download(remote.name(), remote.url());
-  dl->onFinish(bind(&Transaction::saveDatabase, this, dl));
+  dl->onFinish(bind(&Transaction::saveRemoteIndex, this, dl));
 
   m_queue.push(dl);
 }
 
-void Transaction::saveDatabase(Download *dl)
+void Transaction::saveRemoteIndex(Download *dl)
 {
   const Path path = m_dbPath + ("remote_" + dl->name() + ".xml");
 
@@ -74,9 +76,8 @@ void Transaction::saveDatabase(Download *dl)
     return;
 
   try {
-    Database *db = Database::load(dl->name(), path.join().c_str());
-
-    m_databases.push_back(db);
+    RemoteIndex *ri = RemoteIndex::load(dl->name(), path.join().c_str());
+    m_remoteIndexes.push_back(ri);
   }
   catch(const reapack_error &e) {
     addError(e.what(), dl->url());
@@ -85,8 +86,8 @@ void Transaction::saveDatabase(Download *dl)
 
 void Transaction::updateAll()
 {
-  for(Database *db : m_databases) {
-    for(Package *pkg : db->packages()) {
+  for(RemoteIndex *ri : m_remoteIndexes) {
+    for(Package *pkg : ri->packages()) {
       Registry::QueryResult entry = m_registry->query(pkg);
 
       Version *ver = pkg->lastVersion();

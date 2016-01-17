@@ -1,6 +1,6 @@
 #include <catch.hpp>
 
-#include <database.hpp>
+#include <index.hpp>
 #include <source.hpp>
 #include <version.hpp>
 
@@ -113,8 +113,8 @@ TEST_CASE("full name with version", M) {
 }
 
 TEST_CASE("source target path", M) {
-  Database db("Database Name");
-  Category cat("Category Name", &db);
+  RemoteIndex ri("RemoteIndex Name");
+  Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
 
@@ -122,7 +122,7 @@ TEST_CASE("source target path", M) {
 
   Path expected;
   expected.append("Scripts");
-  expected.append("Database Name");
+  expected.append("RemoteIndex Name");
   expected.append("Category Name");
   expected.append("file.name");
 

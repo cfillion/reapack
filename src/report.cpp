@@ -18,6 +18,7 @@
 #include "report.hpp"
 
 #include "encoding.hpp"
+#include "package.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
 

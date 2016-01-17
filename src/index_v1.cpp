@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "database.hpp"
+#include "index.hpp"
 
 #include "errors.hpp"
 
@@ -25,36 +25,36 @@
 
 using namespace std;
 
-static void LoadCategoryV1(TiXmlElement *, Database *db);
+static void LoadCategoryV1(TiXmlElement *, RemoteIndex *ri);
 static void LoadPackageV1(TiXmlElement *, Category *cat);
 static void LoadVersionV1(TiXmlElement *, Package *pkg);
 
-Database *Database::loadV1(TiXmlElement *root, const string &name)
+RemoteIndex *RemoteIndex::loadV1(TiXmlElement *root, const string &name)
 {
-  Database *db = new Database(name);
+  RemoteIndex *ri = new RemoteIndex(name);
 
   // ensure the memory is released if an exception is
   // thrown during the loading process
-  unique_ptr<Database> ptr(db);
+  unique_ptr<RemoteIndex> ptr(ri);
 
   TiXmlElement *catNode = root->FirstChildElement("category");
 
   while(catNode) {
-    LoadCategoryV1(catNode, db);
+    LoadCategoryV1(catNode, ri);
 
     catNode = catNode->NextSiblingElement("category");
   }
 
   ptr.release();
-  return db;
+  return ri;
 }
 
-void LoadCategoryV1(TiXmlElement *catNode, Database *db)
+void LoadCategoryV1(TiXmlElement *catNode, RemoteIndex *ri)
 {
   const char *name = catNode->Attribute("name");
   if(!name) name = "";
 
-  Category *cat = new Category(name, db);
+  Category *cat = new Category(name, ri);
   unique_ptr<Category> ptr(cat);
 
   TiXmlElement *packNode = catNode->FirstChildElement("reapack");
@@ -65,7 +65,7 @@ void LoadCategoryV1(TiXmlElement *catNode, Database *db)
     packNode = packNode->NextSiblingElement("reapack");
   }
 
-  db->addCategory(cat);
+  ri->addCategory(cat);
 
   ptr.release();
 }

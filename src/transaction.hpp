@@ -18,14 +18,15 @@
 #ifndef REAPACK_TRANSACTION_HPP
 #define REAPACK_TRANSACTION_HPP
 
-#include "database.hpp"
 #include "download.hpp"
 #include "path.hpp"
 #include "registry.hpp"
-#include "remote.hpp"
 
 #include <boost/signals2.hpp>
+#include <set>
 
+class Remote;
+class RemoteIndex;
 class Task;
 
 class Transaction {
@@ -73,7 +74,7 @@ private:
   void updateAll();
   void finish();
 
-  void saveDatabase(Download *);
+  void saveRemoteIndex(Download *);
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
   Path prefixPath(const Path &) const;
@@ -87,7 +88,7 @@ private:
   Step m_step;
   bool m_isCancelled;
 
-  DatabaseList m_databases;
+  std::vector<RemoteIndex *> m_remoteIndexes;
   DownloadQueue m_queue;
   PackageEntryList m_packages;
   PackageEntryList m_new;

@@ -20,6 +20,7 @@
 #include "encoding.hpp"
 #include "path.hpp"
 #include "transaction.hpp"
+#include "version.hpp"
 
 #include <cerrno>
 #include <cstdio>

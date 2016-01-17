@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "database.hpp"
+#include "index.hpp"
 
 #include "encoding.hpp"
 #include "errors.hpp"
@@ -35,7 +35,7 @@ static FILE *OpenFile(const char *path)
   #endif
 }
 
-Database *Database::load(const string &name, const char *path)
+RemoteIndex *RemoteIndex::load(const string &name, const char *path)
 {
   TiXmlDocument doc;
 
@@ -47,13 +47,13 @@ Database *Database::load(const string &name, const char *path)
     fclose(file);
 
   if(!success)
-    throw reapack_error("failed to read database");
+    throw reapack_error("failed to read index");
 
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();
 
   if(strcmp(root->Value(), "index"))
-    throw reapack_error("invalid database");
+    throw reapack_error("invalid index");
 
   int version = 0;
   root->Attribute("version", &version);
@@ -69,23 +69,23 @@ Database *Database::load(const string &name, const char *path)
   }
 }
 
-Database::Database(const string &name)
+RemoteIndex::RemoteIndex(const string &name)
   : m_name(name)
 {
   if(m_name.empty())
-    throw reapack_error("empty database name");
+    throw reapack_error("empty index name");
 }
 
-Database::~Database()
+RemoteIndex::~RemoteIndex()
 {
   for(Category *cat : m_categories)
     delete cat;
 }
 
-void Database::addCategory(Category *cat)
+void RemoteIndex::addCategory(Category *cat)
 {
-  if(cat->database() != this)
-    throw reapack_error("category belongs to another database");
+  if(cat->index() != this)
+    throw reapack_error("category belongs to another index");
 
   if(cat->packages().empty())
     return;
@@ -96,8 +96,8 @@ void Database::addCategory(Category *cat)
     cat->packages().begin(), cat->packages().end());
 }
 
-Category::Category(const string &name, Database *db)
-  : m_database(db), m_name(name)
+Category::Category(const string &name, RemoteIndex *ri)
+  : m_index(ri), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty category name");
@@ -111,7 +111,7 @@ Category::~Category()
 
 string Category::fullName() const
 {
-  return m_database ? m_database->name() + "/" + m_name : m_name;
+  return m_index ? m_index->name() + "/" + m_name : m_name;
 }
 
 void Category::addPackage(Package *pkg)

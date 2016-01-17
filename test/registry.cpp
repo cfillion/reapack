@@ -1,6 +1,6 @@
 #include <catch.hpp>
 
-#include <database.hpp>
+#include <index.hpp>
 #include <package.hpp>
 #include <registry.hpp>
 
@@ -9,8 +9,8 @@ using namespace std;
 static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
-  Database db("Hello"); \
-  Category cat("Hello", &db); \
+  RemoteIndex ri("Hello"); \
+  Category cat("Hello", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version *ver = new Version("1.0", &pkg); \
   Source *src = new Source(Source::GenericPlatform, "file", "url", ver); \

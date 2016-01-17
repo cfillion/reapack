@@ -1,13 +1,13 @@
 #include <catch.hpp>
 
-#include <database.hpp>
+#include <index.hpp>
 #include <errors.hpp>
 
 #include <memory>
 #include <string>
 
-#define DBPATH "test/db/v1/"
-#define DBPTR(ptr) unique_ptr<Database> dbptr(ptr)
+#define RIPATH "test/indexes/v1/"
+#define RIPTR(ptr) unique_ptr<RemoteIndex> riptr(ptr)
 
 using namespace std;
 
@@ -15,8 +15,8 @@ static const char *M = "[reapack_v1]";
 
 TEST_CASE("unnamed category", M) {
   try {
-    Database *db = Database::load("a", DBPATH "unnamed_category.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "unnamed_category.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -25,23 +25,23 @@ TEST_CASE("unnamed category", M) {
 }
 
 TEST_CASE("invalid category tag", M) {
-  Database *db = Database::load("a", DBPATH "wrong_category_tag.xml");
-  DBPTR(db);
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_category_tag.xml");
+  RIPTR(ri);
 
-  REQUIRE(db->categories().empty());
+  REQUIRE(ri->categories().empty());
 }
 
 TEST_CASE("invalid package tag", M) {
-  Database *db = Database::load("a", DBPATH "wrong_package_tag.xml");
-  DBPTR(db);
-  REQUIRE(db->categories().empty());
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_package_tag.xml");
+  RIPTR(ri);
+  REQUIRE(ri->categories().empty());
 
 }
 
 TEST_CASE("null package name", M) {
   try {
-    Database *db = Database::load("a", DBPATH "unnamed_package.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "unnamed_package.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -51,8 +51,8 @@ TEST_CASE("null package name", M) {
 
 TEST_CASE("null package type", M) {
   try {
-    Database *db = Database::load("a", DBPATH "missing_type.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_type.xml");
+    RIPTR(ri);
   }
   catch(const reapack_error &) {
     // no segfault -> test passes!
@@ -60,16 +60,16 @@ TEST_CASE("null package type", M) {
 }
 
 TEST_CASE("invalid version tag", M) {
-  Database *db = Database::load("a", DBPATH "wrong_version_tag.xml");
-  DBPTR(db);
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_version_tag.xml");
+  RIPTR(ri);
 
-  REQUIRE(db->categories().empty());
+  REQUIRE(ri->categories().empty());
 }
 
 TEST_CASE("null package version", M) {
   try {
-    Database *db = Database::load("a", DBPATH "missing_version.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_version.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -79,8 +79,8 @@ TEST_CASE("null package version", M) {
 
 TEST_CASE("null source url", M) {
   try {
-    Database *db = Database::load("a", DBPATH "missing_source_url.xml");
-    DBPTR(db);
+    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_source_url.xml");
+    RIPTR(ri);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -89,40 +89,40 @@ TEST_CASE("null source url", M) {
 }
 
 TEST_CASE("null source file", M) {
-  Database *db = Database::load("a", DBPATH "missing_source_file.xml");
-  DBPTR(db);
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_source_file.xml");
+  RIPTR(ri);
 
-  Package *pkg = db->category(0)->package(0);
+  Package *pkg = ri->category(0)->package(0);
   REQUIRE(pkg->version(0)->source(0)->file() == pkg->name());
 }
 
 TEST_CASE("default platform", M) {
-  Database *db = Database::load("a", DBPATH "missing_platform.xml");
-  DBPTR(db);
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_platform.xml");
+  RIPTR(ri);
 
-  REQUIRE(db->category(0)->package(0)->version(0)->source(0)->platform()
+  REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
     == Source::GenericPlatform);
 }
 
 TEST_CASE("version changelog", M) {
-  Database *db = Database::load("a", DBPATH "changelog.xml");
-  DBPTR(db);
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "changelog.xml");
+  RIPTR(ri);
 
-  CHECK_FALSE(db->categories().empty());
-  CHECK_FALSE(db->category(0)->packages().empty());
-  CHECK_FALSE(db->category(0)->package(0)->versions().empty());
+  CHECK_FALSE(ri->categories().empty());
+  CHECK_FALSE(ri->category(0)->packages().empty());
+  CHECK_FALSE(ri->category(0)->package(0)->versions().empty());
 
-  REQUIRE(db->category(0)->package(0)->version(0)->changelog()
+  REQUIRE(ri->category(0)->package(0)->version(0)->changelog()
     == "Hello\nWorld");
 }
 
-TEST_CASE("full database", M) {
-  Database *db = Database::load("a", DBPATH "full_database.xml");
-  DBPTR(db);
+TEST_CASE("full index", M) {
+  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "valid_index.xml");
+  RIPTR(ri);
 
-  REQUIRE(db->categories().size() == 1);
+  REQUIRE(ri->categories().size() == 1);
 
-  Category *cat = db->category(0);
+  Category *cat = ri->category(0);
   REQUIRE(cat->name() == "Category Name");
   REQUIRE(cat->packages().size() == 1);
 

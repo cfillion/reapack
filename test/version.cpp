@@ -2,15 +2,15 @@
 
 #include <version.hpp>
 
-#include <database.hpp>
 #include <errors.hpp>
+#include <index.hpp>
 #include <package.hpp>
 
 using namespace std;
 
 #define MAKE_VERSION \
-  Database db("Database Name"); \
-  Category cat("Category Name", &db); \
+  RemoteIndex ri("Remote Name"); \
+  Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version ver("1", &pkg);
 
@@ -104,13 +104,13 @@ TEST_CASE("version full name", M) {
     REQUIRE(ver.fullName() == "Category Name/file.name v1.0");
   }
 
-  SECTION("with database") {
-    Database db("Database Name");
-    Category cat("Category Name", &db);
+  SECTION("with index") {
+    RemoteIndex ri("Remote Name");
+    Category cat("Category Name", &ri);
     Package pkg(Package::UnknownType, "file.name", &cat);
     Version ver("1.0", &pkg);
 
-    REQUIRE(ver.fullName() == "Database Name/Category Name/file.name v1.0");
+    REQUIRE(ver.fullName() == "Remote Name/Category Name/file.name v1.0");
   }
 }
 
@@ -162,7 +162,7 @@ TEST_CASE("list files", M) {
 
   Path path1;
   path1.append("Scripts");
-  path1.append("Database Name");
+  path1.append("Remote Name");
   path1.append("Category Name");
   path1.append("file");
 
