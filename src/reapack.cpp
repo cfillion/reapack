@@ -17,6 +17,7 @@
 
 #include "reapack.hpp"
 
+#include "errors.hpp"
 #include "config.hpp"
 #include "manager.hpp"
 #include "progress.hpp"
@@ -42,9 +43,6 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   m_config = new Config;
   m_config->read(m_resourcePath + "reapack.ini");
 
-  const Path registryPath = m_resourcePath + "ReaPack" + "registry.db";
-  m_registry = new Registry(registryPath.join());
-
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
 
@@ -57,8 +55,6 @@ void ReaPack::cleanup()
   // and two times during shutdown on osx... cleanup() is called only once
   m_config->write();
   delete m_config;
-
-  delete m_registry;
 
   Dialog::Destroy(m_progress);
   Dialog::Destroy(m_manager);
@@ -196,7 +192,13 @@ Transaction *ReaPack::createTransaction()
   if(m_transaction)
     return nullptr;
 
-  m_transaction = new Transaction(m_registry, m_resourcePath);
+  try {
+    m_transaction = new Transaction(m_resourcePath);
+  }
+  catch(const reapack_error &e) {
+    ShowMessageBox(e.what(), "ReaPack – Fatal Error", 0);
+    return nullptr;
+  }
 
   m_progress->setTransaction(m_transaction);
   m_progress->show();

@@ -26,7 +26,12 @@ using namespace SQLite;
 
 Database::Database(const string &filename)
 {
-  if(sqlite3_open(filename.c_str(), &m_db)) {
+  const char *file = ":memory:";
+
+  if(!filename.empty())
+    file = filename.c_str();
+
+  if(sqlite3_open(file, &m_db)) {
     const auto &error = lastError();
     sqlite3_close(m_db);
 

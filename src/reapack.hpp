@@ -30,7 +30,6 @@ typedef std::function<void()> ActionCallback;
 class Config;
 class Manager;
 class Progress;
-class Registry;
 class Transaction;
 
 class ReaPack {
@@ -59,7 +58,6 @@ private:
   std::map<int, ActionCallback> m_actions;
 
   Config *m_config;
-  Registry *m_registry;
   Transaction *m_transaction;
   Progress *m_progress;
   Manager *m_manager;

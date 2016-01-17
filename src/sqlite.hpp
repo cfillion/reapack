@@ -32,7 +32,7 @@ namespace SQLite {
 
   class Database {
   public:
-    Database(const std::string &filename = ":memory:");
+    Database(const std::string &filename = std::string());
     ~Database();
 
     Statement *prepare(const char *sql);

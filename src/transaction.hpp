@@ -44,7 +44,7 @@ public:
 
   typedef std::vector<const Error> ErrorList;
 
-  Transaction(Registry *reg, const Path &root);
+  Transaction(const Path &root);
   ~Transaction();
 
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }

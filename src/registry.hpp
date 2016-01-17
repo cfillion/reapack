@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <string>
 
+#include "path.hpp"
 #include "sqlite.hpp"
 
 class Package;
@@ -29,7 +30,7 @@ class Version;
 
 class Registry {
 public:
-  Registry(const std::string &filename = ":memory:");
+  Registry(const Path &path = Path());
 
   enum Status {
     UpToDate,

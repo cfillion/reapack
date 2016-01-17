@@ -25,8 +25,8 @@
 
 using namespace std;
 
-Registry::Registry(const std::string &filename)
-  : m_db(filename)
+Registry::Registry(const Path &path)
+  : m_db(path.join())
 {
   m_db.query(
     "PRAGMA foreign_keys = ON;"

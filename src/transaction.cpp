@@ -29,11 +29,12 @@
 
 using namespace std;
 
-Transaction::Transaction(Registry *reg, const Path &root)
-  : m_registry(reg), m_root(root), m_step(Unknown),
-    m_isCancelled(false), m_hasConflicts(false)
+Transaction::Transaction(const Path &root)
+  : m_root(root), m_step(Unknown), m_isCancelled(false), m_hasConflicts(false)
 {
   m_dbPath = m_root + "ReaPack";
+
+  m_registry = new Registry(m_dbPath + "registry.db");
 
   m_queue.onDone([=](void *) {
     switch(m_step) {
@@ -56,6 +57,8 @@ Transaction::~Transaction()
 
   for(RemoteIndex *ri : m_remoteIndexes)
     delete ri;
+
+  delete m_registry;
 }
 
 void Transaction::synchronize(const Remote &remote)
