@@ -36,8 +36,8 @@ vendor
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Run `rake` from this directory
-4. Copy or link `x64/bin/reaper_reapack_x64.dylib` to REAPER's extension
-  directory (replace x64 with x86 for 32-bit)
+4. Copy or link `x64/bin/reaper_reapack_x86_64.dylib` to REAPER's extension
+  directory (replace x64 and x86_64 with x86 and i386 for 32-bit)
 
 ### Windows
 
