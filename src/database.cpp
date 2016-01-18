@@ -46,6 +46,19 @@ Database::~Database()
   sqlite3_close(m_db);
 }
 
+int Database::version() const
+{
+  int version = 0;
+
+  Statement stmt("PRAGMA user_version", this);
+  stmt.exec([&] {
+    version = stmt.intColumn(0);
+    return false;
+  });
+
+  return version;
+}
+
 Statement *Database::prepare(const char *sql)
 {
   Statement *stmt = new Statement(sql, this);
@@ -65,7 +78,7 @@ reapack_error Database::lastError() const
   return reapack_error(sqlite3_errmsg(m_db));
 }
 
-Statement::Statement(const char *sql, Database *db)
+Statement::Statement(const char *sql, const Database *db)
   : m_db(db)
 {
   if(sqlite3_prepare_v2(db->m_db, sql, -1, &m_stmt, nullptr) != SQLITE_OK)
@@ -111,6 +124,11 @@ void Statement::exec(const ExecCallback &callback)
       throw m_db->lastError();
     };
   }
+}
+
+int Statement::intColumn(const int index) const
+{
+  return sqlite3_column_int(m_stmt, index);
 }
 
 uint64_t Statement::uint64Column(const int index) const

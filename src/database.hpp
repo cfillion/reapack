@@ -35,6 +35,7 @@ public:
   Database(const std::string &filename = std::string());
   ~Database();
 
+  int version() const;
   Statement *prepare(const char *sql);
   void exec(const char *sql);
 
@@ -56,16 +57,17 @@ public:
   void exec();
   void exec(const ExecCallback &);
 
+  int intColumn(const int index) const;
   uint64_t uint64Column(const int index) const;
   std::string stringColumn(const int index) const;
 
 private:
   friend Database;
 
-  Statement(const char *sql, Database *db);
+  Statement(const char *sql, const Database *db);
   ~Statement();
 
-  Database *m_db;
+  const Database *m_db;
   sqlite3_stmt *m_stmt;
 };
 

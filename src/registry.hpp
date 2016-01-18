@@ -51,6 +51,9 @@ public:
   QueryResult query(Package *) const;
 
 private:
+  int version();
+  void migrate();
+
   Database m_db;
   Statement *m_insertEntry;
   Statement *m_findEntry;

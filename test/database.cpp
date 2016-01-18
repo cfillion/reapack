@@ -94,3 +94,11 @@ TEST_CASE("bing values and clear", M) {
     REQUIRE(string(e.what()) == "NOT NULL constraint failed: test.value");
   }
 }
+
+TEST_CASE("version", M) {
+  Database db;
+  REQUIRE(db.version() == 0);
+
+  db.exec("PRAGMA user_version = 1");
+  REQUIRE(db.version() == 1);
+}

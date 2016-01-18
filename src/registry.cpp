@@ -29,17 +29,7 @@ using namespace std;
 Registry::Registry(const Path &path)
   : m_db(path.join())
 {
-  m_db.exec(
-    "PRAGMA foreign_keys = ON;"
-
-    "CREATE TABLE IF NOT EXISTS entries ("
-    "  remote TEXT NOT NULL,"
-    "  category TEXT NOT NULL,"
-    "  package TEXT NOT NULL,"
-    "  version INTEGER NOT NULL,"
-    "  UNIQUE(remote, category, package)"
-    ");"
-  );
+  migrate();
 
   m_insertEntry = m_db.prepare(
     "INSERT OR REPLACE INTO entries "
@@ -54,6 +44,31 @@ Registry::Registry(const Path &path)
 
   // lock the database
   m_db.exec("BEGIN EXCLUSIVE TRANSACTION");
+}
+
+void Registry::migrate()
+{
+  switch(m_db.version()) {
+  case 0:
+    // new database!
+    m_db.exec(
+      "PRAGMA user_version = 1;"
+
+      "CREATE TABLE entries ("
+      "  remote TEXT NOT NULL,"
+      "  category TEXT NOT NULL,"
+      "  package TEXT NOT NULL,"
+      "  version INTEGER NOT NULL,"
+      "  UNIQUE(remote, category, package)"
+      ");"
+    );
+    break;
+  case 1:
+    // current schema version
+    break;
+  default:
+    throw reapack_error("database was created with a newer version of ReaPack");
+  }
 }
 
 void Registry::push(Version *ver)
