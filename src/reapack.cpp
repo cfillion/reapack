@@ -113,6 +113,17 @@ void ReaPack::synchronizeAll()
     t->synchronize(remote);
 }
 
+void ReaPack::synchronize(const Remote &remote)
+{
+  if(!m_transaction) {
+    if(!createTransaction())
+      return;
+  }
+
+  // hitchhike currently running transactions
+  m_transaction->synchronize(remote);
+}
+
 void ReaPack::importRemote()
 {
   static const char *title = "ReaPack: Import remote repository";

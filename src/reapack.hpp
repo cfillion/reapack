@@ -30,6 +30,7 @@ typedef std::function<void()> ActionCallback;
 class Config;
 class Manager;
 class Progress;
+class Remote;
 class Transaction;
 
 class ReaPack {
@@ -47,6 +48,7 @@ public:
   bool execActions(const int id, const int);
 
   void synchronizeAll();
+  void synchronize(const Remote &);
   void importRemote();
   void manageRemotes();
 

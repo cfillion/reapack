@@ -129,7 +129,15 @@ void Manager::setRemoteEnabled(const bool enabled)
   if(remote.isNull())
     return;
 
-  m_enableOverrides[remote.name()] = enabled;
+  auto it = m_enableOverrides.find(remote.name());
+
+  if(it == m_enableOverrides.end())
+    m_enableOverrides.insert({remote.name(), enabled});
+  else if(remote.isEnabled() == enabled)
+    m_enableOverrides.erase(it);
+  else
+    it->second = enabled;
+
   m_list->replaceRow(m_list->currentIndex(), makeRow(remote));
 }
 
@@ -153,7 +161,11 @@ void Manager::apply()
 
     Remote remote = list->get(name);
     remote.setEnabled(enable);
+
     list->add(remote);
+
+    if(enable)
+      m_reapack->synchronize(remote);
   }
 
   m_reapack->config()->write();
