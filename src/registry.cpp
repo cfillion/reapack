@@ -117,7 +117,7 @@ Registry::QueryResult Registry::query(Package *pkg) const
 
 void Registry::commit()
 {
-  m_db.exec("COMMIT TRANSACTION");
+  m_db.commit();
 }
 
 bool Registry::addToREAPER(Version *ver, const Path &root)

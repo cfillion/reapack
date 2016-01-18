@@ -54,7 +54,7 @@ Version::Version(const std::string &str, Package *pkg)
 
 Version::~Version()
 {
-  for(auto pair : m_sources)
+  for(const auto &pair : m_sources)
     delete pair.second;
 }
 
