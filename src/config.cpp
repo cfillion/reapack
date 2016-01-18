@@ -58,10 +58,9 @@ void Config::read(const Path &path)
   if(!file_exists(m_path.c_str())) {
     fillDefaults();
     write();
-    return;
   }
-
-  readRemotes();
+  else
+    readRemotes();
 
   restoreSelfRemote();
 }

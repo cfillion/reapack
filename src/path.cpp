@@ -31,19 +31,22 @@ static vector<string> Split(const string &input)
 {
   vector<string> list;
 
-  size_t last = 0;
+  size_t last = 0, size = input.size();
 
-  while(true) {
-    const size_t pos = input.find_first_of("\\/", last);
+  while(last < size) {
+    const size_t pos = input.find_first_of("\\/", last + 1);
 
     if(pos == string::npos) {
       list.push_back(input.substr(last));
       break;
     }
-    else {
-      list.push_back(input.substr(last, pos-last));
-      last = pos + 1;
-    }
+
+    const string part = input.substr(last, pos - last);
+
+    if(!part.empty())
+      list.push_back(part);
+
+    last = pos + 1;
   }
 
   return list;

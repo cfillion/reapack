@@ -129,4 +129,22 @@ TEST_CASE("split input", M) {
 
     REQUIRE(a.size() == 2);
   }
+
+  SECTION("skip empty parts") {
+    Path a;
+    a.append("hello//world/");
+
+    REQUIRE(a.size() == 2);
+  }
 }
+
+#ifndef _WIN32
+TEST_CASE("absolute path (unix)", M) {
+  Path a;
+  a.append("/usr/bin/zsh");
+
+  REQUIRE(a.size() == 3);
+  REQUIRE(a[0] == "/usr");
+  REQUIRE(a.join() == "/usr/bin/zsh");
+}
+#endif
