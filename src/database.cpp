@@ -46,19 +46,6 @@ Database::~Database()
   sqlite3_close(m_db);
 }
 
-int Database::version() const
-{
-  int version = 0;
-
-  Statement stmt("PRAGMA user_version", this);
-  stmt.exec([&] {
-    version = stmt.intColumn(0);
-    return false;
-  });
-
-  return version;
-}
-
 Statement *Database::prepare(const char *sql)
 {
   Statement *stmt = new Statement(sql, this);
@@ -76,6 +63,30 @@ void Database::exec(const char *sql)
 reapack_error Database::lastError() const
 {
   return reapack_error(sqlite3_errmsg(m_db));
+}
+
+int Database::version() const
+{
+  int version = 0;
+
+  Statement stmt("PRAGMA user_version", this);
+  stmt.exec([&] {
+    version = stmt.intColumn(0);
+    return false;
+  });
+
+  return version;
+}
+
+void Database::begin()
+{
+  // EXCLUSIVE -> don't wait until the first query to aquire a lock
+  exec("BEGIN EXCLUSIVE TRANSACTION");
+}
+
+void Database::commit()
+{
+  exec("COMMIT");
 }
 
 Statement::Statement(const char *sql, const Database *db)

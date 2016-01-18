@@ -35,9 +35,11 @@ public:
   Database(const std::string &filename = std::string());
   ~Database();
 
-  int version() const;
   Statement *prepare(const char *sql);
   void exec(const char *sql);
+  int version() const;
+  void begin();
+  void commit();
 
 private:
   friend Statement;

@@ -43,11 +43,13 @@ Registry::Registry(const Path &path)
   );
 
   // lock the database
-  m_db.exec("BEGIN EXCLUSIVE TRANSACTION");
+  m_db.begin();
 }
 
 void Registry::migrate()
 {
+  m_db.begin();
+
   switch(m_db.version()) {
   case 0:
     // new database!
@@ -69,6 +71,8 @@ void Registry::migrate()
   default:
     throw reapack_error("database was created with a newer version of ReaPack");
   }
+
+  m_db.commit();
 }
 
 void Registry::push(Version *ver)
