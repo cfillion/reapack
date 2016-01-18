@@ -65,7 +65,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack.init(instance, rec);
 
   reapack.setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
-    &reapack.syncAction, bind(&ReaPack::synchronize, reapack));
+    &reapack.syncAction, bind(&ReaPack::synchronizeAll, reapack));
 
   reapack.setupAction("REAPACK_IMPORT",
     bind(&ReaPack::importRemote, reapack));

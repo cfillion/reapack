@@ -46,7 +46,7 @@ public:
     gaccel_register_t *action, const ActionCallback &);
   bool execActions(const int id, const int);
 
-  void synchronize();
+  void synchronizeAll();
   void importRemote();
   void manageRemotes();
 

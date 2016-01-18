@@ -93,7 +93,7 @@ bool ReaPack::execActions(const int id, const int)
   return true;
 }
 
-void ReaPack::synchronize()
+void ReaPack::synchronizeAll()
 {
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
