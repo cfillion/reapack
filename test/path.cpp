@@ -103,3 +103,30 @@ TEST_CASE("custom separator", M) {
 
   REQUIRE(a.join('-') == "hello-world");
 }
+
+TEST_CASE("split input", M) {
+  SECTION("slash") {
+    Path a;
+    a.append("hello/world");
+
+    REQUIRE(a.size() == 2);
+    REQUIRE(a[0] == "hello");
+    REQUIRE(a[1] == "world");
+  }
+
+  SECTION("backslash") {
+    Path a;
+    a.append("hello\\world");
+
+    REQUIRE(a.size() == 2);
+    REQUIRE(a[0] == "hello");
+    REQUIRE(a[1] == "world");
+  }
+
+  SECTION("prepend") {
+    Path a;
+    a.prepend("hello/world");
+
+    REQUIRE(a.size() == 2);
+  }
+}

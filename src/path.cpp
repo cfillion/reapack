@@ -17,6 +17,8 @@
 
 #include "path.hpp"
 
+#include <vector>
+
 using namespace std;
 
 #ifndef _WIN32
@@ -25,15 +27,43 @@ static const char SEPARATOR = '/';
 static const char SEPARATOR = '\\';
 #endif
 
-void Path::prepend(const string &part)
+static vector<string> Split(const string &input)
 {
-  if(!part.empty())
+  vector<string> list;
+
+  size_t last = 0;
+
+  while(true) {
+    const size_t pos = input.find_first_of("\\/", last);
+
+    if(pos == string::npos) {
+      list.push_back(input.substr(last));
+      break;
+    }
+    else {
+      list.push_back(input.substr(last, pos-last));
+      last = pos + 1;
+    }
+  }
+
+  return list;
+}
+
+void Path::prepend(const string &parts)
+{
+  if(parts.empty())
+    return;
+
+  for(const string &part : Split(parts))
     m_parts.push_front(part);
 }
 
-void Path::append(const string &part)
+void Path::append(const string &parts)
 {
-  if(!part.empty())
+  if(parts.empty())
+    return;
+
+  for(const string &part : Split(parts))
     m_parts.push_back(part);
 }
 
