@@ -24,7 +24,7 @@ TEST_CASE("query uninstalled package", M) {
 
   const Registry::QueryResult res = reg.query(&pkg);
   REQUIRE(res.status == Registry::Uninstalled);
-  REQUIRE(res.versionCode == 0);
+  REQUIRE(res.version == 0);
 }
 
 TEST_CASE("query up to date pacakge", M) {
@@ -35,7 +35,7 @@ TEST_CASE("query up to date pacakge", M) {
 
   const Registry::QueryResult res = reg.query(&pkg);
   REQUIRE(res.status == Registry::UpToDate);
-  REQUIRE(res.versionCode == Version("1.0").code());
+  REQUIRE(res.version == Version("1.0").code());
 }
 
 TEST_CASE("bump version", M) {
@@ -50,10 +50,10 @@ TEST_CASE("bump version", M) {
 
   const Registry::QueryResult res1 = reg.query(&pkg);
   REQUIRE(res1.status == Registry::UpdateAvailable);
-  REQUIRE(res1.versionCode == Version("1.0").code());
+  REQUIRE(res1.version == Version("1.0").code());
 
   reg.push(ver2);
   const Registry::QueryResult res2 = reg.query(&pkg);
   REQUIRE(res2.status == Registry::UpToDate);
-  REQUIRE(res2.versionCode == Version("2.0").code());
+  REQUIRE(res2.version == Version("2.0").code());
 }

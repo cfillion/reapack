@@ -93,7 +93,7 @@ void Report::formatUpdates(ostringstream &text)
     const VersionSet &versions = pkg->versions();
 
     for(Version *ver : versions | boost::adaptors::reversed) {
-      if(ver->code() <= regEntry.versionCode)
+      if(ver->code() <= regEntry.version)
         break;
 
       text << NL << ver->fullName() << NL;

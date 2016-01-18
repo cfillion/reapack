@@ -40,7 +40,7 @@ public:
 
   struct QueryResult {
     Status status;
-    uint64_t versionCode;
+    uint64_t version;
   };
 
   void push(Version *);
