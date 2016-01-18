@@ -86,8 +86,5 @@ Path Source::targetPath() const
   if(!pkg)
     throw reapack_error("no package associated with the source");
 
-  Path path = pkg->targetPath();
-  path.append(file());
-
-  return path;
+  return pkg->targetPath() + file();
 }
