@@ -17,6 +17,7 @@
 
 #include "path.hpp"
 
+#include <algorithm>
 #include <vector>
 
 using namespace std;
@@ -34,16 +35,19 @@ static vector<string> Split(const string &input)
   size_t last = 0, size = input.size();
 
   while(last < size) {
-    const size_t pos = input.find_first_of("\\/", last + 1);
+    const size_t pos = input.find_first_of("\\/", max((size_t)1, last));
 
     if(pos == string::npos) {
       list.push_back(input.substr(last));
       break;
     }
-    else {
-      list.push_back(input.substr(last, pos - last));
-      last = pos + 1;
-    }
+
+    const string part = input.substr(last, pos - last);
+
+    if(!part.empty())
+      list.push_back(part);
+
+    last = pos + 1;
   }
 
   return list;

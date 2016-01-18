@@ -135,6 +135,8 @@ TEST_CASE("split input", M) {
     a.append("hello//world/");
 
     REQUIRE(a.size() == 2);
+    REQUIRE(a[0] == "hello");
+    REQUIRE(a[1] == "world");
   }
 }
 
