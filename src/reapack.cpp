@@ -182,10 +182,7 @@ void ReaPack::importRemote()
   m_config->write();
 
   m_manager->refresh();
-
-  Transaction *t = createTransaction();
-  if(t)
-    t->synchronize(remote);
+  synchronize(remote);
 }
 
 void ReaPack::manageRemotes()
