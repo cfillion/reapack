@@ -65,7 +65,9 @@ vendor
   to `<reapack directory>\vendor` as `libcurl_x64`
 6. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
   to `<reapack directory>\vendor` as `libcurl_x86`
-7. Run `rake` from this directory using
+7. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
+   Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
+8. Run `rake` from this directory using
   "Developer Command Prompt for VS2013"
-8. Copy `x64\bin\reaper_reapack_x64.dll` to your REAPER
+9. Copy `x64\bin\reaper_reapack_x64.dll` to your REAPER
   plugin folder (replace x64 with x86 for 32-bit)

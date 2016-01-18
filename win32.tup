@@ -14,7 +14,10 @@ LD := $(WRAP) link
 LDFLAGS := /nologo user32.lib
 LDFLAGS += vendor/libcurl_@(WINARCH)/lib/libcurl_a.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
+LDFLAGS += $(TUP_VARIANTDIR)/build/vendor/sqlite3.o
 LDFLAGS += /DEBUG /OPT:REF /PDBALTPATH:%_PDB%
+
+LINKDEPS := src/resource.res build/vendor/sqlite3.o
 
 RC := rc
 RCFLAGS += /nologo /fo $(TUP_VARIANTDIR)/src/resource.res
@@ -27,9 +30,8 @@ TEST := $(TUP_VARIANTDIR)/bin/test.exe
 TSFLAGS := /OUT:$(TEST)
 TSTARGET := bin/test.exe bin/test.lib bin/test.exp
 
-LINKDEPS := src/resource.res
-
 !build = |> $(CXX) $(CXXFLAGS) /c %f /Fo%o |>
 !link = |> $(LD) $(LDFLAGS) %f |>
 
 : src/resource.rc |> $(RC) $(RCFLAGS) %f |> src/resource.res
+: vendor/sqlite3.c |> !build /Os |> build/vendor/sqlite3.o
