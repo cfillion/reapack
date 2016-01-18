@@ -40,13 +40,10 @@ static vector<string> Split(const string &input)
       list.push_back(input.substr(last));
       break;
     }
-
-    const string part = input.substr(last, pos - last);
-
-    if(!part.empty())
-      list.push_back(part);
-
-    last = pos + 1;
+    else {
+      list.push_back(input.substr(last, pos - last));
+      last = pos + 1;
+    }
   }
 
   return list;
