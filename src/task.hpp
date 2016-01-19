@@ -43,8 +43,9 @@ public:
   void rollback();
 
 protected:
-  int removeFile(const Path &) const;
-  int renameFile(const Path &, const Path &) const;
+  bool renameFile(const Path &, const Path &) const;
+  bool removeFile(const Path &) const;
+  bool removeFileRecursive(const Path &) const;
 
   Transaction *transaction() const { return m_transaction; }
 
@@ -52,7 +53,6 @@ protected:
   virtual void doRollback() = 0;
 
 private:
-
   Transaction *m_transaction;
   bool m_isCancelled;
 
@@ -89,8 +89,6 @@ protected:
   void doRollback() override {}
 
 private:
-  bool remove(const Path &);
-
   std::vector<Path> m_files;
   std::set<Path> m_removedFiles;
 };

@@ -54,32 +54,50 @@ void Task::commit()
     m_onCommit();
 }
 
-int Task::removeFile(const Path &path) const
+bool Task::renameFile(const Path &from, const Path &to) const
+{
+  const string &fullFrom = m_transaction->prefixPath(from).join();
+  const string &fullTo = m_transaction->prefixPath(to).join();
+
+#ifdef _WIN32
+  return !_wrename(make_autostring(fullFrom).c_str(),
+    make_autostring(fullTo).c_str());
+#else
+  return !rename(fullFrom.c_str(), fullTo.c_str());
+#endif
+}
+
+bool Task::removeFile(const Path &path) const
 {
   const auto_string &fullPath =
     make_autostring(m_transaction->prefixPath(path).join());
 
 #ifdef _WIN32
   if(GetFileAttributes(fullPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
-    return !RemoveDirectory(fullPath.c_str());
+    return RemoveDirectory(fullPath.c_str()) != 0;
   else
-    return _wremove(fullPath.c_str());
+    return !_wremove(fullPath.c_str());
 #else
-  return remove(fullPath.c_str());
+  return !remove(fullPath.c_str());
 #endif
 }
 
-int Task::renameFile(const Path &from, const Path &to) const
+bool Task::removeFileRecursive(const Path &file) const
 {
-  const string &fullFrom = m_transaction->prefixPath(from).join();
-  const string &fullTo = m_transaction->prefixPath(to).join();
+  if(!removeFile(file))
+    return false;
 
-#ifdef _WIN32
-  return _wrename(make_autostring(fullFrom).c_str(),
-    make_autostring(fullTo).c_str());
-#else
-  return rename(fullFrom.c_str(), fullTo.c_str());
-#endif
+  Path dir = file;
+
+  // remove empty directories, but not top-level ones that were created by REAPER
+  while(dir.size() > 2) {
+    dir.removeLast();
+
+    if(!removeFile(dir))
+      break;
+  }
+
+  return true;
 }
 
 InstallTask::InstallTask(Version *ver, const set<Path> &oldFiles, Transaction *t)
@@ -133,7 +151,7 @@ bool InstallTask::doCommit()
   for(const PathPair &paths : m_newFiles) {
     removeFile(paths.second);
 
-    if(renameFile(paths.first, paths.second)) {
+    if(!renameFile(paths.first, paths.second)) {
       transaction()->addError(strerror(errno), paths.first.join());
 
       // it's a bit late to rollback here as some files might already have been
@@ -149,7 +167,7 @@ bool InstallTask::doCommit()
 void InstallTask::doRollback()
 {
   for(const PathPair &paths : m_newFiles)
-    removeFile(paths.first);
+    removeFileRecursive(paths.first);
 
   m_newFiles.clear();
 }
@@ -162,30 +180,10 @@ RemoveTask::RemoveTask(const vector<Path> &files, Transaction *t)
 bool RemoveTask::doCommit()
 {
   for(const Path &path : m_files) {
-    if(!remove(path))
+    if(removeFileRecursive(path))
+      m_removedFiles.insert(path);
+    else
       return false;
-  }
-
-  return true;
-}
-
-bool RemoveTask::remove(const Path &file)
-{
-  if(removeFile(file)) {
-    transaction()->addError(strerror(errno), file.join());
-    return false;
-  }
-  else
-    m_removedFiles.insert(file);
-
-  Path dir = file;
-
-  // remove empty directories, but not top-level ones that were created by REAPER
-  while(dir.size() > 2) {
-    dir.removeLast();
-
-    if(removeFile(dir))
-      break;
   }
 
   return true;
