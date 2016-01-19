@@ -114,6 +114,12 @@ void Statement::bind(const int index, const string &text)
     throw m_db->lastError();
 }
 
+void Statement::bind(const int index, const int integer)
+{
+  if(sqlite3_bind_int(m_stmt, index, integer))
+    throw m_db->lastError();
+}
+
 void Statement::bind(const int index, const uint64_t integer)
 {
   if(sqlite3_bind_int64(m_stmt, index, (sqlite3_int64)integer))

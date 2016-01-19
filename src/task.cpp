@@ -32,56 +32,13 @@ Task::Task(Transaction *transaction)
 {
 }
 
-void Task::install(Version *ver, const set<Path> &oldFiles)
-{
-  const auto &sources = ver->sources();
-
-  for(auto it = sources.begin(); it != sources.end();) {
-    const Path &path = it->first;
-    Source *src = it->second;
-
-    Download *dl = new Download(src->fullName(), src->url());
-    dl->onFinish(bind(&Task::saveSource, this, dl, src));
-
-    m_transaction->downloadQueue()->push(dl);
-
-    // skip duplicate files
-    do { it++; } while(it != sources.end() && path == it->first);
-  }
-
-  m_oldFiles = move(oldFiles);
-}
-
-void Task::saveSource(Download *dl, Source *src)
-{
-  if(m_isCancelled)
-    return;
-
-  const Path targetPath = src->targetPath();
-  Path tmpPath = targetPath;
-  tmpPath[tmpPath.size() - 1] += ".new";
-
-  m_files.push_back({tmpPath, targetPath});
-
-  const auto old = m_oldFiles.find(targetPath);
-  if(old != m_oldFiles.end())
-    m_oldFiles.erase(old);
-
-  const Path path = m_transaction->prefixPath(tmpPath);
-
-  if(!m_transaction->saveFile(dl, path)) {
-    cancel();
-    return;
-  }
-}
-
-void Task::cancel()
+void Task::rollback()
 {
   m_isCancelled = true;
 
   // it's the transaction queue's job to abort the running downloads, not ours
 
-  rollback();
+  doRollback();
 }
 
 void Task::commit()
@@ -89,31 +46,9 @@ void Task::commit()
   if(m_isCancelled)
     return;
 
-  for(const Path &path : m_oldFiles)
-    removeFile(path);
-
-  for(const PathPair &paths : m_files) {
-    removeFile(paths.second);
-
-    if(renameFile(paths.first, paths.second)) {
-      m_transaction->addError(strerror(errno), paths.first.join());
-
-      // it's a bit late to rollback here as some files might already have been
-      // overwritten. at least we can delete the temporary files
-      rollback();
-      return;
-    }
-  }
+  doCommit();
 
   m_onCommit();
-}
-
-void Task::rollback()
-{
-  for(const PathPair &paths : m_files)
-    removeFile(paths.first);
-
-  m_files.clear();
 }
 
 int Task::removeFile(const Path &path) const
@@ -138,4 +73,104 @@ int Task::renameFile(const Path &from, const Path &to) const
 #else
   return rename(fullFrom.c_str(), fullTo.c_str());
 #endif
+}
+
+InstallTask::InstallTask(Version *ver, const set<Path> &oldFiles, Transaction *t)
+  : Task(t), m_oldFiles(move(oldFiles))
+{
+  const auto &sources = ver->sources();
+
+  for(auto it = sources.begin(); it != sources.end();) {
+    const Path &path = it->first;
+    Source *src = it->second;
+
+    Download *dl = new Download(src->fullName(), src->url());
+    dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
+
+    transaction()->downloadQueue()->push(dl);
+
+    // skip duplicate files
+    do { it++; } while(it != sources.end() && path == it->first);
+  }
+}
+
+void InstallTask::saveSource(Download *dl, Source *src)
+{
+  if(isCancelled())
+    return;
+
+  const Path &targetPath = src->targetPath();
+  Path tmpPath(targetPath);
+  tmpPath[tmpPath.size() - 1] += ".new";
+
+  m_newFiles.push_back({tmpPath, targetPath});
+
+  const auto old = m_oldFiles.find(targetPath);
+  if(old != m_oldFiles.end())
+    m_oldFiles.erase(old);
+
+  const Path &path = transaction()->prefixPath(tmpPath);
+
+  if(!transaction()->saveFile(dl, path)) {
+    rollback();
+    return;
+  }
+}
+
+void InstallTask::doCommit()
+{
+  for(const Path &path : m_oldFiles)
+    removeFile(path);
+
+  for(const PathPair &paths : m_newFiles) {
+    removeFile(paths.second);
+
+    if(renameFile(paths.first, paths.second)) {
+      transaction()->addError(strerror(errno), paths.first.join());
+
+      // it's a bit late to rollback here as some files might already have been
+      // overwritten. at least we can delete the temporary files
+      rollback();
+      return;
+    }
+  }
+}
+
+void InstallTask::doRollback()
+{
+  for(const PathPair &paths : m_newFiles)
+    removeFile(paths.first);
+
+  m_newFiles.clear();
+}
+
+RemoveTask::RemoveTask(const std::set<Path> &files, Transaction *t)
+  : Task(t), m_files(move(files))
+{
+}
+
+void RemoveTask::doCommit()
+{
+  for(const Path &path : m_files)
+    remove(path);
+}
+
+void RemoveTask::remove(const Path &file)
+{
+  if(removeFile(file)) {
+    transaction()->addError(strerror(errno), file.join());
+    return;
+  }
+  else
+    m_removedFiles.push_back(file);
+
+  Path dir = file;
+
+  // remove empty directories, but not top-level ones that were created by REAPER
+  while(dir.size() > 2) {
+    dir.removeLast();
+
+    if(removeFile(dir))
+      break;
+  }
 }

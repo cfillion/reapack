@@ -20,6 +20,8 @@
 
 #include "dialog.hpp"
 
+#include <sstream>
+
 class Transaction;
 
 class Report : public Dialog {
@@ -31,12 +33,15 @@ protected:
   void onCommand(WPARAM, LPARAM) override;
 
 private:
-  void formatNewPackages(std::ostringstream &);
-  void formatUpdates(std::ostringstream &);
-  void formatErrors(std::ostringstream &);
-  void formatChangelog(const std::string &, std::ostringstream &);
+  void printNewPackages();
+  void printUpdates();
+  void printErrors();
+  void printRemovals();
+  void printChangelog(const std::string &);
+  void printHeader(const char *);
 
   Transaction *m_transaction;
+  std::ostringstream m_stream;
 };
 
 #endif

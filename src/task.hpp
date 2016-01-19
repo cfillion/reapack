@@ -34,30 +34,63 @@ public:
   typedef Signal::slot_type Callback;
 
   Task(Transaction *parent);
+  virtual ~Task() {}
 
   void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
+  bool isCancelled() const { return m_isCancelled; }
 
-  void install(Version *ver, const std::set<Path> &oldFiles);
   void commit();
-  void cancel();
+  void rollback();
 
-private:
+protected:
   int removeFile(const Path &) const;
   int renameFile(const Path &, const Path &) const;
 
-  typedef std::pair<Path, Path> PathPair;
+  Transaction *transaction() const { return m_transaction; }
 
-  void finish();
-  void rollback();
+  virtual void doCommit() = 0;
+  virtual void doRollback() = 0;
 
-  void saveSource(Download *, Source *);
+private:
 
   Transaction *m_transaction;
   bool m_isCancelled;
-  std::vector<PathPair> m_files;
-  std::set<Path> m_oldFiles;
 
   Signal m_onCommit;
+};
+
+class InstallTask : public Task {
+public:
+  InstallTask(Version *ver, const std::set<Path> &oldFiles, Transaction *);
+
+protected:
+  void doCommit() override;
+  void doRollback() override;
+
+private:
+  typedef std::pair<Path, Path> PathPair;
+
+  void saveSource(Download *, Source *);
+
+  std::vector<PathPair> m_newFiles;
+  std::set<Path> m_oldFiles;
+};
+
+class RemoveTask : public Task {
+public:
+  RemoveTask(const std::set<Path> &files, Transaction *);
+
+  const std::vector<Path> &removedFiles() const { return m_removedFiles; }
+
+protected:
+  void doCommit() override;
+  void doRollback() override {}
+
+private:
+  void remove(const Path &);
+
+  std::set<Path> m_files;
+  std::vector<Path> m_removedFiles;
 };
 
 #endif

@@ -21,6 +21,7 @@
 #include "index.hpp"
 #include "package.hpp"
 #include "path.hpp"
+#include "remote.hpp"
 
 #include <reaper_plugin_functions.h>
 
@@ -31,6 +32,7 @@ Registry::Registry(const Path &path)
 {
   migrate();
 
+  // entry queries
   m_insertEntry = m_db.prepare(
     "INSERT OR REPLACE INTO entries "
     "VALUES(NULL, ?, ?, ?, ?);"
@@ -42,6 +44,10 @@ Registry::Registry(const Path &path)
     "LIMIT 1"
   );
 
+  m_allEntries = m_db.prepare("SELECT id, version FROM entries WHERE remote = ?");
+  m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
+
+  // file queries
   m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
   m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?)");
   m_clearFiles = m_db.prepare(
@@ -49,6 +55,7 @@ Registry::Registry(const Path &path)
     "  SELECT id FROM entries WHERE remote = ? AND category = ? AND package = ?"
     ")"
   );
+  m_forgetFiles = m_db.prepare("DELETE FROM files WHERE entry = ?");
 
   // lock the database
   m_db.begin();
@@ -144,6 +151,22 @@ Registry::Entry Registry::query(Package *pkg) const
   return {id, status, version};
 }
 
+vector<Registry::Entry> Registry::queryAll(const Remote &remote) const
+{
+  vector<Registry::Entry> list;
+
+  m_allEntries->bind(1, remote.name());
+  m_allEntries->exec([&] {
+    const int id = m_allEntries->intColumn(0);
+    const uint64_t version = m_allEntries->uint64Column(1);
+
+    list.push_back({id, Unknown, version});
+    return true;
+  });
+
+  return list;
+}
+
 set<Path> Registry::getFiles(const Entry &qr) const
 {
   if(!qr.id) // skip processing for new packages
@@ -158,6 +181,15 @@ set<Path> Registry::getFiles(const Entry &qr) const
   });
 
   return list;
+}
+
+void Registry::forget(const Entry &qr)
+{
+  m_forgetFiles->bind(1, qr.id);
+  m_forgetFiles->exec();
+
+  m_forgetEntry->bind(1, qr.id);
+  m_forgetEntry->exec();
 }
 
 void Registry::commit()

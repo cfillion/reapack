@@ -184,6 +184,7 @@ void Manager::apply()
   }
 
   for(const Remote &remote : m_uninstall) {
+    m_reapack->uninstall(remote);
     list->remove(remote);
   }
 

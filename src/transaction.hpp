@@ -25,8 +25,10 @@
 #include <boost/signals2.hpp>
 #include <set>
 
+class InstallTask;
 class Remote;
 class RemoteIndex;
+class RemoveTask;
 class Task;
 
 class Transaction {
@@ -51,14 +53,16 @@ public:
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
   void synchronize(const Remote &);
+  void uninstall(const Remote &);
   void install();
   void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
   DownloadQueue *downloadQueue() { return &m_queue; }
-  const PackageEntryList &packages() const { return m_packages; }
+  size_t taskCount() const { return m_tasks.size(); }
   const PackageEntryList &newPackages() const { return m_new; }
   const PackageEntryList &updates() const { return m_updates; }
+  const std::vector<Path> &removals() const { return m_removals; }
   const ErrorList &errors() const { return m_errors; }
 
 private:
@@ -70,6 +74,8 @@ private:
   };
 
   friend Task;
+  friend InstallTask;
+  friend RemoveTask;
 
   void updateAll();
   void finish();
@@ -80,6 +86,7 @@ private:
   Path prefixPath(const Path &) const;
   bool allFilesExists(const std::set<Path> &) const;
   void registerFiles(const std::set<Path> &);
+  void addTask(Task *);
 
   Registry *m_registry;
 
@@ -93,6 +100,7 @@ private:
   PackageEntryList m_packages;
   PackageEntryList m_new;
   PackageEntryList m_updates;
+  std::vector<Path> m_removals;
   ErrorList m_errors;
 
   std::vector<Task *> m_tasks;

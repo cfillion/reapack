@@ -23,7 +23,6 @@
 #include "transaction.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
-#include <sstream>
 
 using namespace std;
 
@@ -37,29 +36,32 @@ Report::Report(Transaction *transaction)
 
 void Report::onInit()
 {
-  const size_t newPacks = m_transaction->newPackages().size();
+  const size_t newPackages = m_transaction->newPackages().size();
   const size_t updates = m_transaction->updates().size();
+  const size_t removals = m_transaction->removals().size();
   const size_t errors = m_transaction->errors().size();
 
-  ostringstream text; 
-
-  text
-    << newPacks << " new packages, "
-    << updates << " updates and "
+  m_stream
+    << newPackages << " new packages, "
+    << updates << " updates, "
+    << removals << " removed files and "
     << errors << " errors"
     << NL
   ;
 
   if(errors)
-    formatErrors(text);
+    printErrors();
 
-  if(newPacks)
-    formatNewPackages(text);
+  if(newPackages)
+    printNewPackages();
 
   if(updates)
-    formatUpdates(text);
+    printUpdates();
 
-  const auto_string &str = make_autostring(text.str());
+  if(removals)
+    printRemovals();
+
+  const auto_string &str = make_autostring(m_stream.str());
   SetDlgItemText(handle(), IDC_REPORT, str.c_str());
 }
 
@@ -73,19 +75,19 @@ void Report::onCommand(WPARAM wParam, LPARAM)
   }
 }
 
-void Report::formatNewPackages(ostringstream &text)
+void Report::printNewPackages()
 {
-  text << NL << SEP << " New packages: " << SEP << NL;
+  printHeader("New packages");
 
   for(const Transaction::PackageEntry &entry : m_transaction->newPackages()) {
     Version *ver = entry.first;
-    text << NL << ver->fullName() << NL;
+    m_stream << NL << ver->fullName() << NL;
   }
 }
 
-void Report::formatUpdates(ostringstream &text)
+void Report::printUpdates()
 {
-  text << NL << SEP << " Updates: " << SEP << NL;
+  printHeader("Updates");
 
   for(const Transaction::PackageEntry &entry : m_transaction->updates()) {
     Package *pkg = entry.first->package();
@@ -96,27 +98,40 @@ void Report::formatUpdates(ostringstream &text)
       if(ver->code() <= regEntry.version)
         break;
 
-      text << NL << ver->fullName() << NL;
+      m_stream << NL << ver->fullName() << NL;
 
       if(!ver->changelog().empty())
-        formatChangelog(ver->changelog(), text);
+        printChangelog(ver->changelog());
     }
   }
 }
 
-void Report::formatChangelog(const string &changelog, ostringstream &output)
+void Report::printChangelog(const string &changelog)
 {
   istringstream input(changelog);
   string line;
 
   while(getline(input, line, '\n'))
-    output << "  " << line.substr(line.find_first_not_of('\x20')) << NL;
+    m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
 }
 
-void Report::formatErrors(ostringstream &text)
+void Report::printErrors()
 {
-  text << NL << SEP << " Errors: " << SEP << NL;
+  printHeader("Errors");
 
   for(const Transaction::Error &err : m_transaction->errors())
-    text << NL << err.title << ":" << NL << err.message << NL;
+    m_stream << NL << err.title << ':' << NL << err.message << NL;
+}
+
+void Report::printRemovals()
+{
+  printHeader("Removed files");
+
+  for(const Path &path : m_transaction->removals())
+    m_stream << NL << path.join();
+}
+
+void Report::printHeader(const char *title)
+{
+  m_stream << NL << SEP << ' ' << title << ": " << SEP << NL;
 }

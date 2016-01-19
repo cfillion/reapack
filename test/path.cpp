@@ -150,3 +150,16 @@ TEST_CASE("absolute path (unix)", M) {
   REQUIRE(a.join() == "/usr/bin/zsh");
 }
 #endif
+
+TEST_CASE("remove last component of path", M) {
+  Path a;
+  a.append("a");
+  a.append("b");
+
+  CHECK(a.size() == 2);
+
+  a.removeLast();
+
+  REQUIRE(a.size() == 1);
+  REQUIRE(a[0] == "a");
+}

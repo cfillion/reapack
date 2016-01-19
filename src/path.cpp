@@ -81,6 +81,11 @@ void Path::clear()
   m_parts.clear();
 }
 
+void Path::removeLast()
+{
+  m_parts.pop_back();
+}
+
 string Path::basename() const
 {
   if(m_parts.empty())

@@ -26,6 +26,7 @@
 
 class Package;
 class Path;
+class Remote;
 class Version;
 
 class Registry {
@@ -33,9 +34,10 @@ public:
   Registry(const Path &path = Path());
 
   enum Status {
-    UpToDate,
-    UpdateAvailable,
+    Unknown,
     Uninstalled,
+    UpdateAvailable,
+    UpToDate,
   };
 
   struct Entry {
@@ -45,8 +47,10 @@ public:
   };
 
   Entry query(Package *) const;
+  std::vector<Entry> queryAll(const Remote &) const;
   std::set<Path> getFiles(const Entry &) const;
   void push(Version *);
+  void forget(const Entry &);
   void commit();
 
   bool addToREAPER(Version *ver, const Path &root);
@@ -57,9 +61,13 @@ private:
   Database m_db;
   Statement *m_insertEntry;
   Statement *m_findEntry;
+  Statement *m_allEntries;
+  Statement *m_forgetEntry;
+
   Statement *m_getFiles;
   Statement *m_insertFile;
   Statement *m_clearFiles;
+  Statement *m_forgetFiles;
 };
 
 #endif

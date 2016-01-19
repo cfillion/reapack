@@ -18,7 +18,8 @@ STYLE DIALOG_STYLE
 FONT DIALOG_FONT
 CAPTION "ReaPack: Transaction Report"
 BEGIN
-  LTEXT "Synchronization complete!", IDC_LABEL, 5, 5, 250, 10
+  LTEXT "All done! Description of the changes:",
+    IDC_LABEL, 5, 5, 250, 10
   EDITTEXT IDC_REPORT, 6, 18, 248, 195, WS_VSCROLL | ES_MULTILINE |
     ES_READONLY | NOT WS_TABSTOP
   DEFPUSHBUTTON "OK", IDOK, 105, 220, 50, 14

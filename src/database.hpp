@@ -56,6 +56,7 @@ public:
   typedef std::function<bool (void)> ExecCallback;
 
   void bind(const int index, const std::string &text);
+  void bind(const int index, const int integer);
   void bind(const int index, const uint64_t integer);
   void exec();
   void exec(const ExecCallback &);

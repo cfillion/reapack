@@ -27,6 +27,7 @@ public:
 
   void prepend(const std::string &part);
   void append(const std::string &part);
+  void removeLast();
   void clear();
 
   bool empty() const { return m_parts.empty(); }

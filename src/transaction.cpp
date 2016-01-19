@@ -122,33 +122,54 @@ void Transaction::install()
   for(const PackageEntry &entry : m_packages) {
     Version *ver = entry.first;
     const Registry::Entry regEntry = entry.second;
+    const set<Path> &currentFiles = m_registry->getFiles(regEntry);
 
-    Task *task = new Task(this);
+    InstallTask *task = new InstallTask(ver, currentFiles, this);
 
-    try {
-      task->install(ver, m_registry->getFiles(regEntry));
-      task->onCommit([=] {
-        if(regEntry.status == Registry::UpdateAvailable)
-          m_updates.push_back(entry);
-        else
-          m_new.push_back(entry);
+    task->onCommit([=] {
+      if(regEntry.status == Registry::UpdateAvailable)
+        m_updates.push_back(entry);
+      else
+        m_new.push_back(entry);
 
-        m_registry->push(ver);
+      m_registry->push(ver);
 
-        if(!m_registry->addToREAPER(ver, m_root)) {
-          addError(
-            "Cannot register the package in REAPER. "
-            "Are you using REAPER v5.12 or more recent?", ver->fullName()
-          );
-        }
-      });
+      if(!m_registry->addToREAPER(ver, m_root)) {
+        addError(
+          "Cannot register the package in REAPER. "
+          "Are you using REAPER v5.12 or more recent?", ver->fullName()
+        );
+      }
+    });
 
-      m_tasks.push_back(task);
-    }
-    catch(const reapack_error &e) {
-      addError(e.what(), ver->fullName());
-      delete task;
-    }
+    addTask(task);
+  }
+}
+
+void Transaction::uninstall(const Remote &remote)
+{
+  const vector<Registry::Entry> &entries = m_registry->queryAll(remote);
+
+  if(entries.empty()) {
+    cancel();
+    return;
+  }
+
+  for(const auto &entry : entries) {
+    const set<Path> &files = m_registry->getFiles(entry);
+
+    RemoveTask *task = new RemoveTask(files, this);
+
+    task->onCommit([=] {
+      const vector<Path> &removedFiles = task->removedFiles();
+
+      m_registry->forget(entry);
+
+      m_removals.insert(m_removals.end(),
+        removedFiles.begin(), removedFiles.end());
+    });
+
+    addTask(task);
   }
 }
 
@@ -157,9 +178,12 @@ void Transaction::cancel()
   m_isCancelled = true;
 
   for(Task *task : m_tasks)
-    task->cancel();
+    task->rollback();
 
-  m_queue.abort();
+  if(m_queue.idle())
+    finish();
+  else
+    m_queue.abort();
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
@@ -233,4 +257,12 @@ void Transaction::registerFiles(const set<Path> &list)
   }
 
   m_files.insert(list.begin(), list.end());
+}
+
+void Transaction::addTask(Task *task)
+{
+  m_tasks.push_back(task);
+
+  if(m_queue.idle())
+    finish();
 }

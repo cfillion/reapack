@@ -6,13 +6,14 @@
 
 #include <index.hpp>
 #include <package.hpp>
+#include <remote.hpp>
 
 using namespace std;
 
 static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
-  RemoteIndex ri("Hello"); \
+  RemoteIndex ri("Remote Name"); \
   Category cat("Hello", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version *ver = new Version("1.0", &pkg); \
@@ -73,4 +74,35 @@ TEST_CASE("get file list", M) {
   const set<Path> files = reg.getFiles(res);
 
   REQUIRE(files == ver->files());
+}
+
+TEST_CASE("query all packages", M) {
+  MAKE_PACKAGE
+
+  const Remote remote("Remote Name", "irrelevent_url");
+
+  Registry reg;
+  REQUIRE(reg.queryAll(remote).empty());
+
+  reg.push(ver);
+
+  const vector<Registry::Entry> entries = reg.queryAll(remote);
+  REQUIRE(entries.size() == 1);
+  REQUIRE(entries[0].id == 1);
+  REQUIRE(entries[0].status == Registry::Unknown);
+  REQUIRE(entries[0].version == ver->code());
+}
+
+TEST_CASE("forget registry entry", M) {
+  MAKE_PACKAGE
+
+  Registry reg;
+  reg.push(ver);
+
+  reg.forget(reg.query(&pkg));
+
+  const Registry::Entry afterForget = reg.query(&pkg);
+  REQUIRE(afterForget.id == 0);
+  REQUIRE(afterForget.status == Registry::Uninstalled);
+  REQUIRE(afterForget.version == 0);
 }

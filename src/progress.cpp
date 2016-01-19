@@ -38,8 +38,10 @@ void Progress::setTransaction(Transaction *t)
   m_total = 0;
   m_currentName.clear();
 
-  if(!m_transaction)
+  if(!m_transaction) {
+    hide();
     return;
+  }
 
   SetWindowText(m_label, AUTO_STR("Initializing..."));
 
@@ -73,6 +75,9 @@ void Progress::addDownload(Download *dl)
   updateProgress();
 
   dl->onStart([=] {
+    if(!isVisible())
+      show();
+
     m_currentName = make_autostring(dl->name());
     updateProgress();
   });

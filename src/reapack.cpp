@@ -104,6 +104,7 @@ void ReaPack::synchronizeAll()
     return;
   }
 
+  // do nothing is a transation is already running
   Transaction *t = createTransaction();
 
   if(!t)
@@ -122,6 +123,19 @@ void ReaPack::synchronize(const Remote &remote)
 
   // hitchhike currently running transactions
   m_transaction->synchronize(remote);
+}
+
+void ReaPack::uninstall(const Remote &remote)
+{
+  if(remote.isProtected())
+    return;
+
+  if(!m_transaction) {
+    if(!createTransaction())
+      return;
+  }
+
+  m_transaction->uninstall(remote);
 }
 
 void ReaPack::importRemote()
@@ -209,7 +223,6 @@ Transaction *ReaPack::createTransaction()
   }
 
   m_progress->setTransaction(m_transaction);
-  m_progress->show();
 
   m_transaction->onFinish([=] {
     if(m_transaction->isCancelled())
@@ -217,13 +230,12 @@ Transaction *ReaPack::createTransaction()
 
     m_progress->disable();
 
-    if(m_transaction->packages().empty() && m_transaction->errors().empty())
+    if(m_transaction->taskCount() == 0 && m_transaction->errors().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
     m_progress->enable();
-    m_progress->hide();
   });
 
   m_transaction->onDestroy([=] {
