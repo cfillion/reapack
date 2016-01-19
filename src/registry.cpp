@@ -117,7 +117,7 @@ void Registry::push(Version *ver)
   }
 }
 
-Registry::QueryResult Registry::query(Package *pkg) const
+Registry::Entry Registry::query(Package *pkg) const
 {
   int id = 0;
   uint64_t version = 0;
@@ -144,7 +144,7 @@ Registry::QueryResult Registry::query(Package *pkg) const
   return {id, status, version};
 }
 
-set<Path> Registry::getFiles(const QueryResult &qr) const
+set<Path> Registry::getFiles(const Entry &qr) const
 {
   set<Path> list;
 

@@ -21,6 +21,7 @@
 #include "encoding.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
+#include "remote.hpp"
 #include "resource.hpp"
 
 static const int ACTION_ENABLE = 300;

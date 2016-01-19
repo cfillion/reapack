@@ -89,7 +89,7 @@ void Report::formatUpdates(ostringstream &text)
 
   for(const Transaction::PackageEntry &entry : m_transaction->updates()) {
     Package *pkg = entry.first->package();
-    const Registry::QueryResult &regEntry = entry.second;
+    const Registry::Entry &regEntry = entry.second;
     const VersionSet &versions = pkg->versions();
 
     for(Version *ver : versions | boost::adaptors::reversed) {

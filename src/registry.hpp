@@ -38,14 +38,14 @@ public:
     Uninstalled,
   };
 
-  struct QueryResult {
+  struct Entry {
     int id; // internal use
     Status status;
     uint64_t version;
   };
 
-  QueryResult query(Package *) const;
-  std::set<Path> getFiles(const QueryResult &) const;
+  Entry query(Package *) const;
+  std::set<Path> getFiles(const Entry &) const;
   void push(Version *);
   void commit();
 

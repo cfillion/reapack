@@ -21,11 +21,11 @@
 #include "dialog.hpp"
 
 #include "listview.hpp"
-#include "remote.hpp"
 
 #include <map>
 
 class ReaPack;
+class Remote;
 
 class Manager : public Dialog {
 public:

@@ -25,7 +25,7 @@ TEST_CASE("query uninstalled package", M) {
 
   Registry reg;
 
-  const Registry::QueryResult res = reg.query(&pkg);
+  const Registry::Entry res = reg.query(&pkg);
   REQUIRE(res.status == Registry::Uninstalled);
   REQUIRE(res.version == 0);
 }
@@ -36,7 +36,7 @@ TEST_CASE("query up to date pacakge", M) {
   Registry reg;
   reg.push(ver);
 
-  const Registry::QueryResult res = reg.query(&pkg);
+  const Registry::Entry res = reg.query(&pkg);
   REQUIRE(res.status == Registry::UpToDate);
   REQUIRE(res.version == Version("1.0").code());
 }
@@ -51,12 +51,12 @@ TEST_CASE("bump version", M) {
   reg.push(ver);
   pkg.addVersion(ver2);
 
-  const Registry::QueryResult res1 = reg.query(&pkg);
+  const Registry::Entry res1 = reg.query(&pkg);
   REQUIRE(res1.status == Registry::UpdateAvailable);
   REQUIRE(res1.version == Version("1.0").code());
 
   reg.push(ver2);
-  const Registry::QueryResult res2 = reg.query(&pkg);
+  const Registry::Entry res2 = reg.query(&pkg);
   REQUIRE(res2.status == Registry::UpToDate);
   REQUIRE(res2.version == Version("2.0").code());
 }
@@ -67,7 +67,7 @@ TEST_CASE("get file list", M) {
   Registry reg;
   reg.push(ver);
 
-  const Registry::QueryResult res = reg.query(&pkg);
+  const Registry::Entry res = reg.query(&pkg);
   const set<Path> files = reg.getFiles(res);
 
   REQUIRE(files == ver->files());

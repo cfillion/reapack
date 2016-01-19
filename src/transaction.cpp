@@ -91,7 +91,7 @@ void Transaction::updateAll()
 {
   for(RemoteIndex *ri : m_remoteIndexes) {
     for(Package *pkg : ri->packages()) {
-      Registry::QueryResult entry = m_registry->query(pkg);
+      Registry::Entry entry = m_registry->query(pkg);
 
       Version *ver = pkg->lastVersion();
 
@@ -121,7 +121,7 @@ void Transaction::install()
 
   for(const PackageEntry &entry : m_packages) {
     Version *ver = entry.first;
-    const Registry::QueryResult regEntry = entry.second;
+    const Registry::Entry regEntry = entry.second;
 
     Task *task = new Task(this);
 

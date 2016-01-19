@@ -34,7 +34,7 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
-  typedef std::pair<Version *, const Registry::QueryResult> PackageEntry;
+  typedef std::pair<Version *, const Registry::Entry> PackageEntry;
   typedef std::vector<PackageEntry> PackageEntryList;
 
   struct Error {
