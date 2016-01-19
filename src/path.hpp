@@ -34,8 +34,8 @@ public:
   size_t size() const { return m_parts.size(); }
 
   std::string basename() const;
-  std::string dirname() const { return join(true, 0); }
-  std::string join(const char sep = 0) const { return join(false, sep); }
+  std::string dirname() const;
+  std::string join(const char sep = 0) const;
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;
@@ -46,7 +46,6 @@ public:
   const std::string &operator[](const size_t index) const;
 
 private:
-  std::string join(const bool, const char) const;
   const std::string &at(const size_t) const;
 
   std::list<std::string> m_parts;

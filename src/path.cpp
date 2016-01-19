@@ -83,27 +83,34 @@ void Path::clear()
 
 void Path::removeLast()
 {
-  m_parts.pop_back();
+  if(!empty())
+    m_parts.pop_back();
 }
 
 string Path::basename() const
 {
-  if(m_parts.empty())
+  if(empty())
     return {};
 
   return m_parts.back();
 }
 
-string Path::join(const bool skipLast, const char sep) const
+string Path::dirname() const
+{
+  if(empty())
+    return {};
+
+  Path dir(*this);
+  dir.removeLast();
+
+  return dir.join();
+}
+
+string Path::join(const char sep) const
 {
   string path;
 
-  auto end = m_parts.end();
-
-  if(skipLast)
-    end--;
-
-  for(auto it = m_parts.begin(); it != end; it++) {
+  for(auto it = m_parts.begin(); it != m_parts.end(); it++) {
     const string &part = *it;
 
     if(!path.empty())
