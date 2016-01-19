@@ -17,6 +17,10 @@
 
 #include "dialog.hpp"
 
+#include <algorithm>
+
+using namespace std;
+
 DialogMap Dialog::s_instances;
 
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -132,13 +136,21 @@ void Dialog::center()
   GetWindowRect(m_handle, &dialogRect);
   GetWindowRect(m_parent, &parentRect);
 
-  int left = parentRect.right / 2;
-  left -= (dialogRect.right - dialogRect.left) / 2;
+  const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+  const int parentWidth = parentRect.right - parentRect.left;
+  const int dialogWidth = dialogRect.right - dialogRect.left;
 
-  int top = parentRect.bottom / 2;
-  top -= (dialogRect.bottom - dialogRect.top) / 2;
+  int left = (parentWidth - dialogWidth) / 2;
+  left = min(left + (int)parentRect.left, screenWidth - dialogWidth);
 
-  SetWindowPos(m_handle, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
+  const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+  const int parentHeight = parentRect.bottom - parentRect.top;
+  const int dialogHeight = dialogRect.bottom - dialogRect.top;
+
+  int top = (parentHeight - dialogHeight) / 2;
+  top = min(top + (int)parentRect.top, screenHeight - dialogHeight);
+
+  SetWindowPos(m_handle, HWND_TOP, max(0, left), max(0, top), 0, 0, SWP_NOSIZE);
 }
 
 void Dialog::setFocus()
