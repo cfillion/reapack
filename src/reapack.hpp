@@ -37,10 +37,8 @@ class ReaPack {
 public:
   gaccel_register_t syncAction;
 
-  ReaPack();
-
-  void init(REAPER_PLUGIN_HINSTANCE, reaper_plugin_info_t *);
-  void cleanup();
+  ReaPack(REAPER_PLUGIN_HINSTANCE);
+  ~ReaPack();
 
   int setupAction(const char *name, const ActionCallback &);
   int setupAction(const char *name, const char *desc,
@@ -66,7 +64,6 @@ private:
   Manager *m_manager;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
-  reaper_plugin_info_t *m_rec;
   HWND m_mainWindow;
   Path m_resourcePath;
 };

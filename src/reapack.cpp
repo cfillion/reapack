@@ -28,15 +28,9 @@
 
 using namespace std;
 
-ReaPack::ReaPack()
-  : m_config(nullptr), m_transaction(nullptr), m_progress(nullptr)
+ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
+  : m_transaction(nullptr), m_instance(instance)
 {
-}
-
-void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
-{
-  m_instance = instance;
-  m_rec = rec;
   m_mainWindow = GetMainHwnd();
   m_resourcePath.append(GetResourcePath());
 
@@ -49,7 +43,7 @@ void ReaPack::init(REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
   Download::Init();
 }
 
-void ReaPack::cleanup()
+ReaPack::~ReaPack()
 {
   // for some reasons ~ReaPack() is called many times during startup
   // and two times during shutdown on osx... cleanup() is called only once
@@ -64,7 +58,7 @@ void ReaPack::cleanup()
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)
 {
-  const int id = m_rec->Register("command_id", (void *)name);
+  const int id = plugin_register("command_id", (void *)name);
   m_actions[id] = callback;
 
   return id;
@@ -78,7 +72,7 @@ int ReaPack::setupAction(const char *name, const char *desc,
   action->desc = desc;
   action->accel.cmd = id;
 
-  m_rec->Register("gaccel", action);
+  plugin_register("gaccel", action);
 
   return id;
 }

@@ -24,11 +24,11 @@
 
 using namespace std;
 
-static ReaPack reapack;
+static ReaPack *reapack = nullptr;
 
 static bool commandHook(const int id, const int flag)
 {
-  return reapack.execActions(id, flag);
+  return reapack->execActions(id, flag);
 }
 
 static void menuHook(const char *name, HMENU handle, int f)
@@ -52,7 +52,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
   if(!rec) {
-    reapack.cleanup();
+    delete reapack;
     return 0;
   }
 
@@ -62,15 +62,15 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(REAPERAPI_LoadAPI(rec->GetFunc) > 0)
     return 0;
 
-  reapack.init(instance, rec);
+  reapack = new ReaPack(instance);
 
-  reapack.setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
-    &reapack.syncAction, bind(&ReaPack::synchronizeAll, reapack));
+  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
+    &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
 
-  reapack.setupAction("REAPACK_IMPORT",
+  reapack->setupAction("REAPACK_IMPORT",
     bind(&ReaPack::importRemote, reapack));
 
-  reapack.setupAction("REAPACK_MANAGE",
+  reapack->setupAction("REAPACK_MANAGE",
     bind(&ReaPack::manageRemotes, reapack));
 
   rec->Register("hookcommand", (void *)commandHook);
