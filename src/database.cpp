@@ -36,6 +36,8 @@ Database::Database(const string &filename)
 
     throw error;
   }
+
+  exec("PRAGMA foreign_keys = 1");
 }
 
 Database::~Database()

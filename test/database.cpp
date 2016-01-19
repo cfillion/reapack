@@ -102,3 +102,24 @@ TEST_CASE("version", M) {
   db.exec("PRAGMA user_version = 1");
   REQUIRE(db.version() == 1);
 }
+
+TEST_CASE("foreign keys", M) {
+  Database db;
+  db.exec(
+    "CREATE TABLE a (id INTEGER PRIMARY KEY);"
+
+    "CREATE TABLE b ("
+    "  two INTEGER NOT NULL,"
+    "  FOREIGN KEY(two) REFERENCES a(id)"
+    ");"
+
+    "INSERT INTO a VALUES(NULL);"
+    "INSERT INTO b VALUES(1);"
+  );
+
+  try {
+    db.exec("DELETE FROM a");
+    FAIL("foreign keys checks are disabled");
+  }
+  catch(const reapack_error &) {}
+}
