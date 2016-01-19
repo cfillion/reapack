@@ -186,11 +186,20 @@ void ReaPack::importRemote()
       return;
   }
 
-  remotes->add(remote);
-  m_config->write();
-
-  m_manager->refresh();
   synchronize(remote);
+
+  if(!m_transaction)
+    return;
+
+  m_transaction->onFinish([=] {
+    if(m_transaction->isCancelled())
+      return;
+
+    remotes->add(remote);
+    m_config->write();
+
+    m_manager->refresh();
+  });
 }
 
 void ReaPack::manageRemotes()
