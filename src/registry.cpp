@@ -146,6 +146,9 @@ Registry::Entry Registry::query(Package *pkg) const
 
 set<Path> Registry::getFiles(const Entry &qr) const
 {
+  if(!qr.id) // skip processing for new packages
+    return {};
+
   set<Path> list;
 
   m_getFiles->bind(1, qr.id);

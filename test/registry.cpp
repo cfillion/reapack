@@ -65,6 +65,8 @@ TEST_CASE("get file list", M) {
   MAKE_PACKAGE
 
   Registry reg;
+  REQUIRE(reg.getFiles(reg.query(&pkg)).empty());
+
   reg.push(ver);
 
   const Registry::Entry res = reg.query(&pkg);
