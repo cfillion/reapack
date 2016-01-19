@@ -76,7 +76,7 @@ TEST_CASE("get rows from prepared statement", M) {
   }
 }
 
-TEST_CASE("bing values and clear", M) {
+TEST_CASE("bind values and clear", M) {
   Database db;
   db.exec("CREATE TABLE test (value TEXT NOT NULL)");
 
@@ -137,4 +137,26 @@ TEST_CASE("last insert id", M) {
 
   insert->exec();
   REQUIRE(db.lastInsertId() == 2);
+}
+
+TEST_CASE("bind temporary strings", M) {
+  Database db;
+  db.exec("CREATE TABLE a(text TEXT NOT NULL)");
+
+  Statement *insert = db.prepare("INSERT INTO a VALUES(?)");
+
+  string str("hello");
+  insert->bind(1, str);
+  str = "world";
+
+  insert->exec();
+
+  string got;
+  Statement *select = db.prepare("SELECT text FROM a LIMIT 1");
+  select->exec([&] {
+    got = select->stringColumn(0);
+    return false;
+  });
+
+  REQUIRE(got == "hello");
 }

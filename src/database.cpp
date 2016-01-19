@@ -110,7 +110,7 @@ Statement::~Statement()
 
 void Statement::bind(const int index, const string &text)
 {
-  if(sqlite3_bind_text(m_stmt, index, text.c_str(), -1, SQLITE_STATIC))
+  if(sqlite3_bind_text(m_stmt, index, text.c_str(), -1, SQLITE_TRANSIENT))
     throw m_db->lastError();
 }
 
