@@ -32,7 +32,7 @@ Task::Task(Transaction *transaction)
 {
 }
 
-void Task::install(Version *ver)
+void Task::install(Version *ver, const set<Path> &oldFiles)
 {
   const auto &sources = ver->sources();
 
@@ -48,6 +48,8 @@ void Task::install(Version *ver)
     // skip duplicate files
     do { it++; } while(it != sources.end() && path == it->first);
   }
+
+  m_oldFiles = move(oldFiles);
 }
 
 void Task::saveSource(Download *dl, Source *src)
@@ -60,6 +62,10 @@ void Task::saveSource(Download *dl, Source *src)
   tmpPath[tmpPath.size() - 1] += ".new";
 
   m_files.push_back({tmpPath, targetPath});
+
+  const auto old = m_oldFiles.find(targetPath);
+  if(old != m_oldFiles.end())
+    m_oldFiles.erase(old);
 
   const Path path = m_transaction->prefixPath(tmpPath);
 
@@ -83,14 +89,14 @@ void Task::commit()
   if(m_isCancelled)
     return;
 
+  for(const Path &path : m_oldFiles)
+    removeFile(path);
+
   for(const PathPair &paths : m_files) {
-    const string tempPath = m_transaction->prefixPath(paths.first).join();
-    const string targetPath = m_transaction->prefixPath(paths.second).join();
+    removeFile(paths.second);
 
-    RemoveFile(targetPath);
-
-    if(RenameFile(tempPath, targetPath)) {
-      m_transaction->addError(strerror(errno), tempPath);
+    if(renameFile(paths.first, paths.second)) {
+      m_transaction->addError(strerror(errno), paths.first.join());
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
@@ -99,35 +105,37 @@ void Task::commit()
     }
   }
 
-  m_files.clear();
   m_onCommit();
 }
 
 void Task::rollback()
 {
-  for(const PathPair &paths : m_files) {
-    const string tempPath = m_transaction->prefixPath(paths.first).join();
-
-    RemoveFile(tempPath);
-  }
+  for(const PathPair &paths : m_files)
+    removeFile(paths.first);
 
   m_files.clear();
 }
 
-int Task::RemoveFile(const std::string &path)
+int Task::removeFile(const Path &path) const
 {
+  const string &fullPath = m_transaction->prefixPath(path).join();
+
 #ifdef _WIN32
-  return _wremove(make_autostring(path).c_str());
+  return _wremove(make_autostring(fullPath).c_str());
 #else
-  return remove(path.c_str());
+  return remove(fullPath.c_str());
 #endif
 }
 
-int Task::RenameFile(const std::string &from, const std::string &to)
+int Task::renameFile(const Path &from, const Path &to) const
 {
+  const string &fullFrom = m_transaction->prefixPath(from).join();
+  const string &fullTo = m_transaction->prefixPath(to).join();
+
 #ifdef _WIN32
-  return _wrename(make_autostring(from).c_str(), make_autostring(to).c_str());
+  return _wrename(make_autostring(fullFrom).c_str(),
+    make_autostring(fullTo).c_str());
 #else
-  return rename(from.c_str(), to.c_str());
+  return rename(fullFrom.c_str(), fullTo.c_str());
 #endif
 }

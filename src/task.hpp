@@ -19,6 +19,7 @@
 #define REAPACK_TASK_HPP
 
 #include <boost/signals2.hpp>
+#include <set>
 #include <vector>
 
 class Download;
@@ -36,13 +37,13 @@ public:
 
   void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
 
-  void install(Version *ver);
+  void install(Version *ver, const std::set<Path> &oldFiles);
   void commit();
   void cancel();
 
 private:
-  static int RemoveFile(const std::string &);
-  static int RenameFile(const std::string &, const std::string &);
+  int removeFile(const Path &) const;
+  int renameFile(const Path &, const Path &) const;
 
   typedef std::pair<Path, Path> PathPair;
 
@@ -54,6 +55,7 @@ private:
   Transaction *m_transaction;
   bool m_isCancelled;
   std::vector<PathPair> m_files;
+  std::set<Path> m_oldFiles;
 
   Signal m_onCommit;
 };

@@ -126,7 +126,7 @@ void Transaction::install()
     Task *task = new Task(this);
 
     try {
-      task->install(ver);
+      task->install(ver, m_registry->getFiles(regEntry));
       task->onCommit([=] {
         if(regEntry.status == Registry::UpdateAvailable)
           m_updates.push_back(entry);
