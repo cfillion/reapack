@@ -23,6 +23,7 @@
 #include "listview.hpp"
 
 #include <map>
+#include <set>
 
 class ReaPack;
 class Remote;
@@ -55,7 +56,7 @@ private:
   ListView *m_list;
 
   std::map<std::string, bool> m_enableOverrides;
-  std::vector<Remote> m_uninstall;
+  std::set<Remote> m_uninstall;
 };
 
 #endif

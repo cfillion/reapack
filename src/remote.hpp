@@ -58,6 +58,8 @@ public:
   void protect() { m_protected = true; }
   bool isProtected() const { return m_protected; }
 
+  bool operator<(const Remote &o) const { return m_name < o.name(); }
+
 private:
   std::string m_name;
   std::string m_url;

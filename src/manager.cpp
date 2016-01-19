@@ -120,8 +120,10 @@ void Manager::refresh()
 {
   m_list->clear();
 
-  for(const Remote &remote : *m_reapack->config()->remotes())
-    m_list->addRow(makeRow(remote));
+  for(const Remote &remote : *m_reapack->config()->remotes()) {
+    if(!m_uninstall.count(remote))
+      m_list->addRow(makeRow(remote));
+  }
 }
 
 void Manager::setRemoteEnabled(const bool enabled)
@@ -156,7 +158,7 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 void Manager::uninstall()
 {
   const Remote &remote = currentRemote();
-  m_uninstall.push_back(remote);
+  m_uninstall.insert(remote);
 
   const auto it = m_enableOverrides.find(remote.name());
 
