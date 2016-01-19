@@ -62,6 +62,7 @@ void Manager::onCommand(WPARAM wParam, LPARAM)
     setRemoteEnabled(false);
     break;
   case ACTION_UNINSTALL:
+    uninstall();
     break;
   case IDOK:
     apply();
@@ -152,6 +153,19 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
     return it->second;
 }
 
+void Manager::uninstall()
+{
+  const Remote &remote = currentRemote();
+  m_uninstall.push_back(remote);
+
+  const auto it = m_enableOverrides.find(remote.name());
+
+  if(it != m_enableOverrides.end())
+    m_enableOverrides.erase(it);
+
+  m_list->removeRow(m_list->currentIndex());
+}
+
 void Manager::apply()
 {
   RemoteList *list = m_reapack->config()->remotes();
@@ -169,12 +183,17 @@ void Manager::apply()
       m_reapack->synchronize(remote);
   }
 
+  for(const Remote &remote : m_uninstall) {
+    list->remove(remote);
+  }
+
   m_reapack->config()->write();
 }
 
 void Manager::reset()
 {
   m_enableOverrides.clear();
+  m_uninstall.clear();
 }
 
 ListView::Row Manager::makeRow(const Remote &remote) const

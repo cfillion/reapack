@@ -162,6 +162,14 @@ void RemoteList::add(const Remote &remote)
   m_remotes[remote.name()] = remote;
 }
 
+void RemoteList::remove(const string &name)
+{
+  const auto it = m_remotes.find(name);
+
+  if(it != m_remotes.end())
+    m_remotes.erase(it);
+}
+
 Remote RemoteList::get(const string &name) const
 {
   const auto it = m_remotes.find(name);

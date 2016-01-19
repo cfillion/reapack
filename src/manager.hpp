@@ -46,6 +46,7 @@ private:
   Remote currentRemote() const;
   void setRemoteEnabled(const bool);
   bool isRemoteEnabled(const Remote &remote) const;
+  void uninstall();
 
   void apply();
   void reset();
@@ -54,6 +55,7 @@ private:
   ListView *m_list;
 
   std::map<std::string, bool> m_enableOverrides;
+  std::vector<Remote> m_uninstall;
 };
 
 #endif

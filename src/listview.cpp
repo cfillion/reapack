@@ -72,6 +72,11 @@ void ListView::replaceRow(const int index, const Row &content)
   }
 }
 
+void ListView::removeRow(const int index)
+{
+  ListView_DeleteItem(m_handle, index);
+}
+
 ListView::Row ListView::getRow(const int rowIndex) const
 {
   Row row(m_columnSize);

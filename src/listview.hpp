@@ -45,6 +45,7 @@ public:
   int addRow(const Row &);
   Row getRow(const int index) const;
   void replaceRow(const int index, const Row &);
+  void removeRow(const int index);
   void clear();
 
   bool hasSelection() const;

@@ -260,3 +260,18 @@ TEST_CASE("get enabled remotes", M) {
   REQUIRE(array.size() == 1);
   REQUIRE(array[0].name() == "hello");
 }
+
+TEST_CASE("remove remote", M) {
+  const Remote remote{"hello", "url"};
+  RemoteList list;
+
+  list.add(remote);
+  REQUIRE(list.size() == 1);
+  REQUIRE_FALSE(list.empty());
+
+  list.remove(remote);
+  REQUIRE(list.size() == 0);
+  REQUIRE(list.empty());
+
+  list.remove("world"); // no crash
+}

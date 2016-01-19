@@ -224,8 +224,6 @@ Transaction *ReaPack::createTransaction()
 
     m_progress->enable();
     m_progress->hide();
-
-    m_config->write();
   });
 
   m_transaction->onDestroy([=] {
