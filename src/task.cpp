@@ -25,6 +25,10 @@
 #include <cerrno>
 #include <cstdio>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace std;
 
 Task::Task(Transaction *transaction)
@@ -53,10 +57,14 @@ void Task::commit()
 
 int Task::removeFile(const Path &path) const
 {
-  const string &fullPath = m_transaction->prefixPath(path).join();
+  const auto_string &fullPath =
+    make_autostring(m_transaction->prefixPath(path).join());
 
 #ifdef _WIN32
-  return _wremove(make_autostring(fullPath).c_str());
+  if(GetFileAttributes(fullPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
+    return !RemoveDirectory(fullPath.c_str());
+  else
+    return _wremove(fullPath.c_str());
 #else
   return remove(fullPath.c_str());
 #endif
