@@ -48,7 +48,7 @@ protected:
 
   Transaction *transaction() const { return m_transaction; }
 
-  virtual void doCommit() = 0;
+  virtual bool doCommit() = 0;
   virtual void doRollback() = 0;
 
 private:
@@ -66,7 +66,7 @@ public:
   const std::set<Path> &removedFiles() const { return m_oldFiles; }
 
 protected:
-  void doCommit() override;
+  bool doCommit() override;
   void doRollback() override;
 
 private:
@@ -85,11 +85,11 @@ public:
   const std::set<Path> &removedFiles() const { return m_removedFiles; }
 
 protected:
-  void doCommit() override;
+  bool doCommit() override;
   void doRollback() override {}
 
 private:
-  void remove(const Path &);
+  bool remove(const Path &);
 
   std::vector<Path> m_files;
   std::set<Path> m_removedFiles;

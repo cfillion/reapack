@@ -50,9 +50,8 @@ void Task::commit()
   if(m_isCancelled)
     return;
 
-  doCommit();
-
-  m_onCommit();
+  if(doCommit())
+    m_onCommit();
 }
 
 int Task::removeFile(const Path &path) const
@@ -126,7 +125,7 @@ void InstallTask::saveSource(Download *dl, Source *src)
   }
 }
 
-void InstallTask::doCommit()
+bool InstallTask::doCommit()
 {
   for(const Path &path : m_oldFiles)
     removeFile(path);
@@ -140,9 +139,11 @@ void InstallTask::doCommit()
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
       rollback();
-      return;
+      return false;
     }
   }
+
+  return true;
 }
 
 void InstallTask::doRollback()
@@ -158,17 +159,21 @@ RemoveTask::RemoveTask(const vector<Path> &files, Transaction *t)
 {
 }
 
-void RemoveTask::doCommit()
+bool RemoveTask::doCommit()
 {
-  for(const Path &path : m_files)
-    remove(path);
+  for(const Path &path : m_files) {
+    if(!remove(path))
+      return false;
+  }
+
+  return true;
 }
 
-void RemoveTask::remove(const Path &file)
+bool RemoveTask::remove(const Path &file)
 {
   if(removeFile(file)) {
     transaction()->addError(strerror(errno), file.join());
-    return;
+    return false;
   }
   else
     m_removedFiles.insert(file);
@@ -182,4 +187,6 @@ void RemoveTask::remove(const Path &file)
     if(removeFile(dir))
       break;
   }
+
+  return true;
 }
