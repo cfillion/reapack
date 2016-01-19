@@ -1,8 +1,11 @@
 #include <catch.hpp>
 
+#include "helper/io.hpp"
+
+#include <registry.hpp>
+
 #include <index.hpp>
 #include <package.hpp>
-#include <registry.hpp>
 
 using namespace std;
 
@@ -56,4 +59,16 @@ TEST_CASE("bump version", M) {
   const Registry::QueryResult res2 = reg.query(&pkg);
   REQUIRE(res2.status == Registry::UpToDate);
   REQUIRE(res2.version == Version("2.0").code());
+}
+
+TEST_CASE("get file list", M) {
+  MAKE_PACKAGE
+
+  Registry reg;
+  reg.push(ver);
+
+  const Registry::QueryResult res = reg.query(&pkg);
+  const set<Path> files = reg.getFiles(res);
+
+  REQUIRE(files == ver->files());
 }

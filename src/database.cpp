@@ -67,6 +67,11 @@ reapack_error Database::lastError() const
   return reapack_error(sqlite3_errmsg(m_db));
 }
 
+uint64_t Database::lastInsertId() const
+{
+  return (uint64_t)sqlite3_last_insert_rowid(m_db);
+}
+
 int Database::version() const
 {
   int version = 0;

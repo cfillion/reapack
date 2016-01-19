@@ -1,5 +1,7 @@
 #include <catch.hpp>
 
+#include "helper/io.hpp"
+
 #include <version.hpp>
 
 #include <errors.hpp>

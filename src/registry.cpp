@@ -33,13 +33,21 @@ Registry::Registry(const Path &path)
 
   m_insertEntry = m_db.prepare(
     "INSERT OR REPLACE INTO entries "
-    "VALUES(?, ?, ?, ?);"
+    "VALUES(NULL, ?, ?, ?, ?);"
   );
 
   m_findEntry = m_db.prepare(
-    "SELECT version FROM entries "
+    "SELECT id, version FROM entries "
     "WHERE remote = ? AND category = ? AND package = ? "
     "LIMIT 1"
+  );
+
+  m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
+  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?)");
+  m_clearFiles = m_db.prepare(
+    "DELETE FROM files WHERE entry = ("
+    "  SELECT id FROM entries WHERE remote = ? AND category = ? AND package = ?"
+    ")"
   );
 
   // lock the database
@@ -57,11 +65,19 @@ void Registry::migrate()
       "PRAGMA user_version = 1;"
 
       "CREATE TABLE entries ("
+      "  id INTEGER PRIMARY KEY,"
       "  remote TEXT NOT NULL,"
       "  category TEXT NOT NULL,"
       "  package TEXT NOT NULL,"
       "  version INTEGER NOT NULL,"
       "  UNIQUE(remote, category, package)"
+      ");"
+
+      "CREATE TABLE files ("
+      "  id INTEGER PRIMARY KEY,"
+      "  entry INTEGER NOT NULL,"
+      "  path TEXT NOT NULL,"
+      "  FOREIGN KEY(entry) REFERENCES entries(id)"
       ");"
     );
     break;
@@ -81,16 +97,29 @@ void Registry::push(Version *ver)
   Category *cat = pkg->category();
   RemoteIndex *ri = cat->index();
 
+  m_clearFiles->bind(1, ri->name());
+  m_clearFiles->bind(2, cat->name());
+  m_clearFiles->bind(3, pkg->name());
+  m_clearFiles->exec();
+
   m_insertEntry->bind(1, ri->name());
   m_insertEntry->bind(2, cat->name());
   m_insertEntry->bind(3, pkg->name());
   m_insertEntry->bind(4, ver->code());
   m_insertEntry->exec();
+
+  const uint64_t entryId = m_db.lastInsertId();
+
+  for(const Path &path : ver->files()) {
+    m_insertFile->bind(1, entryId);
+    m_insertFile->bind(2, path.join('/'));
+    m_insertFile->exec();
+  }
 }
 
 Registry::QueryResult Registry::query(Package *pkg) const
 {
-  bool exists = false;
+  int id = 0;
   uint64_t version = 0;
 
   Category *cat = pkg->category();
@@ -101,18 +130,31 @@ Registry::QueryResult Registry::query(Package *pkg) const
   m_findEntry->bind(3, pkg->name());
 
   m_findEntry->exec([&] {
-    version = m_findEntry->uint64Column(0);
-    exists = true;
+    id = m_findEntry->intColumn(0);
+    version = m_findEntry->uint64Column(1);
     return false;
   });
 
-  if(!exists)
-    return {Uninstalled, 0};
+  if(!id)
+    return {id, Uninstalled, 0};
 
   Version *lastVer = pkg->lastVersion();
 
   const Status status = version == lastVer->code() ? UpToDate : UpdateAvailable;
-  return {status, version};
+  return {id, status, version};
+}
+
+set<Path> Registry::getFiles(const QueryResult &qr) const
+{
+  set<Path> list;
+
+  m_getFiles->bind(1, qr.id);
+  m_getFiles->exec([&] {
+    list.insert(m_getFiles->stringColumn(0));
+    return true;
+  });
+
+  return list;
 }
 
 void Registry::commit()

@@ -18,7 +18,7 @@
 #ifndef REAPACK_REGISTRY_HPP
 #define REAPACK_REGISTRY_HPP
 
-#include <cstdint>
+#include <set>
 #include <string>
 
 #include "path.hpp"
@@ -39,24 +39,27 @@ public:
   };
 
   struct QueryResult {
+    int id; // internal use
     Status status;
     uint64_t version;
   };
 
+  QueryResult query(Package *) const;
+  std::set<Path> getFiles(const QueryResult &) const;
   void push(Version *);
   void commit();
 
   bool addToREAPER(Version *ver, const Path &root);
 
-  QueryResult query(Package *) const;
-
 private:
-  int version();
   void migrate();
 
   Database m_db;
   Statement *m_insertEntry;
   Statement *m_findEntry;
+  Statement *m_getFiles;
+  Statement *m_insertFile;
+  Statement *m_clearFiles;
 };
 
 #endif

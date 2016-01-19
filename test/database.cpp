@@ -123,3 +123,18 @@ TEST_CASE("foreign keys", M) {
   }
   catch(const reapack_error &) {}
 }
+
+TEST_CASE("last insert id", M) {
+  Database db;
+  db.exec("CREATE TABLE a(text TEXT)");
+
+  Statement *insert = db.prepare("INSERT INTO a VALUES(NULL)");
+
+  REQUIRE(db.lastInsertId() == 0);
+
+  insert->exec();
+  REQUIRE(db.lastInsertId() == 1);
+
+  insert->exec();
+  REQUIRE(db.lastInsertId() == 2);
+}
