@@ -63,6 +63,8 @@ class InstallTask : public Task {
 public:
   InstallTask(Version *ver, const std::set<Path> &oldFiles, Transaction *);
 
+  const std::set<Path> &removedFiles() const { return m_oldFiles; }
+
 protected:
   void doCommit() override;
   void doRollback() override;
@@ -80,7 +82,7 @@ class RemoveTask : public Task {
 public:
   RemoveTask(const std::vector<Path> &files, Transaction *);
 
-  const std::vector<Path> &removedFiles() const { return m_removedFiles; }
+  const std::set<Path> &removedFiles() const { return m_removedFiles; }
 
 protected:
   void doCommit() override;
@@ -90,7 +92,7 @@ private:
   void remove(const Path &);
 
   std::vector<Path> m_files;
-  std::vector<Path> m_removedFiles;
+  std::set<Path> m_removedFiles;
 };
 
 #endif

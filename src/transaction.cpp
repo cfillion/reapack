@@ -134,6 +134,9 @@ void Transaction::install()
 
       m_registry->push(ver);
 
+      const set<Path> &removedFiles = task->removedFiles();
+      m_removals.insert(removedFiles.begin(), removedFiles.end());
+
       if(!m_registry->addToREAPER(ver, m_root)) {
         addError(
           "Cannot register the package in REAPER. "
@@ -167,10 +170,8 @@ void Transaction::uninstall(const Remote &remote)
   RemoveTask *task = new RemoveTask(allFiles, this);
 
   task->onCommit([=] {
-    const vector<Path> &removedFiles = task->removedFiles();
-
-    m_removals.insert(m_removals.end(),
-      removedFiles.begin(), removedFiles.end());
+    const set<Path> &removedFiles = task->removedFiles();
+    m_removals.insert(removedFiles.begin(), removedFiles.end());
   });
 
   addTask(task);

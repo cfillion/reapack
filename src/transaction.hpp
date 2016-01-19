@@ -62,7 +62,7 @@ public:
   size_t taskCount() const { return m_tasks.size(); }
   const PackageEntryList &newPackages() const { return m_new; }
   const PackageEntryList &updates() const { return m_updates; }
-  const std::vector<Path> &removals() const { return m_removals; }
+  const std::set<Path> &removals() const { return m_removals; }
   const ErrorList &errors() const { return m_errors; }
 
 private:
@@ -100,7 +100,7 @@ private:
   PackageEntryList m_packages;
   PackageEntryList m_new;
   PackageEntryList m_updates;
-  std::vector<Path> m_removals;
+  std::set<Path> m_removals;
   ErrorList m_errors;
 
   std::vector<Task *> m_tasks;

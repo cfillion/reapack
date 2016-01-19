@@ -114,6 +114,7 @@ void InstallTask::saveSource(Download *dl, Source *src)
   m_newFiles.push_back({tmpPath, targetPath});
 
   const auto old = m_oldFiles.find(targetPath);
+
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
 
@@ -170,7 +171,7 @@ void RemoveTask::remove(const Path &file)
     return;
   }
   else
-    m_removedFiles.push_back(file);
+    m_removedFiles.insert(file);
 
   Path dir = file;
 
