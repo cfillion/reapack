@@ -55,10 +55,10 @@ vendor
   ```sh
   cd Path\To\Curl\winbuild
   
-  %VCINSTALLDIR%\vcvarsall x86_amd64
+  "%VCINSTALLDIR%\vcvarsall" x86_amd64
   nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x64
   
-  %VCINSTALLDIR%\vcvarsall x86
+  "%VCINSTALLDIR%\vcvarsall" x86
   nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x86
   ```
 5. Copy `<curl directory>\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
