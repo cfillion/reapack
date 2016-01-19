@@ -78,7 +78,7 @@ private:
 
 class RemoveTask : public Task {
 public:
-  RemoveTask(const std::set<Path> &files, Transaction *);
+  RemoveTask(const std::vector<Path> &files, Transaction *);
 
   const std::vector<Path> &removedFiles() const { return m_removedFiles; }
 
@@ -89,7 +89,7 @@ protected:
 private:
   void remove(const Path &);
 
-  std::set<Path> m_files;
+  std::vector<Path> m_files;
   std::vector<Path> m_removedFiles;
 };
 

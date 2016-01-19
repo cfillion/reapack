@@ -155,22 +155,25 @@ void Transaction::uninstall(const Remote &remote)
     return;
   }
 
+  vector<Path> allFiles;
+
   for(const auto &entry : entries) {
     const set<Path> &files = m_registry->getFiles(entry);
+    allFiles.insert(allFiles.end(), files.begin(), files.end());
 
-    RemoveTask *task = new RemoveTask(files, this);
-
-    task->onCommit([=] {
-      const vector<Path> &removedFiles = task->removedFiles();
-
-      m_registry->forget(entry);
-
-      m_removals.insert(m_removals.end(),
-        removedFiles.begin(), removedFiles.end());
-    });
-
-    addTask(task);
+    m_registry->forget(entry);
   }
+
+  RemoveTask *task = new RemoveTask(allFiles, this);
+
+  task->onCommit([=] {
+    const vector<Path> &removedFiles = task->removedFiles();
+
+    m_removals.insert(m_removals.end(),
+      removedFiles.begin(), removedFiles.end());
+  });
+
+  addTask(task);
 }
 
 void Transaction::cancel()

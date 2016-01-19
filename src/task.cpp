@@ -144,7 +144,7 @@ void InstallTask::doRollback()
   m_newFiles.clear();
 }
 
-RemoveTask::RemoveTask(const std::set<Path> &files, Transaction *t)
+RemoveTask::RemoveTask(const vector<Path> &files, Transaction *t)
   : Task(t), m_files(move(files))
 {
 }
