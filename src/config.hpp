@@ -20,7 +20,6 @@
 
 #include <string>
 
-#include "registry.hpp"
 #include "remote.hpp"
 
 class Path;

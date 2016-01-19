@@ -23,6 +23,8 @@
 
 class Path {
 public:
+  Path(const std::string &path = std::string());
+
   void prepend(const std::string &part);
   void append(const std::string &part);
   void clear();
@@ -40,9 +42,11 @@ public:
   Path operator+(const std::string &) const;
   Path operator+(const Path &) const;
   std::string &operator[](const size_t index);
+  const std::string &operator[](const size_t index) const;
 
 private:
   std::string join(const bool, const char) const;
+  const std::string &at(const size_t) const;
 
   std::list<std::string> m_parts;
 };

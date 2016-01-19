@@ -53,6 +53,11 @@ static vector<string> Split(const string &input)
   return list;
 }
 
+Path::Path(const std::string &path)
+{
+  append(path);
+}
+
 void Path::prepend(const string &parts)
 {
   if(parts.empty())
@@ -136,7 +141,7 @@ Path Path::operator+(const Path &o) const
   return path;
 }
 
-string &Path::operator[](const size_t index)
+const string &Path::at(const size_t index) const
 {
   auto it = m_parts.begin();
 
@@ -144,4 +149,14 @@ string &Path::operator[](const size_t index)
     it++;
 
   return *it;
+}
+
+string &Path::operator[](const size_t index)
+{
+  return const_cast<string &>(at(index));
+}
+
+const string &Path::operator[](const size_t index) const
+{
+  return at(index);
 }

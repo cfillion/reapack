@@ -9,8 +9,8 @@ using namespace std;
 static const char *M = "[path]";
 
 TEST_CASE("compare paths", M) {
-  const Path a = Path() + "hello" + "world";
-  const Path b = Path() + "chunky" + "bacon";
+  const Path a = Path("hello");
+  const Path b = Path("world");
 
   REQUIRE_FALSE(a == b);
   REQUIRE(a != b);
@@ -57,11 +57,8 @@ TEST_CASE("prepend and append path components", M) {
 }
 
 TEST_CASE("concatenate paths", M) {
-  Path a;
-  a.append("hello");
-
-  Path b;
-  b.append("world");
+  const Path a("hello");
+  const Path b("world");
 
   Path c;
   c.append("hello");
@@ -106,8 +103,7 @@ TEST_CASE("custom separator", M) {
 
 TEST_CASE("split input", M) {
   SECTION("slash") {
-    Path a;
-    a.append("hello/world");
+    const Path a("hello/world");
 
     REQUIRE(a.size() == 2);
     REQUIRE(a[0] == "hello");
@@ -115,8 +111,7 @@ TEST_CASE("split input", M) {
   }
 
   SECTION("backslash") {
-    Path a;
-    a.append("hello\\world");
+    const Path a("hello\\world");
 
     REQUIRE(a.size() == 2);
     REQUIRE(a[0] == "hello");
@@ -130,9 +125,15 @@ TEST_CASE("split input", M) {
     REQUIRE(a.size() == 2);
   }
 
-  SECTION("skip empty parts") {
+  SECTION("append") {
     Path a;
-    a.append("hello//world/");
+    a.append("hello/world");
+
+    REQUIRE(a.size() == 2);
+  }
+
+  SECTION("skip empty parts") {
+    const Path a("hello//world/");
 
     REQUIRE(a.size() == 2);
     REQUIRE(a[0] == "hello");
@@ -142,8 +143,7 @@ TEST_CASE("split input", M) {
 
 #ifndef _WIN32
 TEST_CASE("absolute path (unix)", M) {
-  Path a;
-  a.append("/usr/bin/zsh");
+  const Path a("/usr/bin/zsh");
 
   REQUIRE(a.size() == 3);
   REQUIRE(a[0] == "/usr");
