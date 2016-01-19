@@ -1,4 +1,4 @@
-task :default => [:prepare, :build]
+task :default => [:prepare, :build, :test]
 
 desc 'Prepare the source code for building using prepare.rb'
 task :prepare do

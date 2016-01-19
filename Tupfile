@@ -13,4 +13,3 @@ include @(TUP_PLATFORM).tup
 : foreach test/*.cpp |> !build -Isrc |> build/test/%B.o
 : foreach test/helper/*.cpp |> !build -Isrc |> build/test/helper_%B.o
 : build/*.o build/test/*.o | $(LINKDEPS) |> !link $(TSFLAGS) |> $(TSTARGET)
-: $(TSTARGET) |> $(TEST) --force-colour |>

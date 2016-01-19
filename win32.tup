@@ -26,8 +26,7 @@ TARGET := bin/reaper_reapack_@(WINARCH)
 SOFLAGS := /DLL /OUT:$(TUP_VARIANTDIR)/$(TARGET).dll
 SOTARGET := $(TARGET).dll $(TARGET).lib $(TARGET).exp
 
-TEST := $(TUP_VARIANTDIR)/bin/test.exe
-TSFLAGS := /OUT:$(TEST)
+TSFLAGS := /OUT:$(TUP_VARIANTDIR)/bin/test.exe
 TSTARGET := bin/test.exe bin/test.lib bin/test.exp
 
 !build = |> $(CXX) $(CXXFLAGS) /c %f /Fo%o |>
