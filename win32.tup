@@ -34,4 +34,4 @@ TSTARGET := bin/test.exe bin/test.lib bin/test.exp
 !link = |> $(LD) $(LDFLAGS) %f |>
 
 : src/resource.rc |> $(RC) $(RCFLAGS) %f |> src/resource.res
-: vendor/sqlite3.c |> !build /Os |> build/vendor/sqlite3.o
+: vendor/sqlite3.c |> !build $(CXXFLAGS) /Os |> build/vendor/sqlite3.o
