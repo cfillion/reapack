@@ -85,16 +85,17 @@ private:
   Path m_dbPath;
   bool m_isCancelled;
 
+  std::set<Remote> m_remotes;
   std::vector<RemoteIndex *> m_remoteIndexes;
   DownloadQueue m_downloadQueue;
   std::queue<PackageEntry> m_installQueue;
+  std::vector<Task *> m_tasks;
+  std::queue<Task *> m_taskQueue;
+
   PackageEntryList m_new;
   PackageEntryList m_updates;
   std::set<Path> m_removals;
   ErrorList m_errors;
-
-  std::vector<Task *> m_tasks;
-  std::queue<Task *> m_taskQueue;
 
   Signal m_onFinish;
   Signal m_onDestroy;

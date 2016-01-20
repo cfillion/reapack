@@ -59,10 +59,14 @@ Transaction::~Transaction()
 
 void Transaction::synchronize(const Remote &remote)
 {
+  if(m_remotes.count(remote))
+    return;
+
   Download *dl = new Download(remote.name(), remote.url());
   dl->onFinish(bind(&Transaction::upgradeAll, this, dl));
 
   m_downloadQueue.push(dl);
+  m_remotes.insert(remote);
 }
 
 void Transaction::upgradeAll(Download *dl)
