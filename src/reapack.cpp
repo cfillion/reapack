@@ -232,6 +232,7 @@ Transaction *ReaPack::createTransaction()
       return;
 
     m_progress->disable();
+    m_manager->disable();
 
     if(m_transaction->taskCount() == 0 && m_transaction->errors().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
@@ -239,6 +240,7 @@ Transaction *ReaPack::createTransaction()
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
     m_progress->enable();
+    m_manager->enable();
   });
 
   m_transaction->onDestroy([=] {
