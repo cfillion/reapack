@@ -54,7 +54,6 @@ public:
 
   void synchronize(const Remote &);
   void uninstall(const Remote &);
-  void install();
   void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
@@ -65,17 +64,15 @@ public:
   const std::set<Path> &removals() const { return m_removals; }
   const ErrorList &errors() const { return m_errors; }
 
-private:
-  friend Task;
-  friend InstallTask;
-  friend RemoveTask;
-
-  void finish();
-
-  void upgradeAll(Download *);
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
   Path prefixPath(const Path &) const;
+
+private:
+  void install();
+  void finish();
+
+  void upgradeAll(Download *);
   bool allFilesExists(const std::set<Path> &) const;
   void registerFiles(const std::set<Path> &);
   void addTask(Task *);
