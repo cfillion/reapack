@@ -75,8 +75,8 @@ private:
   void finish();
 
   void upgradeAll(Download *);
+  void upgrade(Package *pkg);
   bool allFilesExists(const std::set<Path> &) const;
-  void registerFiles(const std::set<Path> &);
   void addTask(Task *);
 
   Registry *m_registry;
@@ -95,8 +95,6 @@ private:
 
   std::vector<Task *> m_tasks;
   std::queue<Task *> m_taskQueue;
-  std::set<Path> m_files;
-  bool m_hasConflicts;
 
   Signal m_onFinish;
   Signal m_onDestroy;

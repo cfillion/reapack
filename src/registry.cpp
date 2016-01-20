@@ -24,6 +24,7 @@
 #include "remote.hpp"
 
 #include <reaper_plugin_functions.h>
+#include <sqlite3.h>
 
 using namespace std;
 
@@ -56,6 +57,10 @@ Registry::Registry(const Path &path)
     ")"
   );
   m_forgetFiles = m_db.prepare("DELETE FROM files WHERE entry = ?");
+
+  m_savepoint = m_db.prepare("SAVEPOINT savept");
+  m_release = m_db.prepare("RELEASE SAVEPOINT savept");
+  m_restore = m_db.prepare("ROLLBACK TO SAVEPOINT savept");
 
   // lock the database
   m_db.begin();
@@ -98,8 +103,11 @@ void Registry::migrate()
   m_db.commit();
 }
 
-void Registry::push(Version *ver)
+void Registry::push(Version *ver, vector<Path> *conflicts)
 {
+  m_savepoint->exec();
+  bool hasConflicts = false;
+
   Package *pkg = ver->package();
   Category *cat = pkg->category();
   RemoteIndex *ri = cat->index();
@@ -120,8 +128,25 @@ void Registry::push(Version *ver)
   for(const Path &path : ver->files()) {
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
-    m_insertFile->exec();
+    try {
+      m_insertFile->exec();
+    }
+    catch(const reapack_error &) {
+      if(conflicts && m_db.errorCode() == SQLITE_CONSTRAINT_UNIQUE) {
+        hasConflicts = true;
+        conflicts->push_back(path);
+      }
+      else {
+        m_restore->exec();
+        throw;
+      }
+    }
   }
+
+  if(hasConflicts)
+    m_restore->exec();
+  else
+    m_release->exec();
 }
 
 Registry::Entry Registry::query(Package *pkg) const

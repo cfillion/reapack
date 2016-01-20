@@ -108,7 +108,7 @@ TEST_CASE("forget registry entry", M) {
   REQUIRE(afterForget.version == 0);
 }
 
-TEST_CASE("enforce unique files", M) {
+TEST_CASE("file conflicts", M) {
   Registry reg;
 
   {
@@ -120,13 +120,27 @@ TEST_CASE("enforce unique files", M) {
   Category cat("Hello", &ri);
   Package pkg(Package::ScriptType, "Duplicate Package", &cat);
   Version *ver = new Version("1.0", &pkg);
-  Source *src = new Source(Source::GenericPlatform, "file", "url", ver);
-  ver->addSource(src);
+  Source *src1 = new Source(Source::GenericPlatform, "file", "url", ver);
+  Source *src2 = new Source(Source::GenericPlatform, "file2", "url", ver);
+  ver->addSource(src1);
+  ver->addSource(src2);
   pkg.addVersion(ver);
+
+  CHECK(reg.query(&pkg).status == Registry::Uninstalled);
 
   try {
     reg.push(ver);
     FAIL("duplicate was accepted");
   }
   catch(const reapack_error &) {}
+
+  REQUIRE(reg.query(&pkg).status == Registry::Uninstalled);
+
+  vector<Path> conflicts;
+  reg.push(ver, &conflicts);
+
+  REQUIRE(conflicts.size() == 1);
+  REQUIRE(conflicts[0] == src1->targetPath());
+
+  REQUIRE(reg.query(&pkg).status == Registry::Uninstalled);
 }

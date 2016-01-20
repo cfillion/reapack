@@ -49,7 +49,7 @@ public:
   Entry query(Package *) const;
   std::vector<Entry> queryAll(const Remote &) const;
   std::set<Path> getFiles(const Entry &) const;
-  void push(Version *);
+  void push(Version *, std::vector<Path> *conflicts = nullptr);
   void forget(const Entry &);
   void commit();
 
@@ -68,6 +68,10 @@ private:
   Statement *m_insertFile;
   Statement *m_clearFiles;
   Statement *m_forgetFiles;
+
+  Statement *m_savepoint;
+  Statement *m_release;
+  Statement *m_restore;
 };
 
 #endif

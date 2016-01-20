@@ -39,6 +39,7 @@ public:
   void exec(const char *sql);
   uint64_t lastInsertId() const;
   int version() const;
+  int errorCode() const;
   void begin();
   void commit();
 

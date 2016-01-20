@@ -4,6 +4,8 @@
 
 #include <errors.hpp>
 
+#include <sqlite3.h>
+
 using namespace std;
 
 static const char *M = "[database]";
@@ -159,4 +161,17 @@ TEST_CASE("bind temporary strings", M) {
   });
 
   REQUIRE(got == "hello");
+}
+
+TEST_CASE("sqlite error code", M) {
+  Database db;
+  db.exec("CREATE TABLE a(b INTEGER UNIQUE); INSERT INTO a VALUES(1)");
+  REQUIRE(db.errorCode() == SQLITE_OK);
+
+  try {
+    db.exec("INSERT INTO a VALUES(1)");
+  }
+  catch(const reapack_error &) {}
+
+  REQUIRE(db.errorCode() == SQLITE_CONSTRAINT_UNIQUE);
 }

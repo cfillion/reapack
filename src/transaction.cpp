@@ -30,14 +30,14 @@
 using namespace std;
 
 Transaction::Transaction(const Path &root)
-  : m_root(root), m_isCancelled(false), m_hasConflicts(false)
+  : m_root(root), m_isCancelled(false)
 {
   m_dbPath = m_root + "ReaPack";
 
   m_registry = new Registry(m_dbPath + "registry.db");
 
   m_downloadQueue.onDone([=](void *) {
-    if(m_installQueue.empty() || m_hasConflicts)
+    if(m_installQueue.empty())
       finish();
     else
       install();
@@ -72,31 +72,53 @@ void Transaction::upgradeAll(Download *dl)
   if(!saveFile(dl, path))
     return;
 
+  RemoteIndex *ri;
+
   try {
-    RemoteIndex *ri = RemoteIndex::load(dl->name(), path.join().c_str());
+    ri = RemoteIndex::load(dl->name(), path.join().c_str());
     m_remoteIndexes.push_back(ri);
-
-    for(Package *pkg : ri->packages()) {
-      Registry::Entry entry = m_registry->query(pkg);
-
-      Version *ver = pkg->lastVersion();
-
-      set<Path> files = ver->files();
-      registerFiles(files);
-
-      if(entry.status == Registry::UpToDate) {
-        if(allFilesExists(files))
-          continue;
-        else
-          entry.status = Registry::Uninstalled;
-      }
-
-      m_installQueue.push({ver, entry});
-    }
   }
   catch(const reapack_error &e) {
     addError(e.what(), dl->url());
+    return;
   }
+
+  for(Package *pkg : ri->packages())
+    upgrade(pkg);
+}
+
+void Transaction::upgrade(Package *pkg)
+{
+  Version *ver = pkg->lastVersion();
+  Registry::Entry entry = m_registry->query(pkg);
+
+  try {
+    vector<Path> conflicts;
+    m_registry->push(ver, &conflicts);
+
+    if(!conflicts.empty()) {
+      for(const Path &path : conflicts) {
+        addError("Conflict: " + path.join() +
+          " is already owned by another package",
+          ver->fullName());
+      }
+
+      return;
+    }
+  }
+  catch(const reapack_error &e) {
+    addError(e.what(), ver->fullName());
+    return;
+  }
+
+  if(entry.status == Registry::UpToDate) {
+    if(allFilesExists(ver->files()))
+      return;
+    else
+      entry.status = Registry::Uninstalled;
+  }
+
+  m_installQueue.push({ver, entry});
 }
 
 void Transaction::install()
@@ -116,8 +138,6 @@ void Transaction::install()
         m_updates.push_back(entry);
       else
         m_new.push_back(entry);
-
-      m_registry->push(ver);
 
       const set<Path> &removedFiles = task->removedFiles();
       m_removals.insert(removedFiles.begin(), removedFiles.end());
@@ -234,21 +254,6 @@ bool Transaction::allFilesExists(const set<Path> &list) const
   }
 
   return true;
-}
-
-void Transaction::registerFiles(const set<Path> &list)
-{
-  for(const Path &path : list) {
-    if(!m_files.count(path))
-      continue;
-
-    addError("Conflict: This file is owned by more than one package",
-      path.join());
-
-    m_hasConflicts = true;
-  }
-
-  m_files.insert(list.begin(), list.end());
 }
 
 void Transaction::addTask(Task *task)

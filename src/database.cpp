@@ -85,6 +85,11 @@ int Database::version() const
   return version;
 }
 
+int Database::errorCode() const
+{
+  return sqlite3_extended_errcode(m_db);
+}
+
 void Database::begin()
 {
   // EXCLUSIVE -> don't wait until the first query to aquire a lock
