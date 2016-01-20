@@ -192,7 +192,7 @@ bool RemoveTask::doCommit()
     if(removeFileRecursive(path))
       m_removedFiles.insert(path);
     else
-      return false;
+      transaction()->addError(strerror(errno), path.join());
   }
 
   return true;

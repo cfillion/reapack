@@ -151,6 +151,7 @@ void Transaction::uninstall(const Remote &remote)
     const set<Path> &files = m_registry->getFiles(entry);
     allFiles.insert(allFiles.end(), files.begin(), files.end());
 
+    // forget the package even if some files cannot be removed
     m_registry->forget(entry);
   }
 
