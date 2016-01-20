@@ -186,15 +186,17 @@ bool Manager::confirm() const
   if(m_uninstall.empty())
     return true;
 
+  const size_t uninstallSize = m_uninstall.size();
+
   auto_char msg[255] = {};
 #ifdef _WIN32
   _snwprintf(msg, sizeof(msg),
 #else
   snprintf(msg, sizeof(msg),
 #endif
-    AUTO_STR("Uninstall %lu remotes?\n")
+    AUTO_STR("Uninstall %lu remote%s?\n")
     AUTO_STR("Every file they contain will be removed from your computer."),
-    m_uninstall.size());
+    uninstallSize, uninstallSize == 1 ? AUTO_STR("") : AUTO_STR("s"));
 
   const auto_char *title = AUTO_STR("ReaPack Query");
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
