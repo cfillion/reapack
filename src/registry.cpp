@@ -83,7 +83,7 @@ void Registry::migrate()
       "CREATE TABLE files ("
       "  id INTEGER PRIMARY KEY,"
       "  entry INTEGER NOT NULL,"
-      "  path TEXT NOT NULL,"
+      "  path TEXT UNIQUE NOT NULL,"
       "  FOREIGN KEY(entry) REFERENCES entries(id)"
       ");"
     );

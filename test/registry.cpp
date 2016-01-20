@@ -4,6 +4,7 @@
 
 #include <registry.hpp>
 
+#include <errors.hpp>
 #include <index.hpp>
 #include <package.hpp>
 #include <remote.hpp>
@@ -105,4 +106,27 @@ TEST_CASE("forget registry entry", M) {
   REQUIRE(afterForget.id == 0);
   REQUIRE(afterForget.status == Registry::Uninstalled);
   REQUIRE(afterForget.version == 0);
+}
+
+TEST_CASE("enforce unique files", M) {
+  Registry reg;
+
+  {
+    MAKE_PACKAGE
+    reg.push(ver);
+  }
+
+  RemoteIndex ri("Remote Name");
+  Category cat("Hello", &ri);
+  Package pkg(Package::ScriptType, "Duplicate Package", &cat);
+  Version *ver = new Version("1.0", &pkg);
+  Source *src = new Source(Source::GenericPlatform, "file", "url", ver);
+  ver->addSource(src);
+  pkg.addVersion(ver);
+
+  try {
+    reg.push(ver);
+    FAIL("duplicate was accepted");
+  }
+  catch(const reapack_error &) {}
 }
