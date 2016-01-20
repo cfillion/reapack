@@ -69,5 +69,5 @@ vendor
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
 8. Run `rake` from this directory using
   "Developer Command Prompt for VS2013"
-9. Copy `x64\bin\reaper_reapack_x64.dll` to your REAPER
+9. Copy or symlink `x64\bin\reaper_reapack_x64.dll` to your REAPER
   plugin folder (replace x64 with x86 for 32-bit)
