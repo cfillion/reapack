@@ -66,21 +66,13 @@ public:
   const ErrorList &errors() const { return m_errors; }
 
 private:
-  enum Step
-  {
-    Unknown,
-    Synchronize,
-    Install,
-  };
-
   friend Task;
   friend InstallTask;
   friend RemoveTask;
 
-  void updateAll();
   void finish();
 
-  void saveRemoteIndex(Download *);
+  void upgradeAll(Download *);
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
   Path prefixPath(const Path &) const;
@@ -92,7 +84,6 @@ private:
 
   Path m_root;
   Path m_dbPath;
-  Step m_step;
   bool m_isCancelled;
 
   std::vector<RemoteIndex *> m_remoteIndexes;

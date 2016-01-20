@@ -30,21 +30,17 @@
 using namespace std;
 
 Transaction::Transaction(const Path &root)
-  : m_root(root), m_step(Unknown), m_isCancelled(false), m_hasConflicts(false)
+  : m_root(root), m_isCancelled(false), m_hasConflicts(false)
 {
   m_dbPath = m_root + "ReaPack";
 
   m_registry = new Registry(m_dbPath + "registry.db");
 
   m_queue.onDone([=](void *) {
-    switch(m_step) {
-    case Synchronize:
-      updateAll();
-      break;
-    default:
+    if(m_packages.empty() || m_hasConflicts)
       finish();
-      break;
-    }
+    else
+      install();
   });
 
   RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
@@ -63,15 +59,13 @@ Transaction::~Transaction()
 
 void Transaction::synchronize(const Remote &remote)
 {
-  m_step = Synchronize;
-
   Download *dl = new Download(remote.name(), remote.url());
-  dl->onFinish(bind(&Transaction::saveRemoteIndex, this, dl));
+  dl->onFinish(bind(&Transaction::upgradeAll, this, dl));
 
   m_queue.push(dl);
 }
 
-void Transaction::saveRemoteIndex(Download *dl)
+void Transaction::upgradeAll(Download *dl)
 {
   const Path path = m_dbPath + ("remote_" + dl->name() + ".xml");
 
@@ -81,15 +75,7 @@ void Transaction::saveRemoteIndex(Download *dl)
   try {
     RemoteIndex *ri = RemoteIndex::load(dl->name(), path.join().c_str());
     m_remoteIndexes.push_back(ri);
-  }
-  catch(const reapack_error &e) {
-    addError(e.what(), dl->url());
-  }
-}
 
-void Transaction::updateAll()
-{
-  for(RemoteIndex *ri : m_remoteIndexes) {
     for(Package *pkg : ri->packages()) {
       Registry::Entry entry = m_registry->query(pkg);
 
@@ -108,17 +94,13 @@ void Transaction::updateAll()
       m_packages.push_back({ver, entry});
     }
   }
-
-  if(m_packages.empty() || m_hasConflicts)
-    finish();
-  else
-    install();
+  catch(const reapack_error &e) {
+    addError(e.what(), dl->url());
+  }
 }
 
 void Transaction::install()
 {
-  m_step = Install;
-
   for(const PackageEntry &entry : m_packages) {
     Version *ver = entry.first;
     const Registry::Entry regEntry = entry.second;
@@ -147,6 +129,9 @@ void Transaction::install()
 
     addTask(task);
   }
+
+  // allow further synchronize() calls to be made (transaction hitchhiking)
+  m_packages.clear();
 }
 
 void Transaction::uninstall(const Remote &remote)
