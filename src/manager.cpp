@@ -42,9 +42,16 @@ Manager::~Manager()
 
 void Manager::onInit()
 {
+  // It would be better to not hard-code the column sizes like that...
+#ifndef _WIN32
+  const int URL_WIDTH = 360;
+#else
+  const int URL_WIDTH = 300;
+#endif
+
   m_list = new ListView({
-    {AUTO_STR("Name"), 100},
-    {AUTO_STR("URL"), 360},
+    {AUTO_STR("Name"), 110},
+    {AUTO_STR("URL"), URL_WIDTH},
     {AUTO_STR("State"), 60},
   }, getItem(IDC_LIST));
 }
