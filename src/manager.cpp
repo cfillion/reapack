@@ -74,8 +74,13 @@ void Manager::onCommand(WPARAM wParam, LPARAM)
     uninstall();
     break;
   case IDOK:
-    if(!apply())
+    if(confirm())
+      apply();
+    else {
+      m_uninstall.clear();
+      refresh();
       break;
+    }
   case IDCANCEL:
     reset();
     hide();
@@ -178,29 +183,29 @@ void Manager::uninstall()
   m_list->removeRow(m_list->currentIndex());
 }
 
-bool Manager::apply()
+bool Manager::confirm() const
 {
-  if(!m_uninstall.empty()) {
-    auto_char buf[255] = {};
+  if(m_uninstall.empty())
+    return true;
+
+  auto_char msg[255] = {};
 #ifdef _WIN32
-    _snwprintf(buf, sizeof(buf),
+  _snwprintf(msg, sizeof(msg),
 #else
-    snprintf(buf, sizeof(buf),
+  snprintf(msg, sizeof(msg),
 #endif
-      AUTO_STR("Uninstall %lu remotes?\n")
-      AUTO_STR("Every file they contain will be removed from your computer."),
-      m_uninstall.size());
+    AUTO_STR("Uninstall %lu remotes?\n")
+    AUTO_STR("Every file they contain will be removed from your computer."),
+    m_uninstall.size());
 
-    const auto_char *title = AUTO_STR("ReaPack Query");
-    const int btn = MessageBox(handle(), buf, title, MB_YESNO);
+  const auto_char *title = AUTO_STR("ReaPack Query");
+  const int btn = MessageBox(handle(), msg, title, MB_YESNO);
 
-    if(btn != IDYES) {
-      m_uninstall.clear();
-      refresh();
-      return false;
-    }
-  }
+  return btn == IDYES;
+}
 
+void Manager::apply()
+{
   RemoteList *list = m_reapack->config()->remotes();
 
   for(const auto &pair : m_enableOverrides) {
@@ -223,8 +228,6 @@ bool Manager::apply()
   }
 
   m_reapack->config()->write();
-
-  return true;
 }
 
 void Manager::reset()

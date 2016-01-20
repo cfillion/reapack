@@ -49,7 +49,8 @@ private:
   bool isRemoteEnabled(const Remote &remote) const;
   void uninstall();
 
-  bool apply();
+  bool confirm() const;
+  void apply();
   void reset();
 
   ReaPack *m_reapack;
