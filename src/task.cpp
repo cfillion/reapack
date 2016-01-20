@@ -36,13 +36,9 @@ Task::Task(Transaction *transaction)
 {
 }
 
-void Task::rollback()
+void Task::start()
 {
-  m_isCancelled = true;
-
-  // it's the transaction queue's job to abort the running downloads, not ours
-
-  doRollback();
+  doStart();
 }
 
 void Task::commit()
@@ -52,6 +48,15 @@ void Task::commit()
 
   if(doCommit())
     m_onCommit();
+}
+
+void Task::rollback()
+{
+  m_isCancelled = true;
+
+  // it's the transaction queue's job to abort the running downloads, not ours
+
+  doRollback();
 }
 
 bool Task::renameFile(const Path &from, const Path &to) const
@@ -101,9 +106,13 @@ bool Task::removeFileRecursive(const Path &file) const
 }
 
 InstallTask::InstallTask(Version *ver, const set<Path> &oldFiles, Transaction *t)
-  : Task(t), m_oldFiles(move(oldFiles))
+  : Task(t), m_version(ver), m_oldFiles(move(oldFiles))
 {
-  const auto &sources = ver->sources();
+}
+
+void InstallTask::doStart()
+{
+  const auto &sources = m_version->sources();
 
   for(auto it = sources.begin(); it != sources.end();) {
     const Path &path = it->first;

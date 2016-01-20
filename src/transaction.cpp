@@ -36,8 +36,8 @@ Transaction::Transaction(const Path &root)
 
   m_registry = new Registry(m_dbPath + "registry.db");
 
-  m_queue.onDone([=](void *) {
-    if(m_packages.empty() || m_hasConflicts)
+  m_downloadQueue.onDone([=](void *) {
+    if(m_installQueue.empty() || m_hasConflicts)
       finish();
     else
       install();
@@ -62,7 +62,7 @@ void Transaction::synchronize(const Remote &remote)
   Download *dl = new Download(remote.name(), remote.url());
   dl->onFinish(bind(&Transaction::upgradeAll, this, dl));
 
-  m_queue.push(dl);
+  m_downloadQueue.push(dl);
 }
 
 void Transaction::upgradeAll(Download *dl)
@@ -91,7 +91,7 @@ void Transaction::upgradeAll(Download *dl)
           entry.status = Registry::Uninstalled;
       }
 
-      m_packages.push_back({ver, entry});
+      m_installQueue.push({ver, entry});
     }
   }
   catch(const reapack_error &e) {
@@ -101,7 +101,10 @@ void Transaction::upgradeAll(Download *dl)
 
 void Transaction::install()
 {
-  for(const PackageEntry &entry : m_packages) {
+  while(!m_installQueue.empty()) {
+    const PackageEntry entry = m_installQueue.front();
+    m_installQueue.pop();
+
     Version *ver = entry.first;
     const Registry::Entry regEntry = entry.second;
     const set<Path> &currentFiles = m_registry->getFiles(regEntry);
@@ -130,8 +133,7 @@ void Transaction::install()
     addTask(task);
   }
 
-  // allow further synchronize() calls to be made (transaction hitchhiking)
-  m_packages.clear();
+  runTasks();
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -169,10 +171,10 @@ void Transaction::cancel()
   for(Task *task : m_tasks)
     task->rollback();
 
-  if(m_queue.idle())
+  if(m_downloadQueue.idle())
     finish();
   else
-    m_queue.abort();
+    m_downloadQueue.abort();
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
@@ -251,7 +253,16 @@ void Transaction::registerFiles(const set<Path> &list)
 void Transaction::addTask(Task *task)
 {
   m_tasks.push_back(task);
+  m_taskQueue.push(task);
+}
 
-  if(m_queue.idle())
+void Transaction::runTasks()
+{
+  while(!m_taskQueue.empty()) {
+    m_taskQueue.front()->start();
+    m_taskQueue.pop();
+  }
+
+  if(m_downloadQueue.idle())
     finish();
 }

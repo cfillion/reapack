@@ -192,8 +192,9 @@ void Manager::apply()
       m_reapack->synchronize(remote);
   }
 
-  for(const Remote &remote : m_uninstall) {
-    m_reapack->uninstall(remote);
+  for(auto it = m_uninstall.begin(); it != m_uninstall.end(); it++) {
+    const Remote &remote = *it;
+    m_reapack->uninstall(remote, next(it) == m_uninstall.end());
     list->remove(remote);
   }
 

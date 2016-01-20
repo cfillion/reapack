@@ -39,6 +39,7 @@ public:
   void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
   bool isCancelled() const { return m_isCancelled; }
 
+  void start();
   void commit();
   void rollback();
 
@@ -49,6 +50,7 @@ protected:
 
   Transaction *transaction() const { return m_transaction; }
 
+  virtual void doStart() = 0;
   virtual bool doCommit() = 0;
   virtual void doRollback() = 0;
 
@@ -66,6 +68,7 @@ public:
   const std::set<Path> &removedFiles() const { return m_oldFiles; }
 
 protected:
+  void doStart() override;
   bool doCommit() override;
   void doRollback() override;
 
@@ -74,8 +77,9 @@ private:
 
   void saveSource(Download *, Source *);
 
-  std::vector<PathPair> m_newFiles;
+  Version *m_version;
   std::set<Path> m_oldFiles;
+  std::vector<PathPair> m_newFiles;
 };
 
 class RemoveTask : public Task {
@@ -85,6 +89,7 @@ public:
   const std::set<Path> &removedFiles() const { return m_removedFiles; }
 
 protected:
+  void doStart() override {}
   bool doCommit() override;
   void doRollback() override {}
 

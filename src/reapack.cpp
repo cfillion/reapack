@@ -119,7 +119,7 @@ void ReaPack::synchronize(const Remote &remote)
   m_transaction->synchronize(remote);
 }
 
-void ReaPack::uninstall(const Remote &remote)
+void ReaPack::uninstall(const Remote &remote, const bool start)
 {
   if(remote.isProtected())
     return;
@@ -130,6 +130,9 @@ void ReaPack::uninstall(const Remote &remote)
   }
 
   m_transaction->uninstall(remote);
+
+  if(start)
+    m_transaction->runTasks();
 }
 
 void ReaPack::importRemote()

@@ -54,11 +54,13 @@ public:
 
   void synchronize(const Remote &);
   void uninstall(const Remote &);
+  void runTasks();
   void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
-  DownloadQueue *downloadQueue() { return &m_queue; }
+  DownloadQueue *downloadQueue() { return &m_downloadQueue; }
   size_t taskCount() const { return m_tasks.size(); }
+
   const PackageEntryList &newPackages() const { return m_new; }
   const PackageEntryList &updates() const { return m_updates; }
   const std::set<Path> &removals() const { return m_removals; }
@@ -84,14 +86,15 @@ private:
   bool m_isCancelled;
 
   std::vector<RemoteIndex *> m_remoteIndexes;
-  DownloadQueue m_queue;
-  PackageEntryList m_packages;
+  DownloadQueue m_downloadQueue;
+  std::queue<PackageEntry> m_installQueue;
   PackageEntryList m_new;
   PackageEntryList m_updates;
   std::set<Path> m_removals;
   ErrorList m_errors;
 
   std::vector<Task *> m_tasks;
+  std::queue<Task *> m_taskQueue;
   std::set<Path> m_files;
   bool m_hasConflicts;
 
