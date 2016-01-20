@@ -28,9 +28,7 @@
 
 using namespace std;
 
-static const int ACTION_ENABLE = 300;
-static const int ACTION_DISABLE = 301;
-static const int ACTION_UNINSTALL = 302;
+enum { ACTION_ENABLE = 300, ACTION_DISABLE, ACTION_UNINSTALL };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
