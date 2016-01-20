@@ -23,6 +23,7 @@
 #include "transaction.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
+#include <locale>
 
 using namespace std;
 
@@ -32,6 +33,8 @@ static const char *NL = "\r\n";
 Report::Report(Transaction *transaction)
   : Dialog(IDD_REPORT_DIALOG), m_transaction(transaction)
 {
+  // enable number formatting (ie. "1,234" instead of "1234")
+  m_stream.imbue(locale(""));
 }
 
 void Report::onInit()
