@@ -49,7 +49,7 @@ private:
   bool isRemoteEnabled(const Remote &remote) const;
   void uninstall();
 
-  void apply();
+  bool apply();
   void reset();
 
   ReaPack *m_reapack;

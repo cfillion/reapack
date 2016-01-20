@@ -24,11 +24,13 @@
 #include "remote.hpp"
 #include "resource.hpp"
 
+#include <cstdio>
+
+using namespace std;
+
 static const int ACTION_ENABLE = 300;
 static const int ACTION_DISABLE = 301;
 static const int ACTION_UNINSTALL = 302;
-
-using namespace std;
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
@@ -72,7 +74,8 @@ void Manager::onCommand(WPARAM wParam, LPARAM)
     uninstall();
     break;
   case IDOK:
-    apply();
+    if(!apply())
+      break;
   case IDCANCEL:
     reset();
     hide();
@@ -175,8 +178,29 @@ void Manager::uninstall()
   m_list->removeRow(m_list->currentIndex());
 }
 
-void Manager::apply()
+bool Manager::apply()
 {
+  if(!m_uninstall.empty()) {
+    auto_char buf[255] = {};
+#ifdef _WIN32
+    _snwprintf(buf, sizeof(buf),
+#else
+    snprintf(buf, sizeof(buf),
+#endif
+      AUTO_STR("Uninstall %lu remotes?\n")
+      AUTO_STR("Every file they contain will be removed from your computer."),
+      m_uninstall.size());
+
+    const auto_char *title = AUTO_STR("ReaPack Query");
+    const int btn = MessageBox(handle(), buf, title, MB_YESNO);
+
+    if(btn != IDYES) {
+      m_uninstall.clear();
+      refresh();
+      return false;
+    }
+  }
+
   RemoteList *list = m_reapack->config()->remotes();
 
   for(const auto &pair : m_enableOverrides) {
@@ -199,6 +223,8 @@ void Manager::apply()
   }
 
   m_reapack->config()->write();
+
+  return true;
 }
 
 void Manager::reset()
