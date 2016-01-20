@@ -214,8 +214,10 @@ void ReaPack::manageRemotes()
 
 Transaction *ReaPack::createTransaction()
 {
-  if(m_transaction)
+  if(m_transaction) {
+    m_progress->setFocus();
     return nullptr;
+  }
 
   try {
     m_transaction = new Transaction(m_resourcePath);
