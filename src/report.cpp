@@ -68,9 +68,9 @@ void Report::onInit()
   SetDlgItemText(handle(), IDC_REPORT, str.c_str());
 }
 
-void Report::onCommand(WPARAM wParam, LPARAM)
+void Report::onCommand(const int id)
 {
-  switch(LOWORD(wParam)) {
+  switch(id) {
   case IDOK:
   case IDCANCEL:
     close();

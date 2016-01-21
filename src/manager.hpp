@@ -37,7 +37,7 @@ public:
 
 protected:
   void onInit() override;
-  void onCommand(WPARAM, LPARAM) override;
+  void onCommand(int) override;
   void onNotify(LPNMHDR, LPARAM) override;
   void onContextMenu(HWND, int x, int y) override;
 

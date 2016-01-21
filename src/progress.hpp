@@ -33,7 +33,7 @@ public:
 
 protected:
   void onInit() override;
-  void onCommand(WPARAM, LPARAM) override;
+  void onCommand(int) override;
 
 private:
   void addDownload(Download *);

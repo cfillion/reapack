@@ -83,7 +83,7 @@ protected:
   virtual void onShow();
   virtual void onHide();
   virtual void onTimer();
-  virtual void onCommand(WPARAM, LPARAM);
+  virtual void onCommand(int);
   virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onContextMenu(HWND, int x, int y);
   virtual void onDestroy();

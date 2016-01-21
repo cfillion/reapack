@@ -56,9 +56,9 @@ void Manager::onInit()
   }, getItem(IDC_LIST));
 }
 
-void Manager::onCommand(WPARAM wParam, LPARAM)
+void Manager::onCommand(const int id)
 {
-  switch(LOWORD(wParam)) {
+  switch(id) {
   case IDC_IMPORT:
     m_reapack->importRemote();
     break;

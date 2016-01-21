@@ -60,7 +60,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onTimer();
     break;
   case WM_COMMAND:
-    dlg->onCommand(wParam, lParam);
+    dlg->onCommand(LOWORD(wParam));
     break;
   case WM_NOTIFY:
     dlg->onNotify((LPNMHDR)lParam, lParam);
@@ -181,7 +181,7 @@ void Dialog::onTimer()
 {
 }
 
-void Dialog::onCommand(WPARAM, LPARAM)
+void Dialog::onCommand(int)
 {
 }
 

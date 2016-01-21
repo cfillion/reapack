@@ -55,9 +55,9 @@ void Progress::onInit()
   m_progress = GetDlgItem(handle(), IDC_PROGRESS);
 }
 
-void Progress::onCommand(WPARAM wParam, LPARAM)
+void Progress::onCommand(const int id)
 {
-  switch(LOWORD(wParam)) {
+  switch(id) {
   case IDCANCEL:
     if(m_transaction)
       m_transaction->cancel();
