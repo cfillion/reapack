@@ -33,6 +33,14 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
+  enum State {
+    Idle,
+    Running,
+    Success,
+    Failure,
+    Aborted,
+  };
+
   static void Init();
   static void Cleanup();
 
@@ -41,10 +49,9 @@ public:
 
   const std::string &name() const { return m_name; }
   const std::string &url() const { return m_url; }
-  int status() const { return m_status; }
-  const std::string &contents() const { return m_contents; }
 
-  bool isRunning();
+  State state();
+  const std::string &contents();
   bool isAborted();
 
   void onStart(const Callback &callback) { m_onStart.connect(callback); }
@@ -67,7 +74,7 @@ private:
   static size_t WriteData(char *, size_t, size_t, void *);
   static DWORD WINAPI Worker(void *ptr);
 
-  void finish(const int status, const std::string &contents);
+  void finish(const State state, const std::string &contents);
   void finishInMainThread();
   void reset();
 
@@ -77,9 +84,8 @@ private:
   WDL_Mutex m_mutex;
 
   HANDLE m_threadHandle;
+  State m_state;
   bool m_aborted;
-  bool m_running;
-  int m_status;
   std::string m_contents;
 
   Signal m_onStart;

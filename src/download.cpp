@@ -53,9 +53,8 @@ Download::~Download()
 
 void Download::reset()
 {
+  m_state = Idle;
   m_aborted = false;
-  m_running = false;
-  m_status = 0;
   m_contents.clear();
 }
 
@@ -82,7 +81,7 @@ void Download::start()
 
   reset();
 
-  m_running = true;
+  m_state = Running;
   m_onStart();
 
   RegisterStart();
@@ -110,12 +109,12 @@ DWORD WINAPI Download::Worker(void *ptr)
   const CURLcode res = curl_easy_perform(curl);
 
   if(download->isAborted()) {
-    download->finish(-2, "aborted");
+    download->finish(Aborted, "aborted");
     curl_easy_cleanup(curl);
     return 1;
   }
   else if(res != CURLE_OK) {
-    download->finish(0, curl_easy_strerror(res));
+    download->finish(Failure, curl_easy_strerror(res));
     curl_easy_cleanup(curl);
     return 1;
   }
@@ -124,21 +123,25 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
 
   // accept a status of 0 for the file:// protocol
-  if(status == 200 || status == 0) {
+  switch(status) {
+  case 0: // for the file:// protocol
+  case 200: // HTTP OK
+  {
     // strip headers
     long headerSize = 0;
     curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
     contents.erase(0, headerSize);
 
-    // always send 200, even for file://
-    download->finish(200, contents);
+    download->finish(Success, contents);
+    break;
   }
-  else {
-    // strip body
+  default:
+    // strip body, only keep error description
     contents.erase(contents.find("\n"));
     contents.erase(0, contents.find("\x20") + 1);
 
-    download->finish(status, contents);
+    download->finish(Failure, contents);
+    break;
   }
 
   curl_easy_cleanup(curl);
@@ -191,14 +194,13 @@ Download *Download::NextFinished()
   return dl;
 }
 
-void Download::finish(const int status, const string &contents)
+void Download::finish(const State state, const string &contents)
 {
   // called from the worker thread
 
   WDL_MutexLock lock(&m_mutex);
 
-  m_running = false;
-  m_status = status;
+  m_state = state;
   m_contents = contents;
 
   MarkAsFinished(this);
@@ -215,11 +217,18 @@ void Download::finishInMainThread()
   m_onDestroy();
 }
 
-bool Download::isRunning()
+auto Download::state() -> State
 {
   WDL_MutexLock lock(&m_mutex);
 
-  return m_running;
+  return m_state;
+}
+
+const string &Download::contents()
+{
+  WDL_MutexLock lock(&m_mutex);
+
+  return m_contents;
 }
 
 bool Download::isAborted()

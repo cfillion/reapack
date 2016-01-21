@@ -204,7 +204,7 @@ void Transaction::cancel()
 
 bool Transaction::saveFile(Download *dl, const Path &path)
 {
-  if(dl->status() != 200) {
+  if(dl->state() != Download::Success) {
     addError(dl->contents(), dl->url());
     return false;
   }
