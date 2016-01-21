@@ -90,20 +90,19 @@ void Progress::addDownload(Download *dl)
 
 void Progress::updateProgress()
 {
-  const auto_string text = AUTO_STR("Downloading ") +
-    to_autostring(min(m_done + 1, m_total)) + AUTO_STR(" of ") +
-    to_autostring(m_total) + AUTO_STR(": ") + m_currentName;
+  auto_char label[1024] = {};
+  auto_snprintf(label, sizeof(label), AUTO_STR("Downloading %d of %d: %s"),
+    min(m_done + 1, m_total), m_total, m_currentName.c_str());
 
-  SetWindowText(m_label, text.c_str());
+  SetWindowText(m_label, label);
 
   const double pos = (double)m_done / m_total;
   const int percent = (int)(pos * 100);
 
-  static const auto_string TITLE = AUTO_STR("ReaPack: Download in progress");
-
-  const auto_string title = TITLE +
-    AUTO_STR(" (") + to_autostring(percent) + AUTO_STR("%)");
+  auto_char title[255] = {};
+  auto_snprintf(title, sizeof(title),
+    AUTO_STR("ReaPack: Download in progress (%d%%)"), percent);
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
-  SetWindowText(handle(), title.c_str());
+  SetWindowText(handle(), title);
 }

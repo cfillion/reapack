@@ -24,8 +24,6 @@
 #include "remote.hpp"
 #include "resource.hpp"
 
-#include <cstdio>
-
 using namespace std;
 
 enum { ACTION_ENABLE = 300, ACTION_DISABLE, ACTION_UNINSTALL };
@@ -189,11 +187,7 @@ bool Manager::confirm() const
   const size_t uninstallSize = m_uninstall.size();
 
   auto_char msg[255] = {};
-#ifdef _WIN32
-  _snwprintf(msg, sizeof(msg),
-#else
-  snprintf(msg, sizeof(msg),
-#endif
+  auto_snprintf(msg, sizeof(msg),
     AUTO_STR("Uninstall %lu remote%s?\n")
     AUTO_STR("Every file they contain will be removed from your computer."),
     uninstallSize, uninstallSize == 1 ? AUTO_STR("") : AUTO_STR("s"));

@@ -22,6 +22,7 @@
 // MultiByteToWideChar is required to make file path like
 // "C:\Users\Test\Downloads\Новая папка" work on Windows...
 
+#include <cstdio>
 #include <string>
 
 #ifdef _WIN32
@@ -31,6 +32,7 @@ typedef std::wstring auto_string;
 
 #define AUTO_STR(text) L##text
 #define to_autostring std::to_wstring
+#define auto_snprintf _snwprintf
 auto_string make_autostring(const std::string &);
 std::string from_autostring(const auto_string &);
 
@@ -41,6 +43,7 @@ typedef std::string auto_string;
 
 #define AUTO_STR(text) text
 #define to_autostring std::to_string
+#define auto_snprintf snprintf
 #define make_autostring(string) string
 #define from_autostring(string) string
 
