@@ -123,13 +123,15 @@ DWORD WINAPI Download::Worker(void *ptr)
   int status = 0;
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
 
-  if(status == 200) {
+  // accept a status of 0 for the file:// protocol
+  if(status == 200 || status == 0) {
     // strip headers
     long headerSize = 0;
     curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
     contents.erase(0, headerSize);
 
-    download->finish(status, contents);
+    // always send 200, even for file://
+    download->finish(200, contents);
   }
   else {
     // strip body
