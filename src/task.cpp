@@ -61,8 +61,8 @@ void Task::rollback()
 
 bool Task::RenameFile(const Path &from, const Path &to)
 {
-  const string &fullFrom = Path::prefix(from).join();
-  const string &fullTo = Path::prefix(to).join();
+  const string &fullFrom = Path::prefixRoot(from).join();
+  const string &fullTo = Path::prefixRoot(to).join();
 
 #ifdef _WIN32
   return !_wrename(make_autostring(fullFrom).c_str(),
@@ -75,7 +75,7 @@ bool Task::RenameFile(const Path &from, const Path &to)
 bool Task::RemoveFile(const Path &path)
 {
   const auto_string &fullPath =
-    make_autostring(Path::prefix(path).join());
+    make_autostring(Path::prefixRoot(path).join());
 
 #ifdef _WIN32
   if(GetFileAttributes(fullPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
@@ -144,7 +144,7 @@ void InstallTask::saveSource(Download *dl, Source *src)
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
 
-  if(!transaction()->saveFile(dl, Path::prefix(tmpPath))) {
+  if(!transaction()->saveFile(dl, Path::prefixRoot(tmpPath))) {
     rollback();
     return;
   }

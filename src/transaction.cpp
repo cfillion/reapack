@@ -32,7 +32,7 @@ using namespace std;
 Transaction::Transaction()
   : m_isCancelled(false)
 {
-  m_registry = new Registry(Path::registry());
+  m_registry = new Registry(Path::prefixCache("registry.db"));
 
   m_downloadQueue.onDone([=](void *) {
     if(m_installQueue.empty())
@@ -67,7 +67,7 @@ void Transaction::synchronize(const Remote &remote)
 
 void Transaction::upgradeAll(Download *dl)
 {
-  const Path path = Path::cache("remote_" + dl->name() + ".xml");
+  const Path path = Path::prefixCache("remote_" + dl->name() + ".xml");
 
   if(!saveFile(dl, path))
     return;
@@ -245,7 +245,7 @@ void Transaction::addError(const string &message, const string &title)
 bool Transaction::allFilesExists(const set<Path> &list) const
 {
   for(const Path &path : list) {
-    if(!file_exists(Path::prefix(path).join().c_str()))
+    if(!file_exists(Path::prefixRoot(path).join().c_str()))
       return false;
   }
 

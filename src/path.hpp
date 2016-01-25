@@ -25,11 +25,10 @@ class UseRootPath;
 
 class Path {
 public:
-  static Path prefix(const Path &p) { return s_root + p; }
-  static Path configFile() { return s_root + "reapack.ini"; }
   static Path cacheDir() { return s_root + "ReaPack"; }
-  static Path cache(const std::string &p) { return cacheDir() + p; }
-  static Path registry() { return cacheDir() + "registry.db"; }
+  static Path prefixRoot(const Path &p) { return s_root + p; }
+  static Path prefixRoot(const std::string &p) { return s_root + p; }
+  static Path prefixCache(const std::string &p) { return cacheDir() + p; }
 
   Path(const std::string &path = std::string());
 

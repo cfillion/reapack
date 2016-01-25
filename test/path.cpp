@@ -164,27 +164,23 @@ TEST_CASE("remove last component of path", M) {
   REQUIRE(a[0] == "a");
 }
 
-TEST_CASE("path collection", M) {
+TEST_CASE("path generation utilities", M) {
   const Path path("world");
 
-  REQUIRE(Path::prefix(path) == Path("world"));
+  REQUIRE(Path::prefixRoot(path) == Path("world"));
+  REQUIRE(Path::cacheDir() == Path("ReaPack"));
+  REQUIRE(Path::prefixCache("test") == Path("ReaPack/test"));
 
   {
     UseRootPath root("hello");
     (void)root;
 
-    REQUIRE(Path::prefix(path) == Path("hello/world"));
+    REQUIRE(Path::prefixRoot(path) == Path("hello/world"));
+    REQUIRE(Path::prefixRoot("world") == Path("hello/world"));
+
+    REQUIRE(Path::cacheDir() == Path("hello/ReaPack"));
+    REQUIRE(Path::prefixCache("test") == Path("hello/ReaPack/test"));
   }
 
-  REQUIRE(Path::prefix(path) == Path("world"));
-}
-
-TEST_CASE("standard paths", M) {
-  UseRootPath root("root");
-  (void)root;
-
-  REQUIRE(Path::configFile() == Path("root/reapack.ini"));
-  REQUIRE(Path::cacheDir() == Path("root/ReaPack"));
-  REQUIRE(Path::cache("test") == Path("root/ReaPack/test"));
-  REQUIRE(Path::registry() == Path("root/ReaPack/registry.db"));
+  REQUIRE(Path::prefixRoot(path) == Path("world"));
 }

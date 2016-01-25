@@ -37,7 +37,7 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   RecursiveCreateDirectory(Path::cacheDir().join().c_str(), 0);
 
   m_config = new Config;
-  m_config->read(Path::configFile());
+  m_config->read(Path::prefixRoot("reapack.ini"));
 
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
