@@ -47,6 +47,8 @@ public:
 
   void synchronizeAll();
   void synchronize(const Remote &);
+  void enable(Remote);
+  void disable(Remote);
   void uninstall(const Remote &, const bool start = true);
   void importRemote();
   void manageRemotes();

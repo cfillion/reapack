@@ -119,6 +119,20 @@ void ReaPack::synchronize(const Remote &remote)
   m_transaction->synchronize(remote);
 }
 
+void ReaPack::enable(Remote remote)
+{
+  remote.setEnabled(true);
+  m_config->remotes()->add(remote);
+
+  synchronize(remote);
+}
+
+void ReaPack::disable(Remote remote)
+{
+  remote.setEnabled(false);
+  m_config->remotes()->add(remote);
+}
+
 void ReaPack::uninstall(const Remote &remote, const bool start)
 {
   if(remote.isProtected())
@@ -130,6 +144,7 @@ void ReaPack::uninstall(const Remote &remote, const bool start)
   }
 
   m_transaction->uninstall(remote);
+  m_config->remotes()->remove(remote);
 
   if(start)
     m_transaction->runTasks();

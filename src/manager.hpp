@@ -56,7 +56,7 @@ private:
   ReaPack *m_reapack;
   ListView *m_list;
 
-  std::map<std::string, bool> m_enableOverrides;
+  std::map<Remote, bool> m_enableOverrides;
   std::set<Remote> m_uninstall;
 };
 

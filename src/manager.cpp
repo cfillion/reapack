@@ -144,10 +144,10 @@ void Manager::setRemoteEnabled(const bool enabled)
   if(remote.isNull())
     return;
 
-  auto it = m_enableOverrides.find(remote.name());
+  auto it = m_enableOverrides.find(remote);
 
   if(it == m_enableOverrides.end())
-    m_enableOverrides.insert({remote.name(), enabled});
+    m_enableOverrides.insert({remote, enabled});
   else if(remote.isEnabled() == enabled)
     m_enableOverrides.erase(it);
   else
@@ -158,7 +158,7 @@ void Manager::setRemoteEnabled(const bool enabled)
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
 {
-  const auto it = m_enableOverrides.find(remote.name());
+  const auto it = m_enableOverrides.find(remote);
 
   if(it == m_enableOverrides.end())
     return remote.isEnabled();
@@ -171,7 +171,7 @@ void Manager::uninstall()
   const Remote &remote = currentRemote();
   m_uninstall.insert(remote);
 
-  const auto it = m_enableOverrides.find(remote.name());
+  const auto it = m_enableOverrides.find(remote);
 
   if(it != m_enableOverrides.end())
     m_enableOverrides.erase(it);
@@ -200,25 +200,19 @@ bool Manager::confirm() const
 
 void Manager::apply()
 {
-  RemoteList *list = m_reapack->config()->remotes();
-
   for(const auto &pair : m_enableOverrides) {
-    const string &name = pair.first;
+    const Remote &remote = pair.first;
     const bool enable = pair.second;
 
-    Remote remote = list->get(name);
-    remote.setEnabled(enable);
-
-    list->add(remote);
-
     if(enable)
-      m_reapack->synchronize(remote);
+      m_reapack->enable(remote);
+    else
+      m_reapack->disable(remote);
   }
 
   for(auto it = m_uninstall.begin(); it != m_uninstall.end(); it++) {
     const Remote &remote = *it;
     m_reapack->uninstall(remote, next(it) == m_uninstall.end());
-    list->remove(remote);
   }
 
   m_reapack->config()->write();
