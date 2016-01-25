@@ -221,22 +221,3 @@ void Registry::commit()
 {
   m_db.commit();
 }
-
-bool Registry::addToREAPER(Version *ver, const Path &root)
-{
-  if(ver->package()->type() != Package::ScriptType)
-    return false;
-
-  Source *src = ver->mainSource();
-
-  if(!src)
-    return false;
-
-  enum { MainSection = 0 };
-  const string &path = (root + src->targetPath()).join();
-
-  custom_action_register_t ca{MainSection, nullptr, path.c_str()};
-  const int id = plugin_register("custom_action", (void *)&ca);
-
-  return id > 0;
-}

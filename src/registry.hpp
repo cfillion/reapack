@@ -53,8 +53,6 @@ public:
   void forget(const Entry &);
   void commit();
 
-  bool addToREAPER(Version *ver, const Path &root);
-
 private:
   void migrate();
 

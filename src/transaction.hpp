@@ -54,6 +54,8 @@ public:
 
   void synchronize(const Remote &);
   void uninstall(const Remote &);
+  void registerAll(const Remote &);
+  void unregisterAll(const Remote &);
   void runTasks();
   void cancel();
 

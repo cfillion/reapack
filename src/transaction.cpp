@@ -149,6 +149,14 @@ void Transaction::install()
   runTasks();
 }
 
+void Transaction::registerAll(const Remote &)
+{
+}
+
+void Transaction::unregisterAll(const Remote &)
+{
+}
+
 void Transaction::uninstall(const Remote &remote)
 {
   const vector<Registry::Entry> &entries = m_registry->queryAll(remote);

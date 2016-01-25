@@ -49,14 +49,17 @@ public:
   void synchronize(const Remote &);
   void enable(Remote);
   void disable(Remote);
-  void uninstall(const Remote &, const bool start = true);
+  void uninstall(const Remote &);
   void importRemote();
   void manageRemotes();
+
+  void runTasks();
 
   Config *config() const { return m_config; }
 
 private:
   Transaction *createTransaction();
+  bool hitchhikeTransaction();
 
   std::map<int, ActionCallback> m_actions;
 

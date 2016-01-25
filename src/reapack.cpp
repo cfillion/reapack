@@ -112,10 +112,7 @@ void ReaPack::synchronizeAll()
 
 void ReaPack::synchronize(const Remote &remote)
 {
-  if(!m_transaction) {
-    if(!createTransaction())
-      return;
-  }
+  hitchhikeTransaction();
 
   // hitchhike currently running transactions
   m_transaction->synchronize(remote);
@@ -126,30 +123,34 @@ void ReaPack::enable(Remote remote)
   remote.setEnabled(true);
   m_config->remotes()->add(remote);
 
-  synchronize(remote);
+  if(!hitchhikeTransaction())
+    return;
+
+  m_transaction->registerAll(remote);
+  m_transaction->synchronize(remote);
 }
 
 void ReaPack::disable(Remote remote)
 {
   remote.setEnabled(false);
   m_config->remotes()->add(remote);
+
+  if(!hitchhikeTransaction())
+    return;
+
+  m_transaction->unregisterAll(remote);
 }
 
-void ReaPack::uninstall(const Remote &remote, const bool start)
+void ReaPack::uninstall(const Remote &remote)
 {
   if(remote.isProtected())
     return;
 
-  if(!m_transaction) {
-    if(!createTransaction())
-      return;
-  }
+  if(!hitchhikeTransaction())
+    return;
 
   m_transaction->uninstall(remote);
   m_config->remotes()->remove(remote);
-
-  if(start)
-    m_transaction->runTasks();
 }
 
 void ReaPack::importRemote()
@@ -273,4 +274,19 @@ Transaction *ReaPack::createTransaction()
   });
 
   return m_transaction;
+}
+
+bool ReaPack::hitchhikeTransaction()
+{
+  if(m_transaction)
+    return true;
+  else
+    return createTransaction() != nullptr;
+}
+
+
+void ReaPack::runTasks()
+{
+  if(m_transaction)
+    m_transaction->runTasks();
 }

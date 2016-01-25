@@ -210,12 +210,11 @@ void Manager::apply()
       m_reapack->disable(remote);
   }
 
-  for(auto it = m_uninstall.begin(); it != m_uninstall.end(); it++) {
-    const Remote &remote = *it;
-    m_reapack->uninstall(remote, next(it) == m_uninstall.end());
-  }
+  for(const Remote &remote : m_uninstall)
+    m_reapack->uninstall(remote);
 
   m_reapack->config()->write();
+  m_reapack->runTasks();
 }
 
 void Manager::reset()
