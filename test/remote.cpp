@@ -275,3 +275,8 @@ TEST_CASE("remove remote", M) {
 
   list.remove("world"); // no crash
 }
+
+TEST_CASE("compare remotes", M) {
+  REQUIRE(Remote("a", "a") < Remote("b", "a"));
+  REQUIRE_FALSE(Remote("a", "a") < Remote("a", "b"));
+}
