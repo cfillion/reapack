@@ -32,7 +32,7 @@ typedef std::wstring auto_string;
 
 #define AUTO_STR(text) L##text
 #define to_autostring std::to_wstring
-#define auto_snprintf _snwprintf
+#define auto_snprintf(buf, size, ...) _snwprintf(buf, size - 1,  __VA_ARGS__)
 auto_string make_autostring(const std::string &);
 std::string from_autostring(const auto_string &);
 
