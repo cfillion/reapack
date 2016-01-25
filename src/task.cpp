@@ -59,10 +59,10 @@ void Task::rollback()
   doRollback();
 }
 
-bool Task::renameFile(const Path &from, const Path &to) const
+bool Task::RenameFile(const Path &from, const Path &to)
 {
-  const string &fullFrom = m_transaction->prefixPath(from).join();
-  const string &fullTo = m_transaction->prefixPath(to).join();
+  const string &fullFrom = Path::prefix(from).join();
+  const string &fullTo = Path::prefix(to).join();
 
 #ifdef _WIN32
   return !_wrename(make_autostring(fullFrom).c_str(),
@@ -72,10 +72,10 @@ bool Task::renameFile(const Path &from, const Path &to) const
 #endif
 }
 
-bool Task::removeFile(const Path &path) const
+bool Task::RemoveFile(const Path &path)
 {
   const auto_string &fullPath =
-    make_autostring(m_transaction->prefixPath(path).join());
+    make_autostring(Path::prefix(path).join());
 
 #ifdef _WIN32
   if(GetFileAttributes(fullPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
@@ -87,9 +87,9 @@ bool Task::removeFile(const Path &path) const
 #endif
 }
 
-bool Task::removeFileRecursive(const Path &file) const
+bool Task::RemoveFileRecursive(const Path &file)
 {
-  if(!removeFile(file))
+  if(!RemoveFile(file))
     return false;
 
   Path dir = file;
@@ -98,7 +98,7 @@ bool Task::removeFileRecursive(const Path &file) const
   while(dir.size() > 2) {
     dir.removeLast();
 
-    if(!removeFile(dir))
+    if(!RemoveFile(dir))
       break;
   }
 
@@ -144,9 +144,7 @@ void InstallTask::saveSource(Download *dl, Source *src)
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
 
-  const Path &path = transaction()->prefixPath(tmpPath);
-
-  if(!transaction()->saveFile(dl, path)) {
+  if(!transaction()->saveFile(dl, Path::prefix(tmpPath))) {
     rollback();
     return;
   }
@@ -155,12 +153,12 @@ void InstallTask::saveSource(Download *dl, Source *src)
 bool InstallTask::doCommit()
 {
   for(const Path &path : m_oldFiles)
-    removeFile(path);
+    RemoveFile(path);
 
   for(const PathPair &paths : m_newFiles) {
-    removeFile(paths.second);
+    RemoveFile(paths.second);
 
-    if(!renameFile(paths.first, paths.second)) {
+    if(!RenameFile(paths.first, paths.second)) {
       transaction()->addError(strerror(errno), paths.first.join());
 
       // it's a bit late to rollback here as some files might already have been
@@ -176,7 +174,7 @@ bool InstallTask::doCommit()
 void InstallTask::doRollback()
 {
   for(const PathPair &paths : m_newFiles)
-    removeFileRecursive(paths.first);
+    RemoveFileRecursive(paths.first);
 
   m_newFiles.clear();
 }
@@ -189,7 +187,7 @@ RemoveTask::RemoveTask(const vector<Path> &files, Transaction *t)
 bool RemoveTask::doCommit()
 {
   for(const Path &path : m_files) {
-    if(removeFileRecursive(path))
+    if(RemoveFileRecursive(path))
       m_removedFiles.insert(path);
     else
       transaction()->addError(strerror(errno), path.join());

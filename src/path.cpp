@@ -28,6 +28,8 @@ static const char SEPARATOR = '/';
 static const char SEPARATOR = '\\';
 #endif
 
+Path Path::s_root;
+
 static vector<string> Split(const string &input)
 {
   vector<string> list;
@@ -171,4 +173,15 @@ string &Path::operator[](const size_t index)
 const string &Path::operator[](const size_t index) const
 {
   return at(index);
+}
+
+UseRootPath::UseRootPath(const std::string &path)
+  : m_backup(move(Path::s_root))
+{
+  Path::s_root = path;
+}
+
+UseRootPath::~UseRootPath()
+{
+  Path::s_root = move(m_backup);
 }

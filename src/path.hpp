@@ -21,8 +21,16 @@
 #include <string>
 #include <list>
 
+class UseRootPath;
+
 class Path {
 public:
+  static Path prefix(const Path &p) { return s_root + p; }
+  static Path configFile() { return s_root + "reapack.ini"; }
+  static Path cacheDir() { return s_root + "ReaPack"; }
+  static Path cache(const std::string &p) { return cacheDir() + p; }
+  static Path registry() { return cacheDir() + "registry.db"; }
+
   Path(const std::string &path = std::string());
 
   void prepend(const std::string &part);
@@ -46,9 +54,21 @@ public:
   const std::string &operator[](const size_t index) const;
 
 private:
+  static Path s_root;
+  friend UseRootPath;
+
   const std::string &at(const size_t) const;
 
   std::list<std::string> m_parts;
+};
+
+class UseRootPath {
+public:
+  UseRootPath(const std::string &);
+  ~UseRootPath();
+
+private:
+  Path m_backup;
 };
 
 #endif

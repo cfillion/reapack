@@ -29,12 +29,10 @@
 
 using namespace std;
 
-Transaction::Transaction(const Path &root)
-  : m_root(root), m_isCancelled(false)
+Transaction::Transaction()
+  : m_isCancelled(false)
 {
-  m_dbPath = m_root + "ReaPack";
-
-  m_registry = new Registry(m_dbPath + "registry.db");
+  m_registry = new Registry(Path::registry());
 
   m_downloadQueue.onDone([=](void *) {
     if(m_installQueue.empty())
@@ -42,8 +40,6 @@ Transaction::Transaction(const Path &root)
     else
       install();
   });
-
-  RecursiveCreateDirectory(m_dbPath.join().c_str(), 0);
 }
 
 Transaction::~Transaction()
@@ -71,7 +67,7 @@ void Transaction::synchronize(const Remote &remote)
 
 void Transaction::upgradeAll(Download *dl)
 {
-  const Path path = m_dbPath + ("remote_" + dl->name() + ".xml");
+  const Path path = Path::cache("remote_" + dl->name() + ".xml");
 
   if(!saveFile(dl, path))
     return;
@@ -145,13 +141,6 @@ void Transaction::install()
 
       const set<Path> &removedFiles = task->removedFiles();
       m_removals.insert(removedFiles.begin(), removedFiles.end());
-
-      if(!m_registry->addToREAPER(ver, m_root)) {
-        addError(
-          "Cannot register the package in REAPER. "
-          "Are you using REAPER v5.12 or more recent?", ver->fullName()
-        );
-      }
     });
 
     addTask(task);
@@ -245,15 +234,10 @@ void Transaction::addError(const string &message, const string &title)
   m_errors.push_back({message, title});
 }
 
-Path Transaction::prefixPath(const Path &input) const
-{
-  return m_root + input;
-}
-
 bool Transaction::allFilesExists(const set<Path> &list) const
 {
   for(const Path &path : list) {
-    if(!file_exists(prefixPath(path).join().c_str()))
+    if(!file_exists(Path::prefix(path).join().c_str()))
       return false;
   }
 

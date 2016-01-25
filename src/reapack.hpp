@@ -67,7 +67,7 @@ private:
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;
-  Path m_resourcePath;
+  UseRootPath *m_useRootPath;
 };
 
 #endif

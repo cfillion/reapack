@@ -46,7 +46,7 @@ public:
 
   typedef std::vector<const Error> ErrorList;
 
-  Transaction(const Path &root);
+  Transaction();
   ~Transaction();
 
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
@@ -79,11 +79,8 @@ private:
   bool allFilesExists(const std::set<Path> &) const;
   void addTask(Task *);
 
-  Registry *m_registry;
-
-  Path m_root;
-  Path m_dbPath;
   bool m_isCancelled;
+  Registry *m_registry;
 
   std::set<Remote> m_remotes;
   std::vector<RemoteIndex *> m_remoteIndexes;

@@ -32,10 +32,12 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : m_transaction(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
-  m_resourcePath.append(GetResourcePath());
+  m_useRootPath = new UseRootPath(GetResourcePath());
+
+  RecursiveCreateDirectory(Path::cacheDir().join().c_str(), 0);
 
   m_config = new Config;
-  m_config->read(m_resourcePath + "reapack.ini");
+  m_config->read(Path::configFile());
 
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
@@ -45,8 +47,6 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
 
 ReaPack::~ReaPack()
 {
-  // for some reasons ~ReaPack() is called many times during startup
-  // and two times during shutdown on osx... cleanup() is called only once
   m_config->write();
   delete m_config;
 
@@ -54,6 +54,8 @@ ReaPack::~ReaPack()
   Dialog::Destroy(m_manager);
 
   Download::Cleanup();
+
+  delete m_useRootPath;
 }
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)
@@ -238,7 +240,7 @@ Transaction *ReaPack::createTransaction()
   }
 
   try {
-    m_transaction = new Transaction(m_resourcePath);
+    m_transaction = new Transaction;
   }
   catch(const reapack_error &e) {
     ShowMessageBox(e.what(), "ReaPack – Fatal Error", 0);

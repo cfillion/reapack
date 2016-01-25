@@ -163,3 +163,28 @@ TEST_CASE("remove last component of path", M) {
   REQUIRE(a.size() == 1);
   REQUIRE(a[0] == "a");
 }
+
+TEST_CASE("path collection", M) {
+  const Path path("world");
+
+  REQUIRE(Path::prefix(path) == Path("world"));
+
+  {
+    UseRootPath root("hello");
+    (void)root;
+
+    REQUIRE(Path::prefix(path) == Path("hello/world"));
+  }
+
+  REQUIRE(Path::prefix(path) == Path("world"));
+}
+
+TEST_CASE("standard paths", M) {
+  UseRootPath root("root");
+  (void)root;
+
+  REQUIRE(Path::configFile() == Path("root/reapack.ini"));
+  REQUIRE(Path::cacheDir() == Path("root/ReaPack"));
+  REQUIRE(Path::cache("test") == Path("root/ReaPack/test"));
+  REQUIRE(Path::registry() == Path("root/ReaPack/registry.db"));
+}

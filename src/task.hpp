@@ -44,9 +44,9 @@ public:
   void rollback();
 
 protected:
-  bool renameFile(const Path &, const Path &) const;
-  bool removeFile(const Path &) const;
-  bool removeFileRecursive(const Path &) const;
+  static bool RenameFile(const Path &, const Path &);
+  static bool RemoveFile(const Path &);
+  static bool RemoveFileRecursive(const Path &);
 
   Transaction *transaction() const { return m_transaction; }
 
