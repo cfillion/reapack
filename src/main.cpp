@@ -19,12 +19,50 @@
 #include "menu.hpp"
 #include "reapack.hpp"
 
+#include <vector>
+
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
 
 using namespace std;
 
 static ReaPack *reapack = nullptr;
+
+#define REQUIRED_API(name) {(void **)&name, #name, true}
+#define OPTIONAL_API(name) {(void **)&name, #name, false}
+
+static bool loadAPI(void *(*getFunc)(const char *))
+{
+  struct ApiFunc { void **ptr; const char *name; bool required; };
+
+  const vector<ApiFunc> funcs = {
+
+    REQUIRED_API(AddExtensionsMainMenu),
+    REQUIRED_API(file_exists),
+    REQUIRED_API(GetMainHwnd),
+    REQUIRED_API(GetResourcePath),
+    REQUIRED_API(GetUserFileNameForRead),    // v3.21
+    REQUIRED_API(NamedCommandLookup),        // v3.1415
+    REQUIRED_API(plugin_register),
+    REQUIRED_API(RecursiveCreateDirectory),  // v4.60
+    REQUIRED_API(ReverseNamedCommandLookup), // v4.7
+    REQUIRED_API(ShowMessageBox),
+
+    OPTIONAL_API(AddRemoveReaScript),        // v5.12
+  };
+
+  bool ok = true;
+
+  for(const ApiFunc &func : funcs) {
+    *func.ptr = getFunc(func.name);
+    ok = ok && (*func.ptr || !func.required);
+  }
+
+  return ok;
+}
+
+#undef REQUIRED_API
+#undef OPTIONAL_API
 
 static bool commandHook(const int id, const int flag)
 {
@@ -52,14 +90,18 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
   if(!rec) {
+    plugin_register("-hookcommand", (void *)commandHook);
+    plugin_register("-hookcustommenu", (void *)menuHook);
+
     delete reapack;
+
     return 0;
   }
 
   if(rec->caller_version != REAPER_PLUGIN_VERSION || !rec->GetFunc)
     return 0;
 
-  if(REAPERAPI_LoadAPI(rec->GetFunc) > 0)
+  if(!loadAPI(rec->GetFunc))
     return 0;
 
   reapack = new ReaPack(instance);
@@ -73,8 +115,8 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack->setupAction("REAPACK_MANAGE",
     bind(&ReaPack::manageRemotes, reapack));
 
-  rec->Register("hookcommand", (void *)commandHook);
-  rec->Register("hookcustommenu", (void *)menuHook);
+  plugin_register("hookcommand", (void *)commandHook);
+  plugin_register("hookcustommenu", (void *)menuHook);
 
   AddExtensionsMainMenu();
 
