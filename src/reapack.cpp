@@ -198,15 +198,14 @@ void ReaPack::importRemote()
 
       return;
     }
-    else if(hitchhikeTransaction()) {
+    else {
       enable(existing);
+
       m_manager->refresh();
       m_config->write();
 
-      m_transaction->synchronize(remote);
+      return;
     }
-
-    return;
   }
 
   if(!hitchhikeTransaction())
@@ -285,7 +284,6 @@ bool ReaPack::hitchhikeTransaction()
   else
     return createTransaction() != nullptr;
 }
-
 
 void ReaPack::runTasks()
 {
