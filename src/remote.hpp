@@ -78,8 +78,8 @@ public:
   size_t size() const { return m_remotes.size(); }
   bool hasName(const std::string &name) const { return m_map.count(name) > 0; }
 
-  auto begin() const { return m_remotes.begin(); }
-  auto end() const { return m_remotes.end(); }
+  std::vector<Remote>::const_iterator begin() const { return m_remotes.begin(); }
+  std::vector<Remote>::const_iterator end() const { return m_remotes.end(); }
 
 private:
   std::vector<Remote> m_remotes;
