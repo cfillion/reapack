@@ -110,14 +110,6 @@ void ReaPack::synchronizeAll()
     t->synchronize(remote);
 }
 
-void ReaPack::synchronize(const Remote &remote)
-{
-  hitchhikeTransaction();
-
-  // hitchhike currently running transactions
-  m_transaction->synchronize(remote);
-}
-
 void ReaPack::enable(Remote remote)
 {
   remote.setEnabled(true);
@@ -189,7 +181,16 @@ void ReaPack::importRemote()
 
       return;
     }
-    else if(existing.url() == remote.url()) {
+    else if(existing.url() != remote.url()) {
+      const int button = ShowMessageBox(
+        "This remote is already configured.\r\n"
+        "Do you want to overwrite the current remote?"
+        , title, MB_YESNO);
+
+      if(button != IDYES)
+        return;
+    }
+    else if(existing.isEnabled()) {
       ShowMessageBox(
         "This remote is already configured.\r\n"
         "Nothing to do!"
@@ -198,16 +199,10 @@ void ReaPack::importRemote()
       return;
     }
 
-    const int button = ShowMessageBox(
-      "This remote is already configured.\r\n"
-      "Do you want to overwrite the current remote?"
-      , title, MB_YESNO);
-
-    if(button != IDYES)
-      return;
   }
 
-  synchronize(remote);
+  if(hitchhikeTransaction())
+    m_transaction->synchronize(remote);
 
   if(!m_transaction)
     return;

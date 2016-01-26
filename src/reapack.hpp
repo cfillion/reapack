@@ -46,7 +46,6 @@ public:
   bool execActions(const int id, const int);
 
   void synchronizeAll();
-  void synchronize(const Remote &);
   void enable(Remote);
   void disable(Remote);
   void uninstall(const Remote &);
