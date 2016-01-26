@@ -31,6 +31,7 @@ public:
   void read(const Path &);
   void write();
 
+  bool isFirstRun() const { return m_isFirstRun; }
   RemoteList *remotes() { return &m_remotes; }
 
 private:
@@ -42,9 +43,11 @@ private:
   void cleanupArray(const char *, const std::string &,
     const size_t begin, const size_t end) const;
 
-  void fillDefaults();
+  void migrate();
 
   std::string m_path;
+  bool m_isFirstRun;
+  size_t m_version;
 
   void readRemotes();
   void restoreSelfRemote();

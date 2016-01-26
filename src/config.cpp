@@ -30,6 +30,9 @@
 
 using namespace std;
 
+static const char *GLOBAL_GRP = "reapack";
+static const char *VERSION_KEY = "version";
+
 static const char *SIZE_KEY = "size";
 
 static const char *REMOTES_GRP = "remotes";
@@ -43,39 +46,58 @@ static string ArrayKey(const string &key, const size_t i)
 static const int BUFFER_SIZE = 2083;
 
 Config::Config()
-  : m_remotesIniSize(0)
+  : m_isFirstRun(false), m_version(0), m_remotesIniSize(0)
 {
 }
 
-void Config::fillDefaults()
+void Config::migrate()
 {
-  m_remotes.add({"ReaTeam Scripts",
-    "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml", false});
+  const size_t version = getUInt(GLOBAL_GRP, VERSION_KEY);
+
+  switch(version) {
+  case 0:
+    m_isFirstRun = true;
+    restoreSelfRemote();
+
+    m_remotes.add({"ReaTeam Scripts",
+      "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml", false});
+
+    m_remotes.add({"MPL Scripts",
+      "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml", false});
+
+    m_remotes.add({"X-Raym Scripts",
+      "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml", false});
+    break;
+  default:
+    // configuration is up-to-date, don't write anything now
+    m_version = version;
+    return;
+  };
+
+  m_version = 1;
+  write();
 }
 
 void Config::read(const Path &path)
 {
   m_path = path.join();
 
-  if(!file_exists(m_path.c_str())) {
-    fillDefaults();
-    write();
-  }
-  else
-    readRemotes();
+  migrate();
 
+  readRemotes();
   restoreSelfRemote();
 }
 
 void Config::write()
 {
+  setUInt(GLOBAL_GRP, VERSION_KEY, m_version);
   writeRemotes();
 }
 
 void Config::restoreSelfRemote()
 {
-  const char *name = "ReaPack";
-  const char *url = "https://github.com/cfillion/reapack/raw/master/index.xml";
+  const string name = "ReaPack";
+  const string url = "https://github.com/cfillion/reapack/raw/master/index.xml";
 
   Remote remote = m_remotes.get(name);
   remote.setName(name);
