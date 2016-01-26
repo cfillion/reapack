@@ -157,7 +157,7 @@ TEST_CASE("get main file", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE(reg.getMainFile({}).empty());
+  REQUIRE((reg.getMainFile({})).empty());
 
   Source *main = new Source(Source::GenericPlatform, {}, "url", ver);
   ver->addSource(main);
