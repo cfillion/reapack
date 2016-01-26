@@ -161,10 +161,8 @@ void Transaction::uninstall(const Remote &remote)
 {
   const vector<Registry::Entry> &entries = m_registry->queryAll(remote);
 
-  if(entries.empty()) {
-    cancel();
+  if(entries.empty())
     return;
-  }
 
   vector<Path> allFiles;
 
