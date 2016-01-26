@@ -29,7 +29,7 @@
 using namespace std;
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : m_transaction(nullptr), m_instance(instance)
+  : syncAction(), m_transaction(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
