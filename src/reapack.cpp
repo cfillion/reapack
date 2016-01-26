@@ -35,6 +35,8 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
 
+  Download::Init();
+
   RecursiveCreateDirectory(Path::cacheDir().join().c_str(), 0);
 
   m_config = new Config;
@@ -43,7 +45,8 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
 
-  Download::Init();
+  if(m_config->isFirstRun())
+    manageRemotes();
 }
 
 ReaPack::~ReaPack()
