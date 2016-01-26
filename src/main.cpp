@@ -106,14 +106,14 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   reapack = new ReaPack(instance);
 
-  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize Packages",
+  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
     &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
 
-  reapack->setupAction("REAPACK_IMPORT",
-    bind(&ReaPack::importRemote, reapack));
+  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import remote repository...",
+    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
 
-  reapack->setupAction("REAPACK_MANAGE",
-    bind(&ReaPack::manageRemotes, reapack));
+  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage remotes...",
+    &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
 
   plugin_register("hookcommand", (void *)commandHook);
   plugin_register("hookcustommenu", (void *)menuHook);

@@ -36,6 +36,8 @@ class Transaction;
 class ReaPack {
 public:
   gaccel_register_t syncAction;
+  gaccel_register_t importAction;
+  gaccel_register_t configAction;
 
   ReaPack(REAPER_PLUGIN_HINSTANCE);
   ~ReaPack();
