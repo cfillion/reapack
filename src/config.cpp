@@ -49,6 +49,8 @@ Config::Config()
 
 void Config::fillDefaults()
 {
+  m_remotes.add({"ReaTeam Scripts",
+    "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml", false});
 }
 
 void Config::read(const Path &path)
