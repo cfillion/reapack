@@ -43,6 +43,8 @@ public:
   std::string basename() const;
   std::string dirname() const;
   std::string join(const char sep = 0) const;
+  std::string first() const;
+  std::string last() const;
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;

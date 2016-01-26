@@ -124,6 +124,22 @@ string Path::join(const char sep) const
   return path;
 }
 
+string Path::first() const
+{
+  if(empty())
+    return {};
+
+  return m_parts.front();
+}
+
+string Path::last() const
+{
+  if(empty())
+    return {};
+
+  return m_parts.back();
+}
+
 bool Path::operator==(const Path &o) const
 {
   return m_parts == o.m_parts;

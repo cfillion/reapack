@@ -23,6 +23,7 @@
 #include "remote.hpp"
 #include "task.hpp"
 
+#include <boost/algorithm/string.hpp>
 #include <fstream>
 
 #include <reaper_plugin_functions.h>
@@ -308,15 +309,24 @@ void Transaction::registerScriptsInHost()
     return;
   }
 
+  enum Section { MainSection = 0, MidiEditorSection = 32060 };
+
   while(!m_scriptRegs.empty()) {
     const HostRegistration &reg = m_scriptRegs.front();
+    const Registry::Entry &entry = reg.entry;
     const std::string &path = Path::prefixRoot(reg.file).join();
     const bool isLast = m_scriptRegs.size() == 1;
+    Section section = MainSection;
 
-    if(!AddRemoveReaScript(reg.add, 0, path.c_str(), isLast) && reg.add)
+    string category = Path(entry.category).first();
+    boost::algorithm::to_lower(category);
+
+    if(category == "midi editor")
+      section = MidiEditorSection;
+
+    if(!AddRemoveReaScript(reg.add, section, path.c_str(), isLast) && reg.add)
       addError("Script could not be registered in REAPER.", reg.file);
 
     m_scriptRegs.pop();
   }
 }
-

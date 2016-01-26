@@ -184,3 +184,12 @@ TEST_CASE("path generation utilities", M) {
 
   REQUIRE(Path::prefixRoot(path) == Path("world"));
 }
+
+TEST_CASE("first and last path component", M) {
+  REQUIRE(Path().first().empty());
+  REQUIRE(Path().last().empty());
+
+  const Path path("hello/world/chunky/bacon");
+  REQUIRE(path.first() == "hello");
+  REQUIRE(path.last() == "bacon");
+}
