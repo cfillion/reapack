@@ -27,7 +27,7 @@ Download::Queue Download::s_finished;
 WDL_Mutex Download::s_mutex;
 size_t Download::s_running = 0;
 
-static const int DOWNLOAD_TIMEOUT = 5;
+static const int DOWNLOAD_TIMEOUT = 15;
 static const int CONCURRENT_DOWNLOADS = 3;
 
 void Download::Init()
