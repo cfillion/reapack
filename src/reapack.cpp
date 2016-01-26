@@ -198,14 +198,21 @@ void ReaPack::importRemote()
 
       return;
     }
+    else if(hitchhikeTransaction()) {
+      enable(existing);
+      m_manager->refresh();
+      m_config->write();
 
+      m_transaction->synchronize(remote);
+    }
+
+    return;
   }
 
-  if(hitchhikeTransaction())
-    m_transaction->synchronize(remote);
-
-  if(!m_transaction)
+  if(!hitchhikeTransaction())
     return;
+
+  m_transaction->synchronize(remote);
 
   m_transaction->onFinish([=] {
     if(m_transaction->isCancelled())
