@@ -23,6 +23,7 @@
 
 #include "path.hpp"
 #include "database.hpp"
+#include "package.hpp"
 
 class Package;
 class Path;
@@ -34,22 +35,31 @@ public:
   Registry(const Path &path = Path());
 
   enum Status {
-    Unknown,
     Uninstalled,
     UpdateAvailable,
     UpToDate,
   };
 
   struct Entry {
-    int id; // internal use
-    Status status;
+    int id;
+    std::string remote;
+    std::string category;
+    std::string package;
+    Package::Type type;
     uint64_t version;
   };
 
-  Entry query(Package *) const;
-  std::vector<Entry> queryAll(const Remote &) const;
+  struct QueryResult {
+    Status status;
+    Entry entry;
+  };
+
+  QueryResult query(Package *) const;
+  Entry getEntry(Package *) const;
+  std::vector<Entry> getEntries(const Remote &) const;
   std::set<Path> getFiles(const Entry &) const;
-  void push(Version *, std::vector<Path> *conflicts = nullptr);
+  std::string getMainFile(const Entry &) const;
+  Entry push(Version *, std::vector<Path> *conflicts = nullptr);
   void forget(const Entry &);
   void commit();
 
@@ -58,11 +68,14 @@ private:
 
   Database m_db;
   Statement *m_insertEntry;
+  Statement *m_updateEntry;
   Statement *m_findEntry;
   Statement *m_allEntries;
   Statement *m_forgetEntry;
+  Statement *m_setMainFile;
 
   Statement *m_getFiles;
+  Statement *m_getMainFile;
   Statement *m_insertFile;
   Statement *m_clearFiles;
   Statement *m_forgetFiles;

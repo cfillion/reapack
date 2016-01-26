@@ -37,7 +37,7 @@ public:
 
   Statement *prepare(const char *sql);
   void exec(const char *sql);
-  uint64_t lastInsertId() const;
+  int lastInsertId() const;
   int version() const;
   int errorCode() const;
   void begin();

@@ -15,7 +15,7 @@ static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
   RemoteIndex ri("Remote Name"); \
-  Category cat("Hello", &ri); \
+  Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version *ver = new Version("1.0", &pkg); \
   Source *src = new Source(Source::GenericPlatform, "file", "url", ver); \
@@ -27,20 +27,28 @@ TEST_CASE("query uninstalled package", M) {
 
   Registry reg;
 
-  const Registry::Entry res = reg.query(&pkg);
+  const auto &res = reg.query(&pkg);
   REQUIRE(res.status == Registry::Uninstalled);
-  REQUIRE(res.version == 0);
+  REQUIRE(res.entry.id == 0);
+  REQUIRE(res.entry.version == 0);
 }
 
 TEST_CASE("query up to date pacakge", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  reg.push(ver);
 
-  const Registry::Entry res = reg.query(&pkg);
-  REQUIRE(res.status == Registry::UpToDate);
-  REQUIRE(res.version == Version("1.0").code());
+  const Registry::Entry &entry = reg.push(ver);
+  REQUIRE(entry.id == 1);
+  REQUIRE(entry.remote == "Remote Name");
+  REQUIRE(entry.category == "Category Name");
+  REQUIRE(entry.package == "Hello");
+  REQUIRE(entry.type == Package::ScriptType);
+  REQUIRE(entry.version == Version("1.0").code());
+
+  const Registry::QueryResult &queryRes = reg.query(&pkg);
+  REQUIRE(queryRes.status == Registry::UpToDate);
+  REQUIRE(queryRes.entry.version == Version("1.0").code());
 }
 
 TEST_CASE("bump version", M) {
@@ -53,26 +61,27 @@ TEST_CASE("bump version", M) {
   reg.push(ver);
   pkg.addVersion(ver2);
 
-  const Registry::Entry res1 = reg.query(&pkg);
+  const Registry::QueryResult &res1 = reg.query(&pkg);
   REQUIRE(res1.status == Registry::UpdateAvailable);
-  REQUIRE(res1.version == Version("1.0").code());
+  REQUIRE(res1.entry.version == Version("1.0").code());
 
   reg.push(ver2);
-  const Registry::Entry res2 = reg.query(&pkg);
+  const Registry::QueryResult &res2 = reg.query(&pkg);
   REQUIRE(res2.status == Registry::UpToDate);
-  REQUIRE(res2.version == Version("2.0").code());
+  REQUIRE(res2.entry.version == Version("2.0").code());
+  
+  REQUIRE(res2.entry.id == res1.entry.id);
 }
 
 TEST_CASE("get file list", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE(reg.getFiles(reg.query(&pkg)).empty());
+  REQUIRE(reg.getFiles(reg.query(&pkg).entry).empty());
 
   reg.push(ver);
 
-  const Registry::Entry res = reg.query(&pkg);
-  const set<Path> files = reg.getFiles(res);
+  const set<Path> &files = reg.getFiles(reg.query(&pkg).entry);
 
   REQUIRE(files == ver->files());
 }
@@ -83,29 +92,28 @@ TEST_CASE("query all packages", M) {
   const Remote remote("Remote Name", "irrelevent_url");
 
   Registry reg;
-  REQUIRE(reg.queryAll(remote).empty());
+  REQUIRE(reg.getEntries(remote).empty());
 
   reg.push(ver);
 
-  const vector<Registry::Entry> entries = reg.queryAll(remote);
+  const vector<Registry::Entry> &entries = reg.getEntries(remote);
   REQUIRE(entries.size() == 1);
   REQUIRE(entries[0].id == 1);
-  REQUIRE(entries[0].status == Registry::Unknown);
-  REQUIRE(entries[0].version == ver->code());
+  REQUIRE(entries[0].remote == "Remote Name");
+  REQUIRE(entries[0].category == "Category Name");
+  REQUIRE(entries[0].package == "Hello");
+  REQUIRE(entries[0].type == Package::ScriptType);
 }
 
 TEST_CASE("forget registry entry", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  reg.push(ver);
+  reg.forget(reg.push(ver));
 
-  reg.forget(reg.query(&pkg));
-
-  const Registry::Entry afterForget = reg.query(&pkg);
-  REQUIRE(afterForget.id == 0);
+  const Registry::QueryResult &afterForget = reg.query(&pkg);
   REQUIRE(afterForget.status == Registry::Uninstalled);
-  REQUIRE(afterForget.version == 0);
+  REQUIRE(afterForget.entry.id == 0);
 }
 
 TEST_CASE("file conflicts", M) {
@@ -117,7 +125,7 @@ TEST_CASE("file conflicts", M) {
   }
 
   RemoteIndex ri("Remote Name");
-  Category cat("Hello", &ri);
+  Category cat("Category Name", &ri);
   Package pkg(Package::ScriptType, "Duplicate Package", &cat);
   Version *ver = new Version("1.0", &pkg);
   Source *src1 = new Source(Source::GenericPlatform, "file", "url", ver);
@@ -130,7 +138,7 @@ TEST_CASE("file conflicts", M) {
 
   try {
     reg.push(ver);
-    FAIL("duplicate was accepted");
+    FAIL("duplicate is accepted");
   }
   catch(const reapack_error &) {}
 
@@ -143,4 +151,17 @@ TEST_CASE("file conflicts", M) {
   REQUIRE(conflicts[0] == src1->targetPath());
 
   REQUIRE(reg.query(&pkg).status == Registry::Uninstalled);
+}
+
+TEST_CASE("get main file", M) {
+  MAKE_PACKAGE
+
+  Registry reg;
+  REQUIRE(reg.getMainFile({}).empty());
+
+  Source *main = new Source(Source::GenericPlatform, {}, "url", ver);
+  ver->addSource(main);
+
+  const Registry::Entry &entry = reg.push(ver);
+  REQUIRE(reg.getMainFile(entry) == main->targetPath().join('/'));
 }

@@ -90,11 +90,11 @@ void Transaction::upgradeAll(Download *dl)
 void Transaction::upgrade(Package *pkg)
 {
   Version *ver = pkg->lastVersion();
-  Registry::Entry entry = m_registry->query(pkg);
+  auto queryRes = m_registry->query(pkg);
 
   try {
     vector<Path> conflicts;
-    m_registry->push(ver, &conflicts);
+    queryRes.entry = m_registry->push(ver, &conflicts);
 
     if(!conflicts.empty()) {
       for(const Path &path : conflicts) {
@@ -111,36 +111,38 @@ void Transaction::upgrade(Package *pkg)
     return;
   }
 
-  if(entry.status == Registry::UpToDate) {
+  if(queryRes.status == Registry::UpToDate) {
     if(allFilesExists(ver->files()))
       return;
     else
-      entry.status = Registry::Uninstalled;
+      queryRes.status = Registry::Uninstalled;
   }
 
-  m_installQueue.push({ver, entry});
+  m_installQueue.push({ver, queryRes});
 }
 
 void Transaction::install()
 {
   while(!m_installQueue.empty()) {
-    const PackageEntry entry = m_installQueue.front();
+    const InstallTicket ticket = m_installQueue.front();
     m_installQueue.pop();
 
-    Version *ver = entry.first;
-    const Registry::Entry regEntry = entry.second;
-    const set<Path> &currentFiles = m_registry->getFiles(regEntry);
+    Version *ver = ticket.first;
+    const Registry::QueryResult queryRes = ticket.second;
+    const set<Path> &currentFiles = m_registry->getFiles(queryRes.entry);
 
     InstallTask *task = new InstallTask(ver, currentFiles, this);
 
     task->onCommit([=] {
-      if(regEntry.status == Registry::UpdateAvailable)
-        m_updates.push_back(entry);
+      if(queryRes.status == Registry::UpdateAvailable)
+        m_updates.push_back(ticket);
       else
-        m_new.push_back(entry);
+        m_new.push_back(ticket);
 
       const set<Path> &removedFiles = task->removedFiles();
       m_removals.insert(removedFiles.begin(), removedFiles.end());
+
+      registerInHost(true, queryRes.entry);
     });
 
     addTask(task);
@@ -149,17 +151,25 @@ void Transaction::install()
   runTasks();
 }
 
-void Transaction::registerAll(const Remote &)
+void Transaction::registerAll(const Remote &remote)
 {
+  const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
+
+  for(const auto &entry : entries)
+    registerInHost(true, entry);
 }
 
-void Transaction::unregisterAll(const Remote &)
+void Transaction::unregisterAll(const Remote &remote)
 {
+  const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
+
+  for(const auto &entry : entries)
+    registerInHost(false, entry);
 }
 
 void Transaction::uninstall(const Remote &remote)
 {
-  const vector<Registry::Entry> &entries = m_registry->queryAll(remote);
+  const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
 
   if(entries.empty())
     return;
@@ -169,6 +179,8 @@ void Transaction::uninstall(const Remote &remote)
   for(const auto &entry : entries) {
     const set<Path> &files = m_registry->getFiles(entry);
     allFiles.insert(allFiles.end(), files.begin(), files.end());
+
+    registerInHost(false, entry);
 
     // forget the package even if some files cannot be removed
     m_registry->forget(entry);
@@ -229,6 +241,8 @@ void Transaction::finish()
       task->commit();
 
     m_registry->commit();
+
+    registerScriptsInHost();
   }
 
   m_onFinish();
@@ -266,3 +280,37 @@ void Transaction::runTasks()
   if(m_downloadQueue.idle())
     finish();
 }
+
+void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
+{
+  // don't actually do anything until commit()
+
+  switch(entry.type) {
+  case Package::ScriptType:
+    m_scriptRegs.push({add, entry, m_registry->getMainFile(entry)});
+    break;
+  default:
+    break;
+  }
+}
+
+void Transaction::registerScriptsInHost()
+{
+  if(!AddRemoveReaScript) {
+    // do nothing if REAPER < v5.12
+    m_scriptRegs = {};
+    return;
+  }
+
+  while(!m_scriptRegs.empty()) {
+    const HostRegistration &reg = m_scriptRegs.front();
+    const std::string &path = Path::prefixRoot(reg.file).join();
+    const bool isLast = m_scriptRegs.size() == 1;
+
+    if(!AddRemoveReaScript(reg.add, 0, path.c_str(), isLast) && reg.add)
+      addError("Script could not be registered in REAPER.", reg.file);
+
+    m_scriptRegs.pop();
+  }
+}
+

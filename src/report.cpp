@@ -82,7 +82,7 @@ void Report::printNewPackages()
 {
   printHeader("New packages");
 
-  for(const Transaction::PackageEntry &entry : m_transaction->newPackages()) {
+  for(const Transaction::InstallTicket &entry : m_transaction->newPackages()) {
     Version *ver = entry.first;
     m_stream << NL << ver->fullName() << NL;
   }
@@ -92,13 +92,13 @@ void Report::printUpdates()
 {
   printHeader("Updates");
 
-  for(const Transaction::PackageEntry &entry : m_transaction->updates()) {
+  for(const Transaction::InstallTicket &entry : m_transaction->updates()) {
     Package *pkg = entry.first->package();
-    const Registry::Entry &regEntry = entry.second;
+    const auto &queryRes = entry.second;
     const VersionSet &versions = pkg->versions();
 
     for(Version *ver : versions | boost::adaptors::reversed) {
-      if(ver->code() <= regEntry.version)
+      if(ver->code() <= queryRes.entry.version)
         break;
 
       m_stream << NL << ver->fullName() << NL;

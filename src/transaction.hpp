@@ -36,8 +36,8 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
-  typedef std::pair<Version *, const Registry::Entry> PackageEntry;
-  typedef std::vector<PackageEntry> PackageEntryList;
+  typedef std::pair<Version *, const Registry::QueryResult> InstallTicket;
+  typedef std::vector<InstallTicket> InstallTicketList;
 
   struct Error {
     std::string message;
@@ -63,14 +63,13 @@ public:
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
   size_t taskCount() const { return m_tasks.size(); }
 
-  const PackageEntryList &newPackages() const { return m_new; }
-  const PackageEntryList &updates() const { return m_updates; }
+  const InstallTicketList &newPackages() const { return m_new; }
+  const InstallTicketList &updates() const { return m_updates; }
   const std::set<Path> &removals() const { return m_removals; }
   const ErrorList &errors() const { return m_errors; }
 
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
-  Path prefixPath(const Path &) const;
 
 private:
   void install();
@@ -81,18 +80,24 @@ private:
   bool allFilesExists(const std::set<Path> &) const;
   void addTask(Task *);
 
+  void registerInHost(bool add, const Registry::Entry &);
+  void registerScriptsInHost();
+
   bool m_isCancelled;
   Registry *m_registry;
 
   std::set<Remote> m_remotes;
   std::vector<RemoteIndex *> m_remoteIndexes;
   DownloadQueue m_downloadQueue;
-  std::queue<PackageEntry> m_installQueue;
+  std::queue<InstallTicket> m_installQueue;
   std::vector<Task *> m_tasks;
   std::queue<Task *> m_taskQueue;
 
-  PackageEntryList m_new;
-  PackageEntryList m_updates;
+  struct HostRegistration { bool add; Registry::Entry entry; std::string file; };
+  std::queue<HostRegistration> m_scriptRegs;
+
+  InstallTicketList m_new;
+  InstallTicketList m_updates;
   std::set<Path> m_removals;
   ErrorList m_errors;
 

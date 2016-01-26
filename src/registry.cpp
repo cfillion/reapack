@@ -23,7 +23,6 @@
 #include "path.hpp"
 #include "remote.hpp"
 
-#include <reaper_plugin_functions.h>
 #include <sqlite3.h>
 
 using namespace std;
@@ -35,21 +34,37 @@ Registry::Registry(const Path &path)
 
   // entry queries
   m_insertEntry = m_db.prepare(
-    "INSERT OR REPLACE INTO entries "
-    "VALUES(NULL, ?, ?, ?, ?);"
+    "INSERT INTO entries VALUES(NULL, ?, ?, ?, ?, ?, NULL);"
+  );
+
+  m_updateEntry = m_db.prepare(
+    "UPDATE entries SET type = ?, version = ? WHERE id = ?"
   );
 
   m_findEntry = m_db.prepare(
-    "SELECT id, version FROM entries "
+    "SELECT id, remote, category, package, type, version FROM entries "
     "WHERE remote = ? AND category = ? AND package = ? "
     "LIMIT 1"
   );
 
-  m_allEntries = m_db.prepare("SELECT id, version FROM entries WHERE remote = ?");
+  m_allEntries = m_db.prepare(
+    "SELECT id, remote, category, package, type "
+    "FROM entries WHERE remote = ?"
+  );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
+  m_setMainFile = m_db.prepare(
+    "UPDATE entries SET mainFile = ("
+    "  SELECT id FROM files WHERE path = ?"
+    ") WHERE id = ?"
+  );
 
   // file queries
   m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
+  m_getMainFile = m_db.prepare(
+    "SELECT path FROM files WHERE id = ("
+    "  SELECT mainFile FROM entries WHERE id = ? LIMIT 1"
+    ") LIMIT 1"
+  );
   m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?)");
   m_clearFiles = m_db.prepare(
     "DELETE FROM files WHERE entry = ("
@@ -81,7 +96,9 @@ void Registry::migrate()
       "  remote TEXT NOT NULL,"
       "  category TEXT NOT NULL,"
       "  package TEXT NOT NULL,"
+      "  type INTEGER NOT NULL,"
       "  version INTEGER NOT NULL,"
+      "  mainFile INTEGER,"
       "  UNIQUE(remote, category, package)"
       ");"
 
@@ -103,7 +120,7 @@ void Registry::migrate()
   m_db.commit();
 }
 
-void Registry::push(Version *ver, vector<Path> *conflicts)
+auto Registry::push(Version *ver, vector<Path> *conflicts) -> Entry
 {
   m_savepoint->exec();
   bool hasConflicts = false;
@@ -117,17 +134,29 @@ void Registry::push(Version *ver, vector<Path> *conflicts)
   m_clearFiles->bind(3, pkg->name());
   m_clearFiles->exec();
 
-  m_insertEntry->bind(1, ri->name());
-  m_insertEntry->bind(2, cat->name());
-  m_insertEntry->bind(3, pkg->name());
-  m_insertEntry->bind(4, ver->code());
-  m_insertEntry->exec();
+  int entryId = getEntry(ver->package()).id;
 
-  const uint64_t entryId = m_db.lastInsertId();
+  if(entryId) {
+    m_updateEntry->bind(1, pkg->type());
+    m_updateEntry->bind(2, ver->code());
+    m_updateEntry->bind(3, entryId);
+    m_updateEntry->exec();
+  }
+  else {
+    m_insertEntry->bind(1, ri->name());
+    m_insertEntry->bind(2, cat->name());
+    m_insertEntry->bind(3, pkg->name());
+    m_insertEntry->bind(4, pkg->type());
+    m_insertEntry->bind(5, ver->code());
+    m_insertEntry->exec();
+
+    entryId = m_db.lastInsertId();
+  }
 
   for(const Path &path : ver->files()) {
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
+
     try {
       m_insertFile->exec();
     }
@@ -143,15 +172,43 @@ void Registry::push(Version *ver, vector<Path> *conflicts)
     }
   }
 
-  if(hasConflicts)
+  if(ver->mainSource()) {
+    m_setMainFile->bind(1, ver->mainSource()->targetPath().join('/'));
+    m_setMainFile->bind(2, entryId);
+    m_setMainFile->exec();
+  }
+
+  if(hasConflicts) {
     m_restore->exec();
-  else
+    return {};
+  }
+  else {
     m_release->exec();
+    return {entryId, ri->name(), cat->name(),
+      pkg->name(), pkg->type(), ver->code()};
+  }
 }
 
-Registry::Entry Registry::query(Package *pkg) const
+auto Registry::query(Package *pkg) const -> QueryResult
+{
+  const Entry &entry = getEntry(pkg);
+
+  if(!entry.id)
+    return {};
+
+  const Status status =
+    entry.version == pkg->lastVersion()->code() ? UpToDate : UpdateAvailable;
+
+  return {status, entry};
+}
+
+auto Registry::getEntry(Package *pkg) const -> Entry
 {
   int id = 0;
+  string remote;
+  string category;
+  string package;
+  Package::Type type = Package::UnknownType;
   uint64_t version = 0;
 
   Category *cat = pkg->category();
@@ -162,44 +219,53 @@ Registry::Entry Registry::query(Package *pkg) const
   m_findEntry->bind(3, pkg->name());
 
   m_findEntry->exec([&] {
-    id = m_findEntry->intColumn(0);
-    version = m_findEntry->uint64Column(1);
+    int col = 0;
+
+    id = m_findEntry->intColumn(col++);
+    remote = m_findEntry->stringColumn(col++);
+    category = m_findEntry->stringColumn(col++);
+    package = m_findEntry->stringColumn(col++);
+    type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
+    version = m_findEntry->uint64Column(col++);
+
     return false;
   });
 
-  if(!id)
-    return {id, Uninstalled, 0};
-
-  Version *lastVer = pkg->lastVersion();
-
-  const Status status = version == lastVer->code() ? UpToDate : UpdateAvailable;
-  return {id, status, version};
+  return {id, remote, category, package, type, version};
 }
 
-vector<Registry::Entry> Registry::queryAll(const Remote &remote) const
+auto Registry::getEntries(const Remote &remote) const -> vector<Entry>
 {
   vector<Registry::Entry> list;
 
   m_allEntries->bind(1, remote.name());
   m_allEntries->exec([&] {
-    const int id = m_allEntries->intColumn(0);
-    const uint64_t version = m_allEntries->uint64Column(1);
+    int col = 0;
 
-    list.push_back({id, Unknown, version});
+    const int id = m_allEntries->intColumn(col++);
+    const string &remote = m_allEntries->stringColumn(col++);
+    const string &category = m_allEntries->stringColumn(col++);
+    const string &package = m_allEntries->stringColumn(col++);
+    const Package::Type type =
+      static_cast<Package::Type>(m_allEntries->intColumn(col++));
+    const uint64_t version = m_allEntries->uint64Column(col++);
+
+    list.push_back({id, remote, category, package, type, version});
+
     return true;
   });
 
   return list;
 }
 
-set<Path> Registry::getFiles(const Entry &qr) const
+set<Path> Registry::getFiles(const Entry &entry) const
 {
-  if(!qr.id) // skip processing for new packages
+  if(!entry.id) // skip processing for new packages
     return {};
 
   set<Path> list;
 
-  m_getFiles->bind(1, qr.id);
+  m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
     list.insert(m_getFiles->stringColumn(0));
     return true;
@@ -208,12 +274,28 @@ set<Path> Registry::getFiles(const Entry &qr) const
   return list;
 }
 
-void Registry::forget(const Entry &qr)
+string Registry::getMainFile(const Entry &entry) const
 {
-  m_forgetFiles->bind(1, qr.id);
+  if(!entry.id)
+    return {};
+
+  string mainFile;
+
+  m_getMainFile->bind(1, entry.id);
+  m_getMainFile->exec([&] {
+    mainFile = m_getMainFile->stringColumn(0);
+    return false;
+  });
+
+  return mainFile;
+}
+
+void Registry::forget(const Entry &entry)
+{
+  m_forgetFiles->bind(1, entry.id);
   m_forgetFiles->exec();
 
-  m_forgetEntry->bind(1, qr.id);
+  m_forgetEntry->bind(1, entry.id);
   m_forgetEntry->exec();
 }
 
