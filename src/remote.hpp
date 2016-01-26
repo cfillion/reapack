@@ -18,7 +18,6 @@
 #ifndef REAPACK_REMOTE_HPP
 #define REAPACK_REMOTE_HPP
 
-#include <boost/range/adaptor/map.hpp>
 #include <map>
 #include <string>
 #include <vector>
@@ -68,9 +67,6 @@ private:
 };
 
 class RemoteList {
-private:
-  std::map<std::string, Remote> m_remotes;
-
 public:
   void add(const Remote &);
   void remove(const Remote &remote) { remove(remote.name()); }
@@ -80,14 +76,14 @@ public:
 
   bool empty() const { return m_remotes.empty(); }
   size_t size() const { return m_remotes.size(); }
-  bool hasName(const std::string &name) const
-  { return m_remotes.count(name) > 0; }
+  bool hasName(const std::string &name) const { return m_map.count(name) > 0; }
 
-  auto begin() const -> decltype(boost::adaptors::values(m_remotes).begin())
-  { return boost::adaptors::values(m_remotes).begin(); }
+  auto begin() const { return m_remotes.begin(); }
+  auto end() const { return m_remotes.end(); }
 
-  auto end() const -> decltype(boost::adaptors::values(m_remotes).end())
-  { return boost::adaptors::values(m_remotes).end(); }
+private:
+  std::vector<Remote> m_remotes;
+  std::map<std::string, size_t> m_map;
 };
 
 #endif

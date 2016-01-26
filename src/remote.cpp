@@ -159,34 +159,48 @@ void RemoteList::add(const Remote &remote)
   if(!remote.isValid())
     return;
 
-  m_remotes[remote.name()] = remote;
+  size_t index = 0;
+  const auto it = m_map.find(remote.name());
+
+  if(it == m_map.end()) {
+    // insert remote
+    index = m_remotes.size();
+    m_remotes.push_back(remote);
+  }
+  else {
+    // replace remote
+    index = it->second;
+    m_remotes[index] = remote;
+  }
+
+  m_map[remote.name()] = index;
 }
 
 void RemoteList::remove(const string &name)
 {
-  const auto it = m_remotes.find(name);
+  const auto it = m_map.find(name);
 
-  if(it != m_remotes.end())
-    m_remotes.erase(it);
+  if(it != m_map.end()) {
+    m_remotes.erase(m_remotes.begin() + it->second);
+    m_map.erase(it);
+  }
 }
 
 Remote RemoteList::get(const string &name) const
 {
-  const auto it = m_remotes.find(name);
+  const auto it = m_map.find(name);
 
-  if(it == m_remotes.end())
+  if(it == m_map.end())
     return {};
   else
-    return it->second;
+    return m_remotes[it->second];
 }
 
 vector<Remote> RemoteList::getEnabled() const
 {
   vector<Remote> list;
 
-  for(const auto &pair : m_remotes) {
-    const Remote &remote = pair.second;
-
+  for(const Remote &remote : m_remotes) {
     if(remote.isEnabled())
       list.push_back(remote);
   }
