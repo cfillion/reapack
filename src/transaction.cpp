@@ -30,7 +30,7 @@
 using namespace std;
 
 Transaction::Transaction()
-  : m_isCancelled(false)
+  : m_isCancelled(false), m_enableReport(false)
 {
   m_registry = new Registry(Path::prefixCache("registry.db"));
 
@@ -53,7 +53,7 @@ Transaction::~Transaction()
   delete m_registry;
 }
 
-void Transaction::synchronize(const Remote &remote)
+void Transaction::synchronize(const Remote &remote, const bool isUserAction)
 {
   if(m_remotes.count(remote))
     return;
@@ -63,6 +63,10 @@ void Transaction::synchronize(const Remote &remote)
 
   m_downloadQueue.push(dl);
   m_remotes.insert(remote);
+
+  // show the report dialog even if no task are ran
+  if(isUserAction)
+    m_enableReport = true;
 }
 
 void Transaction::upgradeAll(Download *dl)
@@ -268,6 +272,8 @@ void Transaction::addTask(Task *task)
 {
   m_tasks.push_back(task);
   m_taskQueue.push(task);
+
+  m_enableReport = true;
 }
 
 void Transaction::runTasks()

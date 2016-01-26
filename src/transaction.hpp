@@ -52,7 +52,7 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
-  void synchronize(const Remote &);
+  void synchronize(const Remote &, const bool userAction = true);
   void uninstall(const Remote &);
   void registerAll(const Remote &);
   void unregisterAll(const Remote &);
@@ -60,6 +60,7 @@ public:
   void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
+  bool isReportEnabled() const { return m_enableReport; }
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
   size_t taskCount() const { return m_tasks.size(); }
 
@@ -84,6 +85,7 @@ private:
   void registerScriptsInHost();
 
   bool m_isCancelled;
+  bool m_enableReport;
   Registry *m_registry;
 
   std::set<Remote> m_remotes;

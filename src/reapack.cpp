@@ -127,7 +127,7 @@ void ReaPack::enable(Remote remote)
     return;
 
   m_transaction->registerAll(remote);
-  m_transaction->synchronize(remote);
+  m_transaction->synchronize(remote, false);
 }
 
 void ReaPack::disable(Remote remote)
@@ -251,7 +251,7 @@ Transaction *ReaPack::createTransaction()
   m_progress->setTransaction(m_transaction);
 
   m_transaction->onFinish([=] {
-    if(m_transaction->isCancelled())
+    if(m_transaction->isCancelled() || !m_transaction->isReportEnabled())
       return;
 
     m_progress->disable();
