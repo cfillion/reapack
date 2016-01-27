@@ -102,7 +102,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
-  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 1);
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
 
   curl_easy_setopt(curl, CURLOPT_HEADER, true);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
