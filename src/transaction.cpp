@@ -84,6 +84,7 @@ void Transaction::upgradeAll(Download *dl)
     m_remoteIndexes.push_back(ri);
   }
   catch(const reapack_error &e) {
+    // index file is invalid (load error)
     addError(e.what(), dl->url());
     return;
   }
@@ -97,7 +98,15 @@ void Transaction::upgrade(Package *pkg)
   Version *ver = pkg->lastVersion();
   auto queryRes = m_registry->query(pkg);
 
+  if(queryRes.status == Registry::UpToDate) {
+    if(allFilesExists(ver->files()))
+      return; // package really is installed, nothing to do!
+    else
+      queryRes.status = Registry::Uninstalled;
+  }
+
   try {
+    // register the new version and prevent file conflicts
     vector<Path> conflicts;
     queryRes.entry = m_registry->push(ver, &conflicts);
 
@@ -112,17 +121,13 @@ void Transaction::upgrade(Package *pkg)
     }
   }
   catch(const reapack_error &e) {
+    // handle database error from Registry::push
     addError(e.what(), ver->fullName());
     return;
   }
 
-  if(queryRes.status == Registry::UpToDate) {
-    if(allFilesExists(ver->files()))
-      return;
-    else
-      queryRes.status = Registry::Uninstalled;
-  }
 
+  // all good! queue for installation
   m_installQueue.push({ver, queryRes});
 }
 
