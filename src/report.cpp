@@ -84,7 +84,7 @@ void Report::printNewPackages()
 
   for(const Transaction::InstallTicket &entry : m_transaction->newPackages()) {
     Version *ver = entry.first;
-    m_stream << NL << ver->fullName() << NL;
+    m_stream << NL << ver->fullName();
   }
 }
 
