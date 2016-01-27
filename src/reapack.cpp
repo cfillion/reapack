@@ -256,10 +256,12 @@ Transaction *ReaPack::createTransaction()
   m_progress->setTransaction(m_transaction);
 
   m_transaction->onFinish([=] {
+    // hide the progress dialog
+    m_progress->setTransaction(nullptr);
+
     if(m_transaction->isCancelled() || !m_transaction->isReportEnabled())
       return;
 
-    m_progress->disable();
     m_manager->disable();
 
     if(m_transaction->taskCount() == 0 && m_transaction->errors().empty())
@@ -267,13 +269,10 @@ Transaction *ReaPack::createTransaction()
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
 
-    m_progress->enable();
     m_manager->enable();
   });
 
   m_transaction->onDestroy([=] {
-    m_progress->setTransaction(nullptr);
-
     delete m_transaction;
     m_transaction = nullptr;
   });
