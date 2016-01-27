@@ -97,7 +97,9 @@ DWORD WINAPI Download::Worker(void *ptr)
   CURL *curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "ReaPack/1.0 (REAPER)");
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, DOWNLOAD_TIMEOUT);
+  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
+  curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 1);
