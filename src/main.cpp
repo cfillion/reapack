@@ -39,6 +39,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
 
     REQUIRED_API(AddExtensionsMainMenu),
     REQUIRED_API(file_exists),
+    REQUIRED_API(GetAppVersion),
     REQUIRED_API(GetMainHwnd),
     REQUIRED_API(GetResourcePath),
     REQUIRED_API(GetUserFileNameForRead),    // v3.21

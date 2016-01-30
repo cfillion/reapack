@@ -94,9 +94,19 @@ DWORD WINAPI Download::Worker(void *ptr)
 
   string contents;
 
+  char userAgent[64] = {};
+#ifndef _WIN32
+  snprintf(userAgent, sizeof(userAgent),
+#else
+  // _snwprintf doesn't append a null byte if len >= count
+  // see https://msdn.microsoft.com/en-us/library/2ts7cx93.aspx
+  _snprintf(userAgent, sizeof(userAgent) - 1,
+#endif
+    "ReaPack/%s (REAPER v%s)", "1.0", GetAppVersion());
+
   CURL *curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "ReaPack/1.0 (REAPER)");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent);
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
   curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
