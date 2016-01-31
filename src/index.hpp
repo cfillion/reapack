@@ -24,14 +24,16 @@
 
 #include "package.hpp"
 
-class TiXmlElement;
-
 class Category;
 typedef std::vector<Category *> CategoryList;
 
+class Path;
+class TiXmlElement;
+
 class RemoteIndex {
 public:
-  static RemoteIndex *load(const std::string &name, const char *url);
+  static Path pathFor(const std::string &name);
+  static RemoteIndex *load(const std::string &name);
 
   RemoteIndex(const std::string &name);
   ~RemoteIndex();

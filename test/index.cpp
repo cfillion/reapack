@@ -13,8 +13,10 @@ using namespace std;
 static const char *M = "[index]";
 
 TEST_CASE("file not found", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "404.xml");
+    RemoteIndex *ri = RemoteIndex::load("404");
     RIPTR(ri);
     FAIL();
   }
@@ -23,9 +25,11 @@ TEST_CASE("file not found", M) {
   }
 }
 
-TEST_CASE("broken xml", M) {
+TEST_CASE("broken", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "broken.xml");
+    RemoteIndex *ri = RemoteIndex::load("broken");
     RIPTR(ri);
     FAIL();
   }
@@ -35,8 +39,10 @@ TEST_CASE("broken xml", M) {
 }
 
 TEST_CASE("wrong root tag name", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_root.xml");
+    RemoteIndex *ri = RemoteIndex::load("wrong_root");
     RIPTR(ri);
     FAIL();
   }
@@ -46,8 +52,10 @@ TEST_CASE("wrong root tag name", M) {
 }
 
 TEST_CASE("invalid version", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "invalid_version.xml");
+    RemoteIndex *ri = RemoteIndex::load("invalid_version");
     RIPTR(ri);
     FAIL();
   }
@@ -57,8 +65,10 @@ TEST_CASE("invalid version", M) {
 }
 
 TEST_CASE("future version", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "future_version.xml");
+    RemoteIndex *ri = RemoteIndex::load("future_version");
     RIPTR(ri);
     FAIL();
   }
@@ -68,8 +78,12 @@ TEST_CASE("future version", M) {
 }
 
 TEST_CASE("unicode index path", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "Новая папка.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("Новая папка");
   RIPTR(ri);
+
+  REQUIRE(ri->name() == "Новая папка");
 }
 
 TEST_CASE("empty index name", M) {

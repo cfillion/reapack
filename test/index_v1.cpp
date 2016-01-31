@@ -14,8 +14,10 @@ using namespace std;
 static const char *M = "[reapack_v1]";
 
 TEST_CASE("unnamed category", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "unnamed_category.xml");
+    RemoteIndex *ri = RemoteIndex::load("unnamed_category");
     RIPTR(ri);
     FAIL();
   }
@@ -25,22 +27,28 @@ TEST_CASE("unnamed category", M) {
 }
 
 TEST_CASE("invalid category tag", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_category_tag.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("wrong_category_tag");
   RIPTR(ri);
 
   REQUIRE(ri->categories().empty());
 }
 
 TEST_CASE("invalid package tag", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_package_tag.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("wrong_package_tag");
   RIPTR(ri);
   REQUIRE(ri->categories().empty());
 
 }
 
 TEST_CASE("null package name", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "unnamed_package.xml");
+    RemoteIndex *ri = RemoteIndex::load("unnamed_package");
     RIPTR(ri);
     FAIL();
   }
@@ -50,8 +58,10 @@ TEST_CASE("null package name", M) {
 }
 
 TEST_CASE("null package type", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_type.xml");
+    RemoteIndex *ri = RemoteIndex::load("missing_type");
     RIPTR(ri);
   }
   catch(const reapack_error &) {
@@ -60,15 +70,19 @@ TEST_CASE("null package type", M) {
 }
 
 TEST_CASE("invalid version tag", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "wrong_version_tag.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("wrong_version_tag");
   RIPTR(ri);
 
   REQUIRE(ri->categories().empty());
 }
 
 TEST_CASE("null package version", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_version.xml");
+    RemoteIndex *ri = RemoteIndex::load("missing_version");
     RIPTR(ri);
     FAIL();
   }
@@ -78,8 +92,10 @@ TEST_CASE("null package version", M) {
 }
 
 TEST_CASE("null source url", M) {
+  UseRootPath root(RIPATH);
+
   try {
-    RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_source_url.xml");
+    RemoteIndex *ri = RemoteIndex::load("missing_source_url");
     RIPTR(ri);
     FAIL();
   }
@@ -89,7 +105,9 @@ TEST_CASE("null source url", M) {
 }
 
 TEST_CASE("null source file", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_source_file.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("missing_source_file");
   RIPTR(ri);
 
   Package *pkg = ri->category(0)->package(0);
@@ -97,7 +115,9 @@ TEST_CASE("null source file", M) {
 }
 
 TEST_CASE("default platform", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "missing_platform.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("missing_platform");
   RIPTR(ri);
 
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
@@ -105,7 +125,9 @@ TEST_CASE("default platform", M) {
 }
 
 TEST_CASE("version changelog", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "changelog.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("changelog");
   RIPTR(ri);
 
   CHECK_FALSE(ri->categories().empty());
@@ -117,7 +139,9 @@ TEST_CASE("version changelog", M) {
 }
 
 TEST_CASE("full index", M) {
-  RemoteIndex *ri = RemoteIndex::load("a", RIPATH "valid_index.xml");
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("valid_index");
   RIPTR(ri);
 
   REQUIRE(ri->categories().size() == 1);

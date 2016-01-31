@@ -72,15 +72,13 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
 
 void Transaction::upgradeAll(Download *dl)
 {
-  const Path path = Path::prefixCache("remote_" + dl->name() + ".xml");
-
-  if(!saveFile(dl, path))
+  if(!saveFile(dl, RemoteIndex::pathFor(dl->name())))
     return;
 
   RemoteIndex *ri;
 
   try {
-    ri = RemoteIndex::load(dl->name(), path.join().c_str());
+    ri = RemoteIndex::load(dl->name());
     m_remoteIndexes.push_back(ri);
   }
   catch(const reapack_error &e) {

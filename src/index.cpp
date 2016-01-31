@@ -19,6 +19,7 @@
 
 #include "encoding.hpp"
 #include "errors.hpp"
+#include "path.hpp"
 
 #include <WDL/tinyxml/tinyxml.h>
 
@@ -35,11 +36,16 @@ static FILE *OpenFile(const char *path)
   #endif
 }
 
-RemoteIndex *RemoteIndex::load(const string &name, const char *path)
+Path RemoteIndex::pathFor(const string &name)
+{
+  return Path::prefixCache(name + ".xml");
+}
+
+RemoteIndex *RemoteIndex::load(const string &name)
 {
   TiXmlDocument doc;
 
-  FILE *file = OpenFile(path);
+  FILE *file = OpenFile(pathFor(name).join().c_str());
 
   const bool success = doc.LoadFile(file);
 
