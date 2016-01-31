@@ -31,7 +31,7 @@
 
 class ListView {
 public:
-  typedef std::pair<auto_string, int> Column;
+  struct Column { auto_string text; int width; };
   typedef std::vector<Column> Columns;
   typedef std::vector<auto_string> Row;
 
@@ -55,7 +55,7 @@ public:
   void onNotify(LPNMHDR, LPARAM);
 
 private:
-  void addColumn(const auto_string &text, const int width);
+  void addColumn(const Column &);
 
   HWND m_handle;
   int m_columnSize;

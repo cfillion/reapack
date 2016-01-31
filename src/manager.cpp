@@ -51,7 +51,7 @@ void Manager::onInit()
     {AUTO_STR("Name"), 110},
     {AUTO_STR("URL"), URL_WIDTH},
     {AUTO_STR("State"), 60},
-  }, getItem(IDC_LIST));
+  }, getControl(IDC_LIST));
 }
 
 void Manager::onCommand(const int id)

@@ -51,7 +51,7 @@ void Progress::setTransaction(Transaction *t)
 
 void Progress::onInit()
 {
-  m_label = getItem(IDC_LABEL);
+  m_label = getControl(IDC_LABEL);
   m_progress = GetDlgItem(handle(), IDC_PROGRESS);
 }
 

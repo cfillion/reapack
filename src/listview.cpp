@@ -27,24 +27,24 @@ ListView::ListView(const Columns &columns, HWND handle)
   : m_handle(handle), m_columnSize(0), m_rowSize(0)
 {
   for(const Column &col : columns)
-    addColumn(col.first, col.second);
+    addColumn(col);
 
   // For some reason FULLROWSELECT doesn't work from the resource file
   ListView_SetExtendedListViewStyleEx(m_handle,
     LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 }
 
-void ListView::addColumn(const auto_string &text, const int width)
+void ListView::addColumn(const Column &col)
 {
-  LVCOLUMN col{};
+  LVCOLUMN item{};
 
-  col.mask |= LVCF_WIDTH;
-  col.cx = width;
+  item.mask |= LVCF_WIDTH;
+  item.cx = col.width;
 
-  col.mask |= LVCF_TEXT;
-  col.pszText = const_cast<auto_char *>(text.c_str());
+  item.mask |= LVCF_TEXT;
+  item.pszText = const_cast<auto_char *>(col.text.c_str());
 
-  ListView_InsertColumn(m_handle, m_columnSize++, &col);
+  ListView_InsertColumn(m_handle, m_columnSize++, &item);
 }
 
 int ListView::addRow(const Row &content)

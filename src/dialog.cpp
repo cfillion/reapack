@@ -78,7 +78,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 
 Dialog::Dialog(const int templateId)
   : m_template(templateId), m_isVisible(false),
-    m_parent(nullptr), m_handle(nullptr)
+    m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
   // can't call reimplemented virtual methods here during object construction
 }
@@ -91,6 +91,7 @@ Dialog::~Dialog()
 
 INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 {
+  m_instance = inst;
   m_parent = parent;
 
   switch(mode) {
@@ -163,7 +164,7 @@ void Dialog::setEnabled(const bool enabled, HWND handle)
   EnableWindow(handle, enabled);
 }
 
-HWND Dialog::getItem(const int idc)
+HWND Dialog::getControl(const int idc)
 {
   return GetDlgItem(m_handle, idc);
 }

@@ -56,6 +56,8 @@ public:
 
   INT_PTR init(REAPER_PLUGIN_HINSTANCE, HWND, const Modality);
 
+  REAPER_PLUGIN_HINSTANCE instance() const { return m_instance; }
+  HWND parent() const { return m_parent; }
   HWND handle() const { return m_handle; }
 
   bool isVisible() const { return m_isVisible; }
@@ -77,7 +79,7 @@ protected:
   Dialog(const int templateId);
   virtual ~Dialog();
 
-  HWND getItem(const int idc);
+  HWND getControl(const int idc);
 
   virtual void onInit() = 0;
   virtual void onShow();
@@ -95,6 +97,7 @@ private:
   const int m_template;
   bool m_isVisible;
 
+  REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_parent;
   HWND m_handle;
 };
