@@ -123,3 +123,13 @@ bool Version::operator<(const Version &o) const
 {
   return m_code < o.code();
 }
+
+bool Version::operator==(const Version &o) const
+{
+  return m_code == o.code();
+}
+
+bool Version::operator!=(const Version &o) const
+{
+  return !(*this == o);
+}

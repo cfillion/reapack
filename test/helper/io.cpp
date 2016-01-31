@@ -1,6 +1,7 @@
 #include "io.hpp"
 
 #include <path.hpp>
+#include <version.hpp>
 
 using namespace std;
 
@@ -19,5 +20,11 @@ ostream &operator<<(ostream &os, const set<Path> &list)
 
   os << '}';
 
+  return os;
+}
+
+ostream &operator<<(ostream &os, const Version &ver)
+{
+  os << ver.name();
   return os;
 }

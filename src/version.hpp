@@ -48,6 +48,8 @@ public:
   const std::set<Path> &files() const { return m_files; }
 
   bool operator<(const Version &) const;
+  bool operator==(const Version &) const;
+  bool operator!=(const Version &) const;
 
 private:
   std::string m_name;
