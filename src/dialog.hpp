@@ -26,6 +26,8 @@
 class Dialog;
 typedef std::map<HWND, Dialog *> DialogMap;
 
+class Control;
+
 class Dialog {
 public:
   enum Modality {
@@ -81,6 +83,21 @@ protected:
 
   HWND getControl(const int idc);
 
+  template<class T, class... Args>
+  T *createControl(int id, Args&&... args)
+  {
+    if(m_controls.count(id))
+      return nullptr;
+
+    HWND handle = getControl(id);
+
+    T *ctrl = new T(args..., handle);
+    m_controls[id] = ctrl;
+
+    return ctrl;
+  }
+
+
   virtual void onInit() = 0;
   virtual void onShow();
   virtual void onHide();
@@ -96,6 +113,8 @@ private:
 
   const int m_template;
   bool m_isVisible;
+
+  std::map<int, Control *> m_controls;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_parent;

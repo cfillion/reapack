@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+#include "control.hpp"
+
 using namespace std;
 
 DialogMap Dialog::s_instances;
@@ -85,6 +87,9 @@ Dialog::Dialog(const int templateId)
 
 Dialog::~Dialog()
 {
+  for(const auto &controlPair : m_controls)
+    delete controlPair.second;
+
   DestroyWindow(m_handle);
   s_instances.erase(m_handle);
 }
@@ -186,8 +191,12 @@ void Dialog::onCommand(int)
 {
 }
 
-void Dialog::onNotify(LPNMHDR, LPARAM)
+void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 {
+  const auto it = m_controls.find((int)info->idFrom);
+
+  if(it != m_controls.end())
+    it->second->onNotify(info, lParam);
 }
 
 void Dialog::onContextMenu(HWND, int, int)

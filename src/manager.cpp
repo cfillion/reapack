@@ -33,11 +33,6 @@ Manager::Manager(ReaPack *reapack)
 {
 }
 
-Manager::~Manager()
-{
-  delete m_list;
-}
-
 void Manager::onInit()
 {
   // It would be better to not hard-code the column sizes like that...
@@ -47,11 +42,11 @@ void Manager::onInit()
   const int URL_WIDTH = 300;
 #endif
 
-  m_list = new ListView({
+  m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Name"), 110},
     {AUTO_STR("URL"), URL_WIDTH},
     {AUTO_STR("State"), 60},
-  }, getControl(IDC_LIST));
+  });
 }
 
 void Manager::onCommand(const int id)
@@ -80,15 +75,6 @@ void Manager::onCommand(const int id)
   case IDCANCEL:
     reset();
     hide();
-    break;
-  }
-}
-
-void Manager::onNotify(LPNMHDR info, LPARAM lParam)
-{
-  switch(info->idFrom) {
-  case IDC_LIST:
-    m_list->onNotify(info, lParam);
     break;
   }
 }

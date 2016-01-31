@@ -24,13 +24,13 @@
 using namespace std;
 
 ListView::ListView(const Columns &columns, HWND handle)
-  : m_handle(handle), m_columnSize(0), m_rowSize(0)
+  : Control(handle), m_columnSize(0), m_rowSize(0)
 {
   for(const Column &col : columns)
     addColumn(col);
 
   // For some reason FULLROWSELECT doesn't work from the resource file
-  ListView_SetExtendedListViewStyleEx(m_handle,
+  ListView_SetExtendedListViewStyleEx(handle,
     LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 }
 
@@ -44,7 +44,7 @@ void ListView::addColumn(const Column &col)
   item.mask |= LVCF_TEXT;
   item.pszText = const_cast<auto_char *>(col.text.c_str());
 
-  ListView_InsertColumn(m_handle, m_columnSize++, &item);
+  ListView_InsertColumn(handle(), m_columnSize++, &item);
 }
 
 int ListView::addRow(const Row &content)
@@ -52,7 +52,7 @@ int ListView::addRow(const Row &content)
   LVITEM item{};
   item.iItem = m_rowSize++;
 
-  ListView_InsertItem(m_handle, &item);
+  ListView_InsertItem(handle(), &item);
 
   replaceRow(item.iItem, content);
 
@@ -68,13 +68,13 @@ void ListView::replaceRow(const int index, const Row &content)
 
   for(int i = 0; i < cols; i++) {
     auto_char *text = const_cast<auto_char *>(content[i].c_str());
-    ListView_SetItemText(m_handle, item.iItem, i, text);
+    ListView_SetItemText(handle(), item.iItem, i, text);
   }
 }
 
 void ListView::removeRow(const int index)
 {
-  ListView_DeleteItem(m_handle, index);
+  ListView_DeleteItem(handle(), index);
 }
 
 ListView::Row ListView::getRow(const int rowIndex) const
@@ -83,7 +83,7 @@ ListView::Row ListView::getRow(const int rowIndex) const
 
   for(int i = 0; i < m_columnSize; i++) {
     auto_char buf[4096];
-    ListView_GetItemText(m_handle, rowIndex, i, buf, sizeof(buf));
+    ListView_GetItemText(handle(), rowIndex, i, buf, sizeof(buf));
     row[i] = buf;
   }
 
@@ -93,7 +93,7 @@ ListView::Row ListView::getRow(const int rowIndex) const
 void ListView::clear()
 {
   for(int i = 0; i < m_rowSize; i++)
-    ListView_DeleteItem(m_handle, 0);
+    ListView_DeleteItem(handle(), 0);
 
   m_rowSize = 0;
 }
@@ -105,7 +105,7 @@ bool ListView::hasSelection() const
 
 int ListView::currentIndex() const
 {
-  return ListView_GetNextItem(m_handle, -1, LVNI_SELECTED);
+  return ListView_GetNextItem(handle(), -1, LVNI_SELECTED);
 }
 
 void ListView::onNotify(LPNMHDR info, LPARAM)

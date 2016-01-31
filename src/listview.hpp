@@ -18,18 +18,14 @@
 #ifndef REAPACK_LISTVIEW_HPP
 #define REAPACK_LISTVIEW_HPP
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <swell/swell.h>
-#endif
+#include "control.hpp"
 
 #include <boost/signals2.hpp>
 #include <vector>
 
 #include "encoding.hpp"
 
-class ListView {
+class ListView : public Control {
 public:
   struct Column { auto_string text; int width; };
   typedef std::vector<Column> Columns;
@@ -39,8 +35,6 @@ public:
   typedef Signal::slot_type Callback;
 
   ListView(const Columns &, HWND handle);
-
-  HWND handle() const { return m_handle; }
 
   int addRow(const Row &);
   Row getRow(const int index) const;
@@ -52,12 +46,13 @@ public:
   int currentIndex() const;
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
-  void onNotify(LPNMHDR, LPARAM);
+
+protected:
+  void onNotify(LPNMHDR, LPARAM) override;
 
 private:
   void addColumn(const Column &);
 
-  HWND m_handle;
   int m_columnSize;
   int m_rowSize;
 
