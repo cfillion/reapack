@@ -37,7 +37,7 @@ void About::onInit()
   m_about = createControl<RichEdit>(IDC_ABOUT);
 
   m_cats = createControl<ListView>(IDC_CATEGORIES, ListView::Columns{
-    {AUTO_STR("Category"), 200}
+    {AUTO_STR("Category"), 142}
   });
 
   m_cats->onSelect(bind(&About::updatePackages, this));
@@ -45,13 +45,13 @@ void About::onInit()
 #ifdef _WIN32
   const int NAME_SIZE = 330;
 #else
-  const int NAME_SIZE = 380;
+  const int NAME_SIZE = 382;
 #endif
 
   m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR("Name"), NAME_SIZE},
     {AUTO_STR("Version"), 80},
-    {AUTO_STR("Author"), 100},
+    {AUTO_STR("Author"), 90},
   });
 
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{

@@ -37,10 +37,13 @@ void RichEdit::setRichText(const string &rtf)
 
   const BOOL isEditable = textView.isEditable;
 
-  // auto-detect links
-  // equivalent to Windows' EM_AUTOURLDETECT message
+  // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
   [textView setEditable:YES];
   [textView setEnabledTextCheckingTypes:NSTextCheckingTypeLink];
   [textView checkTextInDocument:nil];
   [textView setEditable:isEditable];
+
+  // hack: restore NSTextView's default mouse cursors (eg. hover links)
+  // this doesn't fix the shy link tooltips
+  SetCapture(handle());
 }
