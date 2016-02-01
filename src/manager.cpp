@@ -20,6 +20,7 @@
 #include "about.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
+#include "errors.hpp"
 #include "index.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
@@ -180,7 +181,29 @@ void Manager::about()
   if(remote.isNull())
     return;
 
-  RemoteIndex *index = RemoteIndex::load(remote.name());
+  RemoteIndex *index = nullptr;
+
+  try {
+    index = RemoteIndex::load(remote.name());
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("ReaPack could not read %s's index.\n\n")
+
+      AUTO_STR("Synchronize your packages and try again.\n")
+      AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+
+      AUTO_STR("[error description: %s]"),
+      make_autostring(remote.name()).c_str(), desc.c_str()
+    );
+
+    MessageBox(handle(), msg, AUTO_STR("ReaPack Warning"), MB_OK);
+    return;
+  }
+
   unique_ptr<RemoteIndex> ptr(index);
 
   Dialog::Show<About>(instance(), handle(), index);

@@ -26,7 +26,7 @@
 
 using namespace std;
 
-About::About(RemoteIndex *index)
+About::About(const RemoteIndex *index)
   : Dialog(IDD_ABOUT_DIALOG), m_index(index), m_currentCat(-255)
 {
   RichEdit::Init();

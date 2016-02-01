@@ -27,7 +27,7 @@ class TabBar;
 
 class About : public Dialog {
 public:
-  About(RemoteIndex *index);
+  About(const RemoteIndex *);
 
 protected:
   void onInit() override;
@@ -37,7 +37,7 @@ private:
   void populate();
   void updatePackages();
 
-  RemoteIndex *m_index;
+  const RemoteIndex *m_index;
   int m_currentCat;
 
   TabBar *m_tabs;
