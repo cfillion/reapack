@@ -34,4 +34,13 @@ void RichEdit::setRichText(const string &rtf)
     replaceCharactersInRange: NSMakeRange(0, [[textView string] length])
     withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
   ];
+
+  const BOOL isEditable = textView.isEditable;
+
+  // auto-detect links
+  // equivalent to Windows' EM_AUTOURLDETECT message
+  [textView setEditable:YES];
+  [textView setEnabledTextCheckingTypes:NSTextCheckingTypeLink];
+  [textView checkTextInDocument:nil];
+  [textView setEditable:isEditable];
 }
