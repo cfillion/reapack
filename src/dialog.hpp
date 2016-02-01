@@ -63,6 +63,7 @@ public:
   HWND handle() const { return m_handle; }
 
   bool isVisible() const { return m_isVisible; }
+  bool isEnabled() const { return m_isEnabled; }
 
   void enable() { enable(m_handle); }
   void enable(HWND handle) { setEnabled(true, handle); }
@@ -112,6 +113,7 @@ private:
 
   const int m_template;
   bool m_isVisible;
+  bool m_isEnabled;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_parent;

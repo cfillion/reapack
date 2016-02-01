@@ -179,7 +179,7 @@ void Manager::about()
   RemoteIndex *index = RemoteIndex::load(remote.name());
   unique_ptr<RemoteIndex> ptr(index);
 
-  Dialog::Show<About>(instance(), parent(), index);
+  Dialog::Show<About>(instance(), handle(), index);
 }
 
 bool Manager::confirm() const

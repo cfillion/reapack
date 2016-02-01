@@ -45,19 +45,22 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onInit();
     break;
   case WM_SHOWWINDOW:
-    if(wParam) {
-      // this makes possible to call onHide when destroying the window
-      // but only if was visible before the destruction request
-      // (destruction might be caused by the application exiting,
-      // in which case IsWindowVisible would be false but m_isVisible == true)
-      dlg->m_isVisible = true;
+    // this makes possible to call onHide when destroying the window
+    // but only if was visible before the destruction request
+    // (destruction might be caused by the application exiting,
+    // in which case IsWindowVisible would be false but m_isVisible == true)
+    dlg->m_isVisible = wParam == 1;
+
+    if(wParam)
       dlg->onShow();
-    }
-    else {
-      dlg->m_isVisible = false;
+    else
       dlg->onHide();
-    }
     break;
+#ifdef _WIN32
+  case WM_ENABLE: // not supported by SWELL
+    dlg->m_isEnabled = wParam == 1;
+    break;
+#endif
   case WM_TIMER:
     dlg->onTimer();
     break;
@@ -86,7 +89,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 Dialog::Dialog(const int templateId)
-  : m_template(templateId), m_isVisible(false),
+  : m_template(templateId), m_isVisible(false), m_isEnabled(true),
     m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
   // can't call reimplemented virtual methods here during object construction
