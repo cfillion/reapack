@@ -21,6 +21,7 @@
 #include "index.hpp"
 #include "listview.hpp"
 #include "resource.hpp"
+#include "richedit.hpp"
 #include "tabbar.hpp"
 
 using namespace std;
@@ -28,11 +29,12 @@ using namespace std;
 About::About(RemoteIndex *index)
   : Dialog(IDD_ABOUT_DIALOG), m_index(index)
 {
+  RichEdit::Init();
 }
 
 void About::onInit()
 {
-  m_about = getControl(IDC_ABOUT);
+  m_about = createControl<RichEdit>(IDC_ABOUT);
 
   m_cats = createControl<ListView>(IDC_CATEGORIES, ListView::Columns{
     {AUTO_STR("Category"), 140}
@@ -47,7 +49,7 @@ void About::onInit()
   });
 
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{
-    {AUTO_STR("Description"), {m_about}},
+    {AUTO_STR("Description"), {m_about->handle()}},
     {AUTO_STR("Packages"), {m_cats->handle(), m_packages->handle()}},
     {AUTO_STR("Installed Files"), {}},
   });
@@ -74,10 +76,14 @@ void About::populate()
 
   SetWindowText(handle(), title);
 
-  setAboutText(
-    AUTO_STR("{\\rtf1\\ansi{\\fonttbl\\f0\\fswiss Helvetica;}\\f0\\pard\n")
-    AUTO_STR("This is some {\\b bold} text.\\par\n")
-    AUTO_STR("}")
+  m_about->setRichText(
+    "{\\rtf1\\ansi\\ansicpg1252\\cocoartf1348\\cocoasubrtf170\n"
+    "{\\fonttbl\\f0\\fnil\\fcharset134 STHeitiSC-Light;}\n"
+    "{\\colortbl;\\red255\\green255\\blue255;}\n"
+    "\\margl1440\\margr1440\\vieww10800\\viewh8400\\viewkind0\n"
+    "\\pard\\tx566\\tx1133\\tx1700\\tx2267\\tx2834\\tx3401\\tx3968\\tx4535\\tx5102\\tx5669\\tx6236\\tx6803\\pardirnatural\n"
+    "\\f0\\fs24 \\cf0 http://perdu.com test"
+    "{\\field{\\*\\fldinst{HYPERLINK \"https://msdn.microsoft.com/en-us/library/windows/desktop/bb787974%28v=vs.85%29.aspx\"}}{\\fldrslt \\f0\\fs24 \\cf0 \\'d0\\'c2\\'ca\\'c0\\'bd\\'e7\\'a4\\'e8\\'a4\\'ea}}}\n"
   );
 
   m_cats->addRow({AUTO_STR("<All Categories>")});

@@ -15,21 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "about.hpp"
+#ifndef REAPACK_RICHEDIT_HPP
+#define REAPACK_RICHEDIT_HPP
 
-#include <Cocoa/Cocoa.h>
+#include "control.hpp"
 
-void About::setAboutText(const auto_string &text)
-{
-  NSString *str = [NSString
-    stringWithCString:text.c_str()
-    encoding:NSUTF8StringEncoding
-  ];
+#include <string>
 
-  NSTextView *textView = (NSTextView *)m_about;
+class RichEdit : public Control {
+public:
+  static void Init();
 
-  [textView
-    replaceCharactersInRange: NSMakeRange(0, [[textView string] length])
-    withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
-  ];
-}
+  RichEdit(HWND);
+
+  void setRichText(const std::string &);
+
+protected:
+  void onNotify(LPNMHDR, LPARAM) override;
+
+private:
+#ifdef _WIN32
+  void handleLink(LPARAM);
+#endif
+};
+
+#endif

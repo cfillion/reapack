@@ -18,12 +18,13 @@
 #ifndef REAPACK_RESOURCE_HPP
 #define REAPACK_RESOURCE_HPP
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <commctrl.h>
+#include <richedit.h>
+#else
 #define PROGRESS_CLASS "msctls_progress32"
 #define WC_LISTVIEW "SysListView32"
 #define WC_TABCONTROL "SysTabControl32"
-#else
-#include <commctrl.h>
 #endif
 
 #define DIALOG_STYLE \

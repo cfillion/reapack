@@ -71,7 +71,11 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
     break;
   case WM_DESTROY:
-    dlg->onDestroy();
+    // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG but without
+    // our custom lParam pointer if the dialog resource is invalid
+    // (ie. because of an unloaded dll)
+    if(dlg)
+      dlg->onDestroy();
     break;
   };
 

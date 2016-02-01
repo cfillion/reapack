@@ -23,7 +23,7 @@ SQLFLAGS += /DSQLITE_OMIT_CHECK /DSQLITE_OMIT_BLOB_LITERAL
 SQLFLAGS += /DSQLITE_OMIT_DECLTYPE /DSQLITE_OMIT_DEPRECATED
 
 LD := $(WRAP) link
-LDFLAGS := /nologo user32.lib
+LDFLAGS := /nologo user32.lib shell32.lib
 LDFLAGS += vendor/libcurl_@(WINARCH)/lib/libcurl_a.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
 LDFLAGS += $(TUP_VARIANTDIR)/build/vendor/sqlite3.o

@@ -15,34 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_ABOUT_HPP
-#define REAPACK_ABOUT_HPP
+#include "richedit.hpp"
 
-#include "dialog.hpp"
+#include <Cocoa/Cocoa.h>
 
-class ListView;
-class RemoteIndex;
-class RichEdit;
-class TabBar;
+using namespace std;
 
-class About : public Dialog {
-public:
-  About(RemoteIndex *index);
+void RichEdit::setRichText(const string &rtf)
+{
+  NSString *str = [NSString
+    stringWithCString:rtf.c_str()
+    encoding:NSUTF8StringEncoding
+  ];
 
-protected:
-  void onInit() override;
-  void onCommand(int) override;
+  NSTextView *textView = (NSTextView *)handle();
 
-private:
-  void populate();
-  void updatePackages(bool);
-
-  RemoteIndex *m_index;
-
-  TabBar *m_tabs;
-  RichEdit *m_about;
-  ListView *m_cats;
-  ListView *m_packages;
-};
-
-#endif
+  [textView
+    replaceCharactersInRange: NSMakeRange(0, [[textView string] length])
+    withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
+  ];
+}
