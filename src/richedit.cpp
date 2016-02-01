@@ -73,15 +73,21 @@ void RichEdit::handleLink(LPARAM lParam)
 }
 
 // OS X implementation of setRichText in richedit.mm
-void RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const string &rtf)
 {
   SETTEXTEX st{};
-  SendMessage(handle(), EM_SETTEXTEX, (WPARAM)&st, (LPARAM)rtf.c_str());
+  if(!SendMessage(handle(), EM_SETTEXTEX, (WPARAM)&st, (LPARAM)rtf.c_str()))
+    return false;
 
   GETTEXTLENGTHEX tl{};
   LONG length = (LONG)SendMessage(handle(), EM_GETTEXTLENGTHEX, (WPARAM)&tl, 0);
 
+  if(!length)
+    return false;
+
   CHARRANGE cr{length, length};
   SendMessage(handle(), EM_EXSETSEL, 0, (LPARAM)&cr);
+
+  return true;
 }
 #endif

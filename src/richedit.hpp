@@ -28,7 +28,7 @@ public:
 
   RichEdit(HWND);
 
-  void setRichText(const std::string &);
+  bool setRichText(const std::string &);
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;

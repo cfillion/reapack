@@ -54,6 +54,14 @@ int TabBar::currentIndex() const
   return TabCtrl_GetCurSel(handle());
 }
 
+void TabBar::removeTab(const int index)
+{
+  if(TabCtrl_DeleteItem(handle(), index)) {
+    m_pages.erase(m_pages.begin() + index);
+    switchPage();
+  }
+}
+
 void TabBar::onNotify(LPNMHDR info, LPARAM)
 {
   switch(info->code) {

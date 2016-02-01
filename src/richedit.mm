@@ -21,7 +21,7 @@
 
 using namespace std;
 
-void RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const string &rtf)
 {
   NSString *str = [NSString
     stringWithCString:rtf.c_str()
@@ -46,4 +46,6 @@ void RichEdit::setRichText(const string &rtf)
   // hack: restore NSTextView's default mouse cursors (eg. hover links)
   // this doesn't fix the shy link tooltips
   SetCapture(handle());
+
+  return [[textView string] length];
 }

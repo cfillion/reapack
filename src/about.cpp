@@ -87,7 +87,7 @@ void About::populate()
 
   SetWindowText(handle(), title);
 
-  m_about->setRichText(
+  const char *tmpRtf = \
     "{\\rtf1\\ansi\\ansicpg1252\\cocoartf1348\\cocoasubrtf170\n"
     "{\\fonttbl\\f0\\fnil\\fcharset134 STHeitiSC-Light;}\n"
     "{\\colortbl;\\red255\\green255\\blue255;}\n"
@@ -95,7 +95,10 @@ void About::populate()
     "\\pard\\tx566\\tx1133\\tx1700\\tx2267\\tx2834\\tx3401\\tx3968\\tx4535\\tx5102\\tx5669\\tx6236\\tx6803\\pardirnatural\n"
     "\\f0\\fs24 \\cf0 http://perdu.com test"
     "{\\field{\\*\\fldinst{HYPERLINK \"https://msdn.microsoft.com/en-us/library/windows/desktop/bb787974%28v=vs.85%29.aspx\"}}{\\fldrslt \\f0\\fs24 \\cf0 \\'d0\\'c2\\'ca\\'c0\\'bd\\'e7\\'a4\\'e8\\'a4\\'ea}}}\n"
-  );
+  ;
+
+  if(!m_about->setRichText(tmpRtf))
+    m_tabs->removeTab(0);
 
   m_cats->addRow({AUTO_STR("<All Categories>")});
 
