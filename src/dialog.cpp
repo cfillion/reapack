@@ -71,9 +71,12 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
     break;
   case WM_DESTROY:
-    // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG but without
-    // our custom lParam pointer if the dialog resource is invalid
-    // (ie. because of an unloaded dll)
+    // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG
+    // if the dialog resource is invalid (eg. because of an unloaded dll).
+    //
+    // When this happens, neither lParam nor s_instances will contain
+    // a pointer to the Dialog instance, so there is nothing we can do.
+    // At least, let's try to not crash.
     if(dlg)
       dlg->onDestroy();
     break;
