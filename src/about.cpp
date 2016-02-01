@@ -97,8 +97,10 @@ void About::populate()
     "{\\field{\\*\\fldinst{HYPERLINK \"https://msdn.microsoft.com/en-us/library/windows/desktop/bb787974%28v=vs.85%29.aspx\"}}{\\fldrslt \\f0\\fs24 \\cf0 \\'d0\\'c2\\'ca\\'c0\\'bd\\'e7\\'a4\\'e8\\'a4\\'ea}}}\n"
   ;
 
-  if(!m_about->setRichText(tmpRtf))
+  if(!m_about->setRichText(tmpRtf)) {
     m_tabs->removeTab(0);
+    m_tabs->setCurrentIndex(0);
+  }
 
   m_cats->addRow({AUTO_STR("<All Categories>")});
 

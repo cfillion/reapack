@@ -22,7 +22,7 @@
 #endif
 
 TabBar::TabBar(const Tabs &tabs, HWND handle)
-  : Control(handle), m_size(0), m_lastPage(0)
+  : Control(handle), m_size(0), m_lastPage(-1)
 {
   for(const Tab &tab : tabs)
     addTab(tab);
@@ -54,12 +54,21 @@ int TabBar::currentIndex() const
   return TabCtrl_GetCurSel(handle());
 }
 
+void TabBar::setCurrentIndex(const int index)
+{
+  TabCtrl_SetCurSel(handle(), index);
+  switchPage();
+}
+
 void TabBar::removeTab(const int index)
 {
-  if(TabCtrl_DeleteItem(handle(), index)) {
-    m_pages.erase(m_pages.begin() + index);
-    switchPage();
-  }
+  if(!TabCtrl_DeleteItem(handle(), index))
+    return;
+
+  for(HWND control : m_pages[index])
+    ShowWindow(control, SW_HIDE);
+
+  m_pages.erase(m_pages.begin() + index);
 }
 
 void TabBar::onNotify(LPNMHDR info, LPARAM)
