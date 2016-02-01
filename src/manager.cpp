@@ -103,21 +103,16 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("Open &website"), 0);
-  menu.addAction(AUTO_STR("Open &donation URL"), 0);
+  const UINT uninstallAction =
+    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
+
+  menu.addSeparator();
 
   auto_char aboutLabel[255] = {};
   const auto_string &name = make_autostring(remote.name());
   auto_snprintf(aboutLabel, sizeof(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT);
-
-  menu.addSeparator();
-
-  menu.addSeparator();
-
-  const UINT uninstallAction =
-    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
 
   menu.disable(enableAction);
   menu.disable(disableAction);
