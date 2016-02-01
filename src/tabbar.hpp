@@ -15,48 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_MANAGER_HPP
-#define REAPACK_MANAGER_HPP
+#ifndef REAPACK_TABBAR_HPP
+#define REAPACK_TABBAR_HPP
 
-#include "dialog.hpp"
+#include "control.hpp"
 
-#include "listview.hpp"
+#include <vector>
 
-#include <map>
-#include <set>
+#include "encoding.hpp"
 
-class ReaPack;
-class Remote;
-
-class Manager : public Dialog {
+class TabBar : public Control {
 public:
-  Manager(ReaPack *);
+  typedef std::vector<HWND> Page;
+  struct Tab { auto_string text; Page page; };
+  typedef std::vector<Tab> Tabs;
 
-  void refresh();
+  TabBar(const Tabs &tabs, HWND handle);
+  int addTab(const Tab &);
+  int currentIndex() const;
 
 protected:
-  void onInit() override;
-  void onCommand(int) override;
-  void onContextMenu(HWND, int x, int y) override;
+  void onNotify(LPNMHDR, LPARAM) override;
 
 private:
-  ListView::Row makeRow(const Remote &remote) const;
+  void switchPage();
 
-  Remote currentRemote() const;
-  void setRemoteEnabled(const bool);
-  bool isRemoteEnabled(const Remote &remote) const;
-  void uninstall();
-  void about();
-
-  bool confirm() const;
-  void apply();
-  void reset();
-
-  ReaPack *m_reapack;
-  ListView *m_list;
-
-  std::map<Remote, bool> m_enableOverrides;
-  std::set<Remote> m_uninstall;
+  int m_size;
+  int m_lastPage;
+  std::vector<Page> m_pages;
 };
 
 #endif

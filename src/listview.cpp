@@ -114,5 +114,8 @@ void ListView::onNotify(LPNMHDR info, LPARAM)
   case LVN_ITEMCHANGED:
     m_onSelect();
     break;
+  case NM_DBLCLK:
+    m_onDoubleClick();
+    break;
   };
 }

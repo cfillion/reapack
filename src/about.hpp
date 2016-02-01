@@ -15,48 +15,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_MANAGER_HPP
-#define REAPACK_MANAGER_HPP
+#ifndef REAPACK_ABOUT_HPP
+#define REAPACK_ABOUT_HPP
 
 #include "dialog.hpp"
 
-#include "listview.hpp"
+#include "encoding.hpp"
 
-#include <map>
-#include <set>
+class ListView;
+class RemoteIndex;
+class TabBar;
 
-class ReaPack;
-class Remote;
-
-class Manager : public Dialog {
+class About : public Dialog {
 public:
-  Manager(ReaPack *);
-
-  void refresh();
+  About(RemoteIndex *index);
 
 protected:
   void onInit() override;
   void onCommand(int) override;
-  void onContextMenu(HWND, int x, int y) override;
 
 private:
-  ListView::Row makeRow(const Remote &remote) const;
+  void populate();
+  void updatePackages(bool);
+  void setAboutText(const auto_string &);
 
-  Remote currentRemote() const;
-  void setRemoteEnabled(const bool);
-  bool isRemoteEnabled(const Remote &remote) const;
-  void uninstall();
-  void about();
+  RemoteIndex *m_index;
 
-  bool confirm() const;
-  void apply();
-  void reset();
-
-  ReaPack *m_reapack;
-  ListView *m_list;
-
-  std::map<Remote, bool> m_enableOverrides;
-  std::set<Remote> m_uninstall;
+  TabBar *m_tabs;
+  HWND m_about;
+  ListView *m_cats;
+  ListView *m_packages;
 };
 
 #endif

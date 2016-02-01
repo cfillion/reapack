@@ -17,8 +17,10 @@
 
 #include "manager.hpp"
 
+#include "about.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
+#include "index.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
@@ -47,6 +49,8 @@ void Manager::onInit()
     {AUTO_STR("URL"), URL_WIDTH},
     {AUTO_STR("State"), 60},
   });
+
+  m_list->onDoubleClick(bind(&Manager::about, this));
 }
 
 void Manager::onCommand(const int id)
@@ -163,6 +167,19 @@ void Manager::uninstall()
     m_enableOverrides.erase(it);
 
   m_list->removeRow(m_list->currentIndex());
+}
+
+void Manager::about()
+{
+  const Remote &remote = currentRemote();
+
+  if(remote.isNull())
+    return;
+
+  RemoteIndex *index = RemoteIndex::load(remote.name());
+  unique_ptr<RemoteIndex> ptr(index);
+
+  Dialog::Show<About>(instance(), parent(), index);
 }
 
 bool Manager::confirm() const

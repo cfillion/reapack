@@ -46,6 +46,8 @@ public:
   int currentIndex() const;
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
+  void onDoubleClick(const Callback &callback)
+  { m_onDoubleClick.connect(callback); }
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
@@ -57,6 +59,7 @@ private:
   int m_rowSize;
 
   Signal m_onSelect;
+  Signal m_onDoubleClick;
 };
 
 #endif

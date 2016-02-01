@@ -21,6 +21,7 @@
 #ifndef _WIN32
 #define PROGRESS_CLASS "msctls_progress32"
 #define WC_LISTVIEW "SysListView32"
+#define WC_TABCONTROL "SysTabControl32"
 #else
 #include <commctrl.h>
 #endif
@@ -32,11 +33,19 @@
 #define IDD_PROGRESS_DIALOG 100
 #define IDD_REPORT_DIALOG   101
 #define IDD_CONFIG_DIALOG   102
+#define IDD_ABOUT_DIALOG    103
 
-#define IDC_LABEL    200
-#define IDC_PROGRESS 201
-#define IDC_REPORT   202
-#define IDC_LIST     203
-#define IDC_IMPORT   204
+#define IDC_LABEL      200
+#define IDC_PROGRESS   201
+#define IDC_REPORT     202
+#define IDC_LIST       203
+#define IDC_IMPORT     204
+#define IDC_TABS       205
+#define IDC_ENABLE     206
+#define IDC_DONATE     207
+#define IDC_WEBSITE    208
+#define IDC_ABOUT      209
+#define IDC_CATEGORIES 210
+#define IDC_PACKAGES   211
 
 #endif

@@ -85,6 +85,10 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   menu.addAction(AUTO_STR("Manage remotes..."),
     NamedCommandLookup("_REAPACK_MANAGE"));
+
+  menu.addSeparator();
+
+  menu.addAction(AUTO_STR("About ReaPack v0.1"), 0);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(

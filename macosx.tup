@@ -28,3 +28,6 @@ TSTARGET := bin/test
 
 BUILDDEPS := src/resource.rc_mac_menu src/resource.rc_mac_dlg
 : src/resource.rc |> php $(SWELL)/mac_resgen.php %f |> $(BUILDDEPS)
+
+# build Objective-C files
+: foreach src/*.mm | $(BUILDDEPS) |> !build |> build/%B_mm.o
