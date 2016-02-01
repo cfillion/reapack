@@ -29,7 +29,7 @@
 
 using namespace std;
 
-enum { ACTION_ENABLE = 300, ACTION_DISABLE, ACTION_UNINSTALL };
+enum { ACTION_ENABLE = 300, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
@@ -69,6 +69,9 @@ void Manager::onCommand(const int id)
   case ACTION_UNINSTALL:
     uninstall();
     break;
+  case ACTION_ABOUT:
+    about();
+    break;
   case IDOK:
     if(confirm())
       apply();
@@ -89,21 +92,36 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   if(target != m_list->handle())
     return;
 
+  const Remote &remote = currentRemote();
+
   Menu menu;
 
   const UINT enableAction =
-    menu.addAction(AUTO_STR("Enable"), ACTION_ENABLE);
+    menu.addAction(AUTO_STR("&Enable and synchronize"), ACTION_ENABLE);
   const UINT disableAction =
-    menu.addAction(AUTO_STR("Disable"), ACTION_DISABLE);
+    menu.addAction(AUTO_STR("&Disable"), ACTION_DISABLE);
+
+  menu.addSeparator();
+
+  menu.addAction(AUTO_STR("Open &website"), 0);
+  menu.addAction(AUTO_STR("Open &donation URL"), 0);
+
+  auto_char aboutLabel[255] = {};
+  const auto_string &name = make_autostring(remote.name());
+  auto_snprintf(aboutLabel, sizeof(aboutLabel),
+    AUTO_STR("&About %s..."), name.c_str());
+  menu.addAction(aboutLabel, ACTION_ABOUT);
+
+  menu.addSeparator();
 
   menu.addSeparator();
 
   const UINT uninstallAction =
-    menu.addAction(AUTO_STR("Uninstall"), ACTION_UNINSTALL);
+    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
 
-  menu.disable();
-
-  const Remote &remote = currentRemote();
+  menu.disable(enableAction);
+  menu.disable(disableAction);
+  menu.disable(uninstallAction);
 
   if(!remote.isNull()) {
     if(isRemoteEnabled(remote))
