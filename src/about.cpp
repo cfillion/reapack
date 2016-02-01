@@ -27,7 +27,7 @@
 using namespace std;
 
 About::About(RemoteIndex *index)
-  : Dialog(IDD_ABOUT_DIALOG), m_index(index)
+  : Dialog(IDD_ABOUT_DIALOG), m_index(index), m_currentCat(-255)
 {
   RichEdit::Init();
 }
@@ -40,7 +40,7 @@ void About::onInit()
     {AUTO_STR("Category"), 140}
   });
 
-  m_cats->onSelect(bind(&About::updatePackages, this, false));
+  m_cats->onSelect(bind(&About::updatePackages, this));
 
   m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR("Name"), 350},
@@ -91,23 +91,29 @@ void About::populate()
   for(Category *cat : m_index->categories())
     m_cats->addRow({make_autostring(cat->name())});
 
-  updatePackages(true);
+  updatePackages();
 }
 
-void About::updatePackages(const bool force)
+void About::updatePackages()
 {
+  const int index = m_cats->currentIndex();
+
+  // do nothing when the selection is cleared, except for the initial execution
+  if(index == -1 && m_currentCat >= -1)
+    return;
+
+  // -1: all categories, >0 selected category
+  const int catIndex = max(-1, index - 1);
   const PackageList *pkgList;
 
-  // -2: no selection, -1: all categories, >0 selected category
-  const int catIndex = m_cats->currentIndex() - 1;
-
-  if(catIndex == -2 && !force)
+  if(catIndex == m_currentCat)
     return;
   else if(catIndex < 0)
     pkgList = &m_index->packages();
   else
     pkgList = &m_index->category(catIndex)->packages();
 
+  m_packages->inhibitRedraw(true);
   m_packages->clear();
 
   for(Package *pkg : *pkgList) {
@@ -115,4 +121,7 @@ void About::updatePackages(const bool force)
     const auto_string &lastVer = make_autostring(pkg->lastVersion()->name());
     m_packages->addRow({name, lastVer, AUTO_STR("John Doe")});
   }
+
+  m_currentCat = catIndex;
+  m_packages->inhibitRedraw(false);
 }

@@ -33,6 +33,14 @@ public:
 
   HWND handle() const { return m_handle; }
 
+  void inhibitRedraw(const bool inhibit)
+  {
+#ifdef _WIN32
+    // WM_SETREDRAW is not supported by SWELL
+    SendMessage(m_handle, WM_SETREDRAW, !inhibit, 0);
+#endif
+  }
+
 protected:
   friend Dialog;
   virtual void onNotify(LPNMHDR, LPARAM) = 0;

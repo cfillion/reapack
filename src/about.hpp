@@ -35,9 +35,10 @@ protected:
 
 private:
   void populate();
-  void updatePackages(bool);
+  void updatePackages();
 
   RemoteIndex *m_index;
+  int m_currentCat;
 
   TabBar *m_tabs;
   RichEdit *m_about;

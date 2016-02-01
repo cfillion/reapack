@@ -92,8 +92,7 @@ ListView::Row ListView::getRow(const int rowIndex) const
 
 void ListView::clear()
 {
-  for(int i = 0; i < m_rowSize; i++)
-    ListView_DeleteItem(handle(), 0);
+  ListView_DeleteAllItems(handle());
 
   m_rowSize = 0;
 }
