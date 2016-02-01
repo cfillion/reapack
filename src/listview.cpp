@@ -29,9 +29,17 @@ ListView::ListView(const Columns &columns, HWND handle)
   for(const Column &col : columns)
     addColumn(col);
 
-  // For some reason FULLROWSELECT doesn't work from the resource file
-  ListView_SetExtendedListViewStyleEx(handle,
-    LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+  setExStyle(LVS_EX_FULLROWSELECT, true);
+
+#ifdef LVS_EX_LABELTIP
+  // unsupported by SWELL, but always enabled on OS X anyway
+  setExStyle(LVS_EX_LABELTIP, true);
+#endif
+}
+
+void ListView::setExStyle(const int style, const bool enable)
+{
+  ListView_SetExtendedListViewStyleEx(handle(), style, enable ? style : 0);
 }
 
 void ListView::addColumn(const Column &col)
@@ -75,6 +83,11 @@ void ListView::replaceRow(const int index, const Row &content)
 void ListView::removeRow(const int index)
 {
   ListView_DeleteItem(handle(), index);
+}
+
+void ListView::resizeColumn(const int index, const int width)
+{
+  ListView_SetColumnWidth(handle(), index, width);
 }
 
 ListView::Row ListView::getRow(const int rowIndex) const

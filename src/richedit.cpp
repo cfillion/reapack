@@ -40,6 +40,8 @@ RichEdit::RichEdit(HWND handle)
 #ifdef _WIN32
   SendMessage(handle, EM_AUTOURLDETECT, true, 0);
   SendMessage(handle, EM_SETEVENTMASK, 0, ENM_LINK);
+  SendMessage(handle, EM_SETEDITSTYLE,
+    SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
 #endif
 }
 

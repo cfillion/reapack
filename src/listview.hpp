@@ -40,6 +40,7 @@ public:
   Row getRow(const int index) const;
   void replaceRow(const int index, const Row &);
   void removeRow(const int index);
+  void resizeColumn(const int index, const int width);
   void clear();
 
   bool hasSelection() const;
@@ -53,6 +54,7 @@ protected:
   void onNotify(LPNMHDR, LPARAM) override;
 
 private:
+  void setExStyle(int style, bool enable);
   void addColumn(const Column &);
 
   int m_columnSize;

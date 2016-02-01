@@ -125,6 +125,10 @@ void Manager::refresh()
     if(!m_uninstall.count(remote))
       m_list->addRow(makeRow(remote));
   }
+
+#ifdef LVSCW_AUTOSIZE_USEHEADER
+  m_list->resizeColumn(2, LVSCW_AUTOSIZE_USEHEADER);
+#endif
 }
 
 void Manager::setRemoteEnabled(const bool enabled)
