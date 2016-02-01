@@ -22,6 +22,7 @@
 #include "encoding.hpp"
 
 #ifdef _WIN32
+#include <sstream>
 #include <richedit.h>
 #endif
 
@@ -75,8 +76,20 @@ void RichEdit::handleLink(LPARAM lParam)
 // OS X implementation of setRichText in richedit.mm
 bool RichEdit::setRichText(const string &rtf)
 {
-  SETTEXTEX st{};
-  if(!SendMessage(handle(), EM_SETTEXTEX, (WPARAM)&st, (LPARAM)rtf.c_str()))
+  stringstream stream(rtf);
+
+  EDITSTREAM es{};
+  es.dwCookie = (DWORD_PTR)&stream;
+  es.pfnCallback = [](DWORD_PTR cookie, LPBYTE buf, LONG size, LONG *pcb)
+  {
+    stringstream *stream = reinterpret_cast<stringstream *>(cookie);
+    *pcb = (LONG)stream->readsome((char *)buf, size);
+    return (DWORD)0;
+  };
+
+  SendMessage(handle(), EM_STREAMIN, SF_RTF, (LPARAM)&es);
+
+  if(es.dwError)
     return false;
 
   GETTEXTLENGTHEX tl{};
