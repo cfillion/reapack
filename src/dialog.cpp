@@ -56,7 +56,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     else
       dlg->onHide();
     break;
-#ifdef _WIN32
+#ifdef WM_ENABLE
   case WM_ENABLE: // not supported by SWELL
     dlg->m_isEnabled = wParam == 1;
     break;

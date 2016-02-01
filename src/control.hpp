@@ -35,7 +35,7 @@ public:
 
   void inhibitRedraw(const bool inhibit)
   {
-#ifdef _WIN32
+#ifdef WM_SETREDRAW
     // WM_SETREDRAW is not supported by SWELL
     SendMessage(m_handle, WM_SETREDRAW, !inhibit, 0);
 #endif
