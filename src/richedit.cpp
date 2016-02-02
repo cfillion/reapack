@@ -17,63 +17,60 @@
 
 #include "richedit.hpp"
 
+#ifdef _WIN32
+
+// Starting here and onward is the Win32 implementation of RichEdit
+// The OS X implementation can be found in richedit.mm
+
 #include <memory>
+#include <richedit.h>
+#include <sstream>
 
 #include "encoding.hpp"
 
-#ifdef _WIN32
-#include <sstream>
-#include <richedit.h>
-#endif
-
 using namespace std;
 
-void RichEdit::Init()
+static void HandleLink(ENLINK *info, HWND handle)
 {
-#ifdef _WIN32
-  LoadLibrary(AUTO_STR("Msftedit.dll"));
-#endif
-}
-
-RichEdit::RichEdit(HWND handle)
-  : Control(handle)
-{
-#ifdef _WIN32
-  SendMessage(handle, EM_AUTOURLDETECT, true, 0);
-  SendMessage(handle, EM_SETEVENTMASK, 0, ENM_LINK);
-  SendMessage(handle, EM_SETEDITSTYLE,
-    SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
-#endif
-}
-
-void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
-{
-#ifdef _WIN32
-  switch(info->code) {
-  case EN_LINK:
-    handleLink(lParam);
-    break;
-  };
-#endif
-}
-
-#ifdef _WIN32
-void RichEdit::handleLink(LPARAM lParam)
-{
-  ENLINK *info = (ENLINK *)lParam;
   const CHARRANGE &range = info->chrg;
 
   auto_char *url = new auto_char[(range.cpMax - range.cpMin) + 1]();
   unique_ptr<auto_char[]> ptr(url);
 
   TEXTRANGE tr{range, url};
-  SendMessage(handle(), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+  SendMessage(handle, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
   if(info->msg == WM_LBUTTONUP)
     ShellExecute(nullptr, AUTO_STR("open"), url, nullptr, nullptr, SW_SHOW);
 }
 
-// OS X implementation of setRichText in richedit.mm
+void RichEdit::Init()
+{
+  LoadLibrary(AUTO_STR("Msftedit.dll"));
+}
+
+RichEdit::RichEdit(HWND handle)
+  : Control(handle)
+{
+  SendMessage(handle, EM_AUTOURLDETECT, true, 0);
+  SendMessage(handle, EM_SETEVENTMASK, 0, ENM_LINK);
+  SendMessage(handle, EM_SETEDITSTYLE,
+    SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
+}
+
+RichEdit::~RichEdit()
+{
+}
+
+void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
+{
+  switch(info->code) {
+  case EN_LINK:
+    HandleLink((ENLINK *)lParam, handle());
+    break;
+  };
+}
+
 bool RichEdit::setRichText(const string &rtf)
 {
   stringstream stream(rtf);

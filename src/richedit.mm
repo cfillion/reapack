@@ -21,6 +21,28 @@
 
 using namespace std;
 
+void RichEdit::Init()
+{
+}
+
+RichEdit::RichEdit(HWND handle)
+  : Control(handle)
+{
+  // hack: restore NSTextView's default mouse cursors (eg. hover links)
+  // this is an incomplete fix for the hyperlink's shy tooltips
+  SetCapture(handle);
+}
+
+RichEdit::~RichEdit()
+{
+  if(GetCapture() == handle())
+    ReleaseCapture();
+}
+
+void RichEdit::onNotify(LPNMHDR, LPARAM)
+{
+}
+
 bool RichEdit::setRichText(const string &rtf)
 {
   NSString *str = [NSString
@@ -42,10 +64,6 @@ bool RichEdit::setRichText(const string &rtf)
   [textView setEnabledTextCheckingTypes:NSTextCheckingTypeLink];
   [textView checkTextInDocument:nil];
   [textView setEditable:isEditable];
-
-  // hack: restore NSTextView's default mouse cursors (eg. hover links)
-  // this doesn't fix the shy link tooltips
-  SetCapture(handle());
 
   return [[textView string] length];
 }

@@ -27,16 +27,12 @@ public:
   static void Init();
 
   RichEdit(HWND);
+  ~RichEdit();
 
   bool setRichText(const std::string &);
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
-
-private:
-#ifdef _WIN32
-  void handleLink(LPARAM);
-#endif
 };
 
 #endif
