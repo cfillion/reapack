@@ -1,7 +1,7 @@
 <index version="1">
   <category name="catname">
-    <reapack name="packname" author="Watanabe Saki" type="script">
-      <version name="1.0">
+    <reapack name="packname" type="script">
+      <version name="1.0" author="Watanabe Saki">
         <source platform="all" file="filename">https://google.com/</source>
       </version>
     </reapack>

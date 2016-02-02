@@ -185,6 +185,14 @@ TEST_CASE("drop sources for unknown platforms", M) {
   REQUIRE(ver.sources().size() == 0);
 }
 
+TEST_CASE("version author", M) {
+  Version ver("1.0");
+  CHECK(ver.author().empty());
+
+  ver.setAuthor("cfillion");
+  REQUIRE(ver.author() == "cfillion");
+}
+
 #ifdef __APPLE__
 TEST_CASE("drop windows sources on os x", M) {
   MAKE_VERSION

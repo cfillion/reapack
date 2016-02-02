@@ -69,14 +69,15 @@ TEST_CASE("null package type", M) {
   }
 }
 
-TEST_CASE("read package developer", M) {
+TEST_CASE("read version author", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("developer_name");
+  RemoteIndex *ri = RemoteIndex::load("author");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
-  REQUIRE(ri->category(0)->package(0)->author() == "Watanabe Saki");
+  REQUIRE(ri->category(0)->package(0)->lastVersion()->author()
+    == "Watanabe Saki");
 }
 
 TEST_CASE("invalid version tag", M) {
@@ -120,6 +121,8 @@ TEST_CASE("null source file", M) {
   RemoteIndex *ri = RemoteIndex::load("missing_source_file");
   RIPTR(ri);
 
+  CHECK(ri->packages().size() == 1);
+
   Package *pkg = ri->category(0)->package(0);
   REQUIRE(pkg->version(0)->source(0)->file() == pkg->name());
 }
@@ -130,6 +133,7 @@ TEST_CASE("default platform", M) {
   RemoteIndex *ri = RemoteIndex::load("missing_platform");
   RIPTR(ri);
 
+  CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
     == Source::GenericPlatform);
 }
@@ -140,9 +144,7 @@ TEST_CASE("version changelog", M) {
   RemoteIndex *ri = RemoteIndex::load("changelog");
   RIPTR(ri);
 
-  CHECK_FALSE(ri->categories().empty());
-  CHECK_FALSE(ri->category(0)->packages().empty());
-  CHECK_FALSE(ri->category(0)->package(0)->versions().empty());
+  CHECK(ri->packages().size() == 1);
 
   REQUIRE(ri->category(0)->package(0)->version(0)->changelog()
     == "Hello\nWorld");

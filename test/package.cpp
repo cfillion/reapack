@@ -142,11 +142,3 @@ TEST_CASE("full name", M) {
     REQUIRE(pack.fullName() == "Remote Name/Category Name/file.name");
   }
 }
-
-TEST_CASE("package developer", M) {
-  Package pack(Package::ScriptType, "packname");
-  CHECK(pack.author().empty());
-
-  pack.setAuthor("cfillion");
-  REQUIRE(pack.author() == "cfillion");
-}

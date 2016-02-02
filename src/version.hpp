@@ -37,6 +37,10 @@ public:
   uint64_t code() const { return m_code; }
 
   Package *package() const { return m_package; }
+
+  void setAuthor(const std::string &author) { m_author = author; }
+  const std::string &author() const { return m_author; }
+
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
 
@@ -58,6 +62,7 @@ private:
   Package *m_package;
   Source *m_mainSource;
 
+  std::string m_author;
   std::string m_changelog;
   std::multimap<Path, Source *> m_sources;
   std::set<Path> m_files;

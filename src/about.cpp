@@ -43,6 +43,7 @@ void About::onInit()
   m_cats->onSelect(bind(&About::updatePackages, this));
 
 #ifdef _WIN32
+  // dirty hacks...
   const int NAME_SIZE = 330;
 #else
   const int NAME_SIZE = 382;
@@ -51,7 +52,7 @@ void About::onInit()
   m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR("Name"), NAME_SIZE},
     {AUTO_STR("Version"), 80},
-    {AUTO_STR("Developer"), 90},
+    {AUTO_STR("Author"), 90},
   });
 
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{
@@ -80,11 +81,9 @@ void About::onCommand(const int id)
 
 void About::populate()
 {
-  const auto_string &name = make_autostring(m_index->name());
-
   auto_char title[255] = {};
+  const auto_string &name = make_autostring(m_index->name());
   auto_snprintf(title, sizeof(title), AUTO_STR("About %s"), name.c_str());
-
   SetWindowText(handle(), title);
 
   const char *tmpRtf = \
@@ -98,6 +97,7 @@ void About::populate()
   ;
 
   if(!m_about->setRichText(tmpRtf)) {
+    // if description is invalid or empty, don't display it
     m_tabs->removeTab(0);
     m_tabs->setCurrentIndex(0);
   }
@@ -133,11 +133,12 @@ void About::updatePackages()
   m_packages->clear();
 
   for(Package *pkg : *pkgList) {
+    Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->name());
-    const auto_string &author = make_autostring(pkg->author());
-    const auto_string &lastVer = make_autostring(pkg->lastVersion()->name());
+    const auto_string &version = make_autostring(lastVer->name());
+    const auto_string &author = make_autostring(lastVer->author());
 
-    m_packages->addRow({name, lastVer,
+    m_packages->addRow({name, version,
       author.empty() ? AUTO_STR("Unknown") : author});
   }
 
