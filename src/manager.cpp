@@ -94,12 +94,15 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
   const Remote &remote = currentRemote();
 
+  if(remote.isNull())
+    return;
+
   Menu menu;
 
   const UINT enableAction =
     menu.addAction(AUTO_STR("&Enable and synchronize"), ACTION_ENABLE);
   const UINT disableAction =
-    menu.addAction(AUTO_STR("&Disable"), ACTION_DISABLE);
+    menu.addAction(AUTO_STR("&Disable (keep files)"), ACTION_DISABLE);
 
   menu.addSeparator();
 
