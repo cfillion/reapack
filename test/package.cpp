@@ -14,11 +14,11 @@ static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
   SECTION("unknown") {
-    REQUIRE(Package::ConvertType("yoyo") == Package::UnknownType);
+    REQUIRE(Package::typeFor("yoyo") == Package::UnknownType);
   }
 
   SECTION("script") {
-    REQUIRE(Package::ConvertType("script") == Package::ScriptType);
+    REQUIRE(Package::typeFor("script") == Package::ScriptType);
   }
 }
 

@@ -20,9 +20,12 @@
 #include "encoding.hpp"
 #include "index.hpp"
 #include "listview.hpp"
+#include "menu.hpp"
 #include "resource.hpp"
 #include "richedit.hpp"
 #include "tabbar.hpp"
+
+#include <boost/algorithm/string/replace.hpp>
 
 using namespace std;
 
@@ -61,6 +64,9 @@ void About::onInit()
     {AUTO_STR("Installed Files"), {}},
   });
 
+  m_website = getControl(IDC_WEBSITE);
+  m_donate = getControl(IDC_DONATE);
+
   populate();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
@@ -72,10 +78,21 @@ void About::onInit()
 void About::onCommand(const int id)
 {
   switch(id) {
+  case IDC_WEBSITE:
+    selectLink(id, m_websiteLinks);
+    break;
+  case IDC_DONATE:
+    selectLink(id, m_donationLinks);
+    break;
   case IDOK:
   case IDCANCEL:
     close();
     break;
+  default:
+    if(id >> 8 == IDC_WEBSITE)
+      openLink(m_websiteLinks[id & 0xff]);
+    else if(id >> 8 == IDC_DONATE)
+      openLink(m_donationLinks[id & 0xff]);
   }
 }
 
@@ -86,17 +103,15 @@ void About::populate()
   auto_snprintf(title, sizeof(title), AUTO_STR("About %s"), name.c_str());
   SetWindowText(handle(), title);
 
-  const char *tmpRtf = \
-    "{\\rtf1\\ansi\\ansicpg1252\\cocoartf1348\\cocoasubrtf170\n"
-    "{\\fonttbl\\f0\\fnil\\fcharset134 STHeitiSC-Light;}\n"
-    "{\\colortbl;\\red255\\green255\\blue255;}\n"
-    "\\margl1440\\margr1440\\vieww10800\\viewh8400\\viewkind0\n"
-    "\\pard\\tx566\\tx1133\\tx1700\\tx2267\\tx2834\\tx3401\\tx3968\\tx4535\\tx5102\\tx5669\\tx6236\\tx6803\\pardirnatural\n"
-    "\\f0\\fs24 \\cf0 http://perdu.com test"
-    "{\\field{\\*\\fldinst{HYPERLINK \"https://msdn.microsoft.com/en-us/library/windows/desktop/bb787974%28v=vs.85%29.aspx\"}}{\\fldrslt \\f0\\fs24 \\cf0 \\'d0\\'c2\\'ca\\'c0\\'bd\\'e7\\'a4\\'e8\\'a4\\'ea}}}\n"
-  ;
+  m_websiteLinks = m_index->links(RemoteIndex::WebsiteLink);
+  if(m_websiteLinks.empty())
+    hide(m_website);
 
-  if(!m_about->setRichText(tmpRtf)) {
+  m_donationLinks = m_index->links(RemoteIndex::DonationLink);
+  if(m_donationLinks.empty())
+    hide(m_donate);
+
+  if(!m_about->setRichText(m_index->aboutText())) {
     // if description is invalid or empty, don't display it
     m_tabs->removeTab(0);
     m_tabs->setCurrentIndex(0);
@@ -143,4 +158,30 @@ void About::updatePackages()
   }
 
   m_currentCat = catIndex;
+}
+
+void About::selectLink(const int ctrl, const std::vector<const Link *> &links)
+{
+  const int count = (int)links.size();
+
+  if(count > 1) {
+    Menu menu;
+
+    for(int i = 0; i < count; i++) {
+      const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
+      menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
+    }
+
+    RECT rect;
+    GetWindowRect(getControl(ctrl), &rect);
+    menu.show(rect.left, rect.bottom - 1, handle());
+  }
+  else if(count == 1)
+    openLink(links.front());
+}
+
+void About::openLink(const Link *link)
+{
+  const auto_string &url = make_autostring(link->url);
+  ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
 }

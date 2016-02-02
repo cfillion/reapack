@@ -201,3 +201,46 @@ TEST_CASE("category full name", M) {
   Category cat2("Category Name", &ri);
   REQUIRE(cat2.fullName() == "Remote Name/Category Name");
 }
+
+TEST_CASE("repository description", M) {
+  RemoteIndex ri("Remote Name");
+  CHECK(ri.aboutText().empty());
+
+  ri.setAboutText("Hello World");
+  REQUIRE(ri.aboutText() == "Hello World");
+}
+
+TEST_CASE("repository links", M) {
+  RemoteIndex ri("Remote name");
+  CHECK(ri.links(RemoteIndex::WebsiteLink).empty());
+  CHECK(ri.links(RemoteIndex::DonationLink).empty());
+
+  SECTION("website links") {
+    ri.addLink(RemoteIndex::WebsiteLink, {"First", "http://example.com"});
+    REQUIRE(ri.links(RemoteIndex::WebsiteLink).size() == 1);
+    ri.addLink(RemoteIndex::WebsiteLink, {"Second", "http://example.com"});
+
+    const auto &links = ri.links(RemoteIndex::WebsiteLink);
+    REQUIRE(links.size() == 2);
+    REQUIRE(links[0]->name == "First");
+    REQUIRE(links[1]->name == "Second");
+
+    REQUIRE(ri.links(RemoteIndex::DonationLink).empty());
+  }
+
+  SECTION("donation links") {
+    ri.addLink(RemoteIndex::DonationLink, {"First", "http://example.com"});
+    REQUIRE(ri.links(RemoteIndex::DonationLink).size() == 1);
+  }
+
+  SECTION("drop invalid links") {
+    ri.addLink(RemoteIndex::WebsiteLink, {"name", "not http(s)"});
+    REQUIRE(ri.links(RemoteIndex::WebsiteLink).empty());
+  }
+}
+
+TEST_CASE("link type from string", M) {
+  REQUIRE(RemoteIndex::linkTypeFor("website") == RemoteIndex::WebsiteLink);
+  REQUIRE(RemoteIndex::linkTypeFor("donation") == RemoteIndex::DonationLink);
+  REQUIRE(RemoteIndex::linkTypeFor("bacon") == RemoteIndex::WebsiteLink);
+}

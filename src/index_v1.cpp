@@ -25,6 +25,7 @@
 
 using namespace std;
 
+static void LoadMetadataV1(TiXmlElement *, RemoteIndex *ri);
 static void LoadCategoryV1(TiXmlElement *, RemoteIndex *ri);
 static void LoadPackageV1(TiXmlElement *, Category *cat);
 static void LoadVersionV1(TiXmlElement *, Package *pkg);
@@ -37,16 +38,52 @@ RemoteIndex *RemoteIndex::loadV1(TiXmlElement *root, const string &name)
   // thrown during the loading process
   unique_ptr<RemoteIndex> ptr(ri);
 
-  TiXmlElement *catNode = root->FirstChildElement("category");
+  TiXmlElement *node = root->FirstChildElement("category");
 
-  while(catNode) {
-    LoadCategoryV1(catNode, ri);
+  while(node) {
+    LoadCategoryV1(node, ri);
 
-    catNode = catNode->NextSiblingElement("category");
+    node = node->NextSiblingElement("category");
   }
+
+  node = root->FirstChildElement("metadata");
+
+  if(node)
+    LoadMetadataV1(node, ri);
 
   ptr.release();
   return ri;
+}
+
+void LoadMetadataV1(TiXmlElement *meta, RemoteIndex *ri)
+{
+  TiXmlElement *node = meta->FirstChildElement("description");
+
+  if(node) {
+    const char *rtf = node->GetText();
+
+    if(rtf)
+      ri->setAboutText(rtf);
+  }
+
+  node = meta->FirstChildElement("link");
+
+  while(node) {
+    const char *rel = node->Attribute("rel");
+    const char *url = node->Attribute("href");
+    const char *name = node->GetText();
+
+    if(!rel) rel = "";
+    if(!name) {
+      if(!url) url = "";
+      name = url;
+    }
+    else if(!url) url = name;
+
+    ri->addLink(RemoteIndex::linkTypeFor(rel), {name, url});
+
+    node = node->NextSiblingElement("link");
+  }
 }
 
 void LoadCategoryV1(TiXmlElement *catNode, RemoteIndex *ri)
@@ -78,7 +115,7 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
-  Package *pack = new Package(Package::ConvertType(type), name, cat);
+  Package *pack = new Package(Package::typeFor(type), name, cat);
   unique_ptr<Package> ptr(pack);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");

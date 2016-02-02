@@ -28,18 +28,26 @@ using namespace std;
 
 static FILE *OpenFile(const char *path)
 {
-  #ifdef _WIN32
+#ifdef _WIN32
   FILE *file = nullptr;
   _wfopen_s(&file, make_autostring(path).c_str(), L"rb");
   return file;
-  #else
+#else
   return fopen(path, "rb");
-  #endif
+#endif
 }
 
 Path RemoteIndex::pathFor(const string &name)
 {
   return Path::prefixCache(name + ".xml");
+}
+
+auto RemoteIndex::linkTypeFor(const char *rel) -> LinkType
+{
+  if(!strcmp(rel, "donation"))
+    return DonationLink;
+
+  return WebsiteLink;
 }
 
 RemoteIndex *RemoteIndex::load(const string &name)
@@ -102,6 +110,25 @@ void RemoteIndex::addCategory(Category *cat)
 
   m_packages.insert(m_packages.end(),
     cat->packages().begin(), cat->packages().end());
+}
+
+void RemoteIndex::addLink(const LinkType type, const Link &link)
+{
+  if(link.url.find("http") == 0)
+    m_links.insert({type, link});
+}
+
+auto RemoteIndex::links(const LinkType type) const -> LinkList
+{
+  const auto begin = m_links.lower_bound(type);
+  const auto end = m_links.upper_bound(type);
+
+  LinkList list(m_links.count(type));
+
+  for(auto it = begin; it != end; it++)
+    list[distance(begin, it)] = &it->second;
+
+  return list;
 }
 
 Category::Category(const string &name, RemoteIndex *ri)

@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Package::Type Package::ConvertType(const char *type)
+Package::Type Package::typeFor(const char *type)
 {
   if(!strcmp(type, "script"))
     return ScriptType;

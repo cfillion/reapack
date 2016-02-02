@@ -18,7 +18,7 @@
 #ifndef REAPACK_INDEX_HPP
 #define REAPACK_INDEX_HPP
 
-#include <memory>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -30,15 +30,27 @@ typedef std::vector<Category *> CategoryList;
 class Path;
 class TiXmlElement;
 
+struct Link { std::string name; std::string url; };
+
 class RemoteIndex {
 public:
+  enum LinkType { WebsiteLink, DonationLink };
+  typedef std::multimap<LinkType, Link> LinkMap;
+  typedef std::vector<const Link *> LinkList;
+
   static Path pathFor(const std::string &name);
+  static LinkType linkTypeFor(const char *rel);
   static RemoteIndex *load(const std::string &name);
 
   RemoteIndex(const std::string &name);
   ~RemoteIndex();
 
   const std::string &name() const { return m_name; }
+
+  void setAboutText(const std::string &rtf) { m_about = rtf; }
+  const std::string &aboutText() const { return m_about; }
+  void addLink(const LinkType, const Link &);
+  LinkList links(const LinkType type) const;
 
   void addCategory(Category *cat);
   const CategoryList &categories() const { return m_categories; }
@@ -50,6 +62,8 @@ private:
   static RemoteIndex *loadV1(TiXmlElement *, const std::string &);
 
   std::string m_name;
+  std::string m_about;
+  LinkMap m_links;
   CategoryList m_categories;
   PackageList m_packages;
 };

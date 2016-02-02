@@ -130,14 +130,14 @@ void Dialog::Destroy(Dialog *dlg)
   delete dlg;
 }
 
-void Dialog::show()
+void Dialog::show(HWND handle)
 {
-  ShowWindow(m_handle, SW_SHOW);
+  ShowWindow(handle, SW_SHOW);
 }
 
-void Dialog::hide()
+void Dialog::hide(HWND handle)
 {
-  ShowWindow(m_handle, SW_HIDE);
+  ShowWindow(handle, SW_HIDE);
 }
 
 void Dialog::close(const INT_PTR result)

@@ -177,3 +177,34 @@ TEST_CASE("full index", M) {
   REQUIRE(source->file() == "test.lua");
   REQUIRE(source->url() == "https://google.com/");
 }
+
+TEST_CASE("read index metadata", M) {
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("metadata");
+  RIPTR(ri);
+
+  SECTION("description") {
+    REQUIRE(ri->aboutText() == "Chunky\nBacon");
+  }
+  
+  SECTION("website links") {
+    const auto &links = ri->links(RemoteIndex::WebsiteLink);
+    REQUIRE(links.size() == 4);
+    REQUIRE(links[0]->name == "http://cfillion.tk");
+    REQUIRE(links[0]->url == "http://cfillion.tk");
+    REQUIRE(links[1]->name == "https://github.com/cfillion");
+    REQUIRE(links[1]->url == "https://github.com/cfillion");
+    REQUIRE(links[2]->name == "http://twitter.com/cfi30");
+    REQUIRE(links[2]->url == "http://twitter.com/cfi30");
+    REQUIRE(links[3]->name == "http://google.com");
+    REQUIRE(links[3]->url == "http://google.com");
+  }
+
+  SECTION("donation links") {
+    const auto &links = ri->links(RemoteIndex::DonationLink);
+    REQUIRE(links.size() == 1);
+    REQUIRE(links[0]->name == "Donate");
+    REQUIRE(links[0]->url == "http://paypal.com");
+  }
+}

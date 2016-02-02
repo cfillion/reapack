@@ -72,8 +72,10 @@ public:
   void setEnabled(const bool enable) { setEnabled(enable, m_handle); }
   void setEnabled(const bool, HWND);
 
-  void show();
-  void hide();
+  void show(HWND);
+  void show() { show(m_handle); }
+  void hide(HWND);
+  void hide() { hide(m_handle); }
   void close(const INT_PTR = 0);
   void center();
   void setFocus();

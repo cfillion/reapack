@@ -43,8 +43,8 @@
 #define IDC_IMPORT     204
 #define IDC_TABS       205
 #define IDC_ENABLE     206
-#define IDC_DONATE     207
-#define IDC_WEBSITE    208
+#define IDC_WEBSITE    207
+#define IDC_DONATE     208
 #define IDC_ABOUT      209
 #define IDC_CATEGORIES 210
 #define IDC_PACKAGES   211

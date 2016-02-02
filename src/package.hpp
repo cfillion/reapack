@@ -33,7 +33,7 @@ public:
     ScriptType,
   };
 
-  static Type ConvertType(const char *);
+  static Type typeFor(const char *);
 
   Package(const Type, const std::string &name, Category * = nullptr);
   ~Package();
