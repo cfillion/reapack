@@ -18,15 +18,21 @@
 #include "menu.hpp"
 
 Menu::Menu(HMENU handle)
-  : m_handle(handle)
+  : m_handle(handle), m_ownership(!handle)
 {
-  if(!handle)
+  if(m_ownership)
     m_handle = CreatePopupMenu();
 
   m_size = GetMenuItemCount(m_handle);
 
   if(!empty())
     addSeparator();
+}
+
+Menu::~Menu()
+{
+  if(m_ownership)
+    DestroyMenu(m_handle);
 }
 
 UINT Menu::addAction(const auto_char *label, const int commandId)

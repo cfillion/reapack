@@ -29,6 +29,7 @@
 class Menu {
 public:
   Menu(HMENU handle = 0);
+  ~Menu();
 
   unsigned int size() { return m_size; }
   bool empty() const { return m_size == 0; }
@@ -50,6 +51,7 @@ private:
   void append(MENUITEMINFO &);
 
   HMENU m_handle;
+  bool m_ownership;
   UINT m_size;
 };
 
