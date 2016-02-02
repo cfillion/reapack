@@ -49,4 +49,21 @@ private:
   HWND m_handle;
 };
 
+class InhibitControl {
+public:
+  InhibitControl(Control *ctrl)
+    : m_control(ctrl)
+  {
+    m_control->inhibitRedraw(true);
+  }
+
+  ~InhibitControl()
+  {
+    m_control->inhibitRedraw(false);
+  }
+
+private:
+  Control *m_control;
+};
+
 #endif

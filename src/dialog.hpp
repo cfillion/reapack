@@ -122,4 +122,24 @@ private:
   std::map<int, Control *> m_controls;
 };
 
+class LockDialog {
+public:
+  LockDialog(Dialog *dlg)
+    : m_dialog(dlg), m_enabled(dlg->isEnabled())
+  {
+    if(m_enabled)
+      m_dialog->disable();
+  }
+
+  ~LockDialog()
+  {
+    if(m_enabled)
+      m_dialog->enable();
+  }
+
+private:
+  Dialog *m_dialog;
+  bool m_enabled;
+};
+
 #endif

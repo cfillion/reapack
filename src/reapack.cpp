@@ -262,16 +262,12 @@ Transaction *ReaPack::createTransaction()
     if(m_transaction->isCancelled() || !m_transaction->isReportEnabled())
       return;
 
-    const bool wasManagerEnabled = m_manager->isEnabled();
-    m_manager->disable();
+    LockDialog lock(m_manager);
 
     if(m_transaction->taskCount() == 0 && m_transaction->errors().empty())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
-
-    if(wasManagerEnabled)
-      m_manager->enable();
   });
 
   m_transaction->onDestroy([=] {

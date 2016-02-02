@@ -57,9 +57,8 @@ bool RichEdit::setRichText(const string &rtf)
     withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
   ];
 
-  const BOOL isEditable = textView.isEditable;
-
   // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
+  const BOOL isEditable = textView.isEditable;
   [textView setEditable:YES];
   [textView setEnabledTextCheckingTypes:NSTextCheckingTypeLink];
   [textView checkTextInDocument:nil];

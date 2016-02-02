@@ -129,7 +129,7 @@ void About::updatePackages()
   else
     pkgList = &m_index->category(catIndex)->packages();
 
-  m_packages->inhibitRedraw(true);
+  InhibitControl lock(m_packages);
   m_packages->clear();
 
   for(Package *pkg : *pkgList) {
@@ -143,5 +143,4 @@ void About::updatePackages()
   }
 
   m_currentCat = catIndex;
-  m_packages->inhibitRedraw(false);
 }
