@@ -69,6 +69,16 @@ TEST_CASE("null package type", M) {
   }
 }
 
+TEST_CASE("read package developer", M) {
+  UseRootPath root(RIPATH);
+
+  RemoteIndex *ri = RemoteIndex::load("developer_name");
+  RIPTR(ri);
+
+  CHECK(ri->packages().size() == 1);
+  REQUIRE(ri->category(0)->package(0)->author() == "Watanabe Saki");
+}
+
 TEST_CASE("invalid version tag", M) {
   UseRootPath root(RIPATH);
 

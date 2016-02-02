@@ -51,7 +51,7 @@ void About::onInit()
   m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR("Name"), NAME_SIZE},
     {AUTO_STR("Version"), 80},
-    {AUTO_STR("Author"), 90},
+    {AUTO_STR("Developer"), 90},
   });
 
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{
@@ -134,8 +134,11 @@ void About::updatePackages()
 
   for(Package *pkg : *pkgList) {
     const auto_string &name = make_autostring(pkg->name());
+    const auto_string &author = make_autostring(pkg->author());
     const auto_string &lastVer = make_autostring(pkg->lastVersion()->name());
-    m_packages->addRow({name, lastVer, AUTO_STR("John Doe")});
+
+    m_packages->addRow({name, lastVer,
+      author.empty() ? AUTO_STR("Unknown") : author});
   }
 
   m_currentCat = catIndex;

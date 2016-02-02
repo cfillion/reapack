@@ -81,6 +81,9 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
   Package *pack = new Package(Package::ConvertType(type), name, cat);
   unique_ptr<Package> ptr(pack);
 
+  const char *author = packNode->Attribute("author");
+  if(author) pack->setAuthor(author);
+
   TiXmlElement *verNode = packNode->FirstChildElement("version");
 
   while(verNode) {

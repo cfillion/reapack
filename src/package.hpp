@@ -43,6 +43,9 @@ public:
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 
+  void setAuthor(const std::string &author) { m_author = author; }
+  const std::string &author() const { return m_author; }
+
   void addVersion(Version *ver);
   const VersionSet &versions() const { return m_versions; }
   Version *version(const size_t i) const;
@@ -55,6 +58,7 @@ private:
 
   Type m_type;
   std::string m_name;
+  std::string m_author;
   VersionSet m_versions;
 };
 
