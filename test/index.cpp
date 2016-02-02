@@ -21,7 +21,7 @@ TEST_CASE("file not found", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "failed to read index");
+    REQUIRE(string(e.what()) == "No such file or directory");
   }
 }
 
@@ -34,7 +34,7 @@ TEST_CASE("broken", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "failed to read index");
+    REQUIRE(string(e.what()) == "Error reading end tag.");
   }
 }
 

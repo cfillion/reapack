@@ -21,6 +21,7 @@
 #include "errors.hpp"
 #include "path.hpp"
 
+#include <cerrno>
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;
@@ -47,13 +48,14 @@ RemoteIndex *RemoteIndex::load(const string &name)
 
   FILE *file = OpenFile(pathFor(name).join().c_str());
 
-  const bool success = doc.LoadFile(file);
+  if(!file)
+    throw reapack_error(strerror(errno));
 
-  if(file)
-    fclose(file);
+  const bool success = doc.LoadFile(file);
+  fclose(file);
 
   if(!success)
-    throw reapack_error("failed to read index");
+    throw reapack_error(doc.ErrorDesc());
 
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();
