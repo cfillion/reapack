@@ -187,14 +187,21 @@ void About::updateInstalledFiles()
     const auto_string &desc = make_autostring(e.what());
     auto_char msg[255] = {};
     auto_snprintf(msg, sizeof(msg),
-      AUTO_STR("Cannot load the list of installed files: %s"), desc.c_str());
+      AUTO_STR("The file list is currently unavailable.")
+      AUTO_STR("Retry later when all installation task are completed.\r\n")
+      AUTO_STR("\r\nError description: %s"),
+      desc.c_str());
     SetWindowText(m_installedFiles, msg);
     return;
   }
 
   if(allFiles.empty()) {
-    SetWindowText(m_installedFiles, AUTO_STR(
-      "This repository does not own any file on your computer at this time."));
+    SetWindowText(m_installedFiles,
+      AUTO_STR(
+      "This repository does not own any file on your computer at this time.\r\n")
+
+      AUTO_STR("It is either not installed yet, or ")
+      AUTO_STR("it does not provide any package compatible with your system."));
   }
   else {
     stringstream stream;
