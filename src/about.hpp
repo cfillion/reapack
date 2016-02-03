@@ -41,6 +41,7 @@ protected:
 private:
   void populate();
   void updatePackages();
+  void updateInstalledFiles();
   void selectLink(const int control, const std::vector<const Link *> &);
   void openLink(const Link *);
 
@@ -52,6 +53,7 @@ private:
   RichEdit *m_about;
   ListView *m_cats;
   ListView *m_packages;
+  HWND m_installedFiles;
 
   std::vector<const Link *> m_websiteLinks;
   std::vector<const Link *> m_donationLinks;

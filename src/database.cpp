@@ -92,8 +92,10 @@ int Database::errorCode() const
 
 void Database::begin()
 {
-  // EXCLUSIVE -> don't wait until the first query to aquire a lock
-  exec("BEGIN EXCLUSIVE TRANSACTION");
+  // IMMEDIATE -> don't wait until the first query to aquire a lock
+  // but still allow new read-only connections (unlike EXCLUSIVE)
+  // while preventing new transactions to be made as long as it's active
+  exec("BEGIN IMMEDIATE TRANSACTION");
 }
 
 void Database::commit()

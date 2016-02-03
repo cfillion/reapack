@@ -18,15 +18,18 @@
 #include "about.hpp"
 
 #include "encoding.hpp"
+#include "errors.hpp"
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
+#include "registry.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
 #include "richedit.hpp"
 #include "tabbar.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
+#include <sstream>
 
 using namespace std;
 
@@ -60,10 +63,12 @@ void About::onInit()
     {AUTO_STR("Author"), 90},
   });
 
+  m_installedFiles = getControl(IDC_LIST);
+
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{
     {AUTO_STR("Description"), {m_about->handle()}},
     {AUTO_STR("Packages"), {m_cats->handle(), m_packages->handle()}},
-    {AUTO_STR("Installed Files"), {}},
+    {AUTO_STR("Installed Files"), {m_installedFiles}},
   });
 
   populate();
@@ -128,6 +133,8 @@ void About::populate()
     m_cats->addRow({make_autostring(cat->name())});
 
   updatePackages();
+
+  updateInstalledFiles();
 }
 
 void About::updatePackages()
@@ -163,6 +170,40 @@ void About::updatePackages()
   }
 
   m_currentCat = catIndex;
+}
+
+void About::updateInstalledFiles()
+{
+  set<Path> allFiles;
+
+  try {
+    Registry reg(Path::prefixCache("registry.db"));
+    for(const Registry::Entry &entry : reg.getEntries(*m_remote)) {
+      const set<Path> &files = reg.getFiles(entry);
+      allFiles.insert(files.begin(), files.end());
+    }
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+    auto_char msg[255] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("Cannot load the list of installed files: %s"), desc.c_str());
+    SetWindowText(m_installedFiles, msg);
+    return;
+  }
+
+  if(allFiles.empty()) {
+    SetWindowText(m_installedFiles, AUTO_STR(
+      "This repository does not own any file on your computer at this time."));
+  }
+  else {
+    stringstream stream;
+
+    for(const Path &path : allFiles)
+      stream << path.join() << "\r\n";
+
+    SetWindowText(m_installedFiles, make_autostring(stream.str()).c_str());
+  }
 }
 
 void About::selectLink(const int ctrl, const std::vector<const Link *> &links)
