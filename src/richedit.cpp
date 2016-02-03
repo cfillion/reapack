@@ -22,11 +22,11 @@
 // Starting here and onward is the Win32 implementation of RichEdit
 // The OS X implementation can be found in richedit.mm
 
+#include "encoding.hpp"
+
 #include <memory>
 #include <richedit.h>
 #include <sstream>
-
-#include "encoding.hpp"
 
 using namespace std;
 

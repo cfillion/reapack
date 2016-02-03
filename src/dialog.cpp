@@ -17,9 +17,9 @@
 
 #include "dialog.hpp"
 
-#include <algorithm>
-
 #include "control.hpp"
+
+#include <algorithm>
 
 using namespace std;
 

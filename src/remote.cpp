@@ -17,12 +17,12 @@
 
 #include "remote.hpp"
 
+#include "encoding.hpp"
+#include "errors.hpp"
+
 #include <fstream>
 #include <regex>
 #include <sstream>
-
-#include "encoding.hpp"
-#include "errors.hpp"
 
 using namespace std;
 
