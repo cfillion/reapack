@@ -42,7 +42,7 @@ public:
   const Row &row(int index) const { return m_rows[index]; }
   void replaceRow(int index, const Row &);
   void removeRow(int index);
-  void resizeColumn(int index, const int width);
+  void resizeColumn(int index, int width);
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder);
   void clear();

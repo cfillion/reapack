@@ -38,10 +38,10 @@ private:
   std::string getString(const char *, const std::string &) const;
   void setString(const char *, const std::string &, const std::string &) const;
   size_t getUInt(const char *, const std::string &) const;
-  void setUInt(const char *, const std::string &, const size_t) const;
+  void setUInt(const char *, const std::string &, size_t) const;
   void deleteKey(const char *, const std::string &) const;
   void cleanupArray(const char *, const std::string &,
-    const size_t begin, const size_t end) const;
+    size_t begin, size_t end) const;
 
   void migrate();
 

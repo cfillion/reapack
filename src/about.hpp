@@ -42,7 +42,7 @@ private:
   void populate();
   void updatePackages();
   void updateInstalledFiles();
-  void selectLink(const int control, const std::vector<const Link *> &);
+  void selectLink(int control, const std::vector<const Link *> &);
   void openLink(const Link *);
 
   const Remote *m_remote;

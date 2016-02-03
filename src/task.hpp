@@ -63,7 +63,7 @@ private:
 
 class InstallTask : public Task {
 public:
-  InstallTask(Version *ver, const std::set<Path> &oldFiles, Transaction *);
+  InstallTask(const Version *ver, const std::set<Path> &oldFiles, Transaction *);
 
   const std::set<Path> &removedFiles() const { return m_oldFiles; }
 
@@ -75,9 +75,9 @@ protected:
 private:
   typedef std::pair<Path, Path> PathPair;
 
-  void saveSource(Download *, Source *);
+  void saveSource(Download *, const Source *);
 
-  Version *m_version;
+  const Version *m_version;
   std::set<Path> m_oldFiles;
   std::vector<PathPair> m_newFiles;
 };

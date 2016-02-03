@@ -56,15 +56,15 @@ class Statement {
 public:
   typedef std::function<bool (void)> ExecCallback;
 
-  void bind(const int index, const std::string &text);
-  void bind(const int index, const int integer);
-  void bind(const int index, const uint64_t integer);
+  void bind(int index, const std::string &text);
+  void bind(int index, int integer);
+  void bind(int index, uint64_t integer);
   void exec();
   void exec(const ExecCallback &);
 
-  int intColumn(const int index) const;
-  uint64_t uint64Column(const int index) const;
-  std::string stringColumn(const int index) const;
+  int intColumn(int index) const;
+  uint64_t uint64Column(int index) const;
+  std::string stringColumn(int index) const;
 
 private:
   friend Database;

@@ -33,8 +33,8 @@ public:
   TabBar(const Tabs &tabs, HWND handle);
   int addTab(const Tab &);
   int currentIndex() const;
-  void setCurrentIndex(const int);
-  void removeTab(const int);
+  void setCurrentIndex(int);
+  void removeTab(int);
   void setFocus();
 
 protected:

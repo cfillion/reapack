@@ -7,7 +7,7 @@
 #include <string>
 
 #define RIPATH "test/indexes/v1/"
-#define RIPTR(ptr) unique_ptr<RemoteIndex> riptr(ptr)
+#define RIPTR(ptr) unique_ptr<const RemoteIndex> riptr(ptr)
 
 using namespace std;
 
@@ -17,7 +17,7 @@ TEST_CASE("unnamed category", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("unnamed_category");
+    const RemoteIndex *ri = RemoteIndex::load("unnamed_category");
     RIPTR(ri);
     FAIL();
   }
@@ -29,7 +29,7 @@ TEST_CASE("unnamed category", M) {
 TEST_CASE("invalid category tag", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("wrong_category_tag");
+  const RemoteIndex *ri = RemoteIndex::load("wrong_category_tag");
   RIPTR(ri);
 
   REQUIRE(ri->categories().empty());
@@ -38,7 +38,7 @@ TEST_CASE("invalid category tag", M) {
 TEST_CASE("invalid package tag", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("wrong_package_tag");
+  const RemoteIndex *ri = RemoteIndex::load("wrong_package_tag");
   RIPTR(ri);
   REQUIRE(ri->categories().empty());
 
@@ -48,7 +48,7 @@ TEST_CASE("null package name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("unnamed_package");
+    const RemoteIndex *ri = RemoteIndex::load("unnamed_package");
     RIPTR(ri);
     FAIL();
   }
@@ -61,7 +61,7 @@ TEST_CASE("null package type", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("missing_type");
+    const RemoteIndex *ri = RemoteIndex::load("missing_type");
     RIPTR(ri);
   }
   catch(const reapack_error &) {
@@ -72,7 +72,7 @@ TEST_CASE("null package type", M) {
 TEST_CASE("read version author", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("author");
+  const RemoteIndex *ri = RemoteIndex::load("author");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -83,7 +83,7 @@ TEST_CASE("read version author", M) {
 TEST_CASE("invalid version tag", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("wrong_version_tag");
+  const RemoteIndex *ri = RemoteIndex::load("wrong_version_tag");
   RIPTR(ri);
 
   REQUIRE(ri->categories().empty());
@@ -93,7 +93,7 @@ TEST_CASE("null package version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("missing_version");
+    const RemoteIndex *ri = RemoteIndex::load("missing_version");
     RIPTR(ri);
     FAIL();
   }
@@ -106,7 +106,7 @@ TEST_CASE("null source url", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("missing_source_url");
+    const RemoteIndex *ri = RemoteIndex::load("missing_source_url");
     RIPTR(ri);
     FAIL();
   }
@@ -118,19 +118,19 @@ TEST_CASE("null source url", M) {
 TEST_CASE("null source file", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("missing_source_file");
+  const RemoteIndex *ri = RemoteIndex::load("missing_source_file");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
 
-  Package *pkg = ri->category(0)->package(0);
+  const Package *pkg = ri->category(0)->package(0);
   REQUIRE(pkg->version(0)->source(0)->file() == pkg->name());
 }
 
 TEST_CASE("default platform", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("missing_platform");
+  const RemoteIndex *ri = RemoteIndex::load("missing_platform");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -141,7 +141,7 @@ TEST_CASE("default platform", M) {
 TEST_CASE("version changelog", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("changelog");
+  const RemoteIndex *ri = RemoteIndex::load("changelog");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -153,26 +153,26 @@ TEST_CASE("version changelog", M) {
 TEST_CASE("full index", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("valid_index");
+  const RemoteIndex *ri = RemoteIndex::load("valid_index");
   RIPTR(ri);
 
   REQUIRE(ri->categories().size() == 1);
 
-  Category *cat = ri->category(0);
+  const Category *cat = ri->category(0);
   REQUIRE(cat->name() == "Category Name");
   REQUIRE(cat->packages().size() == 1);
 
-  Package *pack = cat->package(0);
+  const Package *pack = cat->package(0);
   REQUIRE(pack->type() == Package::ScriptType);
   REQUIRE(pack->name() == "Hello World.lua");
   REQUIRE(pack->versions().size() == 1);
 
-  Version *ver = pack->version(0);
+  const Version *ver = pack->version(0);
   REQUIRE(ver->name() == "1.0");
   REQUIRE(ver->sources().size() == 1);
   REQUIRE(ver->changelog() == "Fixed a division by zero error.");
 
-  Source *source = ver->source(0);
+  const Source *source = ver->source(0);
   REQUIRE(source->platform() == Source::GenericPlatform);
   REQUIRE(source->file() == "test.lua");
   REQUIRE(source->url() == "https://google.com/");
@@ -181,7 +181,7 @@ TEST_CASE("full index", M) {
 TEST_CASE("read index metadata", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("metadata");
+  const RemoteIndex *ri = RemoteIndex::load("metadata");
   RIPTR(ri);
 
   SECTION("description") {

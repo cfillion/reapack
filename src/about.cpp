@@ -131,7 +131,7 @@ void About::populate()
 
   m_cats->addRow({AUTO_STR("<All Categories>")});
 
-  for(Category *cat : m_index->categories())
+  for(const Category *cat : m_index->categories())
     m_cats->addRow({make_autostring(cat->name())});
 
   m_cats->sortByColumn(0);
@@ -163,8 +163,8 @@ void About::updatePackages()
   InhibitControl lock(m_packages);
   m_packages->clear();
 
-  for(Package *pkg : *pkgList) {
-    Version *lastVer = pkg->lastVersion();
+  for(const Package *pkg : *pkgList) {
+    const Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->name());
     const auto_string &version = make_autostring(lastVer->name());
     const auto_string &author = make_autostring(lastVer->author());

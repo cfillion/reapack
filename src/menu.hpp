@@ -34,18 +34,18 @@ public:
   unsigned int size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  UINT addAction(const auto_char *label, const int commandId);
+  unsigned int addAction(const auto_char *label, int commandId);
   void addSeparator();
   Menu addMenu(const auto_char *label);
 
-  void show(const int x, const int y, HWND parent) const;
+  void show(int x, int y, HWND parent) const;
 
   void enable();
-  void enable(const UINT);
+  void enable(unsigned int);
   void disable();
-  void disable(const UINT);
-  void setEnabled(const bool);
-  void setEnabled(const bool, const UINT);
+  void disable(unsigned int);
+  void setEnabled(bool);
+  void setEnabled(bool, unsigned int);
 
 private:
   void append(MENUITEMINFO &);

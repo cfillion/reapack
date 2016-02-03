@@ -6,7 +6,7 @@
 #include <string>
 
 #define RIPATH "test/indexes/"
-#define RIPTR(ptr) unique_ptr<RemoteIndex> riptr(ptr)
+#define RIPTR(ptr) unique_ptr<const RemoteIndex> riptr(ptr)
 
 using namespace std;
 
@@ -16,7 +16,7 @@ TEST_CASE("file not found", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("404");
+    const RemoteIndex *ri = RemoteIndex::load("404");
     RIPTR(ri);
     FAIL();
   }
@@ -29,7 +29,7 @@ TEST_CASE("broken", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("broken");
+    const RemoteIndex *ri = RemoteIndex::load("broken");
     RIPTR(ri);
     FAIL();
   }
@@ -42,7 +42,7 @@ TEST_CASE("wrong root tag name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("wrong_root");
+    const RemoteIndex *ri = RemoteIndex::load("wrong_root");
     RIPTR(ri);
     FAIL();
   }
@@ -55,7 +55,7 @@ TEST_CASE("invalid version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("invalid_version");
+    const RemoteIndex *ri = RemoteIndex::load("invalid_version");
     RIPTR(ri);
     FAIL();
   }
@@ -68,7 +68,7 @@ TEST_CASE("future version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    RemoteIndex *ri = RemoteIndex::load("future_version");
+    const RemoteIndex *ri = RemoteIndex::load("future_version");
     RIPTR(ri);
     FAIL();
   }
@@ -80,7 +80,7 @@ TEST_CASE("future version", M) {
 TEST_CASE("unicode index path", M) {
   UseRootPath root(RIPATH);
 
-  RemoteIndex *ri = RemoteIndex::load("Новая папка");
+  const RemoteIndex *ri = RemoteIndex::load("Новая папка");
   RIPTR(ri);
 
   REQUIRE(ri->name() == "Новая папка");

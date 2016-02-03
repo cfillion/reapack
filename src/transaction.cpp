@@ -48,7 +48,7 @@ Transaction::~Transaction()
   for(Task *task : m_tasks)
     delete task;
 
-  for(RemoteIndex *ri : m_remoteIndexes)
+  for(const RemoteIndex *ri : m_remoteIndexes)
     delete ri;
 
   delete m_registry;
@@ -75,7 +75,7 @@ void Transaction::upgradeAll(Download *dl)
   if(!saveFile(dl, RemoteIndex::pathFor(dl->name())))
     return;
 
-  RemoteIndex *ri;
+  const RemoteIndex *ri;
 
   try {
     ri = RemoteIndex::load(dl->name());
@@ -87,13 +87,13 @@ void Transaction::upgradeAll(Download *dl)
     return;
   }
 
-  for(Package *pkg : ri->packages())
+  for(const Package *pkg : ri->packages())
     upgrade(pkg);
 }
 
-void Transaction::upgrade(Package *pkg)
+void Transaction::upgrade(const Package *pkg)
 {
-  Version *ver = pkg->lastVersion();
+  const Version *ver = pkg->lastVersion();
   auto queryRes = m_registry->query(pkg);
 
   if(queryRes.status == Registry::UpToDate) {
@@ -135,7 +135,7 @@ void Transaction::install()
     const InstallTicket ticket = m_installQueue.front();
     m_installQueue.pop();
 
-    Version *ver = ticket.first;
+    const Version *ver = ticket.first;
     const Registry::QueryResult queryRes = ticket.second;
     const set<Path> &currentFiles = m_registry->getFiles(queryRes.entry);
 

@@ -24,7 +24,7 @@
 class Category;
 
 class Package;
-typedef std::vector<Package *> PackageList;
+typedef std::vector<const Package *> PackageList;
 
 class Package {
 public:
@@ -43,10 +43,10 @@ public:
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 
-  void addVersion(Version *ver);
+  void addVersion(const Version *ver);
   const VersionSet &versions() const { return m_versions; }
-  Version *version(const size_t i) const;
-  Version *lastVersion() const;
+  const Version *version(size_t index) const;
+  const Version *lastVersion() const;
 
   Path targetPath() const;
 

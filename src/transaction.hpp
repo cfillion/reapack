@@ -36,7 +36,7 @@ public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
-  typedef std::pair<Version *, const Registry::QueryResult> InstallTicket;
+  typedef std::pair<const Version *, const Registry::QueryResult> InstallTicket;
   typedef std::vector<InstallTicket> InstallTicketList;
 
   struct Error {
@@ -52,7 +52,7 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
-  void synchronize(const Remote &, const bool userAction = true);
+  void synchronize(const Remote &, bool userAction = true);
   void uninstall(const Remote &);
   void registerAll(const Remote &);
   void unregisterAll(const Remote &);
@@ -77,7 +77,7 @@ private:
   void finish();
 
   void upgradeAll(Download *);
-  void upgrade(Package *pkg);
+  void upgrade(const Package *pkg);
   bool allFilesExists(const std::set<Path> &) const;
   void addTask(Task *);
 
@@ -89,7 +89,7 @@ private:
   Registry *m_registry;
 
   std::set<Remote> m_remotes;
-  std::vector<RemoteIndex *> m_remoteIndexes;
+  std::vector<const RemoteIndex *> m_remoteIndexes;
   DownloadQueue m_downloadQueue;
   std::queue<InstallTicket> m_installQueue;
   std::vector<Task *> m_tasks;

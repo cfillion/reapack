@@ -50,7 +50,7 @@ auto RemoteIndex::linkTypeFor(const char *rel) -> LinkType
   return WebsiteLink;
 }
 
-RemoteIndex *RemoteIndex::load(const string &name)
+const RemoteIndex *RemoteIndex::load(const string &name)
 {
   TiXmlDocument doc;
 
@@ -94,11 +94,11 @@ RemoteIndex::RemoteIndex(const string &name)
 
 RemoteIndex::~RemoteIndex()
 {
-  for(Category *cat : m_categories)
+  for(const Category *cat : m_categories)
     delete cat;
 }
 
-void RemoteIndex::addCategory(Category *cat)
+void RemoteIndex::addCategory(const Category *cat)
 {
   if(cat->index() != this)
     throw reapack_error("category belongs to another index");
@@ -131,7 +131,7 @@ auto RemoteIndex::links(const LinkType type) const -> LinkList
   return list;
 }
 
-Category::Category(const string &name, RemoteIndex *ri)
+Category::Category(const string &name, const RemoteIndex *ri)
   : m_index(ri), m_name(name)
 {
   if(m_name.empty())
@@ -140,7 +140,7 @@ Category::Category(const string &name, RemoteIndex *ri)
 
 Category::~Category()
 {
-  for(Package *pack : m_packages)
+  for(const Package *pack : m_packages)
     delete pack;
 }
 
@@ -149,7 +149,7 @@ string Category::fullName() const
   return m_index ? m_index->name() + "/" + m_name : m_name;
 }
 
-void Category::addPackage(Package *pkg)
+void Category::addPackage(const Package *pkg)
 {
   if(pkg->category() != this)
     throw reapack_error("package belongs to another category");

@@ -45,7 +45,7 @@ public:
   int setupAction(const char *name, const ActionCallback &);
   int setupAction(const char *name, const char *desc,
     gaccel_register_t *action, const ActionCallback &);
-  bool execActions(const int id, const int);
+  bool execActions(int id, int);
 
   void synchronizeAll();
   void enable(Remote);

@@ -120,14 +120,14 @@ void Registry::migrate()
   m_db.commit();
 }
 
-auto Registry::push(Version *ver, vector<Path> *conflicts) -> Entry
+auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 {
   m_savepoint->exec();
   bool hasConflicts = false;
 
-  Package *pkg = ver->package();
-  Category *cat = pkg->category();
-  RemoteIndex *ri = cat->index();
+  const Package *pkg = ver->package();
+  const Category *cat = pkg->category();
+  const RemoteIndex *ri = cat->index();
 
   m_clearFiles->bind(1, ri->name());
   m_clearFiles->bind(2, cat->name());
@@ -189,7 +189,7 @@ auto Registry::push(Version *ver, vector<Path> *conflicts) -> Entry
   }
 }
 
-auto Registry::query(Package *pkg) const -> QueryResult
+auto Registry::query(const Package *pkg) const -> QueryResult
 {
   const Entry &entry = getEntry(pkg);
 
@@ -202,7 +202,7 @@ auto Registry::query(Package *pkg) const -> QueryResult
   return {status, entry};
 }
 
-auto Registry::getEntry(Package *pkg) const -> Entry
+auto Registry::getEntry(const Package *pkg) const -> Entry
 {
   int id = 0;
   string remote;
@@ -211,8 +211,8 @@ auto Registry::getEntry(Package *pkg) const -> Entry
   Package::Type type = Package::UnknownType;
   uint64_t version = 0;
 
-  Category *cat = pkg->category();
-  RemoteIndex *ri = cat->index();
+  const Category *cat = pkg->category();
+  const RemoteIndex *ri = cat->index();
 
   m_findEntry->bind(1, ri->name());
   m_findEntry->bind(2, cat->name());

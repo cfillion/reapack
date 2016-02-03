@@ -69,22 +69,22 @@ public:
   void enable(HWND handle) { setEnabled(true, handle); }
   void disable() { disable(m_handle); }
   void disable(HWND handle) { setEnabled(false, handle); }
-  void setEnabled(const bool enable) { setEnabled(enable, m_handle); }
-  void setEnabled(const bool, HWND);
+  void setEnabled(bool enable) { setEnabled(enable, m_handle); }
+  void setEnabled(bool, HWND);
 
   void show(HWND);
   void show() { show(m_handle); }
   void hide(HWND);
   void hide() { hide(m_handle); }
-  void close(const INT_PTR = 0);
+  void close(INT_PTR = 0);
   void center();
   void setFocus();
 
 protected:
-  Dialog(const int templateId);
+  Dialog(int templateId);
   virtual ~Dialog();
 
-  HWND getControl(const int idc);
+  HWND getControl(int idc);
 
   template<class T, class... Args>
   T *createControl(int id, Args&&... args)

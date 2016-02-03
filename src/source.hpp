@@ -18,6 +18,7 @@
 #ifndef REAPACK_SOURCE_HPP
 #define REAPACK_SOURCE_HPP
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,7 @@
 
 class Source;
 typedef std::vector<Source *> SourceList;
+typedef std::multimap<Path, const Source *> SourceMap;
 
 class Package;
 class Version;
@@ -49,7 +51,7 @@ public:
   static Platform ConvertPlatform(const char *);
 
   Source(const Platform, const std::string &file,
-    const std::string &url, Version * = nullptr);
+    const std::string &url, const Version * = nullptr);
 
   Platform platform() const { return m_platform; }
 
@@ -57,8 +59,8 @@ public:
   const std::string &file() const;
   const std::string &url() const { return m_url; }
 
-  Version *version() const { return m_version; }
-  Package *package() const;
+  const Version *version() const { return m_version; }
+  const Package *package() const;
 
   std::string fullName() const;
   Path targetPath() const;
@@ -67,7 +69,7 @@ private:
   Platform m_platform;
   std::string m_file;
   std::string m_url;
-  Version *m_version;
+  const Version *m_version;
 };
 
 #endif

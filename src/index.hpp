@@ -25,7 +25,7 @@
 #include "package.hpp"
 
 class Category;
-typedef std::vector<Category *> CategoryList;
+typedef std::vector<const Category *> CategoryList;
 
 class Path;
 class TiXmlElement;
@@ -40,7 +40,7 @@ public:
 
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
-  static RemoteIndex *load(const std::string &name);
+  static const RemoteIndex *load(const std::string &name);
 
   RemoteIndex(const std::string &name);
   ~RemoteIndex();
@@ -52,9 +52,9 @@ public:
   void addLink(const LinkType, const Link &);
   LinkList links(const LinkType type) const;
 
-  void addCategory(Category *cat);
+  void addCategory(const Category *cat);
   const CategoryList &categories() const { return m_categories; }
-  Category *category(const size_t i) const { return m_categories[i]; }
+  const Category *category(size_t i) const { return m_categories[i]; }
 
   const PackageList &packages() const { return m_packages; }
 
@@ -70,19 +70,19 @@ private:
 
 class Category {
 public:
-  Category(const std::string &name, RemoteIndex * = nullptr);
+  Category(const std::string &name, const RemoteIndex * = nullptr);
   ~Category();
 
-  RemoteIndex *index() const { return m_index; }
+  const RemoteIndex *index() const { return m_index; }
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 
-  void addPackage(Package *pack);
+  void addPackage(const Package *pack);
   const PackageList &packages() const { return m_packages; }
-  Package *package(const size_t i) const { return m_packages[i]; }
+  const Package *package(size_t i) const { return m_packages[i]; }
 
 private:
-  RemoteIndex *m_index;
+  const RemoteIndex *m_index;
 
   std::string m_name;
   PackageList m_packages;

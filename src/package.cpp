@@ -46,11 +46,11 @@ string Package::fullName() const
 
 Package::~Package()
 {
-  for(Version *ver : m_versions)
+  for(const Version *ver : m_versions)
     delete ver;
 }
 
-void Package::addVersion(Version *ver)
+void Package::addVersion(const Version *ver)
 {
   if(ver->package() != this)
     throw reapack_error("version belongs to another package");
@@ -61,7 +61,7 @@ void Package::addVersion(Version *ver)
   m_versions.insert(ver);
 }
 
-Version *Package::version(const size_t index) const
+const Version *Package::version(const size_t index) const
 {
   auto it = m_versions.begin();
 
@@ -71,7 +71,7 @@ Version *Package::version(const size_t index) const
   return *it;
 }
 
-Version *Package::lastVersion() const
+const Version *Package::lastVersion() const
 {
   if(m_versions.empty())
     return nullptr;

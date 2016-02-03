@@ -105,7 +105,8 @@ bool Task::RemoveFileRecursive(const Path &file)
   return true;
 }
 
-InstallTask::InstallTask(Version *ver, const set<Path> &oldFiles, Transaction *t)
+InstallTask::InstallTask(const Version *ver,
+    const set<Path> &oldFiles, Transaction *t)
   : Task(t), m_version(ver), m_oldFiles(move(oldFiles))
 {
 }
@@ -116,7 +117,7 @@ void InstallTask::doStart()
 
   for(auto it = sources.begin(); it != sources.end();) {
     const Path &path = it->first;
-    Source *src = it->second;
+    const Source *src = it->second;
 
     Download *dl = new Download(src->fullName(), src->url());
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
@@ -128,7 +129,7 @@ void InstallTask::doStart()
   }
 }
 
-void InstallTask::saveSource(Download *dl, Source *src)
+void InstallTask::saveSource(Download *dl, const Source *src)
 {
   if(isCancelled())
     return;

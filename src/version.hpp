@@ -19,7 +19,6 @@
 #define REAPACK_VERSION_HPP
 
 #include <cstdint>
-#include <map>
 #include <set>
 #include <string>
 
@@ -36,7 +35,7 @@ public:
   std::string fullName() const;
   uint64_t code() const { return m_code; }
 
-  Package *package() const { return m_package; }
+  const Package *package() const { return m_package; }
 
   void setAuthor(const std::string &author) { m_author = author; }
   const std::string &author() const { return m_author; }
@@ -45,9 +44,9 @@ public:
   const std::string &changelog() const { return m_changelog; }
 
   void addSource(Source *source);
-  const std::multimap<Path, Source *> &sources() const { return m_sources; }
-  Source *source(const size_t) const;
-  Source *mainSource() const { return m_mainSource; }
+  const SourceMap &sources() const { return m_sources; }
+  const Source *source(size_t) const;
+  const Source *mainSource() const { return m_mainSource; }
 
   const std::set<Path> &files() const { return m_files; }
 
@@ -59,12 +58,12 @@ private:
   std::string m_name;
   uint64_t m_code;
 
-  Package *m_package;
-  Source *m_mainSource;
+  const Package *m_package;
+  const Source *m_mainSource;
 
   std::string m_author;
   std::string m_changelog;
-  std::multimap<Path, Source *> m_sources;
+  SourceMap m_sources;
   std::set<Path> m_files;
 };
 
@@ -76,6 +75,6 @@ public:
   }
 };
 
-typedef std::set<Version *, VersionCompare> VersionSet;
+typedef std::set<const Version *, VersionCompare> VersionSet;
 
 #endif

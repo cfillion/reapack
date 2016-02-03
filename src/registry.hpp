@@ -54,12 +54,12 @@ public:
     Entry entry;
   };
 
-  QueryResult query(Package *) const;
-  Entry getEntry(Package *) const;
+  QueryResult query(const Package *) const;
+  Entry getEntry(const Package *) const;
   std::vector<Entry> getEntries(const Remote &) const;
   std::set<Path> getFiles(const Entry &) const;
   std::string getMainFile(const Entry &) const;
-  Entry push(Version *, std::vector<Path> *conflicts = nullptr);
+  Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void forget(const Entry &);
   void commit();
 

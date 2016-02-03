@@ -44,14 +44,14 @@ Source::Platform Source::ConvertPlatform(const char *platform)
 }
 
 Source::Source(const Platform platform, const string &file,
-    const string &url, Version *ver)
+    const string &url, const Version *ver)
   : m_platform(platform), m_file(file), m_url(url), m_version(ver)
 {
   if(m_url.empty())
     throw reapack_error("empty source url");
 }
 
-Package *Source::package() const
+const Package *Source::package() const
 {
   return m_version ? m_version->package() : nullptr;
 }
@@ -61,7 +61,7 @@ const string &Source::file() const
   if(!m_file.empty())
     return m_file;
 
-  Package *pkg = package();
+  const Package *pkg = package();
 
   if(pkg)
     return pkg->name();
@@ -81,7 +81,7 @@ string Source::fullName() const
 
 Path Source::targetPath() const
 {
-  Package *pkg = package();
+  const Package *pkg = package();
 
   if(!pkg)
     throw reapack_error("no package associated with the source");

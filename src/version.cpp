@@ -109,7 +109,7 @@ void Version::setChangelog(const std::string &changelog)
   m_changelog = changelog;
 }
 
-Source *Version::source(const size_t index) const
+const Source *Version::source(const size_t index) const
 {
   auto it = m_sources.begin();
 

@@ -35,8 +35,7 @@ public:
   static Remote fromString(const std::string &data, ReadCode *code = nullptr);
 
   Remote();
-  Remote(const std::string &name, const std::string &url,
-    const bool enabled = true);
+  Remote(const std::string &name, const std::string &url, bool enabled = true);
 
   std::string toString() const;
 

@@ -51,14 +51,14 @@ public:
   bool operator<(const Path &) const;
   Path operator+(const std::string &) const;
   Path operator+(const Path &) const;
-  std::string &operator[](const size_t index);
-  const std::string &operator[](const size_t index) const;
+  std::string &operator[](size_t);
+  const std::string &operator[](size_t) const;
 
 private:
   static Path s_root;
   friend UseRootPath;
 
-  const std::string &at(const size_t) const;
+  const std::string &at(size_t) const;
 
   std::list<std::string> m_parts;
 };
