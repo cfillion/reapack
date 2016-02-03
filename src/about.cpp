@@ -63,6 +63,8 @@ void About::onInit()
     {AUTO_STR("Author"), 90},
   });
 
+  m_packages->sortByColumn(0);
+
   m_installedFiles = getControl(IDC_LIST);
 
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{
@@ -132,6 +134,8 @@ void About::populate()
   for(Category *cat : m_index->categories())
     m_cats->addRow({make_autostring(cat->name())});
 
+  m_cats->sortByColumn(0);
+
   updatePackages();
 
   updateInstalledFiles();
@@ -170,6 +174,7 @@ void About::updatePackages()
   }
 
   m_currentCat = catIndex;
+  m_packages->sort();
 }
 
 void About::updateInstalledFiles()

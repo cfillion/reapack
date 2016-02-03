@@ -27,6 +27,8 @@
 
 class ListView : public Control {
 public:
+  enum SortOrder { AscendingOrder, DescendingOrder };
+
   struct Column { auto_string text; int width; };
   typedef std::vector<Column> Columns;
   typedef std::vector<auto_string> Row;
@@ -37,14 +39,17 @@ public:
   ListView(const Columns &, HWND handle);
 
   int addRow(const Row &);
-  Row getRow(const int index) const;
-  void replaceRow(const int index, const Row &);
-  void removeRow(const int index);
-  void resizeColumn(const int index, const int width);
+  const Row &row(int index) const { return m_rows[index]; }
+  void replaceRow(int index, const Row &);
+  void removeRow(int index);
+  void resizeColumn(int index, const int width);
+  void sort();
+  void sortByColumn(int index, SortOrder order = AscendingOrder);
   void clear();
 
   bool hasSelection() const;
   int currentIndex() const;
+  int rowCount() { return (int)m_rows.size(); }
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
   void onDoubleClick(const Callback &callback)
@@ -56,9 +61,13 @@ protected:
 private:
   void setExStyle(int style, bool enable);
   void addColumn(const Column &);
+  void setSortArrow(bool);
+  void onColumnClick(LPARAM lpnmlistview);
 
   int m_columnSize;
-  int m_rowSize;
+  int m_sortColumn;
+  SortOrder m_sortOrder;
+  std::vector<Row> m_rows;
 
   Signal m_onSelect;
   Signal m_onDoubleClick;
