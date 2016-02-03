@@ -205,8 +205,8 @@ void About::updateInstalledFiles()
       AUTO_STR(
       "This repository does not own any file on your computer at this time.\r\n")
 
-      AUTO_STR("It is either not installed yet, or ")
-      AUTO_STR("it does not provide any package compatible with your system."));
+      AUTO_STR("It is either not yet installed or it does not provide")
+      AUTO_STR("any package compatible with your system."));
   }
   else {
     stringstream stream;
