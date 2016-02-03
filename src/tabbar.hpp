@@ -35,6 +35,7 @@ public:
   int currentIndex() const;
   void setCurrentIndex(const int);
   void removeTab(const int);
+  void setFocus();
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;

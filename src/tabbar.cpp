@@ -71,6 +71,14 @@ void TabBar::removeTab(const int index)
   m_pages.erase(m_pages.begin() + index);
 }
 
+void TabBar::setFocus()
+{
+  if(m_lastPage < 0 || (size_t)m_lastPage >= m_pages.size())
+    return;
+
+  SetFocus(m_pages[m_lastPage].front());
+}
+
 void TabBar::onNotify(LPNMHDR info, LPARAM)
 {
   switch(info->code) {

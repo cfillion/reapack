@@ -178,6 +178,8 @@ void About::selectLink(const int ctrl, const std::vector<const Link *> &links)
   }
   else if(count == 1)
     openLink(links.front());
+
+  m_tabs->setFocus();
 }
 
 void About::openLink(const Link *link)
