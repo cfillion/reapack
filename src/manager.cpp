@@ -197,7 +197,7 @@ void Manager::about()
   if(remote.isNull())
     return;
 
-  // show the enable state changes as if they were already applied
+  // show the pending enable state changes as if they were already applied
   remote.setEnabled(isRemoteEnabled(remote));
 
   const RemoteIndex *index;
@@ -225,8 +225,7 @@ void Manager::about()
 
   unique_ptr<const RemoteIndex> ptr(index);
 
-  const int result = Dialog::Show<About>(instance(), handle(), &remote, index);
-  switch(result) {
+  switch(Dialog::Show<About>(instance(), handle(), &remote, index)) {
   case About::EnableResult:
     setRemoteEnabled(true);
     break;
