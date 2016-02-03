@@ -192,12 +192,15 @@ void Manager::uninstall()
 
 void Manager::about()
 {
-  const Remote &remote = currentRemote();
+  Remote remote = currentRemote();
 
   if(remote.isNull())
     return;
 
-  RemoteIndex *index = nullptr;
+  // show the enable state changes as if they were already applied
+  remote.setEnabled(isRemoteEnabled(remote));
+
+  const RemoteIndex *index;
 
   try {
     index = RemoteIndex::load(remote.name());
@@ -212,7 +215,7 @@ void Manager::about()
       AUTO_STR("Synchronize your packages and try again.\n")
       AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
 
-      AUTO_STR("[error description: %s]"),
+      AUTO_STR("[Error description: %s]"),
       make_autostring(remote.name()).c_str(), desc.c_str()
     );
 
@@ -220,9 +223,14 @@ void Manager::about()
     return;
   }
 
-  unique_ptr<RemoteIndex> ptr(index);
+  unique_ptr<const RemoteIndex> ptr(index);
 
-  Dialog::Show<About>(instance(), handle(), index);
+  const int result = Dialog::Show<About>(instance(), handle(), &remote, index);
+  switch(result) {
+  case About::EnableResult:
+    setRemoteEnabled(true);
+    break;
+  }
 }
 
 bool Manager::confirm() const

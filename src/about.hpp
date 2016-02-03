@@ -22,15 +22,17 @@
 
 #include <vector>
 
-struct Link;
 class ListView;
+class Remote;
 class RemoteIndex;
 class RichEdit;
 class TabBar;
+struct Link;
 
 class About : public Dialog {
 public:
-  About(const RemoteIndex *);
+  enum { EnableResult = 100 };
+  About(const Remote *, const RemoteIndex *);
 
 protected:
   void onInit() override;
@@ -42,6 +44,7 @@ private:
   void selectLink(const int control, const std::vector<const Link *> &);
   void openLink(const Link *);
 
+  const Remote *m_remote;
   const RemoteIndex *m_index;
   int m_currentCat;
 
@@ -49,8 +52,6 @@ private:
   RichEdit *m_about;
   ListView *m_cats;
   ListView *m_packages;
-  HWND m_website;
-  HWND m_donate;
 
   std::vector<const Link *> m_websiteLinks;
   std::vector<const Link *> m_donationLinks;

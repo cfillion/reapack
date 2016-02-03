@@ -21,6 +21,7 @@
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
+#include "remote.hpp"
 #include "resource.hpp"
 #include "richedit.hpp"
 #include "tabbar.hpp"
@@ -29,8 +30,9 @@
 
 using namespace std;
 
-About::About(const RemoteIndex *index)
-  : Dialog(IDD_ABOUT_DIALOG), m_index(index), m_currentCat(-255)
+About::About(const Remote *remote, const RemoteIndex *index)
+  : Dialog(IDD_ABOUT_DIALOG), m_remote(remote), m_index(index),
+    m_currentCat(-255)
 {
   RichEdit::Init();
 }
@@ -64,9 +66,6 @@ void About::onInit()
     {AUTO_STR("Installed Files"), {}},
   });
 
-  m_website = getControl(IDC_WEBSITE);
-  m_donate = getControl(IDC_DONATE);
-
   populate();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
@@ -83,6 +82,9 @@ void About::onCommand(const int id)
     break;
   case IDC_DONATE:
     selectLink(id, m_donationLinks);
+    break;
+  case IDC_ENABLE:
+    close(EnableResult);
     break;
   case IDOK:
   case IDCANCEL:
@@ -105,11 +107,14 @@ void About::populate()
 
   m_websiteLinks = m_index->links(RemoteIndex::WebsiteLink);
   if(m_websiteLinks.empty())
-    hide(m_website);
+    hide(getControl(IDC_WEBSITE));
 
   m_donationLinks = m_index->links(RemoteIndex::DonationLink);
   if(m_donationLinks.empty())
-    hide(m_donate);
+    hide(getControl(IDC_DONATE));
+
+  if(m_remote->isEnabled())
+    hide(getControl(IDC_ENABLE));
 
   if(!m_about->setRichText(m_index->aboutText())) {
     // if description is invalid or empty, don't display it
