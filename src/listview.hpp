@@ -49,7 +49,7 @@ public:
 
   bool hasSelection() const;
   int currentIndex() const;
-  int rowCount() { return (int)m_rows.size(); }
+  int rowCount() const { return (int)m_rows.size(); }
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
   void onDoubleClick(const Callback &callback)
@@ -63,6 +63,7 @@ private:
   void addColumn(const Column &);
   void setSortArrow(bool);
   void onColumnClick(LPARAM lpnmlistview);
+  int translate(int index) const;
 
   int m_columnSize;
   int m_sortColumn;

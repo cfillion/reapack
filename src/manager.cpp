@@ -136,12 +136,15 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
 void Manager::refresh()
 {
+  InhibitControl lock(m_list);
   m_list->clear();
 
   for(const Remote &remote : *m_reapack->config()->remotes()) {
     if(!m_uninstall.count(remote))
       m_list->addRow(makeRow(remote));
   }
+
+  m_list->sort();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
   m_list->resizeColumn(2, LVSCW_AUTOSIZE_USEHEADER);

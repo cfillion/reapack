@@ -72,11 +72,12 @@ int ListView::addRow(const Row &content)
   return item.iItem;
 }
 
-void ListView::replaceRow(const int index, const Row &content)
+void ListView::replaceRow(int index, const Row &content)
 {
   m_rows[index] = content;
 
   const int cols = min(m_columnSize, (int)content.size());
+  index = translate(index);
 
   for(int i = 0; i < cols; i++) {
     auto_char *text = const_cast<auto_char *>(content[i].c_str());
@@ -84,20 +85,28 @@ void ListView::replaceRow(const int index, const Row &content)
   }
 }
 
-void ListView::removeRow(const int index)
+void ListView::removeRow(const int userIndex)
 {
-  ListView_DeleteItem(handle(), index);
-  m_rows.erase(m_rows.begin() + index);
+  // translate to view index before fixing lParams
+  const int viewIndex = translate(userIndex);
 
   // shift lParam to reflect the new row indexes
+  map<int, int> translations;
   const int size = rowCount();
-  for(int i = index; i < size; i++) {
+  for(int i = userIndex + 1; i < size; i++)
+    translations[translate(i)] = i - 1;
+
+  for(const auto &it : translations) {
     LVITEM item{};
-    item.iItem = i;
+    item.iItem = it.first;
     item.mask |= LVIF_PARAM;
-    item.lParam = i;
+    item.lParam = it.second;
     ListView_SetItem(handle(), &item);
   }
+
+  ListView_DeleteItem(handle(), viewIndex);
+  m_rows.erase(m_rows.begin() + userIndex);
+
 }
 
 void ListView::resizeColumn(const int index, const int width)
@@ -227,4 +236,22 @@ void ListView::onColumnClick(LPARAM lParam)
   }
 
   sortByColumn(col, order);
+}
+
+int ListView::translate(const int userIndex) const
+{
+  if(m_sortColumn < 0)
+    return userIndex;
+
+  for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
+    LVITEM item{};
+    item.iItem = viewIndex;
+    item.mask |= LVIF_PARAM;
+    ListView_GetItem(handle(), &item);
+
+    if(item.lParam == userIndex)
+      return viewIndex;
+  }
+
+  return -1;
 }
