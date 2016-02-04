@@ -50,7 +50,7 @@ void ReportDialog::printHeader(const char *title)
   if(m_stream.tellp())
     m_stream << NL;
 
-  m_stream << NL << SEP << ' ' << title << ": " << SEP << NL;
+  m_stream << SEP << ' ' << title << ": " << SEP << NL;
 }
 
 void ReportDialog::printChangelog(const string &changelog)
