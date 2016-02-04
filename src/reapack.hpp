@@ -50,6 +50,7 @@ public:
   void synchronizeAll();
   void enable(Remote);
   void disable(Remote);
+  void requireIndex(const Remote &, const std::function<void ()> &);
   void uninstall(const Remote &);
   void importRemote();
   void manageRemotes();

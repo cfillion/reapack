@@ -56,39 +56,50 @@ Transaction::~Transaction()
 
 void Transaction::synchronize(const Remote &remote, const bool isUserAction)
 {
-  if(m_remotes.count(remote))
-    return;
-
-  Download *dl = new Download(remote.name(), remote.url());
-  dl->onFinish(bind(&Transaction::upgradeAll, this, dl));
-
-  m_downloadQueue.push(dl);
-  m_remotes.insert(remote);
-
   // show the report dialog even if no task are ran
   if(isUserAction)
     m_enableReport = true;
+
+  fetchIndex(remote, [=] {
+    const RemoteIndex *ri;
+
+    try {
+      ri = RemoteIndex::load(remote.name());
+      m_remoteIndexes.push_back(ri);
+    }
+    catch(const reapack_error &e) {
+      // index file is invalid (load error)
+      addError(e.what(), remote.name());
+      return;
+    }
+
+    for(const Package *pkg : ri->packages())
+      upgrade(pkg);
+  });
 }
 
-void Transaction::upgradeAll(Download *dl)
+void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
 {
-  if(!saveFile(dl, RemoteIndex::pathFor(dl->name())))
+  m_remotes.insert({remote, cb});
+
+  if(m_remotes.count(remote) > 1)
     return;
 
-  const RemoteIndex *ri;
+  Download *dl = new Download(remote.name(), remote.url());
+  m_downloadQueue.push(dl);
 
-  try {
-    ri = RemoteIndex::load(dl->name());
-    m_remoteIndexes.push_back(ri);
-  }
-  catch(const reapack_error &e) {
-    // index file is invalid (load error)
-    addError(e.what(), dl->url());
+  dl->onFinish(bind(&Transaction::saveIndex, this, dl, remote));
+}
+
+void Transaction::saveIndex(Download *dl, const Remote &remote)
+{
+  if(!saveFile(dl, RemoteIndex::pathFor(remote.name())))
     return;
-  }
 
-  for(const Package *pkg : ri->packages())
-    upgrade(pkg);
+  const auto end = m_remotes.upper_bound(remote);
+
+  for(auto it = m_remotes.lower_bound(remote); it != end; it++)
+    it->second();
 }
 
 void Transaction::upgrade(const Package *pkg)
@@ -207,6 +218,7 @@ void Transaction::uninstall(const Remote &remote)
 void Transaction::cancel()
 {
   m_isCancelled = true;
+  m_enableReport = false;
 
   for(Task *task : m_tasks)
     task->rollback();
@@ -260,6 +272,7 @@ void Transaction::finish()
 void Transaction::addError(const string &message, const string &title)
 {
   m_errors.push_back({message, title});
+  m_enableReport = true;
 }
 
 bool Transaction::allFilesExists(const set<Path> &list) const

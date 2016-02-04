@@ -40,13 +40,14 @@ protected:
   void onContextMenu(HWND, int x, int y) override;
 
 private:
-  ListView::Row makeRow(const Remote &remote) const;
+  ListView::Row makeRow(const Remote &) const;
 
   Remote currentRemote() const;
   void setRemoteEnabled(bool);
-  bool isRemoteEnabled(const Remote &remote) const;
+  bool isRemoteEnabled(const Remote &) const;
   void uninstall();
   void about();
+  void showAbout(const Remote &);
 
   bool confirm() const;
   void apply();

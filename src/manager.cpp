@@ -203,6 +203,11 @@ void Manager::about()
   // show the pending enable state changes as if they were already applied
   remote.setEnabled(isRemoteEnabled(remote));
 
+  m_reapack->requireIndex(remote, bind(&Manager::showAbout, this, remote));
+}
+
+void Manager::showAbout(const Remote &remote)
+{
   const RemoteIndex *index;
 
   try {

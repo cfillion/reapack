@@ -23,6 +23,7 @@
 #include "registry.hpp"
 
 #include <boost/signals2.hpp>
+#include <functional>
 #include <set>
 
 class InstallTask;
@@ -33,6 +34,8 @@ class Task;
 
 class Transaction {
 public:
+  typedef std::function<void ()> IndexCallback;
+
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
@@ -52,6 +55,7 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
+  void fetchIndex(const Remote &, const IndexCallback &cb);
   void synchronize(const Remote &, bool userAction = true);
   void uninstall(const Remote &);
   void registerAll(const Remote &);
@@ -76,7 +80,7 @@ private:
   void install();
   void finish();
 
-  void upgradeAll(Download *);
+  void saveIndex(Download *, const Remote &);
   void upgrade(const Package *pkg);
   bool allFilesExists(const std::set<Path> &) const;
   void addTask(Task *);
@@ -88,7 +92,7 @@ private:
   bool m_enableReport;
   Registry *m_registry;
 
-  std::set<Remote> m_remotes;
+  std::multimap<Remote, IndexCallback> m_remotes;
   std::vector<const RemoteIndex *> m_remoteIndexes;
   DownloadQueue m_downloadQueue;
   std::queue<InstallTicket> m_installQueue;

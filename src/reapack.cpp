@@ -17,8 +17,9 @@
 
 #include "reapack.hpp"
 
-#include "errors.hpp"
 #include "config.hpp"
+#include "errors.hpp"
+#include "index.hpp"
 #include "manager.hpp"
 #include "progress.hpp"
 #include "report.hpp"
@@ -135,6 +136,16 @@ void ReaPack::disable(Remote remote)
     return;
 
   m_transaction->unregisterAll(remote);
+}
+
+void ReaPack::requireIndex(const Remote &remote, const function<void ()> &cb)
+{
+  if(file_exists(RemoteIndex::pathFor(remote.name()).join().c_str()))
+    return cb();
+  else if(!hitchhikeTransaction())
+    return;
+
+  m_transaction->fetchIndex(remote, cb);
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -259,7 +270,7 @@ Transaction *ReaPack::createTransaction()
     // hide the progress dialog
     m_progress->setTransaction(nullptr);
 
-    if(m_transaction->isCancelled() || !m_transaction->isReportEnabled())
+    if(!m_transaction->isReportEnabled())
       return;
 
     LockDialog lock(m_manager);
