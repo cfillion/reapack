@@ -51,7 +51,7 @@ void Manager::onInit()
     {AUTO_STR("State"), 60},
   });
 
-  m_list->onDoubleClick(bind(&Manager::about, this));
+  m_list->onActivate(bind(&Manager::about, this));
 }
 
 void Manager::onCommand(const int id)

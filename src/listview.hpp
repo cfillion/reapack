@@ -52,8 +52,7 @@ public:
   int rowCount() const { return (int)m_rows.size(); }
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
-  void onDoubleClick(const Callback &callback)
-  { m_onDoubleClick.connect(callback); }
+  void onActivate(const Callback &callback) { m_onActivate.connect(callback); }
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
@@ -62,7 +61,8 @@ private:
   void setExStyle(int style, bool enable);
   void addColumn(const Column &);
   void setSortArrow(bool);
-  void onColumnClick(LPARAM lpnmlistview);
+  void handleDoubleClick();
+  void handleColumnClick(LPARAM lpnmlistview);
   int translate(int index) const;
 
   int m_columnSize;
@@ -71,7 +71,7 @@ private:
   std::vector<Row> m_rows;
 
   Signal m_onSelect;
-  Signal m_onDoubleClick;
+  Signal m_onActivate;
 };
 
 #endif

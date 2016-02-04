@@ -210,15 +210,27 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
     m_onSelect();
     break;
   case NM_DBLCLK:
-    m_onDoubleClick();
+    handleDoubleClick();
     break;
   case LVN_COLUMNCLICK:
-    onColumnClick(lParam);
+    handleColumnClick(lParam);
     break;
   };
 }
 
-void ListView::onColumnClick(LPARAM lParam)
+void ListView::handleDoubleClick()
+{
+  LVHITTESTINFO info{};
+  GetCursorPos(&info.pt);
+  ScreenToClient(handle(), &info.pt);
+  ListView_HitTest(handle(), &info);
+
+  // user double clicked on an item
+  if(info.iItem > -1)
+    m_onActivate();
+}
+
+void ListView::handleColumnClick(LPARAM lParam)
 {
   auto info = (LPNMLISTVIEW)lParam;
   const int col = info->iSubItem;
