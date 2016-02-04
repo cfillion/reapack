@@ -22,9 +22,13 @@
 
 #include <vector>
 
+#include "report.hpp"
+
 class ListView;
+class Package;
 class Remote;
 class RemoteIndex;
+class ReportBase;
 class RichEdit;
 class TabBar;
 struct Link;
@@ -37,6 +41,7 @@ public:
 protected:
   void onInit() override;
   void onCommand(int) override;
+  void onContextMenu(HWND, int x, int y) override;
 
 private:
   void populate();
@@ -44,6 +49,7 @@ private:
   void updateInstalledFiles();
   void selectLink(int control, const std::vector<const Link *> &);
   void openLink(const Link *);
+  void packageHistory();
 
   const Remote *m_remote;
   const RemoteIndex *m_index;
@@ -57,6 +63,18 @@ private:
 
   std::vector<const Link *> m_websiteLinks;
   std::vector<const Link *> m_donationLinks;
+  const std::vector<const Package *> *m_packagesData;
+};
+
+class History : public ReportDialog {
+public:
+  History(const Package *);
+
+protected:
+  void fillReport() override;
+
+private:
+  const Package *m_package;
 };
 
 #endif

@@ -100,7 +100,7 @@ protected:
     return ctrl;
   }
 
-  virtual void onInit() = 0;
+  virtual void onInit();
   virtual void onShow();
   virtual void onHide();
   virtual void onTimer();

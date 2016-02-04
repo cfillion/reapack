@@ -29,9 +29,12 @@
 #include "tabbar.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
 using namespace std;
+
+enum { ACTION_HISTORY = 300 };
 
 About::About(const Remote *remote, const RemoteIndex *index)
   : Dialog(IDD_ABOUT_DIALOG), m_remote(remote), m_index(index),
@@ -64,6 +67,7 @@ void About::onInit()
   });
 
   m_packages->sortByColumn(0);
+  m_packages->onActivate(bind(&About::packageHistory, this));
 
   m_installedFiles = getControl(IDC_LIST);
 
@@ -93,6 +97,9 @@ void About::onCommand(const int id)
   case IDC_ENABLE:
     close(EnableResult);
     break;
+  case ACTION_HISTORY:
+    packageHistory();
+    break;
   case IDOK:
   case IDCANCEL:
     close();
@@ -103,6 +110,21 @@ void About::onCommand(const int id)
     else if(id >> 8 == IDC_DONATE)
       openLink(m_donationLinks[id & 0xff]);
   }
+}
+
+void About::onContextMenu(HWND target, const int x, const int y)
+{
+  if(target != m_packages->handle())
+    return;
+
+  const int packageIndex = m_packages->currentIndex();
+
+  if(packageIndex < 0)
+    return;
+
+  Menu menu;
+  menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
+  menu.show(x, y, handle());
 }
 
 void About::populate()
@@ -129,7 +151,7 @@ void About::populate()
     m_tabs->setCurrentIndex(0);
   }
 
-  m_cats->addRow({AUTO_STR("<All Categories>")});
+  m_cats->addRow({AUTO_STR("<All Packages>")});
 
   for(const Category *cat : m_index->categories())
     m_cats->addRow({make_autostring(cat->name())});
@@ -149,21 +171,20 @@ void About::updatePackages()
   if(index == -1 && m_currentCat >= -1)
     return;
 
-  // -1: all categories, >0 selected category
+  // -1: all packages, >0 selected category
   const int catIndex = max(-1, index - 1);
-  const PackageList *pkgList;
 
   if(catIndex == m_currentCat)
     return;
   else if(catIndex < 0)
-    pkgList = &m_index->packages();
+    m_packagesData = &m_index->packages();
   else
-    pkgList = &m_index->category(catIndex)->packages();
+    m_packagesData = &m_index->category(catIndex)->packages();
 
   InhibitControl lock(m_packages);
   m_packages->clear();
 
-  for(const Package *pkg : *pkgList) {
+  for(const Package *pkg : *m_packagesData) {
     const Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->name());
     const auto_string &version = make_autostring(lastVer->name());
@@ -244,4 +265,45 @@ void About::openLink(const Link *link)
 {
   const auto_string &url = make_autostring(link->url);
   ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
+}
+
+void About::packageHistory()
+{
+  const int index = m_packages->currentIndex();
+
+  if(index < 0)
+    return;
+
+  const Package *pkg = m_packagesData->at(index);
+  Dialog::Show<History>(instance(), handle(), pkg);
+}
+
+History::History(const Package *pkg)
+  : ReportDialog(), m_package(pkg)
+{
+}
+
+void History::fillReport()
+{
+  SetWindowText(handle(), AUTO_STR("Package History"));
+  SetWindowText(getControl(IDC_LABEL),
+    make_autostring(m_package->name()).c_str());
+
+  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
+    if(stream().tellp())
+      stream() << NL;
+
+    stream() << ver->name();
+
+    if(!ver->author().empty())
+      stream() << " by " << ver->author();
+
+    stream() << NL;
+
+    const string &changelog = ver->changelog();
+    if(changelog.empty())
+      printChangelog("No changelog");
+    else
+      printChangelog(changelog);
+  }
 }

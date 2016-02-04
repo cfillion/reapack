@@ -184,6 +184,10 @@ HWND Dialog::getControl(const int idc)
   return GetDlgItem(m_handle, idc);
 }
 
+void Dialog::onInit()
+{
+}
+
 void Dialog::onShow()
 {
   center();
@@ -197,8 +201,13 @@ void Dialog::onTimer()
 {
 }
 
-void Dialog::onCommand(int)
+void Dialog::onCommand(const int id)
 {
+  switch(id) {
+  case IDOK:
+  case IDCANCEL:
+    close();
+  }
 }
 
 void Dialog::onNotify(LPNMHDR info, LPARAM lParam)

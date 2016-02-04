@@ -28,23 +28,53 @@
 using namespace std;
 
 static const string SEP(10, '=');
-static const char *NL = "\r\n";
+const char * const ReportDialog::NL = "\r\n";
 
-Report::Report(Transaction *transaction)
-  : Dialog(IDD_REPORT_DIALOG), m_transaction(transaction)
+ReportDialog::ReportDialog()
+  : Dialog(IDD_REPORT_DIALOG)
 {
   // enable number formatting (ie. "1,234" instead of "1234")
   m_stream.imbue(locale(""));
 }
 
-void Report::onInit()
+void ReportDialog::onInit()
+{
+  fillReport();
+
+  const auto_string &str = make_autostring(m_stream.str());
+  SetDlgItemText(handle(), IDC_REPORT, str.c_str());
+}
+
+void ReportDialog::printHeader(const char *title)
+{
+  if(m_stream.tellp())
+    m_stream << NL;
+
+  m_stream << NL << SEP << ' ' << title << ": " << SEP << NL;
+}
+
+void ReportDialog::printChangelog(const string &changelog)
+{
+  istringstream input(changelog);
+  string line;
+
+  while(getline(input, line, '\n'))
+    m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
+}
+
+Report::Report(Transaction *transaction)
+  : ReportDialog(), m_transaction(transaction)
+{
+}
+
+void Report::fillReport()
 {
   const size_t newPackages = m_transaction->newPackages().size();
   const size_t updates = m_transaction->updates().size();
   const size_t removals = m_transaction->removals().size();
   const size_t errors = m_transaction->errors().size();
 
-  m_stream
+  stream()
     << newPackages << " new packages, "
     << updates << " updates, "
     << removals << " removed files and "
@@ -63,19 +93,6 @@ void Report::onInit()
 
   if(removals)
     printRemovals();
-
-  const auto_string &str = make_autostring(m_stream.str());
-  SetDlgItemText(handle(), IDC_REPORT, str.c_str());
-}
-
-void Report::onCommand(const int id)
-{
-  switch(id) {
-  case IDOK:
-  case IDCANCEL:
-    close();
-    break;
-  }
 }
 
 void Report::printNewPackages()
@@ -84,7 +101,7 @@ void Report::printNewPackages()
 
   for(const Transaction::InstallTicket &entry : m_transaction->newPackages()) {
     const Version *ver = entry.first;
-    m_stream << NL << ver->fullName();
+    stream() << NL << ver->fullName();
   }
 }
 
@@ -101,7 +118,7 @@ void Report::printUpdates()
       if(ver->code() <= queryRes.entry.version)
         break;
 
-      m_stream << NL << ver->fullName() << NL;
+      stream() << NL << ver->fullName() << NL;
 
       if(!ver->changelog().empty())
         printChangelog(ver->changelog());
@@ -109,21 +126,12 @@ void Report::printUpdates()
   }
 }
 
-void Report::printChangelog(const string &changelog)
-{
-  istringstream input(changelog);
-  string line;
-
-  while(getline(input, line, '\n'))
-    m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
-}
-
 void Report::printErrors()
 {
   printHeader("Errors");
 
   for(const Transaction::Error &err : m_transaction->errors())
-    m_stream << NL << err.title << ':' << NL << err.message << NL;
+    stream() << NL << err.title << ':' << NL << err.message << NL;
 }
 
 void Report::printRemovals()
@@ -131,10 +139,5 @@ void Report::printRemovals()
   printHeader("Removed files");
 
   for(const Path &path : m_transaction->removals())
-    m_stream << NL << path.join();
-}
-
-void Report::printHeader(const char *title)
-{
-  m_stream << NL << SEP << ' ' << title << ": " << SEP << NL;
+    stream() << NL << path.join();
 }

@@ -23,25 +23,41 @@
 #include <sstream>
 
 class Transaction;
+class Version;
 
-class Report : public Dialog {
+class ReportDialog : public Dialog {
+public:
+  ReportDialog();
+
+protected:
+  void onInit() override;
+
+  virtual void fillReport() = 0;
+
+  static const char * const NL;
+  std::ostringstream &stream() { return m_stream; }
+
+  void printHeader(const char *);
+  void printChangelog(const std::string &);
+
+private:
+  std::ostringstream m_stream;
+};
+
+class Report : public ReportDialog {
 public:
   Report(Transaction *);
 
 protected:
-  void onInit() override;
-  void onCommand(int) override;
+  void fillReport() override;
 
 private:
   void printNewPackages();
   void printUpdates();
   void printErrors();
   void printRemovals();
-  void printChangelog(const std::string &);
-  void printHeader(const char *);
 
   Transaction *m_transaction;
-  std::ostringstream m_stream;
 };
 
 #endif
