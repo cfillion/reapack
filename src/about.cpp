@@ -293,7 +293,7 @@ void History::fillReport()
     if(stream().tellp())
       stream() << NL;
 
-    stream() << ver->name();
+    stream() << 'v' << ver->name();
 
     if(!ver->author().empty())
       stream() << " by " << ver->author();
