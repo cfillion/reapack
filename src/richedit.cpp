@@ -103,6 +103,9 @@ bool RichEdit::setRichText(const string &rtf)
   LONG lines = (LONG)SendMessage(handle(), EM_GETLINECOUNT, 0, 0);
   SendMessage(handle(), EM_LINESCROLL, 0, -lines);
 
+  // scale down a little bit, by default everything is way to big
+  SendMessage(handle(), EM_SETZOOM, 3, 4);
+
   return true;
 }
 #endif
