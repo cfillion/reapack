@@ -115,6 +115,7 @@ TEST_CASE("valide remote urls", M) {
 TEST_CASE("null remote", M) {
   Remote remote;
   REQUIRE(remote.isNull());
+  CHECK(remote.isEnabled());
 
   SECTION("set name") {
     remote.setName("test");

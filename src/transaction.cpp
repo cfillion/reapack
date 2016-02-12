@@ -265,7 +265,7 @@ void Transaction::finish()
 
     m_registry->commit();
 
-    registerScriptsInHost();
+    registerQueued();
   }
 
   m_onFinish();
@@ -309,51 +309,53 @@ void Transaction::runTasks()
 
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 {
-  // don't actually do anything until commit()
+  // don't actually do anything until commit() – which will calls registerQueued
+  m_regQueue.push({add, entry, m_registry->getMainFile(entry)});
+}
 
-  switch(entry.type) {
-  case Package::ScriptType:
-    m_scriptRegs.push({add, entry, m_registry->getMainFile(entry)});
-    break;
-  default:
-    break;
+void Transaction::registerQueued()
+{
+  while(!m_regQueue.empty()) {
+    const HostRegistration &reg = m_regQueue.front();
+
+    // don't register in host if the remote got disabled meanwhile
+    const Remote &remote = m_remoteList->get(reg.entry.remote);
+    if(reg.add && (remote.isNull() || !remote.isEnabled())) {
+      m_regQueue.pop();
+      return;
+    }
+
+    switch(reg.entry.type) {
+    case Package::ScriptType:
+      registerScript(reg);
+      break;
+    default:
+      break;
+    }
+
+    m_regQueue.pop();
   }
 }
 
-void Transaction::registerScriptsInHost()
+void Transaction::registerScript(const HostRegistration &reg)
 {
-  if(!AddRemoveReaScript) {
-    // do nothing if REAPER < v5.12
-    m_scriptRegs = {};
-    return;
-  }
-
   enum Section { MainSection = 0, MidiEditorSection = 32060 };
 
-  while(!m_scriptRegs.empty()) {
-    const HostRegistration &reg = m_scriptRegs.front();
-    const Registry::Entry &entry = reg.entry;
+  if(!AddRemoveReaScript)
+    return; // do nothing if REAPER < v5.12
 
-    const Remote &remote = m_remoteList->get(entry.remote);
-    if(reg.add && (remote.isNull() || !remote.isEnabled()))
-      continue; // don't register in host if the remote got disabled meanwhile
+  Section section;
+  string category = Path(reg.entry.category).first();
+  boost::algorithm::to_lower(category);
 
-    string category = Path(entry.category).first();
-    boost::algorithm::to_lower(category);
+  if(category == "midi editor")
+    section = MidiEditorSection;
+  else
+    section = MainSection;
 
-    Section section;
+  const std::string &path = Path::prefixRoot(reg.file).join();
+  const bool isLast = m_regQueue.size() == 1;
 
-    if(category == "midi editor")
-      section = MidiEditorSection;
-    else
-      section = MainSection;
-
-    const std::string &path = Path::prefixRoot(reg.file).join();
-    const bool isLast = m_scriptRegs.size() == 1;
-
-    if(!AddRemoveReaScript(reg.add, section, path.c_str(), isLast) && reg.add)
-      addError("Script could not be registered in REAPER.", reg.file);
-
-    m_scriptRegs.pop();
-  }
+  if(!AddRemoveReaScript(reg.add, section, path.c_str(), isLast) && reg.add)
+    addError("Script could not be registered in REAPER.", reg.file);
 }

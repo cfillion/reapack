@@ -78,6 +78,8 @@ public:
   void addError(const std::string &msg, const std::string &title);
 
 private:
+  struct HostRegistration { bool add; Registry::Entry entry; std::string file; };
+
   void installQueued();
   void installTicket(const InstallTicket &);
   void finish();
@@ -88,7 +90,8 @@ private:
   void addTask(Task *);
 
   void registerInHost(bool add, const Registry::Entry &);
-  void registerScriptsInHost();
+  void registerQueued();
+  void registerScript(const HostRegistration &);
 
   const RemoteList *m_remoteList;
   bool m_isCancelled;
@@ -97,13 +100,12 @@ private:
 
   std::multimap<Remote, IndexCallback> m_remotes;
   std::vector<const RemoteIndex *> m_remoteIndexes;
+  std::vector<Task *> m_tasks;
+
   DownloadQueue m_downloadQueue;
   std::queue<InstallTicket> m_installQueue;
-  std::vector<Task *> m_tasks;
   std::queue<Task *> m_taskQueue;
-
-  struct HostRegistration { bool add; Registry::Entry entry; std::string file; };
-  std::queue<HostRegistration> m_scriptRegs;
+  std::queue<HostRegistration> m_regQueue;
 
   InstallTicketList m_new;
   InstallTicketList m_updates;
