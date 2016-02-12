@@ -31,8 +31,26 @@ TEST_CASE("construct invalid remote", M) {
 
   SECTION("invalid name") {
     try {
-      Remote remote("/", "url");
+      Remote remote("a/", "url");
       FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "invalid name");
+    }
+  }
+
+  SECTION("directory traversal in name") {
+    try {
+      Remote remote("..", "url");
+      FAIL("dotdot was allowed");
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "invalid name");
+    }
+
+    try {
+      Remote remote(".", "url");
+      FAIL("single dot was allowed");
     }
     catch(const reapack_error &e) {
       REQUIRE(string(e.what()) == "invalid name");

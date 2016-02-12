@@ -18,6 +18,7 @@
 #include "path.hpp"
 
 #include <algorithm>
+#include <boost/range/adaptor/reversed.hpp>
 #include <vector>
 
 using namespace std;
@@ -27,6 +28,9 @@ static const char SEPARATOR = '/';
 #else
 static const char SEPARATOR = '\\';
 #endif
+
+static const string DOT = ".";
+static const string DOTDOT = "..";
 
 Path Path::s_root;
 
@@ -46,7 +50,7 @@ static vector<string> Split(const string &input)
 
     const string part = input.substr(last, pos - last);
 
-    if(!part.empty())
+    if(!part.empty() && part != ".")
       list.push_back(part);
 
     last = pos + 1;
@@ -60,22 +64,48 @@ Path::Path(const std::string &path)
   append(path);
 }
 
-void Path::prepend(const string &parts)
+void Path::prepend(const string &str)
 {
-  if(parts.empty())
+  if(str.empty())
     return;
 
-  for(const string &part : Split(parts))
-    m_parts.push_front(part);
+  bool skip = false;
+
+  const vector<string> &parts = Split(str);
+
+  for(const string &part : parts | boost::adaptors::reversed) {
+    if(part == DOTDOT)
+      skip = true;
+    else if(!skip)
+      m_parts.push_front(part);
+    else
+      skip = false;
+  }
 }
 
-void Path::append(const string &parts)
+void Path::append(const string &parts, const bool traversal)
 {
   if(parts.empty())
     return;
 
-  for(const string &part : Split(parts))
-    m_parts.push_back(part);
+  for(const string &part : Split(parts)) {
+    if(part == DOTDOT) {
+      if(traversal)
+        removeLast();
+    }
+    else
+      m_parts.push_back(part);
+  }
+}
+
+void Path::prepend(const Path &o)
+{
+  m_parts.insert(m_parts.begin(), o.m_parts.begin(), o.m_parts.end());
+}
+
+void Path::append(const Path &o)
+{
+  m_parts.insert(m_parts.end(), o.m_parts.begin(), o.m_parts.end());
 }
 
 void Path::clear()
@@ -166,9 +196,21 @@ Path Path::operator+(const string &part) const
 Path Path::operator+(const Path &o) const
 {
   Path path(*this);
-  path.m_parts.insert(path.m_parts.end(), o.m_parts.begin(), o.m_parts.end());
+  path += o;
 
   return path;
+}
+
+const Path &Path::operator+=(const string &parts)
+{
+  append(parts);
+  return *this;
+}
+
+const Path &Path::operator+=(const Path &o)
+{
+  append(o);
+  return *this;
 }
 
 const string &Path::at(const size_t index) const

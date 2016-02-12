@@ -33,7 +33,9 @@ public:
   Path(const std::string &path = std::string());
 
   void prepend(const std::string &part);
-  void append(const std::string &part);
+  void append(const std::string &part, bool traversal = true);
+  void prepend(const Path &other);
+  void append(const Path &other);
   void removeLast();
   void clear();
 
@@ -51,6 +53,8 @@ public:
   bool operator<(const Path &) const;
   Path operator+(const std::string &) const;
   Path operator+(const Path &) const;
+  const Path &operator+=(const std::string &);
+  const Path &operator+=(const Path &);
   std::string &operator[](size_t);
   const std::string &operator[](size_t) const;
 

@@ -48,7 +48,7 @@ public:
   const Version *version(size_t index) const;
   const Version *lastVersion() const;
 
-  Path targetPath() const;
+  Path makeTargetPath(const std::string &file = {}) const;
 
 private:
   Category *m_category;

@@ -62,7 +62,7 @@ TEST_CASE("concatenate paths", M) {
 
   Path c;
   c.append("hello");
-  c.append("world");
+  c += "world";
 
   REQUIRE(a + b == c);
   REQUIRE(a + "world" == c);
@@ -123,13 +123,17 @@ TEST_CASE("split input", M) {
     a.prepend("hello/world");
 
     REQUIRE(a.size() == 2);
+    REQUIRE(a[0] == "hello");
+    REQUIRE(a[1] == "world");
   }
 
   SECTION("append") {
     Path a;
     a.append("hello/world");
-
     REQUIRE(a.size() == 2);
+
+    a += "chunky/bacon";
+    REQUIRE(a.size() == 4);
   }
 
   SECTION("skip empty parts") {
@@ -192,4 +196,47 @@ TEST_CASE("first and last path component", M) {
   const Path path("hello/world/chunky/bacon");
   REQUIRE(path.first() == "hello");
   REQUIRE(path.last() == "bacon");
+}
+
+TEST_CASE("directory traversal", M) {
+  SECTION("append (enabled)") {
+    REQUIRE(Path("a/./b") == Path("a/b"));
+    REQUIRE(Path("a/../b") == Path("b"));
+    REQUIRE(Path("../a") == Path("a"));
+  }
+
+  SECTION("append (disabled)") {
+    Path a;
+    a.append("a/../b", false);
+    REQUIRE(a == Path("a/b"));
+  }
+
+  SECTION("prepend") {
+    Path a;
+    a.prepend("a/../b/c/../d");
+    REQUIRE(a == Path("b/d"));
+
+    Path b;
+    b.prepend("../a");
+    REQUIRE(b == Path("a"));
+  }
+
+  SECTION("concatenate") {
+    // concatenating a std::string to a path, directory traversal is applied
+    const Path a = Path("a/b/c") + "../../../d/e/f";
+    REQUIRE(a == Path("d/e/f"));
+
+    // here, the directory traversal components are lost before concatenating
+    const Path b = Path("a/b/c") + Path("../../../d/e/f");
+    REQUIRE(b == Path("a/b/c/d/e/f"));
+  }
+}
+
+TEST_CASE("append and prepend full paths") {
+  Path a;
+  a += Path("c/d");
+  a.append(Path("e/f"));
+  a.prepend(Path("a/b"));
+
+  REQUIRE(a == Path("a/b/c/d/e/f"));
 }

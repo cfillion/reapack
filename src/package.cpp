@@ -79,7 +79,7 @@ const Version *Package::lastVersion() const
   return *m_versions.rbegin();
 }
 
-Path Package::targetPath() const
+Path Package::makeTargetPath(const string &file) const
 {
   Path path;
 
@@ -90,7 +90,9 @@ Path Package::targetPath() const
   case ScriptType:
     path.append("Scripts");
     path.append(m_category->index()->name());
-    path.append(m_category->name());
+
+    // only allow directory traversal up to the index name
+    path += Path(m_category->name()) + file;
     break;
   default:
     throw reapack_error("unsupported package type");

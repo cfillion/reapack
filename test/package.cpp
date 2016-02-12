@@ -81,14 +81,14 @@ TEST_CASE("add owned version", M) {
   }
 }
 
-TEST_CASE("unknown target path", M) {
+TEST_CASE("target path for unknown package type", M) {
   RemoteIndex ri("name");
   Category cat("name", &ri);
 
   Package pack(Package::UnknownType, "a", &cat);
 
   try {
-    pack.targetPath();
+    pack.makeTargetPath({});
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -107,14 +107,27 @@ TEST_CASE("script target path", M) {
   expected.append("Remote Name");
   expected.append("Category Name");
 
-  REQUIRE(pack.targetPath() == expected);
+  REQUIRE(pack.makeTargetPath() == expected);
+}
+
+TEST_CASE("script target path: directory traversal", M) {
+  RemoteIndex ri("Remote Name");
+  Category cat("../..", &ri);
+
+  Package pack(Package::ScriptType, "file.name", &cat);
+
+  Path expected;
+  expected.append("Scripts");
+  expected.append("Remote Name");
+
+  REQUIRE(pack.makeTargetPath() == expected);
 }
 
 TEST_CASE("script target path without category", M) {
   Package pack(Package::ScriptType, "file.name");
 
   try {
-    pack.targetPath();
+    pack.makeTargetPath();
     FAIL();
   }
   catch(const reapack_error &e) {

@@ -129,6 +129,23 @@ TEST_CASE("source target path", M) {
   REQUIRE(source.targetPath() == expected);
 }
 
+TEST_CASE("source target path with parent directory traversal", M) {
+  RemoteIndex ri("RemoteIndex Name");
+  Category cat("Category Name", &ri);
+  Package pack(Package::ScriptType, "package name", &cat);
+  Version ver("1.0", &pack);
+
+  const Source source(Source::GenericPlatform, "../../../file.name", "url", &ver);
+
+  Path expected;
+  expected.append("Scripts");
+  expected.append("RemoteIndex Name");
+  // expected.append("Category Name"); // only the category can be bypassed!
+  expected.append("file.name");
+
+  REQUIRE(source.targetPath() == expected);
+}
+
 TEST_CASE("source target path without package", M) {
   try {
     const Source source(Source::GenericPlatform, "a", "b");
