@@ -200,7 +200,10 @@ void Transaction::uninstall(const Remote &remote)
 
   for(const auto &entry : entries) {
     const set<Path> &files = m_registry->getFiles(entry);
-    allFiles.insert(allFiles.end(), files.begin(), files.end());
+    for(const Path &path : files) {
+      if(file_exists(Path::prefixRoot(path).join().c_str()))
+        allFiles.push_back(path);
+    }
 
     registerInHost(false, entry);
 
