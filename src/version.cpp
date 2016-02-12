@@ -114,7 +114,7 @@ void Version::setTime(const char *iso8601)
   unsigned int year, month, day;
   size_t n = sscanf(iso8601, "%u-%u-%u", &year, &month, &day);
 
-  if(n < 3)
+  if(n < 3 || year < 1900 || month < 1 || month > 12 || day < 1 || day > 31)
     return;
 
   m_time = {};
