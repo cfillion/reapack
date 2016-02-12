@@ -30,8 +30,8 @@
 
 using namespace std;
 
-Transaction::Transaction()
-  : m_isCancelled(false), m_enableReport(false)
+Transaction::Transaction(const RemoteList *rl)
+  : m_remoteList(rl), m_isCancelled(false), m_enableReport(false)
 {
   m_registry = new Registry(Path::prefixCache("registry.db"));
 
@@ -333,15 +333,23 @@ void Transaction::registerScriptsInHost()
   while(!m_scriptRegs.empty()) {
     const HostRegistration &reg = m_scriptRegs.front();
     const Registry::Entry &entry = reg.entry;
-    const std::string &path = Path::prefixRoot(reg.file).join();
-    const bool isLast = m_scriptRegs.size() == 1;
-    Section section = MainSection;
+
+    const Remote &remote = m_remoteList->get(entry.remote);
+    if(reg.add && (remote.isNull() || !remote.isEnabled()))
+      continue; // don't register in host if the remote got disabled meanwhile
 
     string category = Path(entry.category).first();
     boost::algorithm::to_lower(category);
 
+    Section section;
+
     if(category == "midi editor")
       section = MidiEditorSection;
+    else
+      section = MainSection;
+
+    const std::string &path = Path::prefixRoot(reg.file).join();
+    const bool isLast = m_scriptRegs.size() == 1;
 
     if(!AddRemoveReaScript(reg.add, section, path.c_str(), isLast) && reg.add)
       addError("Script could not be registered in REAPER.", reg.file);

@@ -29,6 +29,7 @@
 class InstallTask;
 class Remote;
 class RemoteIndex;
+class RemoteList;
 class RemoveTask;
 class Task;
 
@@ -49,7 +50,7 @@ public:
 
   typedef std::vector<const Error> ErrorList;
 
-  Transaction();
+  Transaction(const RemoteList *);
   ~Transaction();
 
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
@@ -89,6 +90,7 @@ private:
   void registerInHost(bool add, const Registry::Entry &);
   void registerScriptsInHost();
 
+  const RemoteList *m_remoteList;
   bool m_isCancelled;
   bool m_enableReport;
   Registry *m_registry;

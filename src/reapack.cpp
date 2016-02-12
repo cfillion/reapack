@@ -257,7 +257,7 @@ Transaction *ReaPack::createTransaction()
   }
 
   try {
-    m_transaction = new Transaction;
+    m_transaction = new Transaction(m_config->remotes());
   }
   catch(const reapack_error &e) {
     ShowMessageBox(e.what(), "ReaPack – Fatal Error", 0);
