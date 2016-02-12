@@ -191,6 +191,8 @@ void Transaction::unregisterAll(const Remote &remote)
 
 void Transaction::uninstall(const Remote &remote)
 {
+  remove(RemoteIndex::pathFor(remote.name()).join().c_str());
+
   const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
 
   if(entries.empty())
