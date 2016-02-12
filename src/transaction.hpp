@@ -77,7 +77,8 @@ public:
   void addError(const std::string &msg, const std::string &title);
 
 private:
-  void install();
+  void installQueued();
+  void installTicket(const InstallTicket &);
   void finish();
 
   void saveIndex(Download *, const Remote &);

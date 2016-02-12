@@ -39,7 +39,7 @@ Transaction::Transaction()
     if(m_installQueue.empty())
       finish();
     else
-      install();
+      installQueued();
   });
 }
 
@@ -109,15 +109,36 @@ void Transaction::upgrade(const Package *pkg)
 
   if(queryRes.status == Registry::UpToDate) {
     if(allFilesExists(ver->files()))
-      return; // package really is installed, nothing to do!
+      return; // latest version is really installed, nothing to do here!
     else
       queryRes.status = Registry::Uninstalled;
   }
 
+  m_installQueue.push({ver, queryRes});
+}
+
+void Transaction::installQueued()
+{
+  while(!m_installQueue.empty()) {
+    installTicket(m_installQueue.front());
+    m_installQueue.pop();
+  }
+
+  runTasks();
+}
+
+void Transaction::installTicket(const InstallTicket &ticket)
+{
+  const Version *ver = ticket.first;
+  const Registry::QueryResult &queryRes = ticket.second;
+  const set<Path> &currentFiles = m_registry->getFiles(queryRes.entry);
+
+  Registry::Entry newEntry;
+
   try {
     // register the new version and prevent file conflicts
     vector<Path> conflicts;
-    queryRes.entry = m_registry->push(ver, &conflicts);
+    newEntry = m_registry->push(ver, &conflicts);
 
     if(!conflicts.empty()) {
       for(const Path &path : conflicts) {
@@ -135,39 +156,21 @@ void Transaction::upgrade(const Package *pkg)
     return;
   }
 
+  InstallTask *task = new InstallTask(ver, currentFiles, this);
 
-  // all good! queue for installation
-  m_installQueue.push({ver, queryRes});
-}
+  task->onCommit([=] {
+    if(queryRes.status == Registry::UpdateAvailable)
+      m_updates.push_back(ticket);
+    else
+      m_new.push_back(ticket);
 
-void Transaction::install()
-{
-  while(!m_installQueue.empty()) {
-    const InstallTicket ticket = m_installQueue.front();
-    m_installQueue.pop();
+    const set<Path> &removedFiles = task->removedFiles();
+    m_removals.insert(removedFiles.begin(), removedFiles.end());
 
-    const Version *ver = ticket.first;
-    const Registry::QueryResult queryRes = ticket.second;
-    const set<Path> &currentFiles = m_registry->getFiles(queryRes.entry);
+    registerInHost(true, newEntry);
+  });
 
-    InstallTask *task = new InstallTask(ver, currentFiles, this);
-
-    task->onCommit([=] {
-      if(queryRes.status == Registry::UpdateAvailable)
-        m_updates.push_back(ticket);
-      else
-        m_new.push_back(ticket);
-
-      const set<Path> &removedFiles = task->removedFiles();
-      m_removals.insert(removedFiles.begin(), removedFiles.end());
-
-      registerInHost(true, queryRes.entry);
-    });
-
-    addTask(task);
-  }
-
-  runTasks();
+  addTask(task);
 }
 
 void Transaction::registerAll(const Remote &remote)
