@@ -19,6 +19,7 @@
 #define REAPACK_VERSION_HPP
 
 #include <cstdint>
+#include <ctime>
 #include <set>
 #include <string>
 
@@ -40,6 +41,10 @@ public:
   void setAuthor(const std::string &author) { m_author = author; }
   const std::string &author() const { return m_author; }
 
+  void setTime(const char *iso8601);
+  const std::tm &time() const { return m_time; }
+  std::string formattedDate() const;
+
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
 
@@ -57,6 +62,7 @@ public:
 private:
   std::string m_name;
   uint64_t m_code;
+  std::tm m_time;
 
   const Package *m_package;
   const Source *m_mainSource;

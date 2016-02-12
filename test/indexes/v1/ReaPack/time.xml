@@ -1,0 +1,9 @@
+<index version="1">
+  <category name="catname">
+    <reapack name="packname" type="script">
+      <version name="1.0" time="2016-02-12T01:16:40Z">
+        <source platform="all" file="filename">https://google.com/</source>
+      </version>
+    </reapack>
+  </category>
+</index>

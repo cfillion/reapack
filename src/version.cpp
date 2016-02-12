@@ -27,7 +27,7 @@
 using namespace std;
 
 Version::Version(const std::string &str, Package *pkg)
-  : m_name(str), m_code(0), m_package(pkg), m_mainSource(nullptr)
+  : m_name(str), m_code(0), m_time(), m_package(pkg), m_mainSource(nullptr)
 {
   static const regex pattern("(\\d+)");
 
@@ -107,6 +107,30 @@ void Version::addSource(Source *source)
 void Version::setChangelog(const std::string &changelog)
 {
   m_changelog = changelog;
+}
+
+void Version::setTime(const char *iso8601)
+{
+  unsigned int year, month, day;
+  size_t n = sscanf(iso8601, "%u-%u-%u", &year, &month, &day);
+
+  if(n < 3)
+    return;
+
+  m_time = {};
+  m_time.tm_year = year - 1900;
+  m_time.tm_mon = month - 1;
+  m_time.tm_mday = day;
+}
+
+string Version::formattedDate() const
+{
+  if(m_time.tm_year == 0)
+    return {};
+
+  char buf[32] = {};
+  strftime(buf, sizeof(buf), "%B %d %Y", &m_time);
+  return buf;
 }
 
 const Source *Version::source(const size_t index) const

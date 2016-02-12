@@ -142,6 +142,9 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
   const char *author = verNode->Attribute("author");
   if(author) ver->setAuthor(author);
 
+  const char *time = verNode->Attribute("time");
+  if(time) ver->setTime(time);
+
   TiXmlElement *node = verNode->FirstChildElement("source");
 
   while(node) {

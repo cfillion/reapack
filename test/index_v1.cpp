@@ -80,6 +80,20 @@ TEST_CASE("read version author", M) {
     == "Watanabe Saki");
 }
 
+TEST_CASE("read version time", M) {
+  UseRootPath root(RIPATH);
+
+  const RemoteIndex *ri = RemoteIndex::load("time");
+  RIPTR(ri);
+
+  CHECK(ri->packages().size() == 1);
+
+  const tm &time = ri->category(0)->package(0)->lastVersion()->time();
+  REQUIRE(time.tm_year == 2016 - 1900);
+  REQUIRE(time.tm_mon == 2 - 1);
+  REQUIRE(time.tm_mday == 12);
+}
+
 TEST_CASE("invalid version tag", M) {
   UseRootPath root(RIPATH);
 

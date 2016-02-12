@@ -298,6 +298,10 @@ void History::fillReport()
     if(!ver->author().empty())
       stream() << " by " << ver->author();
 
+    const string &date = ver->formattedDate();
+    if(!date.empty())
+      stream() << " – " << date;
+
     stream() << NL;
 
     const string &changelog = ver->changelog();
