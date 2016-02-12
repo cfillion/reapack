@@ -80,11 +80,11 @@ TEST_CASE("empty source url", M) {
 
 TEST_CASE("full name without version", M) {
   SECTION("with source name") {
-    const Source source(Source::UnknownPlatform, "a", "b");
-    REQUIRE(source.fullName() == "a");
+    const Source source(Source::UnknownPlatform, "path/to/file", "b");
+    REQUIRE(source.fullName() == "file");
   }
 
-  SECTION("without source name") {
+  SECTION("without file name") {
     try {
       const Source source(Source::UnknownPlatform, string(), "b");
       (void)source.fullName();
@@ -99,9 +99,9 @@ TEST_CASE("full name without version", M) {
 TEST_CASE("full name with version", M) {
   SECTION("with source name") {
     Version ver("1.0");
-    const Source source(Source::UnknownPlatform, "a", "b", &ver);
+    const Source source(Source::UnknownPlatform, "path/to/file", "b", &ver);
 
-    REQUIRE(source.fullName() == "v1.0 (a)");
+    REQUIRE(source.fullName() == "v1.0 (file)");
   }
 
   SECTION("without source name") {

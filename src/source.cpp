@@ -72,11 +72,11 @@ const string &Source::file() const
 string Source::fullName() const
 {
   if(!m_version)
-    return file();
+    return Path(file()).basename();
   else if(m_file.empty())
     return m_version->fullName();
 
-  return m_version->fullName() + " (" + m_file + ")";
+  return m_version->fullName() + " (" + Path(m_file).basename() + ")";
 }
 
 Path Source::targetPath() const
