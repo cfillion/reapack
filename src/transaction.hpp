@@ -65,7 +65,7 @@ public:
   void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
-  bool isReportEnabled() const { return m_enableReport; }
+  bool isReportEnabled() const { return m_enableReport && !m_isCancelled; }
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
   size_t taskCount() const { return m_tasks.size(); }
 

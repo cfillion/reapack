@@ -226,7 +226,6 @@ void Transaction::uninstall(const Remote &remote)
 void Transaction::cancel()
 {
   m_isCancelled = true;
-  m_enableReport = false;
 
   for(Task *task : m_tasks)
     task->rollback();
