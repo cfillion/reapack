@@ -118,7 +118,6 @@ protected:
   virtual void onCommand(int);
   virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onContextMenu(HWND, int x, int y);
-  virtual void onDestroy();
 
 private:
   static WDL_DLGRET Proc(HWND, UINT, WPARAM, LPARAM);
@@ -142,7 +141,7 @@ private:
 class LockDialog {
 public:
   LockDialog(Dialog *dlg)
-    : m_dialog(dlg), m_enabled(dlg->isEnabled())
+    : m_dialog(dlg), m_enabled(dlg && dlg->isEnabled())
   {
     if(m_enabled)
       m_dialog->disable();

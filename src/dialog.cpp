@@ -28,15 +28,20 @@ DialogMap Dialog::s_instances;
 
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-  Dialog *dlg = nullptr;
+  Dialog *dlg;
 
-  const auto it = Dialog::s_instances.find(handle);
-  if(it != Dialog::s_instances.end())
-    dlg = it->second;
+  if(msg == WM_INITDIALOG)
+    dlg = reinterpret_cast<Dialog *>(lParam);
+  else {
+    const auto it = Dialog::s_instances.find(handle);
+    if(it == Dialog::s_instances.end())
+      return false;
+    else
+      dlg = it->second;
+  }
 
   switch(msg) {
   case WM_INITDIALOG:
-    dlg = (Dialog *)lParam;
     dlg->m_handle = handle;
 
     // necessary if something in onInit triggers another event
@@ -74,16 +79,6 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_CONTEXTMENU:
     dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
     break;
-  case WM_DESTROY:
-    // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG
-    // if the dialog resource is invalid (eg. because of an unloaded dll).
-    //
-    // When this happens, neither lParam nor s_instances will contain
-    // a pointer to the Dialog instance, so there is nothing we can do.
-    // At least, let's try to not crash.
-    if(dlg)
-      dlg->onDestroy();
-    break;
   };
 
   return false;
@@ -98,11 +93,16 @@ Dialog::Dialog(const int templateId)
 
 Dialog::~Dialog()
 {
+  s_instances.erase(m_handle);
+
   for(Control *control : m_controls | boost::adaptors::map_values)
     delete control;
 
+  const set<int> timers = m_timers; // make an immutable copy
+  for(const int id : timers)
+    stopTimer(id);
+
   DestroyWindow(m_handle);
-  s_instances.erase(m_handle);
 }
 
 INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
@@ -253,12 +253,4 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 
 void Dialog::onContextMenu(HWND, int, int)
 {
-}
-
-void Dialog::onDestroy()
-{
-  const set<int> timers = m_timers; // make a copy
-
-  for(const int id : timers)
-    stopTimer(id);
 }
