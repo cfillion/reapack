@@ -41,9 +41,10 @@ Version::Version(const std::string &str, Package *pkg)
   if(begin == end || size > 4L)
     throw reapack_error("invalid version name");
 
-  for(sregex_iterator it = begin; it != end; it++) {
+  size_t index = 0;
+
+  for(sregex_iterator it = begin; it != end; it++, index++) {
     const string match = it->str(1);
-    const size_t index = distance(begin, it);
 
     if(match.size() > 4)
       throw reapack_error("version component overflow");

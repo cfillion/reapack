@@ -59,6 +59,13 @@ TEST_CASE("version with 4 components", M) {
   REQUIRE(ver < Version("1.2.4"));
 }
 
+TEST_CASE("version with repeated digits", M) {
+  Version ver("1.1.1");
+  REQUIRE(ver.name() == "1.1.1");
+  REQUIRE(ver.code() == UINT64_C(1000100010000));
+  REQUIRE(ver < Version("1.1.2"));
+}
+
 TEST_CASE("decimal version", M) {
   Version ver("5.05");
   REQUIRE(ver == Version("5.5"));
