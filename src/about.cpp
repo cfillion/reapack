@@ -248,7 +248,7 @@ void About::updateInstalledFiles()
     const auto_string &desc = make_autostring(e.what());
     auto_char msg[255] = {};
     auto_snprintf(msg, sizeof(msg),
-      AUTO_STR("The file list is currently unavailable.")
+      AUTO_STR("The file list is currently unavailable.\x20")
       AUTO_STR("Retry later when all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
