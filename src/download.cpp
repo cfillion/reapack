@@ -183,15 +183,12 @@ int Download::UpdateProgress(void *ptr, const double dltotal, const double dlnow
   if(dl->isAborted())
     return 1;
 
-  short progress;
   const double total = ultotal + dltotal;
 
-  if(total > 0)
-    progress = (short)(ulnow + dlnow / total) * 100;
-  else
-    progress = 10;
-
-  dl->setProgress(min(progress, (short)100));
+  if(total > 0) {
+    const short progress = (short)((ulnow + dlnow / total) * 100);
+    dl->setProgress(min(progress, (short)100));
+  }
 
   return 0;
 }

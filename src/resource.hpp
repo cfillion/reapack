@@ -25,6 +25,7 @@
 #define PROGRESS_CLASS "msctls_progress32"
 #define WC_LISTVIEW "SysListView32"
 #define WC_TABCONTROL "SysTabControl32"
+#define PBS_MARQUEE 0
 #endif
 
 #define DIALOG_STYLE \
