@@ -17,6 +17,7 @@
 
 #include "reapack.hpp"
 
+#include "about.hpp"
 #include "config.hpp"
 #include "errors.hpp"
 #include "import.hpp"
@@ -251,6 +252,14 @@ void ReaPack::manageRemotes()
   m_manager->setCloseHandler([=] (INT_PTR) {
     Dialog::Destroy(m_manager);
     m_manager = nullptr;
+  });
+}
+
+void ReaPack::about()
+{
+  const Remote &remote = m_config->remotes()->get("ReaPack");
+  requireIndex(remote, [=] {
+    Dialog::Show<About>(m_instance, m_mainWindow, &remote);
   });
 }
 

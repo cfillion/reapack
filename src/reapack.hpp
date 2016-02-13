@@ -56,6 +56,7 @@ public:
   void importRemote();
   void import(const Remote &);
   void manageRemotes();
+  void about();
 
   void runTasks();
 

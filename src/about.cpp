@@ -36,15 +36,25 @@ using namespace std;
 
 enum { ACTION_HISTORY = 300 };
 
-About::About(const Remote *remote, const RemoteIndex *index)
-  : Dialog(IDD_ABOUT_DIALOG), m_remote(remote), m_index(index),
+About::About(const Remote *remote)
+  : Dialog(IDD_ABOUT_DIALOG), m_remote(remote), m_index(nullptr),
     m_currentCat(-255)
 {
   RichEdit::Init();
 }
 
+About::~About()
+{
+  delete m_index;
+}
+
 void About::onInit()
 {
+  if(!load()) {
+    close();
+    return;
+  }
+
   m_about = createControl<RichEdit>(IDC_ABOUT);
 
   m_cats = createControl<ListView>(IDC_CATEGORIES, ListView::Columns{
@@ -125,6 +135,31 @@ void About::onContextMenu(HWND target, const int x, const int y)
   Menu menu;
   menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
   menu.show(x, y, handle());
+}
+
+bool About::load()
+{
+  try {
+    m_index = RemoteIndex::load(m_remote->name());
+    return true;
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("ReaPack could not read %s's index.\n\n")
+
+      AUTO_STR("Synchronize your packages and try again.\n")
+      AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+
+      AUTO_STR("[Error description: %s]"),
+      make_autostring(m_remote->name()).c_str(), desc.c_str()
+    );
+
+    MessageBox(parent(), msg, AUTO_STR("ReaPack Warning"), MB_OK);
+    return false;
+  }
 }
 
 void About::populate()

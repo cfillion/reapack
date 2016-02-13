@@ -88,7 +88,8 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("About ReaPack v0.1"), 0);
+  menu.addAction(AUTO_STR("About ReaPack v0.1"),
+    NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
@@ -119,6 +120,8 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage remotes...",
     &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
+
+  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::about, reapack));
 
   plugin_register("hookcommand", (void *)commandHook);
   plugin_register("hookcustommenu", (void *)menuHook);

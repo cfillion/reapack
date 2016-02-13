@@ -36,7 +36,9 @@ struct Link;
 class About : public Dialog {
 public:
   enum { EnableResult = 100 };
-  About(const Remote *, const RemoteIndex *);
+
+  About(const Remote *);
+  ~About();
 
 protected:
   void onInit() override;
@@ -44,6 +46,7 @@ protected:
   void onContextMenu(HWND, int x, int y) override;
 
 private:
+  bool load();
   void populate();
   void updatePackages();
   void updateInstalledFiles();
