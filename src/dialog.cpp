@@ -20,6 +20,7 @@
 #include "control.hpp"
 
 #include <algorithm>
+#include <boost/range/adaptor/map.hpp>
 
 using namespace std;
 
@@ -97,8 +98,8 @@ Dialog::Dialog(const int templateId)
 
 Dialog::~Dialog()
 {
-  for(const auto &controlPair : m_controls)
-    delete controlPair.second;
+  for(Control *control : m_controls | boost::adaptors::map_values)
+    delete control;
 
   DestroyWindow(m_handle);
   s_instances.erase(m_handle);
@@ -108,6 +109,7 @@ INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 {
   m_instance = inst;
   m_parent = parent;
+  m_mode = mode;
 
   switch(mode) {
   case Modeless:
@@ -130,6 +132,13 @@ void Dialog::Destroy(Dialog *dlg)
   delete dlg;
 }
 
+void Dialog::DestroyAll()
+{
+  const DialogMap map = s_instances; // make an immutable copy
+  for(Dialog *dlg : map | boost::adaptors::map_values)
+    Destroy(dlg);
+}
+
 void Dialog::setVisible(const bool visible, HWND handle)
 {
   ShowWindow(handle, visible ? SW_SHOW : SW_HIDE);
@@ -137,7 +146,14 @@ void Dialog::setVisible(const bool visible, HWND handle)
 
 void Dialog::close(const INT_PTR result)
 {
-  EndDialog(m_handle, result);
+  switch(m_mode) {
+  case Modal:
+    EndDialog(m_handle, result);
+    break;
+  case Modeless:
+    m_closeHandler(result);
+    break;
+  }
 }
 
 void Dialog::center()
@@ -166,6 +182,7 @@ void Dialog::center()
 
 void Dialog::setFocus()
 {
+  show(); // hack to unminimize the window on OS X
   SetFocus(m_handle);
 }
 

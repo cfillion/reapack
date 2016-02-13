@@ -18,6 +18,7 @@
 #ifndef REAPACK_DIALOG_HPP
 #define REAPACK_DIALOG_HPP
 
+#include <functional>
 #include <map>
 #include <set>
 
@@ -31,6 +32,8 @@ class Control;
 
 class Dialog {
 public:
+  typedef std::function<void (INT_PTR)> CloseHandler;
+
   enum Modality {
     Modeless,
     Modal,
@@ -56,6 +59,7 @@ public:
   }
 
   static void Destroy(Dialog *);
+  static void DestroyAll();
 
   INT_PTR init(REAPER_PLUGIN_HINSTANCE, HWND, const Modality);
 
@@ -84,6 +88,8 @@ public:
   void setFocus();
   int startTimer(int elapse, int id = 0);
   void stopTimer(int id);
+
+  void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
 protected:
   Dialog(int templateId);
@@ -121,6 +127,7 @@ private:
   const int m_template;
   bool m_isVisible;
   bool m_isEnabled;
+  Modality m_mode;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_parent;
@@ -128,6 +135,8 @@ private:
 
   std::map<int, Control *> m_controls;
   std::set<int> m_timers;
+
+  CloseHandler m_closeHandler;
 };
 
 class LockDialog {

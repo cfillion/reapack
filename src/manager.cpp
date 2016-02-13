@@ -82,7 +82,7 @@ void Manager::onCommand(const int id)
     }
   case IDCANCEL:
     reset();
-    hide();
+    close();
     break;
   }
 }

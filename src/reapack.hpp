@@ -28,6 +28,7 @@
 typedef std::function<void()> ActionCallback;
 
 class Config;
+class Import;
 class Manager;
 class Progress;
 class Remote;
@@ -70,6 +71,7 @@ private:
   Transaction *m_transaction;
   Progress *m_progress;
   Manager *m_manager;
+  Import *m_import;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;

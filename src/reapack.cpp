@@ -32,7 +32,8 @@ using namespace std;
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), importAction(), configAction(),
-    m_transaction(nullptr), m_instance(instance)
+    m_transaction(nullptr), m_manager(nullptr), m_import(nullptr),
+    m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -45,7 +46,6 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   m_config->read(Path::prefixRoot("reapack.ini"));
 
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
-  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
 
   if(m_config->isFirstRun())
     manageRemotes();
@@ -56,8 +56,7 @@ ReaPack::~ReaPack()
   m_config->write();
   delete m_config;
 
-  Dialog::Destroy(m_progress);
-  Dialog::Destroy(m_manager);
+  Dialog::DestroyAll();
 
   Download::Cleanup();
 
@@ -163,7 +162,17 @@ void ReaPack::uninstall(const Remote &remote)
 
 void ReaPack::importRemote()
 {
-  Dialog::Show<Import>(m_instance, m_mainWindow, this);
+  if(m_import) {
+    m_import->setFocus();
+    return;
+  }
+
+  m_import = Dialog::Create<Import>(m_instance, m_mainWindow, this);
+  m_import->show();
+  m_import->setCloseHandler([=] (INT_PTR) {
+    Dialog::Destroy(m_import);
+    m_import = nullptr;
+  });
 }
 
 void ReaPack::import(const Remote &remote)
@@ -199,7 +208,9 @@ void ReaPack::import(const Remote &remote)
     else {
       enable(existing);
 
-      m_manager->refresh();
+      if(m_manager)
+        m_manager->refresh();
+
       m_config->write();
 
       return;
@@ -221,18 +232,26 @@ void ReaPack::import(const Remote &remote)
     remotes->add(remote);
     m_config->write();
 
-    m_manager->refresh();
+    if(m_manager)
+      m_manager->refresh();
   });
 }
 
 void ReaPack::manageRemotes()
 {
-  m_manager->refresh();
-
-  if(m_manager->isVisible())
+  if(m_manager) {
     m_manager->setFocus();
-  else
-    m_manager->show();
+    return;
+  }
+
+  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
+  m_manager->refresh();
+  m_manager->show();
+
+  m_manager->setCloseHandler([=] (INT_PTR) {
+    Dialog::Destroy(m_manager);
+    m_manager = nullptr;
+  });
 }
 
 Transaction *ReaPack::createTransaction()
