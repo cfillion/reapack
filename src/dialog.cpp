@@ -62,7 +62,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     break;
 #endif
   case WM_TIMER:
-    dlg->onTimer();
+    dlg->onTimer((int)wParam);
     break;
   case WM_COMMAND:
     dlg->onCommand(LOWORD(wParam));
@@ -130,14 +130,9 @@ void Dialog::Destroy(Dialog *dlg)
   delete dlg;
 }
 
-void Dialog::show(HWND handle)
+void Dialog::setVisible(const bool visible, HWND handle)
 {
-  ShowWindow(handle, SW_SHOW);
-}
-
-void Dialog::hide(HWND handle)
-{
-  ShowWindow(handle, SW_HIDE);
+  ShowWindow(handle, visible ? SW_SHOW : SW_HIDE);
 }
 
 void Dialog::close(const INT_PTR result)
@@ -179,6 +174,27 @@ void Dialog::setEnabled(const bool enabled, HWND handle)
   EnableWindow(handle, enabled);
 }
 
+int Dialog::startTimer(const int ms, int id)
+{
+  if(id == 0) {
+    if(m_timers.empty())
+      id = 1;
+    else
+      id = *m_timers.rbegin();
+  }
+
+  m_timers.insert(id);
+  SetTimer(m_handle, id, ms, nullptr);
+
+  return id;
+}
+
+void Dialog::stopTimer(int id)
+{
+  KillTimer(m_handle, id);
+  m_timers.erase(id);
+}
+
 HWND Dialog::getControl(const int idc)
 {
   return GetDlgItem(m_handle, idc);
@@ -197,7 +213,7 @@ void Dialog::onHide()
 {
 }
 
-void Dialog::onTimer()
+void Dialog::onTimer(int)
 {
 }
 
@@ -224,4 +240,8 @@ void Dialog::onContextMenu(HWND, int, int)
 
 void Dialog::onDestroy()
 {
+  const set<int> timers = m_timers; // make a copy
+
+  for(const int id : timers)
+    stopTimer(id);
 }

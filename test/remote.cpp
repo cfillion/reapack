@@ -226,6 +226,17 @@ TEST_CASE("remote from file", M) {
 
     REQUIRE(code == Remote::Success);
   }
+
+  SECTION("string stream") {
+    istringstream stream("name\nurl");
+
+    Remote::ReadCode code;
+    const Remote remote = Remote::fromFile(stream, &code);
+    REQUIRE(code == Remote::Success);
+    REQUIRE(remote.isValid());
+    REQUIRE(remote.name() == "name");
+    REQUIRE(remote.url() == "url");
+  }
 };
 
 TEST_CASE("unserialize remote", M) {

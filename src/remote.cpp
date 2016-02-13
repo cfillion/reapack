@@ -65,13 +65,16 @@ Remote Remote::fromFile(const string &path, ReadCode *code)
     return {};
   }
 
+  return fromFile(file, code);
+}
+
+Remote Remote::fromFile(istream &stream, ReadCode *code)
+{
   string name;
-  getline(file, name);
+  getline(stream, name);
 
   string url;
-  getline(file, url);
-
-  file.close();
+  getline(stream, url);
 
   if(!ValidateName(name)) {
     if(code)

@@ -19,6 +19,7 @@
 
 #include "config.hpp"
 #include "errors.hpp"
+#include "import.hpp"
 #include "index.hpp"
 #include "manager.hpp"
 #include "progress.hpp"
@@ -162,29 +163,11 @@ void ReaPack::uninstall(const Remote &remote)
 
 void ReaPack::importRemote()
 {
-  static const char *title = "ReaPack: Import remote repository";
+  Dialog::Show<Import>(m_instance, m_mainWindow, this);
+}
 
-  string path(4096, 0);
-  if(!GetUserFileNameForRead(&path[0], title, "ReaPackRemote"))
-    return;
-
-  Remote::ReadCode code;
-  const Remote remote = Remote::fromFile(path, &code);
-
-  switch(code) {
-  case Remote::ReadFailure:
-    ShowMessageBox(strerror(errno), title, 0);
-    return;
-  case Remote::InvalidName:
-    ShowMessageBox("Invalid .ReaPackRemote file! (invalid name)", title, 0);
-    return;
-  case Remote::InvalidUrl:
-    ShowMessageBox("Invalid .ReaPackRemote file! (invalid url)", title, 0);
-    return;
-  default:
-    break;
-  };
-
+void ReaPack::import(const Remote &remote)
+{
   RemoteList *remotes = m_config->remotes();
 
   const Remote &existing = remotes->get(remote.name());
@@ -192,7 +175,7 @@ void ReaPack::importRemote()
   if(!existing.isNull()) {
     if(existing.isProtected()) {
       ShowMessageBox(
-        "This remote is protected and cannot be overwritten.", title, MB_OK);
+        "This remote is protected and cannot be overwritten.", Import::TITLE, MB_OK);
 
       return;
     }
@@ -200,7 +183,7 @@ void ReaPack::importRemote()
       const int button = ShowMessageBox(
         "This remote is already configured.\r\n"
         "Do you want to overwrite the current remote?"
-        , title, MB_YESNO);
+        , Import::TITLE, MB_YESNO);
 
       if(button != IDYES)
         return;
@@ -209,7 +192,7 @@ void ReaPack::importRemote()
       ShowMessageBox(
         "This remote is already configured.\r\n"
         "Nothing to do!"
-      , title, MB_OK);
+      , Import::TITLE, MB_OK);
 
       return;
     }
@@ -223,8 +206,11 @@ void ReaPack::importRemote()
     }
   }
 
-  if(!hitchhikeTransaction())
+  if(!hitchhikeTransaction()) {
+    remotes->add(remote);
+    m_config->write();
     return;
+  }
 
   m_transaction->synchronize(remote);
 

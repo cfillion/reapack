@@ -19,6 +19,7 @@
 #define REAPACK_DIALOG_HPP
 
 #include <map>
+#include <set>
 
 #include <wdltypes.h>
 #include <reaper_plugin.h>
@@ -72,13 +73,17 @@ public:
   void setEnabled(bool enable) { setEnabled(enable, m_handle); }
   void setEnabled(bool, HWND);
 
-  void show(HWND);
   void show() { show(m_handle); }
-  void hide(HWND);
+  void show(HWND handle) { setVisible(true, handle); }
   void hide() { hide(m_handle); }
+  void hide(HWND handle) { setVisible(false, handle); }
+  void setVisible(bool visible) { setVisible(visible, m_handle); }
+  void setVisible(bool, HWND);
   void close(INT_PTR = 0);
   void center();
   void setFocus();
+  int startTimer(int elapse, int id = 0);
+  void stopTimer(int id);
 
 protected:
   Dialog(int templateId);
@@ -103,7 +108,7 @@ protected:
   virtual void onInit();
   virtual void onShow();
   virtual void onHide();
-  virtual void onTimer();
+  virtual void onTimer(int);
   virtual void onCommand(int);
   virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onContextMenu(HWND, int x, int y);
@@ -122,6 +127,7 @@ private:
   HWND m_handle;
 
   std::map<int, Control *> m_controls;
+  std::set<int> m_timers;
 };
 
 class LockDialog {

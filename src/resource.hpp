@@ -25,6 +25,7 @@
 #define PROGRESS_CLASS "msctls_progress32"
 #define WC_LISTVIEW "SysListView32"
 #define WC_TABCONTROL "SysTabControl32"
+#define PBS_MARQUEE 0
 #endif
 
 #define DIALOG_STYLE \
@@ -35,18 +36,25 @@
 #define IDD_REPORT_DIALOG   101
 #define IDD_CONFIG_DIALOG   102
 #define IDD_ABOUT_DIALOG    103
+#define IDD_IMPORT_DIALOG   104
 
 #define IDC_LABEL      200
-#define IDC_PROGRESS   201
-#define IDC_REPORT     202
-#define IDC_LIST       203
-#define IDC_IMPORT     204
-#define IDC_TABS       205
-#define IDC_ENABLE     206
-#define IDC_WEBSITE    207
-#define IDC_DONATE     208
-#define IDC_ABOUT      209
-#define IDC_CATEGORIES 210
-#define IDC_PACKAGES   211
+#define IDC_LABEL2     201
+#define IDC_LABEL3     202
+#define IDC_PROGRESS   210
+#define IDC_REPORT     211
+#define IDC_LIST       212
+#define IDC_IMPORT     213
+#define IDC_TABS       214
+#define IDC_ENABLE     215
+#define IDC_WEBSITE    216
+#define IDC_DONATE     217
+#define IDC_ABOUT      218
+#define IDC_CATEGORIES 219
+#define IDC_PACKAGES   220
+#define IDC_GROUPBOX   221
+#define IDC_URL        222
+#define IDC_FILE       223
+#define IDC_BROWSE     224
 
 #endif

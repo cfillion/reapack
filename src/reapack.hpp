@@ -53,6 +53,7 @@ public:
   void requireIndex(const Remote &, const std::function<void ()> &);
   void uninstall(const Remote &);
   void importRemote();
+  void import(const Remote &);
   void manageRemotes();
 
   void runTasks();
