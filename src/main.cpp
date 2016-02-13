@@ -80,10 +80,10 @@ static void menuHook(const char *name, HMENU handle, int f)
   menu.addAction(AUTO_STR("Synchronize packages"),
     NamedCommandLookup("_REAPACK_SYNC"));
 
-  menu.addAction(AUTO_STR("Import remote repository..."),
+  menu.addAction(AUTO_STR("Import a repository..."),
     NamedCommandLookup("_REAPACK_IMPORT"));
 
-  menu.addAction(AUTO_STR("Manage remotes..."),
+  menu.addAction(AUTO_STR("Manage repositories..."),
     NamedCommandLookup("_REAPACK_MANAGE"));
 
   menu.addSeparator();

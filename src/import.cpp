@@ -34,7 +34,7 @@
 
 using namespace std;
 
-const char *Import::TITLE = "ReaPack: Import a remote repository";
+const char *Import::TITLE = "ReaPack: Import a repository";
 const char *SUBTITLE = "Select a .ReaPackRemote file";
 
 Import::Import(ReaPack *reapack)
