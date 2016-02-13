@@ -48,7 +48,6 @@ private:
 
   ReaPack *m_reapack;
   Download *m_download;
-  short m_fakePos;
 
   HWND m_url;
   HWND m_file;

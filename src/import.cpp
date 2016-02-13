@@ -53,10 +53,6 @@ void Import::onInit()
   m_ok = getControl(IDOK);
 
   hide(m_progress);
-
-#ifdef PBM_SETMARQUEE
-  SendMessage(m_progress, PBM_SETMARQUEE, 1, 0);
-#endif
 }
 
 void Import::onCommand(const int id)
@@ -79,10 +75,8 @@ void Import::onCommand(const int id)
 
 void Import::onTimer(int)
 {
-#ifndef PBM_SETMARQUEE
-  m_fakePos = (m_fakePos + 1) % 100;
-  SendMessage(m_progress, PBM_SETPOS, m_fakePos, 0);
-#endif
+  if(m_download)
+    SendMessage(m_progress, PBM_SETPOS, m_download->progress(), 0);
 }
 
 void Import::browseFile()
@@ -192,13 +186,10 @@ void Import::setWaiting(const bool wait)
   setVisible(wait, m_progress);
   setEnabled(!wait, m_url);
 
-#ifndef PBM_SETMARQUEE
   if(wait)
     startTimer(42, 1);
   else
     stopTimer(1);
 
-  m_fakePos = 0;
   SendMessage(m_progress, PBM_SETPOS, 0, 0);
-#endif
 }

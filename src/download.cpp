@@ -56,6 +56,7 @@ void Download::reset()
   m_state = Idle;
   m_aborted = false;
   m_contents.clear();
+  m_progress = 0;
 }
 
 void Download::wait()
@@ -115,8 +116,11 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
 
   curl_easy_setopt(curl, CURLOPT_HEADER, true);
+  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
+  curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
+  curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
 
   const CURLcode res = curl_easy_perform(curl);
 
@@ -171,6 +175,27 @@ size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
   return size;
 }
 
+int Download::UpdateProgress(void *ptr, const double dltotal, const double dlnow,
+    const double ultotal, const double ulnow)
+{
+  Download *dl = static_cast<Download *>(ptr);
+
+  if(dl->isAborted())
+    return 1;
+
+  short progress;
+  const double total = ultotal + dltotal;
+
+  if(total > 0)
+    progress = (short)(ulnow + dlnow / total) * 100;
+  else
+    progress = 10;
+
+  dl->setProgress(min(progress, (short)100));
+
+  return 0;
+}
+
 void Download::RegisterStart()
 {
   WDL_MutexLock lock(&s_mutex);
@@ -204,6 +229,13 @@ Download *Download::NextFinished()
   s_running--;
 
   return dl;
+}
+
+void Download::setProgress(const short percent)
+{
+  WDL_MutexLock lock(&m_mutex);
+
+  m_progress = percent;
 }
 
 void Download::finish(const State state, const string &contents)
@@ -248,6 +280,13 @@ bool Download::isAborted()
   WDL_MutexLock lock(&m_mutex);
 
   return m_aborted;
+}
+
+short Download::progress()
+{
+  WDL_MutexLock lock(&m_mutex);
+
+  return m_progress;
 }
 
 void Download::abort()

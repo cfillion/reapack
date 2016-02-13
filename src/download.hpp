@@ -53,6 +53,7 @@ public:
   State state();
   const std::string &contents();
   bool isAborted();
+  short progress();
 
   void onStart(const Callback &callback) { m_onStart.connect(callback); }
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
@@ -72,8 +73,10 @@ private:
 
   static void TimerTick();
   static size_t WriteData(char *, size_t, size_t, void *);
+  static int UpdateProgress(void *, double, double, double, double);
   static DWORD WINAPI Worker(void *ptr);
 
+  void setProgress(short);
   void finish(const State state, const std::string &contents);
   void finishInMainThread();
   void reset();
@@ -87,6 +90,7 @@ private:
   State m_state;
   bool m_aborted;
   std::string m_contents;
+  short m_progress;
 
   Signal m_onStart;
   Signal m_onFinish;
