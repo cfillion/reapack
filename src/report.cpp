@@ -50,7 +50,7 @@ void ReportDialog::printHeader(const char *title)
   if(m_stream.tellp())
     m_stream << NL;
 
-  m_stream << SEP << ' ' << title << ": " << SEP << NL;
+  m_stream << SEP << ' ' << title << ": " << SEP << NL << NL;
 }
 
 void ReportDialog::printChangelog(const string &changelog)
@@ -109,7 +109,7 @@ void Report::printNewPackages()
 
   for(const Transaction::InstallTicket &entry : m_transaction->newPackages()) {
     const Version *ver = entry.first;
-    stream() << NL << ver->fullName();
+    stream() << ver->fullName() << NL;
   }
 }
 
@@ -126,7 +126,7 @@ void Report::printUpdates()
       if(ver->code() <= queryRes.entry.version)
         break;
 
-      stream() << NL << ver->fullName() << NL;
+      stream() << ver->fullName() << NL;
 
       if(!ver->changelog().empty())
         printChangelog(ver->changelog());
@@ -139,7 +139,7 @@ void Report::printErrors()
   printHeader("Errors");
 
   for(const Transaction::Error &err : m_transaction->errors())
-    stream() << NL << err.title << ':' << NL << err.message << NL;
+    stream() << err.title << ": " << err.message << NL;
 }
 
 void Report::printRemovals()
@@ -147,5 +147,5 @@ void Report::printRemovals()
   printHeader("Removed files");
 
   for(const Path &path : m_transaction->removals())
-    stream() << NL << path.join();
+    stream() << path.join() << NL;
 }
