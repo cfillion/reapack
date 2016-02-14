@@ -87,13 +87,7 @@ TEST_CASE("target path for unknown package type", M) {
 
   Package pack(Package::UnknownType, "a", &cat);
 
-  try {
-    pack.makeTargetPath({});
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "unsupported package type");
-  }
+  REQUIRE(pack.makeTargetPath({}).empty());
 }
 
 TEST_CASE("script target path", M) {

@@ -95,7 +95,12 @@ Path Package::makeTargetPath(const string &file) const
     path += Path(m_category->name()) + file;
     break;
   default:
-    throw reapack_error("unsupported package type");
+    // The package has an unsupported type, so we return an empty path.
+    // The empty path won't be used because the category will reject
+    // this package right away. Maybe the parser should not bother with loading
+    // unsupported packages at all anyway... But then in the future
+    // we might want to display unsupported packages in the interface.
+    break;
   }
 
   return path;

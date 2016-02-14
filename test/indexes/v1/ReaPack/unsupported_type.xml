@@ -1,0 +1,9 @@
+<index version="1">
+  <category name="test">
+    <reapack name="a" type="hello_world">
+      <version name="1.0">
+        <source>http://google.com</source>
+      </version>
+    </reapack>
+  </category>
+</index>

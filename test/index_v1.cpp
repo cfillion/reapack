@@ -69,6 +69,12 @@ TEST_CASE("null package type", M) {
   }
 }
 
+TEST_CASE("unsupported package type", M) {
+  UseRootPath root(RIPATH);
+
+  const RemoteIndex *ri = RemoteIndex::load("unsupported_type");
+}
+
 TEST_CASE("read version author", M) {
   UseRootPath root(RIPATH);
 
