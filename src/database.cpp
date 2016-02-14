@@ -169,5 +169,10 @@ uint64_t Statement::uint64Column(const int index) const
 
 string Statement::stringColumn(const int index) const
 {
-  return (char *)sqlite3_column_text(m_stmt, index);
+  char *col = (char *)sqlite3_column_text(m_stmt, index);
+
+  if(col)
+    return col;
+  else
+    return {};
 }

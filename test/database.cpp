@@ -175,3 +175,18 @@ TEST_CASE("sqlite error code", M) {
 
   REQUIRE(db.errorCode() == SQLITE_CONSTRAINT_UNIQUE);
 }
+
+TEST_CASE("invalid string column", M) {
+  Database db;
+  db.exec("CREATE TABLE a(text TEXT NOT NULL)");
+
+  Statement *insert = db.prepare("INSERT INTO a VALUES(?)");
+  insert->bind(1, "hello");
+  insert->exec();
+
+  Statement *select = db.prepare("SELECT text FROM a LIMIT 1");
+  select->exec([&] {
+    REQUIRE(select->stringColumn(4242).empty()); // don't crash!
+    return false;
+  });
+}
