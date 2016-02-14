@@ -74,8 +74,17 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
       return;
     }
 
+    // upgrade() will register all new packages to test for file conflicts.
+    // Once this is done and all possible installations are queued,
+    // we must restore the registry so the failed packages are not marked as
+    // installed, and to keep the old file list intact (this is needed for
+    // cleaning unused files)
+    m_registry->savepoint();
+
     for(const Package *pkg : ri->packages())
       upgrade(pkg);
+
+    m_registry->restore();
   });
 }
 
@@ -115,6 +124,28 @@ void Transaction::upgrade(const Package *pkg)
       queryRes.status = Registry::Uninstalled;
   }
 
+  // prevent file conflicts – pushes to the registry will be reverted!
+  try {
+    vector<Path> conflicts;
+    m_registry->push(ver, &conflicts);
+
+    if(!conflicts.empty()) {
+      for(const Path &path : conflicts) {
+        addError("Conflict: " + path.join() +
+          " is already owned by another package",
+          ver->fullName());
+      }
+
+      return;
+    }
+  }
+  catch(const reapack_error &e) {
+    // handle database error from Registry::push
+    addError(e.what(), ver->fullName());
+    return;
+  }
+
+  // all green! (pronounce with a japanese accent)
   m_installQueue.push({ver, queryRes});
 }
 
@@ -134,29 +165,6 @@ void Transaction::installTicket(const InstallTicket &ticket)
   const Registry::QueryResult &queryRes = ticket.second;
   const set<Path> &currentFiles = m_registry->getFiles(queryRes.entry);
 
-  Registry::Entry newEntry;
-
-  try {
-    // register the new version and prevent file conflicts
-    vector<Path> conflicts;
-    newEntry = m_registry->push(ver, &conflicts);
-
-    if(!conflicts.empty()) {
-      for(const Path &path : conflicts) {
-        addError("Conflict: " + path.join() +
-          " is already owned by another package",
-          ver->fullName());
-      }
-
-      return;
-    }
-  }
-  catch(const reapack_error &e) {
-    // handle database error from Registry::push
-    addError(e.what(), ver->fullName());
-    return;
-  }
-
   InstallTask *task = new InstallTask(ver, currentFiles, this);
 
   task->onCommit([=] {
@@ -165,11 +173,13 @@ void Transaction::installTicket(const InstallTicket &ticket)
     else
       m_new.push_back(ticket);
 
-    if(newEntry.type == Package::ExtensionType)
-      m_needRestart = true;
-
     const set<Path> &removedFiles = task->removedFiles();
     m_removals.insert(removedFiles.begin(), removedFiles.end());
+
+    const Registry::Entry newEntry = m_registry->push(ver);
+
+    if(newEntry.type == Package::ExtensionType)
+      m_needRestart = true;
 
     registerInHost(true, newEntry);
   });

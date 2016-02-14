@@ -61,6 +61,9 @@ public:
   std::string getMainFile(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void forget(const Entry &);
+  void savepoint();
+  void restore();
+  void release();
   void commit();
 
 private:
@@ -80,9 +83,7 @@ private:
   Statement *m_clearFiles;
   Statement *m_forgetFiles;
 
-  Statement *m_savepoint;
-  Statement *m_release;
-  Statement *m_restore;
+  size_t m_savePoint;
 };
 
 #endif

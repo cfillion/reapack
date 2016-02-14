@@ -28,7 +28,7 @@
 using namespace std;
 
 Registry::Registry(const Path &path)
-  : m_db(path.join())
+  : m_db(path.join()), m_savePoint(0)
 {
   migrate();
 
@@ -72,10 +72,6 @@ Registry::Registry(const Path &path)
     ")"
   );
   m_forgetFiles = m_db.prepare("DELETE FROM files WHERE entry = ?");
-
-  m_savepoint = m_db.prepare("SAVEPOINT savept");
-  m_release = m_db.prepare("RELEASE SAVEPOINT savept");
-  m_restore = m_db.prepare("ROLLBACK TO SAVEPOINT savept");
 
   // lock the database
   m_db.begin();
@@ -122,7 +118,8 @@ void Registry::migrate()
 
 auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 {
-  m_savepoint->exec();
+  savepoint();
+
   bool hasConflicts = false;
 
   const Package *pkg = ver->package();
@@ -166,7 +163,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
         conflicts->push_back(path);
       }
       else {
-        m_restore->exec();
+        restore();
         throw;
       }
     }
@@ -179,11 +176,11 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
 
   if(hasConflicts) {
-    m_restore->exec();
+    restore();
     return {};
   }
   else {
-    m_release->exec();
+    release();
     return {entryId, ri->name(), cat->name(),
       pkg->name(), pkg->type(), ver->code()};
   }
@@ -297,6 +294,30 @@ void Registry::forget(const Entry &entry)
 
   m_forgetEntry->bind(1, entry.id);
   m_forgetEntry->exec();
+}
+
+void Registry::savepoint()
+{
+  char sql[64] = {};
+  sprintf(sql, "SAVEPOINT sp%lu", m_savePoint++);
+
+  m_db.exec(sql);
+}
+
+void Registry::restore()
+{
+  char sql[64] = {};
+  sprintf(sql, "ROLLBACK TO SAVEPOINT sp%lu", --m_savePoint);
+
+  m_db.exec(sql);
+}
+
+void Registry::release()
+{
+  char sql[64] = {};
+  sprintf(sql, "RELEASE SAVEPOINT sp%lu", --m_savePoint);
+
+  m_db.exec(sql);
 }
 
 void Registry::commit()
