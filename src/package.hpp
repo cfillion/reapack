@@ -31,6 +31,7 @@ public:
   enum Type {
     UnknownType,
     ScriptType,
+    ExtensionType,
   };
 
   static Type typeFor(const char *);

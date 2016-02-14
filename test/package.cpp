@@ -129,6 +129,21 @@ TEST_CASE("script target path without category", M) {
   }
 }
 
+TEST_CASE("extension target path", M) {
+  RemoteIndex ri("Remote Name");
+  Category cat("Category Name", &ri);
+
+  Package pack(Package::ExtensionType, "file.name", &cat);
+
+  Path expected;
+  expected.append("UserPlugins");
+  REQUIRE(pack.makeTargetPath() == expected);
+
+  expected.append("reaper_reapack.dll");
+  REQUIRE(pack.makeTargetPath("../reaper_reapack.dll") == expected);
+}
+
+
 TEST_CASE("full name", M) {
   SECTION("no category") {
     Package pack(Package::ScriptType, "file.name");

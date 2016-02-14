@@ -28,6 +28,8 @@ Package::Type Package::typeFor(const char *type)
 {
   if(!strcmp(type, "script"))
     return ScriptType;
+  else if(!strcmp(type, "extension"))
+    return ExtensionType;
   else
     return UnknownType;
 }
@@ -93,6 +95,10 @@ Path Package::makeTargetPath(const string &file) const
 
     // only allow directory traversal up to the index name
     path += Path(m_category->name()) + file;
+    break;
+  case ExtensionType:
+    path.append("UserPlugins");
+    path.append(file, false);
     break;
   default:
     // The package has an unsupported type, so we return an empty path.
