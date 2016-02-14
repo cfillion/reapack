@@ -160,7 +160,7 @@ bool InstallTask::doCommit()
     RemoveFile(paths.second);
 
     if(!RenameFile(paths.first, paths.second)) {
-      transaction()->addError(strerror(errno), paths.first.join());
+      transaction()->addError(strerror(errno), paths.second.join());
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
