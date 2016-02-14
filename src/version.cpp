@@ -26,6 +26,17 @@
 
 using namespace std;
 
+bool Version::parse(const std::string &str, Code *out)
+{
+  try {
+    *out = Version(str, nullptr).code();
+    return true;
+  }
+  catch(const reapack_error &) {
+    return false;
+  }
+}
+
 Version::Version(const std::string &str, Package *pkg)
   : m_name(str), m_code(0), m_time(), m_package(pkg), m_mainSource(nullptr)
 {
@@ -49,7 +60,7 @@ Version::Version(const std::string &str, Package *pkg)
     if(match.size() > 4)
       throw reapack_error("version component overflow");
 
-    m_code += stoi(match) * (uint64_t)pow(10000, size - index - 1);
+    m_code += stoi(match) * (Code)pow(10000, size - index - 1);
   }
 }
 

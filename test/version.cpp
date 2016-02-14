@@ -98,6 +98,20 @@ TEST_CASE("version with 5 components", M) {
   }
 }
 
+TEST_CASE("public version parser", M) {
+  Version::Code code = 0;
+
+  REQUIRE(Version::parse("1.0", &code));
+  REQUIRE(code == UINT64_C(1000000000000));
+
+  REQUIRE_FALSE(Version::parse("hello", &code));
+  REQUIRE(code == UINT64_C(1000000000000));
+
+  code = 0;
+  REQUIRE_FALSE(Version::parse("hello", &code));
+  REQUIRE(code == UINT64_C(0));
+}
+
 TEST_CASE("version full name", M) {
   SECTION("no package") {
     Version ver("1.0");

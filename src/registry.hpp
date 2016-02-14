@@ -46,7 +46,7 @@ public:
     std::string category;
     std::string package;
     Package::Type type;
-    uint64_t version;
+    Version::Code version;
   };
 
   struct QueryResult {

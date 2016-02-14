@@ -103,6 +103,7 @@ TEST_CASE("query all packages", M) {
   REQUIRE(entries[0].category == "Category Name");
   REQUIRE(entries[0].package == "Hello");
   REQUIRE(entries[0].type == Package::ScriptType);
+  REQUIRE(entries[0].version == Version("1.0").code());
 }
 
 TEST_CASE("forget registry entry", M) {

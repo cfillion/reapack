@@ -34,7 +34,7 @@ Registry::Registry(const Path &path)
 
   // entry queries
   m_insertEntry = m_db.prepare(
-    "INSERT INTO entries VALUES(NULL, ?, ?, ?, ?, ?, NULL);"
+    "INSERT INTO entries VALUES(NULL, ?, ?, ?, ?, ?);"
   );
 
   m_updateEntry = m_db.prepare(
@@ -48,24 +48,20 @@ Registry::Registry(const Path &path)
   );
 
   m_allEntries = m_db.prepare(
-    "SELECT id, remote, category, package, type "
+    "SELECT id, remote, category, package, type, version "
     "FROM entries WHERE remote = ?"
   );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
-  m_setMainFile = m_db.prepare(
-    "UPDATE entries SET mainFile = ("
-    "  SELECT id FROM files WHERE path = ?"
-    ") WHERE id = ?"
-  );
 
   // file queries
   m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
   m_getMainFile = m_db.prepare(
-    "SELECT path FROM files WHERE id = ("
-    "  SELECT mainFile FROM entries WHERE id = ? LIMIT 1"
-    ") LIMIT 1"
+    "SELECT path FROM files WHERE main = 1 AND entry = ? LIMIT 1"
   );
-  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?)");
+  m_setMainFile = m_db.prepare(
+    "UPDATE files SET main = 1 WHERE path = ? AND entry = ?"
+  );
+  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?, NULL)");
   m_clearFiles = m_db.prepare(
     "DELETE FROM files WHERE entry = ("
     "  SELECT id FROM entries WHERE remote = ? AND category = ? AND package = ?"
@@ -93,8 +89,7 @@ void Registry::migrate()
       "  category TEXT NOT NULL,"
       "  package TEXT NOT NULL,"
       "  type INTEGER NOT NULL,"
-      "  version INTEGER NOT NULL,"
-      "  mainFile INTEGER,"
+      "  version TEXT NOT NULL,"
       "  UNIQUE(remote, category, package)"
       ");"
 
@@ -102,6 +97,7 @@ void Registry::migrate()
       "  id INTEGER PRIMARY KEY,"
       "  entry INTEGER NOT NULL,"
       "  path TEXT UNIQUE NOT NULL,"
+      "  main INTEGER DEFAULT 0,"
       "  FOREIGN KEY(entry) REFERENCES entries(id)"
       ");"
     );
@@ -133,9 +129,10 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 
   int entryId = getEntry(ver->package()).id;
 
+  // register version
   if(entryId) {
     m_updateEntry->bind(1, pkg->type());
-    m_updateEntry->bind(2, ver->code());
+    m_updateEntry->bind(2, ver->name());
     m_updateEntry->bind(3, entryId);
     m_updateEntry->exec();
   }
@@ -144,12 +141,13 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     m_insertEntry->bind(2, cat->name());
     m_insertEntry->bind(3, pkg->name());
     m_insertEntry->bind(4, pkg->type());
-    m_insertEntry->bind(5, ver->code());
+    m_insertEntry->bind(5, ver->name());
     m_insertEntry->exec();
 
     entryId = m_db.lastInsertId();
   }
 
+  // register files
   for(const Path &path : ver->files()) {
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
@@ -206,7 +204,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   string category;
   string package;
   Package::Type type = Package::UnknownType;
-  uint64_t version = 0;
+  Version::Code version = 0;
 
   const Category *cat = pkg->category();
   const RemoteIndex *ri = cat->index();
@@ -223,7 +221,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
     category = m_findEntry->stringColumn(col++);
     package = m_findEntry->stringColumn(col++);
     type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
-    version = m_findEntry->uint64Column(col++);
+    Version::parse(m_findEntry->stringColumn(col++), &version);
 
     return false;
   });
@@ -245,7 +243,8 @@ auto Registry::getEntries(const Remote &remote) const -> vector<Entry>
     const string &package = m_allEntries->stringColumn(col++);
     const Package::Type type =
       static_cast<Package::Type>(m_allEntries->intColumn(col++));
-    const uint64_t version = m_allEntries->uint64Column(col++);
+    Version::Code version = 0;
+    Version::parse(m_allEntries->stringColumn(col++), &version);
 
     list.push_back({id, remote, category, package, type, version});
 

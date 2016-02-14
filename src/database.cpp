@@ -127,12 +127,6 @@ void Statement::bind(const int index, const int integer)
     throw m_db->lastError();
 }
 
-void Statement::bind(const int index, const uint64_t integer)
-{
-  if(sqlite3_bind_int64(m_stmt, index, (sqlite3_int64)integer))
-    throw m_db->lastError();
-}
-
 void Statement::exec()
 {
   exec([=] { return false; });
@@ -160,11 +154,6 @@ void Statement::exec(const ExecCallback &callback)
 int Statement::intColumn(const int index) const
 {
   return sqlite3_column_int(m_stmt, index);
-}
-
-uint64_t Statement::uint64Column(const int index) const
-{
-  return (uint64_t)sqlite3_column_int64(m_stmt, index);
 }
 
 string Statement::stringColumn(const int index) const

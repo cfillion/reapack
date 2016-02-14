@@ -29,6 +29,10 @@ class Package;
 
 class Version {
 public:
+  typedef uint64_t Code;
+
+  static bool parse(const std::string &in, Code *out);
+
   Version(const std::string &, Package * = nullptr);
   ~Version();
 
@@ -61,7 +65,7 @@ public:
 
 private:
   std::string m_name;
-  uint64_t m_code;
+  Code m_code;
   std::tm m_time;
 
   const Package *m_package;

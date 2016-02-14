@@ -18,7 +18,6 @@
 #ifndef REAPACK_DATABASE_HPP
 #define REAPACK_DATABASE_HPP
 
-#include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
@@ -58,12 +57,10 @@ public:
 
   void bind(int index, const std::string &text);
   void bind(int index, int integer);
-  void bind(int index, uint64_t integer);
   void exec();
   void exec(const ExecCallback &);
 
   int intColumn(int index) const;
-  uint64_t uint64Column(int index) const;
   std::string stringColumn(int index) const;
 
 private:
