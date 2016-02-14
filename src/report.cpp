@@ -82,6 +82,14 @@ void Report::fillReport()
     << NL
   ;
 
+  if(m_transaction->isRestartNeeded()) {
+    stream()
+      << NL
+      << "Notice: One or more native REAPER extensions were installed." << NL
+      << "The newly installed files won't be loaded until REAPER is restarted."
+      << NL;
+  }
+
   if(errors)
     printErrors();
 

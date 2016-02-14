@@ -66,6 +66,7 @@ public:
 
   bool isCancelled() const { return m_isCancelled; }
   bool isReportEnabled() const { return m_enableReport && !m_isCancelled; }
+  bool isRestartNeeded() const { return m_needRestart; }
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
   size_t taskCount() const { return m_tasks.size(); }
 
@@ -96,6 +97,7 @@ private:
   const RemoteList *m_remoteList;
   bool m_isCancelled;
   bool m_enableReport;
+  bool m_needRestart;
   Registry *m_registry;
 
   std::multimap<Remote, IndexCallback> m_remotes;

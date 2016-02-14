@@ -31,7 +31,8 @@
 using namespace std;
 
 Transaction::Transaction(const RemoteList *rl)
-  : m_remoteList(rl), m_isCancelled(false), m_enableReport(false)
+  : m_remoteList(rl), m_isCancelled(false),
+    m_enableReport(false), m_needRestart(false)
 {
   m_registry = new Registry(Path::prefixCache("registry.db"));
 
@@ -163,6 +164,9 @@ void Transaction::installTicket(const InstallTicket &ticket)
       m_updates.push_back(ticket);
     else
       m_new.push_back(ticket);
+
+    if(newEntry.type == Package::ExtensionType)
+      m_needRestart = true;
 
     const set<Path> &removedFiles = task->removedFiles();
     m_removals.insert(removedFiles.begin(), removedFiles.end());
