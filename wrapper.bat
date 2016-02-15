@@ -11,9 +11,9 @@ shift
 goto next_arg
 :continue
 
-if "%arch%"=="x64" (
+if "%arch%"=="x86_64" (
   call "%VCINSTALLDIR%\vcvarsall.bat" x86_amd64
-) else ( if "%arch%"=="x86" (
+) else ( if "%arch%"=="i386" (
   call "%VCINSTALLDIR%\vcvarsall.bat" x86
 ) else (
   echo Unknown Architecture: %arch%

@@ -1,16 +1,19 @@
 # wrapper.bat selects which compiler to execute depending on the architecture
-WRAP := cmd /C wrapper.bat @(WINARCH)
+WRAP := cmd /C wrapper.bat @(ARCH)
 
 CXX := $(WRAP) cl
+
+REAPACK_FILE := reaper_reapack@(SUFFIX)
 
 CXXFLAGS := /nologo /W3 /WX /wd4996 /EHsc /MT
 CXXFLAGS += /O2 /Z7 /Zo
 CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
-CXXFLAGS += /Ivendor/libcurl_@(WINARCH)/include
+CXXFLAGS += /Ivendor/libcurl@(SUFFIX)/include
 CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
 CXXFLAGS += /DCURL_STATICLIB /DUNICODE /DNDEBUG
+CXXFLAGS += /DREAPACK_FILE#\"$(REAPACK_FILE).dll\"
 
-SQLFLAGS := /Os /wd4101 /DSQLITE_OMIT_FLOATING_POINT 
+SQLFLAGS := /Os /wd4101 /DSQLITE_OMIT_FLOATING_POINT
 SQLFLAGS += /DSQLITE_OMIT_COMPOUND_SELECT /DSQLITE_OMIT_DATETIME_FUNCS
 SQLFLAGS += /DSQLITE_OMIT_INTEGRITY_CHECK /DSQLITE_OMIT_UTF16
 SQLFLAGS += /DSQLITE_OMIT_SHARED_CACHE /DSQLITE_OMIT_INCRBLOB
@@ -24,7 +27,7 @@ SQLFLAGS += /DSQLITE_OMIT_DECLTYPE /DSQLITE_OMIT_DEPRECATED
 
 LD := $(WRAP) link
 LDFLAGS := /nologo user32.lib shell32.lib
-LDFLAGS += vendor/libcurl_@(WINARCH)/lib/libcurl_a.lib
+LDFLAGS += vendor/libcurl@(SUFFIX)/lib/libcurl_a.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
 LDFLAGS += $(TUP_VARIANTDIR)/build/vendor/sqlite3.o
 LDFLAGS += /DEBUG /OPT:REF /PDBALTPATH:%_PDB%
@@ -34,7 +37,7 @@ LINKDEPS := src/resource.res build/vendor/sqlite3.o
 RC := rc
 RCFLAGS += /nologo /fo $(TUP_VARIANTDIR)/src/resource.res
 
-TARGET := bin/reaper_reapack_@(WINARCH)
+TARGET := bin/$(REAPACK_FILE)
 SOFLAGS := /DLL /OUT:$(TUP_VARIANTDIR)/$(TARGET).dll
 SOTARGET := $(TARGET).dll $(TARGET).lib $(TARGET).exp
 

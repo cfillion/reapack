@@ -36,8 +36,8 @@ vendor
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Run `rake` from this directory
-4. Copy or link `x64/bin/reaper_reapack_x86_64.dylib` to REAPER's extension
-  directory (replace x64 and x86_64 with x86 and i386 for 32-bit)
+4. Copy or link `x64/bin/reaper_reapack64.dylib` or `x64/bin/reaper_reapack32.dylib`
+   to REAPER's extension directory
 
 ### Windows
 
@@ -62,12 +62,12 @@ vendor
   nmake /f Makefile.vc mode=static RTLIBCFG=static ENABLE_IDN=no MACHINE=x86
   ```
 5. Copy `<curl directory>\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
-  to `<reapack directory>\vendor` as `libcurl_x64`
+  to `<reapack directory>\vendor` as `libcurl64`
 6. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
-  to `<reapack directory>\vendor` as `libcurl_x86`
+  to `<reapack directory>\vendor` as `libcurl32`
 7. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
 8. Run `rake` from this directory using
   "Developer Command Prompt for VS2013"
-9. Copy or symlink `x64\bin\reaper_reapack_x64.dll` to your REAPER
-  plugin folder (replace x64 with x86 for 32-bit)
+9. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
+   to your REAPER plugin folder

@@ -1,13 +1,15 @@
 CXX := c++
 
+REAPACK_FILE = reaper_reapack@(SUFFIX).dylib
+
 CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -Wno-unused-function
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
 CXXFLAGS += -pipe -fPIC -O2 -std=c++14
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
-CXXFLAGS += -DWDL_NO_DEFINE_MINMAX
-CXXFLAGS += -arch @(OSXARCH)
+CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DREAPACK_FILE=$(REAPACK_FILE)
+CXXFLAGS += -arch @(ARCH)
 
 WDLFLAGS := -std=c++98 -w
 
@@ -19,7 +21,7 @@ WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
 LDFLAGS := -framework Cocoa -framework Carbon -lcurl -lsqlite3
 
 SOFLAGS := -dynamiclib
-SOTARGET := bin/reaper_reapack_@(OSXARCH).dylib
+SOTARGET := bin/$(REAPACK_FILE)
 
 TSTARGET := bin/test
 
