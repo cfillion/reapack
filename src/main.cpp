@@ -154,10 +154,10 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
     &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
 
-  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import remote repository...",
+  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
     &reapack->importAction, bind(&ReaPack::importRemote, reapack));
 
-  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage remotes...",
+  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
     &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
 
   reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::about, reapack));
