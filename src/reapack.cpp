@@ -31,6 +31,31 @@
 
 using namespace std;
 
+#ifdef _WIN32
+// Removes temporary files that could not be removed by an installation task
+// (eg. extensions dll that were in use by REAPER).
+// Surely there must be a better way...
+static void CleanupTempFiles()
+{
+  const auto_string &pattern =
+    make_autostring(Path::prefixCache("*.tmp").join());
+
+  WIN32_FIND_DATA fd = {};
+  HANDLE handle = FindFirstFile(pattern.c_str(), &fd);
+
+  if(handle == INVALID_HANDLE_VALUE)
+    return;
+
+  do {
+    auto_string file = pattern;
+    file.replace(file.size() - 5, 5, fd.cFileName); // 5 == strlen("*.tmp")
+    DeleteFile(file.c_str());
+  } while(FindNextFile(handle, &fd));
+
+  FindClose(handle);
+}
+#endif
+
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), importAction(), configAction(),
     m_transaction(nullptr), m_manager(nullptr), m_import(nullptr),
@@ -50,6 +75,10 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
 
   if(m_config->isFirstRun())
     manageRemotes();
+
+#ifdef _WIN32
+  CleanupTempFiles();
+#endif
 }
 
 ReaPack::~ReaPack()

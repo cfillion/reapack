@@ -25,7 +25,8 @@ class UseRootPath;
 
 class Path {
 public:
-  static Path cacheDir() { return s_root + "ReaPack"; }
+  static const char *CACHE_DIRNAME;
+  static Path cacheDir() { return s_root + CACHE_DIRNAME; }
   static Path prefixRoot(const Path &p) { return s_root + p; }
   static Path prefixRoot(const std::string &p) { return s_root + p; }
   static Path prefixCache(const std::string &p) { return cacheDir() + p; }

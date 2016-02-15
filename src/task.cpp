@@ -18,7 +18,6 @@
 #include "task.hpp"
 
 #include "encoding.hpp"
-#include "path.hpp"
 #include "transaction.hpp"
 #include "version.hpp"
 
@@ -78,10 +77,24 @@ bool Task::RemoveFile(const Path &path)
     make_autostring(Path::prefixRoot(path).join());
 
 #ifdef _WIN32
+  if(GetFileAttributes(fullPath.c_str()) == INVALID_FILE_ATTRIBUTES
+      && GetLastError() == ERROR_FILE_NOT_FOUND)
+    return true;
+
   if(GetFileAttributes(fullPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
     return RemoveDirectory(fullPath.c_str()) != 0;
-  else
-    return !_wremove(fullPath.c_str());
+  else if(!_wremove(fullPath.c_str()))
+    return true;
+
+  // So the file cannot be removed (probably because it's in use)?
+  // Then let's move it somewhere else. And delete it on next startup.
+  // Windows is so great!
+
+  Path workaroundPath;
+  workaroundPath.prepend(Path::CACHE_DIRNAME);
+  workaroundPath.append("old_" + path.last() + ".tmp");
+
+  return RenameFile(path, workaroundPath);
 #else
   return !remove(fullPath.c_str());
 #endif
@@ -135,10 +148,11 @@ void InstallTask::saveSource(Download *dl, const Source *src)
     return;
 
   const Path &targetPath = src->targetPath();
+
   Path tmpPath(targetPath);
   tmpPath[tmpPath.size() - 1] += ".new";
 
-  m_newFiles.push_back({tmpPath, targetPath});
+  m_newFiles.push_back({targetPath, tmpPath});
 
   const auto old = m_oldFiles.find(targetPath);
 
@@ -156,11 +170,13 @@ bool InstallTask::doCommit()
   for(const Path &path : m_oldFiles)
     RemoveFile(path);
 
-  for(const PathPair &paths : m_newFiles) {
-    RemoveFile(paths.second);
+  for(const PathGroup &paths : m_newFiles) {
+#ifdef _WIN32
+    RemoveFile(paths.target);
+#endif
 
-    if(!RenameFile(paths.first, paths.second)) {
-      transaction()->addError(strerror(errno), paths.second.join());
+    if(!RenameFile(paths.temp, paths.target)) {
+      transaction()->addError(strerror(errno), paths.target.join());
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
@@ -174,8 +190,8 @@ bool InstallTask::doCommit()
 
 void InstallTask::doRollback()
 {
-  for(const PathPair &paths : m_newFiles)
-    RemoveFileRecursive(paths.first);
+  for(const PathGroup &paths : m_newFiles)
+    RemoveFileRecursive(paths.temp);
 
   m_newFiles.clear();
 }

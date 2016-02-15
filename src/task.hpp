@@ -18,6 +18,8 @@
 #ifndef REAPACK_TASK_HPP
 #define REAPACK_TASK_HPP
 
+#include "path.hpp"
+
 #include <boost/signals2.hpp>
 #include <set>
 #include <vector>
@@ -25,7 +27,6 @@
 class Download;
 class Source;
 class Transaction;
-class Path;
 class Version;
 
 class Task {
@@ -73,13 +74,13 @@ protected:
   void doRollback() override;
 
 private:
-  typedef std::pair<Path, Path> PathPair;
+  struct PathGroup { Path target; Path temp; };
 
   void saveSource(Download *, const Source *);
 
   const Version *m_version;
   std::set<Path> m_oldFiles;
-  std::vector<PathPair> m_newFiles;
+  std::vector<PathGroup> m_newFiles;
 };
 
 class RemoveTask : public Task {

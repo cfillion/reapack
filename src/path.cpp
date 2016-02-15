@@ -32,6 +32,8 @@ static const char SEPARATOR = '\\';
 static const string DOT = ".";
 static const string DOTDOT = "..";
 
+const char *Path::CACHE_DIRNAME = "ReaPack";
+
 Path Path::s_root;
 
 static vector<string> Split(const string &input)
