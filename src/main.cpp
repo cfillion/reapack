@@ -48,6 +48,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
     REQUIRED_API(RecursiveCreateDirectory),  // v4.60
     REQUIRED_API(ReverseNamedCommandLookup), // v4.7
     REQUIRED_API(ShowMessageBox),
+    REQUIRED_API(Splash_GetWnd),             // v4.7
 
     OPTIONAL_API(AddRemoveReaScript),        // v5.12
   };
@@ -92,6 +93,41 @@ static void menuHook(const char *name, HMENU handle, int f)
     NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
+static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
+{
+  Path expected;
+  expected.append(GetResourcePath());
+  expected.append("UserPlugins");
+  expected.append(REAPACK_FILE);
+
+#ifdef _WIN32
+  auto_char self[MAX_PATH] = {};
+  GetModuleFileName(module, self, sizeof(self));
+  Path current(from_autostring(self).c_str());
+#else
+  Dl_info info{};
+  dladdr((const void *)checkLocation, &info);
+  const char *self = info.dli_fname;
+  Path current(self);
+#endif
+
+  if(current == expected)
+    return true;
+
+  auto_char msg[4096] = {};
+  auto_snprintf(msg, sizeof(msg),
+    AUTO_STR("ReaPack was not loaded from the standard extension path")
+    AUTO_STR(" or its filename was altered.\n")
+    AUTO_STR("Move or rename it to the expected location and retry.\n\n")
+    AUTO_STR("Current:\xa0%s\n\nExpected:\xa0%s"),
+    self, make_autostring(expected.join()).c_str());
+
+  MessageBox(Splash_GetWnd(), msg,
+    AUTO_STR("ReaPack: Installation path mismatch"), MB_OK);
+
+  return false;
+}
+
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
@@ -108,6 +144,9 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
     return 0;
 
   if(!loadAPI(rec->GetFunc))
+    return 0;
+
+  if(!checkLocation(instance))
     return 0;
 
   reapack = new ReaPack(instance);
