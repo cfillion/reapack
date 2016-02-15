@@ -306,6 +306,22 @@ TEST_CASE("remove remote", M) {
   list.remove("world"); // no crash
 }
 
+TEST_CASE("remove two remotes", M) {
+  RemoteList list;
+
+  list.add({"a_first", "url"});
+  list.add({"z_second", "url"});
+  list.add({"b_third", "url"});
+  REQUIRE(list.size() == 3);
+
+  list.remove("z_second");
+  REQUIRE(list.size() == 2);
+
+  REQUIRE(list.get("z_first").isNull());
+  REQUIRE_FALSE(list.get("b_third").isNull());
+  REQUIRE_FALSE(list.get("a_first").isNull());
+}
+
 TEST_CASE("compare remotes", M) {
   REQUIRE(Remote("a", "a") < Remote("b", "a"));
   REQUIRE_FALSE(Remote("a", "a") < Remote("a", "b"));

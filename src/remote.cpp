@@ -185,10 +185,17 @@ void RemoteList::remove(const string &name)
 {
   const auto it = m_map.find(name);
 
-  if(it != m_map.end()) {
-    m_remotes.erase(m_remotes.begin() + it->second);
-    m_map.erase(it);
+  if(it == m_map.end())
+    return;
+
+  m_remotes.erase(m_remotes.begin() + it->second);
+
+  for(auto walk = m_map.begin(); walk != m_map.end(); walk++) {
+    if(walk->second > it->second)
+      walk->second--;
   }
+
+  m_map.erase(it);
 }
 
 Remote RemoteList::get(const string &name) const
