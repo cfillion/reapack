@@ -50,7 +50,7 @@ public:
 
   typedef std::vector<const Error> ErrorList;
 
-  Transaction(const RemoteList *);
+  Transaction();
   ~Transaction();
 
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
@@ -85,7 +85,7 @@ private:
   void installTicket(const InstallTicket &);
   void finish();
 
-  void saveIndex(Download *, const Remote &);
+  void saveIndex(Download *, const std::string &remoteName);
   void upgrade(const Package *pkg);
   bool allFilesExists(const std::set<Path> &) const;
   void addTask(Task *);
@@ -93,14 +93,14 @@ private:
   void registerInHost(bool add, const Registry::Entry &);
   void registerQueued();
   void registerScript(const HostRegistration &);
+  void inhibit(const Remote &);
 
-  const RemoteList *m_remoteList;
   bool m_isCancelled;
   bool m_enableReport;
   bool m_needRestart;
   Registry *m_registry;
 
-  std::multimap<Remote, IndexCallback> m_remotes;
+  std::multimap<std::string, IndexCallback> m_remotes;
   std::vector<const RemoteIndex *> m_remoteIndexes;
   std::vector<Task *> m_tasks;
 

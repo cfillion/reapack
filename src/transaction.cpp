@@ -30,9 +30,8 @@
 
 using namespace std;
 
-Transaction::Transaction(const RemoteList *rl)
-  : m_remoteList(rl), m_isCancelled(false),
-    m_enableReport(false), m_needRestart(false)
+Transaction::Transaction()
+  : m_isCancelled(false), m_enableReport(false), m_needRestart(false)
 {
   m_registry = new Registry(Path::prefixCache("registry.db"));
 
@@ -90,25 +89,27 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
 
 void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
 {
-  m_remotes.insert({remote, cb});
+  // add the callback to the list, and start the download if it's the first one
+  const std::string &name = remote.name();
+  m_remotes.insert({name, cb});
 
-  if(m_remotes.count(remote) > 1)
+  if(m_remotes.count(name) > 1)
     return;
 
-  Download *dl = new Download(remote.name(), remote.url());
+  Download *dl = new Download(name, remote.url());
   m_downloadQueue.push(dl);
 
-  dl->onFinish(bind(&Transaction::saveIndex, this, dl, remote));
+  dl->onFinish(bind(&Transaction::saveIndex, this, dl, name));
 }
 
-void Transaction::saveIndex(Download *dl, const Remote &remote)
+void Transaction::saveIndex(Download *dl, const string &name)
 {
-  if(!saveFile(dl, RemoteIndex::pathFor(remote.name())))
+  if(!saveFile(dl, RemoteIndex::pathFor(name)))
     return;
 
-  const auto end = m_remotes.upper_bound(remote);
+  const auto end = m_remotes.upper_bound(name);
 
-  for(auto it = m_remotes.lower_bound(remote); it != end; it++)
+  for(auto it = m_remotes.lower_bound(name); it != end; it++)
     it->second();
 }
 
@@ -201,10 +202,13 @@ void Transaction::unregisterAll(const Remote &remote)
 
   for(const auto &entry : entries)
     registerInHost(false, entry);
+
+  inhibit(remote);
 }
 
 void Transaction::uninstall(const Remote &remote)
 {
+  inhibit(remote);
   remove(RemoteIndex::pathFor(remote.name()).join().c_str());
 
   const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
@@ -337,8 +341,7 @@ void Transaction::registerQueued()
     const HostRegistration &reg = m_regQueue.front();
 
     // don't register in host if the remote got disabled meanwhile
-    const Remote &remote = m_remoteList->get(reg.entry.remote);
-    if(reg.add && (remote.isNull() || !remote.isEnabled())) {
+    if(reg.add && m_remotes.count(reg.entry.remote) == 0) {
       m_regQueue.pop();
       return;
     }
@@ -376,4 +379,15 @@ void Transaction::registerScript(const HostRegistration &reg)
 
   if(!AddRemoveReaScript(reg.add, section, path.c_str(), isLast) && reg.add)
     addError("Script could not be registered in REAPER.", reg.file);
+}
+
+void Transaction::inhibit(const Remote &remote)
+{
+  // prevents index post-download callbacks from being called
+  // AND prevents files from this remote from being registered in REAPER
+  // (UNregistering is not affected)
+
+  const auto it = m_remotes.find(remote.name());
+  if(it != m_remotes.end())
+    m_remotes.erase(it);
 }
