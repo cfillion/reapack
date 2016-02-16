@@ -76,6 +76,8 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   if(m_config->isFirstRun())
     manageRemotes();
 
+  registerSelf();
+
 #ifdef _WIN32
   CleanupTempFiles();
 #endif
@@ -344,4 +346,28 @@ void ReaPack::runTasks()
 {
   if(m_transaction)
     m_transaction->runTasks();
+}
+
+void ReaPack::registerSelf()
+{
+  // hard-coding galore!
+  RemoteIndex ri("ReaPack");
+  Category cat("Extensions", &ri);
+  Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
+  Version ver(REAPACK_VERSION, &pkg);
+  ver.addSource(new Source(Source::GenericPlatform,
+    REAPACK_FILE, "dummy url", &ver));
+
+  try {
+    Registry reg(Path::prefixCache(Path::REGISTRY_FILE));
+    reg.push(&ver);
+    reg.commit();
+  }
+  catch(const reapack_error &e) {
+    char msg[4096] = {};
+    sprintf(msg,
+      "ReaPack could not register itself! Please report this.\n\n"
+      "Error description: %s", e.what());
+    ShowMessageBox(msg, "ReaPack", MB_OK);
+  }
 }

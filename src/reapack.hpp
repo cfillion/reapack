@@ -68,6 +68,7 @@ public:
 private:
   Transaction *createTransaction();
   bool hitchhikeTransaction();
+  void registerSelf();
 
   std::map<int, ActionCallback> m_actions;
 
