@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="801e6ff09f3ab7a0da4365d9dfd142ea0d6f1bc3">
+<index version="1" commit="08fcfd31a1dac6757285e8acd23fc9bda23ae021">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
-      <version name="0.8-beta" author="cfillion" time="2016-02-16T02:19:35Z">
+      <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
         <changelog><![CDATA[Bug fixes:
 # fix removal of unneeded files
 # fix the post-update changelog
@@ -34,7 +34,7 @@ Other notable changes:
 * overhaul the default configuration (added ReaTeam's, MPL's and X-Raym's repositories)
 * preserve the insertion order of remotes
 * remove the cached index file when uninstalling a remote
-* store unparsed versions in the registry **(breaking change – remove registry.db)**
+* store unparsed versions in the registry (breaking change – remove registry.db)
 * tidy up newlines in the report dialog
 * unify the output filenames across every supported platforms
 * workaround for deleting opened files on Windows]]></changelog>

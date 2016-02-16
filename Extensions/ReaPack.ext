@@ -37,7 +37,7 @@
   * overhaul the default configuration (added ReaTeam's, MPL's and X-Raym's repositories)
   * preserve the insertion order of remotes
   * remove the cached index file when uninstalling a remote
-  * store unparsed versions in the registry **(breaking change – remove registry.db)**
+  * store unparsed versions in the registry (breaking change – remove registry.db)
   * tidy up newlines in the report dialog
   * unify the output filenames across every supported platforms
   * workaround for deleting opened files on Windows
