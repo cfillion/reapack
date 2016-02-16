@@ -89,8 +89,10 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("About ReaPack v") AUTO_STR(REAPACK_VERSION),
-    NamedCommandLookup("_REAPACK_ABOUT"));
+  auto_char aboutLabel[255] = {};
+  auto_snprintf(aboutLabel, sizeof(aboutLabel),
+    AUTO_STR("About ReaPack v%s"), make_autostring(ReaPack::VERSION).c_str());
+  menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)

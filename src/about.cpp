@@ -184,8 +184,8 @@ void About::populate()
   string aboutText = m_index->aboutText();
 
   if(m_index->name() == "ReaPack") {
-    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", REAPACK_VERSION);
-    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", REAPACK_BUILDTIME);
+    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
+    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
   }
 
   if(!m_about->setRichText(aboutText)) {

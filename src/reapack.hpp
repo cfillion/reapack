@@ -27,9 +27,6 @@
 
 typedef std::function<void()> ActionCallback;
 
-#define REAPACK_VERSION "0.8-beta"
-#define REAPACK_BUILDTIME __DATE__ " " __TIME__
-
 class Config;
 class Import;
 class Manager;
@@ -39,6 +36,9 @@ class Transaction;
 
 class ReaPack {
 public:
+  static const std::string VERSION;
+  static const std::string BUILDTIME;
+
   gaccel_register_t syncAction;
   gaccel_register_t importAction;
   gaccel_register_t configAction;

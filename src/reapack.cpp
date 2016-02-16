@@ -31,6 +31,9 @@
 
 using namespace std;
 
+const string ReaPack::VERSION = "0.8-beta";
+const string ReaPack::BUILDTIME = __DATE__ " " __TIME__;
+
 #ifdef _WIN32
 // Removes temporary files that could not be removed by an installation task
 // (eg. extensions dll that were in use by REAPER).
@@ -354,7 +357,7 @@ void ReaPack::registerSelf()
   RemoteIndex ri("ReaPack");
   Category cat("Extensions", &ri);
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
-  Version ver(REAPACK_VERSION, &pkg);
+  Version ver(VERSION, &pkg);
   ver.addSource(new Source(Source::GenericPlatform,
     REAPACK_FILE, "dummy url", &ver));
 
@@ -366,7 +369,7 @@ void ReaPack::registerSelf()
   catch(const reapack_error &e) {
     char msg[4096] = {};
     sprintf(msg,
-      "ReaPack could not register itself! Please report this.\n\n"
+      "ReaPack could not register itself! Please report this issue.\n\n"
       "Error description: %s", e.what());
     ShowMessageBox(msg, "ReaPack", MB_OK);
   }
