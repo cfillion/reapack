@@ -33,6 +33,8 @@ static const string DOT = ".";
 static const string DOTDOT = "..";
 
 const char *Path::CACHE_DIRNAME = "ReaPack";
+const char *Path::CONFIG_FILE = "reapack.ini";
+const char *Path::REGISTRY_FILE = "registry.db";
 
 Path Path::s_root;
 

@@ -26,6 +26,9 @@ class UseRootPath;
 class Path {
 public:
   static const char *CACHE_DIRNAME;
+  static const char *CONFIG_FILE;
+  static const char *REGISTRY_FILE;
+
   static Path cacheDir() { return s_root + CACHE_DIRNAME; }
   static Path prefixRoot(const Path &p) { return s_root + p; }
   static Path prefixRoot(const std::string &p) { return s_root + p; }

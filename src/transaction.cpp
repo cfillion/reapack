@@ -33,7 +33,7 @@ using namespace std;
 Transaction::Transaction()
   : m_isCancelled(false), m_enableReport(false), m_needRestart(false)
 {
-  m_registry = new Registry(Path::prefixCache("registry.db"));
+  m_registry = new Registry(Path::prefixCache(Path::REGISTRY_FILE));
 
   m_downloadQueue.onDone([=](void *) {
     if(m_installQueue.empty())
