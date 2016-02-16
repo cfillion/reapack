@@ -1,3 +1,74 @@
-<?xml version="1.0"?>
-<index version="1">
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" commit="801e6ff09f3ab7a0da4365d9dfd142ea0d6f1bc3">
+  <category name="Extensions">
+    <reapack name="ReaPack.ext" type="extension">
+      <version name="0.8-beta" author="cfillion" time="2016-02-16T02:19:35Z">
+        <changelog><![CDATA[Bug fixes:
+# fix removal of unneeded files
+# fix the post-update changelog
+# fix version parsing for strings containing repeated digits (like 1.1.1)
+# harden against directory traversal vulnerability
+--
+New features:
++ add support for extension packages
++ allow .ReaPackRemote import from an URL
++ ensure ReaPack is installed at the right location at startup
++ implement sorting in list view controls
++ implement the About ReaPack menu action
++ new About dialog for repositories
++ new Package History dialog
++ show the configuration dialog on first run
+--
+Other notable changes:
+* add actions for "Import a repository" and "Manage repositories"
+* add an accelerator to buttons (accessibility)
+* detect stuck downloads without enforcing a global time limit
+* don't register new script in the action list if the remote got disabled meanwhile
+* don't register packages if they failed to install
+* enhance error reporting when parsing index files
+* hide the progress dialog before showing the report dialog
+* keep track of the download progress internally and abort downloads almost immediately
+* only show the source file's base name in the progress dialog
+* only try to uninstall existing files
+* optimize synchronization when processing up-to-date packages
+* overhaul the default configuration (added ReaTeam's, MPL's and X-Raym's repositories)
+* preserve the insertion order of remotes
+* remove the cached index file when uninstalling a remote
+* store unparsed versions in the registry **(breaking change – remove registry.db)**
+* tidy up newlines in the report dialog
+* unify the output filenames across every supported platforms
+* workaround for deleting opened files on Windows]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack64.dll</source>
+      </version>
+    </reapack>
+  </category>
+  <metadata>
+    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack: Package Manager for REAPER\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} built on [[REAPACK_BUILDTIME]]\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2016  Christian Fillion\line
+\line
+This program is free software: you can redistribute it and/or modify\line
+it under the terms of the GNU Lesser General Public License as published by\line
+the Free Software Foundation, either version 3 of the License, or\line
+(at your option) any later version.\line
+\line
+This program is distributed in the hope that it will be useful,\line
+but WITHOUT ANY WARRANTY; without even the implied warranty of\line
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\line
+GNU Lesser General Public License for more details.\line
+\line
+Visit <http://www.gnu.org/licenses/> to get a copy of the\line
+GNU Lesser General Public License.\par}
+}
+]]></description>
+    <link rel="website" href="https://github.com/cfillion/reapack">Homepage</link>
+    <link rel="website" href="https://github.com/cfillion/reapack/issues">Bug Tracker</link>
+  </metadata>
 </index>
