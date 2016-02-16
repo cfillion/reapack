@@ -89,7 +89,7 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("About ReaPack v0.1"),
+  menu.addAction(AUTO_STR("About ReaPack v") AUTO_STR(REAPACK_VERSION),
     NamedCommandLookup("_REAPACK_ABOUT"));
 }
 

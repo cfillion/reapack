@@ -22,6 +22,7 @@
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
+#include "reapack.hpp"
 #include "registry.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
@@ -180,7 +181,14 @@ void About::populate()
   if(m_remote->isEnabled())
     hide(getControl(IDC_ENABLE));
 
-  if(!m_about->setRichText(m_index->aboutText())) {
+  string aboutText = m_index->aboutText();
+
+  if(m_index->name() == "ReaPack") {
+    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", REAPACK_VERSION);
+    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", REAPACK_BUILDTIME);
+  }
+
+  if(!m_about->setRichText(aboutText)) {
     // if description is invalid or empty, don't display it
     m_tabs->removeTab(0);
     m_tabs->setCurrentIndex(0);

@@ -27,6 +27,9 @@
 
 typedef std::function<void()> ActionCallback;
 
+#define REAPACK_VERSION "0.8-beta"
+#define REAPACK_BUILDTIME __DATE__ " " __TIME__
+
 class Config;
 class Import;
 class Manager;
