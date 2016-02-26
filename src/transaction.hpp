@@ -48,7 +48,7 @@ public:
     std::string title;
   };
 
-  typedef std::vector<const Error> ErrorList;
+  typedef std::vector<Error> ErrorList;
 
   Transaction();
   ~Transaction();

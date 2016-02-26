@@ -45,13 +45,16 @@ vendor
   [tup](http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip)
   (explicit-variant branch, see [this
   thread](https://groups.google.com/d/topic/tup-users/UNUSE15PQdA/discussion))
-  and [Visual Studio Express 2013 for
-  Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=48131)
-2. Download the latest [boost](http://www.boost.org/) and copy the
+  and [Visual Studio 2015, with Visual C++](https://www.visualstudio.com/products/visual-studio-community-vs)
+2. Prevent Microsoft's C++ compiler from saving telemetry outside of the build directory:
+   [instructions here](https://msdn.microsoft.com/en-us/library/ee225238.aspx#Anchor_5)
+   or set the `OptIn` registry key to `0` in
+   `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\14.0\SQM`
+3. Download the latest [boost](http://www.boost.org/) and copy the
   `boost` subdirectory into `<reapack>\vendor`
-3. Download the latest [curl](http://curl.haxx.se/download.html) source
+4. Download the latest [curl](http://curl.haxx.se/download.html) source
   code and extract it on your computer
-4. Launch "Developer Command Prompt for VS2013" and run the following commands:
+5. Launch "Developer Command Prompt for VS2015" and run the following commands:
   ```sh
   cd Path\To\Curl\winbuild
   
@@ -61,13 +64,13 @@ vendor
   "%VCINSTALLDIR%\vcvarsall" x86
   nmake /f Makefile.vc mode=static RTLIBCFG=static ENABLE_IDN=no MACHINE=x86
   ```
-5. Copy `<curl directory>\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
+6. Copy `<curl directory>\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
   to `<reapack directory>\vendor` as `libcurl64`
-6. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
+7. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
   to `<reapack directory>\vendor` as `libcurl32`
-7. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
+8. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
-8. Run `rake` from this directory using
-  "Developer Command Prompt for VS2013"
-9. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
+9. Run `rake` from this directory using
+  "Developer Command Prompt for VS2015"
+10. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
    to your REAPER plugin folder
