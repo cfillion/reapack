@@ -25,8 +25,6 @@
 
 #include <reaper_plugin.h>
 
-typedef std::function<void()> ActionCallback;
-
 class Config;
 class Import;
 class Manager;
@@ -36,6 +34,8 @@ class Transaction;
 
 class ReaPack {
 public:
+  typedef std::function<void()> ActionCallback;
+
   static const std::string VERSION;
   static const std::string BUILDTIME;
 
