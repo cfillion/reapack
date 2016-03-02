@@ -35,7 +35,7 @@ struct Link;
 
 class About : public Dialog {
 public:
-  enum { EnableResult = 100 };
+  enum { InstallResult = 100 };
 
   About(const Remote *);
   ~About();

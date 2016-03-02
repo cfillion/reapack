@@ -46,7 +46,7 @@
 #define IDC_LIST       212
 #define IDC_IMPORT     213
 #define IDC_TABS       214
-#define IDC_ENABLE     215
+#define IDC_INSTALL    215
 #define IDC_WEBSITE    216
 #define IDC_DONATE     217
 #define IDC_ABOUT      218

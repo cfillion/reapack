@@ -59,7 +59,8 @@ public:
   void importRemote();
   void import(const Remote &);
   void manageRemotes();
-  void about();
+  void aboutSelf();
+  void about(const Remote &, HWND parent);
 
   void runTasks();
 

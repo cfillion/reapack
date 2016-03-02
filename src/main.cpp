@@ -162,7 +162,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
     &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
 
-  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::about, reapack));
+  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
 
   plugin_register("hookcommand", (void *)commandHook);
   plugin_register("hookcustommenu", (void *)menuHook);

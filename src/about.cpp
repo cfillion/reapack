@@ -105,8 +105,8 @@ void About::onCommand(const int id)
   case IDC_DONATE:
     selectLink(id, m_donationLinks);
     break;
-  case IDC_ENABLE:
-    close(EnableResult);
+  case IDC_INSTALL:
+    close(InstallResult);
     break;
   case ACTION_HISTORY:
     packageHistory();
@@ -177,9 +177,6 @@ void About::populate()
   m_donationLinks = m_index->links(RemoteIndex::DonationLink);
   if(m_donationLinks.empty())
     hide(getControl(IDC_DONATE));
-
-  if(m_remote->isEnabled())
-    hide(getControl(IDC_ENABLE));
 
   string aboutText = m_index->aboutText();
 
@@ -279,6 +276,8 @@ void About::updateInstalledFiles()
       stream << path.join() << "\r\n";
 
     SetWindowText(m_installedFiles, make_autostring(stream.str()).c_str());
+
+    hide(getControl(IDC_INSTALL));
   }
 }
 

@@ -153,13 +153,28 @@ void ReaPack::synchronizeAll()
 void ReaPack::enable(Remote remote)
 {
   remote.setEnabled(true);
-  m_config->remotes()->add(remote);
 
-  if(!hitchhikeTransaction())
+  if(!hitchhikeTransaction()) {
+    m_config->remotes()->add(remote);
+
+    if(m_manager)
+      m_manager->refresh();
+
     return;
+  }
 
   m_transaction->registerAll(remote);
   m_transaction->synchronize(remote, false);
+
+  m_transaction->onFinish([=] {
+    if(m_transaction->isCancelled())
+      return;
+
+    m_config->remotes()->add(remote);
+
+    if(m_manager)
+      m_manager->refresh();
+  });
 }
 
 void ReaPack::disable(Remote remote)
@@ -289,11 +304,23 @@ void ReaPack::manageRemotes()
   });
 }
 
-void ReaPack::about()
+void ReaPack::aboutSelf()
 {
-  const Remote &remote = m_config->remotes()->get("ReaPack");
+  about(m_config->remotes()->get("ReaPack"), m_mainWindow);
+}
+
+void ReaPack::about(const Remote &remote, HWND parent)
+{
+  if(remote.isNull())
+    return;
+
   requireIndex(remote, [=] {
-    Dialog::Show<About>(m_instance, m_mainWindow, &remote);
+    const auto ret = Dialog::Show<About>(m_instance, parent, &remote);
+
+    if(ret != About::InstallResult)
+      return;
+
+    enable(remote);
   });
 }
 

@@ -195,24 +195,7 @@ void Manager::uninstall()
 
 void Manager::about()
 {
-  Remote remote = currentRemote();
-
-  if(remote.isNull())
-    return;
-
-  // show the pending enable state changes as if they were already applied
-  remote.setEnabled(isRemoteEnabled(remote));
-
-  m_reapack->requireIndex(remote, bind(&Manager::showAbout, this, remote));
-}
-
-void Manager::showAbout(const Remote &remote)
-{
-  switch(Dialog::Show<About>(instance(), handle(), &remote)) {
-  case About::EnableResult:
-    setRemoteEnabled(true);
-    break;
-  }
+  m_reapack->about(currentRemote(), handle());
 }
 
 bool Manager::confirm() const
