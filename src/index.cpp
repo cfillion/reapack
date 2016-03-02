@@ -21,7 +21,9 @@
 #include "errors.hpp"
 #include "path.hpp"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <cerrno>
+
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;
@@ -114,7 +116,7 @@ void RemoteIndex::addCategory(const Category *cat)
 
 void RemoteIndex::addLink(const LinkType type, const Link &link)
 {
-  if(link.url.find("http") == 0)
+  if(boost::algorithm::starts_with(link.url, "http"))
     m_links.insert({type, link});
 }
 
