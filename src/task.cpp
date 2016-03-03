@@ -17,16 +17,9 @@
 
 #include "task.hpp"
 
-#include "encoding.hpp"
+#include "filesystem.hpp"
 #include "transaction.hpp"
 #include "version.hpp"
-
-#include <cerrno>
-#include <cstdio>
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 using namespace std;
 
@@ -56,66 +49,6 @@ void Task::rollback()
   // it's the transaction queue's job to abort the running downloads, not ours
 
   doRollback();
-}
-
-bool Task::RenameFile(const Path &from, const Path &to)
-{
-  const string &fullFrom = Path::prefixRoot(from).join();
-  const string &fullTo = Path::prefixRoot(to).join();
-
-#ifdef _WIN32
-  return !_wrename(make_autostring(fullFrom).c_str(),
-    make_autostring(fullTo).c_str());
-#else
-  return !rename(fullFrom.c_str(), fullTo.c_str());
-#endif
-}
-
-bool Task::RemoveFile(const Path &path)
-{
-  const auto_string &fullPath =
-    make_autostring(Path::prefixRoot(path).join());
-
-#ifdef _WIN32
-  if(GetFileAttributes(fullPath.c_str()) == INVALID_FILE_ATTRIBUTES
-      && GetLastError() == ERROR_FILE_NOT_FOUND)
-    return true;
-
-  if(GetFileAttributes(fullPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
-    return RemoveDirectory(fullPath.c_str()) != 0;
-  else if(!_wremove(fullPath.c_str()))
-    return true;
-
-  // So the file cannot be removed (probably because it's in use)?
-  // Then let's move it somewhere else. And delete it on next startup.
-  // Windows is so great!
-
-  Path workaroundPath;
-  workaroundPath.prepend(Path::CACHE_DIRNAME);
-  workaroundPath.append("old_" + path.last() + ".tmp");
-
-  return RenameFile(path, workaroundPath);
-#else
-  return !remove(fullPath.c_str());
-#endif
-}
-
-bool Task::RemoveFileRecursive(const Path &file)
-{
-  if(!RemoveFile(file))
-    return false;
-
-  Path dir = file;
-
-  // remove empty directories, but not top-level ones that were created by REAPER
-  while(dir.size() > 2) {
-    dir.removeLast();
-
-    if(!RemoveFile(dir))
-      break;
-  }
-
-  return true;
 }
 
 InstallTask::InstallTask(const Version *ver,
@@ -168,15 +101,15 @@ void InstallTask::saveSource(Download *dl, const Source *src)
 bool InstallTask::doCommit()
 {
   for(const Path &path : m_oldFiles)
-    RemoveFile(path);
+    FS::remove(path);
 
   for(const PathGroup &paths : m_newFiles) {
 #ifdef _WIN32
-    RemoveFile(paths.target);
+    FS::remove(paths.target);
 #endif
 
-    if(!RenameFile(paths.temp, paths.target)) {
-      transaction()->addError(strerror(errno), paths.target.join());
+    if(!FS::rename(paths.temp, paths.target)) {
+      transaction()->addError(FS::lastError(), paths.target.join());
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
@@ -191,7 +124,7 @@ bool InstallTask::doCommit()
 void InstallTask::doRollback()
 {
   for(const PathGroup &paths : m_newFiles)
-    RemoveFileRecursive(paths.temp);
+    FS::removeRecursive(paths.temp);
 
   m_newFiles.clear();
 }
@@ -204,10 +137,10 @@ RemoveTask::RemoveTask(const vector<Path> &files, Transaction *t)
 bool RemoveTask::doCommit()
 {
   for(const Path &path : m_files) {
-    if(RemoveFileRecursive(path))
+    if(FS::removeRecursive(path))
       m_removedFiles.insert(path);
     else
-      transaction()->addError(strerror(errno), path.join());
+      transaction()->addError(FS::lastError(), path.join());
   }
 
   return true;

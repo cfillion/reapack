@@ -45,10 +45,6 @@ public:
   void rollback();
 
 protected:
-  static bool RenameFile(const Path &, const Path &);
-  static bool RemoveFile(const Path &);
-  static bool RemoveFileRecursive(const Path &);
-
   Transaction *transaction() const { return m_transaction; }
 
   virtual void doStart() = 0;

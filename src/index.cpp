@@ -17,27 +17,18 @@
 
 #include "index.hpp"
 
+#include "download.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
+#include "filesystem.hpp"
 #include "path.hpp"
+#include "remote.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <cerrno>
 
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;
-
-static FILE *OpenFile(const char *path)
-{
-#ifdef _WIN32
-  FILE *file = nullptr;
-  _wfopen_s(&file, make_autostring(path).c_str(), L"rb");
-  return file;
-#else
-  return fopen(path, "rb");
-#endif
-}
 
 Path RemoteIndex::pathFor(const string &name)
 {
@@ -56,10 +47,10 @@ const RemoteIndex *RemoteIndex::load(const string &name)
 {
   TiXmlDocument doc;
 
-  FILE *file = OpenFile(pathFor(name).join().c_str());
+  FILE *file = FS::open(pathFor(name));
 
   if(!file)
-    throw reapack_error(strerror(errno));
+    throw reapack_error(FS::lastError().c_str());
 
   const bool success = doc.LoadFile(file);
   fclose(file);
@@ -85,6 +76,20 @@ const RemoteIndex *RemoteIndex::load(const string &name)
   default:
     throw reapack_error("unsupported version");
   }
+}
+
+Download *RemoteIndex::fetch(const Remote &remote, const bool stale)
+{
+  time_t mtime = 0, now = time(nullptr);
+
+  if(FS::mtime(pathFor(remote.name()), &mtime)) {
+    const time_t threshold = stale ? 2 : (24 * 3600);
+
+    if(mtime > now - threshold)
+      return nullptr;
+  }
+
+  return new Download(remote.name() + ".xml", remote.url());
 }
 
 RemoteIndex::RemoteIndex(const string &name)

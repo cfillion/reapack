@@ -19,12 +19,12 @@
 
 #include "encoding.hpp"
 #include "errors.hpp"
+#include "filesystem.hpp"
 #include "index.hpp"
 #include "remote.hpp"
 #include "task.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include <fstream>
 
 #include <reaper_plugin_functions.h>
 
@@ -96,9 +96,16 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   if(m_remotes.count(name) > 1)
     return;
 
-  Download *dl = new Download(name, remote.url());
-  m_downloadQueue.push(dl);
+  Download *dl = RemoteIndex::fetch(remote, true);
 
+  if(!dl) {
+    // the index was last downloaded less than a few seconds ago
+    cb();
+    finish();
+    return;
+  }
+
+  m_downloadQueue.push(dl);
   dl->onFinish(bind(&Transaction::saveIndex, this, dl, name));
 }
 
@@ -263,16 +270,10 @@ bool Transaction::saveFile(Download *dl, const Path &path)
 
   RecursiveCreateDirectory(path.dirname().c_str(), 0);
 
-  const string strPath = path.join();
-  ofstream file(make_autostring(strPath), ios_base::binary);
-
-  if(!file) {
-    addError(strerror(errno), strPath);
+  if(!FS::write(path, dl->contents())) {
+    addError(FS::lastError(), path.join());
     return false;
   }
-
-  file << dl->contents();
-  file.close();
 
   return true;
 }
