@@ -23,13 +23,11 @@
 #include "encoding.hpp"
 
 class Download;
-class Transaction;
+class DownloadQueue;
 
 class Progress : public Dialog {
 public:
-  Progress();
-
-  void setTransaction(Transaction *t);
+  Progress(DownloadQueue *);
 
 protected:
   void onInit() override;
@@ -39,7 +37,7 @@ private:
   void addDownload(Download *);
   void updateProgress();
 
-  Transaction *m_transaction;
+  DownloadQueue *m_queue;
   auto_string m_currentName;
 
   HWND m_label;

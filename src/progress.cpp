@@ -23,44 +23,27 @@
 
 using namespace std;
 
-Progress::Progress()
+Progress::Progress(DownloadQueue *queue)
   : Dialog(IDD_PROGRESS_DIALOG),
-    m_transaction(nullptr), m_label(nullptr), m_progress(nullptr),
+    m_queue(queue), m_label(nullptr), m_progress(nullptr),
     m_done(0), m_total(0)
 {
-}
-
-void Progress::setTransaction(Transaction *t)
-{
-  m_transaction = t;
-
-  m_done = 0;
-  m_total = 0;
-  m_currentName.clear();
-
-  if(!m_transaction) {
-    hide();
-    return;
-  }
-
-  SetWindowText(m_label, AUTO_STR("Initializing..."));
-
-  m_transaction->downloadQueue()->onPush(
-    bind(&Progress::addDownload, this, placeholders::_1));
+  m_queue->onPush(bind(&Progress::addDownload, this, placeholders::_1));
 }
 
 void Progress::onInit()
 {
   m_label = getControl(IDC_LABEL);
   m_progress = GetDlgItem(handle(), IDC_PROGRESS);
+
+  SetWindowText(m_label, AUTO_STR("Initializing..."));
 }
 
 void Progress::onCommand(const int id)
 {
   switch(id) {
   case IDCANCEL:
-    if(m_transaction)
-      m_transaction->cancel();
+    m_queue->abort();
 
     // don't wait until the current downloads are finished
     // before getting out of the user way
@@ -74,10 +57,10 @@ void Progress::addDownload(Download *dl)
   m_total++;
   updateProgress();
 
-  dl->onStart([=] {
-    if(!isVisible())
-      show();
+  if(!isVisible())
+    show();
 
+  dl->onStart([=] {
     m_currentName = make_autostring(dl->name());
     updateProgress();
   });

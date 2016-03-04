@@ -295,6 +295,10 @@ void Download::abort()
 
 DownloadQueue::~DownloadQueue()
 {
+  // don't emit DownloadQueue::onAbort from the destructor
+  // which is most likely to cause a crash
+  m_onAbort.disconnect_all_slots();
+
   abort();
 }
 
@@ -312,7 +316,7 @@ void DownloadQueue::push(Download *dl)
      delete dl;
 
     if(idle())
-      m_onDone(nullptr);
+      m_onDone();
   });
 
   m_queue.push(dl);
@@ -337,6 +341,8 @@ void DownloadQueue::abort()
     dl->abort();
 
   clear();
+
+  m_onAbort();
 }
 
 void DownloadQueue::clear()

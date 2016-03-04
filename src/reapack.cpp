@@ -61,8 +61,8 @@ static void CleanupTempFiles()
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), importAction(), configAction(),
-    m_transaction(nullptr), m_manager(nullptr), m_import(nullptr),
-    m_instance(instance)
+    m_transaction(nullptr), m_progress(nullptr), m_manager(nullptr),
+    m_import(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -73,8 +73,6 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
 
   m_config = new Config;
   m_config->read(Path::prefixRoot(Path::CONFIG_FILE));
-
-  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow);
 
   if(m_config->isFirstRun())
     manageRemotes();
@@ -339,11 +337,13 @@ Transaction *ReaPack::createTransaction()
     return nullptr;
   }
 
-  m_progress->setTransaction(m_transaction);
+  assert(!m_progress);
+  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow,
+    m_transaction->downloadQueue());
 
   m_transaction->onFinish([=] {
-    // hide the progress dialog
-    m_progress->setTransaction(nullptr);
+    Dialog::Destroy(m_progress);
+    m_progress = nullptr;
 
     if(!m_transaction->isReportEnabled())
       return;

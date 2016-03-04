@@ -35,7 +35,17 @@ Transaction::Transaction()
 {
   m_registry = new Registry(Path::prefixCache(Path::REGISTRY_FILE));
 
-  m_downloadQueue.onDone([=](void *) {
+  m_downloadQueue.onAbort([=] {
+    m_isCancelled = true;
+
+    for(Task *task : m_tasks)
+      task->rollback();
+
+    if(m_downloadQueue.idle())
+      finish();
+  });
+
+  m_downloadQueue.onDone([=] {
     if(m_installQueue.empty())
       finish();
     else
@@ -246,19 +256,6 @@ void Transaction::uninstall(const Remote &remote)
   });
 
   addTask(task);
-}
-
-void Transaction::cancel()
-{
-  m_isCancelled = true;
-
-  for(Task *task : m_tasks)
-    task->rollback();
-
-  if(m_downloadQueue.idle())
-    finish();
-  else
-    m_downloadQueue.abort();
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)

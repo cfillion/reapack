@@ -62,7 +62,6 @@ public:
   void registerAll(const Remote &);
   void unregisterAll(const Remote &);
   void runTasks();
-  void cancel();
 
   bool isCancelled() const { return m_isCancelled; }
   bool isReportEnabled() const { return m_enableReport && !m_isCancelled; }

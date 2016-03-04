@@ -99,8 +99,10 @@ private:
 
 class DownloadQueue {
 public:
-  typedef boost::signals2::signal<void (Download *)> Signal;
-  typedef Signal::slot_type Callback;
+  typedef boost::signals2::signal<void (Download *)> DlSignal;
+  typedef DlSignal::slot_type DlCallback;
+  typedef boost::signals2::signal<void ()> VoidSignal;
+  typedef VoidSignal::slot_type VoidCallback;
 
   DownloadQueue() {}
   DownloadQueue(const DownloadQueue &) = delete;
@@ -112,8 +114,9 @@ public:
 
   bool idle() const { return m_queue.empty() && m_running.empty(); }
 
-  void onPush(const Callback &callback) { m_onPush.connect(callback); }
-  void onDone(const Callback &callback) { m_onDone.connect(callback); }
+  void onPush(const DlCallback &callback) { m_onPush.connect(callback); }
+  void onAbort(const VoidCallback &callback) { m_onAbort.connect(callback); }
+  void onDone(const VoidCallback &callback) { m_onDone.connect(callback); }
 
 private:
   void clear();
@@ -121,8 +124,9 @@ private:
   Download::Queue m_queue;
   std::vector<Download *> m_running;
 
-  Signal m_onPush;
-  Signal m_onDone;
+  DlSignal m_onPush;
+  VoidSignal m_onAbort;
+  VoidSignal m_onDone;
 };
 
 #endif
