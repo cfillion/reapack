@@ -53,12 +53,29 @@ void ReportDialog::printHeader(const char *title)
   m_stream << SEP << ' ' << title << ": " << SEP << NL << NL;
 }
 
-void ReportDialog::printChangelog(const string &changelog)
+void ReportDialog::printVersion(const Version *ver)
 {
-  istringstream input(changelog);
+  stream() << 'v' << ver->name();
+
+  if(!ver->author().empty())
+    stream() << " by " << ver->author();
+
+  const string &date = ver->formattedDate();
+  if(!date.empty())
+    stream() << " – " << date;
+
+  stream() << NL;
+  
+  const string &changelog = ver->changelog();
+  printIndented(changelog.empty() ? "No changelog" : changelog);
+}
+
+void ReportDialog::printIndented(const string &text)
+{
+  istringstream stream(text);
   string line;
 
-  while(getline(input, line, '\n'))
+  while(getline(stream, line, '\n'))
     m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
 }
 
@@ -122,15 +139,16 @@ void Report::printUpdates()
     const auto &queryRes = entry.second;
     const VersionSet &versions = pkg->versions();
 
+    stream() << pkg->fullName() << ':' << NL;
+
     for(const Version *ver : versions | boost::adaptors::reversed) {
       if(ver->code() <= queryRes.entry.version)
         break;
 
-      stream() << ver->fullName() << NL;
-
-      if(!ver->changelog().empty())
-        printChangelog(ver->changelog());
+      printVersion(ver);
     }
+
+    stream() << NL;
   }
 }
 
@@ -138,8 +156,11 @@ void Report::printErrors()
 {
   printHeader("Errors");
 
-  for(const Transaction::Error &err : m_transaction->errors())
-    stream() << err.title << ": " << err.message << NL;
+  for(const Transaction::Error &err : m_transaction->errors()) {
+    stream() << err.title << ':' << NL;
+    printIndented(err.message);
+    stream() << "\n";
+  }
 }
 
 void Report::printRemovals()

@@ -38,7 +38,8 @@ protected:
   std::ostringstream &stream() { return m_stream; }
 
   void printHeader(const char *);
-  void printChangelog(const std::string &);
+  void printVersion(const Version *);
+  void printIndented(const std::string &);
 
 private:
   std::ostringstream m_stream;
