@@ -185,8 +185,17 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 
 void Manager::uninstall()
 {
-  while(m_list->selectionSize() > 0) {
-    const Remote &remote = currentRemote();
+  int keep = 0;
+
+  while(m_list->selectionSize() - keep > 0) {
+    const int index = m_list->currentIndex() + keep;
+    const Remote &remote = getRemote(index);
+
+    if(remote.isProtected()) {
+      keep++;
+      continue;
+    }
+
     m_uninstall.insert(remote);
 
     const auto it = m_enableOverrides.find(remote);
@@ -194,7 +203,7 @@ void Manager::uninstall()
     if(it != m_enableOverrides.end())
       m_enableOverrides.erase(it);
 
-    m_list->removeRow(m_list->currentIndex());
+    m_list->removeRow(index);
   }
 }
 
@@ -254,11 +263,6 @@ ListView::Row Manager::makeRow(const Remote &remote) const
 
   return {name, url, isRemoteEnabled(remote) ?
     AUTO_STR("Enabled") : AUTO_STR("Disabled")};
-}
-
-Remote Manager::currentRemote() const
-{
-  return getRemote(m_list->currentIndex());
 }
 
 Remote Manager::getRemote(const int index) const
