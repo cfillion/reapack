@@ -117,12 +117,14 @@ bool FS::removeRecursive(const Path &file)
 
 bool FS::mtime(const Path &path, time_t *time)
 {
-  struct stat st;
-
 #ifdef _WIN32
-  if(_wstat(make_autostring(path.join()).c_str() &st))
+  struct _stat st;
+
+  if(_wstat(make_autostring(path.join()).c_str(), &st))
     return false;
 #else
+  struct stat st;
+
   if(stat(path.join().c_str(), &st))
     return false;
 #endif
