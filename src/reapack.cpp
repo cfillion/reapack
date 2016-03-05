@@ -403,15 +403,17 @@ Transaction *ReaPack::createTransaction()
     Dialog::Destroy(m_progress);
     m_progress = nullptr;
 
-    if(!m_transaction->isReportEnabled())
+    const Receipt *receipt = m_transaction->receipt();
+
+    if(m_transaction->isCancelled() || !receipt->isEnabled())
       return;
 
     LockDialog lock(m_manager);
 
-    if(m_transaction->taskCount() == 0 && m_transaction->errors().empty())
+    if(m_transaction->taskCount() == 0 && !receipt->hasErrors())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
-      Dialog::Show<Report>(m_instance, m_mainWindow, m_transaction);
+      Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
   });
 
   m_transaction->onDestroy([=] {

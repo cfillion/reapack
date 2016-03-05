@@ -31,7 +31,7 @@
 using namespace std;
 
 Transaction::Transaction()
-  : m_isCancelled(false), m_enableReport(false), m_needRestart(false)
+  : m_isCancelled(false)
 {
   m_registry = new Registry(Path::prefixCache(Path::REGISTRY_FILE));
 
@@ -68,7 +68,7 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
 {
   // show the report dialog even if no task are ran
   if(isUserAction)
-    m_enableReport = true;
+    m_receipt.setEnabled(true);
 
   fetchIndex(remote, [=] {
     const RemoteIndex *ri;
@@ -179,25 +179,19 @@ void Transaction::installQueued()
 
 void Transaction::installTicket(const InstallTicket &ticket)
 {
-  const Version *ver = ticket.first;
-  const Registry::QueryResult &queryRes = ticket.second;
-  const set<Path> &currentFiles = m_registry->getFiles(queryRes.entry);
+  const Version *ver = ticket.version;
+  const set<Path> &currentFiles = m_registry->getFiles(ticket.regQuery.entry);
 
   InstallTask *task = new InstallTask(ver, currentFiles, this);
 
   task->onCommit([=] {
-    if(queryRes.status == Registry::UpdateAvailable)
-      m_updates.push_back(ticket);
-    else
-      m_new.push_back(ticket);
-
-    const set<Path> &removedFiles = task->removedFiles();
-    m_removals.insert(removedFiles.begin(), removedFiles.end());
+    m_receipt.addTicket(ticket);
+    m_receipt.addRemovals(task->removedFiles());
 
     const Registry::Entry newEntry = m_registry->push(ver);
 
     if(newEntry.type == Package::ExtensionType)
-      m_needRestart = true;
+      m_receipt.setRestartNeeded(true);
 
     registerInHost(true, newEntry);
   });
@@ -226,7 +220,7 @@ void Transaction::unregisterAll(const Remote &remote)
 void Transaction::uninstall(const Remote &remote)
 {
   inhibit(remote);
-  remove(RemoteIndex::pathFor(remote.name()).join().c_str());
+  FS::remove(RemoteIndex::pathFor(remote.name()));
 
   const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
@@ -249,11 +243,7 @@ void Transaction::uninstall(const Remote &remote)
   }
 
   RemoveTask *task = new RemoveTask(allFiles, this);
-
-  task->onCommit([=] {
-    const set<Path> &removedFiles = task->removedFiles();
-    m_removals.insert(removedFiles.begin(), removedFiles.end());
-  });
+  task->onCommit([=] { m_receipt.addRemovals(task->removedFiles()); });
 
   addTask(task);
 }
@@ -294,8 +284,8 @@ void Transaction::finish()
 
 void Transaction::addError(const string &message, const string &title)
 {
-  m_errors.push_back({message, title});
-  m_enableReport = true;
+  m_receipt.addError({message, title});
+  m_receipt.setEnabled(true);
 }
 
 bool Transaction::allFilesExists(const set<Path> &list) const
@@ -313,7 +303,7 @@ void Transaction::addTask(Task *task)
   m_tasks.push_back(task);
   m_taskQueue.push(task);
 
-  m_enableReport = true;
+  m_receipt.setEnabled(true);
 }
 
 void Transaction::runTasks()
@@ -336,7 +326,7 @@ void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 void Transaction::registerQueued()
 {
   while(!m_regQueue.empty()) {
-    const HostRegistration &reg = m_regQueue.front();
+    const HostTicket &reg = m_regQueue.front();
 
     // don't register in host if the remote got disabled meanwhile
     if(reg.add && m_remotes.count(reg.entry.remote) == 0) {
@@ -356,7 +346,7 @@ void Transaction::registerQueued()
   }
 }
 
-void Transaction::registerScript(const HostRegistration &reg)
+void Transaction::registerScript(const HostTicket &reg)
 {
   enum Section { MainSection = 0, MidiEditorSection = 32060 };
 

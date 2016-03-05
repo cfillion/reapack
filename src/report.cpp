@@ -79,27 +79,27 @@ void ReportDialog::printIndented(const string &text)
     m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
 }
 
-Report::Report(Transaction *transaction)
-  : ReportDialog(), m_transaction(transaction)
+Report::Report(const Receipt *receipt)
+  : ReportDialog(), m_receipt(receipt)
 {
 }
 
 void Report::fillReport()
 {
-  const size_t newPackages = m_transaction->newPackages().size();
-  const size_t updates = m_transaction->updates().size();
-  const size_t removals = m_transaction->removals().size();
-  const size_t errors = m_transaction->errors().size();
+  const size_t installs = m_receipt->installs().size();
+  const size_t updates = m_receipt->updates().size();
+  const size_t removals = m_receipt->removals().size();
+  const size_t errors = m_receipt->errors().size();
 
   stream()
-    << newPackages << " new packages, "
+    << installs << " new packages, "
     << updates << " updates, "
     << removals << " removed files and "
     << errors << " errors"
     << NL
   ;
 
-  if(m_transaction->isRestartNeeded()) {
+  if(m_receipt->isRestartNeeded()) {
     stream()
       << NL
       << "Notice: One or more native REAPER extensions were installed." << NL
@@ -110,7 +110,7 @@ void Report::fillReport()
   if(errors)
     printErrors();
 
-  if(newPackages)
+  if(installs)
     printNewPackages();
 
   if(updates)
@@ -124,19 +124,17 @@ void Report::printNewPackages()
 {
   printHeader("New packages");
 
-  for(const Transaction::InstallTicket &entry : m_transaction->newPackages()) {
-    const Version *ver = entry.first;
-    stream() << ver->fullName() << NL;
-  }
+  for(const InstallTicket &ticket : m_receipt->installs())
+    stream() << ticket.version->fullName() << NL;
 }
 
 void Report::printUpdates()
 {
   printHeader("Updates");
 
-  for(const Transaction::InstallTicket &entry : m_transaction->updates()) {
-    const Package *pkg = entry.first->package();
-    const auto &queryRes = entry.second;
+  for(const InstallTicket &ticket : m_receipt->updates()) {
+    const Package *pkg = ticket.version->package();
+    const auto &queryRes = ticket.regQuery;
     const VersionSet &versions = pkg->versions();
 
     stream() << pkg->fullName() << ':' << NL;
@@ -156,7 +154,7 @@ void Report::printErrors()
 {
   printHeader("Errors");
 
-  for(const Transaction::Error &err : m_transaction->errors()) {
+  for(const Receipt::Error &err : m_receipt->errors()) {
     stream() << err.title << ':' << NL;
     printIndented(err.message);
     stream() << "\n";
@@ -167,6 +165,6 @@ void Report::printRemovals()
 {
   printHeader("Removed files");
 
-  for(const Path &path : m_transaction->removals())
+  for(const Path &path : m_receipt->removals())
     stream() << path.join() << NL;
 }

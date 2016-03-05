@@ -22,7 +22,7 @@
 
 #include <sstream>
 
-class Transaction;
+class Receipt;
 class Version;
 
 class ReportDialog : public Dialog {
@@ -47,7 +47,7 @@ private:
 
 class Report : public ReportDialog {
 public:
-  Report(Transaction *);
+  Report(const Receipt *);
 
 protected:
   void fillReport() override;
@@ -58,7 +58,7 @@ private:
   void printErrors();
   void printRemovals();
 
-  Transaction *m_transaction;
+  const Receipt *m_receipt;
 };
 
 #endif

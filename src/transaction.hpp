@@ -20,33 +20,28 @@
 
 #include "download.hpp"
 #include "path.hpp"
+#include "receipt.hpp"
 #include "registry.hpp"
 
 #include <boost/signals2.hpp>
 #include <functional>
 #include <set>
 
-class InstallTask;
 class Remote;
 class RemoteIndex;
-class RemoteList;
-class RemoveTask;
 class Task;
+
+struct InstallTicket {
+  const Version *version;
+  const Registry::QueryResult regQuery;
+};
+
+struct HostTicket { bool add; Registry::Entry entry; std::string file; };
 
 class Transaction {
 public:
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
-
-  typedef std::pair<const Version *, const Registry::QueryResult> InstallTicket;
-  typedef std::vector<InstallTicket> InstallTicketList;
-
-  struct Error {
-    std::string message;
-    std::string title;
-  };
-
-  typedef std::vector<Error> ErrorList;
 
   Transaction();
   ~Transaction();
@@ -61,57 +56,46 @@ public:
   void runTasks();
 
   bool isCancelled() const { return m_isCancelled; }
-  bool isReportEnabled() const { return m_enableReport && !m_isCancelled; }
-  bool isRestartNeeded() const { return m_needRestart; }
-  DownloadQueue *downloadQueue() { return &m_downloadQueue; }
+  const Receipt *receipt() const { return &m_receipt; }
   size_t taskCount() const { return m_tasks.size(); }
 
-  const InstallTicketList &newPackages() const { return m_new; }
-  const InstallTicketList &updates() const { return m_updates; }
-  const std::set<Path> &removals() const { return m_removals; }
-  const ErrorList &errors() const { return m_errors; }
+  DownloadQueue *downloadQueue() { return &m_downloadQueue; }
 
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
 
 private:
-  struct HostRegistration { bool add; Registry::Entry entry; std::string file; };
-
   typedef std::function<void ()> IndexCallback;
 
   void fetchIndex(const Remote &, const IndexCallback &cb);
+  void saveIndex(Download *, const std::string &remoteName);
+
+  void upgrade(const Package *pkg);
   void installQueued();
   void installTicket(const InstallTicket &);
-  void finish();
-
-  void saveIndex(Download *, const std::string &remoteName);
-  void upgrade(const Package *pkg);
-  bool allFilesExists(const std::set<Path> &) const;
   void addTask(Task *);
+
+  bool allFilesExists(const std::set<Path> &) const;
 
   void registerInHost(bool add, const Registry::Entry &);
   void registerQueued();
-  void registerScript(const HostRegistration &);
+  void registerScript(const HostTicket &);
+
+  void finish();
   void inhibit(const Remote &);
 
   bool m_isCancelled;
-  bool m_enableReport;
-  bool m_needRestart;
   Registry *m_registry;
+  Receipt m_receipt;
 
   std::multimap<std::string, IndexCallback> m_remotes;
   std::vector<const RemoteIndex *> m_remoteIndexes;
   std::vector<Task *> m_tasks;
 
   DownloadQueue m_downloadQueue;
-  std::queue<InstallTicket> m_installQueue;
   std::queue<Task *> m_taskQueue;
-  std::queue<HostRegistration> m_regQueue;
-
-  InstallTicketList m_new;
-  InstallTicketList m_updates;
-  std::set<Path> m_removals;
-  ErrorList m_errors;
+  std::queue<InstallTicket> m_installQueue;
+  std::queue<HostTicket> m_regQueue;
 
   Signal m_onFinish;
   Signal m_onDestroy;
