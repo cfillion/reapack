@@ -29,7 +29,7 @@
 
 using namespace std;
 
-enum { ACTION_ENABLE = 300, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT };
+enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
@@ -51,7 +51,7 @@ void Manager::onInit()
     {AUTO_STR("State"), 60},
   });
 
-  m_list->onActivate(bind(&Manager::about, this));
+  m_list->onActivate([=] { about(m_list->currentIndex()); });
 }
 
 void Manager::onCommand(const int id)
@@ -69,12 +69,9 @@ void Manager::onCommand(const int id)
   case ACTION_UNINSTALL:
     uninstall();
     break;
-  case ACTION_ABOUT:
-    about();
-    break;
   case IDOK:
     if(confirm())
-      apply();
+      apply(); // continue to next case (IDCANCEL)
     else {
       m_uninstall.clear();
       refresh();
@@ -84,6 +81,10 @@ void Manager::onCommand(const int id)
     reset();
     close();
     break;
+  default:
+    if(id >> 8 == ACTION_ABOUT)
+      about(id & 0xff);
+    break;
   }
 }
 
@@ -92,7 +93,8 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   if(target != m_list->handle())
     return;
 
-  const Remote &remote = currentRemote();
+  const int index = m_list->itemUnderMouse();
+  const Remote &remote = getRemote(index);
 
   if(remote.isNull())
     return;
@@ -115,7 +117,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   const auto_string &name = make_autostring(remote.name());
   auto_snprintf(aboutLabel, sizeof(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
-  menu.addAction(aboutLabel, ACTION_ABOUT);
+  menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
   menu.disable(enableAction);
   menu.disable(disableAction);
@@ -153,21 +155,22 @@ void Manager::refresh()
 
 void Manager::setRemoteEnabled(const bool enabled)
 {
-  const Remote &remote = currentRemote();
+  for(const int index : m_list->selection()) {
+    const Remote &remote = getRemote(index);
 
-  if(remote.isNull())
-    return;
+    auto it = m_enableOverrides.find(remote);
 
-  auto it = m_enableOverrides.find(remote);
+    if(it == m_enableOverrides.end()) {
+      if(remote.isEnabled() != enabled)
+        m_enableOverrides.insert({remote, enabled});
+    }
+    else if(remote.isEnabled() == enabled)
+      m_enableOverrides.erase(it);
+    else
+      it->second = enabled;
 
-  if(it == m_enableOverrides.end())
-    m_enableOverrides.insert({remote, enabled});
-  else if(remote.isEnabled() == enabled)
-    m_enableOverrides.erase(it);
-  else
-    it->second = enabled;
-
-  m_list->replaceRow(m_list->currentIndex(), makeRow(remote));
+    m_list->replaceRow(index, makeRow(remote));
+  }
 }
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
@@ -182,20 +185,22 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 
 void Manager::uninstall()
 {
-  const Remote &remote = currentRemote();
-  m_uninstall.insert(remote);
+  while(m_list->selectionSize() > 0) {
+    const Remote &remote = currentRemote();
+    m_uninstall.insert(remote);
 
-  const auto it = m_enableOverrides.find(remote);
+    const auto it = m_enableOverrides.find(remote);
 
-  if(it != m_enableOverrides.end())
-    m_enableOverrides.erase(it);
+    if(it != m_enableOverrides.end())
+      m_enableOverrides.erase(it);
 
-  m_list->removeRow(m_list->currentIndex());
+    m_list->removeRow(m_list->currentIndex());
+  }
 }
 
-void Manager::about()
+void Manager::about(const int index)
 {
-  m_reapack->about(currentRemote(), handle());
+  m_reapack->about(getRemote(index), handle());
 }
 
 bool Manager::confirm() const
@@ -253,9 +258,12 @@ ListView::Row Manager::makeRow(const Remote &remote) const
 
 Remote Manager::currentRemote() const
 {
-  const int index = m_list->currentIndex();
+  return getRemote(m_list->currentIndex());
+}
 
-  if(index < 0)
+Remote Manager::getRemote(const int index) const
+{
+  if(index < 0 || index > m_list->rowCount() - 1)
     return {};
 
   const ListView::Row &row = m_list->row(index);

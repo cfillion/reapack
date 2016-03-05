@@ -43,10 +43,11 @@ private:
   ListView::Row makeRow(const Remote &) const;
 
   Remote currentRemote() const;
+  Remote getRemote(int index) const;
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
   void uninstall();
-  void about();
+  void about(int index);
 
   bool confirm() const;
   void apply();

@@ -47,8 +47,11 @@ public:
   void sortByColumn(int index, SortOrder order = AscendingOrder);
   void clear();
 
+  int selectionSize() const;
   bool hasSelection() const;
   int currentIndex() const;
+  std::vector<int> selection() const;
+  int itemUnderMouse() const;
   int rowCount() const { return (int)m_rows.size(); }
 
   void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
@@ -63,7 +66,8 @@ private:
   void setSortArrow(bool);
   void handleDoubleClick();
   void handleColumnClick(LPARAM lpnmlistview);
-  int translate(int index) const;
+  int translate(int userIndex) const;
+  int translateBack(int internalIndex) const;
 
   int m_columnSize;
   int m_sortColumn;

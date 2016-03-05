@@ -185,7 +185,7 @@ void ListView::clear()
 
 bool ListView::hasSelection() const
 {
-  return currentIndex() > -1;
+  return selectionSize() > 0;
 }
 
 int ListView::currentIndex() const
@@ -194,13 +194,35 @@ int ListView::currentIndex() const
 
   if(internalIndex < 0)
     return -1;
+  else
+    return translateBack(internalIndex);
+}
 
-  LVITEM item{};
-  item.iItem = internalIndex;
-  item.mask |= LVIF_PARAM;
-  ListView_GetItem(handle(), &item);
+vector<int> ListView::selection() const
+{
+  int index = -1;
+  vector<int> indexes;
 
-  return (int)item.lParam;
+  while((index = ListView_GetNextItem(handle(), index, LVNI_SELECTED)) != -1) {
+    indexes.push_back(translateBack(index));
+  }
+
+  return indexes;
+}
+
+int ListView::selectionSize() const
+{
+  return ListView_GetSelectedCount(handle());
+}
+
+int ListView::itemUnderMouse() const
+{
+  LVHITTESTINFO info{};
+  GetCursorPos(&info.pt);
+  ScreenToClient(handle(), &info.pt);
+  ListView_HitTest(handle(), &info);
+
+  return translateBack(info.iItem);
 }
 
 void ListView::onNotify(LPNMHDR info, LPARAM lParam)
@@ -220,13 +242,10 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
 
 void ListView::handleDoubleClick()
 {
-  LVHITTESTINFO info{};
-  GetCursorPos(&info.pt);
-  ScreenToClient(handle(), &info.pt);
-  ListView_HitTest(handle(), &info);
+  const int index = itemUnderMouse();
 
   // user double clicked on an item
-  if(info.iItem > -1)
+  if(index > -1)
     m_onActivate();
 }
 
@@ -266,4 +285,17 @@ int ListView::translate(const int userIndex) const
   }
 
   return -1;
+}
+
+int ListView::translateBack(const int internalIndex) const
+{
+  if(m_sortColumn < 0)
+    return internalIndex;
+
+  LVITEM item{};
+  item.iItem = internalIndex;
+  item.mask |= LVIF_PARAM;
+  ListView_GetItem(handle(), &item);
+
+  return (int)item.lParam;
 }
