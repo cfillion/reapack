@@ -26,7 +26,6 @@
 
 class ListView;
 class Package;
-class Remote;
 class RemoteIndex;
 class ReportBase;
 class RichEdit;
@@ -37,7 +36,7 @@ class About : public Dialog {
 public:
   enum { InstallResult = 100 };
 
-  About(const Remote *);
+  About(const RemoteIndex *);
   ~About();
 
 protected:
@@ -46,7 +45,6 @@ protected:
   void onContextMenu(HWND, int x, int y) override;
 
 private:
-  bool load();
   void populate();
   void updatePackages();
   void updateInstalledFiles();
@@ -54,7 +52,6 @@ private:
   void openLink(const Link *);
   void packageHistory();
 
-  const Remote *m_remote;
   const RemoteIndex *m_index;
   int m_currentCat;
 

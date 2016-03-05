@@ -48,7 +48,7 @@ Registry::Registry(const Path &path)
   );
 
   m_allEntries = m_db.prepare(
-    "SELECT id, remote, category, package, type, version "
+    "SELECT id, category, package, type, version "
     "FROM entries WHERE remote = ?"
   );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
@@ -229,16 +229,15 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   return {id, remote, category, package, type, version};
 }
 
-auto Registry::getEntries(const Remote &remote) const -> vector<Entry>
+auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
 {
   vector<Registry::Entry> list;
 
-  m_allEntries->bind(1, remote.name());
+  m_allEntries->bind(1, remoteName);
   m_allEntries->exec([&] {
     int col = 0;
 
     const int id = m_allEntries->intColumn(col++);
-    const string &remote = m_allEntries->stringColumn(col++);
     const string &category = m_allEntries->stringColumn(col++);
     const string &package = m_allEntries->stringColumn(col++);
     const Package::Type type =
@@ -246,7 +245,7 @@ auto Registry::getEntries(const Remote &remote) const -> vector<Entry>
     Version::Code version = 0;
     Version::parse(m_allEntries->stringColumn(col++), &version);
 
-    list.push_back({id, remote, category, package, type, version});
+    list.push_back({id, remoteName, category, package, type, version});
 
     return true;
   });

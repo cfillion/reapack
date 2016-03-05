@@ -56,7 +56,7 @@ public:
 
   QueryResult query(const Package *) const;
   Entry getEntry(const Package *) const;
-  std::vector<Entry> getEntries(const Remote &) const;
+  std::vector<Entry> getEntries(const std::string &) const;
   std::set<Path> getFiles(const Entry &) const;
   std::string getMainFile(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);

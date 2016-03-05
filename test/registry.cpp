@@ -89,7 +89,7 @@ TEST_CASE("get file list", M) {
 TEST_CASE("query all packages", M) {
   MAKE_PACKAGE
 
-  const Remote remote("Remote Name", "irrelevent_url");
+  const string remote = "Remote Name";
 
   Registry reg;
   REQUIRE(reg.getEntries(remote).empty());

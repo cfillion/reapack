@@ -20,6 +20,7 @@
 #include "about.hpp"
 #include "config.hpp"
 #include "errors.hpp"
+#include "filesystem.hpp"
 #include "import.hpp"
 #include "index.hpp"
 #include "manager.hpp"
@@ -186,16 +187,6 @@ void ReaPack::disable(Remote remote)
   m_transaction->unregisterAll(remote);
 }
 
-void ReaPack::requireIndex(const Remote &remote, const function<void ()> &cb)
-{
-  if(file_exists(RemoteIndex::pathFor(remote.name()).join().c_str()))
-    return cb();
-  else if(!hitchhikeTransaction())
-    return;
-
-  m_transaction->fetchIndex(remote, cb);
-}
-
 void ReaPack::uninstall(const Remote &remote)
 {
   if(remote.isProtected())
@@ -312,22 +303,89 @@ void ReaPack::about(const Remote &remote, HWND parent)
   if(remote.isNull())
     return;
 
-  requireIndex(remote, [=] {
-    const auto ret = Dialog::Show<About>(m_instance, parent, &remote);
+  loadIndex(remote, [=] (const RemoteIndex *index) {
+    const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
-    if(ret != About::InstallResult)
-      return;
+    if(ret == About::InstallResult)
+      enable(remote);
+  }, parent);
+}
 
-    enable(remote);
+void ReaPack::loadIndex(const Remote &remote,
+  const IndexCallback &callback, HWND parent)
+{
+  if(!parent)
+    parent = m_mainWindow;
+
+  const auto load = [=] {
+    try {
+      // callback is responsible of deleting the index after use
+      callback(RemoteIndex::load(remote.name()));
+    }
+    catch(const reapack_error &e) {
+      const auto_string &desc = make_autostring(e.what());
+
+      auto_char msg[512] = {};
+      auto_snprintf(msg, sizeof(msg),
+        AUTO_STR("ReaPack could not read %s's index.\n\n")
+
+        AUTO_STR("Synchronize your packages and try again.\n")
+        AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+
+        AUTO_STR("[Error description: %s]"),
+        make_autostring(remote.name()).c_str(), desc.c_str()
+      );
+
+      MessageBox(parent, msg, AUTO_STR("ReaPack"), MB_OK);
+    }
+  };
+
+  Download *dl = RemoteIndex::fetch(remote);
+
+  if(!dl) {
+    load();
+    return;
+  }
+
+  DownloadQueue *queue = new DownloadQueue;
+  Dialog *progress = Dialog::Create<Progress>(m_instance, m_mainWindow, queue);
+
+  // I don't know why, but at least on OSX giving the manager window handle
+  // (in `parent`) to the progress dialog prevents it from being shown at all
+  // while still taking the focus away from the manager dialog.
+
+  queue->push(dl);
+  queue->onDone([=] { delete queue; });
+
+  dl->onFinish([=] {
+    Dialog::Destroy(progress);
+    SetFocus(parent);
+
+    switch(dl->state()) {
+    case Download::Success:
+      if(FS::write(RemoteIndex::pathFor(remote.name()), dl->contents()))
+        load();
+      else
+        MessageBox(parent, make_autostring(FS::lastError()).c_str(),
+          AUTO_STR("Write Failed"), MB_OK);
+      break;
+    case Download::Failure:
+      MessageBox(parent, make_autostring(dl->contents()).c_str(),
+        AUTO_STR("Download Failed"), MB_OK);
+      break;
+    default:
+      break;
+    }
   });
 }
 
 Transaction *ReaPack::createTransaction()
 {
-  if(m_transaction) {
+  if(m_progress)
     m_progress->setFocus();
+
+  if(m_transaction)
     return nullptr;
-  }
 
   try {
     m_transaction = new Transaction;

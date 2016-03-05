@@ -207,7 +207,7 @@ void Transaction::installTicket(const InstallTicket &ticket)
 
 void Transaction::registerAll(const Remote &remote)
 {
-  const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
+  const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
   for(const auto &entry : entries)
     registerInHost(true, entry);
@@ -215,7 +215,7 @@ void Transaction::registerAll(const Remote &remote)
 
 void Transaction::unregisterAll(const Remote &remote)
 {
-  const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
+  const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
   for(const auto &entry : entries)
     registerInHost(false, entry);
@@ -228,7 +228,7 @@ void Transaction::uninstall(const Remote &remote)
   inhibit(remote);
   remove(RemoteIndex::pathFor(remote.name()).join().c_str());
 
-  const vector<Registry::Entry> &entries = m_registry->getEntries(remote);
+  const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
   if(entries.empty())
     return;

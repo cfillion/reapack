@@ -30,11 +30,13 @@ class Import;
 class Manager;
 class Progress;
 class Remote;
+class RemoteIndex;
 class Transaction;
 
 class ReaPack {
 public:
-  typedef std::function<void()> ActionCallback;
+  typedef std::function<void ()> ActionCallback;
+  typedef std::function<void (const RemoteIndex *)> IndexCallback;
 
   static const std::string VERSION;
   static const std::string BUILDTIME;
@@ -54,13 +56,13 @@ public:
   void synchronizeAll();
   void enable(Remote);
   void disable(Remote);
-  void requireIndex(const Remote &, const std::function<void ()> &);
   void uninstall(const Remote &);
   void importRemote();
   void import(const Remote &);
   void manageRemotes();
   void aboutSelf();
   void about(const Remote &, HWND parent);
+  void loadIndex(const Remote &, const IndexCallback &, HWND = nullptr);
 
   void runTasks();
 

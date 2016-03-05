@@ -35,8 +35,6 @@ class Task;
 
 class Transaction {
 public:
-  typedef std::function<void ()> IndexCallback;
-
   typedef boost::signals2::signal<void ()> Signal;
   typedef Signal::slot_type Callback;
 
@@ -56,7 +54,6 @@ public:
   void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
   void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
 
-  void fetchIndex(const Remote &, const IndexCallback &cb);
   void synchronize(const Remote &, bool userAction = true);
   void uninstall(const Remote &);
   void registerAll(const Remote &);
@@ -80,6 +77,9 @@ public:
 private:
   struct HostRegistration { bool add; Registry::Entry entry; std::string file; };
 
+  typedef std::function<void ()> IndexCallback;
+
+  void fetchIndex(const Remote &, const IndexCallback &cb);
   void installQueued();
   void installTicket(const InstallTicket &);
   void finish();
