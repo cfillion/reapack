@@ -28,7 +28,7 @@
 #include <set>
 
 class Remote;
-class RemoteIndex;
+class Index;
 class Task;
 
 struct InstallTicket {
@@ -92,7 +92,7 @@ private:
   Receipt m_receipt;
 
   std::multimap<std::string, IndexCallback> m_remotes;
-  std::vector<const RemoteIndex *> m_remoteIndexes;
+  std::vector<const Index *> m_indexes;
   std::vector<Task *> m_tasks;
 
   DownloadQueue m_downloadQueue;

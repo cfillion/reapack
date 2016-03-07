@@ -24,9 +24,9 @@
 
 #include "report.hpp"
 
+class Index;
 class ListView;
 class Package;
-class RemoteIndex;
 class ReportBase;
 class RichEdit;
 class TabBar;
@@ -36,7 +36,7 @@ class About : public Dialog {
 public:
   enum { InstallResult = 100 };
 
-  About(const RemoteIndex *);
+  About(const Index *);
   ~About();
 
 protected:
@@ -52,7 +52,7 @@ private:
   void openLink(const Link *);
   void packageHistory();
 
-  const RemoteIndex *m_index;
+  const Index *m_index;
   int m_currentCat;
 
   TabBar *m_tabs;

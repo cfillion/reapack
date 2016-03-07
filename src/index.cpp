@@ -30,12 +30,12 @@
 
 using namespace std;
 
-Path RemoteIndex::pathFor(const string &name)
+Path Index::pathFor(const string &name)
 {
   return Path::prefixCache(name + ".xml");
 }
 
-auto RemoteIndex::linkTypeFor(const char *rel) -> LinkType
+auto Index::linkTypeFor(const char *rel) -> LinkType
 {
   if(!strcmp(rel, "donation"))
     return DonationLink;
@@ -43,7 +43,7 @@ auto RemoteIndex::linkTypeFor(const char *rel) -> LinkType
   return WebsiteLink;
 }
 
-const RemoteIndex *RemoteIndex::load(const string &name)
+const Index *Index::load(const string &name)
 {
   TiXmlDocument doc;
 
@@ -78,7 +78,7 @@ const RemoteIndex *RemoteIndex::load(const string &name)
   }
 }
 
-Download *RemoteIndex::fetch(const Remote &remote, const bool stale)
+Download *Index::fetch(const Remote &remote, const bool stale)
 {
   time_t mtime = 0, now = time(nullptr);
 
@@ -92,20 +92,20 @@ Download *RemoteIndex::fetch(const Remote &remote, const bool stale)
   return new Download(remote.name() + ".xml", remote.url());
 }
 
-RemoteIndex::RemoteIndex(const string &name)
+Index::Index(const string &name)
   : m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty index name");
 }
 
-RemoteIndex::~RemoteIndex()
+Index::~Index()
 {
   for(const Category *cat : m_categories)
     delete cat;
 }
 
-void RemoteIndex::addCategory(const Category *cat)
+void Index::addCategory(const Category *cat)
 {
   if(cat->index() != this)
     throw reapack_error("category belongs to another index");
@@ -119,13 +119,13 @@ void RemoteIndex::addCategory(const Category *cat)
     cat->packages().begin(), cat->packages().end());
 }
 
-void RemoteIndex::addLink(const LinkType type, const Link &link)
+void Index::addLink(const LinkType type, const Link &link)
 {
   if(boost::algorithm::starts_with(link.url, "http"))
     m_links.insert({type, link});
 }
 
-auto RemoteIndex::links(const LinkType type) const -> LinkList
+auto Index::links(const LinkType type) const -> LinkList
 {
   const auto begin = m_links.lower_bound(type);
   const auto end = m_links.upper_bound(type);
@@ -138,7 +138,7 @@ auto RemoteIndex::links(const LinkType type) const -> LinkList
   return list;
 }
 
-Category::Category(const string &name, const RemoteIndex *ri)
+Category::Category(const string &name, const Index *ri)
   : m_index(ri), m_name(name)
 {
   if(m_name.empty())

@@ -34,7 +34,7 @@ class TiXmlElement;
 
 struct Link { std::string name; std::string url; };
 
-class RemoteIndex {
+class Index {
 public:
   enum LinkType { WebsiteLink, DonationLink };
   typedef std::multimap<LinkType, Link> LinkMap;
@@ -42,11 +42,11 @@ public:
 
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
-  static const RemoteIndex *load(const std::string &name);
+  static const Index *load(const std::string &name);
   static Download *fetch(const Remote &, bool stale = false);
 
-  RemoteIndex(const std::string &name);
-  ~RemoteIndex();
+  Index(const std::string &name);
+  ~Index();
 
   const std::string &name() const { return m_name; }
 
@@ -62,7 +62,7 @@ public:
   const PackageList &packages() const { return m_packages; }
 
 private:
-  static RemoteIndex *loadV1(TiXmlElement *, const std::string &);
+  static Index *loadV1(TiXmlElement *, const std::string &);
 
   std::string m_name;
   std::string m_about;
@@ -73,10 +73,10 @@ private:
 
 class Category {
 public:
-  Category(const std::string &name, const RemoteIndex * = nullptr);
+  Category(const std::string &name, const Index * = nullptr);
   ~Category();
 
-  const RemoteIndex *index() const { return m_index; }
+  const Index *index() const { return m_index; }
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 
@@ -85,7 +85,7 @@ public:
   const Package *package(size_t i) const { return m_packages[i]; }
 
 private:
-  const RemoteIndex *m_index;
+  const Index *m_index;
 
   std::string m_name;
   PackageList m_packages;

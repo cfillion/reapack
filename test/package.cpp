@@ -33,7 +33,7 @@ TEST_CASE("empty package name", M) {
 }
 
 TEST_CASE("package versions are sorted", M) {
-  RemoteIndex ri("Remote Name");
+  Index ri("Remote Name");
   Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "a", &cat);
@@ -82,7 +82,7 @@ TEST_CASE("add owned version", M) {
 }
 
 TEST_CASE("target path for unknown package type", M) {
-  RemoteIndex ri("name");
+  Index ri("name");
   Category cat("name", &ri);
 
   Package pack(Package::UnknownType, "a", &cat);
@@ -91,7 +91,7 @@ TEST_CASE("target path for unknown package type", M) {
 }
 
 TEST_CASE("script target path", M) {
-  RemoteIndex ri("Remote Name");
+  Index ri("Remote Name");
   Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "file.name", &cat);
@@ -105,7 +105,7 @@ TEST_CASE("script target path", M) {
 }
 
 TEST_CASE("script target path: directory traversal", M) {
-  RemoteIndex ri("Remote Name");
+  Index ri("Remote Name");
   Category cat("../..", &ri);
 
   Package pack(Package::ScriptType, "file.name", &cat);
@@ -130,7 +130,7 @@ TEST_CASE("script target path without category", M) {
 }
 
 TEST_CASE("extension target path", M) {
-  RemoteIndex ri("Remote Name");
+  Index ri("Remote Name");
   Category cat("Category Name", &ri);
 
   Package pack(Package::ExtensionType, "file.name", &cat);
@@ -157,7 +157,7 @@ TEST_CASE("full name", M) {
   }
 
   SECTION("with index") {
-    RemoteIndex ri("Remote Name");
+    Index ri("Remote Name");
     Category cat("Category Name", &ri);
     Package pack(Package::ScriptType, "file.name", &cat);
 

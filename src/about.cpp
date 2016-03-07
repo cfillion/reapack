@@ -36,7 +36,7 @@ using namespace std;
 
 enum { ACTION_HISTORY = 300 };
 
-About::About(const RemoteIndex *index)
+About::About(const Index *index)
   : Dialog(IDD_ABOUT_DIALOG), m_index(index),
     m_currentCat(-255)
 {
@@ -139,11 +139,11 @@ void About::populate()
   auto_snprintf(title, sizeof(title), AUTO_STR("About %s"), name.c_str());
   SetWindowText(handle(), title);
 
-  m_websiteLinks = m_index->links(RemoteIndex::WebsiteLink);
+  m_websiteLinks = m_index->links(Index::WebsiteLink);
   if(m_websiteLinks.empty())
     hide(getControl(IDC_WEBSITE));
 
-  m_donationLinks = m_index->links(RemoteIndex::DonationLink);
+  m_donationLinks = m_index->links(Index::DonationLink);
   if(m_donationLinks.empty())
     hide(getControl(IDC_DONATE));
 

@@ -113,7 +113,7 @@ TEST_CASE("full name with version", M) {
 }
 
 TEST_CASE("source target path", M) {
-  RemoteIndex ri("RemoteIndex Name");
+  Index ri("Index Name");
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
@@ -122,7 +122,7 @@ TEST_CASE("source target path", M) {
 
   Path expected;
   expected.append("Scripts");
-  expected.append("RemoteIndex Name");
+  expected.append("Index Name");
   expected.append("Category Name");
   expected.append("file.name");
 
@@ -130,7 +130,7 @@ TEST_CASE("source target path", M) {
 }
 
 TEST_CASE("source target path with parent directory traversal", M) {
-  RemoteIndex ri("RemoteIndex Name");
+  Index ri("Index Name");
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
@@ -139,7 +139,7 @@ TEST_CASE("source target path with parent directory traversal", M) {
 
   Path expected;
   expected.append("Scripts");
-  expected.append("RemoteIndex Name");
+  expected.append("Index Name");
   // expected.append("Category Name"); // only the category can be bypassed!
   expected.append("file.name");
 

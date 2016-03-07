@@ -27,16 +27,16 @@
 
 class Config;
 class Import;
+class Index;
 class Manager;
 class Progress;
 class Remote;
-class RemoteIndex;
 class Transaction;
 
 class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
-  typedef std::function<void (const RemoteIndex *)> IndexCallback;
+  typedef std::function<void (const Index *)> IndexCallback;
 
   static const std::string VERSION;
   static const std::string BUILDTIME;

@@ -25,18 +25,18 @@
 
 using namespace std;
 
-static void LoadMetadataV1(TiXmlElement *, RemoteIndex *ri);
-static void LoadCategoryV1(TiXmlElement *, RemoteIndex *ri);
+static void LoadMetadataV1(TiXmlElement *, Index *ri);
+static void LoadCategoryV1(TiXmlElement *, Index *ri);
 static void LoadPackageV1(TiXmlElement *, Category *cat);
 static void LoadVersionV1(TiXmlElement *, Package *pkg);
 
-RemoteIndex *RemoteIndex::loadV1(TiXmlElement *root, const string &name)
+Index *Index::loadV1(TiXmlElement *root, const string &name)
 {
-  RemoteIndex *ri = new RemoteIndex(name);
+  Index *ri = new Index(name);
 
   // ensure the memory is released if an exception is
   // thrown during the loading process
-  unique_ptr<RemoteIndex> ptr(ri);
+  unique_ptr<Index> ptr(ri);
 
   TiXmlElement *node = root->FirstChildElement("category");
 
@@ -55,7 +55,7 @@ RemoteIndex *RemoteIndex::loadV1(TiXmlElement *root, const string &name)
   return ri;
 }
 
-void LoadMetadataV1(TiXmlElement *meta, RemoteIndex *ri)
+void LoadMetadataV1(TiXmlElement *meta, Index *ri)
 {
   TiXmlElement *node = meta->FirstChildElement("description");
 
@@ -80,13 +80,13 @@ void LoadMetadataV1(TiXmlElement *meta, RemoteIndex *ri)
     }
     else if(!url) url = name;
 
-    ri->addLink(RemoteIndex::linkTypeFor(rel), {name, url});
+    ri->addLink(Index::linkTypeFor(rel), {name, url});
 
     node = node->NextSiblingElement("link");
   }
 }
 
-void LoadCategoryV1(TiXmlElement *catNode, RemoteIndex *ri)
+void LoadCategoryV1(TiXmlElement *catNode, Index *ri)
 {
   const char *name = catNode->Attribute("name");
   if(!name) name = "";

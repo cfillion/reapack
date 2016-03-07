@@ -120,7 +120,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 
   const Package *pkg = ver->package();
   const Category *cat = pkg->category();
-  const RemoteIndex *ri = cat->index();
+  const Index *ri = cat->index();
 
   m_clearFiles->bind(1, ri->name());
   m_clearFiles->bind(2, cat->name());
@@ -194,7 +194,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   Version::Code version = 0;
 
   const Category *cat = pkg->category();
-  const RemoteIndex *ri = cat->index();
+  const Index *ri = cat->index();
 
   m_findEntry->bind(1, ri->name());
   m_findEntry->bind(2, cat->name());

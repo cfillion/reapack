@@ -7,7 +7,7 @@
 #include <string>
 
 #define RIPATH "test/indexes/v1/"
-#define RIPTR(ptr) unique_ptr<const RemoteIndex> riptr(ptr)
+#define RIPTR(ptr) unique_ptr<const Index> riptr(ptr)
 
 using namespace std;
 
@@ -17,7 +17,7 @@ TEST_CASE("unnamed category", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("unnamed_category");
+    const Index *ri = Index::load("unnamed_category");
     RIPTR(ri);
     FAIL();
   }
@@ -29,7 +29,7 @@ TEST_CASE("unnamed category", M) {
 TEST_CASE("invalid category tag", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("wrong_category_tag");
+  const Index *ri = Index::load("wrong_category_tag");
   RIPTR(ri);
 
   REQUIRE(ri->categories().empty());
@@ -38,7 +38,7 @@ TEST_CASE("invalid category tag", M) {
 TEST_CASE("invalid package tag", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("wrong_package_tag");
+  const Index *ri = Index::load("wrong_package_tag");
   RIPTR(ri);
   REQUIRE(ri->categories().empty());
 
@@ -48,7 +48,7 @@ TEST_CASE("null package name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("unnamed_package");
+    const Index *ri = Index::load("unnamed_package");
     RIPTR(ri);
     FAIL();
   }
@@ -61,7 +61,7 @@ TEST_CASE("null package type", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("missing_type");
+    const Index *ri = Index::load("missing_type");
     RIPTR(ri);
   }
   catch(const reapack_error &) {
@@ -72,13 +72,13 @@ TEST_CASE("null package type", M) {
 TEST_CASE("unsupported package type", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("unsupported_type");
+  const Index *ri = Index::load("unsupported_type");
 }
 
 TEST_CASE("read version author", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("author");
+  const Index *ri = Index::load("author");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -89,7 +89,7 @@ TEST_CASE("read version author", M) {
 TEST_CASE("read version time", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("time");
+  const Index *ri = Index::load("time");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -103,7 +103,7 @@ TEST_CASE("read version time", M) {
 TEST_CASE("invalid version tag", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("wrong_version_tag");
+  const Index *ri = Index::load("wrong_version_tag");
   RIPTR(ri);
 
   REQUIRE(ri->categories().empty());
@@ -113,7 +113,7 @@ TEST_CASE("null package version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("missing_version");
+    const Index *ri = Index::load("missing_version");
     RIPTR(ri);
     FAIL();
   }
@@ -126,7 +126,7 @@ TEST_CASE("null source url", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("missing_source_url");
+    const Index *ri = Index::load("missing_source_url");
     RIPTR(ri);
     FAIL();
   }
@@ -138,7 +138,7 @@ TEST_CASE("null source url", M) {
 TEST_CASE("null source file", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("missing_source_file");
+  const Index *ri = Index::load("missing_source_file");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -150,7 +150,7 @@ TEST_CASE("null source file", M) {
 TEST_CASE("default platform", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("missing_platform");
+  const Index *ri = Index::load("missing_platform");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -161,7 +161,7 @@ TEST_CASE("default platform", M) {
 TEST_CASE("version changelog", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("changelog");
+  const Index *ri = Index::load("changelog");
   RIPTR(ri);
 
   CHECK(ri->packages().size() == 1);
@@ -173,7 +173,7 @@ TEST_CASE("version changelog", M) {
 TEST_CASE("full index", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("valid_index");
+  const Index *ri = Index::load("valid_index");
   RIPTR(ri);
 
   REQUIRE(ri->categories().size() == 1);
@@ -201,7 +201,7 @@ TEST_CASE("full index", M) {
 TEST_CASE("read index metadata", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("metadata");
+  const Index *ri = Index::load("metadata");
   RIPTR(ri);
 
   SECTION("description") {
@@ -209,7 +209,7 @@ TEST_CASE("read index metadata", M) {
   }
   
   SECTION("website links") {
-    const auto &links = ri->links(RemoteIndex::WebsiteLink);
+    const auto &links = ri->links(Index::WebsiteLink);
     REQUIRE(links.size() == 4);
     REQUIRE(links[0]->name == "http://cfillion.tk");
     REQUIRE(links[0]->url == "http://cfillion.tk");
@@ -222,7 +222,7 @@ TEST_CASE("read index metadata", M) {
   }
 
   SECTION("donation links") {
-    const auto &links = ri->links(RemoteIndex::DonationLink);
+    const auto &links = ri->links(Index::DonationLink);
     REQUIRE(links.size() == 1);
     REQUIRE(links[0]->name == "Donate");
     REQUIRE(links[0]->url == "http://paypal.com");

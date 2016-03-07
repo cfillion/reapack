@@ -303,7 +303,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
   if(remote.isNull())
     return;
 
-  loadIndex(remote, [=] (const RemoteIndex *index) {
+  loadIndex(remote, [=] (const Index *index) {
     const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
     if(ret == About::InstallResult)
@@ -320,7 +320,7 @@ void ReaPack::loadIndex(const Remote &remote,
   const auto load = [=] {
     try {
       // callback is responsible of deleting the index after use
-      callback(RemoteIndex::load(remote.name()));
+      callback(Index::load(remote.name()));
     }
     catch(const reapack_error &e) {
       const auto_string &desc = make_autostring(e.what());
@@ -340,7 +340,7 @@ void ReaPack::loadIndex(const Remote &remote,
     }
   };
 
-  Download *dl = RemoteIndex::fetch(remote);
+  Download *dl = Index::fetch(remote);
 
   if(!dl) {
     load();
@@ -363,7 +363,7 @@ void ReaPack::loadIndex(const Remote &remote,
 
     switch(dl->state()) {
     case Download::Success:
-      if(FS::write(RemoteIndex::pathFor(remote.name()), dl->contents()))
+      if(FS::write(Index::pathFor(remote.name()), dl->contents()))
         load();
       else
         MessageBox(parent, make_autostring(FS::lastError()).c_str(),
@@ -441,7 +441,7 @@ void ReaPack::runTasks()
 void ReaPack::registerSelf()
 {
   // hard-coding galore!
-  RemoteIndex ri("ReaPack");
+  Index ri("ReaPack");
   Category cat("Extensions", &ri);
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
   Version ver(VERSION, &pkg);

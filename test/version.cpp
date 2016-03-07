@@ -11,7 +11,7 @@
 using namespace std;
 
 #define MAKE_VERSION \
-  RemoteIndex ri("Remote Name"); \
+  Index ri("Remote Name"); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version ver("1", &pkg);
@@ -134,7 +134,7 @@ TEST_CASE("version full name", M) {
   }
 
   SECTION("with index") {
-    RemoteIndex ri("Remote Name");
+    Index ri("Remote Name");
     Category cat("Category Name", &ri);
     Package pkg(Package::UnknownType, "file.name", &cat);
     Version ver("1.0", &pkg);

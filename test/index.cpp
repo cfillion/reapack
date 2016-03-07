@@ -6,7 +6,7 @@
 #include <string>
 
 #define RIPATH "test/indexes/"
-#define RIPTR(ptr) unique_ptr<const RemoteIndex> riptr(ptr)
+#define RIPTR(ptr) unique_ptr<const Index> riptr(ptr)
 
 using namespace std;
 
@@ -16,7 +16,7 @@ TEST_CASE("file not found", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("404");
+    const Index *ri = Index::load("404");
     RIPTR(ri);
     FAIL();
   }
@@ -29,7 +29,7 @@ TEST_CASE("broken", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("broken");
+    const Index *ri = Index::load("broken");
     RIPTR(ri);
     FAIL();
   }
@@ -42,7 +42,7 @@ TEST_CASE("wrong root tag name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("wrong_root");
+    const Index *ri = Index::load("wrong_root");
     RIPTR(ri);
     FAIL();
   }
@@ -55,7 +55,7 @@ TEST_CASE("invalid version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("invalid_version");
+    const Index *ri = Index::load("invalid_version");
     RIPTR(ri);
     FAIL();
   }
@@ -68,7 +68,7 @@ TEST_CASE("future version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const RemoteIndex *ri = RemoteIndex::load("future_version");
+    const Index *ri = Index::load("future_version");
     RIPTR(ri);
     FAIL();
   }
@@ -80,7 +80,7 @@ TEST_CASE("future version", M) {
 TEST_CASE("unicode index path", M) {
   UseRootPath root(RIPATH);
 
-  const RemoteIndex *ri = RemoteIndex::load("Новая папка");
+  const Index *ri = Index::load("Новая папка");
   RIPTR(ri);
 
   REQUIRE(ri->name() == "Новая папка");
@@ -88,7 +88,7 @@ TEST_CASE("unicode index path", M) {
 
 TEST_CASE("empty index name", M) {
   try {
-    RemoteIndex cat{string()};
+    Index cat{string()};
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -97,7 +97,7 @@ TEST_CASE("empty index name", M) {
 }
 
 TEST_CASE("add category", M) {
-  RemoteIndex ri("a");
+  Index ri("a");
   Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
   Version *ver = new Version("1", pack);
@@ -116,8 +116,8 @@ TEST_CASE("add category", M) {
 }
 
 TEST_CASE("add owned category", M) {
-  RemoteIndex ri1("a");
-  RemoteIndex ri2("b");
+  Index ri1("a");
+  Index ri2("b");
 
   Category *cat = new Category("name", &ri1);
 
@@ -132,14 +132,14 @@ TEST_CASE("add owned category", M) {
 }
 
 TEST_CASE("drop empty category", M) {
-  RemoteIndex ri("a");
+  Index ri("a");
   ri.addCategory(new Category("a", &ri));
 
   REQUIRE(ri.categories().empty());
 }
 
 TEST_CASE("add a package", M) {
-  RemoteIndex ri("a");
+  Index ri("a");
   Category cat("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", &cat);
   Version *ver = new Version("1", pack);
@@ -197,13 +197,13 @@ TEST_CASE("category full name", M) {
   Category cat1("Category Name");
   REQUIRE(cat1.fullName() == "Category Name");
 
-  RemoteIndex ri("Remote Name");
+  Index ri("Remote Name");
   Category cat2("Category Name", &ri);
   REQUIRE(cat2.fullName() == "Remote Name/Category Name");
 }
 
 TEST_CASE("repository description", M) {
-  RemoteIndex ri("Remote Name");
+  Index ri("Remote Name");
   CHECK(ri.aboutText().empty());
 
   ri.setAboutText("Hello World");
@@ -211,36 +211,36 @@ TEST_CASE("repository description", M) {
 }
 
 TEST_CASE("repository links", M) {
-  RemoteIndex ri("Remote name");
-  CHECK(ri.links(RemoteIndex::WebsiteLink).empty());
-  CHECK(ri.links(RemoteIndex::DonationLink).empty());
+  Index ri("Remote name");
+  CHECK(ri.links(Index::WebsiteLink).empty());
+  CHECK(ri.links(Index::DonationLink).empty());
 
   SECTION("website links") {
-    ri.addLink(RemoteIndex::WebsiteLink, {"First", "http://example.com"});
-    REQUIRE(ri.links(RemoteIndex::WebsiteLink).size() == 1);
-    ri.addLink(RemoteIndex::WebsiteLink, {"Second", "http://example.com"});
+    ri.addLink(Index::WebsiteLink, {"First", "http://example.com"});
+    REQUIRE(ri.links(Index::WebsiteLink).size() == 1);
+    ri.addLink(Index::WebsiteLink, {"Second", "http://example.com"});
 
-    const auto &links = ri.links(RemoteIndex::WebsiteLink);
+    const auto &links = ri.links(Index::WebsiteLink);
     REQUIRE(links.size() == 2);
     REQUIRE(links[0]->name == "First");
     REQUIRE(links[1]->name == "Second");
 
-    REQUIRE(ri.links(RemoteIndex::DonationLink).empty());
+    REQUIRE(ri.links(Index::DonationLink).empty());
   }
 
   SECTION("donation links") {
-    ri.addLink(RemoteIndex::DonationLink, {"First", "http://example.com"});
-    REQUIRE(ri.links(RemoteIndex::DonationLink).size() == 1);
+    ri.addLink(Index::DonationLink, {"First", "http://example.com"});
+    REQUIRE(ri.links(Index::DonationLink).size() == 1);
   }
 
   SECTION("drop invalid links") {
-    ri.addLink(RemoteIndex::WebsiteLink, {"name", "not http(s)"});
-    REQUIRE(ri.links(RemoteIndex::WebsiteLink).empty());
+    ri.addLink(Index::WebsiteLink, {"name", "not http(s)"});
+    REQUIRE(ri.links(Index::WebsiteLink).empty());
   }
 }
 
 TEST_CASE("link type from string", M) {
-  REQUIRE(RemoteIndex::linkTypeFor("website") == RemoteIndex::WebsiteLink);
-  REQUIRE(RemoteIndex::linkTypeFor("donation") == RemoteIndex::DonationLink);
-  REQUIRE(RemoteIndex::linkTypeFor("bacon") == RemoteIndex::WebsiteLink);
+  REQUIRE(Index::linkTypeFor("website") == Index::WebsiteLink);
+  REQUIRE(Index::linkTypeFor("donation") == Index::DonationLink);
+  REQUIRE(Index::linkTypeFor("bacon") == Index::WebsiteLink);
 }

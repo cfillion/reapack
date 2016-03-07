@@ -58,7 +58,7 @@ Transaction::~Transaction()
   for(Task *task : m_tasks)
     delete task;
 
-  for(const RemoteIndex *ri : m_remoteIndexes)
+  for(const Index *ri : m_indexes)
     delete ri;
 
   delete m_registry;
@@ -71,11 +71,11 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
     m_receipt.setEnabled(true);
 
   fetchIndex(remote, [=] {
-    const RemoteIndex *ri;
+    const Index *ri;
 
     try {
-      ri = RemoteIndex::load(remote.name());
-      m_remoteIndexes.push_back(ri);
+      ri = Index::load(remote.name());
+      m_indexes.push_back(ri);
     }
     catch(const reapack_error &e) {
       // index file is invalid (load error)
@@ -106,7 +106,7 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   if(m_remotes.count(name) > 1)
     return;
 
-  Download *dl = RemoteIndex::fetch(remote, true);
+  Download *dl = Index::fetch(remote, true);
 
   if(!dl) {
     // the index was last downloaded less than a few seconds ago
@@ -121,7 +121,7 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
 
 void Transaction::saveIndex(Download *dl, const string &name)
 {
-  if(!saveFile(dl, RemoteIndex::pathFor(name)))
+  if(!saveFile(dl, Index::pathFor(name)))
     return;
 
   const auto end = m_remotes.upper_bound(name);
@@ -222,7 +222,7 @@ void Transaction::unregisterAll(const Remote &remote)
 void Transaction::uninstall(const Remote &remote)
 {
   inhibit(remote);
-  FS::remove(RemoteIndex::pathFor(remote.name()));
+  FS::remove(Index::pathFor(remote.name()));
 
   const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
