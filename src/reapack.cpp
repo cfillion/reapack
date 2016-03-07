@@ -147,6 +147,8 @@ void ReaPack::synchronizeAll()
 
   for(const Remote &remote : remotes)
     t->synchronize(remote);
+
+  t->runTasks();
 }
 
 void ReaPack::enable(Remote remote)

@@ -108,7 +108,6 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   if(!dl) {
     // the index was last downloaded less than a few seconds ago
     cb();
-    finish();
     return;
   }
 
