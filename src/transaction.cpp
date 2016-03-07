@@ -133,12 +133,14 @@ void Transaction::upgrade(const Package *pkg)
 
   InstallTicket::Type type = InstallTicket::Install;
 
-  if(regEntry.id && regEntry.version == ver->code()) {
-    if(allFilesExists(ver->files()))
-      return; // latest version is really installed, nothing to do here!
+  if(regEntry.id) {
+    if(regEntry.version == ver->code()) {
+      if(allFilesExists(ver->files()))
+        return; // latest version is really installed, nothing to do here!
+    }
+    else if(regEntry.version < ver->code())
+      type = InstallTicket::Upgrade;
   }
-  else if(regEntry.version < ver->code())
-    type = InstallTicket::Upgrade;
 
   // prevent file conflicts – pushes to the registry will be reverted!
   try {
