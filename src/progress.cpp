@@ -19,7 +19,6 @@
 
 #include "download.hpp"
 #include "resource.hpp"
-#include "transaction.hpp"
 
 using namespace std;
 

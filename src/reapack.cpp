@@ -416,7 +416,7 @@ Transaction *ReaPack::createTransaction()
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
   });
 
-  m_transaction->onDestroy([=] {
+  m_transaction->setCleanupHandler([=] {
     delete m_transaction;
     m_transaction = nullptr;
   });

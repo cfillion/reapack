@@ -278,7 +278,7 @@ void Transaction::finish()
   }
 
   m_onFinish();
-  m_onDestroy();
+  m_cleanupHandler();
 }
 
 void Transaction::addError(const string &message, const string &title)

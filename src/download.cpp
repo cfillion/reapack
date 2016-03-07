@@ -255,7 +255,7 @@ void Download::finishInMainThread()
   }
 
   m_onFinish();
-  m_onDestroy();
+  m_cleanupHandler();
 }
 
 auto Download::state() -> State
@@ -312,9 +312,10 @@ void DownloadQueue::push(Download *dl)
     start();
   });
 
-  dl->onDestroy([=] {
-     delete dl;
+  dl->setCleanupHandler([=] {
+    delete dl;
 
+    // call m_onDone() only after every onFinish slots ran
     if(idle())
       m_onDone();
   });

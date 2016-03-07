@@ -33,8 +33,7 @@ public:
   typedef std::vector<Column> Columns;
   typedef std::vector<auto_string> Row;
 
-  typedef boost::signals2::signal<void ()> Signal;
-  typedef Signal::slot_type Callback;
+  typedef boost::signals2::signal<void ()> VoidSignal;
 
   ListView(const Columns &, HWND handle);
 
@@ -54,8 +53,8 @@ public:
   int itemUnderMouse() const;
   int rowCount() const { return (int)m_rows.size(); }
 
-  void onSelect(const Callback &callback) { m_onSelect.connect(callback); }
-  void onActivate(const Callback &callback) { m_onActivate.connect(callback); }
+  void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
+  void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
@@ -74,8 +73,8 @@ private:
   SortOrder m_sortOrder;
   std::vector<Row> m_rows;
 
-  Signal m_onSelect;
-  Signal m_onActivate;
+  VoidSignal m_onSelect;
+  VoidSignal m_onActivate;
 };
 
 #endif

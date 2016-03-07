@@ -174,7 +174,7 @@ void Import::download(const string &url)
       SetFocus(m_url);
   });
 
-  dl->onDestroy([=] {
+  dl->setCleanupHandler([=] {
     // if we are still alive
     if(dl->state() != Download::Aborted)
       m_download = nullptr;

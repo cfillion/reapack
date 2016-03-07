@@ -18,6 +18,7 @@
 #ifndef REAPACK_DOWNLOAD_HPP
 #define REAPACK_DOWNLOAD_HPP
 
+#include <functional>
 #include <queue>
 #include <string>
 #include <vector>
@@ -30,8 +31,8 @@
 class Download {
 public:
   typedef std::queue<Download *> Queue;
-  typedef boost::signals2::signal<void ()> Signal;
-  typedef Signal::slot_type Callback;
+  typedef boost::signals2::signal<void ()> VoidSignal;
+  typedef std::function<void ()> CleanupHandler;
 
   enum State {
     Idle,
@@ -55,9 +56,9 @@ public:
   bool isAborted();
   short progress();
 
-  void onStart(const Callback &callback) { m_onStart.connect(callback); }
-  void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
-  void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
+  void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
+  void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
+  void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
   void start();
   void abort();
@@ -92,17 +93,15 @@ private:
   std::string m_contents;
   short m_progress;
 
-  Signal m_onStart;
-  Signal m_onFinish;
-  Signal m_onDestroy;
+  VoidSignal m_onStart;
+  VoidSignal m_onFinish;
+  CleanupHandler m_cleanupHandler;
 };
 
 class DownloadQueue {
 public:
-  typedef boost::signals2::signal<void (Download *)> DlSignal;
-  typedef DlSignal::slot_type DlCallback;
   typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef VoidSignal::slot_type VoidCallback;
+  typedef boost::signals2::signal<void (Download *)> DownloadSignal;
 
   DownloadQueue() {}
   DownloadQueue(const DownloadQueue &) = delete;
@@ -114,9 +113,9 @@ public:
 
   bool idle() const { return m_queue.empty() && m_running.empty(); }
 
-  void onPush(const DlCallback &callback) { m_onPush.connect(callback); }
-  void onAbort(const VoidCallback &callback) { m_onAbort.connect(callback); }
-  void onDone(const VoidCallback &callback) { m_onDone.connect(callback); }
+  void onPush(const DownloadSignal::slot_type &slot) { m_onPush.connect(slot); }
+  void onAbort(const VoidSignal::slot_type &slot) { m_onAbort.connect(slot); }
+  void onDone(const VoidSignal::slot_type &slot) { m_onDone.connect(slot); }
 
 private:
   void clear();
@@ -124,7 +123,7 @@ private:
   Download::Queue m_queue;
   std::vector<Download *> m_running;
 
-  DlSignal m_onPush;
+  DownloadSignal m_onPush;
   VoidSignal m_onAbort;
   VoidSignal m_onDone;
 };

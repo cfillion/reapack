@@ -46,14 +46,14 @@ struct HostTicket { bool add; Registry::Entry entry; std::string file; };
 
 class Transaction {
 public:
-  typedef boost::signals2::signal<void ()> Signal;
-  typedef Signal::slot_type Callback;
+  typedef boost::signals2::signal<void ()> VoidSignal;
+  typedef std::function<void()> CleanupHandler;
 
   Transaction();
   ~Transaction();
 
-  void onFinish(const Callback &callback) { m_onFinish.connect(callback); }
-  void onDestroy(const Callback &callback) { m_onDestroy.connect(callback); }
+  void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
+  void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
   void synchronize(const Remote &, bool userAction = true);
   void uninstall(const Remote &);
@@ -103,8 +103,8 @@ private:
   std::queue<InstallTicket> m_installQueue;
   std::queue<HostTicket> m_regQueue;
 
-  Signal m_onFinish;
-  Signal m_onDestroy;
+  VoidSignal m_onFinish;
+  CleanupHandler m_cleanupHandler;
 };
 
 #endif

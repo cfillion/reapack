@@ -18,11 +18,11 @@
 #ifndef REAPACK_REAPACK_HPP
 #define REAPACK_REAPACK_HPP
 
+#include "path.hpp"
+
 #include <functional>
 #include <map>
 #include <memory>
-
-#include "path.hpp"
 
 #include <reaper_plugin.h>
 
