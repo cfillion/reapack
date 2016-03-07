@@ -6,7 +6,6 @@
 #include <string>
 
 #define RIPATH "test/indexes/"
-#define RIPTR(ptr) unique_ptr<const Index> riptr(ptr)
 
 using namespace std;
 
@@ -16,8 +15,7 @@ TEST_CASE("file not found", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("404");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("404");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -29,8 +27,7 @@ TEST_CASE("broken", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("broken");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("broken");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -42,8 +39,7 @@ TEST_CASE("wrong root tag name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("wrong_root");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("wrong_root");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -55,8 +51,7 @@ TEST_CASE("invalid version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("invalid_version");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("invalid_version");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -68,8 +63,7 @@ TEST_CASE("future version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("future_version");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("future_version");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -80,15 +74,13 @@ TEST_CASE("future version", M) {
 TEST_CASE("unicode index path", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("Новая папка");
-  RIPTR(ri);
-
+  IndexPtr ri = Index::load("Новая папка");
   REQUIRE(ri->name() == "Новая папка");
 }
 
 TEST_CASE("empty index name", M) {
   try {
-    Index cat{string()};
+    Index idx({});
     FAIL();
   }
   catch(const reapack_error &e) {

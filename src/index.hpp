@@ -19,6 +19,7 @@
 #define REAPACK_INDEX_HPP
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,11 +29,14 @@ class Category;
 typedef std::vector<const Category *> CategoryList;
 
 class Download;
+class Index;
 class Path;
 class Remote;
 class TiXmlElement;
 
 struct Link { std::string name; std::string url; };
+
+typedef std::shared_ptr<const Index> IndexPtr;
 
 class Index {
 public:
@@ -42,7 +46,7 @@ public:
 
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
-  static const Index *load(const std::string &name);
+  static IndexPtr load(const std::string &name);
   static Download *fetch(const Remote &, bool stale = false);
 
   Index(const std::string &name);
@@ -62,7 +66,7 @@ public:
   const PackageList &packages() const { return m_packages; }
 
 private:
-  static Index *loadV1(TiXmlElement *, const std::string &);
+  static IndexPtr loadV1(TiXmlElement *, const std::string &);
 
   std::string m_name;
   std::string m_about;

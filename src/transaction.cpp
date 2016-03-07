@@ -58,9 +58,6 @@ Transaction::~Transaction()
   for(Task *task : m_tasks)
     delete task;
 
-  for(const Index *ri : m_indexes)
-    delete ri;
-
   delete m_registry;
 }
 
@@ -71,7 +68,7 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
     m_receipt.setEnabled(true);
 
   fetchIndex(remote, [=] {
-    const Index *ri;
+    IndexPtr ri;
 
     try {
       ri = Index::load(remote.name());

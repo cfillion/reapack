@@ -19,17 +19,20 @@
 #define REAPACK_TRANSACTION_HPP
 
 #include "download.hpp"
-#include "path.hpp"
 #include "receipt.hpp"
 #include "registry.hpp"
 
 #include <boost/signals2.hpp>
 #include <functional>
+#include <memory>
 #include <set>
 
-class Remote;
 class Index;
+class Path;
+class Remote;
 class Task;
+
+typedef std::shared_ptr<const Index> IndexPtr;
 
 struct InstallTicket {
   enum Type { Install, Upgrade };
@@ -92,7 +95,7 @@ private:
   Receipt m_receipt;
 
   std::multimap<std::string, IndexCallback> m_remotes;
-  std::vector<const Index *> m_indexes;
+  std::vector<IndexPtr> m_indexes;
   std::vector<Task *> m_tasks;
 
   DownloadQueue m_downloadQueue;

@@ -3,11 +3,9 @@
 #include <index.hpp>
 #include <errors.hpp>
 
-#include <memory>
 #include <string>
 
 #define RIPATH "test/indexes/v1/"
-#define RIPTR(ptr) unique_ptr<const Index> riptr(ptr)
 
 using namespace std;
 
@@ -17,8 +15,7 @@ TEST_CASE("unnamed category", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("unnamed_category");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("unnamed_category");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -29,8 +26,7 @@ TEST_CASE("unnamed category", M) {
 TEST_CASE("invalid category tag", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("wrong_category_tag");
-  RIPTR(ri);
+  IndexPtr ri = Index::load("wrong_category_tag");
 
   REQUIRE(ri->categories().empty());
 }
@@ -38,8 +34,7 @@ TEST_CASE("invalid category tag", M) {
 TEST_CASE("invalid package tag", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("wrong_package_tag");
-  RIPTR(ri);
+  IndexPtr ri = Index::load("wrong_package_tag");
   REQUIRE(ri->categories().empty());
 
 }
@@ -48,8 +43,7 @@ TEST_CASE("null package name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("unnamed_package");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("unnamed_package");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -61,8 +55,7 @@ TEST_CASE("null package type", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("missing_type");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("missing_type");
   }
   catch(const reapack_error &) {
     // no segfault -> test passes!
@@ -72,14 +65,13 @@ TEST_CASE("null package type", M) {
 TEST_CASE("unsupported package type", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("unsupported_type");
+  IndexPtr ri = Index::load("unsupported_type");
 }
 
 TEST_CASE("read version author", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("author");
-  RIPTR(ri);
+  IndexPtr ri = Index::load("author");
 
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->lastVersion()->author()
@@ -89,9 +81,7 @@ TEST_CASE("read version author", M) {
 TEST_CASE("read version time", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("time");
-  RIPTR(ri);
-
+  IndexPtr ri = Index::load("time");
   CHECK(ri->packages().size() == 1);
 
   const tm &time = ri->category(0)->package(0)->lastVersion()->time();
@@ -103,9 +93,7 @@ TEST_CASE("read version time", M) {
 TEST_CASE("invalid version tag", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("wrong_version_tag");
-  RIPTR(ri);
-
+  IndexPtr ri = Index::load("wrong_version_tag");
   REQUIRE(ri->categories().empty());
 }
 
@@ -113,8 +101,7 @@ TEST_CASE("null package version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("missing_version");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("missing_version");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -126,8 +113,7 @@ TEST_CASE("null source url", M) {
   UseRootPath root(RIPATH);
 
   try {
-    const Index *ri = Index::load("missing_source_url");
-    RIPTR(ri);
+    IndexPtr ri = Index::load("missing_source_url");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -138,9 +124,7 @@ TEST_CASE("null source url", M) {
 TEST_CASE("null source file", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("missing_source_file");
-  RIPTR(ri);
-
+  IndexPtr ri = Index::load("missing_source_file");
   CHECK(ri->packages().size() == 1);
 
   const Package *pkg = ri->category(0)->package(0);
@@ -150,8 +134,7 @@ TEST_CASE("null source file", M) {
 TEST_CASE("default platform", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("missing_platform");
-  RIPTR(ri);
+  IndexPtr ri = Index::load("missing_platform");
 
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
@@ -161,9 +144,7 @@ TEST_CASE("default platform", M) {
 TEST_CASE("version changelog", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("changelog");
-  RIPTR(ri);
-
+  IndexPtr ri = Index::load("changelog");
   CHECK(ri->packages().size() == 1);
 
   REQUIRE(ri->category(0)->package(0)->version(0)->changelog()
@@ -173,9 +154,7 @@ TEST_CASE("version changelog", M) {
 TEST_CASE("full index", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("valid_index");
-  RIPTR(ri);
-
+  IndexPtr ri = Index::load("valid_index");
   REQUIRE(ri->categories().size() == 1);
 
   const Category *cat = ri->category(0);
@@ -201,8 +180,7 @@ TEST_CASE("full index", M) {
 TEST_CASE("read index metadata", M) {
   UseRootPath root(RIPATH);
 
-  const Index *ri = Index::load("metadata");
-  RIPTR(ri);
+  IndexPtr ri = Index::load("metadata");
 
   SECTION("description") {
     REQUIRE(ri->aboutText() == "Chunky\nBacon");

@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 
 #include "path.hpp"
 
@@ -36,7 +37,7 @@ class Transaction;
 class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
-  typedef std::function<void (const Index *)> IndexCallback;
+  typedef std::function<void (std::shared_ptr<const Index>)> IndexCallback;
 
   static const std::string VERSION;
   static const std::string BUILDTIME;

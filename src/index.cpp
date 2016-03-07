@@ -43,7 +43,7 @@ auto Index::linkTypeFor(const char *rel) -> LinkType
   return WebsiteLink;
 }
 
-const Index *Index::load(const string &name)
+IndexPtr Index::load(const string &name)
 {
   TiXmlDocument doc;
 

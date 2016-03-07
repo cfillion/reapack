@@ -303,7 +303,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
   if(remote.isNull())
     return;
 
-  loadIndex(remote, [=] (const Index *index) {
+  loadIndex(remote, [=] (IndexPtr index) {
     const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
     if(ret == About::InstallResult)

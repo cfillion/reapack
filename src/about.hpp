@@ -20,6 +20,7 @@
 
 #include "dialog.hpp"
 
+#include <memory>
 #include <vector>
 
 #include "report.hpp"
@@ -32,12 +33,13 @@ class RichEdit;
 class TabBar;
 struct Link;
 
+typedef std::shared_ptr<const Index> IndexPtr;
+
 class About : public Dialog {
 public:
   enum { InstallResult = 100 };
 
-  About(const Index *);
-  ~About();
+  About(IndexPtr);
 
 protected:
   void onInit() override;
@@ -52,7 +54,7 @@ private:
   void openLink(const Link *);
   void packageHistory();
 
-  const Index *m_index;
+  IndexPtr m_index;
   int m_currentCat;
 
   TabBar *m_tabs;

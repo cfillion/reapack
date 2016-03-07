@@ -36,16 +36,11 @@ using namespace std;
 
 enum { ACTION_HISTORY = 300 };
 
-About::About(const Index *index)
+About::About(IndexPtr index)
   : Dialog(IDD_ABOUT_DIALOG), m_index(index),
     m_currentCat(-255)
 {
   RichEdit::Init();
-}
-
-About::~About()
-{
-  delete m_index;
 }
 
 void About::onInit()

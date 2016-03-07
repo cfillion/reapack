@@ -21,8 +21,6 @@
 
 #include <WDL/tinyxml/tinyxml.h>
 
-#include <memory>
-
 using namespace std;
 
 static void LoadMetadataV1(TiXmlElement *, Index *ri);
@@ -30,7 +28,7 @@ static void LoadCategoryV1(TiXmlElement *, Index *ri);
 static void LoadPackageV1(TiXmlElement *, Category *cat);
 static void LoadVersionV1(TiXmlElement *, Package *pkg);
 
-Index *Index::loadV1(TiXmlElement *root, const string &name)
+IndexPtr Index::loadV1(TiXmlElement *root, const string &name)
 {
   Index *ri = new Index(name);
 
@@ -52,7 +50,7 @@ Index *Index::loadV1(TiXmlElement *root, const string &name)
     LoadMetadataV1(node, ri);
 
   ptr.release();
-  return ri;
+  return IndexPtr(ri);
 }
 
 void LoadMetadataV1(TiXmlElement *meta, Index *ri)
