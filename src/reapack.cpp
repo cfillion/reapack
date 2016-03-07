@@ -381,7 +381,7 @@ void ReaPack::loadIndex(const Remote &remote,
 
 Transaction *ReaPack::createTransaction()
 {
-  if(m_progress)
+  if(m_progress && m_progress->isVisible())
     m_progress->setFocus();
 
   if(m_transaction)
