@@ -27,13 +27,12 @@ TEST_CASE("query uninstalled package", M) {
 
   Registry reg;
 
-  const auto &res = reg.query(&pkg);
-  REQUIRE(res.status == Registry::Uninstalled);
-  REQUIRE(res.entry.id == 0);
-  REQUIRE(res.entry.version == 0);
+  const Registry::Entry &res = reg.getEntry(&pkg);
+  REQUIRE(res.id == 0);
+  REQUIRE(res.version == 0);
 }
 
-TEST_CASE("query up to date pacakge", M) {
+TEST_CASE("query installed pacakge", M) {
   MAKE_PACKAGE
 
   Registry reg;
@@ -46,9 +45,13 @@ TEST_CASE("query up to date pacakge", M) {
   REQUIRE(entry.type == Package::ScriptType);
   REQUIRE(entry.version == Version("1.0").code());
 
-  const Registry::QueryResult &queryRes = reg.query(&pkg);
-  REQUIRE(queryRes.status == Registry::UpToDate);
-  REQUIRE(queryRes.entry.version == Version("1.0").code());
+  const Registry::Entry &selectEntry = reg.getEntry(&pkg);
+  REQUIRE(selectEntry.id == entry.id);
+  REQUIRE(selectEntry.remote == entry.remote);
+  REQUIRE(selectEntry.category == entry.category);
+  REQUIRE(selectEntry.package == entry.package);
+  REQUIRE(selectEntry.type == entry.type);
+  REQUIRE(selectEntry.version == entry.version);
 }
 
 TEST_CASE("bump version", M) {
@@ -61,27 +64,25 @@ TEST_CASE("bump version", M) {
   reg.push(ver);
   pkg.addVersion(ver2);
 
-  const Registry::QueryResult &res1 = reg.query(&pkg);
-  REQUIRE(res1.status == Registry::UpdateAvailable);
-  REQUIRE(res1.entry.version == Version("1.0").code());
+  const Registry::Entry &entry1 = reg.getEntry(&pkg);
+  REQUIRE(entry1.version == Version("1.0").code());
 
   reg.push(ver2);
-  const Registry::QueryResult &res2 = reg.query(&pkg);
-  REQUIRE(res2.status == Registry::UpToDate);
-  REQUIRE(res2.entry.version == Version("2.0").code());
+  const Registry::Entry &entry2 = reg.getEntry(&pkg);
+  REQUIRE(entry2.version == Version("2.0").code());
   
-  REQUIRE(res2.entry.id == res1.entry.id);
+  REQUIRE(entry2.id == entry1.id);
 }
 
 TEST_CASE("get file list", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE(reg.getFiles(reg.query(&pkg).entry).empty());
+  REQUIRE(reg.getFiles(reg.getEntry(&pkg)).empty());
 
   reg.push(ver);
 
-  const set<Path> &files = reg.getFiles(reg.query(&pkg).entry);
+  const set<Path> &files = reg.getFiles(reg.getEntry(&pkg));
 
   REQUIRE(files == ver->files());
 }
@@ -112,9 +113,8 @@ TEST_CASE("forget registry entry", M) {
   Registry reg;
   reg.forget(reg.push(ver));
 
-  const Registry::QueryResult &afterForget = reg.query(&pkg);
-  REQUIRE(afterForget.status == Registry::Uninstalled);
-  REQUIRE(afterForget.entry.id == 0);
+  const Registry::Entry &afterForget = reg.getEntry(&pkg);
+  REQUIRE(afterForget.id == 0); // uninstalled
 }
 
 TEST_CASE("file conflicts", M) {
@@ -135,7 +135,7 @@ TEST_CASE("file conflicts", M) {
   ver->addSource(src2);
   pkg.addVersion(ver);
 
-  CHECK(reg.query(&pkg).status == Registry::Uninstalled);
+  CHECK(reg.getEntry(&pkg).id == 0); // uninstalled
 
   try {
     reg.push(ver);
@@ -143,7 +143,7 @@ TEST_CASE("file conflicts", M) {
   }
   catch(const reapack_error &) {}
 
-  REQUIRE(reg.query(&pkg).status == Registry::Uninstalled);
+  CHECK(reg.getEntry(&pkg).id == 0); // still uninstalled
 
   vector<Path> conflicts;
   reg.push(ver, &conflicts);
@@ -151,7 +151,7 @@ TEST_CASE("file conflicts", M) {
   REQUIRE(conflicts.size() == 1);
   REQUIRE(conflicts[0] == src1->targetPath());
 
-  REQUIRE(reg.query(&pkg).status == Registry::Uninstalled);
+  REQUIRE(reg.getEntry(&pkg).id == 0); // never installed
 }
 
 TEST_CASE("get main file", M) {

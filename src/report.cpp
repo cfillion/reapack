@@ -134,13 +134,13 @@ void Report::printUpdates()
 
   for(const InstallTicket &ticket : m_receipt->updates()) {
     const Package *pkg = ticket.version->package();
-    const auto &queryRes = ticket.regQuery;
+    const Registry::Entry &regEntry = ticket.regEntry;
     const VersionSet &versions = pkg->versions();
 
     stream() << pkg->fullName() << ':' << NL;
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
-      if(ver->code() <= queryRes.entry.version)
+      if(ver->code() <= regEntry.version)
         break;
 
       printVersion(ver);

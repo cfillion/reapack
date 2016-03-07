@@ -32,14 +32,6 @@ class Version;
 
 class Registry {
 public:
-  Registry(const Path &path = Path());
-
-  enum Status {
-    Uninstalled,
-    UpdateAvailable,
-    UpToDate,
-  };
-
   struct Entry {
     int id;
     std::string remote;
@@ -49,12 +41,8 @@ public:
     Version::Code version;
   };
 
-  struct QueryResult {
-    Status status;
-    Entry entry;
-  };
+  Registry(const Path &path = Path());
 
-  QueryResult query(const Package *) const;
   Entry getEntry(const Package *) const;
   std::vector<Entry> getEntries(const std::string &) const;
   std::set<Path> getFiles(const Entry &) const;

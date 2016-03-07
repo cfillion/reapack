@@ -26,10 +26,14 @@ Receipt::Receipt()
 
 void Receipt::addTicket(const InstallTicket &ticket)
 {
-  if(ticket.regQuery.status == Registry::UpdateAvailable)
+  switch(ticket.type) {
+  case InstallTicket::Upgrade:
     m_updates.push_back(ticket);
-  else
+    break;
+  default:
     m_installs.push_back(ticket);
+    break;
+  }
 }
 
 void Receipt::addRemovals(const std::set<Path> &pathList)

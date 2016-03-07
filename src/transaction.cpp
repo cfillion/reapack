@@ -133,14 +133,16 @@ void Transaction::saveIndex(Download *dl, const string &name)
 void Transaction::upgrade(const Package *pkg)
 {
   const Version *ver = pkg->lastVersion();
-  auto queryRes = m_registry->query(pkg);
+  const Registry::Entry &regEntry = m_registry->getEntry(pkg);
 
-  if(queryRes.status == Registry::UpToDate) {
+  InstallTicket::Type type = InstallTicket::Install;
+
+  if(regEntry.id && regEntry.version == ver->code()) {
     if(allFilesExists(ver->files()))
       return; // latest version is really installed, nothing to do here!
-    else
-      queryRes.status = Registry::Uninstalled;
   }
+  else if(regEntry.version < ver->code())
+    type = InstallTicket::Upgrade;
 
   // prevent file conflicts – pushes to the registry will be reverted!
   try {
@@ -164,7 +166,7 @@ void Transaction::upgrade(const Package *pkg)
   }
 
   // all green! (pronounce with a japanese accent)
-  m_installQueue.push({ver, queryRes});
+  m_installQueue.push({type, ver, regEntry});
 }
 
 void Transaction::installQueued()
@@ -180,7 +182,7 @@ void Transaction::installQueued()
 void Transaction::installTicket(const InstallTicket &ticket)
 {
   const Version *ver = ticket.version;
-  const set<Path> &currentFiles = m_registry->getFiles(ticket.regQuery.entry);
+  const set<Path> &currentFiles = m_registry->getFiles(ticket.regEntry);
 
   InstallTask *task = new InstallTask(ver, currentFiles, this);
 

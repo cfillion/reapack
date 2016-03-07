@@ -32,8 +32,11 @@ class RemoteIndex;
 class Task;
 
 struct InstallTicket {
+  enum Type { Install, Upgrade };
+
+  Type type;
   const Version *version;
-  const Registry::QueryResult regQuery;
+  const Registry::Entry regEntry;
 };
 
 struct HostTicket { bool add; Registry::Entry entry; std::string file; };

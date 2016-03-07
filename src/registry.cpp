@@ -184,19 +184,6 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
 }
 
-auto Registry::query(const Package *pkg) const -> QueryResult
-{
-  const Entry &entry = getEntry(pkg);
-
-  if(!entry.id)
-    return {};
-
-  const Status status =
-    entry.version == pkg->lastVersion()->code() ? UpToDate : UpdateAvailable;
-
-  return {status, entry};
-}
-
 auto Registry::getEntry(const Package *pkg) const -> Entry
 {
   int id = 0;
