@@ -372,8 +372,11 @@ void ReaPack::loadIndex(const Remote &remote,
           AUTO_STR("Write Failed"), MB_OK);
       break;
     case Download::Failure:
-      MessageBox(parent, make_autostring(dl->contents()).c_str(),
-        AUTO_STR("Download Failed"), MB_OK);
+      if(file_exists(Index::pathFor(remote.name()).join().c_str()))
+        load();
+      else
+        MessageBox(parent, make_autostring(dl->contents()).c_str(),
+          AUTO_STR("Download Failed"), MB_OK);
       break;
     default:
       break;
