@@ -86,15 +86,12 @@ void Import::fetch()
   auto_string url(4096, 0);
   GetWindowText(m_url, &url[0], (int)url.size());
 
-  const size_t end = url.find(AUTO_STR('\0'));
+  // remove extra nulls from the string
+  url.resize(url.find(AUTO_STR('\0')));
 
-  if(end == 0) { // url is empty
+  if(url.empty()) {
     close();
     return;
-  }
-  else {
-    // remove extra nulls from the string
-    url.resize(end);
   }
 
   setWaiting(true);
