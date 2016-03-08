@@ -72,7 +72,6 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
 
     try {
       ri = Index::load(remote.name());
-      m_indexes.push_back(ri);
     }
     catch(const reapack_error &e) {
       // index file is invalid (load error)
@@ -88,7 +87,7 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
     m_registry->savepoint();
 
     for(const Package *pkg : ri->packages())
-      upgrade(pkg);
+      install(pkg->lastVersion());
 
     m_registry->restore();
   });
@@ -126,9 +125,9 @@ void Transaction::saveIndex(Download *dl, const string &name)
     it->second();
 }
 
-void Transaction::upgrade(const Package *pkg)
+void Transaction::install(const Version *ver)
 {
-  const Version *ver = pkg->lastVersion();
+  const Package *pkg = ver->package();
   const Registry::Entry &regEntry = m_registry->getEntry(pkg);
 
   InstallTicket::Type type = InstallTicket::Install;
@@ -142,7 +141,7 @@ void Transaction::upgrade(const Package *pkg)
       type = InstallTicket::Upgrade;
   }
 
-  // prevent file conflicts – pushes to the registry will be reverted!
+  // prevent file conflicts (don't worry, the registry push is reverted later)
   try {
     vector<Path> conflicts;
     m_registry->push(ver, &conflicts);
@@ -164,6 +163,10 @@ void Transaction::upgrade(const Package *pkg)
   }
 
   // all green! (pronounce with a japanese accent)
+  IndexPtr ri = pkg->category()->index()->shared_from_this();
+  if(!m_indexes.count(ri))
+    m_indexes.insert(ri);
+
   m_installQueue.push({type, ver, regEntry});
 }
 

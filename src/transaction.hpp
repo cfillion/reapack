@@ -26,6 +26,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include <unordered_set>
 
 class Index;
 class Path;
@@ -56,6 +57,7 @@ public:
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
   void synchronize(const Remote &, bool userAction = true);
+  void install(const Version *);
   void uninstall(const Remote &);
   void registerAll(const Remote &);
   void unregisterAll(const Remote &);
@@ -76,7 +78,6 @@ private:
   void fetchIndex(const Remote &, const IndexCallback &cb);
   void saveIndex(Download *, const std::string &remoteName);
 
-  void upgrade(const Package *pkg);
   void installQueued();
   void installTicket(const InstallTicket &);
   void addTask(Task *);
@@ -95,7 +96,7 @@ private:
   Receipt m_receipt;
 
   std::multimap<std::string, IndexCallback> m_remotes;
-  std::vector<IndexPtr> m_indexes;
+  std::unordered_set<IndexPtr> m_indexes;
   std::vector<Task *> m_tasks;
 
   DownloadQueue m_downloadQueue;

@@ -38,7 +38,7 @@ struct Link { std::string name; std::string url; };
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
-class Index {
+class Index : public std::enable_shared_from_this<const Index> {
 public:
   enum LinkType { WebsiteLink, DonationLink };
   typedef std::multimap<LinkType, Link> LinkMap;
