@@ -11,7 +11,7 @@ using namespace std;
 
 static const char *M = "[index]";
 
-TEST_CASE("file not found", M) {
+TEST_CASE("index file not found", M) {
   UseRootPath root(RIPATH);
 
   try {
@@ -23,7 +23,23 @@ TEST_CASE("file not found", M) {
   }
 }
 
-TEST_CASE("broken", M) {
+TEST_CASE("load index from raw data", M) {
+  SECTION("valid") {
+    Index::load("", "<index version=\"1\"/>\n");
+  }
+
+  SECTION("broken") {
+    try {
+      Index::load("", "<index>\n");
+      FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "Error reading end tag.");
+    }
+  }
+}
+
+TEST_CASE("broken index", M) {
   UseRootPath root(RIPATH);
 
   try {
@@ -55,7 +71,7 @@ TEST_CASE("invalid version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version");
+    REQUIRE(string(e.what()) == "index version not found");
   }
 }
 
@@ -67,7 +83,7 @@ TEST_CASE("future version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "unsupported version");
+    REQUIRE(string(e.what()) == "index version is unsupported");
   }
 }
 
@@ -76,16 +92,6 @@ TEST_CASE("unicode index path", M) {
 
   IndexPtr ri = Index::load("Новая папка");
   REQUIRE(ri->name() == "Новая папка");
-}
-
-TEST_CASE("empty index name", M) {
-  try {
-    Index idx({});
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty index name");
-  }
 }
 
 TEST_CASE("add category", M) {
@@ -228,6 +234,26 @@ TEST_CASE("repository links", M) {
   SECTION("drop invalid links") {
     ri.addLink(Index::WebsiteLink, {"name", "not http(s)"});
     REQUIRE(ri.links(Index::WebsiteLink).empty());
+  }
+}
+
+TEST_CASE("set index name", M) {
+  SECTION("set") {
+    Index ri({});
+    ri.setName("Hello/World!");
+    REQUIRE(ri.name() == "Hello/World!");
+  }
+
+  SECTION("override") {
+    Index ri("hello");
+    try {
+      ri.setName("world");
+      FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "index name is already set");
+    }
+    REQUIRE(ri.name() == "hello");
   }
 }
 

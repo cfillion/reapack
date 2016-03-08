@@ -54,7 +54,5 @@
 #define IDC_PACKAGES   220
 #define IDC_GROUPBOX   221
 #define IDC_URL        222
-#define IDC_FILE       223
-#define IDC_BROWSE     224
 
 #endif

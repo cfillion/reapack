@@ -28,14 +28,8 @@ static void LoadCategoryV1(TiXmlElement *, Index *ri);
 static void LoadPackageV1(TiXmlElement *, Category *cat);
 static void LoadVersionV1(TiXmlElement *, Package *pkg);
 
-IndexPtr Index::loadV1(TiXmlElement *root, const string &name)
+void Index::loadV1(TiXmlElement *root, Index *ri)
 {
-  Index *ri = new Index(name);
-
-  // ensure the memory is released if an exception is
-  // thrown during the loading process
-  unique_ptr<Index> ptr(ri);
-
   TiXmlElement *node = root->FirstChildElement("category");
 
   while(node) {
@@ -48,9 +42,6 @@ IndexPtr Index::loadV1(TiXmlElement *root, const string &name)
 
   if(node)
     LoadMetadataV1(node, ri);
-
-  ptr.release();
-  return IndexPtr(ri);
 }
 
 void LoadMetadataV1(TiXmlElement *meta, Index *ri)
@@ -58,10 +49,15 @@ void LoadMetadataV1(TiXmlElement *meta, Index *ri)
   TiXmlElement *node = meta->FirstChildElement("description");
 
   if(node) {
-    const char *rtf = node->GetText();
-
-    if(rtf)
+    if(const char *rtf = node->GetText())
       ri->setAboutText(rtf);
+  }
+
+  node = meta->FirstChildElement("name");
+
+  if(node && ri->name().empty()) {
+    if(const char *name = node->GetText())
+      ri->setName(name);
   }
 
   node = meta->FirstChildElement("link");
@@ -163,9 +159,7 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
   node = verNode->FirstChildElement("changelog");
 
   if(node) {
-    const char *changelog = node->GetText();
-
-    if(changelog)
+    if(const char *changelog = node->GetText())
       ver->setChangelog(changelog);
   }
 

@@ -43,19 +43,23 @@ auto Index::linkTypeFor(const char *rel) -> LinkType
   return WebsiteLink;
 }
 
-IndexPtr Index::load(const string &name)
+IndexPtr Index::load(const string &name, const char *data)
 {
   TiXmlDocument doc;
 
-  FILE *file = FS::open(pathFor(name));
+  if(data)
+    doc.Parse(data);
+  else {
+    FILE *file = FS::open(pathFor(name));
 
-  if(!file)
-    throw reapack_error(FS::lastError().c_str());
+    if(!file)
+      throw reapack_error(FS::lastError().c_str());
 
-  const bool success = doc.LoadFile(file);
-  fclose(file);
+    doc.LoadFile(file);
+    fclose(file);
+  }
 
-  if(!success)
+  if(doc.ErrorId())
     throw reapack_error(doc.ErrorDesc());
 
   TiXmlHandle docHandle(&doc);
@@ -68,14 +72,24 @@ IndexPtr Index::load(const string &name)
   root->Attribute("version", &version);
 
   if(!version)
-    throw reapack_error("invalid version");
+    throw reapack_error("index version not found");
+
+  Index *ri = new Index(name);
+
+  // ensure the memory is released if an exception is
+  // thrown during the loading process
+  unique_ptr<Index> ptr(ri);
 
   switch(version) {
   case 1:
-    return loadV1(root, name);
+    loadV1(root, ri);
+    break;
   default:
-    throw reapack_error("unsupported version");
+    throw reapack_error("index version is unsupported");
   }
+
+  ptr.release();
+  return IndexPtr(ri);
 }
 
 Download *Index::fetch(const Remote &remote, const bool stale)
@@ -95,14 +109,21 @@ Download *Index::fetch(const Remote &remote, const bool stale)
 Index::Index(const string &name)
   : m_name(name)
 {
-  if(m_name.empty())
-    throw reapack_error("empty index name");
 }
 
 Index::~Index()
 {
   for(const Category *cat : m_categories)
     delete cat;
+}
+
+void Index::setName(const string &newName)
+{
+  if(!m_name.empty())
+    throw reapack_error("index name is already set");
+
+  // validation is taken care of later by Remote's constructor
+  m_name = newName;
 }
 
 void Index::addCategory(const Category *cat)

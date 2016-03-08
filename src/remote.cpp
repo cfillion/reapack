@@ -20,7 +20,6 @@
 #include "encoding.hpp"
 #include "errors.hpp"
 
-#include <fstream>
 #include <regex>
 #include <sstream>
 
@@ -52,47 +51,6 @@ static bool ValidateUrl(const string &url)
   regex_match(url, match, pattern);
 
   return !match.empty();
-}
-
-Remote Remote::fromFile(const string &path, ReadCode *code)
-{
-  ifstream file(make_autostring(path));
-
-  if(!file) {
-    if(code)
-      *code = ReadFailure;
-
-    return {};
-  }
-
-  return fromFile(file, code);
-}
-
-Remote Remote::fromFile(istream &stream, ReadCode *code)
-{
-  string name;
-  getline(stream, name);
-
-  string url;
-  getline(stream, url);
-
-  if(!ValidateName(name)) {
-    if(code)
-      *code = InvalidName;
-
-    return {};
-  }
-  else if(!ValidateUrl(url)) {
-    if(code)
-      *code = InvalidUrl;
-
-    return {};
-  }
-
-  if(code)
-    *code = Success;
-
-  return {name, url};
 }
 
 Remote Remote::fromString(const string &data, ReadCode *code)

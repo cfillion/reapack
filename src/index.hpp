@@ -46,12 +46,13 @@ public:
 
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
-  static IndexPtr load(const std::string &name);
+  static IndexPtr load(const std::string &name, const char *data = 0);
   static Download *fetch(const Remote &, bool stale = false);
 
   Index(const std::string &name);
   ~Index();
 
+  void setName(const std::string &);
   const std::string &name() const { return m_name; }
 
   void setAboutText(const std::string &rtf) { m_about = rtf; }
@@ -66,7 +67,7 @@ public:
   const PackageList &packages() const { return m_packages; }
 
 private:
-  static IndexPtr loadV1(TiXmlElement *, const std::string &);
+  static void loadV1(TiXmlElement *, Index *);
 
   std::string m_name;
   std::string m_about;

@@ -183,62 +183,6 @@ TEST_CASE("get remote by name", M) {
   REQUIRE_FALSE(list.get("hello").isNull());
 }
 
-TEST_CASE("remote from file", M) {
-  Remote remote;
-
-  SECTION("not found") {
-    Remote::ReadCode code;
-    const Remote remote = Remote::fromFile(RPATH "404.ReaPackRemote", &code);
-    REQUIRE(code == Remote::ReadFailure);
-    REQUIRE_FALSE(remote.isValid());
-  }
-
-  SECTION("valid") {
-    Remote::ReadCode code;
-    const Remote remote = Remote::fromFile(RPATH "test.ReaPackRemote", &code);
-    REQUIRE(code == Remote::Success);
-    REQUIRE(remote.isValid());
-    REQUIRE(remote.name() == "name");
-    REQUIRE(remote.url() == "url");
-  }
-
-  SECTION("invalid name") {
-    Remote::ReadCode code;
-    const Remote remote = Remote::fromFile(
-      RPATH "invalid_name.ReaPackRemote", &code);
-
-    REQUIRE(code == Remote::InvalidName);
-    REQUIRE_FALSE(remote.isValid());
-  }
-
-  SECTION("invalid url") {
-    Remote::ReadCode code;
-    const Remote remote = Remote::fromFile(
-      RPATH "invalid_url.ReaPackRemote", &code);
-
-    REQUIRE(code == Remote::InvalidUrl);
-    REQUIRE_FALSE(remote.isValid());
-  }
-
-  SECTION("unicode name") {
-    Remote::ReadCode code;
-    Remote::fromFile(RPATH "Новая папка.ReaPackRemote", &code);
-
-    REQUIRE(code == Remote::Success);
-  }
-
-  SECTION("string stream") {
-    istringstream stream("name\nurl");
-
-    Remote::ReadCode code;
-    const Remote remote = Remote::fromFile(stream, &code);
-    REQUIRE(code == Remote::Success);
-    REQUIRE(remote.isValid());
-    REQUIRE(remote.name() == "name");
-    REQUIRE(remote.url() == "url");
-  }
-};
-
 TEST_CASE("unserialize remote", M) {
   SECTION("invalid name") {
     Remote::ReadCode code;

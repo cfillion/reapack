@@ -40,10 +40,8 @@ protected:
   void onTimer(int) override;
 
 private:
-  void browseFile();
-  void import(bool fileOnly = false);
-  bool import(const Remote &remote, Remote::ReadCode code);
-  void download(const std::string &url);
+  void fetch();
+  bool import();
   void setWaiting(bool);
 
   ReaPack *m_reapack;
@@ -51,7 +49,6 @@ private:
   short m_fakePos;
 
   HWND m_url;
-  HWND m_file;
   HWND m_progress;
   HWND m_ok;
 };

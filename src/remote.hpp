@@ -18,7 +18,6 @@
 #ifndef REAPACK_REMOTE_HPP
 #define REAPACK_REMOTE_HPP
 
-#include <istream>
 #include <map>
 #include <string>
 #include <vector>
@@ -32,8 +31,6 @@ public:
     InvalidUrl,
   };
 
-  static Remote fromFile(const std::string &path, ReadCode *code = nullptr);
-  static Remote fromFile(std::istream &, ReadCode *code = nullptr);
   static Remote fromString(const std::string &data, ReadCode *code = nullptr);
 
   Remote();

@@ -19,12 +19,11 @@
 
 #include "download.hpp"
 #include "encoding.hpp"
+#include "errors.hpp"
+#include "index.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
-
-#include <cerrno>
-#include <sstream>
 
 #include <reaper_plugin_functions.h>
 
@@ -35,7 +34,6 @@
 using namespace std;
 
 const char *Import::TITLE = "ReaPack: Import a repository";
-const char *SUBTITLE = "Select a .ReaPackRemote file";
 
 Import::Import(ReaPack *reapack)
   : Dialog(IDD_IMPORT_DIALOG), m_reapack(reapack), m_download(nullptr)
@@ -45,10 +43,8 @@ Import::Import(ReaPack *reapack)
 void Import::onInit()
 {
   SetWindowTextA(handle(), TITLE);
-  SetWindowTextA(getControl(IDC_GROUPBOX), SUBTITLE);
 
   m_url = getControl(IDC_URL);
-  m_file = getControl(IDC_FILE);
   m_progress = getControl(IDC_PROGRESS);
   m_ok = getControl(IDOK);
 
@@ -62,11 +58,8 @@ void Import::onInit()
 void Import::onCommand(const int id)
 {
   switch(id) {
-  case IDC_BROWSE:
-    browseFile();
-    break;
   case IDOK:
-    import();
+    fetch();
     break;
   case IDCANCEL:
     if(m_download)
@@ -85,77 +78,34 @@ void Import::onTimer(int)
 #endif
 }
 
-void Import::browseFile()
-{
-  string path(4096, 0);
-  if(!GetUserFileNameForRead(&path[0], SUBTITLE, "ReaPackRemote")) {
-    SetFocus(handle());
-    return;
-  }
-
-  SetWindowText(m_file, make_autostring(path).c_str());
-  import(true);
-}
-
-void Import::import(const bool fileOnly)
-{
-  auto_string input(4096, 0);
-
-  if(!fileOnly) {
-    GetWindowText(m_url, &input[0], (int)input.size());
-
-    if(input[0] != 0) {
-      download(from_autostring(input));
-      return;
-    }
-  }
-
-  GetWindowText(m_file, &input[0], (int)input.size());
-
-  if(input[0] == 0) {
-    close();
-    return;
-  }
-
-  Remote::ReadCode code;
-  if(!import(Remote::fromFile(from_autostring(input), &code), code))
-    SetFocus(m_file);
-}
-
-bool Import::import(const Remote &remote, const Remote::ReadCode code)
-{
-  switch(code) {
-  case Remote::ReadFailure:
-    ShowMessageBox(strerror(errno), TITLE, 0);
-    return false;
-  case Remote::InvalidName:
-    ShowMessageBox("Invalid .ReaPackRemote file! (invalid name)", TITLE, 0);
-    return false;
-  case Remote::InvalidUrl:
-    ShowMessageBox("Invalid .ReaPackRemote file! (invalid url)", TITLE, 0);
-    return false;
-  default:
-    break;
-  };
-
-  m_reapack->import(remote);
-  close();
-
-  return true;
-}
-
-void Import::download(const string &url)
+void Import::fetch()
 {
   if(m_download)
    return;
 
+  auto_string url(4096, 0);
+  GetWindowText(m_url, &url[0], (int)url.size());
+
+  const size_t end = url.find(AUTO_STR('\0'));
+
+  if(end == 0) { // url is empty
+    close();
+    return;
+  }
+  else {
+    // remove extra nulls from the string
+    url.resize(end);
+  }
+
   setWaiting(true);
 
-  Download *dl = new Download({}, url);
+  Download *dl = m_download = new Download({}, from_autostring(url));
+
   dl->onFinish([=] {
     const Download::State state = dl->state();
     if(state == Download::Aborted) {
-      // we are deleted here, so there is nothing much we can do without crashing
+      // at this point `this` is deleted, so there is nothing else
+      // we can do without crashing
       return; 
     }
 
@@ -167,10 +117,7 @@ void Import::download(const string &url)
       return;
     }
 
-    istringstream stream(dl->contents());
-
-    Remote::ReadCode code;
-    if(!import(Remote::fromFile(stream, &code), code))
+    if(!import())
       SetFocus(m_url);
   });
 
@@ -183,8 +130,25 @@ void Import::download(const string &url)
   });
 
   dl->start();
+}
 
-  m_download = dl;
+bool Import::import()
+{
+  assert(m_download);
+
+  try {
+    IndexPtr index = Index::load({}, m_download->contents().c_str());
+    m_reapack->import({index->name(), m_download->url()});
+
+    close();
+
+    return true;
+  }
+  catch(const reapack_error &e) {
+    const string msg = "The received file is invalid: " + string(e.what());
+    ShowMessageBox(msg.c_str(), TITLE, MB_OK);
+    return false;
+  }
 }
 
 void Import::setWaiting(const bool wait)

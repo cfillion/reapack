@@ -181,6 +181,10 @@ TEST_CASE("read index metadata", M) {
   UseRootPath root(RIPATH);
 
   IndexPtr ri = Index::load("metadata");
+  
+  SECTION("name (ignored)") {
+    REQUIRE(ri->name() == "metadata");
+  }
 
   SECTION("description") {
     REQUIRE(ri->aboutText() == "Chunky\nBacon");
@@ -204,5 +208,31 @@ TEST_CASE("read index metadata", M) {
     REQUIRE(links.size() == 1);
     REQUIRE(links[0]->name == "Donate");
     REQUIRE(links[0]->url == "http://paypal.com");
+  }
+}
+
+TEST_CASE("read index name (from raw data only)") {
+  SECTION("valid") {
+    IndexPtr ri = Index::load({}, R"XML(
+  <index version="1">
+    <metadata>
+      <name>Hello World</name>
+    </metadata>
+  </index>
+    )XML");
+
+    REQUIRE(ri->name() == "Hello World");
+  }
+
+  SECTION("broken") {
+    IndexPtr ri = Index::load({}, R"XML(
+  <index version="1">
+    <metadata>
+      <name/>
+    </metadata>
+  </index>
+    )XML");
+
+    REQUIRE(ri->name() == "");
   }
 }
