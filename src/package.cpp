@@ -30,6 +30,8 @@ Package::Type Package::typeFor(const char *type)
     return ScriptType;
   else if(!strcmp(type, "extension"))
     return ExtensionType;
+  else if(!strcmp(type, "effect"))
+    return EffectType;
   else
     return UnknownType;
 }
@@ -96,11 +98,16 @@ Path Package::makeTargetPath(const string &file) const
     // only allow directory traversal up to the index name
     path += Path(m_category->name()) + file;
     break;
+  case EffectType:
+    path.append("Effects");
+    path.append(m_category->index()->name());
+    path += Path(m_category->name()) + file;
+    break;
   case ExtensionType:
     path.append("UserPlugins");
     path.append(file, false);
     break;
-  default:
+  case UnknownType:
     // The package has an unsupported type, so we return an empty path.
     // The empty path won't be used because the category will reject
     // this package right away. Maybe the parser should not bother with loading

@@ -13,13 +13,17 @@ using namespace std;
 static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
-  SECTION("unknown") {
+  SECTION("unknown")
     REQUIRE(Package::typeFor("yoyo") == Package::UnknownType);
-  }
 
-  SECTION("script") {
+  SECTION("script")
     REQUIRE(Package::typeFor("script") == Package::ScriptType);
-  }
+
+  SECTION("extension")
+    REQUIRE(Package::typeFor("extension") == Package::ExtensionType);
+
+  SECTION("effect")
+    REQUIRE(Package::typeFor("effect") == Package::EffectType);
 }
 
 TEST_CASE("empty package name", M) {
@@ -100,11 +104,14 @@ TEST_CASE("script target path", M) {
   expected.append("Scripts");
   expected.append("Remote Name");
   expected.append("Category Name");
-
   REQUIRE(pack.makeTargetPath() == expected);
+
+  expected.removeLast();
+  expected.append("hello_world.lua");
+  REQUIRE(pack.makeTargetPath("../../../hello_world.lua") == expected);
 }
 
-TEST_CASE("script target path: directory traversal", M) {
+TEST_CASE("limited directory traversal from category", M) {
   Index ri("Remote Name");
   Category cat("../..", &ri);
 
@@ -117,7 +124,7 @@ TEST_CASE("script target path: directory traversal", M) {
   REQUIRE(pack.makeTargetPath() == expected);
 }
 
-TEST_CASE("script target path without category", M) {
+TEST_CASE("target path without category", M) {
   Package pack(Package::ScriptType, "file.name");
 
   try {
@@ -143,6 +150,23 @@ TEST_CASE("extension target path", M) {
   REQUIRE(pack.makeTargetPath("../reaper_reapack.dll") == expected);
 }
 
+TEST_CASE("effect target path", M) {
+  Index ri("Remote Name");
+  Category cat("Category Name", &ri);
+
+  Package pack(Package::EffectType, "file.name", &cat);
+
+  Path expected;
+  expected.append("Effects");
+  expected.append("Remote Name");
+  expected.append("Category Name");
+
+  REQUIRE(pack.makeTargetPath() == expected);
+
+  expected.removeLast();
+  expected.append("hello_world.jsfx");
+  REQUIRE(pack.makeTargetPath("../../../hello_world.jsfx") == expected);
+}
 
 TEST_CASE("full name", M) {
   SECTION("no category") {
