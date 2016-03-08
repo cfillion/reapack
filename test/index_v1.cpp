@@ -213,26 +213,12 @@ TEST_CASE("read index metadata", M) {
 
 TEST_CASE("read index name (from raw data only)") {
   SECTION("valid") {
-    IndexPtr ri = Index::load({}, R"XML(
-  <index version="1">
-    <metadata>
-      <name>Hello World</name>
-    </metadata>
-  </index>
-    )XML");
-
+    IndexPtr ri = Index::load({}, "<index version=\"1\" name=\"Hello World\"/>\n");
     REQUIRE(ri->name() == "Hello World");
   }
 
-  SECTION("broken") {
-    IndexPtr ri = Index::load({}, R"XML(
-  <index version="1">
-    <metadata>
-      <name/>
-    </metadata>
-  </index>
-    )XML");
-
+  SECTION("missing") {
+    IndexPtr ri = Index::load({}, "<index version=\"1\"/>\n");
     REQUIRE(ri->name() == "");
   }
 }

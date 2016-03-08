@@ -30,6 +30,11 @@ static void LoadVersionV1(TiXmlElement *, Package *pkg);
 
 void Index::loadV1(TiXmlElement *root, Index *ri)
 {
+  if(ri->name().empty()) {
+    if(const char *name = root->Attribute("name"))
+      ri->setName(name);
+  }
+
   TiXmlElement *node = root->FirstChildElement("category");
 
   while(node) {
@@ -51,13 +56,6 @@ void LoadMetadataV1(TiXmlElement *meta, Index *ri)
   if(node) {
     if(const char *rtf = node->GetText())
       ri->setAboutText(rtf);
-  }
-
-  node = meta->FirstChildElement("name");
-
-  if(node && ri->name().empty()) {
-    if(const char *name = node->GetText())
-      ri->setName(name);
   }
 
   node = meta->FirstChildElement("link");

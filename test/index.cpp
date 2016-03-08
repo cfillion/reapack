@@ -237,6 +237,12 @@ TEST_CASE("repository links", M) {
   }
 }
 
+TEST_CASE("link type from string", M) {
+  REQUIRE(Index::linkTypeFor("website") == Index::WebsiteLink);
+  REQUIRE(Index::linkTypeFor("donation") == Index::DonationLink);
+  REQUIRE(Index::linkTypeFor("bacon") == Index::WebsiteLink);
+}
+
 TEST_CASE("set index name", M) {
   SECTION("set") {
     Index ri({});
@@ -255,10 +261,4 @@ TEST_CASE("set index name", M) {
     }
     REQUIRE(ri.name() == "hello");
   }
-}
-
-TEST_CASE("link type from string", M) {
-  REQUIRE(Index::linkTypeFor("website") == Index::WebsiteLink);
-  REQUIRE(Index::linkTypeFor("donation") == Index::DonationLink);
-  REQUIRE(Index::linkTypeFor("bacon") == Index::WebsiteLink);
 }
