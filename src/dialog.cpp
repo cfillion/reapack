@@ -177,6 +177,14 @@ void Dialog::center()
   int top = (parentHeight - dialogHeight) / 2;
   top = min(top + (int)parentRect.top, screenHeight - dialogHeight);
 
+  const int verticalBias = (int)(parentHeight * 0.1);
+
+#ifdef _WIN32
+  top -= verticalBias;
+#else
+  top += verticalBias; // according to SWELL, top means bottom.
+#endif
+
   SetWindowPos(m_handle, HWND_TOP, max(0, left), max(0, top), 0, 0, SWP_NOSIZE);
 }
 
