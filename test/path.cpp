@@ -172,8 +172,6 @@ TEST_CASE("path generation utilities", M) {
   const Path path("world");
 
   REQUIRE(Path::prefixRoot(path) == Path("world"));
-  REQUIRE(Path::cacheDir() == Path("ReaPack"));
-  REQUIRE(Path::prefixCache("test") == Path("ReaPack/test"));
 
   {
     UseRootPath root("hello");
@@ -181,9 +179,6 @@ TEST_CASE("path generation utilities", M) {
 
     REQUIRE(Path::prefixRoot(path) == Path("hello/world"));
     REQUIRE(Path::prefixRoot("world") == Path("hello/world"));
-
-    REQUIRE(Path::cacheDir() == Path("hello/ReaPack"));
-    REQUIRE(Path::prefixCache("test") == Path("hello/ReaPack/test"));
   }
 
   REQUIRE(Path::prefixRoot(path) == Path("world"));

@@ -32,9 +32,9 @@ static const char SEPARATOR = '\\';
 static const string DOT = ".";
 static const string DOTDOT = "..";
 
-const char *Path::CACHE_DIRNAME = "ReaPack";
-const char *Path::CONFIG_FILE = "reapack.ini";
-const char *Path::REGISTRY_FILE = "registry.db";
+Path Path::CACHE = Path("ReaPack");
+Path Path::CONFIG = Path("reapack.ini");
+Path Path::REGISTRY = Path::CACHE + "registry.db";
 
 Path Path::s_root;
 

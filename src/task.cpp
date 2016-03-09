@@ -92,7 +92,7 @@ void InstallTask::saveSource(Download *dl, const Source *src)
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
 
-  if(!transaction()->saveFile(dl, Path::prefixRoot(tmpPath))) {
+  if(!transaction()->saveFile(dl, tmpPath)) {
     rollback();
     return;
   }

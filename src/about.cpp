@@ -207,7 +207,7 @@ void About::updateInstalledFiles()
   set<Path> allFiles;
 
   try {
-    Registry reg(Path::prefixCache("registry.db"));
+    Registry reg(Path::prefixRoot(Path::REGISTRY));
     for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
       const set<Path> &files = reg.getFiles(entry);
       allFiles.insert(files.begin(), files.end());

@@ -41,8 +41,8 @@ const string ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 // Surely there must be a better way...
 static void CleanupTempFiles()
 {
-  const auto_string &pattern =
-    make_autostring(Path::prefixCache("*.tmp").join());
+  const Path &path = Path::prefixRoot(Path::CACHE + "*.tmp");
+  const auto_string &pattern = make_autostring(path.join());
 
   WIN32_FIND_DATA fd = {};
   HANDLE handle = FindFirstFile(pattern.c_str(), &fd);
@@ -70,10 +70,10 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
 
   Download::Init();
 
-  RecursiveCreateDirectory(Path::cacheDir().join().c_str(), 0);
+  FS::mkdir(Path::CACHE);
 
   m_config = new Config;
-  m_config->read(Path::prefixRoot(Path::CONFIG_FILE));
+  m_config->read(Path::prefixRoot(Path::CONFIG));
 
   if(m_config->isFirstRun())
     manageRemotes();
@@ -372,7 +372,7 @@ void ReaPack::loadIndex(const Remote &remote,
           AUTO_STR("Write Failed"), MB_OK);
       break;
     case Download::Failure:
-      if(file_exists(Index::pathFor(remote.name()).join().c_str()))
+      if(FS::exists(Index::pathFor(remote.name())))
         load();
       else
         MessageBox(parent, make_autostring(dl->contents()).c_str(),
@@ -454,7 +454,7 @@ void ReaPack::registerSelf()
     REAPACK_FILE, "dummy url", &ver));
 
   try {
-    Registry reg(Path::prefixCache(Path::REGISTRY_FILE));
+    Registry reg(Path::prefixRoot(Path::REGISTRY));
     reg.push(&ver);
     reg.commit();
   }

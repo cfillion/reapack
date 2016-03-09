@@ -29,6 +29,8 @@ namespace FS {
   bool remove(const Path &);
   bool removeRecursive(const Path &);
   bool mtime(const Path &, time_t *);
+  bool exists(const Path &);
+  void mkdir(const Path &);
 
   std::string lastError();
 };

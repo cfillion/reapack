@@ -25,6 +25,8 @@
 #include <fstream>
 #include <sys/stat.h>
 
+#include <reaper_plugin_functions.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -33,18 +35,23 @@ using namespace std;
 
 FILE *FS::open(const Path &path)
 {
+  const Path &fullPath = Path::prefixRoot(path);
+
 #ifdef _WIN32
   FILE *file = nullptr;
-  _wfopen_s(&file, make_autostring(path.join()).c_str(), L"rb");
+  _wfopen_s(&file, make_autostring(fullPath.join()).c_str(), L"rb");
   return file;
 #else
-  return fopen(path.join().c_str(), "rb");
+  return fopen(fullPath.join().c_str(), "rb");
 #endif
 }
 
 bool FS::write(const Path &path, const string &contents)
 {
-  ofstream file(make_autostring(path.join()), ios_base::binary);
+  mkdir(path.dirname());
+
+  const Path &fullPath = Path::prefixRoot(path);
+  ofstream file(make_autostring(fullPath.join()), ios_base::binary);
 
   if(!file)
     return false;
@@ -87,8 +94,7 @@ bool FS::remove(const Path &path)
   // Then let's move it somewhere else. And delete it on next startup.
   // Windows is so great!
 
-  Path workaroundPath;
-  workaroundPath.prepend(Path::CACHE_DIRNAME);
+  Path workaroundPath = Path::CACHE;
   workaroundPath.append("old_" + path.last() + ".tmp");
 
   return rename(path, workaroundPath);
@@ -117,21 +123,35 @@ bool FS::removeRecursive(const Path &file)
 
 bool FS::mtime(const Path &path, time_t *time)
 {
+  const Path &fullPath = Path::prefixRoot(path);
+
 #ifdef _WIN32
   struct _stat st;
 
-  if(_wstat(make_autostring(path.join()).c_str(), &st))
+  if(_wstat(make_autostring(fullPath.join()).c_str(), &st))
     return false;
 #else
   struct stat st;
 
-  if(stat(path.join().c_str(), &st))
+  if(stat(fullPath.join().c_str(), &st))
     return false;
 #endif
 
   *time = st.st_mtime;
 
   return true;
+}
+
+bool FS::exists(const Path &path)
+{
+  const Path &fullPath = Path::prefixRoot(path);
+  return file_exists(fullPath.join().c_str());
+}
+
+void FS::mkdir(const Path &path)
+{
+  const Path &fullPath = Path::prefixRoot(path);
+  RecursiveCreateDirectory(fullPath.join().c_str(), 0);
 }
 
 string FS::lastError()

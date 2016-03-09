@@ -33,7 +33,7 @@ using namespace std;
 Transaction::Transaction()
   : m_isCancelled(false)
 {
-  m_registry = new Registry(Path::prefixCache(Path::REGISTRY_FILE));
+  m_registry = new Registry(Path::prefixRoot(Path::REGISTRY));
 
   m_downloadQueue.onAbort([=] {
     m_isCancelled = true;
@@ -223,7 +223,13 @@ void Transaction::unregisterAll(const Remote &remote)
 void Transaction::uninstall(const Remote &remote)
 {
   inhibit(remote);
-  FS::remove(Index::pathFor(remote.name()));
+
+  const Path &indexPath = Index::pathFor(remote.name());
+
+  if(FS::exists(indexPath)) {
+    if(!FS::remove(indexPath))
+      addError(FS::lastError(), indexPath.join());
+  }
 
   const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
@@ -235,7 +241,7 @@ void Transaction::uninstall(const Remote &remote)
   for(const auto &entry : entries) {
     const set<Path> &files = m_registry->getFiles(entry);
     for(const Path &path : files) {
-      if(file_exists(Path::prefixRoot(path).join().c_str()))
+      if(FS::exists(path))
         allFiles.push_back(path);
     }
 
@@ -257,8 +263,6 @@ bool Transaction::saveFile(Download *dl, const Path &path)
     addError(dl->contents(), dl->url());
     return false;
   }
-
-  RecursiveCreateDirectory(path.dirname().c_str(), 0);
 
   if(!FS::write(path, dl->contents())) {
     addError(FS::lastError(), path.join());
@@ -294,7 +298,7 @@ void Transaction::addError(const string &message, const string &title)
 bool Transaction::allFilesExists(const set<Path> &list) const
 {
   for(const Path &path : list) {
-    if(!file_exists(Path::prefixRoot(path).join().c_str()))
+    if(!FS::exists(path))
       return false;
   }
 
@@ -365,10 +369,10 @@ void Transaction::registerScript(const HostTicket &reg)
   else
     section = MainSection;
 
-  const std::string &path = Path::prefixRoot(reg.file).join();
+  const std::string &fullPath = Path::prefixRoot(reg.file).join();
   const bool isLast = m_regQueue.size() == 1;
 
-  if(!AddRemoveReaScript(reg.add, section, path.c_str(), isLast) && reg.add)
+  if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add)
     addError("Script could not be registered in REAPER.", reg.file);
 }
 

@@ -32,7 +32,7 @@ using namespace std;
 
 Path Index::pathFor(const string &name)
 {
-  return Path::prefixCache(name + ".xml");
+  return Path::CACHE + (name + ".xml");
 }
 
 auto Index::linkTypeFor(const char *rel) -> LinkType
