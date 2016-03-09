@@ -258,24 +258,13 @@ void ReaPack::import(const Remote &remote)
     }
   }
 
-  if(!hitchhikeTransaction()) {
-    remotes->add(remote);
-    m_config->write();
-    return;
-  }
+  remotes->add(remote);
+  m_config->write();
 
-  m_transaction->synchronize(remote);
+  if(m_manager)
+    m_manager->refresh();
 
-  m_transaction->onFinish([=] {
-    if(m_transaction->isCancelled())
-      return;
-
-    remotes->add(remote);
-    m_config->write();
-
-    if(m_manager)
-      m_manager->refresh();
-  });
+  about(remote, m_manager ? m_manager->handle() : m_mainWindow);
 }
 
 void ReaPack::manageRemotes()
