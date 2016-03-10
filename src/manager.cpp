@@ -45,6 +45,9 @@ void Manager::onInit()
   const int URL_WIDTH = 300;
 #endif
 
+  m_apply = getControl(IDAPPLY);
+  disable(m_apply);
+
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Name"), 110},
     {AUTO_STR("URL"), URL_WIDTH},
@@ -70,15 +73,22 @@ void Manager::onCommand(const int id)
     uninstall();
     break;
   case IDOK:
-    if(confirm())
-      apply(); // continue to next case (IDCANCEL)
+  case IDAPPLY:
+    if(confirm()) {
+      apply();
+      reset();
+
+      if(id == IDAPPLY)
+        break;
+
+      // IDOK -> continue to next case (IDCANCEL)
+    }
     else {
       m_uninstall.clear();
       refresh();
       break;
     }
   case IDCANCEL:
-    reset();
     close();
     break;
   default:
@@ -171,6 +181,8 @@ void Manager::setRemoteEnabled(const bool enabled)
 
     m_list->replaceRow(index, makeRow(remote));
   }
+
+  enable(m_apply);
 }
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
@@ -197,6 +209,7 @@ void Manager::uninstall()
     }
 
     m_uninstall.insert(remote);
+    enable(m_apply);
 
     const auto it = m_enableOverrides.find(remote);
 
@@ -254,6 +267,8 @@ void Manager::reset()
 {
   m_enableOverrides.clear();
   m_uninstall.clear();
+
+  disable(m_apply);
 }
 
 ListView::Row Manager::makeRow(const Remote &remote) const

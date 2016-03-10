@@ -52,6 +52,7 @@ private:
   void apply();
   void reset();
 
+  HWND m_apply;
   ReaPack *m_reapack;
   ListView *m_list;
 
