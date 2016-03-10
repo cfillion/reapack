@@ -257,7 +257,9 @@ void ReaPack::import(const Remote &remote)
   if(m_manager)
     m_manager->refresh();
 
-  about(remote, m_manager ? m_manager->handle() : m_mainWindow);
+  const string msg = remote.name() +
+    " has been successfully imported into your repository list.";
+  ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
 }
 
 void ReaPack::manageRemotes()
