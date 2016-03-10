@@ -60,7 +60,6 @@ public:
   void install(const Version *);
   void uninstall(const Remote &);
   void registerAll(const Remote &);
-  void unregisterAll(const Remote &);
   void runTasks();
 
   bool isCancelled() const { return m_isCancelled; }
@@ -96,6 +95,7 @@ private:
   Receipt m_receipt;
 
   std::multimap<std::string, IndexCallback> m_remotes;
+  std::unordered_set<std::string> m_inhibited;
   std::unordered_set<IndexPtr> m_indexes;
   std::vector<Task *> m_tasks;
 

@@ -207,17 +207,10 @@ void Transaction::registerAll(const Remote &remote)
   const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
 
   for(const auto &entry : entries)
-    registerInHost(true, entry);
-}
+    registerInHost(remote.isEnabled(), entry);
 
-void Transaction::unregisterAll(const Remote &remote)
-{
-  const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
-
-  for(const auto &entry : entries)
-    registerInHost(false, entry);
-
-  inhibit(remote);
+  if(!remote.isEnabled())
+    inhibit(remote);
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -336,7 +329,7 @@ void Transaction::registerQueued()
     const HostTicket &reg = m_regQueue.front();
 
     // don't register in host if the remote got disabled meanwhile
-    if(reg.add && m_remotes.count(reg.entry.remote) == 0) {
+    if(reg.add && m_inhibited.count(reg.entry.remote) > 0) {
       m_regQueue.pop();
       return;
     }
@@ -385,4 +378,6 @@ void Transaction::inhibit(const Remote &remote)
   const auto it = m_remotes.find(remote.name());
   if(it != m_remotes.end())
     m_remotes.erase(it);
+
+  m_inhibited.insert(remote.name());
 }

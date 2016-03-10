@@ -55,8 +55,9 @@ public:
   bool execActions(int id, int);
 
   void synchronizeAll();
-  void enable(Remote);
-  void disable(Remote);
+  void setRemoteEnabled(const Remote &, bool enable);
+  void enable(const Remote &r) { setRemoteEnabled(r, true); }
+  void disable(const Remote &r) { setRemoteEnabled(r, false); }
   void uninstall(const Remote &);
   void importRemote();
   void import(const Remote &);

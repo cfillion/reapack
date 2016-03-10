@@ -151,42 +151,29 @@ void ReaPack::synchronizeAll()
   t->runTasks();
 }
 
-void ReaPack::enable(Remote remote)
+void ReaPack::setRemoteEnabled(const Remote &original, const bool enable)
 {
-  remote.setEnabled(true);
+  Remote remote(original);
+  remote.setEnabled(enable);
 
-  if(!hitchhikeTransaction()) {
+  const auto apply = [=] {
     m_config->remotes()->add(remote);
 
     if(m_manager)
       m_manager->refresh();
+  };
 
+  if(!hitchhikeTransaction()) {
+    apply();
     return;
   }
 
   m_transaction->registerAll(remote);
-  m_transaction->synchronize(remote, false);
 
   m_transaction->onFinish([=] {
-    if(m_transaction->isCancelled())
-      return;
-
-    m_config->remotes()->add(remote);
-
-    if(m_manager)
-      m_manager->refresh();
+    if(!m_transaction->isCancelled())
+      apply();
   });
-}
-
-void ReaPack::disable(Remote remote)
-{
-  remote.setEnabled(false);
-  m_config->remotes()->add(remote);
-
-  if(!hitchhikeTransaction())
-    return;
-
-  m_transaction->unregisterAll(remote);
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -194,11 +181,21 @@ void ReaPack::uninstall(const Remote &remote)
   if(remote.isProtected())
     return;
 
-  if(!hitchhikeTransaction())
+  const auto apply = [=] {
+    m_config->remotes()->remove(remote);
+  };
+
+  if(!hitchhikeTransaction()) {
+    apply();
     return;
+  }
 
   m_transaction->uninstall(remote);
-  m_config->remotes()->remove(remote);
+
+  m_transaction->onFinish([=] {
+    if(!m_transaction->isCancelled())
+      apply();
+  });
 }
 
 void ReaPack::importRemote()
@@ -248,10 +245,6 @@ void ReaPack::import(const Remote &remote)
     }
     else {
       enable(existing);
-
-      if(m_manager)
-        m_manager->refresh();
-
       m_config->write();
 
       return;
@@ -297,8 +290,11 @@ void ReaPack::about(const Remote &remote, HWND parent)
   loadIndex(remote, [=] (IndexPtr index) {
     const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
-    if(ret == About::InstallResult)
+    if(ret == About::InstallResult) {
       enable(remote);
+      if(m_transaction)
+        m_transaction->synchronize(remote);
+    }
   }, parent);
 }
 
