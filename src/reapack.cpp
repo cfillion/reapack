@@ -289,7 +289,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
   if(remote.isNull())
     return;
 
-  loadIndex(remote, [=] (IndexPtr index) {
+  fetchIndex(remote, [=] (IndexPtr index) {
     const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
     if(ret == About::InstallResult) {
@@ -300,75 +300,130 @@ void ReaPack::about(const Remote &remote, HWND parent)
   }, parent);
 }
 
-void ReaPack::loadIndex(const Remote &remote,
+void ReaPack::cleanupPackages()
+{
+  const vector<Remote> &remotes = m_config->remotes()->getEnabled();
+
+  fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+    printf("%zu indexes loaded\n", indexes.size());
+  });
+}
+
+void ReaPack::fetchIndex(const Remote &remote,
   const IndexCallback &callback, HWND parent)
+{
+  fetchIndexes({remote}, [=] (const vector<IndexPtr> &indexes) {
+    callback(indexes.front());
+  }, parent);
+}
+
+void ReaPack::fetchIndexes(const vector<Remote> &remotes,
+  const IndexesCallback &callback, HWND parent)
 {
   if(!parent)
     parent = m_mainWindow;
 
-  const auto load = [=] {
-    try {
-      // callback is responsible of deleting the index after use
-      callback(Index::load(remote.name()));
-    }
-    catch(const reapack_error &e) {
-      const auto_string &desc = make_autostring(e.what());
-
-      auto_char msg[512] = {};
-      auto_snprintf(msg, sizeof(msg),
-        AUTO_STR("ReaPack could not read %s's index.\n\n")
-
-        AUTO_STR("Synchronize your packages and try again.\n")
-        AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
-
-        AUTO_STR("[Error description: %s]"),
-        make_autostring(remote.name()).c_str(), desc.c_str()
-      );
-
-      MessageBox(parent, msg, AUTO_STR("ReaPack"), MB_OK);
-    }
-  };
-
-  Download *dl = Index::fetch(remote);
-
-  if(!dl) {
-    load();
-    return;
-  }
-
   DownloadQueue *queue = new DownloadQueue;
   Dialog *progress = Dialog::Create<Progress>(m_instance, m_mainWindow, queue);
+
+  auto load = [=] {
+    Dialog::Destroy(progress);
+    delete queue;
+
+    vector<IndexPtr> indexes;
+
+    for(const Remote &remote : remotes) {
+      if(!FS::exists(Index::pathFor(remote.name())))
+        continue;
+
+      IndexPtr index = loadIndex(remote, parent);
+
+      if(index)
+        indexes.push_back(index);
+    }
+
+    callback(indexes);
+  };
+
+  queue->onDone(load);
 
   // I don't know why, but at least on OSX giving the manager window handle
   // (in `parent`) to the progress dialog prevents it from being shown at all
   // while still taking the focus away from the manager dialog.
 
-  queue->push(dl);
-  queue->onDone([=] { delete queue; });
+  for(const Remote &remote : remotes)
+    fetchIndex(remote, queue, parent);
+
+  if(queue->idle()) {
+    load();
+  }
+}
+
+void ReaPack::fetchIndex(const Remote &remote, DownloadQueue *queue, HWND parent)
+{
+  Download *dl = Index::fetch(remote);
+
+  if(!dl)
+    return;
+
+  const auto warn = [=] (const string &desc, const auto_char *title) {
+    auto_char msg[512] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("ReaPack could not download %s's index.\n\n")
+
+      AUTO_STR("Try again later. ")
+      AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+
+      AUTO_STR("[Error description: %s]"),
+      make_autostring(remote.name()).c_str(), make_autostring(desc).c_str()
+    );
+
+    MessageBox(parent, msg, title, MB_OK);
+  };
 
   dl->onFinish([=] {
-    Dialog::Destroy(progress);
-    SetFocus(parent);
+    const Path &path = Index::pathFor(remote.name());
 
     switch(dl->state()) {
     case Download::Success:
-      if(FS::write(Index::pathFor(remote.name()), dl->contents()))
-        load();
-      else
-        MessageBox(parent, make_autostring(FS::lastError()).c_str(),
-          AUTO_STR("Write Failed"), MB_OK);
+      if(!FS::write(path, dl->contents()))
+        warn(FS::lastError(), AUTO_STR("Write Failed"));
       break;
     case Download::Failure:
-      if(FS::exists(Index::pathFor(remote.name())))
-        load();
-      else
-        MessageBox(parent, make_autostring(dl->contents()).c_str(),
-          AUTO_STR("Download Failed"), MB_OK);
+      if(!FS::exists(path))
+        warn(dl->contents(), AUTO_STR("Download Failed"));
       break;
     default:
       break;
     }
   });
+
+  queue->push(dl);
+}
+
+IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
+{
+  try {
+    return Index::load(remote.name());
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("ReaPack could not read %s's index.\n\n")
+
+      AUTO_STR("Synchronize your packages and try again later.\n")
+      AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+
+      AUTO_STR("[Error description: %s]"),
+      make_autostring(remote.name()).c_str(), desc.c_str()
+    );
+
+    MessageBox(parent, msg, AUTO_STR("ReaPack"), MB_OK);
+  }
+
+  return nullptr;
 }
 
 Transaction *ReaPack::createTransaction()

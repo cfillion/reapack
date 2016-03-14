@@ -23,10 +23,12 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include <reaper_plugin.h>
 
 class Config;
+class DownloadQueue;
 class Import;
 class Index;
 class Manager;
@@ -34,10 +36,13 @@ class Progress;
 class Remote;
 class Transaction;
 
+typedef std::shared_ptr<const Index> IndexPtr;
+
 class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
-  typedef std::function<void (std::shared_ptr<const Index>)> IndexCallback;
+  typedef std::function<void (IndexPtr)> IndexCallback;
+  typedef std::function<void (const std::vector<IndexPtr> &)> IndexesCallback;
 
   static const std::string VERSION;
   static const std::string BUILDTIME;
@@ -64,7 +69,8 @@ public:
   void manageRemotes();
   void aboutSelf();
   void about(const Remote &, HWND parent);
-  void loadIndex(const Remote &, const IndexCallback &, HWND = nullptr);
+  void fetchIndexes(const std::vector<Remote> &,
+    const IndexesCallback &, HWND = nullptr);
 
   void runTasks();
 
@@ -74,6 +80,9 @@ private:
   Transaction *createTransaction();
   bool hitchhikeTransaction();
   void registerSelf();
+  void fetchIndex(const Remote &remote, const IndexCallback &, HWND);
+  void fetchIndex(const Remote &remote, DownloadQueue *, HWND);
+  IndexPtr loadIndex(const Remote &remote, HWND);
 
   std::map<int, ActionCallback> m_actions;
 
