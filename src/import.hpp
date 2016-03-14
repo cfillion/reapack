@@ -20,8 +20,6 @@
 
 #include "dialog.hpp"
 
-#include "remote.hpp"
-
 #include <string>
 
 class Download;
