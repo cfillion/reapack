@@ -19,6 +19,7 @@
 #define REAPACK_REAPACK_HPP
 
 #include "path.hpp"
+#include "registry.hpp"
 
 #include <functional>
 #include <map>
@@ -27,6 +28,7 @@
 
 #include <reaper_plugin.h>
 
+class Cleanup;
 class Config;
 class DownloadQueue;
 class Import;
@@ -49,6 +51,7 @@ public:
 
   gaccel_register_t syncAction;
   gaccel_register_t importAction;
+  gaccel_register_t cleanupAction;
   gaccel_register_t configAction;
 
   ReaPack(REAPER_PLUGIN_HINSTANCE);
@@ -64,11 +67,13 @@ public:
   void enable(const Remote &r) { setRemoteEnabled(r, true); }
   void disable(const Remote &r) { setRemoteEnabled(r, false); }
   void uninstall(const Remote &);
+  void uninstall(const Registry::Entry &);
   void importRemote();
   void import(const Remote &);
   void manageRemotes();
   void aboutSelf();
   void about(const Remote &, HWND parent);
+  void cleanupPackages();
   void fetchIndexes(const std::vector<Remote> &,
     const IndexesCallback &, HWND = nullptr);
 
@@ -91,6 +96,7 @@ private:
   Progress *m_progress;
   Manager *m_manager;
   Import *m_import;
+  Cleanup *m_cleanup;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;

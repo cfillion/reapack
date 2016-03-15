@@ -183,6 +183,12 @@ void ListView::clear()
   m_rows.clear();
 }
 
+void ListView::setSelected(const int index, const bool select)
+{
+  ListView_SetItemState(handle(), translate(index),
+    select ? LVIS_SELECTED : 0, LVIS_SELECTED);
+}
+
 bool ListView::hasSelection() const
 {
   return selectionSize() > 0;

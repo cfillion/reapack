@@ -18,6 +18,7 @@
 #include "reapack.hpp"
 
 #include "about.hpp"
+#include "cleanup.hpp"
 #include "config.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
@@ -61,9 +62,9 @@ static void CleanupTempFiles()
 #endif
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : syncAction(), importAction(), configAction(),
+  : syncAction(), importAction(), cleanupAction(), configAction(),
     m_transaction(nullptr), m_progress(nullptr), m_manager(nullptr),
-    m_import(nullptr), m_instance(instance)
+    m_import(nullptr), m_cleanup(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -198,6 +199,12 @@ void ReaPack::uninstall(const Remote &remote)
   });
 }
 
+void ReaPack::uninstall(const Registry::Entry &entry)
+{
+  if(hitchhikeTransaction())
+    m_transaction->uninstall(entry);
+}
+
 void ReaPack::importRemote()
 {
   if(m_import) {
@@ -302,10 +309,27 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
 void ReaPack::cleanupPackages()
 {
+  if(m_cleanup) {
+    m_cleanup->setFocus();
+    return;
+  }
+  else if(m_transaction) {
+    ShowMessageBox(
+      "This feature cannot be used while packages are being installed. "
+      "Try again later.", "Clean up packages", MB_OK
+    );
+    return;
+  }
+
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
   fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
-    printf("%zu indexes loaded\n", indexes.size());
+    m_cleanup = Dialog::Create<Cleanup>(m_instance, m_mainWindow, indexes, this);
+    m_cleanup->show();
+    m_cleanup->setCloseHandler([=] (INT_PTR) {
+      Dialog::Destroy(m_cleanup);
+      m_cleanup = nullptr;
+    });
   });
 }
 

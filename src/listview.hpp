@@ -45,6 +45,11 @@ public:
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder);
   void clear();
+  void setSelected(int index, bool select);
+  void select(int index) { setSelected(index, true); }
+  void unselect(int index) { setSelected(index, false); }
+  void selectAll() { select(-1); }
+  void unselectAll() { unselect(-1); }
 
   int selectionSize() const;
   bool hasSelection() const;
@@ -52,6 +57,7 @@ public:
   std::vector<int> selection() const;
   int itemUnderMouse() const;
   int rowCount() const { return (int)m_rows.size(); }
+  bool empty() const { return rowCount() < 1; }
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
   void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }

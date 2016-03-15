@@ -229,22 +229,26 @@ void Transaction::uninstall(const Remote &remote)
   if(entries.empty())
     return;
 
-  vector<Path> allFiles;
+  for(const auto &entry : entries)
+    uninstall(entry);
 
-  for(const auto &entry : entries) {
-    const set<Path> &files = m_registry->getFiles(entry);
-    for(const Path &path : files) {
-      if(FS::exists(path))
-        allFiles.push_back(path);
-    }
+}
 
-    registerInHost(false, entry);
+void Transaction::uninstall(const Registry::Entry &entry)
+{
+  vector<Path> files;
 
-    // forget the package even if some files cannot be removed
-    m_registry->forget(entry);
+  for(const Path &path : m_registry->getFiles(entry)) {
+    if(FS::exists(path))
+      files.push_back(path);
   }
 
-  RemoveTask *task = new RemoveTask(allFiles, this);
+  registerInHost(false, entry);
+
+  // forget the package even if some files cannot be removed
+  m_registry->forget(entry);
+
+  RemoveTask *task = new RemoveTask(files, this);
   task->onCommit([=] { m_receipt.addRemovals(task->removedFiles()); });
 
   addTask(task);

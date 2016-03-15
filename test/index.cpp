@@ -94,7 +94,7 @@ TEST_CASE("unicode index path", M) {
   REQUIRE(ri->name() == "Новая папка");
 }
 
-TEST_CASE("add category", M) {
+TEST_CASE("add a category", M) {
   Index ri("a");
   Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
@@ -106,10 +106,12 @@ TEST_CASE("add category", M) {
   cat->addPackage(pack);
 
   CHECK(ri.categories().size() == 0);
+  CHECK(ri.category("a") == nullptr);
 
   ri.addCategory(cat);
 
   REQUIRE(ri.categories().size() == 1);
+  REQUIRE(ri.category("a") == cat);
   REQUIRE(ri.packages() == cat->packages());
 }
 
@@ -145,10 +147,12 @@ TEST_CASE("add a package", M) {
   pack->addVersion(ver);
 
   CHECK(cat.packages().size() == 0);
+  CHECK(cat.package("name") == nullptr);
 
   cat.addPackage(pack);
 
   REQUIRE(cat.packages().size() == 1);
+  REQUIRE(cat.package("name") == pack);
   REQUIRE(pack->category() == &cat);
 }
 

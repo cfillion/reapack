@@ -21,6 +21,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "package.hpp"
@@ -63,6 +64,7 @@ public:
   void addCategory(const Category *cat);
   const CategoryList &categories() const { return m_categories; }
   const Category *category(size_t i) const { return m_categories[i]; }
+  const Category *category(const std::string &name) const;
 
   const PackageList &packages() const { return m_packages; }
 
@@ -74,6 +76,8 @@ private:
   LinkMap m_links;
   CategoryList m_categories;
   PackageList m_packages;
+
+  std::unordered_map<std::string, size_t> m_catMap;
 };
 
 class Category {
@@ -88,12 +92,15 @@ public:
   void addPackage(const Package *pack);
   const PackageList &packages() const { return m_packages; }
   const Package *package(size_t i) const { return m_packages[i]; }
+  const Package *package(const std::string &name) const;
 
 private:
   const Index *m_index;
 
   std::string m_name;
   PackageList m_packages;
+
+  std::unordered_map<std::string, size_t> m_pkgMap;
 };
 
 #endif

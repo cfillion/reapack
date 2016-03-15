@@ -134,10 +134,21 @@ void Index::addCategory(const Category *cat)
   if(cat->packages().empty())
     return;
 
+  m_catMap.insert({cat->name(), m_categories.size()});
   m_categories.push_back(cat);
 
   m_packages.insert(m_packages.end(),
     cat->packages().begin(), cat->packages().end());
+}
+
+const Category *Index::category(const string &name) const
+{
+  const auto it = m_catMap.find(name);
+
+  if(it == m_catMap.end())
+    return nullptr;
+  else
+    return category(it->second);
 }
 
 void Index::addLink(const LinkType type, const Link &link)
@@ -187,5 +198,16 @@ void Category::addPackage(const Package *pkg)
   else if(pkg->versions().empty())
     return;
 
+  m_pkgMap.insert({pkg->name(), m_packages.size()});
   m_packages.push_back(pkg);
+}
+
+const Package *Category::package(const string &name) const
+{
+  const auto it = m_pkgMap.find(name);
+
+  if(it == m_pkgMap.end())
+    return nullptr;
+  else
+    return package(it->second);
 }

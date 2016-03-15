@@ -59,6 +59,7 @@ public:
   void synchronize(const Remote &, bool userAction = true);
   void install(const Version *);
   void uninstall(const Remote &);
+  void uninstall(const Registry::Entry &);
   void registerAll(const Remote &);
   void runTasks();
 
