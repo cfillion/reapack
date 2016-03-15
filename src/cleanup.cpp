@@ -108,7 +108,7 @@ void Cleanup::onTimer(const int id)
 {
   stopTimer(id);
 
-  MessageBox(handle(), AUTO_STR("No orphaned package found!"),
+  MessageBox(handle(), AUTO_STR("No obsolete package found!"),
     AUTO_STR("ReaPack"), MB_OK);
 
   close();
