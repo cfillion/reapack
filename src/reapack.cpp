@@ -479,7 +479,8 @@ Transaction *ReaPack::createTransaction()
     if(m_transaction->isCancelled() || !receipt->isEnabled())
       return;
 
-    LockDialog lock(m_manager);
+    LockDialog managerLock(m_manager);
+    LockDialog cleanupLock(m_cleanup);
 
     if(m_transaction->taskCount() == 0 && !receipt->hasErrors())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
