@@ -78,23 +78,23 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   Menu menu = Menu(handle).addMenu(AUTO_STR("ReaPack"));
 
-  menu.addAction(AUTO_STR("Synchronize packages"),
+  menu.addAction(AUTO_STR("&Synchronize packages"),
     NamedCommandLookup("_REAPACK_SYNC"));
 
-  menu.addAction(AUTO_STR("Import a repository..."),
-    NamedCommandLookup("_REAPACK_IMPORT"));
-
-  menu.addAction(AUTO_STR("Clean up packages..."),
+  menu.addAction(AUTO_STR("&Clean up packages..."),
     NamedCommandLookup("_REAPACK_CLEANUP"));
 
-  menu.addAction(AUTO_STR("Manage repositories..."),
+  menu.addAction(AUTO_STR("&Import a repository..."),
+    NamedCommandLookup("_REAPACK_IMPORT"));
+
+  menu.addAction(AUTO_STR("&Manage repositories..."),
     NamedCommandLookup("_REAPACK_MANAGE"));
 
   menu.addSeparator();
 
-  auto_char aboutLabel[255] = {};
+  auto_char aboutLabel[32] = {};
   auto_snprintf(aboutLabel, sizeof(aboutLabel),
-    AUTO_STR("About ReaPack v%s"), make_autostring(ReaPack::VERSION).c_str());
+    AUTO_STR("&About ReaPack v%s"), make_autostring(ReaPack::VERSION).c_str());
   menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
@@ -159,11 +159,11 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
     &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
 
-  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
-    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
-
   reapack->setupAction("REAPACK_CLEANUP", "ReaPack: Clean up packages...",
     &reapack->cleanupAction, bind(&ReaPack::cleanupPackages, reapack));
+
+  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
+    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
 
   reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
     &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));

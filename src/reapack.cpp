@@ -62,7 +62,7 @@ static void CleanupTempFiles()
 #endif
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : syncAction(), importAction(), cleanupAction(), configAction(),
+  : syncAction(), cleanupAction(), importAction(), configAction(),
     m_transaction(nullptr), m_progress(nullptr), m_manager(nullptr),
     m_import(nullptr), m_cleanup(nullptr), m_instance(instance)
 {

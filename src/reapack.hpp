@@ -50,8 +50,8 @@ public:
   static const std::string BUILDTIME;
 
   gaccel_register_t syncAction;
-  gaccel_register_t importAction;
   gaccel_register_t cleanupAction;
+  gaccel_register_t importAction;
   gaccel_register_t configAction;
 
   ReaPack(REAPER_PLUGIN_HINSTANCE);
