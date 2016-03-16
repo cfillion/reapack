@@ -60,7 +60,7 @@ void ReportDialog::printVersion(const Version *ver)
   if(!ver->author().empty())
     stream() << " by " << ver->author();
 
-  const string &date = ver->formattedDate();
+  const string &date = ver->displayTime();
   if(!date.empty())
     stream() << " – " << date;
 

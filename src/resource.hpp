@@ -40,6 +40,7 @@
 #define IDD_ABOUT_DIALOG    103
 #define IDD_IMPORT_DIALOG   104
 #define IDD_CLEANUP_DIALOG  105
+#define IDD_BROWSER_DIALOG  106
 
 #define IDC_LABEL      200
 #define IDC_LABEL2     201
@@ -57,5 +58,10 @@
 #define IDC_PACKAGES   220
 #define IDC_GROUPBOX   221
 #define IDC_URL        222
+#define IDC_SCRIPTS    223
+#define IDC_EFFECTS    224
+#define IDC_EXTENSIONS 225
+#define IDC_FILTER     226
+#define IDC_CLEAR      227
 
 #endif

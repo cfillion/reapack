@@ -42,6 +42,7 @@ public:
 
   Category *category() const { return m_category; }
   Type type() const { return m_type; }
+  std::string displayType() const;
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 

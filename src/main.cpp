@@ -81,6 +81,9 @@ static void menuHook(const char *name, HMENU handle, int f)
   menu.addAction(AUTO_STR("&Synchronize packages"),
     NamedCommandLookup("_REAPACK_SYNC"));
 
+  menu.addAction(AUTO_STR("&Browse packages..."),
+    NamedCommandLookup("_REAPACK_BROWSE"));
+
   menu.addAction(AUTO_STR("&Clean up packages..."),
     NamedCommandLookup("_REAPACK_CLEANUP"));
 
@@ -158,6 +161,9 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
     &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
+
+  reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
+    &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
 
   reapack->setupAction("REAPACK_CLEANUP", "ReaPack: Clean up packages...",
     &reapack->cleanupAction, bind(&ReaPack::cleanupPackages, reapack));

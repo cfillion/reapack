@@ -18,6 +18,7 @@
 #include "reapack.hpp"
 
 #include "about.hpp"
+#include "browser.hpp"
 #include "cleanup.hpp"
 #include "config.hpp"
 #include "errors.hpp"
@@ -62,9 +63,9 @@ static void CleanupTempFiles()
 #endif
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : syncAction(), cleanupAction(), importAction(), configAction(),
-    m_transaction(nullptr), m_progress(nullptr), m_manager(nullptr),
-    m_import(nullptr), m_cleanup(nullptr), m_instance(instance)
+  : syncAction(), browseAction(), cleanupAction(), importAction(), configAction(),
+    m_transaction(nullptr), m_progress(nullptr), m_browser(nullptr),
+    m_cleanup(nullptr), m_import(nullptr), m_manager(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -329,6 +330,32 @@ void ReaPack::cleanupPackages()
     m_cleanup->setCloseHandler([=] (INT_PTR) {
       Dialog::Destroy(m_cleanup);
       m_cleanup = nullptr;
+    });
+  });
+}
+
+void ReaPack::browsePackages()
+{
+  if(m_browser) {
+    m_browser->setFocus();
+    return;
+  }
+  else if(m_transaction) {
+    ShowMessageBox(
+      "This feature cannot be used while packages are being installed. "
+      "Try again later.", "Browse packages", MB_OK
+    );
+    return;
+  }
+
+  const vector<Remote> &remotes = m_config->remotes()->getEnabled();
+
+  fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, indexes, this);
+    m_browser->show();
+    m_browser->setCloseHandler([=] (INT_PTR) {
+      Dialog::Destroy(m_browser);
+      m_browser = nullptr;
     });
   });
 }

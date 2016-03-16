@@ -192,7 +192,7 @@ void About::updatePackages()
     const Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->name());
     const auto_string &version = make_autostring(lastVer->name());
-    const auto_string &author = make_autostring(lastVer->author());
+    const auto_string &author = make_autostring(lastVer->displayAuthor());
 
     m_packages->addRow({name, version,
       author.empty() ? AUTO_STR("Unknown") : author});

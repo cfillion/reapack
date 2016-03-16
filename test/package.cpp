@@ -26,6 +26,20 @@ TEST_CASE("package type from string", M) {
     REQUIRE(Package::typeFor("effect") == Package::EffectType);
 }
 
+TEST_CASE("package type to string", M) {
+  SECTION("unknown")
+    REQUIRE("Unknown" == Package(Package::UnknownType, "test").displayType());
+
+  SECTION("script")
+    REQUIRE("Script" == Package(Package::ScriptType, "test").displayType());
+
+  SECTION("extension")
+    REQUIRE("Extension" == Package(Package::ExtensionType, "test").displayType());
+
+  SECTION("effect")
+    REQUIRE("Effect" == Package(Package::EffectType, "test").displayType());
+}
+
 TEST_CASE("empty package name", M) {
   try {
     Package pack(Package::ScriptType, string());

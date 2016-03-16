@@ -48,6 +48,20 @@ string Package::fullName() const
   return m_category ? m_category->fullName() + "/" + m_name : m_name;
 }
 
+string Package::displayType() const
+{
+  switch(m_type) {
+  case UnknownType:
+    return "Unknown";
+  case ScriptType:
+    return "Script";
+  case ExtensionType:
+    return "Extension";
+  case EffectType:
+    return "Effect";
+  }
+}
+
 Package::~Package()
 {
   for(const Version *ver : m_versions)
