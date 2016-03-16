@@ -18,8 +18,8 @@
 #include "browser.hpp"
 
 #include "encoding.hpp"
+#include "errors.hpp"
 #include "index.hpp"
-#include "listview.hpp"
 #include "reapack.hpp"
 #include "resource.hpp"
 
@@ -58,7 +58,7 @@ void Browser::onInit()
   m_list->sortByColumn(1);
 
   reload();
-  m_reloadTimer = startTimer(200);
+  m_filterTimer = startTimer(200);
 }
 
 void Browser::onCommand(const int id)
@@ -67,7 +67,7 @@ void Browser::onCommand(const int id)
   case IDC_SCRIPTS:
   case IDC_EFFECTS:
   case IDC_EXTENSIONS:
-    reload();
+    fillList();
     break;
   case IDC_FILTER:
     m_checkFilter = true;
@@ -90,14 +90,15 @@ void Browser::onContextMenu(HWND, const int, const int)
 
 void Browser::onTimer(const int id)
 {
-  if(id != m_reloadTimer || !m_checkFilter)
-    return;
-
-  checkFilter();
+  if(id == m_filterTimer)
+    checkFilter();
 }
 
 void Browser::checkFilter()
 {
+  if(!m_checkFilter)
+    return;
+
   m_checkFilter = false;
 
   auto_string wideFilter(4096, 0);
@@ -108,44 +109,121 @@ void Browser::checkFilter()
 
   if(filter != m_filter) {
     m_filter = filter;
-    reload();
+    fillList();
   }
 }
 
 void Browser::reload()
 {
+  try {
+    Registry reg(Path::prefixRoot(Path::REGISTRY));
+
+    m_entries.clear();
+
+    for(IndexPtr index : m_indexes) {
+      for(const Package *pkg : index->packages())
+        m_entries.push_back({pkg->lastVersion(), reg.getEntry(pkg)});
+    }
+
+    fillList();
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+    auto_char msg[255] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("ReaPack could not open the package registry.\r\n")
+      AUTO_STR("Retry later when all installation task are completed.\r\n")
+      AUTO_STR("\r\nError description: %s"),
+      desc.c_str());
+    MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
+  }
+}
+
+void Browser::fillList()
+{
   InhibitControl freeze(m_list);
 
   m_list->clear();
 
-  for(IndexPtr index : m_indexes) {
-    for(const Package *pkg : index->packages()) {
-      const Version *ver = pkg->lastVersion();
-
-      if(!match(ver))
-        continue;
-
-      m_list->addRow({"??", pkg->name(), pkg->category()->name(),
-        ver->name(), ver->displayAuthor(), pkg->displayType()});
-    }
+  for(const Entry &entry : m_entries) {
+    if(match(entry))
+      m_list->addRow(makeRow(entry));
   }
 
   m_list->sort();
 }
 
-bool Browser::match(const Version *ver)
+ListView::Row Browser::makeRow(const Entry &entry) const
+{
+  const string &state = getValue(StateColumn, entry);
+  const string &name = getValue(NameColumn, entry);
+  const string &category = getValue(CategoryColumn, entry);
+  const string &version = getValue(VersionColumn, entry);
+  const string &author = getValue(AuthorColumn, entry);
+  const string &type = getValue(TypeColumn, entry);
+
+  return {
+    make_autostring(state), make_autostring(name), make_autostring(category),
+    make_autostring(version), make_autostring(author), make_autostring(type)
+  };
+}
+
+string Browser::getValue(const Column col, const Entry &entry) const
+{
+  const Version *ver = entry.version;
+  const Package *pkg = ver ? ver->package() : nullptr;
+  const Registry::Entry &regEntry = entry.regEntry;
+
+  string display;
+
+  switch(col) {
+  case StateColumn:
+    if(regEntry.id)
+      display += ver ? 'i' : 'o';
+    else
+      display += '\x20';
+
+    return display;
+  case NameColumn:
+    return pkg ? pkg->name() : regEntry.package;
+  case CategoryColumn:
+    return pkg ? pkg->category()->name() : regEntry.category;
+  case VersionColumn:
+    if(regEntry.id)
+      display = regEntry.versionName;
+
+    if(ver && ver->code() != regEntry.versionCode) {
+      if(!display.empty())
+        display += "\x20";
+
+      display += "(" + ver->name() + ")";
+    }
+
+    return display;
+  case AuthorColumn:
+    return ver ? ver->displayAuthor() : "";
+  case TypeColumn:
+    return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
+  }
+}
+
+bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
-  const Package *pkg = ver->package();
+  const Package::Type type =
+    entry.version ? entry.version->package()->type() : entry.regEntry.type;
 
-  const auto typeIt = m_types.find(pkg->type());
+  const auto typeIt = m_types.find(type);
 
   if(typeIt == m_types.end() ||
       SendMessage(typeIt->second, BM_GETCHECK, 0, 0) == BST_UNCHECKED)
     return false;
 
-  return icontains(pkg->name(), m_filter) ||
-    icontains(pkg->category()->name(), m_filter) ||
-    icontains(ver->author(), m_filter);
+  const string &name = getValue(NameColumn, entry);
+  const string &category = getValue(CategoryColumn, entry);
+  const string &author = getValue(AuthorColumn, entry);
+
+  return icontains(name, m_filter) || icontains(category, m_filter) ||
+    icontains(author, m_filter);
 }

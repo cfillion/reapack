@@ -20,6 +20,9 @@
 
 #include "dialog.hpp"
 
+#include "listview.hpp"
+#include "registry.hpp"
+
 #include <map>
 #include <memory>
 #include <string>
@@ -44,14 +47,29 @@ protected:
   void onTimer(int) override;
 
 private:
-  bool match(const Version *);
+  struct Entry { const Version *version; Registry::Entry regEntry; };
+
+  enum Column {
+    StateColumn,
+    NameColumn,
+    CategoryColumn,
+    VersionColumn,
+    AuthorColumn,
+    TypeColumn,
+  };
+
+  bool match(const Entry &) const;
   void checkFilter();
+  void fillList();
+  std::string getValue(Column, const Entry &entry) const;
+  ListView::Row makeRow(const Entry &) const;
 
   std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;
   bool m_checkFilter;
-  int m_reloadTimer;
+  int m_filterTimer;
   std::string m_filter;
+  std::vector<Entry> m_entries;
 
   HWND m_filterHandle;
   std::map<int, HWND> m_types;
