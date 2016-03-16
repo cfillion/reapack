@@ -36,6 +36,7 @@ public:
   };
 
   static Type typeFor(const char *);
+  static std::string displayType(Type);
 
   Package(const Type, const std::string &name, Category * = nullptr);
   ~Package();

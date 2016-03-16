@@ -36,6 +36,20 @@ Package::Type Package::typeFor(const char *type)
     return UnknownType;
 }
 
+string Package::displayType(const Type type)
+{
+  switch(type) {
+  case UnknownType:
+    return "Unknown";
+  case ScriptType:
+    return "Script";
+  case ExtensionType:
+    return "Extension";
+  case EffectType:
+    return "Effect";
+  }
+}
+
 Package::Package(const Type type, const string &name, Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
@@ -50,16 +64,7 @@ string Package::fullName() const
 
 string Package::displayType() const
 {
-  switch(m_type) {
-  case UnknownType:
-    return "Unknown";
-  case ScriptType:
-    return "Script";
-  case ExtensionType:
-    return "Extension";
-  case EffectType:
-    return "Effect";
-  }
+  return displayType(m_type);
 }
 
 Package::~Package()
