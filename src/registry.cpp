@@ -180,18 +180,13 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   else {
     release();
     return {entryId, ri->name(), cat->name(),
-      pkg->name(), pkg->type(), ver->code()};
+      pkg->name(), pkg->type(), ver->name(), ver->code()};
   }
 }
 
 auto Registry::getEntry(const Package *pkg) const -> Entry
 {
-  int id = 0;
-  string remote;
-  string category;
-  string package;
-  Package::Type type = Package::UnknownType;
-  Version::Code version = 0;
+  Entry entry{};
 
   const Category *cat = pkg->category();
   const Index *ri = cat->index();
@@ -203,17 +198,18 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   m_findEntry->exec([&] {
     int col = 0;
 
-    id = m_findEntry->intColumn(col++);
-    remote = m_findEntry->stringColumn(col++);
-    category = m_findEntry->stringColumn(col++);
-    package = m_findEntry->stringColumn(col++);
-    type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
-    Version::parse(m_findEntry->stringColumn(col++), &version);
+    entry.id = m_findEntry->intColumn(col++);
+    entry.remote = m_findEntry->stringColumn(col++);
+    entry.category = m_findEntry->stringColumn(col++);
+    entry.package = m_findEntry->stringColumn(col++);
+    entry.type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
+    entry.versionName = m_findEntry->stringColumn(col++);
+    Version::parse(entry.versionName, &entry.versionCode);
 
     return false;
   });
 
-  return {id, remote, category, package, type, version};
+  return entry;
 }
 
 auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
@@ -224,15 +220,16 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
   m_allEntries->exec([&] {
     int col = 0;
 
-    const int id = m_allEntries->intColumn(col++);
-    const string &category = m_allEntries->stringColumn(col++);
-    const string &package = m_allEntries->stringColumn(col++);
-    const Package::Type type =
-      static_cast<Package::Type>(m_allEntries->intColumn(col++));
-    Version::Code version = 0;
-    Version::parse(m_allEntries->stringColumn(col++), &version);
+    Entry entry{};
+    entry.id = m_allEntries->intColumn(col++);
+    entry.remote = remoteName;
+    entry.category = m_allEntries->stringColumn(col++);
+    entry.package = m_allEntries->stringColumn(col++);
+    entry.type = static_cast<Package::Type>(m_allEntries->intColumn(col++));
+    entry.versionName = m_allEntries->stringColumn(col++);
+    Version::parse(entry.versionName, &entry.versionCode);
 
-    list.push_back({id, remoteName, category, package, type, version});
+    list.push_back(entry);
 
     return true;
   });

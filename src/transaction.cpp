@@ -133,11 +133,11 @@ void Transaction::install(const Version *ver)
   InstallTicket::Type type = InstallTicket::Install;
 
   if(regEntry.id) {
-    if(regEntry.version == ver->code()) {
+    if(regEntry.versionCode == ver->code()) {
       if(allFilesExists(ver->files()))
         return; // latest version is really installed, nothing to do here!
     }
-    else if(regEntry.version < ver->code())
+    else if(regEntry.versionCode < ver->code())
       type = InstallTicket::Upgrade;
   }
 

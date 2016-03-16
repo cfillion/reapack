@@ -38,7 +38,8 @@ public:
     std::string category;
     std::string package;
     Package::Type type;
-    Version::Code version;
+    std::string versionName;
+    Version::Code versionCode;
   };
 
   Registry(const Path &path = Path());
