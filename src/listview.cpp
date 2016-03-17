@@ -277,7 +277,7 @@ void ListView::handleColumnClick(LPARAM lParam)
 
 int ListView::translate(const int userIndex) const
 {
-  if(m_sortColumn < 0)
+  if(m_sortColumn < 0 || userIndex < 0)
     return userIndex;
 
   for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
@@ -295,13 +295,15 @@ int ListView::translate(const int userIndex) const
 
 int ListView::translateBack(const int internalIndex) const
 {
-  if(m_sortColumn < 0)
+  if(m_sortColumn < 0 || internalIndex < 0)
     return internalIndex;
 
   LVITEM item{};
   item.iItem = internalIndex;
   item.mask |= LVIF_PARAM;
-  ListView_GetItem(handle(), &item);
 
-  return (int)item.lParam;
+  if(ListView_GetItem(handle(), &item))
+    return (int)item.lParam;
+  else
+    return -1;
 }
