@@ -72,6 +72,7 @@ private:
   std::vector<Entry> m_entries;
 
   HWND m_filterHandle;
+  HWND m_display;
   std::map<int, HWND> m_types;
   ListView *m_list;
 };

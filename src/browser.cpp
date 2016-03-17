@@ -36,6 +36,12 @@ Browser::Browser(const vector<IndexPtr> &indexes, ReaPack *reapack)
 void Browser::onInit()
 {
   m_filterHandle = getControl(IDC_FILTER);
+  m_display = getControl(IDC_DISPLAY);
+
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
 
   m_types = {
     {Package::ScriptType, getControl(IDC_SCRIPTS)},
@@ -64,6 +70,7 @@ void Browser::onInit()
 void Browser::onCommand(const int id)
 {
   switch(id) {
+  case IDC_DISPLAY:
   case IDC_SCRIPTS:
   case IDC_EFFECTS:
   case IDC_EXTENSIONS:
@@ -210,6 +217,22 @@ string Browser::getValue(const Column col, const Entry &entry) const
 bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
+
+  int display = SendMessage(m_display, CB_GETCURSEL, 0, 0);
+  switch(display) {
+  case 1: // Installed
+    if(!entry.regEntry.id)
+      return false;
+    break;
+  case 2: // Uninstalled
+    if(entry.regEntry.id)
+      return false;
+    break;
+  case 3: // Obsolete
+    if(entry.version)
+      return false;
+    break;
+  }
 
   const Package::Type type =
     entry.version ? entry.version->package()->type() : entry.regEntry.type;
