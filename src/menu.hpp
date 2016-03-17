@@ -40,11 +40,10 @@ public:
 
   void show(int x, int y, HWND parent) const;
 
-  void enable();
+  void enableAll();
   void enable(unsigned int);
-  void disable();
+  void disableAll();
   void disable(unsigned int);
-  void setEnabled(bool);
   void setEnabled(bool, unsigned int);
 
 private:
