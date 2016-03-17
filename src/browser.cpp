@@ -119,63 +119,65 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
   SetFocus(m_list->handle());
 
-  const Entry *entry = entryAt(m_list->itemUnderMouse());
-  m_currentEntry = entry;
-
-  if(!entry)
-    return;
-
   Menu menu;
 
-  if(entry->test(InstalledFlag)) {
-    if(entry->test(OutOfDateFlag)) {
+  if(const Entry *entry = entryAt(m_list->itemUnderMouse()))
+    entryMenu(menu, *entry);
+
+  menu.show(x, y, handle());
+}
+
+void Browser::entryMenu(Menu &menu, const Entry &entry)
+{
+  m_currentEntry = &entry;
+
+  if(entry.test(InstalledFlag)) {
+    if(entry.test(OutOfDateFlag)) {
       auto_char installLabel[255] = {};
-      auto_snprintf(installLabel, sizeof(installLabel),
-        AUTO_STR("&Update to v%s"), make_autostring(entry->latest->name()).c_str());
+      auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("&Update to v%s"),
+        make_autostring(entry.latest->name()).c_str());
 
       menu.addAction(installLabel, 0);
     }
 
     auto_char reinstallLabel[255] = {};
-    auto_snprintf(reinstallLabel, sizeof(reinstallLabel),
-      AUTO_STR("&Reinstall v%s"),
-      make_autostring(entry->regEntry.versionName).c_str());
+    auto_snprintf(reinstallLabel, sizeof(reinstallLabel), AUTO_STR("&Reinstall v%s"),
+      make_autostring(entry.regEntry.versionName).c_str());
 
-    menu.setEnabled(!entry->test(ObsoleteFlag),
+    menu.setEnabled(!entry.test(ObsoleteFlag),
       menu.addAction(reinstallLabel, 0));
   }
   else {
     auto_char installLabel[255] = {};
-    auto_snprintf(installLabel, sizeof(installLabel),
-      AUTO_STR("&Install v%s"), make_autostring(entry->latest->name()).c_str());
+    auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("&Install v%s"),
+      make_autostring(entry.latest->name()).c_str());
 
     menu.addAction(installLabel, 0);
   }
 
-  Menu versions = menu.addMenu(AUTO_STR("Versions"));
+  Menu versionMenu = menu.addMenu(AUTO_STR("Versions"));
   const UINT versionIndex = menu.size() - 1;
-  if(entry->test(ObsoleteFlag))
+  if(entry.test(ObsoleteFlag))
     menu.disable(versionIndex);
   else {
-    for(const Version *ver : entry->package->versions() | boost::adaptors::reversed)
-      versions.addAction(make_autostring(ver->name()).c_str(), 0);
+    const auto &versions = entry.package->versions();
+    for(const Version *ver : versions | boost::adaptors::reversed)
+      versionMenu.addAction(make_autostring(ver->name()).c_str(), 0);
   }
 
-  menu.setEnabled(entry->test(InstalledFlag),
+  menu.setEnabled(entry.test(InstalledFlag),
     menu.addAction(AUTO_STR("&Uninstall"), 0));
 
   menu.addSeparator();
 
-  menu.setEnabled(!entry->test(ObsoleteFlag),
+  menu.setEnabled(!entry.test(ObsoleteFlag),
     menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY));
 
   auto_char aboutLabel[255] = {};
-  const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
+  const auto_string &name = make_autostring(getValue(RemoteColumn, entry));
   auto_snprintf(aboutLabel, sizeof(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT);
-
-  menu.show(x, y, handle());
 }
 
 void Browser::onTimer(const int id)

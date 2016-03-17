@@ -30,6 +30,7 @@
 
 class Index;
 class ListView;
+class Menu;
 class ReaPack;
 class Version;
 
@@ -79,6 +80,7 @@ private:
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
   const Entry *entryAt(int) const;
+  void entryMenu(Menu &, const Entry &);
 
   void history(const Entry *) const;
   void about(const Entry *) const;
