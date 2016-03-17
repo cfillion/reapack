@@ -47,11 +47,20 @@ protected:
   void onTimer(int) override;
 
 private:
+  enum Flag {
+    UninstalledFlag = 1<<1,
+    InstalledFlag   = 1<<2,
+    OutOfDateFlag   = 1<<3,
+    ObsoleteFlag    = 1<<4,
+  };
+
   struct Entry {
-    bool isInstalled;
+    int flags;
     Registry::Entry regEntry;
     const Package *package;
     const Version *latest;
+
+    bool test(Flag f) const { return flags & f; }
   };
 
   enum Column {

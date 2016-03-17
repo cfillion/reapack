@@ -31,7 +31,6 @@
 using namespace std;
 
 enum Action { ACTION_HISTORY = 300, ACTION_ABOUT };
-enum Display { All, Installed, OutOfDate, Uninstalled, Obsolete };
 
 Browser::Browser(const vector<IndexPtr> &indexes, ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_indexes(indexes), m_reapack(reapack),
@@ -128,12 +127,8 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
   Menu menu;
 
-  if(!entry->isInstalled ||
-      (entry->latest && entry->latest->code() > entry->regEntry.versionCode)) {
-  }
-
-  if(entry->isInstalled) {
-    if(entry->latest && entry->latest->code() > entry->regEntry.versionCode) {
+  if(entry->test(InstalledFlag)) {
+    if(entry->test(OutOfDateFlag)) {
       auto_char installLabel[255] = {};
       auto_snprintf(installLabel, sizeof(installLabel),
         AUTO_STR("&Update to v%s"), make_autostring(entry->latest->name()).c_str());
@@ -146,10 +141,8 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
       AUTO_STR("&Reinstall v%s"),
       make_autostring(entry->regEntry.versionName).c_str());
 
-    const UINT index = menu.addAction(reinstallLabel, 0);
-
-    if(!entry->package)
-      menu.disable(index);
+    menu.setEnabled(!entry->test(ObsoleteFlag),
+      menu.addAction(reinstallLabel, 0));
   }
   else {
     auto_char installLabel[255] = {};
@@ -161,28 +154,26 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
   Menu versions = menu.addMenu(AUTO_STR("Versions"));
   const UINT versionIndex = menu.size() - 1;
-  const UINT uninstallIndex = menu.addAction(AUTO_STR("&Uninstall"), 0);
+  if(entry->test(ObsoleteFlag))
+    menu.disable(versionIndex);
+  else {
+    for(const Version *ver : entry->package->versions() | boost::adaptors::reversed)
+      versions.addAction(make_autostring(ver->name()).c_str(), 0);
+  }
+
+  menu.setEnabled(entry->test(InstalledFlag),
+    menu.addAction(AUTO_STR("&Uninstall"), 0));
+
   menu.addSeparator();
-  const UINT historyIndex =
-    menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
+
+  menu.setEnabled(!entry->test(ObsoleteFlag),
+    menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY));
 
   auto_char aboutLabel[255] = {};
   const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
   auto_snprintf(aboutLabel, sizeof(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT);
-
-  if(!entry->package) {
-    menu.disable(historyIndex);
-    menu.disable(versionIndex);
-  }
-  else {
-    for(const Version *ver : entry->package->versions() | boost::adaptors::reversed)
-      versions.addAction(make_autostring(ver->name()).c_str(), 0);
-  }
-
-  if(!entry->isInstalled)
-    menu.disable(uninstallIndex);
 
   menu.show(x, y, handle());
 }
@@ -222,8 +213,19 @@ void Browser::reload()
 
     for(IndexPtr index : m_indexes) {
       for(const Package *pkg : index->packages()) {
+        const Version *latest = pkg->lastVersion();
         const Registry::Entry &regEntry = reg.getEntry(pkg);
-        m_entries.push_back({regEntry.id != 0, regEntry, pkg, pkg->lastVersion()});
+        int flags = 0;
+
+        if(regEntry.id) {
+          flags |= InstalledFlag;
+          if(regEntry.versionCode < latest->code())
+            flags |= OutOfDateFlag;
+        }
+        else
+          flags |= UninstalledFlag;
+
+        m_entries.push_back({flags, regEntry, pkg, latest});
       }
 
       // obsolete packages
@@ -233,7 +235,7 @@ void Browser::reload()
         if(cat && cat->package(entry.package))
           continue;
 
-        m_entries.push_back({true, entry});
+        m_entries.push_back({InstalledFlag | ObsoleteFlag, entry});
       }
     }
 
@@ -296,8 +298,12 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
   switch(col) {
   case StateColumn:
-    if(entry.isInstalled)
-      display += ver ? 'i' : 'o';
+    if(entry.test(ObsoleteFlag))
+      display += 'o';
+    else if(entry.test(OutOfDateFlag))
+      display += 'u';
+    else if(entry.test(InstalledFlag))
+        display += 'i';
     else
       display += '\x20';
 
@@ -307,14 +313,14 @@ string Browser::getValue(const Column col, const Entry &entry) const
   case CategoryColumn:
     return pkg ? pkg->category()->name() : regEntry.category;
   case VersionColumn:
-    if(entry.isInstalled)
+    if(entry.test(InstalledFlag))
       display = regEntry.versionName;
 
     if(ver && ver->code() != regEntry.versionCode) {
       if(!display.empty())
-        display += "\x20";
+        display += '\x20';
 
-      display += "(" + ver->name() + ")";
+      display += '(' + ver->name() + ')';
     }
 
     return display;
@@ -331,26 +337,26 @@ bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
+  enum Display { All, Installed, OutOfDate, Uninstalled, Obsolete };
   Display display = (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
 
   switch(display) {
   case All:
     break;
   case Installed:
-    if(!entry.isInstalled)
+    if(!entry.test(InstalledFlag))
       return false;
     break;
   case OutOfDate:
-    if(!entry.latest || !entry.isInstalled ||
-        entry.regEntry.versionCode >= entry.latest->code())
+    if(!entry.test(OutOfDateFlag))
       return false;
     break;
   case Uninstalled:
-    if(entry.isInstalled)
+    if(!entry.test(UninstalledFlag))
       return false;
     break;
   case Obsolete:
-    if(entry.latest)
+    if(!entry.test(ObsoleteFlag))
       return false;
     break;
   }
