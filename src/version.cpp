@@ -72,7 +72,7 @@ Version::~Version()
 
 string Version::fullName() const
 {
-  const string fName = "v" + m_name;
+  const string fName = 'v' + m_name;
   return m_package ? m_package->fullName() + " " + fName : fName;
 }
 

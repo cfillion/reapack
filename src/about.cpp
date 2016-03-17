@@ -109,6 +109,7 @@ void About::onCommand(const int id)
       openLink(m_websiteLinks[id & 0xff]);
     else if(id >> 8 == IDC_DONATE)
       openLink(m_donationLinks[id & 0xff]);
+    break;
   }
 }
 
@@ -249,22 +250,23 @@ void About::selectLink(const int ctrl, const std::vector<const Link *> &links)
 {
   const int count = (int)links.size();
 
-  if(count > 1) {
-    Menu menu;
-
-    for(int i = 0; i < count; i++) {
-      const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
-      menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
-    }
-
-    RECT rect;
-    GetWindowRect(getControl(ctrl), &rect);
-    menu.show(rect.left, rect.bottom - 1, handle());
-  }
-  else if(count == 1)
-    openLink(links.front());
-
   m_tabs->setFocus();
+
+  if(count == 1) {
+    openLink(links.front());
+    return;
+  }
+
+  Menu menu;
+
+  for(int i = 0; i < count; i++) {
+    const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
+    menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
+  }
+
+  RECT rect;
+  GetWindowRect(getControl(ctrl), &rect);
+  menu.show(rect.left, rect.bottom - 1, handle());
 }
 
 void About::openLink(const Link *link)
