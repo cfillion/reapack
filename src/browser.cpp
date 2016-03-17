@@ -130,6 +130,16 @@ void Browser::reload()
     for(IndexPtr index : m_indexes) {
       for(const Package *pkg : index->packages())
         m_entries.push_back({pkg->lastVersion(), reg.getEntry(pkg)});
+
+      // obsolete packages
+      for(const Registry::Entry &entry : reg.getEntries(index->name())) {
+        const Category *cat = index->category(entry.category);
+
+        if(cat && cat->package(entry.package))
+          continue;
+
+        m_entries.push_back({nullptr, entry});
+      }
     }
 
     fillList();
