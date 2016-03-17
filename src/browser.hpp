@@ -47,7 +47,12 @@ protected:
   void onTimer(int) override;
 
 private:
-  struct Entry { const Version *version; Registry::Entry regEntry; };
+  struct Entry {
+    bool isInstalled;
+    Registry::Entry regEntry;
+    const Package *package;
+    const Version *latest;
+  };
 
   enum Column {
     StateColumn,
@@ -56,6 +61,7 @@ private:
     VersionColumn,
     AuthorColumn,
     TypeColumn,
+    RemoteColumn,
   };
 
   bool match(const Entry &) const;
@@ -63,13 +69,20 @@ private:
   void fillList();
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
+  const Entry *entryAt(int) const;
+
+  void history(const Entry *) const;
+  void about(const Entry *) const;
 
   std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;
   bool m_checkFilter;
+  const Entry *m_currentEntry;
+
   int m_filterTimer;
   std::string m_filter;
   std::vector<Entry> m_entries;
+  std::vector<size_t> m_visibleEntries;
 
   HWND m_filterHandle;
   HWND m_display;

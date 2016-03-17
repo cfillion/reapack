@@ -20,16 +20,22 @@
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
+#include "menu.hpp"
 #include "reapack.hpp"
+#include "report.hpp"
 #include "resource.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 using namespace std;
 
+enum Action { ACTION_HISTORY = 300, ACTION_ABOUT };
+enum Display { All, Installed, OutOfDate, Uninstalled, Obsolete };
+
 Browser::Browser(const vector<IndexPtr> &indexes, ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_indexes(indexes), m_reapack(reapack),
-    m_checkFilter(false)
+    m_checkFilter(false), m_currentEntry(nullptr)
 {
 }
 
@@ -40,6 +46,7 @@ void Browser::onInit()
 
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
 
@@ -60,6 +67,8 @@ void Browser::onInit()
     {AUTO_STR("Author"), 105},
     {AUTO_STR("Type"), 70},
   });
+
+  m_list->onActivate([=] { history(entryAt(m_list->itemUnderMouse())); });
 
   m_list->sortByColumn(1);
 
@@ -83,6 +92,20 @@ void Browser::onCommand(const int id)
     SetWindowText(m_filterHandle, AUTO_STR(""));
     checkFilter();
     break;
+  case IDC_SELECT:
+    m_list->selectAll();
+    SetFocus(m_list->handle());
+    break;
+  case IDC_UNSELECT:
+    m_list->unselectAll();
+    SetFocus(m_list->handle());
+    break;
+  case ACTION_HISTORY:
+    history(m_currentEntry);
+    break;
+  case ACTION_ABOUT:
+    about(m_currentEntry);
+    break;
   case IDOK:
   case IDCANCEL:
     close();
@@ -90,9 +113,78 @@ void Browser::onCommand(const int id)
   }
 }
 
-void Browser::onContextMenu(HWND, const int, const int)
+void Browser::onContextMenu(HWND target, const int x, const int y)
 {
-  (void)m_reapack;
+  if(target != m_list->handle())
+    return;
+
+  SetFocus(m_list->handle());
+
+  const Entry *entry = entryAt(m_list->itemUnderMouse());
+  m_currentEntry = entry;
+
+  if(!entry)
+    return;
+
+  Menu menu;
+
+  if(!entry->isInstalled ||
+      (entry->latest && entry->latest->code() > entry->regEntry.versionCode)) {
+  }
+
+  if(entry->isInstalled) {
+    if(entry->latest && entry->latest->code() > entry->regEntry.versionCode) {
+      auto_char installLabel[255] = {};
+      auto_snprintf(installLabel, sizeof(installLabel),
+        AUTO_STR("&Update to v%s"), make_autostring(entry->latest->name()).c_str());
+
+      menu.addAction(installLabel, 0);
+    }
+
+    auto_char reinstallLabel[255] = {};
+    auto_snprintf(reinstallLabel, sizeof(reinstallLabel),
+      AUTO_STR("&Reinstall v%s"),
+      make_autostring(entry->regEntry.versionName).c_str());
+
+    const UINT index = menu.addAction(reinstallLabel, 0);
+
+    if(!entry->package)
+      menu.disable(index);
+  }
+  else {
+    auto_char installLabel[255] = {};
+    auto_snprintf(installLabel, sizeof(installLabel),
+      AUTO_STR("&Install v%s"), make_autostring(entry->latest->name()).c_str());
+
+    menu.addAction(installLabel, 0);
+  }
+
+  Menu versions = menu.addMenu(AUTO_STR("Versions"));
+  const UINT versionIndex = menu.size() - 1;
+  const UINT uninstallIndex = menu.addAction(AUTO_STR("&Uninstall"), 0);
+  menu.addSeparator();
+  const UINT historyIndex =
+    menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
+
+  auto_char aboutLabel[255] = {};
+  const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
+  auto_snprintf(aboutLabel, sizeof(aboutLabel),
+    AUTO_STR("&About %s..."), name.c_str());
+  menu.addAction(aboutLabel, ACTION_ABOUT);
+
+  if(!entry->package) {
+    menu.disable(historyIndex);
+    menu.disable(versionIndex);
+  }
+  else {
+    for(const Version *ver : entry->package->versions() | boost::adaptors::reversed)
+      versions.addAction(make_autostring(ver->name()).c_str(), 0);
+  }
+
+  if(!entry->isInstalled)
+    menu.disable(uninstallIndex);
+
+  menu.show(x, y, handle());
 }
 
 void Browser::onTimer(const int id)
@@ -125,11 +217,14 @@ void Browser::reload()
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
+    m_currentEntry = nullptr;
     m_entries.clear();
 
     for(IndexPtr index : m_indexes) {
-      for(const Package *pkg : index->packages())
-        m_entries.push_back({pkg->lastVersion(), reg.getEntry(pkg)});
+      for(const Package *pkg : index->packages()) {
+        const Registry::Entry &regEntry = reg.getEntry(pkg);
+        m_entries.push_back({regEntry.id != 0, regEntry, pkg, pkg->lastVersion()});
+      }
 
       // obsolete packages
       for(const Registry::Entry &entry : reg.getEntries(index->name())) {
@@ -138,7 +233,7 @@ void Browser::reload()
         if(cat && cat->package(entry.package))
           continue;
 
-        m_entries.push_back({nullptr, entry});
+        m_entries.push_back({true, entry});
       }
     }
 
@@ -161,10 +256,16 @@ void Browser::fillList()
   InhibitControl freeze(m_list);
 
   m_list->clear();
+  m_visibleEntries.clear();
 
-  for(const Entry &entry : m_entries) {
-    if(match(entry))
-      m_list->addRow(makeRow(entry));
+  for(size_t i = 0; i < m_entries.size(); i++) {
+    const Entry &entry = m_entries[i];
+
+    if(!match(entry))
+      continue;
+
+    m_list->addRow(makeRow(entry));
+    m_visibleEntries.push_back(i);
   }
 
   m_list->sort();
@@ -187,15 +288,15 @@ ListView::Row Browser::makeRow(const Entry &entry) const
 
 string Browser::getValue(const Column col, const Entry &entry) const
 {
-  const Version *ver = entry.version;
-  const Package *pkg = ver ? ver->package() : nullptr;
+  const Package *pkg = entry.package;
+  const Version *ver = entry.latest;
   const Registry::Entry &regEntry = entry.regEntry;
 
   string display;
 
   switch(col) {
   case StateColumn:
-    if(regEntry.id)
+    if(entry.isInstalled)
       display += ver ? 'i' : 'o';
     else
       display += '\x20';
@@ -206,7 +307,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
   case CategoryColumn:
     return pkg ? pkg->category()->name() : regEntry.category;
   case VersionColumn:
-    if(regEntry.id)
+    if(entry.isInstalled)
       display = regEntry.versionName;
 
     if(ver && ver->code() != regEntry.versionCode) {
@@ -221,6 +322,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
     return ver ? ver->displayAuthor() : "";
   case TypeColumn:
     return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
+  case RemoteColumn:
+    return pkg ? pkg->category()->index()->name() : regEntry.remote;
   }
 }
 
@@ -228,24 +331,32 @@ bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
-  int display = SendMessage(m_display, CB_GETCURSEL, 0, 0);
+  Display display = (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
+
   switch(display) {
-  case 1: // Installed
-    if(!entry.regEntry.id)
+  case All:
+    break;
+  case Installed:
+    if(!entry.isInstalled)
       return false;
     break;
-  case 2: // Uninstalled
-    if(entry.regEntry.id)
+  case OutOfDate:
+    if(!entry.latest || !entry.isInstalled ||
+        entry.regEntry.versionCode >= entry.latest->code())
       return false;
     break;
-  case 3: // Obsolete
-    if(entry.version)
+  case Uninstalled:
+    if(entry.isInstalled)
+      return false;
+    break;
+  case Obsolete:
+    if(entry.latest)
       return false;
     break;
   }
 
   const Package::Type type =
-    entry.version ? entry.version->package()->type() : entry.regEntry.type;
+    entry.latest ? entry.package->type() : entry.regEntry.type;
 
   const auto typeIt = m_types.find(type);
 
@@ -259,4 +370,24 @@ bool Browser::match(const Entry &entry) const
 
   return icontains(name, m_filter) || icontains(category, m_filter) ||
     icontains(author, m_filter);
+}
+
+auto Browser::entryAt(const int listIndex) const -> const Entry *
+{
+  if(listIndex < 0 || listIndex >= (int)m_visibleEntries.size())
+    return nullptr;
+
+  return &m_entries[m_visibleEntries[listIndex]];
+}
+
+void Browser::history(const Entry *entry) const
+{
+  if(entry && entry->package)
+    Dialog::Show<History>(instance(), handle(), entry->package);
+}
+
+void Browser::about(const Entry *entry) const
+{
+  if(entry)
+    m_reapack->about(getValue(RemoteColumn, *entry), handle());
 }

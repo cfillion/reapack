@@ -168,3 +168,22 @@ void Report::printRemovals()
   for(const Path &path : m_receipt->removals())
     stream() << path.join() << NL;
 }
+
+History::History(const Package *pkg)
+  : ReportDialog(), m_package(pkg)
+{
+}
+
+void History::fillReport()
+{
+  SetWindowText(handle(), AUTO_STR("Package History"));
+  SetWindowText(getControl(IDC_LABEL),
+    make_autostring(m_package->name()).c_str());
+
+  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
+    if(stream().tellp())
+      stream() << NL;
+
+    printVersion(ver);
+  }
+}

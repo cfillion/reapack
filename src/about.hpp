@@ -23,12 +23,9 @@
 #include <memory>
 #include <vector>
 
-#include "report.hpp"
-
 class Index;
 class ListView;
 class Package;
-class ReportBase;
 class RichEdit;
 class TabBar;
 struct Link;
@@ -66,17 +63,6 @@ private:
   std::vector<const Link *> m_websiteLinks;
   std::vector<const Link *> m_donationLinks;
   const std::vector<const Package *> *m_packagesData;
-};
-
-class History : public ReportDialog {
-public:
-  History(const Package *);
-
-protected:
-  void fillReport() override;
-
-private:
-  const Package *m_package;
 };
 
 #endif

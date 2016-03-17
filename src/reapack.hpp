@@ -74,6 +74,7 @@ public:
   void import(const Remote &);
   void manageRemotes();
   void aboutSelf();
+  void about(const std::string &, HWND parent);
   void about(const Remote &, HWND parent);
   void cleanupPackages();
   void browsePackages();

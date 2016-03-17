@@ -24,12 +24,12 @@
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
+#include "report.hpp"
 #include "resource.hpp"
 #include "richedit.hpp"
 #include "tabbar.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
 using namespace std;
@@ -282,23 +282,4 @@ void About::packageHistory()
 
   const Package *pkg = m_packagesData->at(index);
   Dialog::Show<History>(instance(), handle(), pkg);
-}
-
-History::History(const Package *pkg)
-  : ReportDialog(), m_package(pkg)
-{
-}
-
-void History::fillReport()
-{
-  SetWindowText(handle(), AUTO_STR("Package History"));
-  SetWindowText(getControl(IDC_LABEL),
-    make_autostring(m_package->name()).c_str());
-
-  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
-    if(stream().tellp())
-      stream() << NL;
-
-    printVersion(ver);
-  }
 }

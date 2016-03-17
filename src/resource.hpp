@@ -64,5 +64,7 @@
 #define IDC_FILTER     226
 #define IDC_CLEAR      227
 #define IDC_DISPLAY    228
+#define IDC_SELECT     229
+#define IDC_UNSELECT   230
 
 #endif
