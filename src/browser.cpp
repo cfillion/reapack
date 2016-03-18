@@ -76,11 +76,11 @@ void Browser::onInit()
     SendMessage(pair.second, BM_SETCHECK, BST_CHECKED, 0);
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR(""), 25},
+    {AUTO_STR(""), 23},
     {AUTO_STR("Package Name"), 380},
     {AUTO_STR("Category"), 150},
     {AUTO_STR("Version"), 80},
-    {AUTO_STR("Author"), 105},
+    {AUTO_STR("Author"), 95},
     {AUTO_STR("Type"), 70},
   });
 

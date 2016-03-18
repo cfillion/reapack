@@ -43,7 +43,7 @@ void Manager::onInit()
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Name"), 110},
-    {AUTO_STR("URL"), 360},
+    {AUTO_STR("URL"), 350},
     {AUTO_STR("State"), 60},
   });
 
