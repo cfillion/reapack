@@ -30,20 +30,33 @@
 
 using namespace std;
 
-enum Action { ACTION_HISTORY = 300, ACTION_ABOUT };
+enum Action {
+  ACTION_VERSION = 80,
+  ACTION_LATEST = 300,
+  ACTION_LATEST_ALL,
+  ACTION_REINSTALL,
+  ACTION_REINSTALL_ALL,
+  ACTION_UNINSTALL,
+  ACTION_UNINSTALL_ALL,
+  ACTION_HISTORY,
+  ACTION_ABOUT,
+  ACTION_RESET_ALL,
+};
 
 Browser::Browser(const vector<IndexPtr> &indexes, ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_indexes(indexes), m_reapack(reapack),
-    m_checkFilter(false), m_currentEntry(nullptr)
+    m_checkFilter(false), m_currentIndex(-1)
 {
 }
 
 void Browser::onInit()
 {
+  m_action = getControl(IDC_ACTION);
   m_filterHandle = getControl(IDC_FILTER);
   m_display = getControl(IDC_DISPLAY);
 
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
@@ -59,24 +72,26 @@ void Browser::onInit()
     SendMessage(pair.second, BM_SETCHECK, BST_CHECKED, 0);
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR(""), 20},
-    {AUTO_STR("Package Name"), 382},
+    {AUTO_STR(""), 22},
+    {AUTO_STR("Package Name"), 380},
     {AUTO_STR("Category"), 150},
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 105},
     {AUTO_STR("Type"), 70},
   });
 
-  m_list->onActivate([=] { history(entryAt(m_list->itemUnderMouse())); });
-
+  m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
   m_list->sortByColumn(1);
 
   reload();
+
   m_filterTimer = startTimer(200);
 }
 
 void Browser::onCommand(const int id)
 {
+  namespace arg = std::placeholders;
+
   switch(id) {
   case IDC_DISPLAY:
   case IDC_SCRIPTS:
@@ -99,17 +114,51 @@ void Browser::onCommand(const int id)
     m_list->unselectAll();
     SetFocus(m_list->handle());
     break;
+  case IDC_ACTION:
+    selectionMenu();
+    break;
+  case ACTION_LATEST:
+    installLatest(m_currentIndex);
+    break;
+  case ACTION_LATEST_ALL:
+    selectionDo(bind(&Browser::installLatest, this, arg::_1));
+    break;
+  case ACTION_REINSTALL:
+    reinstall(m_currentIndex);
+    break;
+  case ACTION_REINSTALL_ALL:
+    selectionDo(bind(&Browser::reinstall, this, arg::_1));
+    break;
+  case ACTION_UNINSTALL:
+    uninstall(m_currentIndex);
+    break;
+  case ACTION_UNINSTALL_ALL:
+    selectionDo(bind(&Browser::uninstall, this, arg::_1));
+    break;
   case ACTION_HISTORY:
-    history(m_currentEntry);
+    history(m_currentIndex);
     break;
   case ACTION_ABOUT:
-    about(m_currentEntry);
+    about(m_currentIndex);
+    break;
+  case ACTION_RESET_ALL:
+    selectionDo(bind(&Browser::resetAction, this, arg::_1));
     break;
   case IDOK:
   case IDCANCEL:
     close();
     break;
+  default:
+    if(id >> 8 == ACTION_VERSION)
+      installVersion(m_currentIndex, id & 0xff);
+    break;
   }
+}
+
+void Browser::onTimer(const int id)
+{
+  if(id == m_filterTimer)
+    checkFilter();
 }
 
 void Browser::onContextMenu(HWND target, const int x, const int y)
@@ -119,71 +168,102 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
   SetFocus(m_list->handle());
 
+  m_currentIndex = m_list->itemUnderMouse();
+  const Entry *entry = getEntry(m_currentIndex);
+
+  if(!entry)
+    return;
+
   Menu menu;
 
-  if(const Entry *entry = entryAt(m_list->itemUnderMouse()))
-    entryMenu(menu, *entry);
-
-  menu.show(x, y, handle());
-}
-
-void Browser::entryMenu(Menu &menu, const Entry &entry)
-{
-  m_currentEntry = &entry;
-
-  if(entry.test(InstalledFlag)) {
-    if(entry.test(OutOfDateFlag)) {
+  if(entry->test(InstalledFlag)) {
+    if(entry->test(OutOfDateFlag)) {
       auto_char installLabel[255] = {};
       auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("&Update to v%s"),
-        make_autostring(entry.latest->name()).c_str());
+        make_autostring(entry->latest->name()).c_str());
 
-      menu.addAction(installLabel, 0);
+      const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
+      if(isTarget(entry, entry->latest))
+        menu.check(actionIndex);
     }
 
     auto_char reinstallLabel[255] = {};
     auto_snprintf(reinstallLabel, sizeof(reinstallLabel), AUTO_STR("&Reinstall v%s"),
-      make_autostring(entry.regEntry.versionName).c_str());
+      make_autostring(entry->regEntry.versionName).c_str());
 
-    menu.setEnabled(!entry.test(ObsoleteFlag),
-      menu.addAction(reinstallLabel, 0));
+    const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
+    if(!entry->current || entry->test(ObsoleteFlag))
+      menu.disable(actionIndex);
+    else if(isTarget(entry, entry->current))
+      menu.check(actionIndex);
   }
   else {
     auto_char installLabel[255] = {};
     auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("&Install v%s"),
-      make_autostring(entry.latest->name()).c_str());
+      make_autostring(entry->latest->name()).c_str());
 
-    menu.addAction(installLabel, 0);
+    const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
+    if(isTarget(entry, entry->latest))
+      menu.check(actionIndex);
   }
 
   Menu versionMenu = menu.addMenu(AUTO_STR("Versions"));
   const UINT versionIndex = menu.size() - 1;
-  if(entry.test(ObsoleteFlag))
+  if(entry->test(ObsoleteFlag))
     menu.disable(versionIndex);
   else {
-    const auto &versions = entry.package->versions();
-    for(const Version *ver : versions | boost::adaptors::reversed)
-      versionMenu.addAction(make_autostring(ver->name()).c_str(), 0);
+    const auto &versions = entry->package->versions();
+    int verIndex = versions.size();
+    for(const Version *ver : versions | boost::adaptors::reversed) {
+      const UINT actionIndex = versionMenu.addAction(
+        make_autostring(ver->name()).c_str(), --verIndex | (ACTION_VERSION << 8));
+
+      if(hasAction(entry) ? isTarget(entry, ver) : ver == entry->current)
+        versionMenu.checkRadio(actionIndex);
+    }
   }
 
-  menu.setEnabled(entry.test(InstalledFlag),
-    menu.addAction(AUTO_STR("&Uninstall"), 0));
+  const UINT uninstallIndex =
+    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
+  if(!entry->test(InstalledFlag))
+    menu.disable(uninstallIndex);
+  else if(isTarget(entry, nullptr))
+    menu.check(uninstallIndex);
 
   menu.addSeparator();
 
-  menu.setEnabled(!entry.test(ObsoleteFlag),
+  menu.setEnabled(!entry->test(ObsoleteFlag),
     menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY));
 
   auto_char aboutLabel[255] = {};
-  const auto_string &name = make_autostring(getValue(RemoteColumn, entry));
+  const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
   auto_snprintf(aboutLabel, sizeof(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT);
+
+  menu.show(x, y, handle());
 }
 
-void Browser::onTimer(const int id)
+void Browser::selectionMenu()
 {
-  if(id == m_filterTimer)
-    checkFilter();
+  RECT rect;
+  GetWindowRect(m_action, &rect);
+
+  const Entry *entry = nullptr;
+  if(m_list->selectionSize() == 1)
+    entry = getEntry(m_list->currentIndex());
+
+  Menu menu;
+
+  menu.addAction("&Install/update selection", ACTION_LATEST_ALL);
+  menu.addAction("&Reinstall selection", ACTION_REINSTALL_ALL);
+  menu.addAction("&Uninstall selection", ACTION_UNINSTALL_ALL);
+  menu.addAction("&Clear queued action", ACTION_RESET_ALL);
+
+  if(!m_list->hasSelection())
+    menu.disableAll();
+
+  menu.show(rect.left, rect.bottom - 1, handle());
 }
 
 void Browser::checkFilter()
@@ -210,25 +290,13 @@ void Browser::reload()
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
-    m_currentEntry = nullptr;
+    m_currentIndex = -1;
+    m_actions.clear();
     m_entries.clear();
 
     for(IndexPtr index : m_indexes) {
-      for(const Package *pkg : index->packages()) {
-        const Version *latest = pkg->lastVersion();
-        const Registry::Entry &regEntry = reg.getEntry(pkg);
-        int flags = 0;
-
-        if(regEntry.id) {
-          flags |= InstalledFlag;
-          if(regEntry.versionCode < latest->code())
-            flags |= OutOfDateFlag;
-        }
-        else
-          flags |= UninstalledFlag;
-
-        m_entries.push_back({flags, regEntry, pkg, latest});
-      }
+      for(const Package *pkg : index->packages())
+        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
 
       // obsolete packages
       for(const Registry::Entry &entry : reg.getEntries(index->name())) {
@@ -253,6 +321,33 @@ void Browser::reload()
       desc.c_str());
     MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
   }
+}
+
+auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
+  -> Entry
+{
+  const Version *latest = pkg->lastVersion();
+  const Version *current = nullptr;
+
+  int flags = 0;
+
+  if(regEntry.id) {
+    flags |= InstalledFlag;
+
+    if(regEntry.versionCode < latest->code())
+      flags |= OutOfDateFlag;
+
+    for(const Version *ver : pkg->versions()) {
+      if(ver->code() == regEntry.versionCode) {
+        current = ver;
+        break;
+      }
+    }
+  }
+  else
+    flags |= UninstalledFlag;
+
+  return {flags, regEntry, pkg, latest, current};
 }
 
 void Browser::fillList()
@@ -299,17 +394,19 @@ string Browser::getValue(const Column col, const Entry &entry) const
   string display;
 
   switch(col) {
-  case StateColumn:
+  case StateColumn: {
     if(entry.test(ObsoleteFlag))
       display += 'o';
     else if(entry.test(OutOfDateFlag))
       display += 'u';
     else if(entry.test(InstalledFlag))
-        display += 'i';
-    else
-      display += '\x20';
+      display += 'i';
+
+    if(hasAction(&entry))
+      display += isTarget(&entry, nullptr) ? 'U' : 'I';
 
     return display;
+  }
   case NameColumn:
     return pkg ? pkg->name() : regEntry.package;
   case CategoryColumn:
@@ -339,11 +436,15 @@ bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
-  enum Display { All, Installed, OutOfDate, Uninstalled, Obsolete };
+  enum Display { All, Queued, Installed, OutOfDate, Uninstalled, Obsolete };
   Display display = (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
 
   switch(display) {
   case All:
+    break;
+  case Queued:
+    if(!hasAction(&entry))
+      return false;
     break;
   case Installed:
     if(!entry.test(InstalledFlag))
@@ -380,7 +481,7 @@ bool Browser::match(const Entry &entry) const
     icontains(author, m_filter);
 }
 
-auto Browser::entryAt(const int listIndex) const -> const Entry *
+auto Browser::getEntry(const int listIndex) const -> const Entry *
 {
   if(listIndex < 0 || listIndex >= (int)m_visibleEntries.size())
     return nullptr;
@@ -388,14 +489,99 @@ auto Browser::entryAt(const int listIndex) const -> const Entry *
   return &m_entries[m_visibleEntries[listIndex]];
 }
 
-void Browser::history(const Entry *entry) const
+void Browser::history(const int index) const
 {
+  const Entry *entry = getEntry(index);
+
   if(entry && entry->package)
     Dialog::Show<History>(instance(), handle(), entry->package);
 }
 
-void Browser::about(const Entry *entry) const
+void Browser::about(const int index) const
 {
-  if(entry)
+  if(const Entry *entry = getEntry(index))
     m_reapack->about(getValue(RemoteColumn, *entry), handle());
+}
+
+void Browser::installLatest(const int index)
+{
+  const Entry *entry = getEntry(index);
+
+  if(entry && entry->latest && entry->latest != entry->current)
+    setAction(index, entry->latest);
+}
+
+void Browser::reinstall(const int index)
+{
+  const Entry *entry = getEntry(index);
+
+  if(entry && entry->current)
+    setAction(index, entry->current);
+}
+
+void Browser::installVersion(const int index, const size_t verIndex)
+{
+  const Entry *entry = getEntry(index);
+  const auto versions = entry->package->versions();
+
+  if(verIndex >= versions.size())
+    return;
+
+  const Version *target = entry->package->version(verIndex);
+
+  if(target == entry->current)
+    resetAction(index);
+  else
+    setAction(index, target);
+}
+
+void Browser::uninstall(const int index)
+{
+  const Entry *entry = getEntry(index);
+
+  if(entry && entry->test(InstalledFlag))
+    setAction(index, nullptr);
+}
+
+void Browser::resetAction(const int index)
+{
+  const Entry *entry = getEntry(index);
+  const auto it = m_actions.find(entry);
+
+  if(it != m_actions.end()) {
+    m_actions.erase(it);
+    m_list->replaceRow(index, makeRow(*entry));
+  }
+}
+
+bool Browser::isTarget(const Entry *entry, const Version *target) const
+{
+  const auto it = m_actions.find(entry);
+
+  if(it == m_actions.end())
+    return false;
+  else
+    return it->second == target;
+}
+
+void Browser::setAction(const int index, const Version *target)
+{
+  const Entry *entry = getEntry(index);
+
+  if(isTarget(entry, target))
+    resetAction(index);
+  else if(entry) {
+    m_actions[entry] = target;
+    m_list->replaceRow(index, makeRow(*entry));
+  }
+}
+
+void Browser::selectionDo(const std::function<void (int)> &func)
+{
+  for(const int index : m_list->selection())
+    func(index);
+}
+
+void Browser::apply()
+{
 }

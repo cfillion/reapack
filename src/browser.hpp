@@ -23,6 +23,7 @@
 #include "listview.hpp"
 #include "registry.hpp"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -30,7 +31,6 @@
 
 class Index;
 class ListView;
-class Menu;
 class ReaPack;
 class Version;
 
@@ -60,6 +60,7 @@ private:
     Registry::Entry regEntry;
     const Package *package;
     const Version *latest;
+    const Version *current;
 
     bool test(Flag f) const { return flags & f; }
   };
@@ -74,31 +75,45 @@ private:
     RemoteColumn,
   };
 
+  static Entry makeEntry(const Package *, const Registry::Entry &);
+
   bool match(const Entry &) const;
   void checkFilter();
   void fillList();
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
-  const Entry *entryAt(int) const;
-  void entryMenu(Menu &, const Entry &);
+  const Entry *getEntry(int) const;
+  void selectionMenu();
+  bool hasAction(const Entry *e) const { return m_actions.count(e) > 0; }
+  bool isTarget(const Entry *, const Version *) const;
+  void setAction(const int index, const Version *);
+  void selectionDo(const std::function<void (int)> &);
+  void apply();
 
-  void history(const Entry *) const;
-  void about(const Entry *) const;
+  void installLatest(int index);
+  void reinstall(int index);
+  void installVersion(int index, size_t verIndex);
+  void uninstall(int index);
+  void resetAction(int index);
+  void history(int index) const;
+  void about(int index) const;
 
   std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;
   bool m_checkFilter;
-  const Entry *m_currentEntry;
+  int m_currentIndex;
 
   int m_filterTimer;
   std::string m_filter;
   std::vector<Entry> m_entries;
   std::vector<size_t> m_visibleEntries;
+  std::map<const Entry *, const Version *> m_actions;
 
   HWND m_filterHandle;
   HWND m_display;
   std::map<int, HWND> m_types;
   ListView *m_list;
+  HWND m_action;
 };
 
 #endif
