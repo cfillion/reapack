@@ -52,8 +52,11 @@ Browser::Browser(const vector<IndexPtr> &indexes, ReaPack *reapack)
 void Browser::onInit()
 {
   m_action = getControl(IDC_ACTION);
+  m_apply = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
   m_display = getControl(IDC_DISPLAY);
+
+  disable(m_apply);
 
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
@@ -436,10 +439,7 @@ bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
-  enum Display { All, Queued, Installed, OutOfDate, Obsolete, Uninstalled };
-  Display display = (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
-
-  switch(display) {
+  switch(getDisplay()) {
   case All:
     break;
   case Queued:
@@ -548,10 +548,18 @@ void Browser::resetAction(const int index)
   const Entry *entry = getEntry(index);
   const auto it = m_actions.find(entry);
 
-  if(it != m_actions.end()) {
-    m_actions.erase(it);
+  if(it == m_actions.end())
+    return;
+
+  m_actions.erase(it);
+
+  if(getDisplay() == Queued)
+    m_list->removeRow(index);
+  else
     m_list->replaceRow(index, makeRow(*entry));
-  }
+
+  if(m_actions.empty())
+    disable(m_apply);
 }
 
 bool Browser::isTarget(const Entry *entry, const Version *target) const
@@ -573,6 +581,7 @@ void Browser::setAction(const int index, const Version *target)
   else if(entry) {
     m_actions[entry] = target;
     m_list->replaceRow(index, makeRow(*entry));
+    enable(m_apply);
   }
 }
 
@@ -580,6 +589,11 @@ void Browser::selectionDo(const std::function<void (int)> &func)
 {
   for(const int index : m_list->selection())
     func(index);
+}
+
+auto Browser::getDisplay() const -> Display
+{
+  return (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
 }
 
 void Browser::apply()

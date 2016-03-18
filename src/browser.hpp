@@ -75,6 +75,15 @@ private:
     RemoteColumn,
   };
 
+  enum Display {
+    All,
+    Queued,
+    Installed,
+    OutOfDate,
+    Obsolete,
+    Uninstalled,
+  };
+
   static Entry makeEntry(const Package *, const Registry::Entry &);
 
   bool match(const Entry &) const;
@@ -88,6 +97,7 @@ private:
   bool isTarget(const Entry *, const Version *) const;
   void setAction(const int index, const Version *);
   void selectionDo(const std::function<void (int)> &);
+  Display getDisplay() const;
   void apply();
 
   void installLatest(int index);
@@ -114,6 +124,7 @@ private:
   std::map<int, HWND> m_types;
   ListView *m_list;
   HWND m_action;
+  HWND m_apply;
 };
 
 #endif
