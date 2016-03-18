@@ -225,7 +225,7 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
     menu.disable(versionIndex);
   else {
     const auto &versions = entry->package->versions();
-    int verIndex = versions.size();
+    int verIndex = (int)versions.size();
     for(const Version *ver : versions | boost::adaptors::reversed) {
       const UINT actionIndex = versionMenu.addAction(
         make_autostring(ver->name()).c_str(), --verIndex | (ACTION_VERSION << 8));
@@ -267,10 +267,10 @@ void Browser::selectionMenu()
 
   Menu menu;
 
-  menu.addAction("&Install/update selection", ACTION_LATEST_ALL);
-  menu.addAction("&Reinstall selection", ACTION_REINSTALL_ALL);
-  menu.addAction("&Uninstall selection", ACTION_UNINSTALL_ALL);
-  menu.addAction("&Clear queued action", ACTION_RESET_ALL);
+  menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
+  menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
+  menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
+  menu.addAction(AUTO_STR("&Clear queued action"), ACTION_RESET_ALL);
 
   if(!m_list->hasSelection())
     menu.disableAll();
@@ -442,6 +442,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
   case RemoteColumn:
     return pkg ? pkg->category()->index()->name() : regEntry.remote;
   }
+
+  return {}; // for MSVC
 }
 
 bool Browser::match(const Entry &entry) const

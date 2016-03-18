@@ -48,6 +48,8 @@ string Package::displayType(const Type type)
   case EffectType:
     return "Effect";
   }
+
+  return {}; // MSVC is stupid
 }
 
 Package::Package(const Type type, const string &name, Category *cat)

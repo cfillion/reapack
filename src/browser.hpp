@@ -62,7 +62,7 @@ private:
     const Version *latest;
     const Version *current;
 
-    bool test(Flag f) const { return flags & f; }
+    bool test(Flag f) const { return (flags & f) != 0; }
   };
 
   enum Column {
