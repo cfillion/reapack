@@ -38,26 +38,25 @@ Manager::Manager(ReaPack *reapack)
 
 void Manager::onInit()
 {
-  // It would be better to not hard-code the column sizes like that...
-#ifndef _WIN32
-  const int URL_WIDTH = 360;
-#else
-  const int URL_WIDTH = 300;
-#endif
-
   m_apply = getControl(IDAPPLY);
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Name"), 110},
-    {AUTO_STR("URL"), URL_WIDTH},
+    {AUTO_STR("URL"), 360},
     {AUTO_STR("State"), 60},
   });
 
   m_list->onActivate([=] { about(m_list->currentIndex()); });
+
+  refresh();
+
+#ifdef LVSCW_AUTOSIZE_USEHEADER
+  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+#endif
 }
 
-void Manager::onCommand(const int id)
+void Manager::onCommand(const short id, short)
 {
   switch(id) {
   case IDC_IMPORT:
@@ -157,10 +156,6 @@ void Manager::refresh()
   }
 
   m_list->sort();
-
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_list->resizeColumn(2, LVSCW_AUTOSIZE_USEHEADER);
-#endif
 }
 
 void Manager::setRemoteEnabled(const bool enabled)

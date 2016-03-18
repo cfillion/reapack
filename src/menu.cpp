@@ -17,6 +17,10 @@
 
 #include "menu.hpp"
 
+#ifndef MIIM_FTYPE // for SWELL
+#define MIIM_FTYPE MIIM_TYPE
+#endif
+
 Menu::Menu(HMENU handle)
   : m_handle(handle), m_ownership(!handle)
 {
@@ -131,11 +135,11 @@ void Menu::check(const UINT index)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
+  mii.fMask |= MIIM_STATE;
 
   if(!GetMenuItemInfo(m_handle, index, true, &mii))
     return;
 
-  mii.fMask |= MIIM_STATE;
   mii.fState |= MFS_CHECKED;
 
   SetMenuItemInfo(m_handle, index, true, &mii);
@@ -145,14 +149,13 @@ void Menu::checkRadio(const UINT index)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
+  mii.fMask |= MIIM_FTYPE;
+  mii.fMask |= MIIM_STATE;
 
   if(!GetMenuItemInfo(m_handle, index, true, &mii))
     return;
 
-  mii.fMask |= MIIM_TYPE;
   mii.fType |= MFT_RADIOCHECK;
-
-  mii.fMask |= MIIM_STATE;
   mii.fState |= MFS_CHECKED;
 
   SetMenuItemInfo(m_handle, index, true, &mii);

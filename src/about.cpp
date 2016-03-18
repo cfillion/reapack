@@ -53,15 +53,8 @@ void About::onInit()
 
   m_cats->onSelect(bind(&About::updatePackages, this));
 
-#ifdef _WIN32
-  // dirty hacks...
-  const int NAME_SIZE = 330;
-#else
-  const int NAME_SIZE = 382;
-#endif
-
   m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR("Name"), NAME_SIZE},
+    {AUTO_STR("Name"), 382},
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 90},
   });
@@ -80,12 +73,12 @@ void About::onInit()
   populate();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_cats->resizeColumn(0, LVSCW_AUTOSIZE_USEHEADER);
-  m_packages->resizeColumn(2, LVSCW_AUTOSIZE_USEHEADER);
+  m_cats->resizeColumn(m_cats->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+  m_packages->resizeColumn(m_packages->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
 }
 
-void About::onCommand(const int id)
+void About::onCommand(const short id, short)
 {
   switch(id) {
   case IDC_WEBSITE:

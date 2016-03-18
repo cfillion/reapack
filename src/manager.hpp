@@ -36,7 +36,7 @@ public:
 
 protected:
   void onInit() override;
-  void onCommand(int) override;
+  void onCommand(short, short) override;
   void onContextMenu(HWND, int x, int y) override;
 
 private:

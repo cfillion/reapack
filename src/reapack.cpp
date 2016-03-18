@@ -285,7 +285,6 @@ void ReaPack::manageRemotes()
   }
 
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
-  m_manager->refresh();
   m_manager->show();
 
   m_manager->setCloseHandler([=] (INT_PTR) {

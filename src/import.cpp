@@ -55,7 +55,7 @@ void Import::onInit()
 #endif
 }
 
-void Import::onCommand(const int id)
+void Import::onCommand(const short id, short)
 {
   switch(id) {
   case IDOK:

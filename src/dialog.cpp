@@ -71,7 +71,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onTimer((int)wParam);
     break;
   case WM_COMMAND:
-    dlg->onCommand(LOWORD(wParam));
+    dlg->onCommand(LOWORD(wParam), HIWORD(wParam));
     break;
   case WM_NOTIFY:
     dlg->onNotify((LPNMHDR)lParam, lParam);
@@ -242,7 +242,7 @@ void Dialog::onTimer(int)
 {
 }
 
-void Dialog::onCommand(const int id)
+void Dialog::onCommand(const short id, short)
 {
   switch(id) {
   case IDOK:

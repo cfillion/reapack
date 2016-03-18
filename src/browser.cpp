@@ -64,6 +64,7 @@ void Browser::onInit()
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
+  SendMessage(m_display, CB_SETCURSEL, 0, 0);
 
   m_types = {
     {Package::ScriptType, getControl(IDC_SCRIPTS)},
@@ -75,7 +76,7 @@ void Browser::onInit()
     SendMessage(pair.second, BM_SETCHECK, BST_CHECKED, 0);
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR(""), 22},
+    {AUTO_STR(""), 25},
     {AUTO_STR("Package Name"), 380},
     {AUTO_STR("Category"), 150},
     {AUTO_STR("Version"), 80},
@@ -88,15 +89,21 @@ void Browser::onInit()
 
   reload();
 
+#ifdef LVSCW_AUTOSIZE_USEHEADER
+  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+#endif
+
   m_filterTimer = startTimer(200);
 }
 
-void Browser::onCommand(const int id)
+void Browser::onCommand(const short id, const short event)
 {
   namespace arg = std::placeholders;
 
   switch(id) {
   case IDC_DISPLAY:
+    if(event != CBN_SELCHANGE)
+      break;
   case IDC_SCRIPTS:
   case IDC_EFFECTS:
   case IDC_EXTENSIONS:
@@ -413,6 +420,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
       display += 'u';
     else if(entry.test(InstalledFlag))
       display += 'i';
+
+    display += '\x20';
 
     if(hasAction(&entry))
       display += isTarget(&entry, nullptr) ? 'U' : 'I';
