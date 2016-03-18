@@ -59,8 +59,8 @@ void Browser::onInit()
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
   SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
+  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
 
   m_types = {
     {Package::ScriptType, getControl(IDC_SCRIPTS)},
@@ -436,7 +436,7 @@ bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
-  enum Display { All, Queued, Installed, OutOfDate, Uninstalled, Obsolete };
+  enum Display { All, Queued, Installed, OutOfDate, Obsolete, Uninstalled };
   Display display = (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
 
   switch(display) {
