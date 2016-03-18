@@ -95,16 +95,16 @@ private:
   void selectionMenu();
   bool hasAction(const Entry *e) const { return m_actions.count(e) > 0; }
   bool isTarget(const Entry *, const Version *) const;
-  void setAction(const int index, const Version *);
+  void setAction(const int index, const Version *, bool toggle = true);
   void selectionDo(const std::function<void (int)> &);
   Display getDisplay() const;
   bool confirm() const;
   void apply();
 
-  void installLatest(int index);
-  void reinstall(int index);
+  void installLatest(int index, bool toggle = true);
+  void reinstall(int index, bool toggle = true);
   void installVersion(int index, size_t verIndex);
-  void uninstall(int index);
+  void uninstall(int index, bool toggle = true);
   void resetAction(int index);
   void history(int index) const;
   void about(int index) const;

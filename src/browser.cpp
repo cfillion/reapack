@@ -124,19 +124,19 @@ void Browser::onCommand(const int id)
     installLatest(m_currentIndex);
     break;
   case ACTION_LATEST_ALL:
-    selectionDo(bind(&Browser::installLatest, this, arg::_1));
+    selectionDo(bind(&Browser::installLatest, this, arg::_1, false));
     break;
   case ACTION_REINSTALL:
     reinstall(m_currentIndex);
     break;
   case ACTION_REINSTALL_ALL:
-    selectionDo(bind(&Browser::reinstall, this, arg::_1));
+    selectionDo(bind(&Browser::reinstall, this, arg::_1, false));
     break;
   case ACTION_UNINSTALL:
     uninstall(m_currentIndex);
     break;
   case ACTION_UNINSTALL_ALL:
-    selectionDo(bind(&Browser::uninstall, this, arg::_1));
+    selectionDo(bind(&Browser::uninstall, this, arg::_1, false));
     break;
   case ACTION_HISTORY:
     history(m_currentIndex);
@@ -512,20 +512,20 @@ void Browser::about(const int index) const
     m_reapack->about(getValue(RemoteColumn, *entry), handle());
 }
 
-void Browser::installLatest(const int index)
+void Browser::installLatest(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
   if(entry && entry->latest && entry->latest != entry->current)
-    setAction(index, entry->latest);
+    setAction(index, entry->latest, toggle);
 }
 
-void Browser::reinstall(const int index)
+void Browser::reinstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
   if(entry && entry->current)
-    setAction(index, entry->current);
+    setAction(index, entry->current, toggle);
 }
 
 void Browser::installVersion(const int index, const size_t verIndex)
@@ -544,12 +544,12 @@ void Browser::installVersion(const int index, const size_t verIndex)
     setAction(index, target);
 }
 
-void Browser::uninstall(const int index)
+void Browser::uninstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
   if(entry && entry->test(InstalledFlag))
-    setAction(index, nullptr);
+    setAction(index, nullptr, toggle);
 }
 
 void Browser::resetAction(const int index)
@@ -581,11 +581,11 @@ bool Browser::isTarget(const Entry *entry, const Version *target) const
     return it->second == target;
 }
 
-void Browser::setAction(const int index, const Version *target)
+void Browser::setAction(const int index, const Version *target, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(isTarget(entry, target))
+  if(toggle && isTarget(entry, target))
     resetAction(index);
   else if(entry) {
     m_actions[entry] = target;
