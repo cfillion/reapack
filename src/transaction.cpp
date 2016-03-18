@@ -49,7 +49,7 @@ Transaction::Transaction()
     if(m_installQueue.empty())
       finish();
     else
-      installQueued();
+      runTasks();
   });
 }
 
@@ -87,7 +87,7 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
     m_registry->savepoint();
 
     for(const Package *pkg : ri->packages())
-      install(pkg->lastVersion());
+      install(pkg->lastVersion(), false);
 
     m_registry->restore();
   });
@@ -125,8 +125,10 @@ void Transaction::saveIndex(Download *dl, const string &name)
     it->second();
 }
 
-void Transaction::install(const Version *ver)
+void Transaction::install(const Version *ver, const bool force)
 {
+  m_receipt.setEnabled(true);
+
   const Package *pkg = ver->package();
   const Registry::Entry &regEntry = m_registry->getEntry(pkg);
 
@@ -134,7 +136,7 @@ void Transaction::install(const Version *ver)
 
   if(regEntry.id) {
     if(regEntry.versionCode == ver->code()) {
-      if(allFilesExists(ver->files()))
+      if(!force && allFilesExists(ver->files()))
         return; // latest version is really installed, nothing to do here!
     }
     else if(regEntry.versionCode < ver->code())
@@ -168,16 +170,6 @@ void Transaction::install(const Version *ver)
     m_indexes.insert(ri);
 
   m_installQueue.push({type, ver, regEntry});
-}
-
-void Transaction::installQueued()
-{
-  while(!m_installQueue.empty()) {
-    installTicket(m_installQueue.front());
-    m_installQueue.pop();
-  }
-
-  runTasks();
 }
 
 void Transaction::installTicket(const InstallTicket &ticket)
@@ -312,6 +304,11 @@ void Transaction::addTask(Task *task)
 
 void Transaction::runTasks()
 {
+  while(!m_installQueue.empty()) {
+    installTicket(m_installQueue.front());
+    m_installQueue.pop();
+  }
+
   while(!m_taskQueue.empty()) {
     m_taskQueue.front()->start();
     m_taskQueue.pop();

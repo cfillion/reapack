@@ -177,6 +177,14 @@ void ReaPack::setRemoteEnabled(const Remote &original, const bool enable)
   });
 }
 
+void ReaPack::install(const Version *ver)
+{
+  if(!hitchhikeTransaction())
+    return;
+
+  m_transaction->install(ver, true);
+}
+
 void ReaPack::uninstall(const Remote &remote)
 {
   if(remote.isProtected())
@@ -491,6 +499,9 @@ Transaction *ReaPack::createTransaction()
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
+
+    if(m_browser && m_transaction->taskCount() > 0)
+      m_browser->reload();
   });
 
   m_transaction->setCleanupHandler([=] {

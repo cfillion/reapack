@@ -148,6 +148,15 @@ void Browser::onCommand(const int id)
     selectionDo(bind(&Browser::resetAction, this, arg::_1));
     break;
   case IDOK:
+  case IDAPPLY:
+    if(confirm()) {
+      apply();
+
+      if(id == IDAPPLY)
+        break;
+    }
+    else
+      break;
   case IDCANCEL:
     close();
     break;
@@ -596,6 +605,40 @@ auto Browser::getDisplay() const -> Display
   return (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
 }
 
+bool Browser::confirm() const
+{
+  if(m_actions.empty())
+    return true;
+
+  const size_t count = m_actions.size();
+
+  auto_char msg[255] = {};
+  auto_snprintf(msg, sizeof(msg),
+    AUTO_STR("Confirm execution of %zu action%s?\n"),
+    count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
+
+  const auto_char *title = AUTO_STR("ReaPack Query");
+  const int btn = MessageBox(handle(), msg, title, MB_YESNO);
+
+  return btn == IDYES;
+}
+
 void Browser::apply()
 {
+  if(m_actions.empty())
+    return;
+
+  disable(m_apply);
+
+  for(const auto &pair : m_actions) {
+    if(pair.second)
+      m_reapack->install(pair.second);
+    else
+      m_reapack->uninstall(pair.first->regEntry);
+  }
+
+  m_actions.clear();
+  m_reapack->runTasks();
+
+  fillList(); // update state column
 }

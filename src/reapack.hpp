@@ -66,6 +66,7 @@ public:
   void setRemoteEnabled(const Remote &, bool enable);
   void enable(const Remote &r) { setRemoteEnabled(r, true); }
   void disable(const Remote &r) { setRemoteEnabled(r, false); }
+  void install(const Version *);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void importRemote();

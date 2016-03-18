@@ -98,6 +98,7 @@ private:
   void setAction(const int index, const Version *);
   void selectionDo(const std::function<void (int)> &);
   Display getDisplay() const;
+  bool confirm() const;
   void apply();
 
   void installLatest(int index);

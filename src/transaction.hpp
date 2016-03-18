@@ -57,7 +57,7 @@ public:
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
   void synchronize(const Remote &, bool userAction = true);
-  void install(const Version *);
+  void install(const Version *, bool force = false);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void registerAll(const Remote &);
@@ -78,7 +78,6 @@ private:
   void fetchIndex(const Remote &, const IndexCallback &cb);
   void saveIndex(Download *, const std::string &remoteName);
 
-  void installQueued();
   void installTicket(const InstallTicket &);
   void addTask(Task *);
 
