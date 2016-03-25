@@ -54,7 +54,7 @@ protected:
   void fillReport() override;
 
 private:
-  void printNewPackages();
+  void printInstalls();
   void printUpdates();
   void printErrors();
   void printRemovals();

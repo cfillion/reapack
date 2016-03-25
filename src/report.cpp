@@ -92,7 +92,7 @@ void Report::fillReport()
   const size_t errors = m_receipt->errors().size();
 
   stream()
-    << installs << " new packages, "
+    << installs << " installed packages, "
     << updates << " updates, "
     << removals << " removed files and "
     << errors << " errors"
@@ -111,7 +111,7 @@ void Report::fillReport()
     printErrors();
 
   if(installs)
-    printNewPackages();
+    printInstalls();
 
   if(updates)
     printUpdates();
@@ -120,9 +120,9 @@ void Report::fillReport()
     printRemovals();
 }
 
-void Report::printNewPackages()
+void Report::printInstalls()
 {
-  printHeader("New packages");
+  printHeader("Installed packages");
 
   for(const InstallTicket &ticket : m_receipt->installs())
     stream() << ticket.version->fullName() << NL;
