@@ -132,10 +132,15 @@ void Report::printUpdates()
 {
   printHeader("Updates");
 
+  const auto start = stream().tellp();
+
   for(const InstallTicket &ticket : m_receipt->updates()) {
     const Package *pkg = ticket.version->package();
     const Registry::Entry &regEntry = ticket.regEntry;
     const VersionSet &versions = pkg->versions();
+
+    if(stream().tellp() != start)
+      stream() << NL;
 
     stream() << pkg->fullName() << ':' << NL;
 
@@ -145,8 +150,6 @@ void Report::printUpdates()
 
       printVersion(ver);
     }
-
-    stream() << NL;
   }
 }
 
@@ -154,10 +157,14 @@ void Report::printErrors()
 {
   printHeader("Errors");
 
+  const auto start = stream().tellp();
+
   for(const Receipt::Error &err : m_receipt->errors()) {
+    if(stream().tellp() != start)
+      stream() << NL;
+
     stream() << err.title << ':' << NL;
     printIndented(err.message);
-    stream() << "\n";
   }
 }
 
