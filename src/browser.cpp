@@ -198,7 +198,7 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   if(entry->test(InstalledFlag)) {
     if(entry->test(OutOfDateFlag)) {
       auto_char installLabel[255] = {};
-      auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("&Update to v%s"),
+      auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("U&pdate to v%s"),
         make_autostring(entry->latest->name()).c_str());
 
       const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
@@ -334,7 +334,7 @@ void Browser::reload()
     const auto_string &desc = make_autostring(e.what());
     auto_char msg[255] = {};
     auto_snprintf(msg, sizeof(msg),
-      AUTO_STR("ReaPack could not open the package registry.\r\n")
+      AUTO_STR("ReaPack could not open its package registry.\r\n")
       AUTO_STR("Retry later when all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
@@ -420,6 +420,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
       display += 'u';
     else if(entry.test(InstalledFlag))
       display += 'i';
+    else
+      display += '\x20';
 
     if(hasAction(&entry))
       display += isTarget(&entry, nullptr) ? 'U' : 'I';
