@@ -421,8 +421,6 @@ string Browser::getValue(const Column col, const Entry &entry) const
     else if(entry.test(InstalledFlag))
       display += 'i';
 
-    display += '\x20';
-
     if(hasAction(&entry))
       display += isTarget(&entry, nullptr) ? 'U' : 'I';
 

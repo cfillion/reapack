@@ -106,7 +106,8 @@ void Registry::migrate()
     // current schema version
     break;
   default:
-    throw reapack_error("database was created with a newer version of ReaPack");
+    throw reapack_error(
+      "The package registry was created by a newer version of ReaPack");
   }
 
   m_db.commit();
