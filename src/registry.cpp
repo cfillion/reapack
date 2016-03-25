@@ -34,21 +34,22 @@ Registry::Registry(const Path &path)
 
   // entry queries
   m_insertEntry = m_db.prepare(
-    "INSERT INTO entries VALUES(NULL, ?, ?, ?, ?, ?);"
+    "INSERT INTO entries(remote, category, package, type, version, author)"
+    "VALUES(?, ?, ?, ?, ?, ?);"
   );
 
   m_updateEntry = m_db.prepare(
-    "UPDATE entries SET type = ?, version = ? WHERE id = ?"
+    "UPDATE entries SET type = ?, version = ?, author = ? WHERE id = ?"
   );
 
   m_findEntry = m_db.prepare(
-    "SELECT id, remote, category, package, type, version FROM entries "
+    "SELECT id, remote, category, package, type, version, author FROM entries "
     "WHERE remote = ? AND category = ? AND package = ? "
     "LIMIT 1"
   );
 
   m_allEntries = m_db.prepare(
-    "SELECT id, category, package, type, version "
+    "SELECT id, category, package, type, version, author "
     "FROM entries WHERE remote = ?"
   );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
@@ -90,6 +91,7 @@ void Registry::migrate()
       "  package TEXT NOT NULL,"
       "  type INTEGER NOT NULL,"
       "  version TEXT NOT NULL,"
+      "  author TEXT NOT NULL,"
       "  UNIQUE(remote, category, package)"
       ");"
 
@@ -134,7 +136,8 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   if(entryId) {
     m_updateEntry->bind(1, pkg->type());
     m_updateEntry->bind(2, ver->name());
-    m_updateEntry->bind(3, entryId);
+    m_updateEntry->bind(3, ver->displayAuthor());
+    m_updateEntry->bind(4, entryId);
     m_updateEntry->exec();
   }
   else {
@@ -143,6 +146,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     m_insertEntry->bind(3, pkg->name());
     m_insertEntry->bind(4, pkg->type());
     m_insertEntry->bind(5, ver->name());
+    m_insertEntry->bind(6, ver->displayAuthor());
     m_insertEntry->exec();
 
     entryId = m_db.lastInsertId();
@@ -181,7 +185,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   else {
     release();
     return {entryId, ri->name(), cat->name(),
-      pkg->name(), pkg->type(), ver->name(), ver->code()};
+      pkg->name(), pkg->type(), ver->name(), ver->code(), ver->displayAuthor()};
   }
 }
 
@@ -206,6 +210,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
     entry.type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
     entry.versionName = m_findEntry->stringColumn(col++);
     Version::parse(entry.versionName, &entry.versionCode);
+    entry.author = m_findEntry->stringColumn(col++);
 
     return false;
   });
@@ -229,6 +234,7 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
     entry.type = static_cast<Package::Type>(m_allEntries->intColumn(col++));
     entry.versionName = m_allEntries->stringColumn(col++);
     Version::parse(entry.versionName, &entry.versionCode);
+    entry.author = m_allEntries->stringColumn(col++);
 
     list.push_back(entry);
 

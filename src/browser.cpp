@@ -443,7 +443,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
     return display;
   case AuthorColumn:
-    return ver ? ver->displayAuthor() : "";
+    return ver ? ver->displayAuthor() : regEntry.author;
   case TypeColumn:
     return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
   case RemoteColumn:

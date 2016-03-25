@@ -40,6 +40,7 @@ public:
     Package::Type type;
     std::string versionName;
     Version::Code versionCode;
+    std::string author;
   };
 
   Registry(const Path &path = Path());
