@@ -147,7 +147,7 @@ void ReaPack::synchronizeAll()
     return;
 
   for(const Remote &remote : remotes)
-    t->synchronize(remote);
+    t->synchronize(remote, m_config->autoInstall());
 
   t->runTasks();
 }
@@ -182,7 +182,7 @@ void ReaPack::install(const Version *ver)
   if(!hitchhikeTransaction())
     return;
 
-  m_transaction->install(ver, true);
+  m_transaction->install(ver);
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -313,8 +313,9 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
     if(ret == About::InstallResult) {
       enable(remote);
-      if(m_transaction)
-        m_transaction->synchronize(remote);
+
+      if(m_transaction) // transaction is created by enable()
+        m_transaction->synchronize(remote, true);
     }
   }, parent);
 }

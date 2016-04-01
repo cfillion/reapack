@@ -32,6 +32,8 @@ public:
   void write();
 
   bool isFirstRun() const { return m_isFirstRun; }
+  bool autoInstall() const { return m_autoInstall; }
+  void setAutoInstall(const bool enable) { m_autoInstall = enable; }
   RemoteList *remotes() { return &m_remotes; }
 
 private:
@@ -48,6 +50,7 @@ private:
   std::string m_path;
   bool m_isFirstRun;
   size_t m_version;
+  bool m_autoInstall;
 
   void readRemotes();
   void restoreSelfRemote();

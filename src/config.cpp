@@ -32,6 +32,7 @@ using namespace std;
 
 static const char *GLOBAL_GRP = "reapack";
 static const char *VERSION_KEY = "version";
+static const char *AUTOINSTALL_KEY = "autoInstall";
 
 static const char *SIZE_KEY = "size";
 
@@ -46,7 +47,7 @@ static string ArrayKey(const string &key, const size_t i)
 static const int BUFFER_SIZE = 2083;
 
 Config::Config()
-  : m_isFirstRun(false), m_version(0), m_remotesIniSize(0)
+  : m_isFirstRun(false), m_version(0), m_autoInstall(false), m_remotesIniSize(0)
 {
 }
 
@@ -84,6 +85,8 @@ void Config::read(const Path &path)
 
   migrate();
 
+  m_autoInstall = getUInt(GLOBAL_GRP, AUTOINSTALL_KEY) > 0;
+
   readRemotes();
   restoreSelfRemote();
 }
@@ -91,6 +94,7 @@ void Config::read(const Path &path)
 void Config::write()
 {
   setUInt(GLOBAL_GRP, VERSION_KEY, m_version);
+  setUInt(GLOBAL_GRP, AUTOINSTALL_KEY, m_autoInstall);
   writeRemotes();
 }
 

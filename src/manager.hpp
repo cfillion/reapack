@@ -22,9 +22,11 @@
 
 #include "listview.hpp"
 
+#include <boost/optional.hpp>
 #include <map>
 #include <set>
 
+class Config;
 class ReaPack;
 class Remote;
 
@@ -47,6 +49,7 @@ private:
   bool isRemoteEnabled(const Remote &) const;
   void uninstall();
   void about(int index);
+  void options();
 
   bool confirm() const;
   void apply();
@@ -54,10 +57,12 @@ private:
 
   HWND m_apply;
   ReaPack *m_reapack;
+  Config *m_config;
   ListView *m_list;
 
   std::map<Remote, bool> m_enableOverrides;
   std::set<Remote> m_uninstall;
+  boost::optional<bool> m_autoInstall;
 };
 
 #endif

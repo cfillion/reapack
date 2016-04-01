@@ -56,8 +56,8 @@ public:
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
-  void synchronize(const Remote &, bool userAction = true);
-  void install(const Version *, bool force = false);
+  void synchronize(const Remote &, bool autoInstall);
+  void install(const Version *);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void registerAll(const Remote &);
@@ -78,6 +78,8 @@ private:
   void fetchIndex(const Remote &, const IndexCallback &cb);
   void saveIndex(Download *, const std::string &remoteName);
 
+  void synchronize(const Package *, bool autoInstall);
+  void install(const Version *, const Registry::Entry &);
   void installTicket(const InstallTicket &);
   void addTask(Task *);
 
