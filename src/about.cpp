@@ -233,8 +233,6 @@ void About::updateInstalledFiles()
       stream << path.join() << "\r\n";
 
     SetWindowText(m_installedFiles, make_autostring(stream.str()).c_str());
-
-    hide(getControl(IDC_INSTALL));
   }
 }
 
