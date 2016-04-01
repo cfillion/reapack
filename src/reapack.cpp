@@ -260,6 +260,8 @@ void ReaPack::import(const Remote &remote)
     }
     else {
       enable(existing);
+      runTasks();
+
       m_config->write();
 
       return;
@@ -316,6 +318,8 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
       if(m_transaction) // transaction is created by enable()
         m_transaction->synchronize(remote, true);
+
+      runTasks();
     }
   }, parent);
 }
