@@ -188,8 +188,7 @@ void About::updatePackages()
     const auto_string &version = make_autostring(lastVer->name());
     const auto_string &author = make_autostring(lastVer->displayAuthor());
 
-    m_packages->addRow({name, version,
-      author.empty() ? AUTO_STR("Unknown") : author});
+    m_packages->addRow({name, version, author});
   }
 
   m_currentCat = catIndex;
