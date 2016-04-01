@@ -44,10 +44,11 @@ public:
 
   void setAuthor(const std::string &author) { m_author = author; }
   const std::string &author() const { return m_author; }
+  std::string displayAuthor() const;
 
   void setTime(const char *iso8601);
   const std::tm &time() const { return m_time; }
-  std::string formattedDate() const;
+  std::string displayTime() const;
 
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }

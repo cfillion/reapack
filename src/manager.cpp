@@ -29,35 +29,36 @@
 
 using namespace std;
 
-enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT };
+enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
+       ACTION_AUTOINSTALL };
 
 Manager::Manager(ReaPack *reapack)
-  : Dialog(IDD_CONFIG_DIALOG), m_reapack(reapack), m_list(0)
+  : Dialog(IDD_CONFIG_DIALOG),
+    m_reapack(reapack), m_config(reapack->config()), m_list(0)
 {
 }
 
 void Manager::onInit()
 {
-  // It would be better to not hard-code the column sizes like that...
-#ifndef _WIN32
-  const int URL_WIDTH = 360;
-#else
-  const int URL_WIDTH = 300;
-#endif
-
   m_apply = getControl(IDAPPLY);
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Name"), 110},
-    {AUTO_STR("URL"), URL_WIDTH},
+    {AUTO_STR("URL"), 350},
     {AUTO_STR("State"), 60},
   });
 
   m_list->onActivate([=] { about(m_list->currentIndex()); });
+
+  refresh();
+
+#ifdef LVSCW_AUTOSIZE_USEHEADER
+  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+#endif
 }
 
-void Manager::onCommand(const int id)
+void Manager::onCommand(const short id, short)
 {
   switch(id) {
   case IDC_IMPORT:
@@ -71,6 +72,13 @@ void Manager::onCommand(const int id)
     break;
   case ACTION_UNINSTALL:
     uninstall();
+    break;
+  case ACTION_AUTOINSTALL:
+    m_autoInstall = !m_autoInstall.value_or(m_config->autoInstall());
+    enable(m_apply);
+    break;
+  case IDC_OPTIONS:
+    options();
     break;
   case IDOK:
   case IDAPPLY:
@@ -151,16 +159,12 @@ void Manager::refresh()
   InhibitControl lock(m_list);
   m_list->clear();
 
-  for(const Remote &remote : *m_reapack->config()->remotes()) {
+  for(const Remote &remote : *m_config->remotes()) {
     if(!m_uninstall.count(remote))
       m_list->addRow(makeRow(remote));
   }
 
   m_list->sort();
-
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_list->resizeColumn(2, LVSCW_AUTOSIZE_USEHEADER);
-#endif
 }
 
 void Manager::setRemoteEnabled(const bool enabled)
@@ -225,6 +229,22 @@ void Manager::about(const int index)
   m_reapack->about(getRemote(index), handle());
 }
 
+void Manager::options()
+{
+  RECT rect;
+  GetWindowRect(getControl(IDC_OPTIONS), &rect);
+
+  Menu menu;
+
+  const UINT index = menu.addAction(
+    AUTO_STR("&Install new packages automatically"), ACTION_AUTOINSTALL);
+
+  if(m_autoInstall.value_or(m_config->autoInstall()))
+    menu.check(index);
+
+  menu.show(rect.left, rect.bottom - 1, handle());
+}
+
 bool Manager::confirm() const
 {
   if(m_uninstall.empty())
@@ -246,6 +266,9 @@ bool Manager::confirm() const
 
 void Manager::apply()
 {
+  if(m_autoInstall)
+    m_config->setAutoInstall(m_autoInstall.value());
+
   for(const auto &pair : m_enableOverrides) {
     const Remote &remote = pair.first;
     const bool enable = pair.second;
@@ -259,7 +282,7 @@ void Manager::apply()
   for(const Remote &remote : m_uninstall)
     m_reapack->uninstall(remote);
 
-  m_reapack->config()->write();
+  m_config->write();
   m_reapack->runTasks();
 }
 
@@ -288,5 +311,5 @@ Remote Manager::getRemote(const int index) const
   const ListView::Row &row = m_list->row(index);
   const string &remoteName = from_autostring(row[0]);
 
-  return m_reapack->config()->remotes()->get(remoteName);
+  return m_config->remotes()->get(remoteName);
 }

@@ -36,6 +36,22 @@ Package::Type Package::typeFor(const char *type)
     return UnknownType;
 }
 
+string Package::displayType(const Type type)
+{
+  switch(type) {
+  case UnknownType:
+    return "Unknown";
+  case ScriptType:
+    return "Script";
+  case ExtensionType:
+    return "Extension";
+  case EffectType:
+    return "Effect";
+  }
+
+  return {}; // MSVC is stupid
+}
+
 Package::Package(const Type type, const string &name, Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
@@ -46,6 +62,11 @@ Package::Package(const Type type, const string &name, Category *cat)
 string Package::fullName() const
 {
   return m_category ? m_category->fullName() + "/" + m_name : m_name;
+}
+
+string Package::displayType() const
+{
+  return displayType(m_type);
 }
 
 Package::~Package()

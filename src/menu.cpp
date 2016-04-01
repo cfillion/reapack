@@ -17,6 +17,10 @@
 
 #include "menu.hpp"
 
+#ifndef MIIM_FTYPE // for SWELL
+#define MIIM_FTYPE MIIM_TYPE
+#endif
+
 Menu::Menu(HMENU handle)
   : m_handle(handle), m_ownership(!handle)
 {
@@ -91,9 +95,10 @@ void Menu::show(const int x, const int y, HWND parent) const
     x, y, 0, parent, nullptr);
 }
 
-void Menu::disable()
+void Menu::disableAll()
 {
-  setEnabled(false);
+  for(UINT i = 0; i < m_size; i++)
+    setEnabled(false, i);
 }
 
 void Menu::disable(const UINT index)
@@ -101,9 +106,10 @@ void Menu::disable(const UINT index)
   setEnabled(false, index);
 }
 
-void Menu::enable()
+void Menu::enableAll()
 {
-  setEnabled(true);
+  for(UINT i = 0; i < m_size; i++)
+    setEnabled(false, i);
 }
 
 void Menu::enable(const UINT index)
@@ -111,21 +117,46 @@ void Menu::enable(const UINT index)
   setEnabled(true, index);
 }
 
-void Menu::setEnabled(const bool enabled)
-{
-  for(UINT i = 0; i < m_size; i++)
-    setEnabled(enabled, i);
-}
-
 void Menu::setEnabled(const bool enabled, const UINT index)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
 
-  GetMenuItemInfo(m_handle, index, true, &mii);
+  if(!GetMenuItemInfo(m_handle, index, true, &mii))
+    return;
 
   mii.fMask |= MIIM_STATE;
   mii.fState |= enabled ? MFS_ENABLED : MFS_DISABLED;
+
+  SetMenuItemInfo(m_handle, index, true, &mii);
+}
+
+void Menu::check(const UINT index)
+{
+  MENUITEMINFO mii{};
+  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.fMask |= MIIM_STATE;
+
+  if(!GetMenuItemInfo(m_handle, index, true, &mii))
+    return;
+
+  mii.fState |= MFS_CHECKED;
+
+  SetMenuItemInfo(m_handle, index, true, &mii);
+}
+
+void Menu::checkRadio(const UINT index)
+{
+  MENUITEMINFO mii{};
+  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.fMask |= MIIM_FTYPE;
+  mii.fMask |= MIIM_STATE;
+
+  if(!GetMenuItemInfo(m_handle, index, true, &mii))
+    return;
+
+  mii.fType |= MFT_RADIOCHECK;
+  mii.fState |= MFS_CHECKED;
 
   SetMenuItemInfo(m_handle, index, true, &mii);
 }

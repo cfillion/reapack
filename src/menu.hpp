@@ -31,21 +31,23 @@ public:
   Menu(HMENU handle = 0);
   ~Menu();
 
-  unsigned int size() { return m_size; }
+  UINT size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  unsigned int addAction(const auto_char *label, int commandId);
+  UINT addAction(const auto_char *label, int commandId);
   void addSeparator();
   Menu addMenu(const auto_char *label);
 
   void show(int x, int y, HWND parent) const;
 
-  void enable();
-  void enable(unsigned int);
-  void disable();
-  void disable(unsigned int);
-  void setEnabled(bool);
-  void setEnabled(bool, unsigned int);
+  void enableAll();
+  void enable(UINT);
+  void disableAll();
+  void disable(UINT);
+  void setEnabled(bool, UINT);
+
+  void check(UINT);
+  void checkRadio(UINT);
 
 private:
   void append(MENUITEMINFO &);

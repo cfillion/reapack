@@ -36,12 +36,14 @@ public:
   };
 
   static Type typeFor(const char *);
+  static std::string displayType(Type);
 
   Package(const Type, const std::string &name, Category * = nullptr);
   ~Package();
 
   Category *category() const { return m_category; }
   Type type() const { return m_type; }
+  std::string displayType() const;
   const std::string &name() const { return m_name; }
   std::string fullName() const;
 

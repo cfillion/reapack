@@ -28,7 +28,7 @@
 
 #include <reaper_plugin.h>
 
-class Cleanup;
+class Browser;
 class Config;
 class DownloadQueue;
 class Import;
@@ -50,7 +50,7 @@ public:
   static const std::string BUILDTIME;
 
   gaccel_register_t syncAction;
-  gaccel_register_t cleanupAction;
+  gaccel_register_t browseAction;
   gaccel_register_t importAction;
   gaccel_register_t configAction;
 
@@ -66,14 +66,16 @@ public:
   void setRemoteEnabled(const Remote &, bool enable);
   void enable(const Remote &r) { setRemoteEnabled(r, true); }
   void disable(const Remote &r) { setRemoteEnabled(r, false); }
+  void install(const Version *);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void importRemote();
   void import(const Remote &);
   void manageRemotes();
   void aboutSelf();
+  void about(const std::string &, HWND parent);
   void about(const Remote &, HWND parent);
-  void cleanupPackages();
+  void browsePackages();
   void fetchIndexes(const std::vector<Remote> &,
     const IndexesCallback &, HWND = nullptr);
 
@@ -94,9 +96,9 @@ private:
   Config *m_config;
   Transaction *m_transaction;
   Progress *m_progress;
-  Manager *m_manager;
+  Browser *m_browser;
   Import *m_import;
-  Cleanup *m_cleanup;
+  Manager *m_manager;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;

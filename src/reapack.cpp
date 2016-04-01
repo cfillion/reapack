@@ -18,7 +18,7 @@
 #include "reapack.hpp"
 
 #include "about.hpp"
-#include "cleanup.hpp"
+#include "browser.hpp"
 #include "config.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
@@ -62,9 +62,9 @@ static void CleanupTempFiles()
 #endif
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : syncAction(), cleanupAction(), importAction(), configAction(),
-    m_transaction(nullptr), m_progress(nullptr), m_manager(nullptr),
-    m_import(nullptr), m_cleanup(nullptr), m_instance(instance)
+  : syncAction(), browseAction(),importAction(), configAction(),
+    m_transaction(nullptr), m_progress(nullptr), m_browser(nullptr),
+    m_import(nullptr), m_manager(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -147,7 +147,7 @@ void ReaPack::synchronizeAll()
     return;
 
   for(const Remote &remote : remotes)
-    t->synchronize(remote);
+    t->synchronize(remote, m_config->autoInstall());
 
   t->runTasks();
 }
@@ -175,6 +175,14 @@ void ReaPack::setRemoteEnabled(const Remote &original, const bool enable)
     if(!m_transaction->isCancelled())
       apply();
   });
+}
+
+void ReaPack::install(const Version *ver)
+{
+  if(!hitchhikeTransaction())
+    return;
+
+  m_transaction->install(ver);
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -252,6 +260,8 @@ void ReaPack::import(const Remote &remote)
     }
     else {
       enable(existing);
+      runTasks();
+
       m_config->write();
 
       return;
@@ -277,7 +287,6 @@ void ReaPack::manageRemotes()
   }
 
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
-  m_manager->refresh();
   m_manager->show();
 
   m_manager->setCloseHandler([=] (INT_PTR) {
@@ -288,7 +297,12 @@ void ReaPack::manageRemotes()
 
 void ReaPack::aboutSelf()
 {
-  about(m_config->remotes()->get("ReaPack"), m_mainWindow);
+  about("ReaPack", m_mainWindow);
+}
+
+void ReaPack::about(const string &remoteName, HWND parent)
+{
+  about(m_config->remotes()->get(remoteName), parent);
 }
 
 void ReaPack::about(const Remote &remote, HWND parent)
@@ -301,22 +315,25 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
     if(ret == About::InstallResult) {
       enable(remote);
-      if(m_transaction)
-        m_transaction->synchronize(remote);
+
+      if(m_transaction) // transaction is created by enable()
+        m_transaction->synchronize(remote, true);
+
+      runTasks();
     }
   }, parent);
 }
 
-void ReaPack::cleanupPackages()
+void ReaPack::browsePackages()
 {
-  if(m_cleanup) {
-    m_cleanup->setFocus();
+  if(m_browser) {
+    m_browser->setFocus();
     return;
   }
   else if(m_transaction) {
     ShowMessageBox(
       "This feature cannot be used while packages are being installed. "
-      "Try again later.", "Clean up packages", MB_OK
+      "Try again later.", "Browse packages", MB_OK
     );
     return;
   }
@@ -324,11 +341,11 @@ void ReaPack::cleanupPackages()
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
   fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
-    m_cleanup = Dialog::Create<Cleanup>(m_instance, m_mainWindow, indexes, this);
-    m_cleanup->show();
-    m_cleanup->setCloseHandler([=] (INT_PTR) {
-      Dialog::Destroy(m_cleanup);
-      m_cleanup = nullptr;
+    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, indexes, this);
+    m_browser->show();
+    m_browser->setCloseHandler([=] (INT_PTR) {
+      Dialog::Destroy(m_browser);
+      m_browser = nullptr;
     });
   });
 }
@@ -480,12 +497,15 @@ Transaction *ReaPack::createTransaction()
       return;
 
     LockDialog managerLock(m_manager);
-    LockDialog cleanupLock(m_cleanup);
+    LockDialog cleanupLock(m_browser);
 
     if(m_transaction->taskCount() == 0 && !receipt->hasErrors())
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
+
+    if(m_browser && m_transaction->taskCount() > 0)
+      m_browser->reload();
   });
 
   m_transaction->setCleanupHandler([=] {

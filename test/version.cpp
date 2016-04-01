@@ -219,25 +219,25 @@ TEST_CASE("version date", M) {
   CHECK(ver.time().tm_year == 0);
   CHECK(ver.time().tm_mon == 0);
   CHECK(ver.time().tm_mday == 0);
-  CHECK(ver.formattedDate() == "");
+  CHECK(ver.displayTime() == "");
 
   SECTION("valid") {
     ver.setTime("2016-02-12T01:16:40Z");
     REQUIRE(ver.time().tm_year == 2016 - 1900);
     REQUIRE(ver.time().tm_mon == 2 - 1);
     REQUIRE(ver.time().tm_mday == 12);
-    REQUIRE(ver.formattedDate() != "");
+    REQUIRE(ver.displayTime() != "");
   }
 
   SECTION("garbage") {
     ver.setTime("hello world");
     REQUIRE(ver.time().tm_year == 0);
-    REQUIRE(ver.formattedDate() == "");
+    REQUIRE(ver.displayTime() == "");
   }
 
   SECTION("out of range") {
     ver.setTime("2016-99-99T99:99:99Z");
-    ver.formattedDate(); // no crash
+    ver.displayTime(); // no crash
   }
 }
 

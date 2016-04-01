@@ -72,8 +72,16 @@ Version::~Version()
 
 string Version::fullName() const
 {
-  const string fName = "v" + m_name;
+  const string fName = 'v' + m_name;
   return m_package ? m_package->fullName() + " " + fName : fName;
+}
+
+string Version::displayAuthor() const
+{
+  if(m_author.empty())
+    return "Unknown";
+  else
+    return m_author;
 }
 
 void Version::addSource(Source *source)
@@ -135,7 +143,7 @@ void Version::setTime(const char *iso8601)
   m_time.tm_mday = day;
 }
 
-string Version::formattedDate() const
+string Version::displayTime() const
 {
   if(m_time.tm_year == 0)
     return {};

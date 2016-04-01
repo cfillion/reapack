@@ -60,7 +60,7 @@ void ReportDialog::printVersion(const Version *ver)
   if(!ver->author().empty())
     stream() << " by " << ver->author();
 
-  const string &date = ver->formattedDate();
+  const string &date = ver->displayTime();
   if(!date.empty())
     stream() << " – " << date;
 
@@ -92,7 +92,7 @@ void Report::fillReport()
   const size_t errors = m_receipt->errors().size();
 
   stream()
-    << installs << " new packages, "
+    << installs << " installed packages, "
     << updates << " updates, "
     << removals << " removed files and "
     << errors << " errors"
@@ -111,7 +111,7 @@ void Report::fillReport()
     printErrors();
 
   if(installs)
-    printNewPackages();
+    printInstalls();
 
   if(updates)
     printUpdates();
@@ -120,9 +120,9 @@ void Report::fillReport()
     printRemovals();
 }
 
-void Report::printNewPackages()
+void Report::printInstalls()
 {
-  printHeader("New packages");
+  printHeader("Installed packages");
 
   for(const InstallTicket &ticket : m_receipt->installs())
     stream() << ticket.version->fullName() << NL;
@@ -132,21 +132,24 @@ void Report::printUpdates()
 {
   printHeader("Updates");
 
+  const auto start = stream().tellp();
+
   for(const InstallTicket &ticket : m_receipt->updates()) {
     const Package *pkg = ticket.version->package();
     const Registry::Entry &regEntry = ticket.regEntry;
     const VersionSet &versions = pkg->versions();
 
+    if(stream().tellp() != start)
+      stream() << NL;
+
     stream() << pkg->fullName() << ':' << NL;
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
-      if(ver->code() <= regEntry.version)
+      if(ver->code() <= regEntry.versionCode)
         break;
 
       printVersion(ver);
     }
-
-    stream() << NL;
   }
 }
 
@@ -154,10 +157,14 @@ void Report::printErrors()
 {
   printHeader("Errors");
 
+  const auto start = stream().tellp();
+
   for(const Receipt::Error &err : m_receipt->errors()) {
+    if(stream().tellp() != start)
+      stream() << NL;
+
     stream() << err.title << ':' << NL;
     printIndented(err.message);
-    stream() << "\n";
   }
 }
 
@@ -167,4 +174,23 @@ void Report::printRemovals()
 
   for(const Path &path : m_receipt->removals())
     stream() << path.join() << NL;
+}
+
+History::History(const Package *pkg)
+  : ReportDialog(), m_package(pkg)
+{
+}
+
+void History::fillReport()
+{
+  SetWindowText(handle(), AUTO_STR("Package History"));
+  SetWindowText(getControl(IDC_LABEL),
+    make_autostring(m_package->name()).c_str());
+
+  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
+    if(stream().tellp())
+      stream() << NL;
+
+    printVersion(ver);
+  }
 }

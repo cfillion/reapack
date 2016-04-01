@@ -48,7 +48,7 @@ void ListView::addColumn(const Column &col)
   LVCOLUMN item{};
 
   item.mask |= LVCF_WIDTH;
-  item.cx = col.width;
+  item.cx = adjustWidth(col.width);
 
   item.mask |= LVCF_TEXT;
   item.pszText = const_cast<auto_char *>(col.text.c_str());
@@ -111,7 +111,7 @@ void ListView::removeRow(const int userIndex)
 
 void ListView::resizeColumn(const int index, const int width)
 {
-  ListView_SetColumnWidth(handle(), index, width);
+  ListView_SetColumnWidth(handle(), index, adjustWidth(width));
 }
 
 void ListView::sort()
@@ -277,7 +277,7 @@ void ListView::handleColumnClick(LPARAM lParam)
 
 int ListView::translate(const int userIndex) const
 {
-  if(m_sortColumn < 0)
+  if(m_sortColumn < 0 || userIndex < 0)
     return userIndex;
 
   for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
@@ -295,13 +295,27 @@ int ListView::translate(const int userIndex) const
 
 int ListView::translateBack(const int internalIndex) const
 {
-  if(m_sortColumn < 0)
+  if(m_sortColumn < 0 || internalIndex < 0)
     return internalIndex;
 
   LVITEM item{};
   item.iItem = internalIndex;
   item.mask |= LVIF_PARAM;
-  ListView_GetItem(handle(), &item);
 
-  return (int)item.lParam;
+  if(ListView_GetItem(handle(), &item))
+    return (int)item.lParam;
+  else
+    return -1;
+}
+
+int ListView::adjustWidth(const int points)
+{
+#ifdef _WIN32
+  if(points < 1)
+    return points;
+  else
+    return (int)ceil(points * 0.863); // magic number to make pretty sizes...
+#else
+  return points;
+#endif
 }

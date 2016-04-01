@@ -22,6 +22,7 @@
 
 #include <sstream>
 
+class Package;
 class Receipt;
 class Version;
 
@@ -53,12 +54,23 @@ protected:
   void fillReport() override;
 
 private:
-  void printNewPackages();
+  void printInstalls();
   void printUpdates();
   void printErrors();
   void printRemovals();
 
   const Receipt *m_receipt;
+};
+
+class History : public ReportDialog {
+public:
+  History(const Package *);
+
+protected:
+  void fillReport() override;
+
+private:
+  const Package *m_package;
 };
 
 #endif

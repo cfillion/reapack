@@ -57,6 +57,7 @@ public:
   std::vector<int> selection() const;
   int itemUnderMouse() const;
   int rowCount() const { return (int)m_rows.size(); }
+  int columnCount() const { return m_columnSize; }
   bool empty() const { return rowCount() < 1; }
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
@@ -66,6 +67,7 @@ protected:
   void onNotify(LPNMHDR, LPARAM) override;
 
 private:
+  static int adjustWidth(int);
   void setExStyle(int style, bool enable);
   void addColumn(const Column &);
   void setSortArrow(bool);

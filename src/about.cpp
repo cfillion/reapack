@@ -24,12 +24,12 @@
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
+#include "report.hpp"
 #include "resource.hpp"
 #include "richedit.hpp"
 #include "tabbar.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
 using namespace std;
@@ -53,15 +53,8 @@ void About::onInit()
 
   m_cats->onSelect(bind(&About::updatePackages, this));
 
-#ifdef _WIN32
-  // dirty hacks...
-  const int NAME_SIZE = 330;
-#else
-  const int NAME_SIZE = 382;
-#endif
-
   m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR("Name"), NAME_SIZE},
+    {AUTO_STR("Name"), 382},
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 90},
   });
@@ -80,12 +73,12 @@ void About::onInit()
   populate();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_cats->resizeColumn(0, LVSCW_AUTOSIZE_USEHEADER);
-  m_packages->resizeColumn(2, LVSCW_AUTOSIZE_USEHEADER);
+  m_cats->resizeColumn(m_cats->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+  m_packages->resizeColumn(m_packages->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
 }
 
-void About::onCommand(const int id)
+void About::onCommand(const short id, short)
 {
   switch(id) {
   case IDC_WEBSITE:
@@ -109,6 +102,7 @@ void About::onCommand(const int id)
       openLink(m_websiteLinks[id & 0xff]);
     else if(id >> 8 == IDC_DONATE)
       openLink(m_donationLinks[id & 0xff]);
+    break;
   }
 }
 
@@ -192,10 +186,9 @@ void About::updatePackages()
     const Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->name());
     const auto_string &version = make_autostring(lastVer->name());
-    const auto_string &author = make_autostring(lastVer->author());
+    const auto_string &author = make_autostring(lastVer->displayAuthor());
 
-    m_packages->addRow({name, version,
-      author.empty() ? AUTO_STR("Unknown") : author});
+    m_packages->addRow({name, version, author});
   }
 
   m_currentCat = catIndex;
@@ -240,8 +233,6 @@ void About::updateInstalledFiles()
       stream << path.join() << "\r\n";
 
     SetWindowText(m_installedFiles, make_autostring(stream.str()).c_str());
-
-    hide(getControl(IDC_INSTALL));
   }
 }
 
@@ -249,22 +240,23 @@ void About::selectLink(const int ctrl, const std::vector<const Link *> &links)
 {
   const int count = (int)links.size();
 
-  if(count > 1) {
-    Menu menu;
-
-    for(int i = 0; i < count; i++) {
-      const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
-      menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
-    }
-
-    RECT rect;
-    GetWindowRect(getControl(ctrl), &rect);
-    menu.show(rect.left, rect.bottom - 1, handle());
-  }
-  else if(count == 1)
-    openLink(links.front());
-
   m_tabs->setFocus();
+
+  if(count == 1) {
+    openLink(links.front());
+    return;
+  }
+
+  Menu menu;
+
+  for(int i = 0; i < count; i++) {
+    const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
+    menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
+  }
+
+  RECT rect;
+  GetWindowRect(getControl(ctrl), &rect);
+  menu.show(rect.left, rect.bottom - 1, handle());
 }
 
 void About::openLink(const Link *link)
@@ -282,23 +274,4 @@ void About::packageHistory()
 
   const Package *pkg = m_packagesData->at(index);
   Dialog::Show<History>(instance(), handle(), pkg);
-}
-
-History::History(const Package *pkg)
-  : ReportDialog(), m_package(pkg)
-{
-}
-
-void History::fillReport()
-{
-  SetWindowText(handle(), AUTO_STR("Package History"));
-  SetWindowText(getControl(IDC_LABEL),
-    make_autostring(m_package->name()).c_str());
-
-  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
-    if(stream().tellp())
-      stream() << NL;
-
-    printVersion(ver);
-  }
 }

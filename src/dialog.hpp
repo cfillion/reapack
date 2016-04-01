@@ -114,8 +114,8 @@ protected:
   virtual void onInit();
   virtual void onShow();
   virtual void onHide();
-  virtual void onTimer(int);
-  virtual void onCommand(int);
+  virtual void onTimer(int id);
+  virtual void onCommand(short id, short event);
   virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onContextMenu(HWND, int x, int y);
 

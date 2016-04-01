@@ -49,7 +49,7 @@ Transaction::Transaction()
     if(m_installQueue.empty())
       finish();
     else
-      installQueued();
+      runTasks();
   });
 }
 
@@ -61,11 +61,10 @@ Transaction::~Transaction()
   delete m_registry;
 }
 
-void Transaction::synchronize(const Remote &remote, const bool isUserAction)
+void Transaction::synchronize(const Remote &remote, const bool autoInstall)
 {
-  // show the report dialog even if no task are ran
-  if(isUserAction)
-    m_receipt.setEnabled(true);
+  // show the report dialog or "nothing to do" even if no task are ran
+  m_receipt.setEnabled(true);
 
   fetchIndex(remote, [=] {
     IndexPtr ri;
@@ -87,10 +86,27 @@ void Transaction::synchronize(const Remote &remote, const bool isUserAction)
     m_registry->savepoint();
 
     for(const Package *pkg : ri->packages())
-      install(pkg->lastVersion());
+      synchronize(pkg, autoInstall);
 
     m_registry->restore();
   });
+}
+
+void Transaction::synchronize(const Package *pkg, const bool autoInstall)
+{
+  const auto &regEntry = m_registry->getEntry(pkg);
+
+  if(!regEntry.id && !autoInstall)
+    return;
+
+  const Version *ver = pkg->lastVersion();
+
+  if(regEntry.versionCode == ver->code()) {
+    if(allFilesExists(ver->files()))
+      return; // latest version is really installed, nothing to do here!
+  }
+
+  install(ver, regEntry);
 }
 
 void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
@@ -127,19 +143,20 @@ void Transaction::saveIndex(Download *dl, const string &name)
 
 void Transaction::install(const Version *ver)
 {
-  const Package *pkg = ver->package();
-  const Registry::Entry &regEntry = m_registry->getEntry(pkg);
+  install(ver, m_registry->getEntry(ver->package()));
+}
 
-  InstallTicket::Type type = InstallTicket::Install;
+void Transaction::install(const Version *ver,
+  const Registry::Entry &regEntry)
+{
+  m_receipt.setEnabled(true);
 
-  if(regEntry.id) {
-    if(regEntry.version == ver->code()) {
-      if(allFilesExists(ver->files()))
-        return; // latest version is really installed, nothing to do here!
-    }
-    else if(regEntry.version < ver->code())
-      type = InstallTicket::Upgrade;
-  }
+  InstallTicket::Type type;
+
+  if(regEntry.id && regEntry.versionCode < ver->code())
+    type = InstallTicket::Upgrade;
+  else
+    type = InstallTicket::Install;
 
   // prevent file conflicts (don't worry, the registry push is reverted later)
   try {
@@ -163,21 +180,11 @@ void Transaction::install(const Version *ver)
   }
 
   // all green! (pronounce with a japanese accent)
-  IndexPtr ri = pkg->category()->index()->shared_from_this();
+  IndexPtr ri = ver->package()->category()->index()->shared_from_this();
   if(!m_indexes.count(ri))
     m_indexes.insert(ri);
 
   m_installQueue.push({type, ver, regEntry});
-}
-
-void Transaction::installQueued()
-{
-  while(!m_installQueue.empty()) {
-    installTicket(m_installQueue.front());
-    m_installQueue.pop();
-  }
-
-  runTasks();
 }
 
 void Transaction::installTicket(const InstallTicket &ticket)
@@ -312,6 +319,11 @@ void Transaction::addTask(Task *task)
 
 void Transaction::runTasks()
 {
+  while(!m_installQueue.empty()) {
+    installTicket(m_installQueue.front());
+    m_installQueue.pop();
+  }
+
   while(!m_taskQueue.empty()) {
     m_taskQueue.front()->start();
     m_taskQueue.pop();

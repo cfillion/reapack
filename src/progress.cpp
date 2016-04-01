@@ -38,7 +38,7 @@ void Progress::onInit()
   SetWindowText(m_label, AUTO_STR("Initializing..."));
 }
 
-void Progress::onCommand(const int id)
+void Progress::onCommand(const short id, short)
 {
   switch(id) {
   case IDCANCEL:
