@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="af524ffe15f8fe1d5f1ce07f3e14675c99fe7686" name="ReaPack2">
+<index version="1" commit="0b2830327f2246bb80f0ba3e34798020ff533a6b" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -43,14 +43,17 @@ Other notable changes:
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack64.dll</source>
       </version>
-      <version name="0.9-beta" author="cfillion" time="2016-04-02T03:00:49Z">
+      <version name="0.9-beta" author="cfillion" time="2016-04-02T16:48:27Z">
         <changelog><![CDATA[Added:
 + add an Apply button in the configuration dialog
 + add support for JSFXs
-+ drop .ReaPackRemote files (import directly from the index URL instead)
 + implement multi-selection in the configuration dialog
++ import repositories directly from the index URL
 + new "Install new packages automatically" option
 + new Package Browser feature with downgrading capability and list of obsolete packages
+--
+Removed:
+- drop import from .ReaPackRemote files
 --
 Changed:
 * don't error out when failing to download a fresh index if a stale one is cached
