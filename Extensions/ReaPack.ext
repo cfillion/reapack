@@ -9,10 +9,13 @@
   Added:
   + add an Apply button in the configuration dialog
   + add support for JSFXs
-  + drop .ReaPackRemote files (import directly from the index URL instead)
   + implement multi-selection in the configuration dialog
+  + import repositories directly from the index URL
   + new "Install new packages automatically" option
   + new Package Browser feature with downgrading capability and list of obsolete packages
+  --
+  Removed:
+  - drop import from .ReaPackRemote files
   --
   Changed:
   * don't error out when failing to download a fresh index if a stale one is cached
