@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="af524ffe15f8fe1d5f1ce07f3e14675c99fe7686" name="ReaPack">
+<index version="1" commit="af524ffe15f8fe1d5f1ce07f3e14675c99fe7686" name="ReaPack2">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -56,7 +56,7 @@ Changed:
 * don't error out when failing to download a fresh index if a stale one is cached
 * enhance behavior of the "Install this repository" button
 * enhance the "download failed" error messages when importing a repository
-* fetch fresh index files immediately without waiting for a tasks to finish
+* fetch fresh index files immediately without waiting for tasks to finish
 * give a vertical bias to the default dialog position
 * keep a copy of the package authors in the registry (breaking change – remove registry.db)
 * update to Visual Studio 2015 for Windows builds
