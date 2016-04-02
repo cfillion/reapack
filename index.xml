@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="08fcfd31a1dac6757285e8acd23fc9bda23ae021">
+<index version="1" commit="af524ffe15f8fe1d5f1ce07f3e14675c99fe7686" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -43,6 +43,29 @@ Other notable changes:
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v0.8-beta/reaper_reapack64.dll</source>
       </version>
+      <version name="0.9-beta" author="cfillion" time="2016-04-02T03:00:49Z">
+        <changelog><![CDATA[Added:
++ add an Apply button in the configuration dialog
++ add support for JSFXs
++ drop .ReaPackRemote files (import directly from the index URL instead)
++ implement multi-selection in the configuration dialog
++ new "Install new packages automatically" option
++ new Package Browser feature with downgrading capability and list of obsolete packages
+--
+Changed:
+* don't error out when failing to download a fresh index if a stale one is cached
+* enhance behavior of the "Install this repository" button
+* enhance the "download failed" error messages when importing a repository
+* fetch fresh index files immediately without waiting for a tasks to finish
+* give a vertical bias to the default dialog position
+* keep a copy of the package authors in the registry (breaking change – remove registry.db)
+* update to Visual Studio 2015 for Windows builds
+* use the same formatting in the report dialog as in the package history dialog]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v0.9-beta/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v0.9-beta/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v0.9-beta/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v0.9-beta/reaper_reapack64.dll</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -69,6 +92,7 @@ GNU Lesser General Public License.\par}
 }
 ]]></description>
     <link rel="website" href="https://github.com/cfillion/reapack">Homepage</link>
+    <link rel="website" href="https://github.com/cfillion/reapack/wiki">Wiki</link>
     <link rel="website" href="https://github.com/cfillion/reapack/issues">Bug Tracker</link>
   </metadata>
 </index>
