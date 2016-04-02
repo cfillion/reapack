@@ -108,12 +108,7 @@ void About::onCommand(const int id, int)
 
 void About::onContextMenu(HWND target, const int x, const int y)
 {
-  if(target != m_packages->handle())
-    return;
-
-  const int packageIndex = m_packages->currentIndex();
-
-  if(packageIndex < 0)
+  if(target != m_packages->handle() || m_packages->currentIndex() < 0)
     return;
 
   Menu menu;

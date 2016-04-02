@@ -364,6 +364,10 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
   if(!parent)
     parent = m_mainWindow;
 
+  // I don't know why, but at least on OSX giving the manager window handle
+  // (in `parent`) to the progress dialog prevents it from being shown at all
+  // while still taking the focus away from the manager dialog.
+
   DownloadQueue *queue = new DownloadQueue;
   Dialog *progress = Dialog::Create<Progress>(m_instance, m_mainWindow, queue);
 
@@ -388,16 +392,11 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
 
   queue->onDone(load);
 
-  // I don't know why, but at least on OSX giving the manager window handle
-  // (in `parent`) to the progress dialog prevents it from being shown at all
-  // while still taking the focus away from the manager dialog.
-
   for(const Remote &remote : remotes)
     fetchIndex(remote, queue, parent);
 
-  if(queue->idle()) {
+  if(queue->idle())
     load();
-  }
 }
 
 void ReaPack::fetchIndex(const Remote &remote, DownloadQueue *queue, HWND parent)

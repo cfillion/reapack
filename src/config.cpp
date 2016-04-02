@@ -26,8 +26,6 @@
 #include <swell/swell.h>
 #endif
 
-#include <reaper_plugin_functions.h>
-
 using namespace std;
 
 static const char *GLOBAL_GRP = "reapack";
