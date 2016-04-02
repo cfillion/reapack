@@ -546,10 +546,13 @@ void ReaPack::registerSelf()
     reg.commit();
   }
   catch(const reapack_error &e) {
-    char msg[4096] = {};
-    sprintf(msg,
-      "ReaPack could not register itself! Please report this issue.\n\n"
-      "Error description: %s", e.what());
-    ShowMessageBox(msg, "ReaPack", MB_OK);
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[255] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("ReaPack could not register itself! Please report this issue.\n\n")
+      AUTO_STR("Error description: %s"), desc.c_str());
+
+    MessageBox(Splash_GetWnd(), msg, AUTO_STR("ReaPack"), MB_OK);
   }
 }
