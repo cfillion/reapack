@@ -58,7 +58,7 @@ void Manager::onInit()
 #endif
 }
 
-void Manager::onCommand(const short id, short)
+void Manager::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_IMPORT:

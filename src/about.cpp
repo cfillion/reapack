@@ -78,7 +78,7 @@ void About::onInit()
 #endif
 }
 
-void About::onCommand(const short id, short)
+void About::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_WEBSITE:

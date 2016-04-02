@@ -96,7 +96,7 @@ void Browser::onInit()
   m_filterTimer = startTimer(200);
 }
 
-void Browser::onCommand(const short id, const short event)
+void Browser::onCommand(const int id, const int event)
 {
   namespace arg = std::placeholders;
 

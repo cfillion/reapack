@@ -31,7 +31,7 @@ public:
 
 protected:
   void onInit() override;
-  void onCommand(short, short) override;
+  void onCommand(int, int) override;
 
 private:
   void addDownload(Download *);

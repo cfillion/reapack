@@ -242,7 +242,7 @@ void Dialog::onTimer(int)
 {
 }
 
-void Dialog::onCommand(const short id, short)
+void Dialog::onCommand(const int id, int)
 {
   switch(id) {
   case IDOK:
