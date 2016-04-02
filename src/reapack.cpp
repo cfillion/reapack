@@ -33,7 +33,7 @@
 
 using namespace std;
 
-const string ReaPack::VERSION = "0.8-beta";
+const string ReaPack::VERSION = "0.9-beta";
 const string ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 
 #ifdef _WIN32

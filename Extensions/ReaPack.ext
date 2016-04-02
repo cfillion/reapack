@@ -1,4 +1,4 @@
-@version 0.8-beta
+@version 0.9-beta
 @author cfillion
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
@@ -6,38 +6,20 @@
   [win32] reaper_reapack32.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  Bug fixes:
-  # fix removal of unneeded files
-  # fix the post-update changelog
-  # fix version parsing for strings containing repeated digits (like 1.1.1)
-  # harden against directory traversal vulnerability
+  Added:
+  + add an Apply button in the configuration dialog
+  + add support for JSFXs
+  + drop .ReaPackRemote files (import directly from the index URL instead)
+  + implement multi-selection in the configuration dialog
+  + new "Install new packages automatically" option
+  + new Package Browser feature with downgrading capability and list of obsolete packages
   --
-  New features:
-  + add support for extension packages
-  + allow .ReaPackRemote import from an URL
-  + ensure ReaPack is installed at the right location at startup
-  + implement sorting in list view controls
-  + implement the About ReaPack menu action
-  + new About dialog for repositories
-  + new Package History dialog
-  + show the configuration dialog on first run
-  --
-  Other notable changes:
-  * add actions for "Import a repository" and "Manage repositories"
-  * add an accelerator to buttons (accessibility)
-  * detect stuck downloads without enforcing a global time limit
-  * don't register new script in the action list if the remote got disabled meanwhile
-  * don't register packages if they failed to install
-  * enhance error reporting when parsing index files
-  * hide the progress dialog before showing the report dialog
-  * keep track of the download progress internally and abort downloads almost immediately
-  * only show the source file's base name in the progress dialog
-  * only try to uninstall existing files
-  * optimize synchronization when processing up-to-date packages
-  * overhaul the default configuration (added ReaTeam's, MPL's and X-Raym's repositories)
-  * preserve the insertion order of remotes
-  * remove the cached index file when uninstalling a remote
-  * store unparsed versions in the registry (breaking change – remove registry.db)
-  * tidy up newlines in the report dialog
-  * unify the output filenames across every supported platforms
-  * workaround for deleting opened files on Windows
+  Changed:
+  * don't error out when failing to download a fresh index if a stale one is cached
+  * enhance behavior of the "Install this repository" button
+  * enhance the "download failed" error messages when importing a repository
+  * fetch fresh index files immediately without waiting for a tasks to finish
+  * give a vertical bias to the default dialog position
+  * keep a copy of the package authors in the registry (breaking change – remove registry.db)
+  * update to Visual Studio 2015 for Windows builds
+  * use the same formatting in the report dialog as in the package history dialog
