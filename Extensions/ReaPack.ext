@@ -15,6 +15,7 @@
   + new Package Browser feature with downgrading capability and list of obsolete packages
   --
   Removed:
+  - don't automatically synchronize newly-enabled remotes
   - drop import from .ReaPackRemote files
   --
   Changed:
