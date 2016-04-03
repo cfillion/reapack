@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="0b2830327f2246bb80f0ba3e34798020ff533a6b" name="ReaPack">
+<index version="1" commit="6eb10665d35cf9655a93aae2ae3c585e4a7120b0" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -53,6 +53,7 @@ Other notable changes:
 + new Package Browser feature with downgrading capability and list of obsolete packages
 --
 Removed:
+- don't automatically synchronize newly-enabled remotes
 - drop import from .ReaPackRemote files
 --
 Changed:
