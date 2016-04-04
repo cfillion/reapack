@@ -35,6 +35,9 @@ Transaction::Transaction()
 {
   m_registry = new Registry(Path::prefixRoot(Path::REGISTRY));
 
+  // don't keep pre-install pushes (for conflict checks); released in runTasks
+  m_registry->savepoint();
+
   m_downloadQueue.onAbort([=] {
     m_isCancelled = true;
 
@@ -78,17 +81,8 @@ void Transaction::synchronize(const Remote &remote, const bool autoInstall)
       return;
     }
 
-    // upgrade() will register all new packages to test for file conflicts.
-    // Once this is done and all possible installations are queued,
-    // we must restore the registry so the failed packages are not marked as
-    // installed, and to keep the old file list intact (this is needed for
-    // cleaning unused files)
-    m_registry->savepoint();
-
     for(const Package *pkg : ri->packages())
       synchronize(pkg, autoInstall);
-
-    m_registry->restore();
   });
 }
 
@@ -158,7 +152,7 @@ void Transaction::install(const Version *ver,
   else
     type = InstallTicket::Install;
 
-  // prevent file conflicts (don't worry, the registry push is reverted later)
+  // prevent file conflicts (don't worry, the registry push is reverted in runTasks)
   try {
     vector<Path> conflicts;
     m_registry->push(ver, &conflicts);
@@ -238,7 +232,6 @@ void Transaction::uninstall(const Remote &remote)
 
   for(const auto &entry : entries)
     uninstall(entry);
-
 }
 
 void Transaction::uninstall(const Registry::Entry &entry)
@@ -252,8 +245,9 @@ void Transaction::uninstall(const Registry::Entry &entry)
 
   registerInHost(false, entry);
 
-  // forget the package even if some files cannot be removed
-  m_registry->forget(entry);
+  // forget the package even if some files cannot be removed,
+  // once the pre-run savepoint is released
+  m_onRun.connect(bind(&Registry::forget, m_registry, entry));
 
   RemoveTask *task = new RemoveTask(files, this);
   task->onCommit([=] { m_receipt.addRemovals(task->removedFiles()); });
@@ -319,6 +313,12 @@ void Transaction::addTask(Task *task)
 
 void Transaction::runTasks()
 {
+  m_registry->restore();
+
+  // execute code waiting for the savepoint to be released
+  m_onRun();
+  m_onRun.disconnect_all_slots();
+
   while(!m_installQueue.empty()) {
     installTicket(m_installQueue.front());
     m_installQueue.pop();
@@ -328,6 +328,8 @@ void Transaction::runTasks()
     m_taskQueue.front()->start();
     m_taskQueue.pop();
   }
+
+  m_registry->savepoint(); // get ready for new tasks
 
   if(m_downloadQueue.idle())
     finish();

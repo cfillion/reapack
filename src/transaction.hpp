@@ -106,6 +106,7 @@ private:
   std::queue<InstallTicket> m_installQueue;
   std::queue<HostTicket> m_regQueue;
 
+  VoidSignal m_onRun;
   VoidSignal m_onFinish;
   CleanupHandler m_cleanupHandler;
 };
