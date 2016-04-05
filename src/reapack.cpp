@@ -478,7 +478,15 @@ Transaction *ReaPack::createTransaction()
     m_transaction = new Transaction;
   }
   catch(const reapack_error &e) {
-    ShowMessageBox(e.what(), "ReaPack – Fatal Error", 0);
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512] = {};
+    auto_snprintf(msg, sizeof(msg),
+      AUTO_STR("The following error occured while creating a transaction:\n\n%s"),
+      desc.c_str()
+    );
+
+    MessageBox(m_mainWindow, msg, AUTO_STR("ReaPack – Fatal Error"), MB_OK);
     return nullptr;
   }
 
