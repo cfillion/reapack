@@ -342,6 +342,14 @@ void ReaPack::browsePackages()
 
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
+  if(remotes.empty()) {
+    ShowMessageBox("No repository enabled!\r\n"
+      "Enable or import repositories from Extensions > ReaPack > Manage repositories.",
+      "ReaPack", 0);
+
+    return;
+  }
+
   fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
     m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, indexes, this);
     m_browser->show();
