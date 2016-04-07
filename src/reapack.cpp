@@ -313,6 +313,10 @@ void ReaPack::about(const Remote &remote, HWND parent)
     return;
 
   fetchIndex(remote, [=] (IndexPtr index) {
+    // do nothing if the index could not be loaded
+    if(!index)
+      return;
+
     const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
     if(ret == About::InstallResult) {
@@ -351,6 +355,14 @@ void ReaPack::browsePackages()
   }
 
   fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+    if(indexes.empty()) {
+      ShowMessageBox(
+        "The package browser cannot be opened because no repositories were successfully loaded.",
+        "Browse packages", MB_OK);
+
+      return;
+    }
+
     m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, indexes, this);
     m_browser->show();
     m_browser->setCloseHandler([=] (INT_PTR) {
@@ -364,7 +376,7 @@ void ReaPack::fetchIndex(const Remote &remote,
   const IndexCallback &callback, HWND parent)
 {
   fetchIndexes({remote}, [=] (const vector<IndexPtr> &indexes) {
-    callback(indexes.front());
+    callback(indexes.empty() ? nullptr : indexes.front());
   }, parent);
 }
 
