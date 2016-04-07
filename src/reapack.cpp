@@ -64,7 +64,8 @@ static void CleanupTempFiles()
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(),importAction(), configAction(),
     m_transaction(nullptr), m_progress(nullptr), m_browser(nullptr),
-    m_import(nullptr), m_manager(nullptr), m_instance(instance)
+    m_import(nullptr), m_manager(nullptr), m_loadingBrowser(false),
+    m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -343,6 +344,8 @@ void ReaPack::browsePackages()
     );
     return;
   }
+  else if(m_loadingBrowser)
+    return;
 
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
@@ -354,7 +357,11 @@ void ReaPack::browsePackages()
     return;
   }
 
+  m_loadingBrowser = true;
+
   fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+    m_loadingBrowser = false;
+
     if(indexes.empty()) {
       ShowMessageBox(
         "The package browser cannot be opened because no repositories were successfully loaded.",
