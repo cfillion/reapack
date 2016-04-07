@@ -134,7 +134,7 @@ void ReaPack::synchronizeAll()
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
   if(remotes.empty()) {
-    ShowMessageBox("No remote repository enabled, nothing to do!",
+    ShowMessageBox("No repository enabled, nothing to do!",
       "ReaPack", 0);
 
     return;
@@ -237,24 +237,23 @@ void ReaPack::import(const Remote &remote)
   if(!existing.isNull()) {
     if(existing.isProtected()) {
       ShowMessageBox(
-        "This remote is protected and cannot be overwritten.", Import::TITLE, MB_OK);
+        "This repository is protected and cannot be overwritten.", Import::TITLE, MB_OK);
 
       return;
     }
     else if(existing.url() != remote.url()) {
-      const int button = ShowMessageBox(
-        "This remote is already configured.\r\n"
-        "Do you want to overwrite the current remote?"
-        , Import::TITLE, MB_YESNO);
+      const string msg = remote.name() +
+        " is already configured with a different URL.\r\n"
+        "Do you want to overwrite it?";
 
-      if(button != IDYES)
+      if(ShowMessageBox(msg.c_str(), Import::TITLE, MB_YESNO) != IDYES)
         return;
     }
     else if(existing.isEnabled()) {
-      ShowMessageBox(
-        "This remote is already configured.\r\n"
-        "Nothing to do!"
-      , Import::TITLE, MB_OK);
+      const string msg = remote.name() +
+        " is already configured.\r\nNothing to do!";
+
+      ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
 
       return;
     }
@@ -263,6 +262,9 @@ void ReaPack::import(const Remote &remote)
       runTasks();
 
       m_config->write();
+
+      const string msg = remote.name() + " has been enabled.";
+      ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
 
       return;
     }
