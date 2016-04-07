@@ -135,7 +135,7 @@ void ReaPack::synchronizeAll()
 
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled, nothing to do!",
-      "ReaPack", 0);
+      "ReaPack", MB_OK);
 
     return;
   }
@@ -345,7 +345,7 @@ void ReaPack::browsePackages()
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled!\r\n"
       "Enable or import repositories from Extensions > ReaPack > Manage repositories.",
-      "ReaPack", 0);
+      "Browse packages", MB_OK);
 
     return;
   }
@@ -422,7 +422,7 @@ void ReaPack::fetchIndex(const Remote &remote, DownloadQueue *queue, HWND parent
       AUTO_STR("ReaPack could not download %s's index.\n\n")
 
       AUTO_STR("Try again later. ")
-      AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+      AUTO_STR("If the problem persist, contact the maintainer of this repository.\n\n")
 
       AUTO_STR("[Error description: %s]"),
       make_autostring(remote.name()).c_str(), make_autostring(desc).c_str()
@@ -464,7 +464,7 @@ IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
       AUTO_STR("ReaPack could not read %s's index.\n\n")
 
       AUTO_STR("Synchronize your packages and try again later.\n")
-      AUTO_STR("If the problem persist, contact the repository maintainer.\n\n")
+      AUTO_STR("If the problem persist, contact the maintainer of this repository.\n\n")
 
       AUTO_STR("[Error description: %s]"),
       make_autostring(remote.name()).c_str(), desc.c_str()
