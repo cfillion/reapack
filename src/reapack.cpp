@@ -403,13 +403,13 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
   queue->onDone(load);
 
   for(const Remote &remote : remotes)
-    fetchIndex(remote, queue, parent);
+    doFetchIndex(remote, queue, parent);
 
   if(queue->idle())
     load();
 }
 
-void ReaPack::fetchIndex(const Remote &remote, DownloadQueue *queue, HWND parent)
+void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue, HWND parent)
 {
   Download *dl = Index::fetch(remote);
 

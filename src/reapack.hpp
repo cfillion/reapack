@@ -76,6 +76,7 @@ public:
   void about(const std::string &, HWND parent);
   void about(const Remote &, HWND parent);
   void browsePackages();
+  void fetchIndex(const Remote &remote, const IndexCallback &, HWND);
   void fetchIndexes(const std::vector<Remote> &,
     const IndexesCallback &, HWND = nullptr);
 
@@ -87,8 +88,7 @@ private:
   Transaction *createTransaction();
   bool hitchhikeTransaction();
   void registerSelf();
-  void fetchIndex(const Remote &remote, const IndexCallback &, HWND);
-  void fetchIndex(const Remote &remote, DownloadQueue *, HWND);
+  void doFetchIndex(const Remote &remote, DownloadQueue *, HWND);
   IndexPtr loadIndex(const Remote &remote, HWND);
 
   std::map<int, ActionCallback> m_actions;
