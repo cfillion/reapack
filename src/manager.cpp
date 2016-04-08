@@ -30,7 +30,7 @@
 using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-       ACTION_AUTOINSTALL };
+       ACTION_AUTOINSTALL, ACTION_SELECT, ACTION_UNSELECT };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -64,6 +64,9 @@ void Manager::onCommand(const int id, int)
   case IDC_IMPORT:
     m_reapack->importRemote();
     break;
+  case IDC_OPTIONS:
+    options();
+    break;
   case ACTION_ENABLE:
     setRemoteEnabled(true);
     break;
@@ -77,8 +80,13 @@ void Manager::onCommand(const int id, int)
     m_autoInstall = !m_autoInstall.value_or(m_config->autoInstall());
     enable(m_apply);
     break;
-  case IDC_OPTIONS:
-    options();
+  case ACTION_SELECT:
+    m_list->selectAll();
+    SetFocus(m_list->handle());
+    break;
+  case ACTION_UNSELECT:
+    m_list->unselectAll();
+    SetFocus(m_list->handle());
     break;
   case IDOK:
   case IDAPPLY:
@@ -114,10 +122,15 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   const int index = m_list->itemUnderMouse();
   const Remote &remote = getRemote(index);
 
-  if(remote.isNull())
-    return;
 
   Menu menu;
+
+  if(remote.isNull()) {
+    menu.addAction(AUTO_STR("&Select all"), ACTION_SELECT);
+    menu.addAction(AUTO_STR("&Unselect all"), ACTION_UNSELECT);
+    menu.show(x, y, handle());
+    return;
+  }
 
   const UINT enableAction =
     menu.addAction(AUTO_STR("&Enable"), ACTION_ENABLE);
@@ -141,15 +154,13 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   menu.disable(disableAction);
   menu.disable(uninstallAction);
 
-  if(!remote.isNull()) {
-    if(isRemoteEnabled(remote))
-      menu.enable(disableAction);
-    else
-      menu.enable(enableAction);
+  if(isRemoteEnabled(remote))
+    menu.enable(disableAction);
+  else
+    menu.enable(enableAction);
 
-    if(!remote.isProtected())
-      menu.enable(uninstallAction);
-  }
+  if(!remote.isProtected())
+    menu.enable(uninstallAction);
 
   menu.show(x, y, handle());
 }
