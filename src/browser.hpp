@@ -39,7 +39,7 @@ typedef std::shared_ptr<const Index> IndexPtr;
 class Browser : public Dialog {
 public:
   Browser(ReaPack *);
-  void refresh();
+  void refresh(bool stale = false);
 
 protected:
   void onInit() override;
@@ -112,6 +112,7 @@ private:
 
   std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;
+  bool m_loading;
   bool m_loaded;
   bool m_checkFilter;
   int m_currentIndex;

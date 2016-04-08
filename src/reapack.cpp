@@ -355,19 +355,16 @@ void ReaPack::browsePackages()
 }
 
 void ReaPack::fetchIndex(const Remote &remote,
-  const IndexCallback &callback, HWND parent)
+  const IndexCallback &callback, HWND parent, const bool stale)
 {
   fetchIndexes({remote}, [=] (const vector<IndexPtr> &indexes) {
     callback(indexes.empty() ? nullptr : indexes.front());
-  }, parent);
+  }, parent, stale);
 }
 
 void ReaPack::fetchIndexes(const vector<Remote> &remotes,
-  const IndexesCallback &callback, HWND parent)
+  const IndexesCallback &callback, HWND parent, const bool stale)
 {
-  if(!parent)
-    parent = m_mainWindow;
-
   // I don't know why, but at least on OSX giving the manager window handle
   // (in `parent`) to the progress dialog prevents it from being shown at all
   // while still taking the focus away from the manager dialog.
@@ -397,15 +394,16 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
   queue->onDone(load);
 
   for(const Remote &remote : remotes)
-    doFetchIndex(remote, queue, parent);
+    doFetchIndex(remote, queue, parent, stale);
 
   if(queue->idle())
     load();
 }
 
-void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue, HWND parent)
+void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
+  HWND parent, const bool stale)
 {
-  Download *dl = Index::fetch(remote);
+  Download *dl = Index::fetch(remote, stale);
 
   if(!dl)
     return;

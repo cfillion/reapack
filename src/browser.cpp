@@ -42,11 +42,13 @@ enum Action {
   ACTION_HISTORY,
   ACTION_ABOUT,
   ACTION_RESET_ALL,
+  ACTION_REFRESH,
+  ACTION_MANAGE,
 };
 
 Browser::Browser(ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
-    m_loaded(false), m_checkFilter(false), m_currentIndex(-1)
+    m_loading(false), m_loaded(false), m_checkFilter(false), m_currentIndex(-1)
 {
 }
 
@@ -154,6 +156,12 @@ void Browser::onCommand(const int id, const int event)
     break;
   case ACTION_RESET_ALL:
     selectionDo(bind(&Browser::resetAction, this, arg::_1));
+    break;
+  case ACTION_REFRESH:
+    refresh(true);
+    break;
+  case ACTION_MANAGE:
+    m_reapack->manageRemotes();
     break;
   case IDOK:
   case IDAPPLY:
@@ -283,6 +291,10 @@ void Browser::selectionMenu()
   if(!m_list->hasSelection())
     menu.disableAll();
 
+  menu.addSeparator();
+  menu.addAction(AUTO_STR("Re&fresh repositories"), ACTION_REFRESH);
+  menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
+
   menu.show(rect.left, rect.bottom - 1, handle());
 }
 
@@ -305,8 +317,11 @@ void Browser::checkFilter()
   }
 }
 
-void Browser::refresh()
+void Browser::refresh(const bool stale)
 {
+  if(m_loading)
+    return;
+
   const vector<Remote> &remotes = m_reapack->config()->remotes()->getEnabled();
 
   if(!m_loaded && remotes.empty()) {
@@ -321,7 +336,10 @@ void Browser::refresh()
     return;
   }
 
+  m_loading = true;
+
   m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+    m_loading = false;
     m_indexes = indexes;
     populate();
 
@@ -329,7 +347,7 @@ void Browser::refresh()
       m_loaded = true;
       show();
     }
-  });
+  }, handle(), stale);
 }
 
 void Browser::populate()
