@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "package.hpp"
+#include "remote.hpp"
 
 class Category;
 typedef std::vector<const Category *> CategoryList;
@@ -47,12 +48,13 @@ public:
 
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
-  static IndexPtr load(const std::string &name, const char *data = 0);
+  static IndexPtr load(const Remote &, const char *data = 0);
   static Download *fetch(const Remote &, bool stale = false);
 
-  Index(const std::string &name);
+  Index(const Remote &);
   ~Index();
 
+  const Remote &remote() const { return m_remote; }
   void setName(const std::string &);
   const std::string &name() const { return m_name; }
 
@@ -71,6 +73,7 @@ public:
 private:
   static void loadV1(TiXmlElement *, Index *);
 
+  Remote m_remote;
   std::string m_name;
   std::string m_about;
   LinkMap m_links;

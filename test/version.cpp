@@ -11,12 +11,13 @@
 using namespace std;
 
 #define MAKE_VERSION \
-  Index ri("Remote Name"); \
+  Index ri(REMOTE); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version ver("1", &pkg);
 
 static const char *M = "[version]";
+static const Remote REMOTE("Remote Name", "remote_url");
 
 TEST_CASE("invalid", M) {
   try {
@@ -120,7 +121,7 @@ TEST_CASE("version full name", M) {
   }
 
   SECTION("with index") {
-    Index ri("Remote Name");
+    Index ri(REMOTE);
     Category cat("Category Name", &ri);
     Package pkg(Package::UnknownType, "file.name", &cat);
     Version ver("1.0", &pkg);

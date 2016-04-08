@@ -473,7 +473,7 @@ void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue, HWND pare
 IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
 {
   try {
-    return Index::load(remote.name());
+    return Index::load(remote);
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
@@ -569,7 +569,7 @@ void ReaPack::runTasks()
 void ReaPack::registerSelf()
 {
   // hard-coding galore!
-  Index ri("ReaPack");
+  Index ri(m_config->remotes()->get("ReaPack"));
   Category cat("Extensions", &ri);
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
   Version ver(VERSION, &pkg);

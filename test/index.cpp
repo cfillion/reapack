@@ -11,11 +11,13 @@ using namespace std;
 
 static const char *M = "[index]";
 
+#define REMOTE(x) Remote{x, "url"}
+
 TEST_CASE("index file not found", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("404");
+    IndexPtr ri = Index::load(REMOTE("404"));
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -25,12 +27,12 @@ TEST_CASE("index file not found", M) {
 
 TEST_CASE("load index from raw data", M) {
   SECTION("valid") {
-    Index::load("", "<index version=\"1\"/>\n");
+    Index::load({}, "<index version=\"1\"/>\n");
   }
 
   SECTION("broken") {
     try {
-      Index::load("", "<index>\n");
+      Index::load({}, "<index>\n");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -43,7 +45,7 @@ TEST_CASE("broken index", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("broken");
+    IndexPtr ri = Index::load(REMOTE("broken"));
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -55,7 +57,7 @@ TEST_CASE("wrong root tag name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("wrong_root");
+    IndexPtr ri = Index::load(REMOTE("wrong_root"));
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -67,7 +69,7 @@ TEST_CASE("invalid version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("invalid_version");
+    IndexPtr ri = Index::load(REMOTE("invalid_version"));
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -79,7 +81,7 @@ TEST_CASE("future version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("future_version");
+    IndexPtr ri = Index::load(REMOTE("future_version"));
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -90,12 +92,12 @@ TEST_CASE("future version", M) {
 TEST_CASE("unicode index path", M) {
   UseRootPath root(RIPATH);
 
-  IndexPtr ri = Index::load("Новая папка");
+  IndexPtr ri = Index::load(REMOTE("Новая папка"));
   REQUIRE(ri->name() == "Новая папка");
 }
 
 TEST_CASE("add a category", M) {
-  Index ri("a");
+  Index ri(REMOTE("a"));
   Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
   Version *ver = new Version("1", pack);
@@ -116,8 +118,8 @@ TEST_CASE("add a category", M) {
 }
 
 TEST_CASE("add owned category", M) {
-  Index ri1("a");
-  Index ri2("b");
+  Index ri1(REMOTE("a"));
+  Index ri2(REMOTE("b"));
 
   Category *cat = new Category("name", &ri1);
 
@@ -132,14 +134,14 @@ TEST_CASE("add owned category", M) {
 }
 
 TEST_CASE("drop empty category", M) {
-  Index ri("a");
+  Index ri(REMOTE("a"));
   ri.addCategory(new Category("a", &ri));
 
   REQUIRE(ri.categories().empty());
 }
 
 TEST_CASE("add a package", M) {
-  Index ri("a");
+  Index ri(REMOTE("a"));
   Category cat("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", &cat);
   Version *ver = new Version("1", pack);
@@ -199,13 +201,13 @@ TEST_CASE("category full name", M) {
   Category cat1("Category Name");
   REQUIRE(cat1.fullName() == "Category Name");
 
-  Index ri("Remote Name");
+  Index ri(REMOTE("Remote Name"));
   Category cat2("Category Name", &ri);
   REQUIRE(cat2.fullName() == "Remote Name/Category Name");
 }
 
 TEST_CASE("repository description", M) {
-  Index ri("Remote Name");
+  Index ri(REMOTE("Remote Name"));
   CHECK(ri.aboutText().empty());
 
   ri.setAboutText("Hello World");
@@ -213,7 +215,7 @@ TEST_CASE("repository description", M) {
 }
 
 TEST_CASE("repository links", M) {
-  Index ri("Remote name");
+  Index ri(REMOTE("Remote name"));
   CHECK(ri.links(Index::WebsiteLink).empty());
   CHECK(ri.links(Index::DonationLink).empty());
 
@@ -247,6 +249,13 @@ TEST_CASE("link type from string", M) {
   REQUIRE(Index::linkTypeFor("bacon") == Index::WebsiteLink);
 }
 
+TEST_CASE("get index repository", M) {
+  const Remote remote("Name", "Url");
+  const Index ri(remote);
+
+  REQUIRE(ri.remote() == remote);
+}
+
 TEST_CASE("set index name", M) {
   SECTION("set") {
     Index ri({});
@@ -255,7 +264,7 @@ TEST_CASE("set index name", M) {
   }
 
   SECTION("override") {
-    Index ri("hello");
+    Index ri(REMOTE("hello"));
     try {
       ri.setName("world");
       FAIL();

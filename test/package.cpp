@@ -12,6 +12,8 @@ using namespace std;
 
 static const char *M = "[package]";
 
+static const Remote REMOTE("Remote Name", "remote_url");
+
 TEST_CASE("package type from string", M) {
   SECTION("unknown")
     REQUIRE(Package::typeFor("yoyo") == Package::UnknownType);
@@ -59,7 +61,7 @@ TEST_CASE("empty package name", M) {
 }
 
 TEST_CASE("package versions are sorted", M) {
-  Index ri("Remote Name");
+  Index ri(REMOTE);
   Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "a", &cat);
@@ -108,7 +110,7 @@ TEST_CASE("add owned version", M) {
 }
 
 TEST_CASE("target path for unknown package type", M) {
-  Index ri("name");
+  Index ri(REMOTE);
   Category cat("name", &ri);
 
   Package pack(Package::UnknownType, "a", &cat);
@@ -117,7 +119,7 @@ TEST_CASE("target path for unknown package type", M) {
 }
 
 TEST_CASE("script target path", M) {
-  Index ri("Remote Name");
+  Index ri(REMOTE);
   Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "file.name", &cat);
@@ -134,7 +136,7 @@ TEST_CASE("script target path", M) {
 }
 
 TEST_CASE("limited directory traversal from category", M) {
-  Index ri("Remote Name");
+  Index ri(REMOTE);
   Category cat("../..", &ri);
 
   Package pack(Package::ScriptType, "file.name", &cat);
@@ -159,7 +161,7 @@ TEST_CASE("target path without category", M) {
 }
 
 TEST_CASE("extension target path", M) {
-  Index ri("Remote Name");
+  Index ri(REMOTE);
   Category cat("Category Name", &ri);
 
   Package pack(Package::ExtensionType, "file.name", &cat);
@@ -173,7 +175,7 @@ TEST_CASE("extension target path", M) {
 }
 
 TEST_CASE("effect target path", M) {
-  Index ri("Remote Name");
+  Index ri(REMOTE);
   Category cat("Category Name", &ri);
 
   Package pack(Package::EffectType, "file.name", &cat);
@@ -203,7 +205,7 @@ TEST_CASE("full name", M) {
   }
 
   SECTION("with index") {
-    Index ri("Remote Name");
+    Index ri(REMOTE);
     Category cat("Category Name", &ri);
     Package pack(Package::ScriptType, "file.name", &cat);
 

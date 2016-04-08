@@ -39,18 +39,18 @@ auto Index::linkTypeFor(const char *rel) -> LinkType
 {
   if(!strcmp(rel, "donation"))
     return DonationLink;
-
-  return WebsiteLink;
+  else
+    return WebsiteLink;
 }
 
-IndexPtr Index::load(const string &name, const char *data)
+IndexPtr Index::load(const Remote &remote, const char *data)
 {
   TiXmlDocument doc;
 
   if(data)
     doc.Parse(data);
   else {
-    FILE *file = FS::open(pathFor(name));
+    FILE *file = FS::open(pathFor(remote.name()));
 
     if(!file)
       throw reapack_error(FS::lastError().c_str());
@@ -74,7 +74,7 @@ IndexPtr Index::load(const string &name, const char *data)
   if(!version)
     throw reapack_error("index version not found");
 
-  Index *ri = new Index(name);
+  Index *ri = new Index(remote);
 
   // ensure the memory is released if an exception is
   // thrown during the loading process
@@ -106,8 +106,8 @@ Download *Index::fetch(const Remote &remote, const bool stale)
   return new Download(remote.name() + ".xml", remote.url());
 }
 
-Index::Index(const string &name)
-  : m_name(name)
+Index::Index(const Remote &remote)
+  : m_remote(remote), m_name(remote.name())
 {
 }
 

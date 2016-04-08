@@ -14,7 +14,7 @@ using namespace std;
 static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
-  Index ri("Remote Name"); \
+  Index ri({"Remote Name", "remote_url"}); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version *ver = new Version("1.0", &pkg); \
@@ -131,7 +131,7 @@ TEST_CASE("file conflicts", M) {
     reg.push(ver);
   }
 
-  Index ri("Remote Name");
+  Index ri({"Remote Name", "remote_url"});
   Category cat("Category Name", &ri);
   Package pkg(Package::ScriptType, "Duplicate Package", &cat);
   Version *ver = new Version("1.0", &pkg);

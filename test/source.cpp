@@ -9,6 +9,7 @@
 using namespace std;
 
 static const char *M = "[source]";
+static const Remote REMOTE("Remote Name", "remote_url");
 
 TEST_CASE("convert platforms", M) {
   SECTION("unknown") {
@@ -113,7 +114,7 @@ TEST_CASE("full name with version", M) {
 }
 
 TEST_CASE("source target path", M) {
-  Index ri("Index Name");
+  Index ri(REMOTE);
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
@@ -122,7 +123,7 @@ TEST_CASE("source target path", M) {
 
   Path expected;
   expected.append("Scripts");
-  expected.append("Index Name");
+  expected.append("Remote Name");
   expected.append("Category Name");
   expected.append("file.name");
 
@@ -130,7 +131,7 @@ TEST_CASE("source target path", M) {
 }
 
 TEST_CASE("source target path with parent directory traversal", M) {
-  Index ri("Index Name");
+  Index ri(REMOTE);
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
@@ -139,7 +140,7 @@ TEST_CASE("source target path with parent directory traversal", M) {
 
   Path expected;
   expected.append("Scripts");
-  expected.append("Index Name");
+  expected.append("Remote Name");
   // expected.append("Category Name"); // only the category can be bypassed!
   expected.append("file.name");
 

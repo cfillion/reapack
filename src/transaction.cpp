@@ -73,7 +73,7 @@ void Transaction::synchronize(const Remote &remote, const bool autoInstall)
     IndexPtr ri;
 
     try {
-      ri = Index::load(remote.name());
+      ri = Index::load(remote);
     }
     catch(const reapack_error &e) {
       // index file is invalid (load error)

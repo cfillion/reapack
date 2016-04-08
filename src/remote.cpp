@@ -177,3 +177,9 @@ vector<Remote> RemoteList::getEnabled() const
 
   return list;
 }
+
+bool Remote::operator==(const Remote &o) const
+{
+  return m_name == o.name() && m_url == o.url() &&
+    m_enabled == o.isEnabled() && m_protected == o.isProtected();
+}

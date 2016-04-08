@@ -56,6 +56,8 @@ public:
   bool isProtected() const { return m_protected; }
 
   bool operator<(const Remote &o) const { return m_name < o.name(); }
+  bool operator==(const Remote &o) const;
+  bool operator!=(const Remote &o) const { return !(*this == o); }
 
 private:
   std::string m_name;
