@@ -358,11 +358,15 @@ void Browser::populate()
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
-    std::vector<Entry> entries;
+    std::vector<Entry> oldEntries; // keep old entries in memory a bit longer
+    swap(m_entries, oldEntries);
+
+    m_currentIndex = -1;
+    m_visibleEntries.clear();
 
     for(IndexPtr index : m_indexes) {
       for(const Package *pkg : index->packages())
-        entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
+        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
 
       // obsolete packages
       for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
@@ -371,7 +375,7 @@ void Browser::populate()
         if(cat && cat->package(regEntry.package))
           continue;
 
-        entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
+        m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
       }
     }
 
@@ -381,11 +385,11 @@ void Browser::populate()
       const Entry &oldEntry = *actionIt->first;
       const Version *target = actionIt->second;
 
-      const auto &entryIt = find(entries.begin(), entries.end(), oldEntry);
+      const auto &entryIt = find(m_entries.begin(), m_entries.end(), oldEntry);
 
       actionIt = m_actions.erase(actionIt);
 
-      if(entryIt == entries.end())
+      if(entryIt == m_entries.end())
         continue;
 
       if(target) {
@@ -396,9 +400,6 @@ void Browser::populate()
 
       m_actions[&*entryIt] = target;
     }
-
-    m_currentIndex = -1;
-    m_entries.swap(entries);
 
     fillList();
   }
@@ -440,6 +441,15 @@ void Browser::fillList()
 {
   InhibitControl freeze(m_list);
 
+  // store the indexes to the selected entries if they still exists
+  // and m_visibleEntries hasn't been emptied
+  const auto selection = m_list->selection();
+  vector<size_t> selected(min(selection.size(), m_visibleEntries.size()));
+  for(size_t i = 0; i < selected.size(); i++) {
+    if(i < m_visibleEntries.size())
+      selected[i] = m_visibleEntries[selection[i]];
+  }
+
   m_list->clear();
   m_visibleEntries.clear();
 
@@ -449,7 +459,11 @@ void Browser::fillList()
     if(!match(entry))
       continue;
 
-    m_list->addRow(makeRow(entry));
+    const int index = m_list->addRow(makeRow(entry));
+
+    if(find(selected.begin(), selected.end(), i) != selected.end())
+      m_list->select(index);
+
     m_visibleEntries.push_back(i);
   }
 
