@@ -213,6 +213,8 @@ vector<int> ListView::selection() const
     indexes.push_back(translateBack(index));
   }
 
+  std::sort(indexes.begin(), indexes.end());
+
   return indexes;
 }
 

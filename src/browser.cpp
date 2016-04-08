@@ -640,8 +640,10 @@ void Browser::resetAction(const int index)
 
   m_actions.erase(it);
 
-  if(getDisplay() == Queued)
+  if(getDisplay() == Queued) {
     m_list->removeRow(index);
+    m_visibleEntries.erase(m_visibleEntries.begin() + index);
+  }
   else
     m_list->replaceRow(index, makeRow(*entry));
 
@@ -674,8 +676,20 @@ void Browser::setAction(const int index, const Version *target, const bool toggl
 
 void Browser::selectionDo(const std::function<void (int)> &func)
 {
-  for(const int index : m_list->selection())
-    func(index);
+  InhibitControl freeze(m_list);
+
+  int lastSize = m_list->rowCount();
+  int offset = 0;
+
+  for(const int index : m_list->selection()) {
+    func(index - offset);
+
+    // handle row removal
+    int newSize = m_list->rowCount();
+    if(newSize < lastSize)
+      offset++;
+    swap(newSize, lastSize);
+  }
 }
 
 auto Browser::getDisplay() const -> Display
