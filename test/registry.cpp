@@ -30,7 +30,7 @@ TEST_CASE("query uninstalled package", M) {
 
   const Registry::Entry &res = reg.getEntry(&pkg);
   REQUIRE(res.id == 0);
-  REQUIRE(res.versionCode == 0);
+  REQUIRE(res.version == Version());
 }
 
 TEST_CASE("query installed package", M) {
@@ -44,9 +44,8 @@ TEST_CASE("query installed package", M) {
   REQUIRE(entry.category == "Category Name");
   REQUIRE(entry.package == "Hello");
   REQUIRE(entry.type == Package::ScriptType);
-  REQUIRE(entry.versionName == "1.0");
-  REQUIRE(entry.versionCode == Version("1.0").code());
-  REQUIRE(entry.author == "John Doe");
+  REQUIRE(entry.version.name() == "1.0");
+  REQUIRE(entry.version.author() == "John Doe");
 
   const Registry::Entry &selectEntry = reg.getEntry(&pkg);
   REQUIRE(selectEntry.id == entry.id);
@@ -54,9 +53,8 @@ TEST_CASE("query installed package", M) {
   REQUIRE(selectEntry.category == entry.category);
   REQUIRE(selectEntry.package == entry.package);
   REQUIRE(selectEntry.type == entry.type);
-  REQUIRE(selectEntry.versionName == entry.versionName);
-  REQUIRE(selectEntry.versionCode == entry.versionCode);
-  REQUIRE(selectEntry.author == entry.author);
+  REQUIRE(selectEntry.version == entry.version);
+  REQUIRE(selectEntry.version.author() == entry.version.author());
 }
 
 TEST_CASE("bump version", M) {
@@ -70,13 +68,13 @@ TEST_CASE("bump version", M) {
   pkg.addVersion(ver2);
 
   const Registry::Entry &entry1 = reg.getEntry(&pkg);
-  REQUIRE(entry1.versionName == "1.0");
-  CHECK(entry1.author == "John Doe");
+  REQUIRE(entry1.version.name() == "1.0");
+  CHECK(entry1.version.author() == "John Doe");
 
   reg.push(ver2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
-  REQUIRE(entry2.versionName == "2.0");
-  CHECK(entry2.author == "Unknown");
+  REQUIRE(entry2.version.name() == "2.0");
+  CHECK(entry2.version.author() == "");
   
   REQUIRE(entry2.id == entry1.id);
 }
@@ -111,9 +109,8 @@ TEST_CASE("query all packages", M) {
   REQUIRE(entries[0].category == "Category Name");
   REQUIRE(entries[0].package == "Hello");
   REQUIRE(entries[0].type == Package::ScriptType);
-  REQUIRE(entries[0].versionName == "1.0");
-  REQUIRE(entries[0].versionCode == Version("1.0").code());
-  REQUIRE(entries[0].author == "John Doe");
+  REQUIRE(entries[0].version.name() == "1.0");
+  REQUIRE(entries[0].version.author() == "John Doe");
 }
 
 TEST_CASE("forget registry entry", M) {

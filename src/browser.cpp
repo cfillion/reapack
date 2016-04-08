@@ -208,7 +208,7 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
     auto_char reinstallLabel[255] = {};
     auto_snprintf(reinstallLabel, sizeof(reinstallLabel), AUTO_STR("&Reinstall v%s"),
-      make_autostring(entry->regEntry.versionName).c_str());
+      make_autostring(entry->regEntry.version.name()).c_str());
 
     const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
     if(!entry->current || entry->test(ObsoleteFlag))
@@ -353,11 +353,11 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
   if(regEntry.id) {
     flags |= InstalledFlag;
 
-    if(regEntry.versionCode < latest->code())
+    if(regEntry.version < *latest)
       flags |= OutOfDateFlag;
 
     for(const Version *ver : pkg->versions()) {
-      if(ver->code() == regEntry.versionCode) {
+      if(*ver == regEntry.version) {
         current = ver;
         break;
       }
@@ -434,9 +434,9 @@ string Browser::getValue(const Column col, const Entry &entry) const
     return pkg ? pkg->category()->name() : regEntry.category;
   case VersionColumn:
     if(entry.test(InstalledFlag))
-      display = regEntry.versionName;
+      display = regEntry.version.name();
 
-    if(ver && ver->code() != regEntry.versionCode) {
+    if(ver && *ver != regEntry.version) {
       if(!display.empty())
         display += '\x20';
 
@@ -445,7 +445,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
     return display;
   case AuthorColumn:
-    return ver ? ver->displayAuthor() : regEntry.author;
+    return ver ? ver->displayAuthor() : regEntry.version.displayAuthor();
   case TypeColumn:
     return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
   case RemoteColumn:

@@ -26,18 +26,12 @@
 
 using namespace std;
 
-bool Version::parse(const std::string &str, Code *out)
+Version::Version()
+  : m_code(0), m_time(), m_package(nullptr), m_mainSource(nullptr)
 {
-  try {
-    *out = Version(str, nullptr).code();
-    return true;
-  }
-  catch(const reapack_error &) {
-    return false;
-  }
 }
 
-Version::Version(const std::string &str, Package *pkg)
+Version::Version(const std::string &str, const Package *pkg)
   : m_name(str), m_code(0), m_time(), m_package(pkg), m_mainSource(nullptr)
 {
   static const regex pattern("(\\d+)");
@@ -62,6 +56,13 @@ Version::Version(const std::string &str, Package *pkg)
 
     m_code += stoi(match) * (Code)pow(10000, size - index - 1);
   }
+}
+
+Version::Version(const Version &o, const Package *pkg)
+  : m_name(o.name()), m_code(o.code()),
+    m_author(o.author()), m_changelog(o.changelog()), m_time(o.time()),
+    m_package(pkg), m_mainSource(nullptr)
+{
 }
 
 Version::~Version()
@@ -166,6 +167,21 @@ const Source *Version::source(const size_t index) const
 bool Version::operator<(const Version &o) const
 {
   return m_code < o.code();
+}
+
+bool Version::operator<=(const Version &o) const
+{
+  return !(m_code > o.code());
+}
+
+bool Version::operator>(const Version &o) const
+{
+  return m_code > o.code();
+}
+
+bool Version::operator>=(const Version &o) const
+{
+  return !(m_code < o.code());
 }
 
 bool Version::operator==(const Version &o) const

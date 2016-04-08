@@ -31,9 +31,9 @@ class Version {
 public:
   typedef uint64_t Code;
 
-  static bool parse(const std::string &in, Code *out);
-
-  Version(const std::string &, Package * = nullptr);
+  Version();
+  Version(const std::string &, const Package * = nullptr);
+  Version(const Version &, const Package * = nullptr);
   ~Version();
 
   const std::string &name() const { return m_name; }
@@ -60,20 +60,24 @@ public:
 
   const std::set<Path> &files() const { return m_files; }
 
-  bool operator<(const Version &) const;
   bool operator==(const Version &) const;
   bool operator!=(const Version &) const;
+  bool operator<(const Version &) const;
+  bool operator<=(const Version &) const;
+  bool operator>(const Version &) const;
+  bool operator>=(const Version &) const;
 
 private:
   std::string m_name;
   Code m_code;
+
+  std::string m_author;
+  std::string m_changelog;
   std::tm m_time;
 
   const Package *m_package;
   const Source *m_mainSource;
 
-  std::string m_author;
-  std::string m_changelog;
   SourceMap m_sources;
   std::set<Path> m_files;
 };

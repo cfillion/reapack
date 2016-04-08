@@ -145,7 +145,7 @@ void Report::printUpdates()
     stream() << pkg->fullName() << ':' << NL;
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
-      if(ver->code() <= regEntry.versionCode)
+      if(*ver <= regEntry.version)
         break;
 
       printVersion(ver);

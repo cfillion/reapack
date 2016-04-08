@@ -98,20 +98,6 @@ TEST_CASE("version with 5 components", M) {
   }
 }
 
-TEST_CASE("public version parser", M) {
-  Version::Code code = 0;
-
-  REQUIRE(Version::parse("1.0", &code));
-  REQUIRE(code == UINT64_C(1000000000000));
-
-  REQUIRE_FALSE(Version::parse("hello", &code));
-  REQUIRE(code == UINT64_C(1000000000000));
-
-  code = 0;
-  REQUIRE_FALSE(Version::parse("hello", &code));
-  REQUIRE(code == UINT64_C(0));
-}
-
 TEST_CASE("version full name", M) {
   SECTION("no package") {
     Version ver("1.0");
@@ -238,6 +224,73 @@ TEST_CASE("version date", M) {
   SECTION("out of range") {
     ver.setTime("2016-99-99T99:99:99Z");
     ver.displayTime(); // no crash
+  }
+}
+
+TEST_CASE("construct null version", M) {
+  const Version ver;
+
+  REQUIRE(ver.code() == 0);
+  REQUIRE(ver.displayTime().empty());
+  REQUIRE(ver.package() == nullptr);
+  REQUIRE(ver.mainSource() == nullptr);
+}
+
+TEST_CASE("copy version constructor", M) {
+  const Package pkg(Package::UnknownType, "Hello");
+
+  Version original("1.1", &pkg);
+  original.setAuthor("John Doe");
+  original.setChangelog("Initial release");
+  original.setTime("2016-02-12T01:16:40Z");
+
+  const Version copy1(original);
+  REQUIRE(copy1.name() == "1.1");
+  REQUIRE(copy1.code() == original.code());
+  REQUIRE(copy1.author() == original.author());
+  REQUIRE(copy1.changelog() == original.changelog());
+  REQUIRE(copy1.displayTime() == original.displayTime());
+  REQUIRE(copy1.package() == nullptr);
+  REQUIRE(copy1.mainSource() == nullptr);
+  REQUIRE(copy1.sources().empty());
+
+  const Version copy2(original, &pkg);
+  REQUIRE(copy2.package() == &pkg);
+}
+
+TEST_CASE("version operators", M) {
+  SECTION("equality") {
+    REQUIRE(Version("1.0") == Version("1.0"));
+    REQUIRE_FALSE(Version("1.0") == Version("1.1"));
+  }
+
+  SECTION("inequality") {
+    REQUIRE_FALSE(Version("1.0") != Version("1.0"));
+    REQUIRE(Version("1.0") != Version("1.1"));
+  }
+
+  SECTION("less than") {
+    REQUIRE(Version("1.0") < Version("1.1"));
+    REQUIRE_FALSE(Version("1.0") < Version("1.0"));
+    REQUIRE_FALSE(Version("1.1") < Version("1.0"));
+  }
+
+  SECTION("less than or equal") {
+    REQUIRE(Version("1.0") <= Version("1.1"));
+    REQUIRE(Version("1.0") <= Version("1.0"));
+    REQUIRE_FALSE(Version("1.1") <= Version("1.0"));
+  }
+
+  SECTION("greater than") {
+    REQUIRE_FALSE(Version("1.0") > Version("1.1"));
+    REQUIRE_FALSE(Version("1.0") > Version("1.0"));
+    REQUIRE(Version("1.1") > Version("1.0"));
+  }
+
+  SECTION("greater than or equal") {
+    REQUIRE_FALSE(Version("1.0") >= Version("1.1"));
+    REQUIRE(Version("1.0") >= Version("1.0"));
+    REQUIRE(Version("1.1") >= Version("1.0"));
   }
 }
 

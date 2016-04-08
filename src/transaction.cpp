@@ -93,14 +93,14 @@ void Transaction::synchronize(const Package *pkg, const bool autoInstall)
   if(!regEntry.id && !autoInstall)
     return;
 
-  const Version *ver = pkg->lastVersion();
+  const Version *latest = pkg->lastVersion();
 
-  if(regEntry.versionCode == ver->code()) {
-    if(allFilesExists(ver->files()))
+  if(regEntry.version == *latest) {
+    if(allFilesExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
 
-  install(ver, regEntry);
+  install(latest, regEntry);
 }
 
 void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
@@ -147,7 +147,7 @@ void Transaction::install(const Version *ver,
 
   InstallTicket::Type type;
 
-  if(regEntry.id && regEntry.versionCode < ver->code())
+  if(regEntry.id && regEntry.version < *ver)
     type = InstallTicket::Upgrade;
   else
     type = InstallTicket::Install;
