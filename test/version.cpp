@@ -236,6 +236,42 @@ TEST_CASE("construct null version", M) {
   REQUIRE(ver.mainSource() == nullptr);
 }
 
+TEST_CASE("parse version", M) {
+  Version ver;
+
+  SECTION("valid") {
+    ver.parse("1.0");
+    REQUIRE(ver.name() == "1.0");
+    REQUIRE(ver.code() == UINT64_C(1000000000000));
+  }
+
+  SECTION("invalid") {
+    try { ver.parse("hello"); FAIL(); }
+    catch(const reapack_error &) {}
+
+    REQUIRE(ver.name().empty());
+    REQUIRE(ver.code() == 0);
+  }
+}
+
+TEST_CASE("parse version failsafe", M) {
+  Version ver;
+
+  SECTION("valid") {
+    REQUIRE(ver.tryParse("1.0"));
+
+    REQUIRE(ver.name() == "1.0");
+    REQUIRE(ver.code() == UINT64_C(1000000000000));
+  }
+
+  SECTION("invalid") {
+    REQUIRE_FALSE(ver.tryParse("hello"));
+
+    REQUIRE(ver.name().empty());
+    REQUIRE(ver.code() == 0);
+  }
+}
+
 TEST_CASE("copy version constructor", M) {
   const Package pkg(Package::UnknownType, "Hello");
 

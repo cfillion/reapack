@@ -36,6 +36,9 @@ public:
   Version(const Version &, const Package * = nullptr);
   ~Version();
 
+  void parse(const std::string &);
+  bool tryParse(const std::string &);
+
   const std::string &name() const { return m_name; }
   std::string fullName() const;
   uint64_t code() const { return m_code; }
@@ -60,12 +63,12 @@ public:
 
   const std::set<Path> &files() const { return m_files; }
 
-  bool operator==(const Version &) const;
-  bool operator!=(const Version &) const;
   bool operator<(const Version &) const;
   bool operator<=(const Version &) const;
   bool operator>(const Version &) const;
   bool operator>=(const Version &) const;
+  bool operator==(const Version &) const;
+  bool operator!=(const Version &) const;
 
 private:
   std::string m_name;

@@ -31,8 +31,26 @@ Version::Version()
 {
 }
 
-Version::Version(const std::string &str, const Package *pkg)
-  : m_name(str), m_code(0), m_time(), m_package(pkg), m_mainSource(nullptr)
+Version::Version(const string &str, const Package *pkg)
+  : m_code(0), m_time(), m_package(pkg), m_mainSource(nullptr)
+{
+  parse(str);
+}
+
+Version::Version(const Version &o, const Package *pkg)
+  : m_name(o.name()), m_code(o.code()),
+    m_author(o.author()), m_changelog(o.changelog()), m_time(o.time()),
+    m_package(pkg), m_mainSource(nullptr)
+{
+}
+
+Version::~Version()
+{
+  for(const auto &pair : m_sources)
+    delete pair.second;
+}
+
+void Version::parse(const string &str)
 {
   static const regex pattern("(\\d+)");
 
@@ -56,19 +74,19 @@ Version::Version(const std::string &str, const Package *pkg)
 
     m_code += stoi(match) * (Code)pow(10000, size - index - 1);
   }
+
+  m_name = str;
 }
 
-Version::Version(const Version &o, const Package *pkg)
-  : m_name(o.name()), m_code(o.code()),
-    m_author(o.author()), m_changelog(o.changelog()), m_time(o.time()),
-    m_package(pkg), m_mainSource(nullptr)
+bool Version::tryParse(const string &str)
 {
-}
-
-Version::~Version()
-{
-  for(const auto &pair : m_sources)
-    delete pair.second;
+  try {
+    parse(str);
+    return true;
+  }
+  catch(const reapack_error &) {
+    return false;
+  }
 }
 
 string Version::fullName() const
@@ -125,7 +143,7 @@ void Version::addSource(Source *source)
     m_mainSource = source;
 }
 
-void Version::setChangelog(const std::string &changelog)
+void Version::setChangelog(const string &changelog)
 {
   m_changelog = changelog;
 }

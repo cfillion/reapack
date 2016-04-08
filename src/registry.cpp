@@ -207,10 +207,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
     entry.category = m_findEntry->stringColumn(col++);
     entry.package = m_findEntry->stringColumn(col++);
     entry.type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
-
-    try { entry.version = Version(m_findEntry->stringColumn(col++)); }
-    catch(const reapack_error &) {}
-
+    entry.version.tryParse(m_findEntry->stringColumn(col++));
     entry.version.setAuthor(m_findEntry->stringColumn(col++));
 
     return false;
@@ -233,10 +230,7 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
     entry.category = m_allEntries->stringColumn(col++);
     entry.package = m_allEntries->stringColumn(col++);
     entry.type = static_cast<Package::Type>(m_allEntries->intColumn(col++));
-
-    try { entry.version = Version(m_allEntries->stringColumn(col++)); }
-    catch(const reapack_error &) {}
-
+    entry.version.tryParse(m_allEntries->stringColumn(col++));
     entry.version.setAuthor(m_allEntries->stringColumn(col++));
 
     list.push_back(entry);
