@@ -38,10 +38,10 @@ public:
   static Type typeFor(const char *);
   static std::string displayType(Type);
 
-  Package(const Type, const std::string &name, Category * = nullptr);
+  Package(const Type, const std::string &name, const Category * = nullptr);
   ~Package();
 
-  Category *category() const { return m_category; }
+  const Category *category() const { return m_category; }
   Type type() const { return m_type; }
   std::string displayType() const;
   const std::string &name() const { return m_name; }
@@ -51,11 +51,12 @@ public:
   const VersionSet &versions() const { return m_versions; }
   const Version *version(size_t index) const;
   const Version *lastVersion() const;
+  const Version *findVersion(const Version &) const;
 
   Path makeTargetPath(const std::string &file = {}) const;
 
 private:
-  Category *m_category;
+  const Category *m_category;
 
   Type m_type;
   std::string m_name;

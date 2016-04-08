@@ -52,7 +52,7 @@ string Package::displayType(const Type type)
   return {}; // MSVC is stupid
 }
 
-Package::Package(const Type type, const string &name, Category *cat)
+Package::Package(const Type type, const string &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
@@ -102,6 +102,17 @@ const Version *Package::lastVersion() const
     return nullptr;
 
   return *m_versions.rbegin();
+}
+
+const Version *Package::findVersion(const Version &ver) const
+{
+  const auto &it = find_if(m_versions.begin(), m_versions.end(),
+    [=] (const Version *cur) { return *cur == ver; });
+
+  if(it == m_versions.end())
+    return nullptr;
+  else
+    return *it;
 }
 
 Path Package::makeTargetPath(const string &file) const

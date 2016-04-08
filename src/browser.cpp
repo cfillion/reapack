@@ -338,9 +338,12 @@ void Browser::refresh(const bool stale)
 
   m_loading = true;
 
-  m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+  m_reapack->fetchIndexes(remotes, [=] (vector<IndexPtr> indexes) {
     m_loading = false;
-    m_indexes = indexes;
+
+    // keep the old indexes around a little bit longer for use by populate
+    indexes.swap(m_indexes);
+
     populate();
 
     if(!m_loaded) {
@@ -355,24 +358,47 @@ void Browser::populate()
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
-    m_currentIndex = -1;
-    m_actions.clear();
-    m_entries.clear();
+    std::vector<Entry> entries;
 
     for(IndexPtr index : m_indexes) {
       for(const Package *pkg : index->packages())
-        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
+        entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
 
       // obsolete packages
-      for(const Registry::Entry &entry : reg.getEntries(index->name())) {
-        const Category *cat = index->category(entry.category);
+      for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
+        const Category *cat = index->category(regEntry.category);
 
-        if(cat && cat->package(entry.package))
+        if(cat && cat->package(regEntry.package))
           continue;
 
-        m_entries.push_back({InstalledFlag | ObsoleteFlag, entry});
+        entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
       }
     }
+
+    auto actionIt = m_actions.begin();
+    while(actionIt != m_actions.end())
+    {
+      const Entry &oldEntry = *actionIt->first;
+      const Version *target = actionIt->second;
+
+      const auto &entryIt = find(entries.begin(), entries.end(), oldEntry);
+
+      actionIt = m_actions.erase(actionIt);
+
+      if(entryIt == entries.end())
+        continue;
+
+      if(target) {
+        const Package *pkg = entryIt->package;
+        if(!pkg || !(target = pkg->findVersion(*target)))
+          continue;
+      }
+
+      m_actions[&*entryIt] = target;
+    }
+
+    m_currentIndex = -1;
+    m_entries.swap(entries);
 
     fillList();
   }
@@ -380,8 +406,8 @@ void Browser::populate()
     const auto_string &desc = make_autostring(e.what());
     auto_char msg[255] = {};
     auto_snprintf(msg, sizeof(msg),
-      AUTO_STR("ReaPack could not open its package registry.\r\n")
-      AUTO_STR("Retry later when all installation task are completed.\r\n")
+      AUTO_STR("ReaPack could not read from its package registry.\r\n")
+      AUTO_STR("Retry later once all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
     MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
@@ -402,12 +428,7 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
     if(regEntry.version < *latest)
       flags |= OutOfDateFlag;
 
-    for(const Version *ver : pkg->versions()) {
-      if(*ver == regEntry.version) {
-        current = ver;
-        break;
-      }
-    }
+    current = pkg->findVersion(regEntry.version);
   }
   else
     flags |= UninstalledFlag;
@@ -698,4 +719,14 @@ void Browser::apply()
   m_reapack->runTasks();
 
   fillList(); // update state column
+}
+
+auto Browser::Entry::hash() const -> Hash
+{
+  if(package) {
+    return make_tuple(package->category()->index()->name(),
+      package->category()->name(), package->name());
+  }
+  else
+    return make_tuple(regEntry.remote, regEntry.category, regEntry.package);
 }

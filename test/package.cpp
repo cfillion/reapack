@@ -107,6 +107,25 @@ TEST_CASE("add owned version", M) {
   }
 }
 
+TEST_CASE("find matching version", M) {
+  Index ri("Remote Name");
+  Category cat("Category Name", &ri);
+
+  Package pack(Package::ScriptType, "a", &cat);
+  CHECK(pack.versions().size() == 0);
+
+  Version *ver = new Version("1", &pack);
+  ver->addSource(new Source(Source::GenericPlatform, {}, "google.com", ver));
+
+  REQUIRE(pack.findVersion(Version("1")) == nullptr);
+  REQUIRE(pack.findVersion(Version("2")) == nullptr);
+
+  pack.addVersion(ver);
+
+  REQUIRE(pack.findVersion(Version("1")) == ver);
+  REQUIRE(pack.findVersion(Version("2")) == nullptr);
+}
+
 TEST_CASE("target path for unknown package type", M) {
   Index ri("name");
   Category cat("name", &ri);

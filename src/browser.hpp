@@ -56,13 +56,16 @@ private:
   };
 
   struct Entry {
+    typedef std::tuple<std::string, std::string, std::string> Hash;
     int flags;
     Registry::Entry regEntry;
     const Package *package;
     const Version *latest;
     const Version *current;
 
+    Hash hash() const;
     bool test(Flag f) const { return (flags & f) != 0; }
+    bool operator==(const Entry &o) const { return hash() == o.hash(); }
   };
 
   enum Column {
