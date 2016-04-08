@@ -100,8 +100,6 @@ private:
   Import *m_import;
   Manager *m_manager;
 
-  bool m_loadingBrowser;
-
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;
   UseRootPath *m_useRootPath;

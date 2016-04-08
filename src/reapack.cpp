@@ -64,8 +64,7 @@ static void CleanupTempFiles()
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(),importAction(), configAction(),
     m_transaction(nullptr), m_progress(nullptr), m_browser(nullptr),
-    m_import(nullptr), m_manager(nullptr), m_loadingBrowser(false),
-    m_instance(instance)
+    m_import(nullptr), m_manager(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(GetResourcePath());
@@ -277,6 +276,9 @@ void ReaPack::import(const Remote &remote)
   if(m_manager)
     m_manager->refresh();
 
+  if(m_browser)
+    m_browser->refresh();
+
   const string msg = remote.name() +
     " has been successfully imported into your repository list.";
   ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
@@ -344,38 +346,11 @@ void ReaPack::browsePackages()
     );
     return;
   }
-  else if(m_loadingBrowser)
-    return;
 
-  const vector<Remote> &remotes = m_config->remotes()->getEnabled();
-
-  if(remotes.empty()) {
-    ShowMessageBox("No repository enabled!\r\n"
-      "Enable or import repositories from Extensions > ReaPack > Manage repositories.",
-      "Browse packages", MB_OK);
-
-    return;
-  }
-
-  m_loadingBrowser = true;
-
-  fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
-    m_loadingBrowser = false;
-
-    if(indexes.empty()) {
-      ShowMessageBox(
-        "The package browser cannot be opened because no repositories were successfully loaded.",
-        "Browse packages", MB_OK);
-
-      return;
-    }
-
-    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, indexes, this);
-    m_browser->show();
-    m_browser->setCloseHandler([=] (INT_PTR) {
-      Dialog::Destroy(m_browser);
-      m_browser = nullptr;
-    });
+  m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, this);
+  m_browser->setCloseHandler([=] (INT_PTR) {
+    Dialog::Destroy(m_browser);
+    m_browser = nullptr;
   });
 }
 
@@ -539,14 +514,15 @@ Transaction *ReaPack::createTransaction()
       ShowMessageBox("Nothing to do!", "ReaPack", 0);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
-
-    if(m_browser && m_transaction->taskCount() > 0)
-      m_browser->reload();
   });
 
   m_transaction->setCleanupHandler([=] {
     delete m_transaction;
     m_transaction = nullptr;
+
+    // refresh only once all onFinish slots were ran
+    if(m_browser)
+      m_browser->refresh();
   });
 
   return m_transaction;

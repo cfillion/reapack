@@ -17,6 +17,7 @@
 
 #include "browser.hpp"
 
+#include "config.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
@@ -43,9 +44,9 @@ enum Action {
   ACTION_RESET_ALL,
 };
 
-Browser::Browser(const vector<IndexPtr> &indexes, ReaPack *reapack)
-  : Dialog(IDD_BROWSER_DIALOG), m_indexes(indexes), m_reapack(reapack),
-    m_checkFilter(false), m_currentIndex(-1)
+Browser::Browser(ReaPack *reapack)
+  : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
+    m_loaded(false), m_checkFilter(false), m_currentIndex(-1)
 {
 }
 
@@ -87,7 +88,7 @@ void Browser::onInit()
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
   m_list->sortByColumn(1);
 
-  reload();
+  refresh();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
   m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
@@ -304,7 +305,34 @@ void Browser::checkFilter()
   }
 }
 
-void Browser::reload()
+void Browser::refresh()
+{
+  const vector<Remote> &remotes = m_reapack->config()->remotes()->getEnabled();
+
+  if(!m_loaded && remotes.empty()) {
+    m_loaded = true;
+    show();
+
+    MessageBox(handle(), AUTO_STR("No repository enabled!\r\n")
+      AUTO_STR("Enable or import repositories from ")
+      AUTO_STR("Extensions > ReaPack > Manage repositories."),
+      AUTO_STR("Browse packages"), MB_OK);
+
+    return;
+  }
+
+  m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
+    m_indexes = indexes;
+    populate();
+
+    if(!m_loaded) {
+      m_loaded = true;
+      show();
+    }
+  });
+}
+
+void Browser::populate()
 {
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
