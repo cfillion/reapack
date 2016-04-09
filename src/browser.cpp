@@ -762,7 +762,8 @@ void Browser::apply()
   m_actions.clear();
   m_reapack->runTasks();
 
-  fillList(); // update state column
+  if(m_reapack->isRunning())
+    fillList(); // update state column
 }
 
 auto Browser::Entry::hash() const -> Hash

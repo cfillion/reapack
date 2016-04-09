@@ -82,6 +82,7 @@ public:
     const IndexesCallback &, HWND parent, bool stale = false);
 
   void runTasks();
+  bool isRunning() const { return m_transaction != nullptr; }
 
   Config *config() const { return m_config; }
 
