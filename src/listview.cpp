@@ -17,6 +17,8 @@
 
 #include "listview.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #ifdef _WIN32
 #include <commctrl.h>
 #endif
@@ -127,8 +129,11 @@ void ListView::sortByColumn(const int index, const SortOrder order)
     ListView *view = reinterpret_cast<ListView *>(param);
     const int column = view->m_sortColumn;
 
-    const auto_string &a = view->m_rows[aRow][column];
-    const auto_string &b = view->m_rows[bRow][column];
+    auto_string a = view->m_rows[aRow][column];
+    boost::algorithm::to_lower(a);
+
+    auto_string b = view->m_rows[bRow][column];
+    boost::algorithm::to_lower(b);
 
     const int ret = a.compare(b);
 
