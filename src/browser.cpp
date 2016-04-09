@@ -237,9 +237,9 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   }
 
   Menu versionMenu = menu.addMenu(AUTO_STR("Versions"));
-  const UINT versionIndex = menu.size() - 1;
+  const UINT versionMenuIndex = menu.size() - 1;
   if(entry->test(ObsoleteFlag))
-    menu.disable(versionIndex);
+    menu.disable(versionMenuIndex);
   else {
     const auto &versions = entry->package->versions();
     int verIndex = (int)versions.size();
@@ -247,8 +247,13 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
       const UINT actionIndex = versionMenu.addAction(
         make_autostring(ver->name()).c_str(), --verIndex | (ACTION_VERSION << 8));
 
-      if(hasAction(entry) ? isTarget(entry, ver) : ver == entry->current)
+      const bool isAction = hasAction(entry);
+      if(isAction ? isTarget(entry, ver) : ver == entry->current) {
+        if(isAction && ver != entry->latest)
+          menu.check(versionMenuIndex);
+
         versionMenu.checkRadio(actionIndex);
+      }
     }
   }
 
