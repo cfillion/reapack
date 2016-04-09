@@ -311,8 +311,8 @@ void Browser::checkFilter()
 
   const string &filter = from_autostring(wideFilter);
 
-  if(filter != m_filter) {
-    m_filter = filter;
+  if(filter != m_filter.get()) {
+    m_filter.set(filter);
     fillList();
   }
 }
@@ -578,8 +578,7 @@ bool Browser::match(const Entry &entry) const
   const string &category = getValue(CategoryColumn, entry);
   const string &author = getValue(AuthorColumn, entry);
 
-  return icontains(name, m_filter) || icontains(category, m_filter) ||
-    icontains(author, m_filter);
+  return m_filter.match(name) || m_filter.match(category) || m_filter.match(author);
 }
 
 auto Browser::getEntry(const int listIndex) const -> const Entry *

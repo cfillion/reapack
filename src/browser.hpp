@@ -20,6 +20,7 @@
 
 #include "dialog.hpp"
 
+#include "filter.hpp"
 #include "listview.hpp"
 #include "registry.hpp"
 
@@ -121,7 +122,7 @@ private:
   int m_currentIndex;
 
   int m_filterTimer;
-  std::string m_filter;
+  Filter m_filter;
   std::vector<Entry> m_entries;
   std::vector<size_t> m_visibleEntries;
   std::map<const Entry *, const Version *> m_actions;
