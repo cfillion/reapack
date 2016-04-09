@@ -199,10 +199,14 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   m_currentIndex = m_list->itemUnderMouse();
   const Entry *entry = getEntry(m_currentIndex);
 
-  if(!entry)
-    return;
-
   Menu menu;
+
+  if(!entry) {
+    menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
+    menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
+    menu.show(x, y, handle());
+    return;
+  }
 
   if(entry->test(InstalledFlag)) {
     if(entry->test(OutOfDateFlag)) {
