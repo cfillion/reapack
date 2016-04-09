@@ -114,6 +114,7 @@ void Browser::onCommand(const int id, const int event)
   case IDC_CLEAR:
     SetWindowText(m_filterHandle, AUTO_STR(""));
     checkFilter();
+    SetFocus(m_filterHandle);
     break;
   case IDC_SELECT:
     m_list->selectAll();
