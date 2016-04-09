@@ -32,6 +32,7 @@
 
 class Index;
 class ListView;
+class Menu;
 class ReaPack;
 class Version;
 
@@ -97,7 +98,8 @@ private:
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
   const Entry *getEntry(int) const;
-  void selectionMenu();
+  void selectionMenu(Menu &) const;
+  void actionButton();
   bool hasAction(const Entry *e) const { return m_actions.count(e) > 0; }
   bool isTarget(const Entry *, const Version *) const;
   void setAction(const int index, const Version *, bool toggle = true);

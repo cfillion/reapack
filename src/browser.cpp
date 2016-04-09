@@ -125,7 +125,7 @@ void Browser::onCommand(const int id, const int event)
     SetFocus(m_list->handle());
     break;
   case IDC_ACTION:
-    selectionMenu();
+    actionButton();
     break;
   case ACTION_LATEST:
     installLatest(m_currentIndex);
@@ -204,6 +204,10 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
     menu.show(x, y, handle());
     return;
   }
+  else if(m_list->selectionSize() > 1) {
+    selectionMenu(menu);
+    menu.addSeparator();
+  }
 
   if(entry->test(InstalledFlag)) {
     if(entry->test(OutOfDateFlag)) {
@@ -278,7 +282,15 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   menu.show(x, y, handle());
 }
 
-void Browser::selectionMenu()
+void Browser::selectionMenu(Menu &menu) const
+{
+  menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
+  menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
+  menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
+  menu.addAction(AUTO_STR("&Clear queued action"), ACTION_RESET_ALL);
+}
+
+void Browser::actionButton()
 {
   RECT rect;
   GetWindowRect(m_action, &rect);
@@ -288,11 +300,7 @@ void Browser::selectionMenu()
     entry = getEntry(m_list->currentIndex());
 
   Menu menu;
-
-  menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
-  menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
-  menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
-  menu.addAction(AUTO_STR("&Clear queued action"), ACTION_RESET_ALL);
+  selectionMenu(menu);
 
   if(!m_list->hasSelection())
     menu.disableAll();
