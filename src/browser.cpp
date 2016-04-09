@@ -396,28 +396,7 @@ void Browser::populate()
       }
     }
 
-    auto actionIt = m_actions.begin();
-    while(actionIt != m_actions.end())
-    {
-      const Entry &oldEntry = *actionIt->first;
-      const Version *target = actionIt->second;
-
-      const auto &entryIt = find(m_entries.begin(), m_entries.end(), oldEntry);
-
-      actionIt = m_actions.erase(actionIt);
-
-      if(entryIt == m_entries.end())
-        continue;
-
-      if(target) {
-        const Package *pkg = entryIt->package;
-        if(!pkg || !(target = pkg->findVersion(*target)))
-          continue;
-      }
-
-      m_actions[&*entryIt] = target;
-    }
-
+    transferActions();
     fillList();
   }
   catch(const reapack_error &e) {
@@ -429,6 +408,31 @@ void Browser::populate()
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
     MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
+  }
+}
+
+void Browser::transferActions()
+{
+  auto actionIt = m_actions.begin();
+  while(actionIt != m_actions.end())
+  {
+    const Entry &oldEntry = *actionIt->first;
+    const Version *target = actionIt->second;
+
+    const auto &entryIt = find(m_entries.begin(), m_entries.end(), oldEntry);
+
+    actionIt = m_actions.erase(actionIt);
+
+    if(entryIt == m_entries.end())
+      continue;
+
+    if(target) {
+      const Package *pkg = entryIt->package;
+      if(!pkg || !(target = pkg->findVersion(*target)))
+        continue;
+    }
+
+    m_actions[&*entryIt] = target;
   }
 }
 

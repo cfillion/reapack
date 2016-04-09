@@ -92,6 +92,7 @@ private:
   static Entry makeEntry(const Package *, const Registry::Entry &);
 
   void populate();
+  void transferActions();
   bool match(const Entry &) const;
   void checkFilter();
   void fillList();
