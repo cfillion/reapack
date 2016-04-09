@@ -20,6 +20,7 @@
 #include "errors.hpp"
 #include "index.hpp"
 
+#include <algorithm>
 #include <sstream>
 
 using namespace std;
