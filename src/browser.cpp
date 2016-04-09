@@ -54,7 +54,6 @@ Browser::Browser(ReaPack *reapack)
 
 void Browser::onInit()
 {
-  m_action = getControl(IDC_ACTION);
   m_apply = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
   m_display = getControl(IDC_DISPLAY);
@@ -124,8 +123,8 @@ void Browser::onCommand(const int id, const int event)
     m_list->unselectAll();
     SetFocus(m_list->handle());
     break;
-  case IDC_ACTION:
-    actionButton();
+  case IDC_ACTIONS:
+    actionsButton();
     break;
   case ACTION_LATEST:
     installLatest(m_currentIndex);
@@ -290,10 +289,10 @@ void Browser::selectionMenu(Menu &menu) const
   menu.addAction(AUTO_STR("&Clear queued action"), ACTION_RESET_ALL);
 }
 
-void Browser::actionButton()
+void Browser::actionsButton()
 {
   RECT rect;
-  GetWindowRect(m_action, &rect);
+  GetWindowRect(getControl(IDC_ACTIONS), &rect);
 
   const Entry *entry = nullptr;
   if(m_list->selectionSize() == 1)

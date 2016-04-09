@@ -99,7 +99,7 @@ private:
   ListView::Row makeRow(const Entry &) const;
   const Entry *getEntry(int) const;
   void selectionMenu(Menu &) const;
-  void actionButton();
+  void actionsButton();
   bool hasAction(const Entry *e) const { return m_actions.count(e) > 0; }
   bool isTarget(const Entry *, const Version *) const;
   void setAction(const int index, const Version *, bool toggle = true);
@@ -133,7 +133,6 @@ private:
   HWND m_display;
   std::map<int, HWND> m_types;
   ListView *m_list;
-  HWND m_action;
   HWND m_apply;
 };
 
