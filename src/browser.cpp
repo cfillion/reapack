@@ -324,8 +324,8 @@ void Browser::checkFilter()
 
   const string &filter = from_autostring(wideFilter);
 
-  if(filter != m_filter.get()) {
-    m_filter.set(filter);
+  if(m_filter != filter) {
+    m_filter = filter;
     fillList();
   }
 }

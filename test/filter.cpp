@@ -30,6 +30,24 @@ TEST_CASE("get/set filter", M) {
   REQUIRE(f.match("world"));
 }
 
+TEST_CASE("filter operators", M) {
+  SECTION("assignment") {
+    Filter f;
+    f = "hello";
+    REQUIRE(f.get() == "hello");
+  }
+
+  SECTION("equal") {
+    REQUIRE(Filter("hello") == "hello");
+    REQUIRE_FALSE(Filter("hello") == "world");
+  }
+
+  SECTION("not equal") {
+    REQUIRE_FALSE(Filter("hello") != "hello");
+    REQUIRE(Filter("hello") != "world");
+  }
+}
+
 TEST_CASE("word matching", M) {
   Filter f;
   f.set("hello world");

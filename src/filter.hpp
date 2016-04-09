@@ -23,9 +23,17 @@
 
 class Filter {
 public:
+  Filter() {}
+  Filter(const std::string &input) { set(input); }
+
   const std::string get() const { return m_input; }
   void set(const std::string &);
+
   bool match(const std::string &) const;
+
+  Filter &operator=(const std::string &f) { set(f); return *this; }
+  bool operator==(const std::string &f) const { return m_input == f; }
+  bool operator!=(const std::string &f) const { return !(*this == f); }
 
 private:
   std::string m_input;
