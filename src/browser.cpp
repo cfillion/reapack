@@ -444,7 +444,7 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
 
   int flags = 0;
 
-  if(regEntry.id) {
+  if(regEntry) {
     flags |= InstalledFlag;
 
     if(regEntry.version < *latest)

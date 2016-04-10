@@ -243,7 +243,7 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
 
 set<Path> Registry::getFiles(const Entry &entry) const
 {
-  if(!entry.id) // skip processing for new packages
+  if(!entry) // skip processing for new packages
     return {};
 
   set<Path> list;
@@ -259,7 +259,7 @@ set<Path> Registry::getFiles(const Entry &entry) const
 
 string Registry::getMainFile(const Entry &entry) const
 {
-  if(!entry.id)
+  if(!entry)
     return {};
 
   string mainFile;

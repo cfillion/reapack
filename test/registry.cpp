@@ -28,9 +28,10 @@ TEST_CASE("query uninstalled package", M) {
 
   Registry reg;
 
-  const Registry::Entry &res = reg.getEntry(&pkg);
-  REQUIRE(res.id == 0);
-  REQUIRE(res.version == Version());
+  const Registry::Entry &entry = reg.getEntry(&pkg);
+  REQUIRE_FALSE(entry);
+  REQUIRE(entry.id == 0);
+  REQUIRE(entry.version == Version());
 }
 
 TEST_CASE("query installed package", M) {
@@ -39,6 +40,7 @@ TEST_CASE("query installed package", M) {
   Registry reg;
 
   const Registry::Entry &entry = reg.push(ver);
+  REQUIRE(entry);
   REQUIRE(entry.id == 1);
   REQUIRE(entry.remote == "Remote Name");
   REQUIRE(entry.category == "Category Name");

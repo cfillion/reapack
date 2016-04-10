@@ -39,9 +39,11 @@ public:
     std::string package;
     Package::Type type;
     Version version;
+
+    operator bool() const { return id != 0; }
   };
 
-  Registry(const Path &path = Path());
+  Registry(const Path &path = {});
 
   Entry getEntry(const Package *) const;
   std::vector<Entry> getEntries(const std::string &) const;

@@ -90,7 +90,7 @@ void Transaction::synchronize(const Package *pkg, const bool autoInstall)
 {
   const auto &regEntry = m_registry->getEntry(pkg);
 
-  if(!regEntry.id && !autoInstall)
+  if(!regEntry && !autoInstall)
     return;
 
   const Version *latest = pkg->lastVersion();
@@ -147,7 +147,7 @@ void Transaction::install(const Version *ver,
 
   InstallTicket::Type type;
 
-  if(regEntry.id && regEntry.version < *ver)
+  if(regEntry && regEntry.version < *ver)
     type = InstallTicket::Upgrade;
   else
     type = InstallTicket::Install;
