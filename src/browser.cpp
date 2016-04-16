@@ -591,7 +591,7 @@ bool Browser::match(const Entry &entry) const
 
   const auto typeIt = m_types.find(type);
 
-  if(typeIt == m_types.end() ||
+  if(typeIt != m_types.end() &&
       SendMessage(typeIt->second, BM_GETCHECK, 0, 0) == BST_UNCHECKED)
     return false;
 

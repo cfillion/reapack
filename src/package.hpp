@@ -33,6 +33,7 @@ public:
     ScriptType,
     ExtensionType,
     EffectType,
+    DataType,
   };
 
   static Type typeFor(const char *);

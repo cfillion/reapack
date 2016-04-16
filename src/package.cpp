@@ -33,6 +33,8 @@ Package::Type Package::typeFor(const char *type)
     return ExtensionType;
   else if(!strcmp(type, "effect"))
     return EffectType;
+  else if(!strcmp(type, "data"))
+    return DataType;
   else
     return UnknownType;
 }
@@ -48,6 +50,8 @@ string Package::displayType(const Type type)
     return "Extension";
   case EffectType:
     return "Effect";
+  case DataType:
+    return "Data";
   }
 
   return {}; // MSVC is stupid
@@ -123,22 +127,19 @@ Path Package::makeTargetPath(const string &file) const
   if(!m_category || !m_category->index())
     throw reapack_error("category or index is unset");
 
+  // select the target directory
   switch(m_type) {
   case ScriptType:
     path.append("Scripts");
-    path.append(m_category->index()->name());
-
-    // only allow directory traversal up to the index name
-    path += Path(m_category->name()) + file;
     break;
   case EffectType:
     path.append("Effects");
-    path.append(m_category->index()->name());
-    path += Path(m_category->name()) + file;
+    break;
+  case DataType:
+    path.append("Data");
     break;
   case ExtensionType:
     path.append("UserPlugins");
-    path.append(file, false);
     break;
   case UnknownType:
     // The package has an unsupported type, so we return an empty path.
@@ -146,6 +147,23 @@ Path Package::makeTargetPath(const string &file) const
     // this package right away. Maybe the parser should not bother with loading
     // unsupported packages at all anyway... But then in the future
     // we might want to display unsupported packages in the interface.
+    break;
+  }
+
+  // append the rest of the path
+  switch(m_type) {
+  case ScriptType:
+  case EffectType:
+  case DataType:
+    path.append(m_category->index()->name());
+
+    // only allow directory traversal up to the index name
+    path += Path(m_category->name()) + file;
+    break;
+  case ExtensionType:
+    path.append(file, false);
+    break;
+  case UnknownType:
     break;
   }
 

@@ -24,6 +24,9 @@ TEST_CASE("package type from string", M) {
 
   SECTION("effect")
     REQUIRE(Package::typeFor("effect") == Package::EffectType);
+
+  SECTION("data")
+    REQUIRE(Package::typeFor("data") == Package::DataType);
 }
 
 TEST_CASE("package type to string", M) {
@@ -45,6 +48,11 @@ TEST_CASE("package type to string", M) {
   SECTION("effect") {
     REQUIRE("Effect" == Package::displayType(Package::EffectType));
     REQUIRE("Effect" == Package(Package::EffectType, "test").displayType());
+  }
+
+  SECTION("data") {
+    REQUIRE("Data" == Package::displayType(Package::DataType));
+    REQUIRE("Data" == Package(Package::DataType, "test").displayType());
   }
 }
 
@@ -199,6 +207,24 @@ TEST_CASE("effect target path", M) {
 
   Path expected;
   expected.append("Effects");
+  expected.append("Remote Name");
+  expected.append("Category Name");
+
+  REQUIRE(pack.makeTargetPath() == expected);
+
+  expected.removeLast();
+  expected.append("hello_world.jsfx");
+  REQUIRE(pack.makeTargetPath("../../../hello_world.jsfx") == expected);
+}
+
+TEST_CASE("data target path", M) {
+  Index ri("Remote Name");
+  Category cat("Category Name", &ri);
+
+  Package pack(Package::DataType, "file.name", &cat);
+
+  Path expected;
+  expected.append("Data");
   expected.append("Remote Name");
   expected.append("Category Name");
 
