@@ -599,7 +599,7 @@ bool Browser::match(const Entry &entry) const
   const string &category = getValue(CategoryColumn, entry);
   const string &author = getValue(AuthorColumn, entry);
 
-  return m_filter.match(name) || m_filter.match(category) || m_filter.match(author);
+  return m_filter.match(name + category + author);
 }
 
 auto Browser::getEntry(const int listIndex) const -> const Entry *
