@@ -24,12 +24,12 @@
 
 class Path;
 
+struct BrowserConfig {
+  unsigned int typeFilter;
+};
+
 class Config {
 public:
-  struct BrowserConfig {
-    size_t typeFilter;
-  };
-
   Config();
 
   void read(const Path &);
@@ -44,17 +44,17 @@ public:
 private:
   std::string getString(const char *, const std::string &) const;
   void setString(const char *, const std::string &, const std::string &) const;
-  size_t getUInt(const char *, const std::string &) const;
-  void setUInt(const char *, const std::string &, size_t) const;
+  unsigned int getUInt(const char *, const std::string &) const;
+  void setUInt(const char *, const std::string &, unsigned int) const;
   void deleteKey(const char *, const std::string &) const;
   void cleanupArray(const char *, const std::string &,
-    size_t begin, size_t end) const;
+    unsigned int begin, unsigned int end) const;
 
   void migrate();
 
   std::string m_path;
   bool m_isFirstRun;
-  size_t m_version;
+  unsigned int m_version;
   bool m_autoInstall;
   BrowserConfig m_browser;
 
@@ -62,7 +62,7 @@ private:
   void restoreSelfRemote();
   void writeRemotes();
   RemoteList m_remotes;
-  size_t m_remotesIniSize;
+  unsigned int m_remotesIniSize;
 };
 
 #endif

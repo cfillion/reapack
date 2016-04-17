@@ -40,7 +40,7 @@ static const char *SIZE_KEY = "size";
 static const char *REMOTES_GRP = "remotes";
 static const char *REMOTE_KEY  = "remote";
 
-static string ArrayKey(const string &key, const size_t i)
+static string ArrayKey(const string &key, const unsigned int i)
 {
   return key + to_string(i);
 }
@@ -55,7 +55,7 @@ Config::Config()
 
 void Config::migrate()
 {
-  const size_t version = getUInt(GLOBAL_GRP, VERSION_KEY);
+  const unsigned int version = getUInt(GLOBAL_GRP, VERSION_KEY);
 
   switch(version) {
   case 0:
@@ -73,6 +73,7 @@ void Config::migrate()
     break;
   default:
     // configuration is up-to-date, don't write anything now
+    // keep the version intact in case it comes from a newer version of ReaPack
     m_version = version;
     return;
   };
@@ -124,7 +125,7 @@ void Config::readRemotes()
 {
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
 
-  for(size_t i = 0; i < m_remotesIniSize; i++) {
+  for(unsigned int i = 0; i < m_remotesIniSize; i++) {
     const string data = getString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i));
 
     m_remotes.add(Remote::fromString(data));
@@ -133,8 +134,8 @@ void Config::readRemotes()
 
 void Config::writeRemotes()
 {
-  size_t i = 0;
-  m_remotesIniSize = max(m_remotes.size(), m_remotesIniSize);
+  unsigned int i = 0;
+  m_remotesIniSize = max((unsigned int)m_remotes.size(), m_remotesIniSize);
 
   for(auto it = m_remotes.begin(); it != m_remotes.end(); it++, i++) {
     setString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i), it->toString());
@@ -160,13 +161,12 @@ void Config::setString(const char *group,
   WritePrivateProfileString(group, key.c_str(), val.c_str(), m_path.c_str());
 }
 
-size_t Config::getUInt(const char *group, const string &key) const
+unsigned int Config::getUInt(const char *group, const string &key) const
 {
-  const int i = GetPrivateProfileInt(group, key.c_str(), 0, m_path.c_str());
-  return max(0, i);
+  return GetPrivateProfileInt(group, key.c_str(), 0, m_path.c_str());
 }
 
-void Config::setUInt(const char *grp, const string &key, const size_t val) const
+void Config::setUInt(const char *grp, const string &key, const unsigned int val) const
 {
   setString(grp, key, to_string(val));
 }
@@ -177,8 +177,8 @@ void Config::deleteKey(const char *group, const string &key) const
 }
 
 void Config::cleanupArray(const char *group, const string &key,
-  const size_t begin, const size_t end) const
+  const unsigned int begin, const unsigned int end) const
 {
-  for(size_t i = begin; i < end; i++)
+  for(unsigned int i = begin; i < end; i++)
     deleteKey(group, ArrayKey(key, i));
 }
