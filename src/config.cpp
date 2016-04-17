@@ -64,6 +64,9 @@ void Config::migrate()
     m_remotes.add({"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml", false});
 
+    m_remotes.add({"ReaTeam JSFX",
+      "https://github.com/ReaTeam/JSFX/raw/master/index.xml", false});
+
     m_remotes.add({"MPL Scripts",
       "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml", false});
 
