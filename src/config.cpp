@@ -60,7 +60,6 @@ void Config::migrate()
   switch(version) {
   case 0:
     m_isFirstRun = true;
-    restoreSelfRemote();
 
     m_remotes.add({"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml", false});
@@ -86,8 +85,6 @@ void Config::read(const Path &path)
 {
   m_path = path.join();
 
-  migrate();
-
   m_autoInstall = getUInt(GLOBAL_GRP, AUTOINSTALL_KEY) > 0;
 
   m_browser = {
@@ -96,6 +93,7 @@ void Config::read(const Path &path)
 
   readRemotes();
   restoreSelfRemote();
+  migrate();
 }
 
 void Config::write()
