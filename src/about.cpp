@@ -123,6 +123,11 @@ void About::populate()
   auto_snprintf(title, sizeof(title), AUTO_STR("About %s"), name.c_str());
   SetWindowText(handle(), title);
 
+  auto_char btnLabel[32] = {};
+  auto_snprintf(btnLabel, sizeof(btnLabel),
+    AUTO_STR("Install/update %s"), name.c_str());
+  SetWindowText(getControl(IDC_INSTALL), btnLabel);
+
   m_websiteLinks = m_index->links(Index::WebsiteLink);
   if(m_websiteLinks.empty())
     hide(getControl(IDC_WEBSITE));
