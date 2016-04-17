@@ -28,7 +28,7 @@
 
 class Menu {
 public:
-  Menu(HMENU handle = 0);
+  Menu(HMENU handle = nullptr);
   ~Menu();
 
   UINT size() { return m_size; }

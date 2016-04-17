@@ -47,7 +47,7 @@ public:
 
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
-  static IndexPtr load(const std::string &name, const char *data = 0);
+  static IndexPtr load(const std::string &name, const char *data = nullptr);
   static Download *fetch(const Remote &, bool stale = false);
 
   Index(const std::string &name);

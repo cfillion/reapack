@@ -70,7 +70,7 @@ public:
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void importRemote();
-  void import(const Remote &, HWND = 0);
+  void import(const Remote &, HWND = nullptr);
   void manageRemotes();
   void aboutSelf();
   void about(const std::string &, HWND parent);
