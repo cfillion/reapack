@@ -265,7 +265,7 @@ bool Manager::confirm() const
 
   auto_char msg[255] = {};
   auto_snprintf(msg, sizeof(msg),
-    AUTO_STR("Uninstall %zu remote%s?\n")
+    AUTO_STR("Uninstall %zu repositories%s?\n")
     AUTO_STR("Every file they contain will be removed from your computer."),
     uninstallSize, uninstallSize == 1 ? AUTO_STR("") : AUTO_STR("s"));
 
