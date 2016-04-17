@@ -42,8 +42,6 @@ Package::Type Package::typeFor(const char *type)
 string Package::displayType(const Type type)
 {
   switch(type) {
-  case UnknownType:
-    return "Unknown";
   case ScriptType:
     return "Script";
   case ExtensionType:
@@ -52,9 +50,9 @@ string Package::displayType(const Type type)
     return "Effect";
   case DataType:
     return "Data";
+  default:
+    return "Unknown";
   }
-
-  return {}; // MSVC is stupid
 }
 
 Package::Package(const Type type, const string &name, const Category *cat)

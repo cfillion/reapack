@@ -54,6 +54,9 @@ TEST_CASE("package type to string", M) {
     REQUIRE("Data" == Package::displayType(Package::DataType));
     REQUIRE("Data" == Package(Package::DataType, "test").displayType());
   }
+
+  SECTION("unknown value")
+    REQUIRE("Unknown" == Package::displayType(static_cast<Package::Type>(-1)));
 }
 
 TEST_CASE("empty package name", M) {
