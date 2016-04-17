@@ -228,16 +228,20 @@ void ReaPack::importRemote()
   });
 }
 
-void ReaPack::import(const Remote &remote)
+void ReaPack::import(const Remote &remote, HWND parent)
 {
+  if(!parent)
+    parent = m_mainWindow;
+
   RemoteList *remotes = m_config->remotes();
 
   const Remote &existing = remotes->get(remote.name());
 
   if(!existing.isNull()) {
     if(existing.isProtected()) {
-      ShowMessageBox(
-        "This repository is protected and cannot be overwritten.", Import::TITLE, MB_OK);
+      MessageBox(parent,
+        AUTO_STR("This repository is protected and cannot be overwritten."),
+        Import::TITLE, MB_OK);
 
       return;
     }
@@ -246,14 +250,17 @@ void ReaPack::import(const Remote &remote)
         " is already configured with a different URL.\r\n"
         "Do you want to overwrite it?";
 
-      if(ShowMessageBox(msg.c_str(), Import::TITLE, MB_YESNO) != IDYES)
+      const auto answer = MessageBox(parent, make_autostring(msg).c_str(),
+        Import::TITLE, MB_YESNO);
+
+      if(answer != IDYES)
         return;
     }
     else if(existing.isEnabled()) {
       const string msg = remote.name() +
         " is already configured.\r\nNothing to do!";
 
-      ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
+      MessageBox(parent, make_autostring(msg).c_str(), Import::TITLE, MB_OK);
 
       return;
     }
@@ -264,7 +271,7 @@ void ReaPack::import(const Remote &remote)
       m_config->write();
 
       const string msg = remote.name() + " has been enabled.";
-      ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
+      MessageBox(parent, make_autostring(msg).c_str(), Import::TITLE, MB_OK);
 
       return;
     }
@@ -281,7 +288,7 @@ void ReaPack::import(const Remote &remote)
 
   const string msg = remote.name() +
     " has been successfully imported into your repository list.";
-  ShowMessageBox(msg.c_str(), Import::TITLE, MB_OK);
+  MessageBox(parent, make_autostring(msg).c_str(), Import::TITLE, MB_OK);
 }
 
 void ReaPack::manageRemotes()

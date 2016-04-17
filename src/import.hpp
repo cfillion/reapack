@@ -20,6 +20,8 @@
 
 #include "dialog.hpp"
 
+#include "encoding.hpp"
+
 #include <string>
 
 class Download;
@@ -28,7 +30,7 @@ class ReaPack;
 class Import : public Dialog
 {
 public:
-  static const char *TITLE;
+  static const auto_char *TITLE;
 
   Import(ReaPack *);
 

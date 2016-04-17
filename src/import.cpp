@@ -18,22 +18,15 @@
 #include "import.hpp"
 
 #include "download.hpp"
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
 
-#include <reaper_plugin_functions.h>
-
-#ifndef _WIN32 // for SWELL
-#define SetWindowTextA SetWindowText
-#endif
-
 using namespace std;
 
-const char *Import::TITLE = "ReaPack: Import a repository";
+const auto_char *Import::TITLE = AUTO_STR("ReaPack: Import a repository");
 
 Import::Import(ReaPack *reapack)
   : Dialog(IDD_IMPORT_DIALOG), m_reapack(reapack), m_download(nullptr)
@@ -42,7 +35,7 @@ Import::Import(ReaPack *reapack)
 
 void Import::onInit()
 {
-  SetWindowTextA(handle(), TITLE);
+  SetWindowText(handle(), TITLE);
 
   m_url = getControl(IDC_URL);
   m_progress = getControl(IDC_PROGRESS);
@@ -110,7 +103,7 @@ void Import::fetch()
 
     if(state != Download::Success) {
       const string msg = "Download failed: " + dl->contents();
-      ShowMessageBox(msg.c_str(), TITLE, MB_OK);
+      MessageBox(handle(), make_autostring(msg).c_str(), TITLE, MB_OK);
       SetFocus(m_url);
       return;
     }
@@ -136,7 +129,7 @@ bool Import::import()
 
   try {
     IndexPtr index = Index::load({}, m_download->contents().c_str());
-    m_reapack->import({index->name(), m_download->url()});
+    m_reapack->import({index->name(), m_download->url()}, handle());
 
     close();
 
@@ -144,7 +137,7 @@ bool Import::import()
   }
   catch(const reapack_error &e) {
     const string msg = "The received file is invalid: " + string(e.what());
-    ShowMessageBox(msg.c_str(), TITLE, MB_OK);
+    MessageBox(handle(), make_autostring(msg).c_str(), TITLE, MB_OK);
     return false;
   }
 }
