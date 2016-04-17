@@ -57,13 +57,11 @@
 #define IDC_PACKAGES   220
 #define IDC_GROUPBOX   221
 #define IDC_URL        222
-#define IDC_SCRIPTS    223
-#define IDC_FILTER     224
-#define IDC_CLEAR      225
-#define IDC_DISPLAY    226
-#define IDC_SELECT     227
-#define IDC_UNSELECT   228
-#define IDC_ACTIONS    229
-#define IDC_OPTIONS    230
+#define IDC_FILTER     223
+#define IDC_CLEAR      224
+#define IDC_DISPLAY    225
+#define IDC_SELECT     226
+#define IDC_UNSELECT   227
+#define IDC_OPTIONS    228
 
 #endif
