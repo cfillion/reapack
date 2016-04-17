@@ -28,11 +28,14 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <locale>
+#include <sstream>
 
 using namespace std;
 
 enum Action {
   ACTION_VERSION = 80,
+  ACTION_FILTERTYPE,
   ACTION_LATEST = 300,
   ACTION_LATEST_ALL,
   ACTION_REINSTALL,
@@ -56,26 +59,18 @@ void Browser::onInit()
 {
   m_apply = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
+  m_tabs = getControl(IDC_TABS);
   m_display = getControl(IDC_DISPLAY);
 
   disable(m_apply);
 
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
-  SendMessage(m_display, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
-  SendMessage(m_display, CB_SETCURSEL, 0, 0);
-
-  m_types = {
-    {Package::ScriptType, getControl(IDC_SCRIPTS)},
-    {Package::EffectType, getControl(IDC_EFFECTS)},
-    {Package::ExtensionType, getControl(IDC_EXTENSIONS)},
-  };
-
-  for(const auto &pair : m_types)
-    SendMessage(pair.second, BM_SETCHECK, BST_CHECKED, 0);
+  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
+  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
+  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
+  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
+  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
+  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
+  SendMessage(m_tabs, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR(""), 23},
@@ -99,13 +94,12 @@ void Browser::onCommand(const int id, const int event)
   namespace arg = std::placeholders;
 
   switch(id) {
+  case IDC_TABS:
+    if(event == CBN_SELCHANGE)
+      fillList();
+    break;
   case IDC_DISPLAY:
-    if(event != CBN_SELCHANGE)
-      break;
-  case IDC_SCRIPTS:
-  case IDC_EFFECTS:
-  case IDC_EXTENSIONS:
-    fillList();
+    displayButton();
     break;
   case IDC_FILTER:
     m_checkFilter = true;
@@ -175,6 +169,8 @@ void Browser::onCommand(const int id, const int event)
   default:
     if(id >> 8 == ACTION_VERSION)
       installVersion(m_currentIndex, id & 0xff);
+    else if(id >> 8 == ACTION_FILTERTYPE)
+      toggleFiltered(static_cast<Package::Type>(id & 0xff));
     break;
   }
 }
@@ -304,11 +300,57 @@ void Browser::actionsButton()
   if(!m_list->hasSelection())
     menu.disableAll();
 
+  menu.show(rect.left, rect.bottom - 1, handle());
+}
+
+void Browser::displayButton()
+{
+  RECT rect;
+  GetWindowRect(m_display, &rect);
+
+  static map<const auto_char *, Package::Type> types = {
+    {AUTO_STR("&Scripts"), Package::ScriptType},
+    {AUTO_STR("&Effects"), Package::EffectType},
+    {AUTO_STR("E&xtensions"), Package::ExtensionType},
+    {AUTO_STR("&Other packages"), Package::UnknownType},
+  };
+
+  Menu menu;
+  for(const auto &pair : types) {
+    const auto index = menu.addAction(pair.first,
+      pair.second | (ACTION_FILTERTYPE << 8));
+
+    if(!isFiltered(pair.second))
+      menu.check(index);
+  }
+
   menu.addSeparator();
   menu.addAction(AUTO_STR("Re&fresh repositories"), ACTION_REFRESH);
   menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
 
   menu.show(rect.left, rect.bottom - 1, handle());
+}
+
+bool Browser::isFiltered(Package::Type type) const
+{
+  switch(type) {
+  case Package::ScriptType:
+  case Package::EffectType:
+  case Package::ExtensionType:
+    break;
+  default:
+    type = Package::UnknownType;
+  }
+
+  auto config = m_reapack->config()->browser();
+  return ((config->typeFilter >> type) & 1) == 1;
+}
+
+void Browser::toggleFiltered(const Package::Type type)
+{
+  auto config = m_reapack->config()->browser();
+  config->typeFilter ^= 1 << type;
+  fillList();
 }
 
 void Browser::checkFilter()
@@ -489,6 +531,16 @@ void Browser::fillList()
   }
 
   m_list->sort();
+
+  basic_ostringstream<auto_char> btnLabel;
+  btnLabel.imbue(locale("")); // enable number formatting
+  btnLabel << m_list->rowCount() << AUTO_STR('/') << m_entries.size()
+    << AUTO_STR(" package");
+
+  if(m_entries.size() != 1)
+    btnLabel << AUTO_STR('s');
+
+  SetWindowText(m_display, btnLabel.str().c_str());
 }
 
 ListView::Row Browser::makeRow(const Entry &entry) const
@@ -561,7 +613,7 @@ bool Browser::match(const Entry &entry) const
 {
   using namespace boost;
 
-  switch(getDisplay()) {
+  switch(currentTab()) {
   case All:
     break;
   case Queued:
@@ -589,10 +641,7 @@ bool Browser::match(const Entry &entry) const
   const Package::Type type =
     entry.latest ? entry.package->type() : entry.regEntry.type;
 
-  const auto typeIt = m_types.find(type);
-
-  if(typeIt != m_types.end() &&
-      SendMessage(typeIt->second, BM_GETCHECK, 0, 0) == BST_UNCHECKED)
+  if(isFiltered(type))
     return false;
 
   const string &name = getValue(NameColumn, entry);
@@ -674,7 +723,7 @@ void Browser::resetAction(const int index)
 
   m_actions.erase(it);
 
-  if(getDisplay() == Queued) {
+  if(currentTab() == Queued) {
     m_list->removeRow(index);
     m_visibleEntries.erase(m_visibleEntries.begin() + index);
   }
@@ -726,9 +775,9 @@ void Browser::selectionDo(const std::function<void (int)> &func)
   }
 }
 
-auto Browser::getDisplay() const -> Display
+auto Browser::currentTab() const -> Tab
 {
-  return (Display)SendMessage(m_display, CB_GETCURSEL, 0, 0);
+  return (Tab)SendMessage(m_tabs, CB_GETCURSEL, 0, 0);
 }
 
 bool Browser::confirm() const

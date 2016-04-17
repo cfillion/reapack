@@ -80,7 +80,7 @@ private:
     RemoteColumn,
   };
 
-  enum Display {
+  enum Tab {
     All,
     Queued,
     Installed,
@@ -101,11 +101,14 @@ private:
   const Entry *getEntry(int) const;
   void selectionMenu(Menu &) const;
   void actionsButton();
+  void displayButton();
+  bool isFiltered(Package::Type) const;
+  void toggleFiltered(Package::Type);
   bool hasAction(const Entry *e) const { return m_actions.count(e) > 0; }
   bool isTarget(const Entry *, const Version *) const;
   void setAction(const int index, const Version *, bool toggle = true);
   void selectionDo(const std::function<void (int)> &);
-  Display getDisplay() const;
+  Tab currentTab() const;
   bool confirm() const;
   void apply();
 
@@ -131,8 +134,8 @@ private:
   std::map<const Entry *, const Version *> m_actions;
 
   HWND m_filterHandle;
+  HWND m_tabs;
   HWND m_display;
-  std::map<int, HWND> m_types;
   ListView *m_list;
   HWND m_apply;
 };

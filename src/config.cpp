@@ -30,7 +30,10 @@ using namespace std;
 
 static const char *GLOBAL_GRP = "reapack";
 static const char *VERSION_KEY = "version";
-static const char *AUTOINSTALL_KEY = "autoInstall";
+static const char *AUTOINSTALL_KEY = "autoinstall";
+
+static const char *BROWSER_GRP = "browser";
+static const char *TYPEFILTER_KEY = "typefilter";
 
 static const char *SIZE_KEY = "size";
 
@@ -45,7 +48,8 @@ static string ArrayKey(const string &key, const size_t i)
 static const int BUFFER_SIZE = 2083;
 
 Config::Config()
-  : m_isFirstRun(false), m_version(0), m_autoInstall(false), m_remotesIniSize(0)
+  : m_isFirstRun(false), m_version(0), m_autoInstall(false), m_browser(),
+    m_remotesIniSize(0)
 {
 }
 
@@ -85,6 +89,10 @@ void Config::read(const Path &path)
 
   m_autoInstall = getUInt(GLOBAL_GRP, AUTOINSTALL_KEY) > 0;
 
+  m_browser = {
+    getUInt(BROWSER_GRP, TYPEFILTER_KEY),
+  };
+
   readRemotes();
   restoreSelfRemote();
 }
@@ -93,6 +101,9 @@ void Config::write()
 {
   setUInt(GLOBAL_GRP, VERSION_KEY, m_version);
   setUInt(GLOBAL_GRP, AUTOINSTALL_KEY, m_autoInstall);
+
+  setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
+
   writeRemotes();
 }
 

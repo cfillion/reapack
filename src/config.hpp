@@ -26,6 +26,10 @@ class Path;
 
 class Config {
 public:
+  struct BrowserConfig {
+    size_t typeFilter;
+  };
+
   Config();
 
   void read(const Path &);
@@ -35,6 +39,7 @@ public:
   bool autoInstall() const { return m_autoInstall; }
   void setAutoInstall(const bool enable) { m_autoInstall = enable; }
   RemoteList *remotes() { return &m_remotes; }
+  BrowserConfig *browser() { return &m_browser; }
 
 private:
   std::string getString(const char *, const std::string &) const;
@@ -51,6 +56,7 @@ private:
   bool m_isFirstRun;
   size_t m_version;
   bool m_autoInstall;
+  BrowserConfig m_browser;
 
   void readRemotes();
   void restoreSelfRemote();
