@@ -28,8 +28,10 @@
 
 using namespace std;
 
-static const char *GLOBAL_GRP = "reapack";
+static const char *GENERAL_GRP = "general";
 static const char *VERSION_KEY = "version";
+
+static const char *INSTALL_GRP = "install";
 static const char *AUTOINSTALL_KEY = "autoinstall";
 
 static const char *BROWSER_GRP = "browser";
@@ -55,7 +57,7 @@ Config::Config()
 
 void Config::migrate()
 {
-  const unsigned int version = getUInt(GLOBAL_GRP, VERSION_KEY);
+  const unsigned int version = getUInt(GENERAL_GRP, VERSION_KEY);
 
   switch(version) {
   case 0:
@@ -88,7 +90,7 @@ void Config::read(const Path &path)
 {
   m_path = path.join();
 
-  m_autoInstall = getUInt(GLOBAL_GRP, AUTOINSTALL_KEY) > 0;
+  m_autoInstall = getUInt(INSTALL_GRP, AUTOINSTALL_KEY) > 0;
 
   m_browser = {
     getUInt(BROWSER_GRP, TYPEFILTER_KEY),
@@ -101,8 +103,9 @@ void Config::read(const Path &path)
 
 void Config::write()
 {
-  setUInt(GLOBAL_GRP, VERSION_KEY, m_version);
-  setUInt(GLOBAL_GRP, AUTOINSTALL_KEY, m_autoInstall);
+  setUInt(GENERAL_GRP, VERSION_KEY, m_version);
+
+  setUInt(INSTALL_GRP, AUTOINSTALL_KEY, m_autoInstall);
 
   setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
 
