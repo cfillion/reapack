@@ -2,28 +2,28 @@
 
 Signal.trap('INT') { abort }
 
-REGEX = /\A\/\*(.+\n[^\n])+?\*\/\n/.freeze
+REGEX = /\A\/\*.+?\*\/\n/m.freeze
 PREAMBLE = DATA.read.freeze
 
 def process(input)
-  if input[0] == '/'
-   output = input.sub REGEX, PREAMBLE
+  if input.start_with? '/'
+    before = input.hash
+    input.sub! REGEX, PREAMBLE
+    input if input.hash != before
   else
-   output = "%s\n%s" % [PREAMBLE, input]
+    input.prepend "#{PREAMBLE}\n"
   end
-  
-  input == output ? nil : output
 end
 
 ARGV.each do |path|
- File.open path, 'r+t' do |file|
-   output = process file.read
-   next unless output
+  File.open path, 'r+t' do |file|
+    output = process file.read
+    next unless output
 
-   file.rewind
-   file.write output
-   file.truncate file.pos
- end
+    file.rewind
+    file.write output
+    file.truncate file.pos
+  end
 end
 
 __END__
