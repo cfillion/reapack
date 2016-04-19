@@ -190,18 +190,19 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
   Menu menu;
 
-  if(!entry) {
-    menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
-    menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
-    menu.show(x, y, handle());
-    return;
-  }
-  else if(m_list->selectionSize() > 1) {
+  if(m_list->selectionSize() > 1) {
     menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
     menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
     menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
     menu.addAction(AUTO_STR("&Clear queued action"), ACTION_RESET_ALL);
     menu.addSeparator();
+  }
+
+  if(!entry) {
+    menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
+    menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
+    menu.show(x, y, handle());
+    return;
   }
 
   if(entry->test(InstalledFlag)) {
