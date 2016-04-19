@@ -52,7 +52,7 @@ public:
   void unselectAll() { unselect(-1); }
 
   int selectionSize() const;
-  bool hasSelection() const;
+  bool hasSelection() const { return selectionSize() > 0; }
   int currentIndex() const;
   std::vector<int> selection() const;
   int itemUnderMouse() const;

@@ -62,6 +62,12 @@ Package::Package(const Type type, const string &name, const Category *cat)
     throw reapack_error("empty package name");
 }
 
+Package::~Package()
+{
+  for(const Version *ver : m_versions)
+    delete ver;
+}
+
 string Package::fullName() const
 {
   return m_category ? m_category->fullName() + "/" + m_name : m_name;
@@ -70,12 +76,6 @@ string Package::fullName() const
 string Package::displayType() const
 {
   return displayType(m_type);
-}
-
-Package::~Package()
-{
-  for(const Version *ver : m_versions)
-    delete ver;
 }
 
 void Package::addVersion(const Version *ver)

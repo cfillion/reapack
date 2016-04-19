@@ -82,8 +82,6 @@ TEST_CASE("bind values and clear", M) {
   Database db;
   db.exec("CREATE TABLE test (value TEXT NOT NULL)");
 
-  vector<string> values;
-
   Statement *stmt = db.prepare("INSERT INTO test VALUES (?)");
   stmt->bind(1, "hello");
   stmt->exec();

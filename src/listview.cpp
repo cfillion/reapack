@@ -194,11 +194,6 @@ void ListView::setSelected(const int index, const bool select)
     select ? LVIS_SELECTED : 0, LVIS_SELECTED);
 }
 
-bool ListView::hasSelection() const
-{
-  return selectionSize() > 0;
-}
-
 int ListView::currentIndex() const
 {
   const int internalIndex = ListView_GetNextItem(handle(), -1, LVNI_SELECTED);
