@@ -65,7 +65,10 @@ void ReportDialog::printVersion(const Version *ver)
     stream() << " – " << date;
 
   stream() << NL;
-  
+}
+
+void ReportDialog::printChangelog(const Version *ver)
+{
   const string &changelog = ver->changelog();
   printIndented(changelog.empty() ? "No changelog" : changelog);
 }
@@ -149,6 +152,7 @@ void Report::printUpdates()
         break;
 
       printVersion(ver);
+      printChangelog(ver);
     }
   }
 }
@@ -192,5 +196,27 @@ void History::fillReport()
       stream() << NL;
 
     printVersion(ver);
+    printChangelog(ver);
+  }
+}
+
+Contents::Contents(const Package *pkg)
+  : ReportDialog(), m_package(pkg)
+{
+}
+
+void Contents::fillReport()
+{
+  SetWindowText(handle(), AUTO_STR("Package Contents"));
+  SetWindowText(getControl(IDC_LABEL),
+    make_autostring(m_package->name()).c_str());
+
+  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
+    if(stream().tellp())
+      stream() << NL;
+
+    printVersion(ver);
+    for(const Path &file : ver->files())
+      printIndented(file.join());
   }
 }

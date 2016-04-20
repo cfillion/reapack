@@ -116,6 +116,7 @@ private:
   void uninstall(int index, bool toggle = true);
   void resetAction(int index);
   void history(int index) const;
+  void contents(int index) const;
   void about(int index) const;
 
   std::vector<IndexPtr> m_indexes;

@@ -50,6 +50,7 @@ private:
   void selectLink(int control, const std::vector<const Link *> &);
   void openLink(const Link *);
   void packageHistory();
+  void packageContents();
 
   IndexPtr m_index;
   int m_currentCat;

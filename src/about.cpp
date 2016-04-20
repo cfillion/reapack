@@ -34,7 +34,7 @@
 
 using namespace std;
 
-enum { ACTION_HISTORY = 300 };
+enum { ACTION_HISTORY = 300, ACTION_CONTENTS };
 
 About::About(IndexPtr index)
   : Dialog(IDD_ABOUT_DIALOG), m_index(index),
@@ -90,6 +90,9 @@ void About::onCommand(const int id, int)
   case IDC_INSTALL:
     close(InstallResult);
     break;
+  case ACTION_CONTENTS:
+    packageContents();
+    break;
   case ACTION_HISTORY:
     packageHistory();
     break;
@@ -112,6 +115,7 @@ void About::onContextMenu(HWND target, const int x, const int y)
     return;
 
   Menu menu;
+  menu.addAction(AUTO_STR("Package &Contents"), ACTION_CONTENTS);
   menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
   menu.show(x, y, handle());
 }
@@ -274,4 +278,15 @@ void About::packageHistory()
 
   const Package *pkg = m_packagesData->at(index);
   Dialog::Show<History>(instance(), handle(), pkg);
+}
+
+void About::packageContents()
+{
+  const int index = m_packages->currentIndex();
+
+  if(index < 0)
+    return;
+
+  const Package *pkg = m_packagesData->at(index);
+  Dialog::Show<Contents>(instance(), handle(), pkg);
 }

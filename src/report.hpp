@@ -20,6 +20,8 @@
 
 #include "dialog.hpp"
 
+#include "registry.hpp"
+
 #include <sstream>
 
 class Package;
@@ -40,6 +42,7 @@ protected:
 
   void printHeader(const char *);
   void printVersion(const Version *);
+  void printChangelog(const Version *);
   void printIndented(const std::string &);
 
 private:
@@ -65,6 +68,17 @@ private:
 class History : public ReportDialog {
 public:
   History(const Package *);
+
+protected:
+  void fillReport() override;
+
+private:
+  const Package *m_package;
+};
+
+class Contents : public ReportDialog {
+public:
+  Contents(const Package *);
 
 protected:
   void fillReport() override;

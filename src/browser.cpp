@@ -42,6 +42,7 @@ enum Action {
   ACTION_REINSTALL_ALL,
   ACTION_UNINSTALL,
   ACTION_UNINSTALL_ALL,
+  ACTION_CONTENTS,
   ACTION_HISTORY,
   ACTION_ABOUT,
   ACTION_RESET_ALL,
@@ -134,6 +135,9 @@ void Browser::onCommand(const int id, const int event)
     break;
   case ACTION_UNINSTALL_ALL:
     selectionDo(bind(&Browser::uninstall, this, arg::_1, false));
+    break;
+  case ACTION_CONTENTS:
+    contents(m_currentIndex);
     break;
   case ACTION_HISTORY:
     history(m_currentIndex);
@@ -265,6 +269,9 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
     menu.check(uninstallIndex);
 
   menu.addSeparator();
+
+  menu.setEnabled(!entry->test(ObsoleteFlag),
+    menu.addAction(AUTO_STR("Package &Contents"), ACTION_CONTENTS));
 
   menu.setEnabled(!entry->test(ObsoleteFlag),
     menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY));
@@ -640,6 +647,14 @@ void Browser::history(const int index) const
 
   if(entry && entry->package)
     Dialog::Show<History>(instance(), handle(), entry->package);
+}
+
+void Browser::contents(const int index) const
+{
+  const Entry *entry = getEntry(index);
+
+  if(entry)
+    Dialog::Show<Contents>(instance(), handle(), entry->package);
 }
 
 void Browser::about(const int index) const
