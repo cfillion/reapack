@@ -117,6 +117,12 @@ void Path::clear()
   m_parts.clear();
 }
 
+void Path::removeFirst()
+{
+  if(!empty())
+    m_parts.pop_front();
+}
+
 void Path::removeLast()
 {
   if(!empty())

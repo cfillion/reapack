@@ -143,6 +143,9 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
     const char *platform = node->Attribute("platform");
     if(!platform) platform = "all";
 
+    const char *type = node->Attribute("type");
+    if(!type) type = "";
+
     const char *file = node->Attribute("file");
     if(!file) file = "";
 
@@ -151,6 +154,7 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
 
     Source *src = new Source(file, url, ver);
     src->setPlatform(Source::getPlatform(platform));
+    src->setTypeOverride(Package::getType(type));
     ver->addSource(src);
 
     node = node->NextSiblingElement("source");

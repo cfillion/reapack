@@ -51,6 +51,9 @@ public:
   void setPlatform(Platform p) { m_platform = p; }
   Platform platform() const { return m_platform; }
 
+  void setTypeOverride(Package::Type t) { m_type = t; }
+  Package::Type typeOverride() const { return m_type; }
+
   bool isMain() const { return m_file.empty(); }
   const std::string &file() const;
   const std::string &url() const { return m_url; }
@@ -63,6 +66,7 @@ public:
 
 private:
   Platform m_platform;
+  Package::Type m_type;
   std::string m_file;
   std::string m_url;
   const Version *m_version;

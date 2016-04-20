@@ -54,8 +54,6 @@ public:
   const Version *lastVersion() const;
   const Version *findVersion(const Version &) const;
 
-  Path makeTargetPath(const std::string &file = {}) const;
-
 private:
   const Category *m_category;
 

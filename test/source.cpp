@@ -47,6 +47,14 @@ TEST_CASE("source platform", M) {
   REQUIRE(src.platform() == Source::WindowsPlatform);
 }
 
+TEST_CASE("source type override", M) {
+  Source src({}, "url");
+  REQUIRE(src.typeOverride() == Package::UnknownType);
+
+  src.setTypeOverride(Package::ScriptType);
+  REQUIRE(src.typeOverride() == Package::ScriptType);
+}
+
 TEST_CASE("empty file name and no package", M) {
   const Source source({}, "url");
 
@@ -121,7 +129,7 @@ TEST_CASE("source target path", M) {
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
 
-  const Source source("file.name", "url", &ver);
+  Source source("file.name", "url", &ver);
 
   Path expected;
   expected.append("Scripts");
@@ -129,33 +137,104 @@ TEST_CASE("source target path", M) {
   expected.append("Category Name");
   expected.append("file.name");
 
-  REQUIRE(source.targetPath() == expected);
+  SECTION("script")
+    REQUIRE(source.targetPath() == expected);
+
+  SECTION("effect") {
+    expected.removeFirst();
+    expected.prepend("Effects");
+    source.setTypeOverride(Package::EffectType);
+    REQUIRE(source.targetPath() == expected);
+  }
+
+  SECTION("extension") {
+    expected.clear();
+    expected.append("UserPlugins");
+    expected.append("file.name");
+    source.setTypeOverride(Package::ExtensionType);
+    REQUIRE(source.targetPath() == expected);
+  }
+
+  SECTION("data") {
+    expected.removeFirst();
+    expected.prepend("Data");
+    source.setTypeOverride(Package::DataType);
+    REQUIRE(source.targetPath() == expected);
+  }
 }
 
-TEST_CASE("source target path with parent directory traversal", M) {
+TEST_CASE("target path with parent directory traversal", M) {
   Index ri("Index Name");
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
+  Source source("../../../file.name", "url", &ver);
 
-  const Source source("../../../file.name", "url", &ver);
+  SECTION("script") {
+    Path expected;
+    expected.append("Scripts");
+    expected.append("Index Name");
+    // expected.append("Category Name"); // only the category can be bypassed!
+    expected.append("file.name");
 
-  Path expected;
-  expected.append("Scripts");
-  expected.append("Index Name");
-  // expected.append("Category Name"); // only the category can be bypassed!
-  expected.append("file.name");
+    REQUIRE(source.targetPath() == expected);
+  }
 
-  REQUIRE(source.targetPath() == expected);
+  SECTION("extension") {
+    Path expected;
+    expected.append("UserPlugins");
+    expected.append("file.name");
+    source.setTypeOverride(Package::ExtensionType);
+    REQUIRE(source.targetPath() == expected);
+  }
 }
 
-TEST_CASE("source target path without package", M) {
+TEST_CASE("target path without package", M) {
   try {
     const Source source("a", "b");
     (void)source.targetPath();
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "no package associated with the source");
+    REQUIRE(string(e.what()) == "no package associated with this source");
+  }
+}
+
+TEST_CASE("target path for unknown package type", M) {
+  Index ri("name");
+  Category cat("name", &ri);
+  Package pack(Package::UnknownType, "a", &cat);
+  Version ver("1.0", &pack);
+  Source src({}, "url", &ver);
+
+  REQUIRE(src.targetPath().empty());
+}
+
+TEST_CASE("directory traversal in category name", M) {
+  Index ri("Remote Name");
+  Category cat("../..", &ri);
+  Package pack(Package::ScriptType, "file.name", &cat);
+  Version ver("1.0", &pack);
+  Source src({}, "url", &ver);
+
+  Path expected;
+  expected.append("Scripts");
+  expected.append("Remote Name");
+  expected.append("file.name");
+
+  REQUIRE(src.targetPath() == expected);
+}
+
+TEST_CASE("target path without category", M) {
+  Package pack(Package::ScriptType, "file.name");
+  Version ver("1.0", &pack);
+  Source src({}, "url", &ver);
+
+  try {
+    src.targetPath();
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "category or index is unset");
   }
 }

@@ -155,6 +155,24 @@ TEST_CASE("absolute path (unix)", M) {
 }
 #endif
 
+TEST_CASE("remove first component of path", M) {
+  Path a;
+  a.append("a");
+  a.append("b");
+
+  CHECK(a.size() == 2);
+
+  a.removeFirst();
+
+  REQUIRE(a.size() == 1);
+  REQUIRE(a[0] == "b");
+
+  a.removeFirst();
+  REQUIRE(a.empty());
+
+  a.removeFirst(); // no crash
+}
+
 TEST_CASE("remove last component of path", M) {
   Path a;
   a.append("a");
@@ -166,6 +184,11 @@ TEST_CASE("remove last component of path", M) {
 
   REQUIRE(a.size() == 1);
   REQUIRE(a[0] == "a");
+
+  a.removeLast();
+  REQUIRE(a.empty());
+
+  a.removeLast(); // no crash
 }
 
 TEST_CASE("path generation utilities", M) {
