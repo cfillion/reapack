@@ -18,17 +18,12 @@
 #ifndef REAPACK_SOURCE_HPP
 #define REAPACK_SOURCE_HPP
 
-#include <map>
 #include <string>
-#include <vector>
 
-#include "path.hpp"
-
-class Source;
-typedef std::vector<Source *> SourceList;
-typedef std::multimap<Path, const Source *> SourceMap;
+#include "package.hpp"
 
 class Package;
+class Path;
 class Version;
 
 class Source {
@@ -48,7 +43,7 @@ public:
     Darwin64Platform,
   };
 
-  static Platform ConvertPlatform(const char *);
+  static Platform getPlatform(const char *);
 
   Source(const std::string &file, const std::string &url,
     const Version * = nullptr);

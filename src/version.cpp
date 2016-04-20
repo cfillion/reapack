@@ -19,6 +19,7 @@
 
 #include "errors.hpp"
 #include "package.hpp"
+#include "source.hpp"
 
 #include <algorithm>
 #include <cmath>

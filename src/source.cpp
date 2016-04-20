@@ -23,7 +23,7 @@
 
 using namespace std;
 
-Source::Platform Source::ConvertPlatform(const char *platform)
+Source::Platform Source::getPlatform(const char *platform)
 {
   if(!strcmp(platform, "all"))
     return GenericPlatform;

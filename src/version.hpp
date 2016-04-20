@@ -20,16 +20,20 @@
 
 #include <cstdint>
 #include <ctime>
+#include <map>
 #include <set>
 #include <string>
-
-#include "source.hpp"
+#include <vector>
 
 class Package;
+class Source;
+class Path;
 
 class Version {
 public:
   typedef uint64_t Code;
+  typedef std::vector<Source *> SourceList;
+  typedef std::multimap<Path, const Source *> SourceMap;
 
   Version();
   Version(const std::string &, const Package * = nullptr);

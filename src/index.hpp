@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "package.hpp"
+#include "source.hpp"
 
 class Category;
 typedef std::vector<const Category *> CategoryList;

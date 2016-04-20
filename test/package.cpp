@@ -14,19 +14,19 @@ static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
   SECTION("unknown")
-    REQUIRE(Package::typeFor("yoyo") == Package::UnknownType);
+    REQUIRE(Package::getType("yoyo") == Package::UnknownType);
 
   SECTION("script")
-    REQUIRE(Package::typeFor("script") == Package::ScriptType);
+    REQUIRE(Package::getType("script") == Package::ScriptType);
 
   SECTION("extension")
-    REQUIRE(Package::typeFor("extension") == Package::ExtensionType);
+    REQUIRE(Package::getType("extension") == Package::ExtensionType);
 
   SECTION("effect")
-    REQUIRE(Package::typeFor("effect") == Package::EffectType);
+    REQUIRE(Package::getType("effect") == Package::EffectType);
 
   SECTION("data")
-    REQUIRE(Package::typeFor("data") == Package::DataType);
+    REQUIRE(Package::getType("data") == Package::DataType);
 }
 
 TEST_CASE("package type to string", M) {

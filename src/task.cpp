@@ -18,6 +18,7 @@
 #include "task.hpp"
 
 #include "filesystem.hpp"
+#include "source.hpp"
 #include "transaction.hpp"
 #include "version.hpp"
 

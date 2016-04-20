@@ -107,7 +107,7 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
-  Package *pack = new Package(Package::typeFor(type), name, cat);
+  Package *pack = new Package(Package::getType(type), name, cat);
   unique_ptr<Package> ptr(pack);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");
@@ -150,7 +150,7 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
     if(!url) url = "";
 
     Source *src = new Source(file, url, ver);
-    src->setPlatform(Source::ConvertPlatform(platform));
+    src->setPlatform(Source::getPlatform(platform));
     ver->addSource(src);
 
     node = node->NextSiblingElement("source");
