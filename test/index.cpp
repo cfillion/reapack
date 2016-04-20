@@ -99,7 +99,7 @@ TEST_CASE("add a category", M) {
   Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
   Version *ver = new Version("1", pack);
-  Source *source = new Source(Source::GenericPlatform, {}, "google.com", ver);
+  Source *source = new Source({}, "google.com", ver);
 
   ver->addSource(source);
   pack->addVersion(ver);
@@ -143,7 +143,7 @@ TEST_CASE("add a package", M) {
   Category cat("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", &cat);
   Version *ver = new Version("1", pack);
-  ver->addSource(new Source(Source::GenericPlatform, {}, "google.com", ver));
+  ver->addSource(new Source({}, "google.com", ver));
   pack->addVersion(ver);
 
   CHECK(cat.packages().size() == 0);

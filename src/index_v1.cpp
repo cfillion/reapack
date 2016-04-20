@@ -149,7 +149,9 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
     const char *url = node->GetText();
     if(!url) url = "";
 
-    ver->addSource(new Source(Source::ConvertPlatform(platform), file, url, ver));
+    Source *src = new Source(file, url, ver);
+    src->setPlatform(Source::ConvertPlatform(platform));
+    ver->addSource(src);
 
     node = node->NextSiblingElement("source");
   }

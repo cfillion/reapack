@@ -554,8 +554,7 @@ void ReaPack::registerSelf()
   Category cat("Extensions", &ri);
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
   Version ver(VERSION, &pkg);
-  ver.addSource(new Source(Source::GenericPlatform,
-    REAPACK_FILE, "dummy url", &ver));
+  ver.addSource(new Source(REAPACK_FILE, "dummy url", &ver));
 
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));

@@ -77,10 +77,10 @@ TEST_CASE("package versions are sorted", M) {
   CHECK(pack.versions().size() == 0);
 
   Version *final = new Version("1", &pack);
-  final->addSource(new Source(Source::GenericPlatform, {}, "google.com", final));
+  final->addSource(new Source({}, "google.com", final));
 
   Version *alpha = new Version("0.1", &pack);
-  alpha->addSource(new Source(Source::GenericPlatform, {}, "google.com", alpha));
+  alpha->addSource(new Source({}, "google.com", alpha));
 
   pack.addVersion(final);
   REQUIRE(final->package() == &pack);
@@ -126,7 +126,7 @@ TEST_CASE("find matching version", M) {
   CHECK(pack.versions().size() == 0);
 
   Version *ver = new Version("1", &pack);
-  ver->addSource(new Source(Source::GenericPlatform, {}, "google.com", ver));
+  ver->addSource(new Source({}, "google.com", ver));
 
   REQUIRE(pack.findVersion(Version("1")) == nullptr);
   REQUIRE(pack.findVersion(Version("2")) == nullptr);

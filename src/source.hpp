@@ -50,9 +50,10 @@ public:
 
   static Platform ConvertPlatform(const char *);
 
-  Source(const Platform, const std::string &file,
-    const std::string &url, const Version * = nullptr);
+  Source(const std::string &file, const std::string &url,
+    const Version * = nullptr);
 
+  void setPlatform(Platform p) { m_platform = p; }
   Platform platform() const { return m_platform; }
 
   bool isMain() const { return m_file.empty(); }

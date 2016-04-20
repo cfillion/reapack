@@ -44,8 +44,19 @@ TEST_CASE("convert platforms", M) {
   }
 }
 
+TEST_CASE("source platform", M) {
+  Source src({}, "url");
+  REQUIRE(src.platform() == Source::GenericPlatform);
+
+  src.setPlatform(Source::UnknownPlatform);
+  REQUIRE(src.platform() == Source::UnknownPlatform);
+
+  src.setPlatform(Source::WindowsPlatform);
+  REQUIRE(src.platform() == Source::WindowsPlatform);
+}
+
 TEST_CASE("empty file name and no package", M) {
-  const Source source(Source::UnknownPlatform, string(), "b");
+  const Source source({}, "url");
 
   try {
     (void)source.file();
@@ -58,19 +69,19 @@ TEST_CASE("empty file name and no package", M) {
 
 TEST_CASE("main source", M) {
   SECTION("with file name") {
-    const Source source(Source::UnknownPlatform, "a", "b");
+    const Source source("filename", "url");
     REQUIRE_FALSE(source.isMain());
   }
 
   SECTION("without file name") {
-    const Source source(Source::UnknownPlatform, string(), "b");
+    const Source source({}, "url");
     REQUIRE(source.isMain());
   }
 }
 
 TEST_CASE("empty source url", M) {
   try {
-    const Source source(Source::UnknownPlatform, "a", string());
+    const Source source("filename", {});
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -79,14 +90,14 @@ TEST_CASE("empty source url", M) {
 }
 
 TEST_CASE("full name without version", M) {
-  SECTION("with source name") {
-    const Source source(Source::UnknownPlatform, "path/to/file", "b");
+  SECTION("with file name") {
+    const Source source("path/to/file", "b");
     REQUIRE(source.fullName() == "file");
   }
 
   SECTION("without file name") {
     try {
-      const Source source(Source::UnknownPlatform, string(), "b");
+      const Source source({}, "b");
       (void)source.fullName();
       FAIL();
     }
@@ -97,16 +108,16 @@ TEST_CASE("full name without version", M) {
 }
 
 TEST_CASE("full name with version", M) {
-  SECTION("with source name") {
+  SECTION("with file name") {
     Version ver("1.0");
-    const Source source(Source::UnknownPlatform, "path/to/file", "b", &ver);
+    const Source source("path/to/file", "b", &ver);
 
     REQUIRE(source.fullName() == "v1.0 (file)");
   }
 
-  SECTION("without source name") {
+  SECTION("without file name") {
     Version ver("1.0");
-    const Source source(Source::UnknownPlatform, string(), "b", &ver);
+    const Source source({}, "b", &ver);
 
     REQUIRE(source.fullName() == ver.fullName());
   }
@@ -118,7 +129,7 @@ TEST_CASE("source target path", M) {
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
 
-  const Source source(Source::GenericPlatform, "file.name", "url", &ver);
+  const Source source("file.name", "url", &ver);
 
   Path expected;
   expected.append("Scripts");
@@ -135,7 +146,7 @@ TEST_CASE("source target path with parent directory traversal", M) {
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
 
-  const Source source(Source::GenericPlatform, "../../../file.name", "url", &ver);
+  const Source source("../../../file.name", "url", &ver);
 
   Path expected;
   expected.append("Scripts");
@@ -148,7 +159,7 @@ TEST_CASE("source target path with parent directory traversal", M) {
 
 TEST_CASE("source target path without package", M) {
   try {
-    const Source source(Source::GenericPlatform, "a", "b");
+    const Source source("a", "b");
     (void)source.targetPath();
     FAIL();
   }

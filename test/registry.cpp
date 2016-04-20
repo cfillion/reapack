@@ -19,7 +19,7 @@ static const char *M = "[registry]";
   Package pkg(Package::ScriptType, "Hello", &cat); \
   Version *ver = new Version("1.0", &pkg); \
   ver->setAuthor("John Doe"); \
-  Source *src = new Source(Source::GenericPlatform, "file", "url", ver); \
+  Source *src = new Source("file", "url", ver); \
   ver->addSource(src); \
   pkg.addVersion(ver);
 
@@ -63,7 +63,7 @@ TEST_CASE("bump version", M) {
   MAKE_PACKAGE
 
   Version *ver2 = new Version("2.0", &pkg);
-  ver2->addSource(new Source(Source::GenericPlatform, "file", "url", ver2));
+  ver2->addSource(new Source("file", "url", ver2));
 
   Registry reg;
   reg.push(ver);
@@ -137,8 +137,8 @@ TEST_CASE("file conflicts", M) {
   Category cat("Category Name", &ri);
   Package pkg(Package::ScriptType, "Duplicate Package", &cat);
   Version *ver = new Version("1.0", &pkg);
-  Source *src1 = new Source(Source::GenericPlatform, "file", "url", ver);
-  Source *src2 = new Source(Source::GenericPlatform, "file2", "url", ver);
+  Source *src1 = new Source("file", "url", ver);
+  Source *src2 = new Source("file2", "url", ver);
   ver->addSource(src1);
   ver->addSource(src2);
   pkg.addVersion(ver);
@@ -168,7 +168,7 @@ TEST_CASE("get main file", M) {
   Registry reg;
   REQUIRE((reg.getMainFile({})).empty());
 
-  Source *main = new Source(Source::GenericPlatform, {}, "url", ver);
+  Source *main = new Source({}, "url", ver);
   ver->addSource(main);
 
   const Registry::Entry &entry = reg.push(ver);
