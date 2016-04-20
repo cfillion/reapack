@@ -77,7 +77,8 @@ public:
   bool operator!=(const Version &o) const { return compare(o) != 0; }
 
 private:
-  typedef boost::variant<uint64_t, std::string> Segment;
+  typedef uint16_t Numeric;
+  typedef boost::variant<Numeric, std::string> Segment;
 
   Segment segment(size_t i) const;
 

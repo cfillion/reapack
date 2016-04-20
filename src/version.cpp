@@ -71,7 +71,7 @@ void Version::parse(const string &str)
     }
     else {
       try {
-        segments.push_back(boost::lexical_cast<uint64_t>(match));
+        segments.push_back(boost::lexical_cast<Numeric>(match));
         numeric++;
       }
       catch(const boost::bad_lexical_cast &) {
@@ -206,11 +206,11 @@ int Version::compare(const Version &o) const
 
   for(size_t i = 0; i < biggest; i++) {
     const Segment &lseg = segment(i);
-    const uint64_t *lnum = boost::get<uint64_t>(&lseg);
+    const Numeric *lnum = boost::get<Numeric>(&lseg);
     const string *lstr = boost::get<string>(&lseg);
 
     const Segment &rseg = o.segment(i);
-    const uint64_t *rnum = boost::get<uint64_t>(&rseg);
+    const Numeric *rnum = boost::get<Numeric>(&rseg);
     const string *rstr = boost::get<string>(&rseg);
 
     if(lnum && rnum) {
