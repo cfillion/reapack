@@ -21,26 +21,26 @@
 #include "package.hpp"
 #include "source.hpp"
 
-#include <algorithm>
-#include <cmath>
+#include <boost/lexical_cast.hpp>
+#include <cctype>
 #include <regex>
 
 using namespace std;
 
 Version::Version()
-  : m_code(0), m_time(), m_package(nullptr), m_mainSource(nullptr)
+  : m_prerelease(false), m_time(), m_package(nullptr), m_mainSource(nullptr)
 {
 }
 
 Version::Version(const string &str, const Package *pkg)
-  : m_code(0), m_time(), m_package(pkg), m_mainSource(nullptr)
+  : m_time(), m_package(pkg), m_mainSource(nullptr)
 {
   parse(str);
 }
 
 Version::Version(const Version &o, const Package *pkg)
-  : m_name(o.name()), m_code(o.code()),
-    m_author(o.author()), m_changelog(o.changelog()), m_time(o.time()),
+  : m_name(o.m_name), m_segments(o.m_segments), m_prerelease(o.m_prerelease),
+    m_author(o.m_author), m_changelog(o.m_changelog), m_time(o.m_time),
     m_package(pkg), m_mainSource(nullptr)
 {
 }
@@ -53,30 +53,39 @@ Version::~Version()
 
 void Version::parse(const string &str)
 {
-  static const regex pattern("(\\d+)");
+  static const regex pattern("\\d+|[a-zA-Z]+");
 
-  auto begin = sregex_iterator(str.begin(), str.end(), pattern);
-  auto end = sregex_iterator();
+  const auto &begin = sregex_iterator(str.begin(), str.end(), pattern);
+  const sregex_iterator end;
 
-  // set the major version by default
-  // even if there are less than 4 numeric components in the string
-  const size_t size = max((size_t)4, (size_t)distance(begin, end));
+  size_t numeric = 0, alpha = 0;
+  vector<Segment> segments;
 
-  if(begin == end || size > 4L)
-    throw reapack_error("invalid version name");
+  for(sregex_iterator it = begin; it != end; it++) {
+    const string match = it->str(0);
+    const char first = tolower(match[0]);
 
-  size_t index = 0;
-
-  for(sregex_iterator it = begin; it != end; it++, index++) {
-    const string match = it->str(1);
-
-    if(match.size() > 4)
-      throw reapack_error("version component overflow");
-
-    m_code += stoi(match) * (Code)pow(10000, size - index - 1);
+    if(first >= 'a' || first >= 'z') {
+      segments.push_back(match);
+      alpha++;
+    }
+    else {
+      try {
+        segments.push_back(boost::lexical_cast<uint64_t>(match));
+        numeric++;
+      }
+      catch(const boost::bad_lexical_cast &) {
+        throw reapack_error("version segment overflow");
+      }
+    }
   }
 
+  if(!numeric)
+    throw reapack_error("invalid version name");
+
   m_name = str;
+  swap(m_segments, segments);
+  m_prerelease = alpha > 0;
 }
 
 bool Version::tryParse(const string &str)
@@ -183,32 +192,44 @@ const Source *Version::source(const size_t index) const
   return it->second;
 }
 
-bool Version::operator<(const Version &o) const
+auto Version::segment(const size_t index) const -> Segment
 {
-  return m_code < o.code();
+  if(index < size())
+    return m_segments[index];
+  else
+    return 0;
 }
 
-bool Version::operator<=(const Version &o) const
+int Version::compare(const Version &o) const
 {
-  return !(m_code > o.code());
-}
+  const size_t biggest = max(size(), o.size());
 
-bool Version::operator>(const Version &o) const
-{
-  return m_code > o.code();
-}
+  for(size_t i = 0; i < biggest; i++) {
+    const Segment &lseg = segment(i);
+    const uint64_t *lnum = boost::get<uint64_t>(&lseg);
+    const string *lstr = boost::get<string>(&lseg);
 
-bool Version::operator>=(const Version &o) const
-{
-  return !(m_code < o.code());
-}
+    const Segment &rseg = o.segment(i);
+    const uint64_t *rnum = boost::get<uint64_t>(&rseg);
+    const string *rstr = boost::get<string>(&rseg);
 
-bool Version::operator==(const Version &o) const
-{
-  return m_code == o.code();
-}
+    if(lnum && rnum) {
+      if(*lnum < *rnum)
+        return -1;
+      else if(*lnum > *rnum)
+        return 1;
+    }
+    else if(lstr && rstr) {
+      if(*lstr < *rstr)
+        return -1;
+      else if(*lstr > *rstr)
+        return 1;
+    }
+    else if(lnum && rstr)
+      return 1;
+    else if(lstr && rnum)
+      return -1;
+  }
 
-bool Version::operator!=(const Version &o) const
-{
-  return !(*this == o);
+  return 0;
 }

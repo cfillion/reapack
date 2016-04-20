@@ -18,6 +18,7 @@
 #ifndef REAPACK_VERSION_HPP
 #define REAPACK_VERSION_HPP
 
+#include <boost/variant.hpp>
 #include <cstdint>
 #include <ctime>
 #include <map>
@@ -31,7 +32,6 @@ class Path;
 
 class Version {
 public:
-  typedef uint64_t Code;
   typedef std::vector<Source *> SourceList;
   typedef std::multimap<Path, const Source *> SourceMap;
 
@@ -45,7 +45,8 @@ public:
 
   const std::string &name() const { return m_name; }
   std::string fullName() const;
-  uint64_t code() const { return m_code; }
+  size_t size() const { return m_segments.size(); }
+  bool isPrerelease() const { return m_prerelease; }
 
   const Package *package() const { return m_package; }
 
@@ -67,16 +68,22 @@ public:
 
   const std::set<Path> &files() const { return m_files; }
 
-  bool operator<(const Version &) const;
-  bool operator<=(const Version &) const;
-  bool operator>(const Version &) const;
-  bool operator>=(const Version &) const;
-  bool operator==(const Version &) const;
-  bool operator!=(const Version &) const;
+  int compare(const Version &) const;
+  bool operator<(const Version &o) const { return compare(o) < 0; }
+  bool operator<=(const Version &o) const { return compare(o) <= 0; }
+  bool operator>(const Version &o) const { return compare(o) > 0; }
+  bool operator>=(const Version &o) const { return compare(o) >= 0; }
+  bool operator==(const Version &o) const { return compare(o) == 0; }
+  bool operator!=(const Version &o) const { return compare(o) != 0; }
 
 private:
+  typedef boost::variant<uint64_t, std::string> Segment;
+
+  Segment segment(size_t i) const;
+
   std::string m_name;
-  Code m_code;
+  std::vector<Segment> m_segments;
+  bool m_prerelease;
 
   std::string m_author;
   std::string m_changelog;
@@ -89,7 +96,7 @@ private:
   std::set<Path> m_files;
 };
 
-class VersionCompare {
+class VersionPtrCompare {
 public:
   bool operator()(const Version *l, const Version *r) const
   {
@@ -97,6 +104,6 @@ public:
   }
 };
 
-typedef std::set<const Version *, VersionCompare> VersionSet;
+typedef std::set<const Version *, VersionPtrCompare> VersionSet;
 
 #endif
