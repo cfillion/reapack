@@ -305,7 +305,11 @@ void Manager::apply()
     m_reapack->uninstall(remote);
 
   m_config->write();
-  m_reapack->runTasks();
+
+  if(m_reapack->isRunning())
+    m_reapack->runTasks();
+  else
+    m_reapack->refreshBrowser();
 }
 
 void Manager::reset()
