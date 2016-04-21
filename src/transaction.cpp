@@ -98,7 +98,10 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
     (regEntry && !regEntry.version.isStable());
   const Version *latest = pkg->lastVersion(includePre);
 
-  if(latest && regEntry.version == *latest) {
+  if(!latest)
+    return;
+
+  if(regEntry.version == *latest) {
     if(allFilesExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
