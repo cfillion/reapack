@@ -105,6 +105,8 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
     if(allFilesExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
+  else if(regEntry.version > *latest)
+    return;
 
   install(latest, regEntry);
 }
