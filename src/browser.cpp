@@ -285,6 +285,19 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   menu.show(x, y, handle());
 }
 
+void Browser::updateDisplayLabel()
+{
+  basic_ostringstream<auto_char> btnLabel;
+  btnLabel.imbue(locale("")); // enable number formatting
+  btnLabel << m_list->rowCount() << AUTO_STR('/') << m_entries.size()
+    << AUTO_STR(" package");
+
+  if(m_entries.size() != 1)
+    btnLabel << AUTO_STR('s');
+
+  SetWindowText(m_display, btnLabel.str().c_str());
+}
+
 void Browser::displayButton()
 {
   RECT rect;
@@ -521,15 +534,7 @@ void Browser::fillList()
 
   m_list->sort();
 
-  basic_ostringstream<auto_char> btnLabel;
-  btnLabel.imbue(locale("")); // enable number formatting
-  btnLabel << m_list->rowCount() << AUTO_STR('/') << m_entries.size()
-    << AUTO_STR(" package");
-
-  if(m_entries.size() != 1)
-    btnLabel << AUTO_STR('s');
-
-  SetWindowText(m_display, btnLabel.str().c_str());
+  updateDisplayLabel();
 }
 
 ListView::Row Browser::makeRow(const Entry &entry) const
@@ -723,6 +728,7 @@ void Browser::resetAction(const int index)
   if(currentTab() == Queued) {
     m_list->removeRow(index);
     m_visibleEntries.erase(m_visibleEntries.begin() + index);
+    updateDisplayLabel();
   }
   else
     m_list->replaceRow(index, makeRow(*entry));

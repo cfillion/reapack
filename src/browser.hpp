@@ -99,6 +99,7 @@ private:
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
   const Entry *getEntry(int) const;
+  void updateDisplayLabel();
   void displayButton();
   bool isFiltered(Package::Type) const;
   void toggleFiltered(Package::Type);
