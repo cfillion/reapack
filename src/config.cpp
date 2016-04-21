@@ -33,6 +33,7 @@ static const char *VERSION_KEY = "version";
 
 static const char *INSTALL_GRP = "install";
 static const char *AUTOINSTALL_KEY = "autoinstall";
+static const char *PRERELEASES_KEY = "prereleases";
 
 static const char *BROWSER_GRP = "browser";
 static const char *TYPEFILTER_KEY = "typefilter";
@@ -50,7 +51,7 @@ static string ArrayKey(const string &key, const unsigned int i)
 static const int BUFFER_SIZE = 2083;
 
 Config::Config()
-  : m_isFirstRun(false), m_version(0), m_autoInstall(false), m_browser(),
+  : m_isFirstRun(false), m_version(0), m_install(), m_browser(),
     m_remotesIniSize(0)
 {
 }
@@ -90,7 +91,10 @@ void Config::read(const Path &path)
 {
   m_path = path.join();
 
-  m_autoInstall = getUInt(INSTALL_GRP, AUTOINSTALL_KEY) > 0;
+  m_install = {
+    getUInt(INSTALL_GRP, AUTOINSTALL_KEY) > 0,
+    getUInt(INSTALL_GRP, PRERELEASES_KEY) > 0,
+  };
 
   m_browser = {
     getUInt(BROWSER_GRP, TYPEFILTER_KEY),
@@ -105,7 +109,8 @@ void Config::write()
 {
   setUInt(GENERAL_GRP, VERSION_KEY, m_version);
 
-  setUInt(INSTALL_GRP, AUTOINSTALL_KEY, m_autoInstall);
+  setUInt(INSTALL_GRP, AUTOINSTALL_KEY, m_install.autoInstall);
+  setUInt(INSTALL_GRP, PRERELEASES_KEY, m_install.bleedingEdge);
 
   setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
 

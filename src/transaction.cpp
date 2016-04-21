@@ -17,6 +17,7 @@
 
 #include "transaction.hpp"
 
+#include "config.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
@@ -64,7 +65,7 @@ Transaction::~Transaction()
   delete m_registry;
 }
 
-void Transaction::synchronize(const Remote &remote, const bool autoInstall)
+void Transaction::synchronize(const Remote &remote, const InstallOpts &opts)
 {
   // show the report dialog or "nothing to do" even if no task are ran
   m_receipt.setEnabled(true);
@@ -82,18 +83,19 @@ void Transaction::synchronize(const Remote &remote, const bool autoInstall)
     }
 
     for(const Package *pkg : ri->packages())
-      synchronize(pkg, autoInstall);
+      synchronize(pkg, opts);
   });
 }
 
-void Transaction::synchronize(const Package *pkg, const bool autoInstall)
+void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
 {
   const auto &regEntry = m_registry->getEntry(pkg);
 
-  if(!regEntry && !autoInstall)
+  if(!regEntry && !opts.autoInstall)
     return;
 
-  const Version *latest = pkg->lastVersion(!regEntry.version.isStable());
+  const bool includePre = opts.bleedingEdge || !regEntry.version.isStable();
+  const Version *latest = pkg->lastVersion(includePre);
 
   if(latest && regEntry.version == *latest) {
     if(allFilesExists(latest->files()))

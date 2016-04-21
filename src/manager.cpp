@@ -30,7 +30,7 @@
 using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-       ACTION_AUTOINSTALL, ACTION_SELECT, ACTION_UNSELECT };
+       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_SELECT, ACTION_UNSELECT };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -77,7 +77,11 @@ void Manager::onCommand(const int id, int)
     uninstall();
     break;
   case ACTION_AUTOINSTALL:
-    m_autoInstall = !m_autoInstall.value_or(m_config->autoInstall());
+    m_autoInstall = !m_autoInstall.value_or(m_config->install()->autoInstall);
+    enable(m_apply);
+    break;
+  case ACTION_BLEEDINGEDGE:
+    m_bleedingEdge = !m_bleedingEdge.value_or(m_config->install()->bleedingEdge);
     enable(m_apply);
     break;
   case ACTION_SELECT:
@@ -247,10 +251,14 @@ void Manager::options()
 
   Menu menu;
 
-  const UINT index = menu.addAction(
+  UINT index = menu.addAction(
     AUTO_STR("&Install new packages automatically"), ACTION_AUTOINSTALL);
+  if(m_autoInstall.value_or(m_config->install()->autoInstall))
+    menu.check(index);
 
-  if(m_autoInstall.value_or(m_config->autoInstall()))
+  index = menu.addAction(
+    AUTO_STR("Enable &pre-releases (bleeding edge mode)"), ACTION_BLEEDINGEDGE);
+  if(m_bleedingEdge.value_or(m_config->install()->bleedingEdge))
     menu.check(index);
 
   menu.show(rect.left, rect.bottom - 1, handle());
@@ -278,7 +286,10 @@ bool Manager::confirm() const
 void Manager::apply()
 {
   if(m_autoInstall)
-    m_config->setAutoInstall(m_autoInstall.value());
+    m_config->install()->autoInstall = m_autoInstall.value();
+
+  if(m_bleedingEdge)
+    m_config->install()->bleedingEdge = m_bleedingEdge.value();
 
   for(const auto &pair : m_enableOverrides) {
     const Remote &remote = pair.first;

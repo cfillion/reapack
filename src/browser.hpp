@@ -89,7 +89,7 @@ private:
     Uninstalled,
   };
 
-  static Entry makeEntry(const Package *, const Registry::Entry &);
+  Entry makeEntry(const Package *, const Registry::Entry &) const;
 
   void populate();
   void transferActions();

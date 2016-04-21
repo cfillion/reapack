@@ -461,9 +461,11 @@ void Browser::transferActions()
 }
 
 auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
-  -> Entry
+  const -> Entry
 {
-  const Version *latest = pkg->lastVersion(!regEntry.version.isStable());
+  const auto &instOpts = *m_reapack->config()->install();
+  const bool includePre = instOpts.bleedingEdge || !regEntry.version.isStable();
+  const Version *latest = pkg->lastVersion(includePre);
   const Version *current = nullptr;
 
   int flags = 0;
