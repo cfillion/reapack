@@ -25,7 +25,60 @@ static Source *mksource(Source::Platform p, Version *parent)
 
 static const char *M = "[version]";
 
-TEST_CASE("invalid", M) {
+TEST_CASE("construct null version", M) {
+  const Version ver;
+
+  REQUIRE(ver.size() == 0);
+  REQUIRE_FALSE(ver.isStable());
+  REQUIRE(ver.displayTime().empty());
+  REQUIRE(ver.package() == nullptr);
+  REQUIRE(ver.mainSource() == nullptr);
+}
+
+TEST_CASE("parse version", M) {
+  Version ver;
+
+  SECTION("valid") {
+    ver.parse("1.0.1");
+    REQUIRE(ver.name() == "1.0.1");
+    REQUIRE(ver.size() == 3);
+  }
+
+  SECTION("prerelease set/unset") {
+    ver.parse("1.0beta");
+    REQUIRE_FALSE(ver.isStable());
+    ver.parse("1.0");
+    REQUIRE(ver.isStable());
+  }
+
+  SECTION("invalid") {
+    try { ver.parse("hello"); FAIL(); }
+    catch(const reapack_error &) {}
+
+    REQUIRE(ver.name().empty());
+    REQUIRE(ver.size() == 0);
+  }
+}
+
+TEST_CASE("parse version failsafe", M) {
+  Version ver;
+
+  SECTION("valid") {
+    REQUIRE(ver.tryParse("1.0"));
+
+    REQUIRE(ver.name() == "1.0");
+    REQUIRE(ver.size() == 2);
+  }
+
+  SECTION("invalid") {
+    REQUIRE_FALSE(ver.tryParse("hello"));
+
+    REQUIRE(ver.name().empty());
+    REQUIRE(ver.size() == 0);
+  }
+}
+
+TEST_CASE("construct invalid version", M) {
   try {
     Version ver("hello");
     FAIL();
@@ -35,73 +88,94 @@ TEST_CASE("invalid", M) {
   }
 }
 
-TEST_CASE("major minor patch version", M) {
-  Version ver("1.2.3");
-  REQUIRE(ver.name() == "1.2.3");
-  REQUIRE(ver.code() == UINT64_C(1000200030000));
-}
-
-TEST_CASE("major minor version", M) {
-  Version ver("1.2");
-  REQUIRE(ver.name() == "1.2");
-  REQUIRE(ver.code() == UINT64_C(1000200000000));
-}
-
-TEST_CASE("major version", M) {
-  Version ver("1");
-  REQUIRE(ver.name() == "1");
-  REQUIRE(ver.code() == UINT64_C(1000000000000));
-}
-
-TEST_CASE("version with string suffix", M) {
-  Version ver("1.2pre3");
-  REQUIRE(ver.name() == "1.2pre3");
-  REQUIRE(ver.code() == UINT64_C(1000200030000));
-}
-
-TEST_CASE("version with 4 components", M) {
-  Version ver("1.2.3.4");
-  REQUIRE(ver.name() == "1.2.3.4");
-  REQUIRE(ver.code() == UINT64_C(1000200030004));
-  REQUIRE(ver < Version("1.2.4"));
-}
-
-TEST_CASE("version with repeated digits", M) {
-  Version ver("1.1.1");
-  REQUIRE(ver.name() == "1.1.1");
-  REQUIRE(ver.code() == UINT64_C(1000100010000));
-  REQUIRE(ver < Version("1.1.2"));
-}
-
 TEST_CASE("decimal version", M) {
   Version ver("5.05");
   REQUIRE(ver == Version("5.5"));
   REQUIRE(ver < Version("5.50"));
 }
 
-TEST_CASE("4 digits version component", M) {
-  Version ver("0.2015.12.25");
-  REQUIRE(ver.name() == "0.2015.12.25");
-  REQUIRE(ver.code() == UINT64_C(201500120025));
+TEST_CASE("5 version segments", M) {
+  REQUIRE(Version("1.1.1.1.0") < Version("1.1.1.1.1"));
+  REQUIRE(Version("1.1.1.1.1") == Version("1.1.1.1.1"));
+  REQUIRE(Version("1.1.1.1.1") < Version("1.1.1.1.2"));
+  REQUIRE(Version("1.1.1.1.1") < Version("1.1.1.2.0"));
 }
 
-TEST_CASE("5 digits version component", M) {
+TEST_CASE("version segment overflow", M) {
   try {
-    Version ver("12345.1");
+    Version ver("9999999999999999999999");
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "version component overflow");
+    REQUIRE(string(e.what()) == "version segment overflow");
   }
 }
 
-TEST_CASE("version with 5 components", M) {
-  try {
-    Version ver("1.2.3.4.5");
-    FAIL();
+TEST_CASE("compare versions", M) {
+  SECTION("equality") {
+    REQUIRE(Version("1.0").compare(Version("1.0")) == 0);
+
+    REQUIRE(Version("1.0") == Version("1.0"));
+    REQUIRE_FALSE(Version("1.0") == Version("1.1"));
   }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version name");
+
+  SECTION("inequality") {
+    REQUIRE_FALSE(Version("1.0") != Version("1.0"));
+    REQUIRE(Version("1.0") != Version("1.1"));
+  }
+
+  SECTION("less than") {
+    REQUIRE(Version("1.0").compare(Version("1.1")) == -1);
+
+    REQUIRE(Version("1.0") < Version("1.1"));
+    REQUIRE_FALSE(Version("1.0") < Version("1.0"));
+    REQUIRE_FALSE(Version("1.1") < Version("1.0"));
+  }
+
+  SECTION("less than or equal") {
+    REQUIRE(Version("1.0") <= Version("1.1"));
+    REQUIRE(Version("1.0") <= Version("1.0"));
+    REQUIRE_FALSE(Version("1.1") <= Version("1.0"));
+  }
+
+  SECTION("greater than") {
+    REQUIRE(Version("1.1").compare(Version("1.0")) == 1);
+
+    REQUIRE_FALSE(Version("1.0") > Version("1.1"));
+    REQUIRE_FALSE(Version("1.0") > Version("1.0"));
+    REQUIRE(Version("1.1") > Version("1.0"));
+  }
+
+  SECTION("greater than or equal") {
+    REQUIRE_FALSE(Version("1.0") >= Version("1.1"));
+    REQUIRE(Version("1.0") >= Version("1.0"));
+    REQUIRE(Version("1.1") >= Version("1.0"));
+  }
+}
+
+TEST_CASE("compare versions with more or less segments", M) {
+  REQUIRE(Version("1") == Version("1.0.0.0"));
+  REQUIRE(Version("1") != Version("1.0.0.1"));
+
+  REQUIRE(Version("1.0.0.0") == Version("1"));
+  REQUIRE(Version("1.0.0.1") != Version("1"));
+}
+
+TEST_CASE("prerelease versions", M) {
+  SECTION("detect") {
+    REQUIRE(Version("1.0").isStable());
+    REQUIRE_FALSE(Version("1.0b").isStable());
+    REQUIRE_FALSE(Version("1.0-beta").isStable());
+    REQUIRE_FALSE(Version("1.0-beta1").isStable());
+  }
+
+  SECTION("compare") {
+    REQUIRE(Version("0.9") < Version("1.0a"));
+    REQUIRE(Version("1.0a.2") < Version("1.0b.1"));
+    REQUIRE(Version("1.0-beta1") < Version("1.0"));
+
+    REQUIRE(Version("1.0b") < Version("1.0.1"));
+    REQUIRE(Version("1.0.1") > Version("1.0b"));
   }
 }
 
@@ -236,62 +310,18 @@ TEST_CASE("version date", M) {
   }
 }
 
-TEST_CASE("construct null version", M) {
-  const Version ver;
-
-  REQUIRE(ver.code() == 0);
-  REQUIRE(ver.displayTime().empty());
-  REQUIRE(ver.package() == nullptr);
-  REQUIRE(ver.mainSource() == nullptr);
-}
-
-TEST_CASE("parse version", M) {
-  Version ver;
-
-  SECTION("valid") {
-    ver.parse("1.0");
-    REQUIRE(ver.name() == "1.0");
-    REQUIRE(ver.code() == UINT64_C(1000000000000));
-  }
-
-  SECTION("invalid") {
-    try { ver.parse("hello"); FAIL(); }
-    catch(const reapack_error &) {}
-
-    REQUIRE(ver.name().empty());
-    REQUIRE(ver.code() == 0);
-  }
-}
-
-TEST_CASE("parse version failsafe", M) {
-  Version ver;
-
-  SECTION("valid") {
-    REQUIRE(ver.tryParse("1.0"));
-
-    REQUIRE(ver.name() == "1.0");
-    REQUIRE(ver.code() == UINT64_C(1000000000000));
-  }
-
-  SECTION("invalid") {
-    REQUIRE_FALSE(ver.tryParse("hello"));
-
-    REQUIRE(ver.name().empty());
-    REQUIRE(ver.code() == 0);
-  }
-}
-
 TEST_CASE("copy version constructor", M) {
   const Package pkg(Package::UnknownType, "Hello");
 
-  Version original("1.1", &pkg);
+  Version original("1.1test", &pkg);
   original.setAuthor("John Doe");
   original.setChangelog("Initial release");
   original.setTime("2016-02-12T01:16:40Z");
 
   const Version copy1(original);
-  REQUIRE(copy1.name() == "1.1");
-  REQUIRE(copy1.code() == original.code());
+  REQUIRE(copy1.name() == "1.1test");
+  REQUIRE(copy1.size() == original.size());
+  REQUIRE(copy1.isStable() == original.isStable());
   REQUIRE(copy1.author() == original.author());
   REQUIRE(copy1.changelog() == original.changelog());
   REQUIRE(copy1.displayTime() == original.displayTime());
@@ -301,42 +331,6 @@ TEST_CASE("copy version constructor", M) {
 
   const Version copy2(original, &pkg);
   REQUIRE(copy2.package() == &pkg);
-}
-
-TEST_CASE("version operators", M) {
-  SECTION("equality") {
-    REQUIRE(Version("1.0") == Version("1.0"));
-    REQUIRE_FALSE(Version("1.0") == Version("1.1"));
-  }
-
-  SECTION("inequality") {
-    REQUIRE_FALSE(Version("1.0") != Version("1.0"));
-    REQUIRE(Version("1.0") != Version("1.1"));
-  }
-
-  SECTION("less than") {
-    REQUIRE(Version("1.0") < Version("1.1"));
-    REQUIRE_FALSE(Version("1.0") < Version("1.0"));
-    REQUIRE_FALSE(Version("1.1") < Version("1.0"));
-  }
-
-  SECTION("less than or equal") {
-    REQUIRE(Version("1.0") <= Version("1.1"));
-    REQUIRE(Version("1.0") <= Version("1.0"));
-    REQUIRE_FALSE(Version("1.1") <= Version("1.0"));
-  }
-
-  SECTION("greater than") {
-    REQUIRE_FALSE(Version("1.0") > Version("1.1"));
-    REQUIRE_FALSE(Version("1.0") > Version("1.0"));
-    REQUIRE(Version("1.1") > Version("1.0"));
-  }
-
-  SECTION("greater than or equal") {
-    REQUIRE_FALSE(Version("1.0") >= Version("1.1"));
-    REQUIRE(Version("1.0") >= Version("1.0"));
-    REQUIRE(Version("1.1") >= Version("1.0"));
-  }
 }
 
 #ifdef __APPLE__

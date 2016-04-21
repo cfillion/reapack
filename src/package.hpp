@@ -51,7 +51,7 @@ public:
   void addVersion(const Version *ver);
   const VersionSet &versions() const { return m_versions; }
   const Version *version(size_t index) const;
-  const Version *lastVersion() const;
+  const Version *lastVersion(bool prerelease = true) const;
   const Version *findVersion(const Version &) const;
 
 private:

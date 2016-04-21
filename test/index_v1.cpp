@@ -74,7 +74,7 @@ TEST_CASE("read version author", M) {
   IndexPtr ri = Index::load("author");
 
   CHECK(ri->packages().size() == 1);
-  REQUIRE(ri->category(0)->package(0)->lastVersion()->author()
+  REQUIRE(ri->category(0)->package(0)->version(0)->author()
     == "Watanabe Saki");
 }
 
@@ -84,7 +84,7 @@ TEST_CASE("read version time", M) {
   IndexPtr ri = Index::load("time");
   CHECK(ri->packages().size() == 1);
 
-  const tm &time = ri->category(0)->package(0)->lastVersion()->time();
+  const tm &time = ri->category(0)->package(0)->version(0)->time();
   REQUIRE(time.tm_year == 2016 - 1900);
   REQUIRE(time.tm_mon == 2 - 1);
   REQUIRE(time.tm_mday == 12);

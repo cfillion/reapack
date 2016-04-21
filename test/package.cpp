@@ -94,6 +94,30 @@ TEST_CASE("package versions are sorted", M) {
   REQUIRE(pack.lastVersion() == final);
 }
 
+TEST_CASE("get latest stable version", M) {
+  Index ri("Remote Name");
+  Category cat("Category Name", &ri);
+  Package pack(Package::ScriptType, "a", &cat);
+
+  Version *alpha = new Version("2.0-alpha", &pack);
+  alpha->addSource(new Source({}, "google.com", alpha));
+  pack.addVersion(alpha);
+
+  SECTION("only prereleases are available")
+    REQUIRE(pack.lastVersion(false) == nullptr);
+
+  SECTION("an older stable release is available") {
+    Version *final = new Version("1.0", &pack);
+    final->addSource(new Source({}, "google.com", final));
+    pack.addVersion(final);
+
+    REQUIRE(pack.lastVersion(false) == final);
+  }
+
+  REQUIRE(pack.lastVersion() == alpha);
+  REQUIRE(pack.lastVersion(true) == alpha);
+}
+
 TEST_CASE("drop empty version", M) {
   Package pack(Package::ScriptType, "a");
   pack.addVersion(new Version("1", &pack));

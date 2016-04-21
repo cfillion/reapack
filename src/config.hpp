@@ -24,7 +24,12 @@
 
 class Path;
 
-struct BrowserConfig {
+struct InstallOpts {
+  bool autoInstall;
+  bool bleedingEdge;
+};
+
+struct BrowserOpts {
   unsigned int typeFilter;
 };
 
@@ -36,10 +41,9 @@ public:
   void write();
 
   bool isFirstRun() const { return m_isFirstRun; }
-  bool autoInstall() const { return m_autoInstall; }
-  void setAutoInstall(const bool enable) { m_autoInstall = enable; }
   RemoteList *remotes() { return &m_remotes; }
-  BrowserConfig *browser() { return &m_browser; }
+  InstallOpts *install() { return &m_install; }
+  BrowserOpts *browser() { return &m_browser; }
 
 private:
   std::string getString(const char *, const std::string &) const;
@@ -55,8 +59,8 @@ private:
   std::string m_path;
   bool m_isFirstRun;
   unsigned int m_version;
-  bool m_autoInstall;
-  BrowserConfig m_browser;
+  InstallOpts m_install;
+  BrowserOpts m_browser;
 
   void readRemotes();
   void restoreSelfRemote();

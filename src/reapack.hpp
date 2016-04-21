@@ -69,6 +69,7 @@ public:
   void install(const Version *);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
+
   void importRemote();
   void import(const Remote &, HWND = nullptr);
   void manageRemotes();
@@ -76,6 +77,9 @@ public:
   void about(const std::string &, HWND parent);
   void about(const Remote &, HWND parent);
   void browsePackages();
+  void refreshManager();
+  void refreshBrowser();
+
   void fetchIndex(const Remote &remote, const IndexCallback &,
     HWND parent, bool stale = false);
   void fetchIndexes(const std::vector<Remote> &,

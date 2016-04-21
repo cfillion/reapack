@@ -147,7 +147,7 @@ void ReaPack::synchronizeAll()
     return;
 
   for(const Remote &remote : remotes)
-    t->synchronize(remote, m_config->autoInstall());
+    t->synchronize(remote, *m_config->install());
 
   t->runTasks();
 }
@@ -159,13 +159,12 @@ void ReaPack::setRemoteEnabled(const Remote &original, const bool enable)
 
   const auto apply = [=] {
     m_config->remotes()->add(remote);
-
-    if(m_manager)
-      m_manager->refresh();
+    refreshManager();
   };
 
   if(!hitchhikeTransaction()) {
     apply();
+    refreshBrowser();
     return;
   }
 
@@ -196,6 +195,7 @@ void ReaPack::uninstall(const Remote &remote)
 
   if(!hitchhikeTransaction()) {
     apply();
+    refreshBrowser();
     return;
   }
 
@@ -280,11 +280,8 @@ void ReaPack::import(const Remote &remote, HWND parent)
   remotes->add(remote);
   m_config->write();
 
-  if(m_manager)
-    m_manager->refresh();
-
-  if(m_browser)
-    m_browser->refresh();
+  refreshManager();
+  refreshBrowser();
 
   const string msg = remote.name() +
     " has been successfully imported into your repository list.";
@@ -332,8 +329,11 @@ void ReaPack::about(const Remote &remote, HWND parent)
     if(ret == About::InstallResult) {
       enable(remote);
 
-      if(m_transaction) // transaction is created by enable()
-        m_transaction->synchronize(remote, true);
+      if(m_transaction) { // transaction is created by enable()
+        InstallOpts opts = *m_config->install();
+        opts.autoInstall = true;
+        m_transaction->synchronize(remote, opts);
+      }
 
       runTasks();
     }
@@ -526,8 +526,7 @@ Transaction *ReaPack::createTransaction()
     m_transaction = nullptr;
 
     // refresh only once all onFinish slots were ran
-    if(m_browser)
-      m_browser->refresh();
+    refreshBrowser();
   });
 
   return m_transaction;
@@ -545,6 +544,18 @@ void ReaPack::runTasks()
 {
   if(m_transaction)
     m_transaction->runTasks();
+}
+
+void ReaPack::refreshManager()
+{
+  if(m_manager)
+    m_manager->refresh();
+}
+
+void ReaPack::refreshBrowser()
+{
+  if(m_browser)
+    m_browser->refresh();
 }
 
 void ReaPack::registerSelf()

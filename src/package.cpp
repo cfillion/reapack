@@ -21,7 +21,7 @@
 #include "index.hpp"
 
 #include <algorithm>
-#include <sstream>
+#include <boost/range/adaptor/reversed.hpp>
 
 using namespace std;
 
@@ -99,12 +99,14 @@ const Version *Package::version(const size_t index) const
   return *it;
 }
 
-const Version *Package::lastVersion() const
+const Version *Package::lastVersion(const bool prerelease) const
 {
-  if(m_versions.empty())
-    return nullptr;
+  for(const Version *ver : m_versions | boost::adaptors::reversed) {
+    if(ver->isStable() || prerelease)
+      return ver;
+  }
 
-  return *m_versions.rbegin();
+  return nullptr;
 }
 
 const Version *Package::findVersion(const Version &ver) const
