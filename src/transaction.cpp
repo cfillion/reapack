@@ -94,7 +94,8 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   if(!regEntry && !opts.autoInstall)
     return;
 
-  const bool includePre = opts.bleedingEdge || !regEntry.version.isStable();
+  const bool includePre = opts.bleedingEdge ||
+    (regEntry && !regEntry.version.isStable());
   const Version *latest = pkg->lastVersion(includePre);
 
   if(latest && regEntry.version == *latest) {
