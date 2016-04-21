@@ -1,4 +1,4 @@
-@version 0.9-beta
+@version 0.10-beta
 @author cfillion
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
@@ -7,23 +7,44 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  + add an Apply button in the configuration dialog
-  + add support for JSFXs
-  + implement multi-selection in the configuration dialog
-  + import repositories directly from the index URL
-  + new "Install new packages automatically" option
-  + new Package Browser feature with downgrading capability and list of obsolete packages
-  --
-  Removed:
-  - don't automatically synchronize newly-enabled remotes
-  - drop import from .ReaPackRemote files
+  + add simple "Package Contents" view (browser and about box)
+  + add support for data packages (installed in REAPER's Data/ directory)
+  + browser: create "Refresh repositories" feature to update the package list
+  + browser: implement smarter filtering (multi-words, quotes, cross-column matches)
+  + browser: remember the previous type filtering choices
+  + config: add ReaTeam's JSFX repository to the defaults
+  + create "bleeding edge" mode to install pre-releases by default
+  + implement per-source type override
+  + synchronize: don't automatically upgrade packages from stable to pre-release
+  + treat version names containing letters as pre-releases
   --
   Changed:
-  * don't error out when failing to download a fresh index if a stale one is cached
-  * enhance behavior of the "Install this repository" button
-  * enhance the "download failed" error messages when importing a repository
-  * fetch fresh index files immediately without waiting for tasks to finish
-  * give a vertical bias to the default dialog position
-  * keep a copy of the package authors in the registry (breaking change – remove registry.db)
-  * update to Visual Studio 2015 for Windows builds
-  * use the same formatting in the report dialog as in the package history dialog
+  + about: put the repo's actual name instead of "this repository" (install/update button)
+  + browser: add "Select all" and "Unselect all" actions to the context menu in empty areas
+  + browser: add a link to the repository management window
+  + browser: better UI for filtering by package type
+  + browser: don't lose current selection when filtering
+  + browser: give focus to the filter box when clicking on the Clear button
+  + browser: move selection-wide actions to the context menu when >1 package are selected
+  + browser: only show the last available version in the list if it's actually newer
+  + browser: reload when importing/toggling/removing repositories
+  + browser: remember queued actions when reloading the list
+  + browser: show selection-wide actions even if the mouse isn't over an entry
+  + browser: tick the "Versions" submenu when a version is queued for install
+  + browser: warn if no repositories are enabled when opening the window
+  + config: enhance organization of the ini file (warning: some settings will be lost)
+  + ignore case when sorting list views
+  + import: always show the repository name in post-import message boxes
+  + import: don't interrupt REAPER use when displaying post-import message boxes
+  + registry: store original author information (non-breaking change)
+  + repo manager: add "Select all" and "Unselect all" actions to the context menu in empty areas
+  + show the self-registration error message above REAPER's splash screen
+  + synchronize: prevent upgrading to an older version
+  + tweak the text of a few message boxes
+  --
+  Fixed:
+  + browser: don't repopulate the list twice when only synchronous tasks are ran
+  + browser: fix a crash occuring when clearing actions from the queued tab
+  + browser: fix handling of installation failures (don't mark pkgs as installed)
+  + config: launch migration only after having read the current settings
+  + don't crash if an index fails to load when opening an about dialog
