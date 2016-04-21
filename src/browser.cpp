@@ -165,7 +165,10 @@ void Browser::onCommand(const int id, const int event)
     else
       break;
   case IDCANCEL:
-    close();
+    if(m_loading)
+      hide();
+    else
+      close();
     break;
   default:
     if(id >> 8 == ACTION_VERSION)
@@ -389,6 +392,12 @@ void Browser::refresh(const bool stale)
   m_loading = true;
 
   m_reapack->fetchIndexes(remotes, [=] (vector<IndexPtr> indexes) {
+    // if the user wanted to close the window while we were downloading stuff
+    if(m_loaded && !isVisible()) {
+      close();
+      return;
+    }
+
     m_loading = false;
 
     // keep the old indexes around a little bit longer for use by populate
