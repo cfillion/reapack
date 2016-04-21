@@ -28,7 +28,7 @@
 using namespace std;
 
 Version::Version()
-  : m_prerelease(false), m_time(), m_package(nullptr), m_mainSource(nullptr)
+  : m_stable(false), m_time(), m_package(nullptr), m_mainSource(nullptr)
 {
 }
 
@@ -39,7 +39,7 @@ Version::Version(const string &str, const Package *pkg)
 }
 
 Version::Version(const Version &o, const Package *pkg)
-  : m_name(o.m_name), m_segments(o.m_segments), m_prerelease(o.m_prerelease),
+  : m_name(o.m_name), m_segments(o.m_segments), m_stable(o.m_stable),
     m_author(o.m_author), m_changelog(o.m_changelog), m_time(o.m_time),
     m_package(pkg), m_mainSource(nullptr)
 {
@@ -85,7 +85,7 @@ void Version::parse(const string &str)
 
   m_name = str;
   swap(m_segments, segments);
-  m_prerelease = alpha > 0;
+  m_stable = alpha < 1;
 }
 
 bool Version::tryParse(const string &str)

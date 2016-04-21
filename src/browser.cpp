@@ -463,7 +463,7 @@ void Browser::transferActions()
 auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
   -> Entry
 {
-  const Version *latest = pkg->lastVersion();
+  const Version *latest = pkg->lastVersion(!regEntry.version.isStable());
   const Version *current = nullptr;
 
   int flags = 0;
@@ -471,13 +471,17 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
   if(regEntry) {
     flags |= InstalledFlag;
 
-    if(regEntry.version < *latest)
+    if(latest && regEntry.version < *latest)
       flags |= OutOfDateFlag;
 
     current = pkg->findVersion(regEntry.version);
   }
-  else
+  else {
+    if(!latest) // show prerelases if no stable version is available
+      latest = pkg->lastVersion(true);
+
     flags |= UninstalledFlag;
+  }
 
   return {flags, regEntry, pkg, latest, current};
 }

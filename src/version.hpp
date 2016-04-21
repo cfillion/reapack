@@ -46,7 +46,7 @@ public:
   const std::string &name() const { return m_name; }
   std::string fullName() const;
   size_t size() const { return m_segments.size(); }
-  bool isPrerelease() const { return m_prerelease; }
+  bool isStable() const { return m_stable; }
 
   const Package *package() const { return m_package; }
 
@@ -84,7 +84,7 @@ private:
 
   std::string m_name;
   std::vector<Segment> m_segments;
-  bool m_prerelease;
+  bool m_stable;
 
   std::string m_author;
   std::string m_changelog;

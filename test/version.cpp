@@ -29,7 +29,7 @@ TEST_CASE("construct null version", M) {
   const Version ver;
 
   REQUIRE(ver.size() == 0);
-  REQUIRE_FALSE(ver.isPrerelease());
+  REQUIRE_FALSE(ver.isStable());
   REQUIRE(ver.displayTime().empty());
   REQUIRE(ver.package() == nullptr);
   REQUIRE(ver.mainSource() == nullptr);
@@ -45,11 +45,10 @@ TEST_CASE("parse version", M) {
   }
 
   SECTION("prerelease set/unset") {
-    REQUIRE_FALSE(ver.isPrerelease());
     ver.parse("1.0beta");
-    REQUIRE(ver.isPrerelease());
+    REQUIRE_FALSE(ver.isStable());
     ver.parse("1.0");
-    REQUIRE_FALSE(ver.isPrerelease());
+    REQUIRE(ver.isStable());
   }
 
   SECTION("invalid") {
@@ -164,10 +163,10 @@ TEST_CASE("compare versions with more or less segments", M) {
 
 TEST_CASE("prerelease versions", M) {
   SECTION("detect") {
-    REQUIRE_FALSE(Version("1.0").isPrerelease());
-    REQUIRE(Version("1.0b").isPrerelease());
-    REQUIRE(Version("1.0-beta").isPrerelease());
-    REQUIRE(Version("1.0-beta1").isPrerelease());
+    REQUIRE(Version("1.0").isStable());
+    REQUIRE_FALSE(Version("1.0b").isStable());
+    REQUIRE_FALSE(Version("1.0-beta").isStable());
+    REQUIRE_FALSE(Version("1.0-beta1").isStable());
   }
 
   SECTION("compare") {
@@ -314,15 +313,15 @@ TEST_CASE("version date", M) {
 TEST_CASE("copy version constructor", M) {
   const Package pkg(Package::UnknownType, "Hello");
 
-  Version original("1.1b", &pkg);
+  Version original("1.1test", &pkg);
   original.setAuthor("John Doe");
   original.setChangelog("Initial release");
   original.setTime("2016-02-12T01:16:40Z");
 
   const Version copy1(original);
-  REQUIRE(copy1.name() == "1.1b");
+  REQUIRE(copy1.name() == "1.1test");
   REQUIRE(copy1.size() == original.size());
-  REQUIRE(copy1.isPrerelease() == original.isPrerelease());
+  REQUIRE(copy1.isStable() == original.isStable());
   REQUIRE(copy1.author() == original.author());
   REQUIRE(copy1.changelog() == original.changelog());
   REQUIRE(copy1.displayTime() == original.displayTime());
