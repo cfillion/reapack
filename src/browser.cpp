@@ -579,7 +579,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
     if(entry.test(InstalledFlag))
       display = regEntry.version.name();
 
-    if(ver && *ver != regEntry.version) {
+    if(ver && *ver > regEntry.version) {
       if(!display.empty())
         display += '\x20';
 
