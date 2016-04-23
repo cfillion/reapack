@@ -215,8 +215,9 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
 
   if(entry->test(InstalledFlag)) {
     if(entry->test(OutOfDateFlag)) {
-      auto_char installLabel[255] = {};
-      auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("U&pdate to v%s"),
+      auto_char installLabel[32] = {};
+      auto_snprintf(installLabel, auto_size(installLabel),
+        AUTO_STR("U&pdate to v%s"),
         make_autostring(entry->latest->name()).c_str());
 
       const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
@@ -224,8 +225,9 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
         menu.check(actionIndex);
     }
 
-    auto_char reinstallLabel[255] = {};
-    auto_snprintf(reinstallLabel, sizeof(reinstallLabel), AUTO_STR("&Reinstall v%s"),
+    auto_char reinstallLabel[32] = {};
+    auto_snprintf(reinstallLabel, auto_size(reinstallLabel),
+      AUTO_STR("&Reinstall v%s"),
       make_autostring(entry->regEntry.version.name()).c_str());
 
     const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
@@ -235,8 +237,9 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
       menu.check(actionIndex);
   }
   else {
-    auto_char installLabel[255] = {};
-    auto_snprintf(installLabel, sizeof(installLabel), AUTO_STR("&Install v%s"),
+    auto_char installLabel[32] = {};
+    auto_snprintf(installLabel, auto_size(installLabel),
+      AUTO_STR("&Install v%s"),
       make_autostring(entry->latest->name()).c_str());
 
     const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
@@ -280,9 +283,9 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   menu.setEnabled(!entry->test(ObsoleteFlag),
     menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY));
 
-  auto_char aboutLabel[255] = {};
+  auto_char aboutLabel[32] = {};
   const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
-  auto_snprintf(aboutLabel, sizeof(aboutLabel),
+  auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT);
 
@@ -449,7 +452,7 @@ void Browser::populate()
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
     auto_char msg[255] = {};
-    auto_snprintf(msg, sizeof(msg),
+    auto_snprintf(msg, auto_size(msg),
       AUTO_STR("ReaPack could not read from its package registry.\r\n")
       AUTO_STR("Retry later once all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
@@ -801,7 +804,7 @@ bool Browser::confirm() const
   const size_t count = m_actions.size();
 
   auto_char msg[255] = {};
-  auto_snprintf(msg, sizeof(msg),
+  auto_snprintf(msg, auto_size(msg),
     AUTO_STR("Confirm execution of %zu action%s?\n"),
     count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
 

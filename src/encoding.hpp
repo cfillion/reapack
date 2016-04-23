@@ -49,4 +49,6 @@ typedef std::string auto_string;
 
 #endif
 
+#define auto_size(buf) (sizeof(buf) / sizeof(auto_char))
+
 #endif

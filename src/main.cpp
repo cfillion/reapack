@@ -93,7 +93,7 @@ static void menuHook(const char *name, HMENU handle, int f)
   menu.addSeparator();
 
   auto_char aboutLabel[32] = {};
-  auto_snprintf(aboutLabel, sizeof(aboutLabel),
+  auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About ReaPack v%s"), make_autostring(ReaPack::VERSION).c_str());
   menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
 }
@@ -107,7 +107,7 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 
 #ifdef _WIN32
   auto_char self[MAX_PATH] = {};
-  GetModuleFileName(module, self, sizeof(self));
+  GetModuleFileName(module, self, auto_size(self));
   Path current(from_autostring(self).c_str());
 #else
   Dl_info info{};
@@ -120,7 +120,7 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
     return true;
 
   auto_char msg[4096] = {};
-  auto_snprintf(msg, sizeof(msg),
+  auto_snprintf(msg, auto_size(msg),
     AUTO_STR("ReaPack was not loaded from the standard extension path")
     AUTO_STR(" or its filename was altered.\n")
     AUTO_STR("Move or rename it to the expected location and retry.\n\n")
