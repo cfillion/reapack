@@ -85,6 +85,7 @@ void Browser::onInit()
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
   m_list->sortByColumn(1);
 
+  updateDisplayLabel();
   refresh();
 
   m_filterTimer = startTimer(200);
