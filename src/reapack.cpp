@@ -491,11 +491,11 @@ Transaction *ReaPack::createTransaction()
 
     auto_char msg[512] = {};
     auto_snprintf(msg, sizeof(msg),
-      AUTO_STR("The following error occured while creating a transaction:\n\n%s"),
+      AUTO_STR("The following error occurred while creating a transaction:\n\n%s"),
       desc.c_str()
     );
 
-    MessageBox(m_mainWindow, msg, AUTO_STR("ReaPack – Fatal Error"), MB_OK);
+    MessageBox(m_mainWindow, msg, AUTO_STR("ReaPack \u2013 Fatal Error"), MB_OK);
     return nullptr;
   }
 
