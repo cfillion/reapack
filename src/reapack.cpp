@@ -439,7 +439,7 @@ void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
         warn(FS::lastError(), AUTO_STR("Write Failed"));
       break;
     case Download::Failure:
-      if(!FS::exists(path))
+      if(stale || !FS::exists(path))
         warn(dl->contents(), AUTO_STR("Download Failed"));
       break;
     default:
