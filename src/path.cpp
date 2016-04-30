@@ -63,7 +63,7 @@ static vector<string> Split(const string &input)
   return list;
 }
 
-Path::Path(const std::string &path)
+Path::Path(const string &path)
 {
   append(path);
 }
@@ -243,7 +243,7 @@ const string &Path::operator[](const size_t index) const
   return at(index);
 }
 
-UseRootPath::UseRootPath(const std::string &path)
+UseRootPath::UseRootPath(const string &path)
   : m_backup(move(Path::s_root))
 {
   Path::s_root = path;

@@ -414,7 +414,7 @@ void Browser::refresh(const bool stale)
       show();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
-       m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+      m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
     }
   }, handle(), stale);
@@ -425,7 +425,7 @@ void Browser::populate()
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
-    std::vector<Entry> oldEntries; // keep old entries in memory a bit longer
+    vector<Entry> oldEntries; // keep old entries in memory a bit longer
     swap(m_entries, oldEntries);
 
     m_currentIndex = -1;
@@ -773,7 +773,7 @@ void Browser::setAction(const int index, const Version *target, const bool toggl
   }
 }
 
-void Browser::selectionDo(const std::function<void (int)> &func)
+void Browser::selectionDo(const function<void (int)> &func)
 {
   InhibitControl freeze(m_list);
 

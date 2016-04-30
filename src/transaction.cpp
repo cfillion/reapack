@@ -114,7 +114,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
 void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
 {
   // add the callback to the list, and start the download if it's the first one
-  const std::string &name = remote.name();
+  const string &name = remote.name();
   m_remotes.insert({name, cb});
 
   if(m_remotes.count(name) > 1)
@@ -388,7 +388,7 @@ void Transaction::registerScript(const HostTicket &reg)
   else
     section = MainSection;
 
-  const std::string &fullPath = Path::prefixRoot(reg.file).join();
+  const string &fullPath = Path::prefixRoot(reg.file).join();
   const bool isLast = m_regQueue.size() == 1;
 
   if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add)

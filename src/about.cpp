@@ -240,7 +240,7 @@ void About::updateInstalledFiles()
   }
 }
 
-void About::selectLink(const int ctrl, const std::vector<const Link *> &links)
+void About::selectLink(const int ctrl, const vector<const Link *> &links)
 {
   const int count = (int)links.size();
 
