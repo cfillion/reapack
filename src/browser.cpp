@@ -342,6 +342,7 @@ bool Browser::isFiltered(Package::Type type) const
     break;
   default:
     type = Package::UnknownType;
+    break;
   }
 
   auto config = m_reapack->config()->browser();
@@ -404,7 +405,7 @@ void Browser::refresh(const bool stale)
 
     m_loading = false;
 
-    // keep the old indexes around a little bit longer for use by populate
+    // keep the old indexes around a little bit longer for use by #populate
     indexes.swap(m_indexes);
 
     populate();
@@ -425,10 +426,15 @@ void Browser::populate()
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
-    vector<Entry> oldEntries; // keep old entries in memory a bit longer
+    // keep previous entries in memory a bit longer for #transferActions
+    vector<Entry> oldEntries;
     swap(m_entries, oldEntries);
 
     m_currentIndex = -1;
+
+    // prevent #fillList from trying to restore the selection
+    // (entry indexes may mismatch depending on the new repository contents,
+    // thus causing the wrong package to be selected)
     m_visibleEntries.clear();
 
     for(IndexPtr index : m_indexes) {
@@ -506,7 +512,7 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
     current = pkg->findVersion(regEntry.version);
   }
   else {
-    if(!latest) // show prerelases if no stable version is available
+    if(!latest) // show latest pre-release if no stable version is available
       latest = pkg->lastVersion(true);
 
     flags |= UninstalledFlag;
@@ -521,7 +527,7 @@ void Browser::fillList()
 
   // store the indexes to the selected entries if they still exists
   // and m_visibleEntries hasn't been emptied
-  const auto selection = m_list->selection();
+  const vector<int> selection = m_list->selection();
   vector<size_t> selected(min(selection.size(), m_visibleEntries.size()));
   for(size_t i = 0; i < selected.size(); i++) {
     if(i < m_visibleEntries.size())
@@ -787,7 +793,7 @@ void Browser::selectionDo(const function<void (int)> &func)
     int newSize = m_list->rowCount();
     if(newSize < lastSize)
       offset++;
-    swap(newSize, lastSize);
+    lastSize = newSize;
   }
 }
 
