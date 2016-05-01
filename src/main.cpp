@@ -60,7 +60,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
         AUTO_STR("ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n")
         AUTO_STR("(Unable to import the following API function: %s)"),
         make_autostring(ReaPack::VERSION).c_str(),
-        make_autostring(func.name).c_str());
+        make_autostring(string(func.name)).c_str());
 
       MessageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
         msg, AUTO_STR("ReaPack: Fatal Error"), MB_OK);
