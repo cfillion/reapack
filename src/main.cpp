@@ -42,25 +42,34 @@ static bool loadAPI(void *(*getFunc)(const char *))
     REQUIRED_API(GetAppVersion),
     REQUIRED_API(GetMainHwnd),
     REQUIRED_API(GetResourcePath),
-    REQUIRED_API(GetUserFileNameForRead),    // v3.21
     REQUIRED_API(NamedCommandLookup),        // v3.1415
     REQUIRED_API(plugin_register),
     REQUIRED_API(RecursiveCreateDirectory),  // v4.60
-    REQUIRED_API(ReverseNamedCommandLookup), // v4.7
     REQUIRED_API(ShowMessageBox),
     REQUIRED_API(Splash_GetWnd),             // v4.7
 
     OPTIONAL_API(AddRemoveReaScript),        // v5.12
   };
 
-  bool ok = true;
-
   for(const ApiFunc &func : funcs) {
     *func.ptr = getFunc(func.name);
-    ok = ok && (*func.ptr || !func.required);
+
+    if(func.required && *func.ptr == nullptr) {
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n")
+        AUTO_STR("(Unable to import the following API function: %s)"),
+        make_autostring(ReaPack::VERSION).c_str(),
+        make_autostring(func.name).c_str());
+
+      MessageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
+        msg, AUTO_STR("ReaPack: Fatal Error"), MB_OK);
+
+      return false;
+    }
   }
 
-  return ok;
+  return true;
 }
 
 #undef REQUIRED_API
