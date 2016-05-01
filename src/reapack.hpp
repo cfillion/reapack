@@ -46,8 +46,8 @@ public:
   typedef std::function<void (IndexPtr)> IndexCallback;
   typedef std::function<void (const std::vector<IndexPtr> &)> IndexesCallback;
 
-  static const std::string VERSION;
-  static const std::string BUILDTIME;
+  static const char *VERSION;
+  static const char *BUILDTIME;
 
   gaccel_register_t syncAction;
   gaccel_register_t browseAction;

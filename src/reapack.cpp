@@ -33,8 +33,8 @@
 
 using namespace std;
 
-const string ReaPack::VERSION = "0.10-beta";
-const string ReaPack::BUILDTIME = __DATE__ " " __TIME__;
+const char *ReaPack::VERSION = "0.10-beta";
+const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 
 #ifdef _WIN32
 // Removes temporary files that could not be removed by an installation task
@@ -245,21 +245,23 @@ void ReaPack::import(const Remote &remote, HWND parent)
       return;
     }
     else if(existing.url() != remote.url()) {
-      const string msg = remote.name() +
-        " is already configured with a different URL.\r\n"
-        "Do you want to overwrite it?";
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("%s is already configured with a different URL.\r\n")
+        AUTO_STR("Do you want to overwrite it?"),
+        make_autostring(remote.name()).c_str());
 
-      const auto answer = MessageBox(parent, make_autostring(msg).c_str(),
-        Import::TITLE, MB_YESNO);
+      const auto answer = MessageBox(parent, msg, Import::TITLE, MB_YESNO);
 
       if(answer != IDYES)
         return;
     }
     else if(existing.isEnabled()) {
-      const string msg = remote.name() +
-        " is already configured.\r\nNothing to do!";
-
-      MessageBox(parent, make_autostring(msg).c_str(), Import::TITLE, MB_OK);
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("%s is already configured.\r\nNothing to do!"),
+        make_autostring(remote.name()).c_str());
+      MessageBox(parent, msg, Import::TITLE, MB_OK);
 
       return;
     }
@@ -269,8 +271,10 @@ void ReaPack::import(const Remote &remote, HWND parent)
 
       m_config->write();
 
-      const string msg = remote.name() + " has been enabled.";
-      MessageBox(parent, make_autostring(msg).c_str(), Import::TITLE, MB_OK);
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg), AUTO_STR("%s has been enabled."),
+        make_autostring(remote.name()).c_str());
+      MessageBox(parent, msg, Import::TITLE, MB_OK);
 
       return;
     }
@@ -282,9 +286,11 @@ void ReaPack::import(const Remote &remote, HWND parent)
   refreshManager();
   refreshBrowser();
 
-  const string msg = remote.name() +
-    " has been successfully imported into your repository list.";
-  MessageBox(parent, make_autostring(msg).c_str(), Import::TITLE, MB_OK);
+  auto_char msg[1024] = {};
+  auto_snprintf(msg, auto_size(msg),
+    "%s has been successfully imported into your repository list.",
+    make_autostring(remote.name()).c_str());
+  MessageBox(parent, msg, Import::TITLE, MB_OK);
 }
 
 void ReaPack::manageRemotes()

@@ -34,6 +34,7 @@ typedef std::wstring auto_string;
 #define to_autostring std::to_wstring
 #define auto_snprintf(buf, size, ...) _snwprintf(buf, size - 1,  __VA_ARGS__)
 auto_string make_autostring(const std::string &);
+#define make_autocstring(cstr) make_autostring(cstr).c_str() // temporary string!
 std::string from_autostring(const auto_string &);
 
 #else
@@ -45,6 +46,7 @@ typedef std::string auto_string;
 #define to_autostring std::to_string
 #define auto_snprintf snprintf
 #define make_autostring(string) string
+#define make_autocstring(cstr) cstr
 #define from_autostring(string) string
 
 #endif

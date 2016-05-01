@@ -59,8 +59,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
       auto_snprintf(msg, auto_size(msg),
         AUTO_STR("ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n")
         AUTO_STR("(Unable to import the following API function: %s)"),
-        make_autostring(ReaPack::VERSION).c_str(),
-        make_autostring(string(func.name)).c_str());
+        make_autocstring(ReaPack::VERSION), make_autocstring(func.name));
 
       MessageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
         msg, AUTO_STR("ReaPack: Fatal Error"), MB_OK);
@@ -103,7 +102,7 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   auto_char aboutLabel[32] = {};
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About ReaPack v%s"), make_autostring(ReaPack::VERSION).c_str());
+    AUTO_STR("&About ReaPack v%s"), make_autocstring(ReaPack::VERSION));
   menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
