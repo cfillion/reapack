@@ -134,8 +134,7 @@ void ReaPack::synchronizeAll()
   const vector<Remote> &remotes = m_config->remotes()->getEnabled();
 
   if(remotes.empty()) {
-    ShowMessageBox("No repository enabled, nothing to do!",
-      "ReaPack", MB_OK);
+    ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
 
     return;
   }
@@ -516,7 +515,7 @@ Transaction *ReaPack::createTransaction()
     LockDialog cleanupLock(m_browser);
 
     if(m_transaction->taskCount() == 0 && !receipt->hasErrors())
-      ShowMessageBox("Nothing to do!", "ReaPack", 0);
+      ShowMessageBox("Nothing to do!", "ReaPack", MB_OK);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
   });
