@@ -235,11 +235,6 @@ void Manager::uninstall()
     m_uninstall.insert(remote);
     enable(m_apply);
 
-    const auto it = m_enableOverrides.find(remote);
-
-    if(it != m_enableOverrides.end())
-      m_enableOverrides.erase(it);
-
     m_list->removeRow(index);
   }
 }
@@ -305,7 +300,8 @@ bool Manager::apply()
     const Remote &remote = pair.first;
     const bool enable = pair.second;
 
-    m_reapack->setRemoteEnabled(enable, remote);
+    if(m_uninstall.find(remote) == m_uninstall.end())
+      m_reapack->setRemoteEnabled(enable, remote);
   }
 
   for(const Remote &remote : m_uninstall)
