@@ -109,7 +109,7 @@ private:
   void selectionDo(const std::function<void (int)> &);
   Tab currentTab() const;
   bool confirm() const;
-  void apply();
+  bool apply();
 
   void installLatest(int index, bool toggle = true);
   void reinstall(int index, bool toggle = true);

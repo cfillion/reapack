@@ -52,7 +52,7 @@ private:
   void options();
 
   bool confirm() const;
-  void apply();
+  bool apply();
   void reset();
 
   HWND m_apply;

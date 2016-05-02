@@ -26,6 +26,7 @@
 #include "reapack.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
+#include "transaction.hpp"
 
 using namespace std;
 
@@ -95,10 +96,7 @@ void Manager::onCommand(const int id, int)
   case IDOK:
   case IDAPPLY:
     if(confirm()) {
-      apply();
-      reset();
-
-      if(id == IDAPPLY)
+      if(!apply() || id == IDAPPLY)
         break;
 
       // IDOK -> continue to next case (IDCANCEL)
@@ -283,8 +281,13 @@ bool Manager::confirm() const
   return btn == IDYES;
 }
 
-void Manager::apply()
+bool Manager::apply()
 {
+  Transaction *tx = m_reapack->setupTransaction();
+
+  if(!tx)
+    return false;
+
   if(m_autoInstall)
     m_config->install()->autoInstall = m_autoInstall.value();
 
@@ -295,21 +298,17 @@ void Manager::apply()
     const Remote &remote = pair.first;
     const bool enable = pair.second;
 
-    if(enable)
-      m_reapack->enable(remote);
-    else
-      m_reapack->disable(remote);
+    m_reapack->setRemoteEnabled(enable, remote);
   }
 
   for(const Remote &remote : m_uninstall)
     m_reapack->uninstall(remote);
 
+  tx->runTasks();
   m_config->write();
+  reset();
 
-  if(m_reapack->isRunning())
-    m_reapack->runTasks();
-  else
-    m_reapack->refreshBrowser();
+  return true;
 }
 
 void Manager::reset()

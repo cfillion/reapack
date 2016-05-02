@@ -25,6 +25,7 @@
 #include "reapack.hpp"
 #include "report.hpp"
 #include "resource.hpp"
+#include "transaction.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/reversed.hpp>
@@ -158,9 +159,7 @@ void Browser::onCommand(const int id, const int event)
   case IDOK:
   case IDAPPLY:
     if(confirm()) {
-      apply();
-
-      if(id == IDAPPLY)
+      if(!apply() || id == IDAPPLY)
         break;
     }
     else
@@ -820,25 +819,34 @@ bool Browser::confirm() const
   return btn == IDYES;
 }
 
-void Browser::apply()
+bool Browser::apply()
 {
   if(m_actions.empty())
-    return;
+    return true;
+
+  Transaction *tx = m_reapack->setupTransaction();
+
+  if(!tx)
+    return false;
 
   disable(m_apply);
 
   for(const auto &pair : m_actions) {
     if(pair.second)
-      m_reapack->install(pair.second);
+      tx->install(pair.second);
     else
-      m_reapack->uninstall(pair.first->regEntry);
+      tx->uninstall(pair.first->regEntry);
   }
 
   m_actions.clear();
-  m_reapack->runTasks();
 
-  if(m_reapack->isRunning())
-    fillList(); // update state column
+  if(!tx->runTasks()) {
+    // this is an asynchronous transaction
+    // update the state column right away to give visual feedback
+    fillList();
+  }
+
+  return true;
 }
 
 auto Browser::Entry::hash() const -> Hash

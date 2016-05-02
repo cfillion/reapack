@@ -319,7 +319,7 @@ void Transaction::addTask(Task *task)
   m_receipt.setEnabled(true);
 }
 
-void Transaction::runTasks()
+bool Transaction::runTasks()
 {
   m_registry->restore();
 
@@ -339,8 +339,11 @@ void Transaction::runTasks()
 
   m_registry->savepoint(); // get ready for new tasks
 
-  if(m_downloadQueue.idle())
-    finish();
+  if(!m_downloadQueue.idle())
+    return false;
+
+  finish();
+  return true;
 }
 
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)

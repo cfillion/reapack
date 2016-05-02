@@ -63,7 +63,7 @@ static void CleanupTempFiles()
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(),importAction(), configAction(),
-    m_transaction(nullptr), m_progress(nullptr), m_browser(nullptr),
+    m_tx(nullptr), m_progress(nullptr), m_browser(nullptr),
     m_import(nullptr), m_manager(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
@@ -135,52 +135,36 @@ void ReaPack::synchronizeAll()
 
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
-
     return;
   }
 
-  // do nothing is a transation is already running
-  Transaction *t = createTransaction();
+  Transaction *tx = setupTransaction();
 
-  if(!t)
+  if(!tx)
     return;
 
   for(const Remote &remote : remotes)
-    t->synchronize(remote, *m_config->install());
+    tx->synchronize(remote, *m_config->install());
 
-  t->runTasks();
+  tx->runTasks();
 }
 
-void ReaPack::setRemoteEnabled(const Remote &original, const bool enable)
+void ReaPack::setRemoteEnabled(const bool enable, const Remote &remote)
 {
-  Remote remote(original);
-  remote.setEnabled(enable);
+  assert(m_tx);
 
-  const auto apply = [=] {
-    m_config->remotes()->add(remote);
+  Remote copy(remote);
+  copy.setEnabled(enable);
+
+  m_tx->registerAll(copy);
+
+  m_tx->onFinish([=] {
+    if(m_tx->isCancelled())
+      return;
+
+    m_config->remotes()->add(copy);
     refreshManager();
-  };
-
-  if(!hitchhikeTransaction()) {
-    apply();
-    refreshBrowser();
-    return;
-  }
-
-  m_transaction->registerAll(remote);
-
-  m_transaction->onFinish([=] {
-    if(!m_transaction->isCancelled())
-      apply();
   });
-}
-
-void ReaPack::install(const Version *ver)
-{
-  if(!hitchhikeTransaction())
-    return;
-
-  m_transaction->install(ver);
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -188,28 +172,13 @@ void ReaPack::uninstall(const Remote &remote)
   if(remote.isProtected())
     return;
 
-  const auto apply = [=] {
-    m_config->remotes()->remove(remote);
-  };
+  assert(m_tx);
+  m_tx->uninstall(remote);
 
-  if(!hitchhikeTransaction()) {
-    apply();
-    refreshBrowser();
-    return;
-  }
-
-  m_transaction->uninstall(remote);
-
-  m_transaction->onFinish([=] {
-    if(!m_transaction->isCancelled())
-      apply();
+  m_tx->onFinish([=] {
+    if(!m_tx->isCancelled())
+      m_config->remotes()->remove(remote);
   });
-}
-
-void ReaPack::uninstall(const Registry::Entry &entry)
-{
-  if(hitchhikeTransaction())
-    m_transaction->uninstall(entry);
 }
 
 void ReaPack::importRemote()
@@ -266,8 +235,13 @@ void ReaPack::import(const Remote &remote, HWND parent)
       return;
     }
     else {
+      Transaction *tx = setupTransaction();
+
+      if(!tx)
+        return;
+
       enable(existing);
-      runTasks();
+      tx->runTasks();
 
       m_config->write();
 
@@ -332,15 +306,20 @@ void ReaPack::about(const Remote &remote, HWND parent)
     const auto ret = Dialog::Show<About>(m_instance, parent, index);
 
     if(ret == About::InstallResult) {
+      Transaction *tx = setupTransaction();
+
+      if(!tx)
+        return;
+
       enable(remote);
 
-      if(m_transaction) { // transaction is created by enable()
+      if(m_tx) { // transaction is created by enable()
         InstallOpts opts = *m_config->install();
         opts.autoInstall = true;
-        m_transaction->synchronize(remote, opts);
+        tx->synchronize(remote, opts);
       }
 
-      runTasks();
+      tx->runTasks();
     }
   }, parent);
 }
@@ -351,7 +330,7 @@ void ReaPack::browsePackages()
     m_browser->setFocus();
     return;
   }
-  else if(m_transaction) {
+  else if(m_tx) {
     ShowMessageBox(
       "This feature cannot be used while packages are being installed. "
       "Try again later.", "Browse packages", MB_OK
@@ -480,16 +459,16 @@ IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
   return nullptr;
 }
 
-Transaction *ReaPack::createTransaction()
+Transaction *ReaPack::setupTransaction()
 {
   if(m_progress && m_progress->isVisible())
     m_progress->setFocus();
 
-  if(m_transaction)
-    return nullptr;
+  if(m_tx)
+    return m_tx;
 
   try {
-    m_transaction = new Transaction;
+    m_tx = new Transaction;
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
@@ -506,49 +485,35 @@ Transaction *ReaPack::createTransaction()
 
   assert(!m_progress);
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow,
-    m_transaction->downloadQueue());
+    m_tx->downloadQueue());
 
-  m_transaction->onFinish([=] {
+  m_tx->onFinish([=] {
     Dialog::Destroy(m_progress);
     m_progress = nullptr;
 
-    const Receipt *receipt = m_transaction->receipt();
+    const Receipt *receipt = m_tx->receipt();
 
-    if(m_transaction->isCancelled() || !receipt->isEnabled())
+    if(m_tx->isCancelled() || !receipt->isEnabled())
       return;
 
     LockDialog managerLock(m_manager);
     LockDialog cleanupLock(m_browser);
 
-    if(m_transaction->taskCount() == 0 && !receipt->hasErrors())
+    if(m_tx->taskCount() == 0 && !receipt->hasErrors())
       ShowMessageBox("Nothing to do!", "ReaPack", MB_OK);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
   });
 
-  m_transaction->setCleanupHandler([=] {
-    delete m_transaction;
-    m_transaction = nullptr;
+  m_tx->setCleanupHandler([=] {
+    delete m_tx;
+    m_tx = nullptr;
 
     // refresh only once all onFinish slots were ran
     refreshBrowser();
   });
 
-  return m_transaction;
-}
-
-bool ReaPack::hitchhikeTransaction()
-{
-  if(m_transaction)
-    return true;
-  else
-    return createTransaction() != nullptr;
-}
-
-void ReaPack::runTasks()
-{
-  if(m_transaction)
-    m_transaction->runTasks();
+  return m_tx;
 }
 
 void ReaPack::refreshManager()

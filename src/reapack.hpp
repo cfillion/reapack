@@ -63,12 +63,9 @@ public:
   bool execActions(int id, int);
 
   void synchronizeAll();
-  void setRemoteEnabled(const Remote &, bool enable);
-  void enable(const Remote &r) { setRemoteEnabled(r, true); }
-  void disable(const Remote &r) { setRemoteEnabled(r, false); }
-  void install(const Version *);
+  void setRemoteEnabled(bool enable, const Remote &);
+  void enable(const Remote &r) { setRemoteEnabled(true, r); }
   void uninstall(const Remote &);
-  void uninstall(const Registry::Entry &);
 
   void importRemote();
   void import(const Remote &, HWND = nullptr);
@@ -85,14 +82,10 @@ public:
   void fetchIndexes(const std::vector<Remote> &,
     const IndexesCallback &, HWND parent, bool stale = false);
 
-  void runTasks();
-  bool isRunning() const { return m_transaction != nullptr; }
-
+  Transaction *setupTransaction();
   Config *config() const { return m_config; }
 
 private:
-  Transaction *createTransaction();
-  bool hitchhikeTransaction();
   void registerSelf();
   void doFetchIndex(const Remote &remote, DownloadQueue *, HWND, bool stale);
   IndexPtr loadIndex(const Remote &remote, HWND);
@@ -100,7 +93,7 @@ private:
   std::map<int, ActionCallback> m_actions;
 
   Config *m_config;
-  Transaction *m_transaction;
+  Transaction *m_tx;
   Progress *m_progress;
   Browser *m_browser;
   Import *m_import;
