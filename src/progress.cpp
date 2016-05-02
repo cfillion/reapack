@@ -51,13 +51,19 @@ void Progress::onCommand(const int id, int)
   }
 }
 
+void Progress::onTimer(const int id)
+{
+  show();
+  stopTimer(id);
+}
+
 void Progress::addDownload(Download *dl)
 {
   m_total++;
   updateProgress();
 
   if(!isVisible())
-    show();
+    startTimer(10);
 
   dl->onStart([=] {
     m_currentName = make_autostring(dl->name());
