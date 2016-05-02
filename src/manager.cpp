@@ -31,7 +31,8 @@
 using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_SELECT, ACTION_UNSELECT };
+       ACTION_REFRESH, ACTION_SELECT, ACTION_UNSELECT,
+       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -73,6 +74,9 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_DISABLE:
     setRemoteEnabled(false);
+    break;
+  case ACTION_REFRESH:
+    refreshIndex();
     break;
   case ACTION_UNINSTALL:
     uninstall();
@@ -140,6 +144,8 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
     menu.addAction(AUTO_STR("&Disable"), ACTION_DISABLE);
 
   menu.addSeparator();
+
+  menu.addAction(AUTO_STR("&Refresh"), ACTION_REFRESH);
 
   const UINT uninstallAction =
     menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
@@ -217,6 +223,21 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
     return remote.isEnabled();
   else
     return it->second;
+}
+
+void Manager::refreshIndex()
+{
+  if(!m_list->hasSelection())
+    return;
+
+  const vector<int> selection = m_list->selection();
+  vector<Remote> remotes(selection.size());
+  for(size_t i = 0; i < selection.size(); i++)
+    remotes[i] = getRemote(selection[i]);
+
+  m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &) {
+    m_reapack->refreshBrowser();
+  }, handle(), true);
 }
 
 void Manager::uninstall()

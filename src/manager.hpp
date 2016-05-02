@@ -48,6 +48,7 @@ private:
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
   void uninstall();
+  void refreshIndex();
   void about(int index);
   void options();
 
