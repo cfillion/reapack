@@ -528,10 +528,8 @@ void Browser::fillList()
   // and m_visibleEntries hasn't been emptied
   const vector<int> selection = m_list->selection();
   vector<size_t> selected(min(selection.size(), m_visibleEntries.size()));
-  for(size_t i = 0; i < selected.size(); i++) {
-    if(i < m_visibleEntries.size())
-      selected[i] = m_visibleEntries[selection[i]];
-  }
+  for(size_t i = 0; i < selected.size(); i++)
+    selected[i] = m_visibleEntries[selection[i]];
 
   m_list->clear();
   m_visibleEntries.clear();
