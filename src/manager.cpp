@@ -170,11 +170,22 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 void Manager::refresh()
 {
   InhibitControl lock(m_list);
+
+  const vector<int> selection = m_list->selection();
+  vector<string> selected(selection.size());
+  for(size_t i = 0; i < selection.size(); i++)
+    selected[i] = m_list->row(selection[i])[0];
+
   m_list->clear();
 
   for(const Remote &remote : *m_config->remotes()) {
-    if(!m_uninstall.count(remote))
-      m_list->addRow(makeRow(remote));
+    if(m_uninstall.count(remote))
+      continue;
+
+    const int index = m_list->addRow(makeRow(remote));
+
+    if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
+      m_list->select(index);
   }
 
   m_list->sort();
