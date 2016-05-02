@@ -84,7 +84,7 @@ void Progress::updateProgress()
 
   SetWindowText(m_label, label);
 
-  const double pos = (double)m_done / m_total;
+  const double pos = (double)(m_done+1) / max(2, m_total);
   const int percent = (int)(pos * 100);
 
   auto_char title[255] = {};
