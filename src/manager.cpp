@@ -235,9 +235,8 @@ void Manager::refreshIndex()
   for(size_t i = 0; i < selection.size(); i++)
     remotes[i] = getRemote(selection[i]);
 
-  m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &) {
-    m_reapack->refreshBrowser();
-  }, handle(), true);
+  m_reapack->fetchIndexes(remotes,
+    bind(&ReaPack::refreshBrowser, m_reapack), handle(), true);
 }
 
 void Manager::uninstall()
