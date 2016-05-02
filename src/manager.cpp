@@ -152,17 +152,13 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
-  menu.disable(enableAction);
-  menu.disable(disableAction);
-  menu.disable(uninstallAction);
-
   if(isRemoteEnabled(remote))
-    menu.enable(disableAction);
+    menu.disable(enableAction);
   else
-    menu.enable(enableAction);
+    menu.disable(disableAction);
 
-  if(!remote.isProtected())
-    menu.enable(uninstallAction);
+  if(remote.isProtected())
+    menu.disable(uninstallAction);
 
   menu.show(x, y, handle());
 }
