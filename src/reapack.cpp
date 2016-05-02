@@ -570,6 +570,7 @@ void ReaPack::registerSelf()
   Category cat("Extensions", &ri);
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
   Version ver(VERSION, &pkg);
+  ver.setAuthor("cfillion");
   ver.addSource(new Source(REAPACK_FILE, "dummy url", &ver));
 
   try {
