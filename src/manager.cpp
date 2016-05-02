@@ -277,10 +277,10 @@ bool Manager::confirm() const
   const size_t uninstallSize = m_uninstall.size();
 
   auto_char msg[255] = {};
-  auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("Uninstall %zu repositories%s?\n")
+  auto_snprintf(msg, auto_size(msg), AUTO_STR("Uninstall %zu %s?\n")
     AUTO_STR("Every file they contain will be removed from your computer."),
-    uninstallSize, uninstallSize == 1 ? AUTO_STR("") : AUTO_STR("s"));
+    uninstallSize,
+    uninstallSize == 1 ? AUTO_STR("repository") : AUTO_STR("repositories"));
 
   const auto_char *title = AUTO_STR("ReaPack Query");
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
