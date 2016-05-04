@@ -24,10 +24,12 @@
 #include "listview.hpp"
 #include "registry.hpp"
 
+#include <boost/optional.hpp>
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 class Index;
@@ -64,6 +66,7 @@ private:
     const Package *package;
     const Version *latest;
     const Version *current;
+    boost::optional<const Version *> target;
 
     Hash hash() const;
     bool test(Flag f) const { return (flags & f) != 0; }
@@ -98,14 +101,12 @@ private:
   void fillList();
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
-  const Entry *getEntry(int) const;
+  Entry *getEntry(int);
   void updateDisplayLabel();
   void displayButton();
   bool isFiltered(Package::Type) const;
   void toggleFiltered(Package::Type);
-  bool hasAction(const Entry *e) const { return m_actions.count(e) > 0; }
-  bool isTarget(const Entry *, const Version *) const;
-  void setAction(const int index, const Version *, bool toggle = true);
+  void setTarget(const int index, const Version *, bool toggle = true);
   void selectionDo(const std::function<void (int)> &);
   Tab currentTab() const;
   bool confirm() const;
@@ -116,9 +117,9 @@ private:
   void installVersion(int index, size_t verIndex);
   void uninstall(int index, bool toggle = true);
   void resetAction(int index);
-  void history(int index) const;
-  void contents(int index) const;
-  void about(int index) const;
+  void history(int index);
+  void contents(int index);
+  void about(int index);
 
   std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;
@@ -131,7 +132,7 @@ private:
   Filter m_filter;
   std::vector<Entry> m_entries;
   std::vector<size_t> m_visibleEntries;
-  std::map<const Entry *, const Version *> m_actions;
+  std::unordered_set<Entry *> m_actions;
 
   HWND m_filterHandle;
   HWND m_tabs;
