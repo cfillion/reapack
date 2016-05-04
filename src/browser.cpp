@@ -467,29 +467,32 @@ void Browser::populate()
 
 void Browser::transferActions()
 {
-  auto actionIt = m_actions.begin();
-  while(actionIt != m_actions.end())
-  {
-    const Entry &oldEntry = **actionIt;
-    actionIt = m_actions.erase(actionIt);
+  unordered_set<Entry *> oldActions;
+  swap(m_actions, oldActions);
 
-    if(!oldEntry.target)
-      continue;
-
-    const auto &entryIt = find(m_entries.begin(), m_entries.end(), oldEntry);
+  for(Entry *oldEntry : oldActions) {
+    const auto &entryIt = find(m_entries.begin(), m_entries.end(), *oldEntry);
     if(entryIt == m_entries.end())
       continue;
 
-    const Version *target = *oldEntry.target;
+    if(oldEntry->target) {
+      const Version *target = *oldEntry->target;
 
-    if(target) {
-      const Package *pkg = entryIt->package;
-      if(!pkg || !(target = pkg->findVersion(*target)))
-        continue;
+      if(target) {
+        const Package *pkg = entryIt->package;
+        if(!pkg || !(target = pkg->findVersion(*target)))
+          continue;
+      }
+
+      entryIt->target = target;
     }
 
-    entryIt->target = target;
+
+    m_actions.insert(&*entryIt);
   }
+
+  if(m_actions.empty())
+    disable(m_apply);
 }
 
 auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
@@ -622,8 +625,6 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
 bool Browser::match(const Entry &entry) const
 {
-  using namespace boost;
-
   switch(currentTab()) {
   case All:
     break;
