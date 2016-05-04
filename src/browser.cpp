@@ -711,6 +711,9 @@ void Browser::reinstall(const int index, const bool toggle)
 void Browser::installVersion(const int index, const size_t verIndex)
 {
   const Entry *entry = getEntry(index);
+  if(!entry)
+    return;
+
   const auto versions = entry->package->versions();
 
   if(verIndex >= versions.size())
