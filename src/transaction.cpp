@@ -349,7 +349,9 @@ bool Transaction::runTasks()
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 {
   // don't actually do anything until commit() – which will calls registerQueued
-  m_regQueue.push({add, entry, m_registry->getMainFile(entry)});
+  const string &mainFile = m_registry->getMainFile(entry);
+  if(!mainFile.empty())
+    m_regQueue.push({add, entry, mainFile});
 }
 
 void Transaction::registerQueued()
