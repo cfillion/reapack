@@ -36,14 +36,6 @@ struct InstallOpts;
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
-struct InstallTicket {
-  enum Type { Install, Upgrade };
-
-  Type type;
-  const Version *version;
-  const Registry::Entry regEntry;
-};
-
 struct HostTicket { bool add; Registry::Entry entry; std::string file; };
 
 class Transaction {
@@ -59,6 +51,7 @@ public:
 
   void synchronize(const Remote &, const InstallOpts &);
   void install(const Version *);
+  void setPinned(const Package *, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void registerAll(const Remote &);
@@ -81,7 +74,6 @@ private:
 
   void synchronize(const Package *, const InstallOpts &);
   void install(const Version *, const Registry::Entry &);
-  void installTicket(const InstallTicket &);
   void addTask(Task *);
 
   bool allFilesExists(const std::set<Path> &) const;
@@ -104,7 +96,6 @@ private:
 
   DownloadQueue m_downloadQueue;
   std::queue<Task *> m_taskQueue;
-  std::queue<InstallTicket> m_installQueue;
   std::queue<HostTicket> m_regQueue;
 
   VoidSignal m_onRun;

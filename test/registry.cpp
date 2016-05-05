@@ -174,3 +174,20 @@ TEST_CASE("get main file", M) {
   const Registry::Entry &entry = reg.push(ver);
   REQUIRE(reg.getMainFile(entry) == main->targetPath().join('/'));
 }
+
+TEST_CASE("pin registry entry", M) {
+  MAKE_PACKAGE
+
+  Registry reg;
+  reg.push(ver);
+
+  const Registry::Entry &entry = reg.getEntry(&pkg);
+  REQUIRE_FALSE(entry.pinned);
+
+  reg.setPinned(entry, true);
+  REQUIRE(reg.getEntry(&pkg).pinned);
+  REQUIRE(reg.getEntries(ri.name())[0].pinned);
+
+  reg.setPinned(entry, false);
+  REQUIRE_FALSE(reg.getEntry(&pkg).pinned);
+}

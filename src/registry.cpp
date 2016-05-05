@@ -42,14 +42,15 @@ Registry::Registry(const Path &path)
     "UPDATE entries SET type = ?, version = ?, author = ? WHERE id = ?"
   );
 
+  m_setPinned = m_db.prepare("UPDATE entries SET pinned = ? WHERE id = ?");
+
   m_findEntry = m_db.prepare(
-    "SELECT id, remote, category, package, type, version, author FROM entries "
-    "WHERE remote = ? AND category = ? AND package = ? "
-    "LIMIT 1"
+    "SELECT id, remote, category, package, type, version, author, pinned "
+    "FROM entries WHERE remote = ? AND category = ? AND package = ? LIMIT 1"
   );
 
   m_allEntries = m_db.prepare(
-    "SELECT id, category, package, type, version, author "
+    "SELECT id, category, package, type, version, author, pinned "
     "FROM entries WHERE remote = ?"
   );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
@@ -92,6 +93,7 @@ void Registry::migrate()
       "  type INTEGER NOT NULL,"
       "  version TEXT NOT NULL,"
       "  author TEXT NOT NULL,"
+      "  pinned INTEGER DEFAULT 0,"
       "  UNIQUE(remote, category, package)"
       ");"
 
@@ -188,6 +190,13 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
 }
 
+void Registry::setPinned(const Entry &entry, const bool pinned)
+{
+  m_setPinned->bind(1, pinned);
+  m_setPinned->bind(2, entry.id);
+  m_setPinned->exec();
+}
+
 auto Registry::getEntry(const Package *pkg) const -> Entry
 {
   Entry entry{};
@@ -209,6 +218,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
     entry.type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
     entry.version.tryParse(m_findEntry->stringColumn(col++));
     entry.version.setAuthor(m_findEntry->stringColumn(col++));
+    entry.pinned = m_findEntry->intColumn(col++) != 0;
 
     return false;
   });
@@ -232,6 +242,7 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
     entry.type = static_cast<Package::Type>(m_allEntries->intColumn(col++));
     entry.version.tryParse(m_allEntries->stringColumn(col++));
     entry.version.setAuthor(m_allEntries->stringColumn(col++));
+    entry.pinned = m_allEntries->intColumn(col++) != 0;
 
     list.push_back(entry);
 

@@ -49,8 +49,9 @@ Transaction::Transaction()
       finish();
   });
 
+  // run tasks after fetching indexes
   m_downloadQueue.onDone([=] {
-    if(m_installQueue.empty())
+    if(m_tasks.empty())
       finish();
     else
       runTasks();
@@ -105,7 +106,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
     if(allFilesExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
-  else if(regEntry.version > *latest)
+  else if(regEntry.pinned || *latest < regEntry.version)
     return;
 
   install(latest, regEntry);
@@ -186,18 +187,12 @@ void Transaction::install(const Version *ver,
   if(!m_indexes.count(ri))
     m_indexes.insert(ri);
 
-  m_installQueue.push({type, ver, regEntry});
-}
-
-void Transaction::installTicket(const InstallTicket &ticket)
-{
-  const Version *ver = ticket.version;
-  const set<Path> &currentFiles = m_registry->getFiles(ticket.regEntry);
+  const set<Path> &currentFiles = m_registry->getFiles(regEntry);
 
   InstallTask *task = new InstallTask(ver, currentFiles, this);
 
   task->onCommit([=] {
-    m_receipt.addTicket(ticket);
+    m_receipt.addTicket({type, ver, regEntry});
     m_receipt.addRemovals(task->removedFiles());
 
     const Registry::Entry newEntry = m_registry->push(ver);
@@ -209,6 +204,7 @@ void Transaction::installTicket(const InstallTicket &ticket)
   });
 
   addTask(task);
+  m_receipt.setEnabled(true);
 }
 
 void Transaction::registerAll(const Remote &remote)
@@ -220,6 +216,21 @@ void Transaction::registerAll(const Remote &remote)
 
   if(!remote.isEnabled())
     inhibit(remote);
+}
+
+void Transaction::setPinned(const Package *pkg, const bool pinned)
+{
+  // pkg may or may not be installed yet at this point,
+  // waiting for the install task to be commited before querying the registry
+
+  DummyTask *task = new DummyTask(this);
+  task->onCommit([=] {
+    const Registry::Entry &entry = m_registry->getEntry(pkg);
+    if(entry)
+      m_registry->setPinned(entry, pinned);
+  });
+
+  addTask(task);
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -261,6 +272,7 @@ void Transaction::uninstall(const Registry::Entry &entry)
   task->onCommit([=] { m_receipt.addRemovals(task->removedFiles()); });
 
   addTask(task);
+  m_receipt.setEnabled(true);
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
@@ -315,8 +327,6 @@ void Transaction::addTask(Task *task)
 {
   m_tasks.push_back(task);
   m_taskQueue.push(task);
-
-  m_receipt.setEnabled(true);
 }
 
 bool Transaction::runTasks()
@@ -326,11 +336,6 @@ bool Transaction::runTasks()
   // execute code waiting for the savepoint to be released
   m_onRun();
   m_onRun.disconnect_all_slots();
-
-  while(!m_installQueue.empty()) {
-    installTicket(m_installQueue.front());
-    m_installQueue.pop();
-  }
 
   while(!m_taskQueue.empty()) {
     m_taskQueue.front()->start();
@@ -349,7 +354,9 @@ bool Transaction::runTasks()
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 {
   // don't actually do anything until commit() – which will calls registerQueued
-  m_regQueue.push({add, entry, m_registry->getMainFile(entry)});
+  const string &mainFile = m_registry->getMainFile(entry);
+  if(!mainFile.empty())
+    m_regQueue.push({add, entry, mainFile});
 }
 
 void Transaction::registerQueued()

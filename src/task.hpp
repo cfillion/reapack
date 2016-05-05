@@ -95,4 +95,14 @@ private:
   std::set<Path> m_removedFiles;
 };
 
+class DummyTask : public Task {
+public:
+  DummyTask(Transaction *t) : Task(t) {}
+
+protected:
+  void doStart() override {}
+  bool doCommit() override { return true; }
+  void doRollback() override {}
+};
+
 #endif
