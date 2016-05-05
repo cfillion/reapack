@@ -233,6 +233,14 @@ void Transaction::setPinned(const Package *pkg, const bool pinned)
   addTask(task);
 }
 
+void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
+{
+  DummyTask *task = new DummyTask(this);
+  task->onCommit(bind(&Registry::setPinned, m_registry, entry, pinned));
+
+  addTask(task);
+}
+
 void Transaction::uninstall(const Remote &remote)
 {
   inhibit(remote);
@@ -301,6 +309,10 @@ void Transaction::finish()
 
     registerQueued();
   }
+
+  assert(m_downloadQueue.idle());
+  assert(m_taskQueue.empty());
+  assert(m_regQueue.empty());
 
   m_onFinish();
   m_cleanupHandler();

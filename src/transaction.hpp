@@ -52,6 +52,7 @@ public:
   void synchronize(const Remote &, const InstallOpts &);
   void install(const Version *);
   void setPinned(const Package *, bool pinned);
+  void setPinned(const Registry::Entry &, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void registerAll(const Remote &);

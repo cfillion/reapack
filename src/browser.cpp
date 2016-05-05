@@ -887,7 +887,11 @@ bool Browser::apply()
     }
 
     if(entry->pin) {
-      tx->setPinned(entry->package, *entry->pin);
+      if(entry->regEntry)
+        tx->setPinned(entry->regEntry, *entry->pin);
+      else
+        tx->setPinned(entry->package, *entry->pin);
+
       entry->pin = boost::none;
     }
   }
