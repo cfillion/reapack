@@ -39,6 +39,7 @@ public:
     std::string package;
     Package::Type type;
     Version version;
+    bool pinned;
 
     operator bool() const { return id != 0; }
   };
@@ -50,6 +51,7 @@ public:
   std::set<Path> getFiles(const Entry &) const;
   std::string getMainFile(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
+  void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);
   void savepoint();
   void restore();
@@ -62,13 +64,14 @@ private:
   Database m_db;
   Statement *m_insertEntry;
   Statement *m_updateEntry;
+  Statement *m_setPinned;
   Statement *m_findEntry;
   Statement *m_allEntries;
   Statement *m_forgetEntry;
-  Statement *m_setMainFile;
 
   Statement *m_getFiles;
   Statement *m_getMainFile;
+  Statement *m_setMainFile;
   Statement *m_insertFile;
   Statement *m_clearFiles;
   Statement *m_forgetFiles;

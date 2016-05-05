@@ -61,15 +61,19 @@ private:
 
   struct Entry {
     typedef std::tuple<std::string, std::string, std::string> Hash;
+
     int flags;
     Registry::Entry regEntry;
     const Package *package;
     const Version *latest;
     const Version *current;
+
     boost::optional<const Version *> target;
+    boost::optional<bool> pin;
 
     Hash hash() const;
     bool test(Flag f) const { return (flags & f) != 0; }
+    bool canPin() const { return target ? *target != nullptr : test(InstalledFlag); }
     bool operator==(const Entry &o) const { return hash() == o.hash(); }
   };
 
@@ -107,6 +111,8 @@ private:
   bool isFiltered(Package::Type) const;
   void toggleFiltered(Package::Type);
   void setTarget(const int index, const Version *, bool toggle = true);
+  void resetTarget(int index);
+  void updateAction(const int index);
   void selectionDo(const std::function<void (int)> &);
   Tab currentTab() const;
   bool confirm() const;
@@ -116,7 +122,7 @@ private:
   void reinstall(int index, bool toggle = true);
   void installVersion(int index, size_t verIndex);
   void uninstall(int index, bool toggle = true);
-  void resetAction(int index);
+  void togglePin(int index);
   void history(int index);
   void contents(int index);
   void about(int index);

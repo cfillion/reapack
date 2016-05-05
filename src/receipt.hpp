@@ -22,8 +22,17 @@
 #include <string>
 #include <vector>
 
+#include "registry.hpp"
+
 class Path;
-struct InstallTicket;
+
+struct InstallTicket {
+  enum Type { Install, Upgrade };
+
+  Type type;
+  const Version *version;
+  Registry::Entry regEntry;
+};
 
 class Receipt {
 public:

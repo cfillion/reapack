@@ -43,6 +43,7 @@ enum Action {
   ACTION_REINSTALL_ALL,
   ACTION_UNINSTALL,
   ACTION_UNINSTALL_ALL,
+  ACTION_PIN,
   ACTION_CONTENTS,
   ACTION_HISTORY,
   ACTION_ABOUT,
@@ -138,6 +139,9 @@ void Browser::onCommand(const int id, const int event)
   case ACTION_UNINSTALL_ALL:
     selectionDo(bind(&Browser::uninstall, this, arg::_1, false));
     break;
+  case ACTION_PIN:
+    togglePin(m_currentIndex);
+    break;
   case ACTION_CONTENTS:
     contents(m_currentIndex);
     break;
@@ -148,7 +152,7 @@ void Browser::onCommand(const int id, const int event)
     about(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
-    selectionDo(bind(&Browser::resetAction, this, arg::_1));
+    selectionDo(bind(&Browser::resetTarget, this, arg::_1));
     break;
   case ACTION_REFRESH:
     refresh(true);
@@ -201,7 +205,7 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
     menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
     menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
     menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
-    menu.addAction(AUTO_STR("&Clear queued action"), ACTION_RESET_ALL);
+    menu.addAction(AUTO_STR("&Clear queued actions"), ACTION_RESET_ALL);
     menu.addSeparator();
   }
 
@@ -272,6 +276,16 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
     menu.disable(uninstallIndex);
   else if(entry->target && *entry->target == nullptr)
     menu.check(uninstallIndex);
+
+  menu.addSeparator();
+
+  const UINT pinIndex = menu.addAction(
+    AUTO_STR("&Pin current version"), ACTION_PIN);
+
+  if(!entry->canPin())
+    menu.disable(pinIndex);
+  if(entry->pin.value_or(entry->regEntry.pinned))
+    menu.check(pinIndex);
 
   menu.addSeparator();
 
@@ -487,6 +501,8 @@ void Browser::transferActions()
       entryIt->target = target;
     }
 
+    if(oldEntry->pin)
+      entryIt->pin = *oldEntry->pin;
 
     m_actions.insert(&*entryIt);
   }
@@ -584,6 +600,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
   case StateColumn: {
     if(entry.test(ObsoleteFlag))
       display += 'o';
+    else if(entry.regEntry.pinned)
+      display += 'p';
     else if(entry.test(OutOfDateFlag))
       display += 'u';
     else if(entry.test(InstalledFlag))
@@ -593,6 +611,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
     if(entry.target)
       display += *entry.target == nullptr ? 'U' : 'I';
+    if(entry.pin && entry.canPin())
+      display += 'P';
 
     return display;
   }
@@ -629,7 +649,7 @@ bool Browser::match(const Entry &entry) const
   case All:
     break;
   case Queued:
-    if(!entry.target)
+    if(!m_actions.count(const_cast<Entry *>(&entry)))
       return false;
     break;
   case Installed:
@@ -723,7 +743,7 @@ void Browser::installVersion(const int index, const size_t verIndex)
   const Version *target = entry->package->version(verIndex);
 
   if(target == entry->current)
-    resetAction(index);
+    resetTarget(index);
   else
     setTarget(index, target);
 }
@@ -736,16 +756,60 @@ void Browser::uninstall(const int index, const bool toggle)
     setTarget(index, nullptr, toggle);
 }
 
-void Browser::resetAction(const int index)
+void Browser::togglePin(const int index)
+{
+  Entry *entry = getEntry(index);
+  if(!entry)
+    return;
+
+  const bool newVal = !entry->pin.value_or(entry->regEntry.pinned);
+
+  if(newVal == entry->regEntry.pinned) {
+    entry->pin = boost::none;
+    if(!entry->target)
+      m_actions.erase(entry);
+  }
+  else {
+    entry->pin = newVal;
+    m_actions.insert(entry);
+  }
+
+  updateAction(index);
+}
+
+void Browser::setTarget(const int index, const Version *target, const bool toggle)
+{
+  Entry *entry = getEntry(index);
+
+  if(toggle && entry->target && *entry->target == target)
+    resetTarget(index);
+  else if(entry) {
+    entry->target = target;
+    m_actions.insert(entry);
+    updateAction(index);
+  }
+}
+
+void Browser::resetTarget(const int index)
 {
   Entry *entry = getEntry(index);
   if(!entry->target)
     return;
 
   entry->target = boost::none;
-  m_actions.erase(entry);
+  if(!entry->pin || !entry->canPin())
+    m_actions.erase(entry);
 
-  if(currentTab() == Queued) {
+  updateAction(index);
+}
+
+void Browser::updateAction(const int index)
+{
+  Entry *entry = getEntry(index);
+  if(!entry)
+    return;
+
+  if(currentTab() == Queued && !m_actions.count(entry)) {
     m_list->removeRow(index);
     m_visibleEntries.erase(m_visibleEntries.begin() + index);
     updateDisplayLabel();
@@ -755,20 +819,8 @@ void Browser::resetAction(const int index)
 
   if(m_actions.empty())
     disable(m_apply);
-}
-
-void Browser::setTarget(const int index, const Version *target, const bool toggle)
-{
-  Entry *entry = getEntry(index);
-
-  if(toggle && entry->target && *entry->target == target)
-    resetAction(index);
-  else if(entry) {
-    entry->target = target;
-    m_actions.insert(entry);
-    m_list->replaceRow(index, makeRow(*entry));
+  else
     enable(m_apply);
-  }
 }
 
 void Browser::selectionDo(const function<void (int)> &func)
@@ -823,18 +875,21 @@ bool Browser::apply()
     return false;
 
   for(Entry *entry : m_actions) {
-    if(!entry->target)
-      continue;
+    if(entry->target) {
+      const Version *target = *entry->target;
 
-    const Version *target = *entry->target;
+      if(target)
+        tx->install(target);
+      else
+        tx->uninstall(entry->regEntry);
 
-    if(target)
-      tx->install(target);
-    else
-      tx->uninstall(entry->regEntry);
+      entry->target = boost::none;
+    }
 
-    // clear queued actions
-    entry->target = boost::none;
+    if(entry->pin) {
+      tx->setPinned(entry->package, *entry->pin);
+      entry->pin = boost::none;
+    }
   }
 
   m_actions.clear();
