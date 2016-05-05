@@ -224,6 +224,8 @@ void ReaPack::import(const Remote &remote, HWND parent)
 
       if(answer != IDYES)
         return;
+
+      FS::remove(Index::pathFor(remote.name()));
     }
     else if(existing.isEnabled()) {
       auto_char msg[1024] = {};
