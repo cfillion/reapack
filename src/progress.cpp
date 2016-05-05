@@ -63,7 +63,7 @@ void Progress::addDownload(Download *dl)
   updateProgress();
 
   if(!isVisible())
-    startTimer(10);
+    startTimer(100);
 
   dl->onStart([=] {
     m_currentName = make_autostring(dl->name());
