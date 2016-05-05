@@ -176,7 +176,7 @@ void Manager::refresh()
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = m_list->row(selection[i])[0];
+    selected[i] = from_autostring(m_list->row(selection[i])[0]);
 
   m_list->clear();
 

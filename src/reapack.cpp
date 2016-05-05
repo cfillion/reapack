@@ -264,7 +264,7 @@ void ReaPack::import(const Remote &remote, HWND parent)
 
   auto_char msg[1024] = {};
   auto_snprintf(msg, auto_size(msg),
-    "%s has been successfully imported into your repository list.",
+    AUTO_STR("%s has been successfully imported into your repository list."),
     make_autostring(remote.name()).c_str());
   MessageBox(parent, msg, Import::TITLE, MB_OK);
 }
