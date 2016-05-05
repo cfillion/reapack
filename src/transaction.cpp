@@ -264,12 +264,11 @@ void Transaction::uninstall(const Registry::Entry &entry)
 
   registerInHost(false, entry);
 
-  // forget the package even if some files cannot be removed,
-  // once the pre-run savepoint is released
-  m_onRun.connect(bind(&Registry::forget, m_registry, entry));
-
   RemoveTask *task = new RemoveTask(files, this);
-  task->onCommit([=] { m_receipt.addRemovals(task->removedFiles()); });
+  task->onCommit([=] {
+    m_registry->forget(entry);
+    m_receipt.addRemovals(task->removedFiles());
+  });
 
   addTask(task);
   m_receipt.setEnabled(true);
@@ -332,10 +331,6 @@ void Transaction::addTask(Task *task)
 bool Transaction::runTasks()
 {
   m_registry->restore();
-
-  // execute code waiting for the savepoint to be released
-  m_onRun();
-  m_onRun.disconnect_all_slots();
 
   while(!m_taskQueue.empty()) {
     m_taskQueue.front()->start();

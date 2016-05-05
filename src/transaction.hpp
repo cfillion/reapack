@@ -98,7 +98,6 @@ private:
   std::queue<Task *> m_taskQueue;
   std::queue<HostTicket> m_regQueue;
 
-  VoidSignal m_onRun;
   VoidSignal m_onFinish;
   CleanupHandler m_cleanupHandler;
 };
