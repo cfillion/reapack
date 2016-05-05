@@ -277,7 +277,7 @@ void Manager::options()
     menu.check(index);
 
   index = menu.addAction(
-    AUTO_STR("Enable &pre-releases (bleeding edge mode)"), ACTION_BLEEDINGEDGE);
+    AUTO_STR("Enable &pre-releases globally (bleeding edge)"), ACTION_BLEEDINGEDGE);
   if(m_bleedingEdge.value_or(m_config->install()->bleedingEdge))
     menu.check(index);
 
