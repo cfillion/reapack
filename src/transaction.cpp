@@ -103,8 +103,10 @@ void Transaction::synchronize(const Package *pkg)
     return;
 
   if(regEntry.version == *latest) {
-    if(allFilesExists(latest->files()))
+    if(allFilesExists(latest->files())) {
+      installDependencies(latest); // are dependency installed too?
       return; // latest version is really installed, nothing to do here!
+    }
   }
   else if(regEntry.pinned || *latest < regEntry.version)
     return;
