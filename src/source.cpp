@@ -22,29 +22,8 @@
 
 using namespace std;
 
-Source::Platform Source::getPlatform(const char *platform)
-{
-  if(!strcmp(platform, "all"))
-    return GenericPlatform;
-  else if(!strcmp(platform, "windows"))
-    return WindowsPlatform;
-  else if(!strcmp(platform, "win32"))
-    return Win32Platform;
-  else if(!strcmp(platform, "win64"))
-    return Win64Platform;
-  else if(!strcmp(platform, "darwin"))
-    return DarwinPlatform;
-  else if(!strcmp(platform, "darwin32"))
-    return Darwin32Platform;
-  else if(!strcmp(platform, "darwin64"))
-    return Darwin64Platform;
-  else
-    return UnknownPlatform;
-}
-
 Source::Source(const string &file, const string &url, const Version *ver)
-  : m_platform(GenericPlatform), m_type(Package::UnknownType),
-    m_file(file), m_url(url), m_version(ver)
+  : m_type(Package::UnknownType), m_file(file), m_url(url), m_version(ver)
 {
   if(m_url.empty())
     throw reapack_error("empty source url");

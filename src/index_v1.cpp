@@ -27,6 +27,7 @@ static void LoadMetadataV1(TiXmlElement *, Index *ri);
 static void LoadCategoryV1(TiXmlElement *, Index *ri);
 static void LoadPackageV1(TiXmlElement *, Category *cat);
 static void LoadVersionV1(TiXmlElement *, Package *pkg);
+static void LoadSourceV1(TiXmlElement *, Version *pkg);
 
 void Index::loadV1(TiXmlElement *root, Index *ri)
 {
@@ -140,23 +141,7 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
   TiXmlElement *node = verNode->FirstChildElement("source");
 
   while(node) {
-    const char *platform = node->Attribute("platform");
-    if(!platform) platform = "all";
-
-    const char *type = node->Attribute("type");
-    if(!type) type = "";
-
-    const char *file = node->Attribute("file");
-    if(!file) file = "";
-
-    const char *url = node->GetText();
-    if(!url) url = "";
-
-    Source *src = new Source(file, url, ver);
-    src->setPlatform(Source::getPlatform(platform));
-    src->setTypeOverride(Package::getType(type));
-    ver->addSource(src);
-
+    LoadSourceV1(node, ver);
     node = node->NextSiblingElement("source");
   }
 
@@ -170,4 +155,24 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
   pkg->addVersion(ver);
 
   ptr.release();
+}
+
+void LoadSourceV1(TiXmlElement *node, Version *ver)
+{
+  const char *platform = node->Attribute("platform");
+  if(!platform) platform = "all";
+
+  const char *type = node->Attribute("type");
+  if(!type) type = "";
+
+  const char *file = node->Attribute("file");
+  if(!file) file = "";
+
+  const char *url = node->GetText();
+  if(!url) url = "";
+
+  Source *src = new Source(file, url, ver);
+  src->setPlatform(platform);
+  src->setTypeOverride(Package::getType(type));
+  ver->addSource(src);
 }

@@ -10,41 +10,15 @@ using namespace std;
 
 static const char *M = "[source]";
 
-TEST_CASE("source platform from string", M) {
-  SECTION("unknown")
-    REQUIRE(Source::getPlatform("hello") == Source::UnknownPlatform);
-
-  SECTION("generic")
-    REQUIRE(Source::getPlatform("all") == Source::GenericPlatform);
-
-  SECTION("generic windows")
-    REQUIRE(Source::getPlatform("windows") == Source::WindowsPlatform);
-
-  SECTION("windows 32-bit")
-    REQUIRE(Source::getPlatform("win32") == Source::Win32Platform);
-
-  SECTION("windows 64-bit")
-    REQUIRE(Source::getPlatform("win64") == Source::Win64Platform);
-
-  SECTION("generic os x")
-    REQUIRE(Source::getPlatform("darwin") == Source::DarwinPlatform);
-
-  SECTION("os x 32-bit")
-    REQUIRE(Source::getPlatform("darwin32") == Source::Darwin32Platform);
-
-  SECTION("os x 64-bit")
-    REQUIRE(Source::getPlatform("darwin64") == Source::Darwin64Platform);
-}
-
 TEST_CASE("source platform", M) {
   Source src({}, "url");
-  REQUIRE(src.platform() == Source::GenericPlatform);
+  REQUIRE(src.platform() == Platform::GenericPlatform);
 
-  src.setPlatform(Source::UnknownPlatform);
-  REQUIRE(src.platform() == Source::UnknownPlatform);
+  src.setPlatform(Platform::UnknownPlatform);
+  REQUIRE(src.platform() == Platform::UnknownPlatform);
 
-  src.setPlatform(Source::WindowsPlatform);
-  REQUIRE(src.platform() == Source::WindowsPlatform);
+  src.setPlatform(Platform::WindowsPlatform);
+  REQUIRE(src.platform() == Platform::WindowsPlatform);
 }
 
 TEST_CASE("source type override", M) {

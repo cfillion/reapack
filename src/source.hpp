@@ -18,9 +18,8 @@
 #ifndef REAPACK_SOURCE_HPP
 #define REAPACK_SOURCE_HPP
 
-#include <string>
-
 #include "package.hpp"
+#include "platform.hpp"
 
 class Package;
 class Path;
@@ -28,23 +27,6 @@ class Version;
 
 class Source {
 public:
-  enum Platform {
-    UnknownPlatform,
-    GenericPlatform,
-
-    // windows
-    WindowsPlatform,
-    Win32Platform,
-    Win64Platform,
-
-    // os x
-    DarwinPlatform,
-    Darwin32Platform,
-    Darwin64Platform,
-  };
-
-  static Platform getPlatform(const char *);
-
   Source(const std::string &file, const std::string &url,
     const Version * = nullptr);
 

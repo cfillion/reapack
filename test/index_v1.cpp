@@ -131,14 +131,14 @@ TEST_CASE("null source file", M) {
   REQUIRE(pkg->version(0)->source(0)->file() == pkg->name());
 }
 
-TEST_CASE("default platform", M) {
+TEST_CASE("default source platform", M) {
   UseRootPath root(RIPATH);
 
   IndexPtr ri = Index::load("missing_platform");
 
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
-    == Source::GenericPlatform);
+    == Platform::GenericPlatform);
 }
 
 TEST_CASE("version changelog", M) {
@@ -172,7 +172,7 @@ TEST_CASE("full index", M) {
   REQUIRE(ver->changelog() == "Fixed a division by zero error.");
 
   const Source *source = ver->source(0);
-  REQUIRE(source->platform() == Source::GenericPlatform);
+  REQUIRE(source->platform() == Platform::GenericPlatform);
   REQUIRE(source->file() == "test.lua");
   REQUIRE(source->url() == "https://google.com/");
 }

@@ -115,34 +115,9 @@ string Version::displayAuthor() const
 
 void Version::addSource(Source *source)
 {
-  const Source::Platform p = source->platform();
-
-#ifdef __APPLE__
-  if(p != Source::GenericPlatform && p < Source::DarwinPlatform)
+  if(!source->platform().test())
     return;
-
-#ifdef __x86_64__
-  if(p == Source::Darwin32Platform)
-    return;
-#else
-  if(p == Source::Darwin64Platform)
-    return;
-#endif
-
-#elif _WIN32
-  if(p == Source::UnknownPlatform || p > Source::Win64Platform)
-    return;
-
-#ifdef _WIN64
-  if(p == Source::Win32Platform)
-    return;
-#else
-  if(p == Source::Win64Platform)
-    return;
-#endif
-#endif
-
-  if(source->version() != this)
+  else if(source->version() != this)
     throw reapack_error("source belongs to another version");
 
   const Path path = source->targetPath();
