@@ -159,22 +159,27 @@ TEST_CASE("full index", M) {
 
   const Category *cat = ri->category(0);
   REQUIRE(cat->name() == "Category Name");
-  REQUIRE(cat->packages().size() == 1);
 
+  REQUIRE(cat->packages().size() == 1);
   const Package *pack = cat->package(0);
   REQUIRE(pack->type() == Package::ScriptType);
   REQUIRE(pack->name() == "Hello World.lua");
-  REQUIRE(pack->versions().size() == 1);
 
+  REQUIRE(pack->versions().size() == 1);
   const Version *ver = pack->version(0);
   REQUIRE(ver->name() == "1.0");
-  REQUIRE(ver->sources().size() == 1);
   REQUIRE(ver->changelog() == "Fixed a division by zero error.");
 
+  REQUIRE(ver->sources().size() == 1);
   const Source *source = ver->source(0);
   REQUIRE(source->platform() == Platform::GenericPlatform);
   REQUIRE(source->file() == "test.lua");
   REQUIRE(source->url() == "https://google.com/");
+
+  REQUIRE(ver->dependencies().size() == 1);
+  const Dependency &dep = ver->dependency(0);
+  REQUIRE(dep.platform == Platform::GenericPlatform);
+  REQUIRE(dep.path == "Hello/World");
 }
 
 TEST_CASE("read index metadata", M) {
@@ -221,4 +226,7 @@ TEST_CASE("read index name (from raw data only)") {
     IndexPtr ri = Index::load({}, "<index version=\"1\"/>\n");
     REQUIRE(ri->name() == "");
   }
+}
+
+TEST_CASE("parse dependencies", M) {
 }

@@ -199,7 +199,7 @@ TEST_CASE("find matching version", M) {
   REQUIRE(pack.findVersion(Version("2")) == nullptr);
 }
 
-TEST_CASE("full name", M) {
+TEST_CASE("package full name", M) {
   SECTION("no category") {
     Package pack(Package::ScriptType, "file.name");
     REQUIRE(pack.fullName() == "file.name");

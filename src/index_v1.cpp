@@ -23,11 +23,12 @@
 
 using namespace std;
 
-static void LoadMetadataV1(TiXmlElement *, Index *ri);
-static void LoadCategoryV1(TiXmlElement *, Index *ri);
-static void LoadPackageV1(TiXmlElement *, Category *cat);
-static void LoadVersionV1(TiXmlElement *, Package *pkg);
-static void LoadSourceV1(TiXmlElement *, Version *pkg);
+static void LoadMetadataV1(TiXmlElement *, Index *);
+static void LoadCategoryV1(TiXmlElement *, Index *);
+static void LoadPackageV1(TiXmlElement *, Category *);
+static void LoadVersionV1(TiXmlElement *, Package *);
+static void LoadSourceV1(TiXmlElement *, Version *);
+static void LoadDependencyV1(TiXmlElement *, Version *);
 
 void Index::loadV1(TiXmlElement *root, Index *ri)
 {
@@ -145,6 +146,13 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
     node = node->NextSiblingElement("source");
   }
 
+  node = verNode->FirstChildElement("dependency");
+
+  while(node) {
+    LoadDependencyV1(node, ver);
+    node = node->NextSiblingElement("dependency");
+  }
+
   node = verNode->FirstChildElement("changelog");
 
   if(node) {
@@ -175,4 +183,15 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   src->setPlatform(platform);
   src->setTypeOverride(Package::getType(type));
   ver->addSource(src);
+}
+
+void LoadDependencyV1(TiXmlElement *node, Version *ver)
+{
+  const char *platform = node->Attribute("platform");
+  if(!platform) platform = "all";
+
+  const char *path = node->GetText();
+  if(!path) path = "";
+
+  ver->addDependency({platform, path});
 }

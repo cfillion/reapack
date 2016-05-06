@@ -18,6 +18,7 @@
 #ifndef REAPACK_TRANSACTION_HPP
 #define REAPACK_TRANSACTION_HPP
 
+#include "config.hpp"
 #include "download.hpp"
 #include "receipt.hpp"
 #include "registry.hpp"
@@ -32,7 +33,6 @@ class Index;
 class Path;
 class Remote;
 class Task;
-struct InstallOpts;
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
@@ -43,13 +43,13 @@ public:
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef std::function<void()> CleanupHandler;
 
-  Transaction();
+  Transaction(const InstallOpts &);
   ~Transaction();
 
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
-  void synchronize(const Remote &, const InstallOpts &);
+  void synchronize(const Remote &);
   void install(const Version *);
   void setPinned(const Package *, bool pinned);
   void setPinned(const Registry::Entry &, bool pinned);
@@ -63,6 +63,7 @@ public:
   size_t taskCount() const { return m_tasks.size(); }
 
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
+  InstallOpts *options() { return &m_opts; }
 
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
@@ -73,8 +74,9 @@ private:
   void fetchIndex(const Remote &, const IndexCallback &cb);
   void saveIndex(Download *, const std::string &remoteName);
 
-  void synchronize(const Package *, const InstallOpts &);
-  void install(const Version *, const Registry::Entry &);
+  void synchronize(const Package *);
+  bool install(const Version *, const Registry::Entry &);
+  bool installDependencies(const Version *);
   void addTask(Task *);
 
   bool allFilesExists(const std::set<Path> &) const;
@@ -87,12 +89,14 @@ private:
   void inhibit(const Remote &);
 
   bool m_isCancelled;
+  InstallOpts m_opts;
   Registry *m_registry;
   Receipt m_receipt;
 
   std::multimap<std::string, IndexCallback> m_remotes;
   std::unordered_set<std::string> m_inhibited;
   std::unordered_set<IndexPtr> m_indexes;
+  std::unordered_set<const Package *> m_deps;
   std::vector<Task *> m_tasks;
 
   DownloadQueue m_downloadQueue;

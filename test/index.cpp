@@ -99,9 +99,8 @@ TEST_CASE("add a category", M) {
   Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
   Version *ver = new Version("1", pack);
-  Source *source = new Source({}, "google.com", ver);
+  ver->addSource(new Source({}, "google.com", ver));
 
-  ver->addSource(source);
   pack->addVersion(ver);
   cat->addPackage(pack);
 
@@ -265,4 +264,32 @@ TEST_CASE("set index name", M) {
     }
     REQUIRE(ri.name() == "hello");
   }
+}
+
+TEST_CASE("find package from root", M) {
+  const Path path("Category/Name/Package.lua");
+
+  Index ri({});
+  REQUIRE(ri.findPackage(path) == nullptr);
+
+  Category *cat = new Category("Category/Name", &ri);
+
+  {
+    Package *pkg = new Package(Package::ScriptType, "Dummy.lua", cat);
+    Version *ver = new Version("1", pkg);
+    ver->addSource(new Source({}, "google.com", ver));
+    pkg->addVersion(ver);
+    cat->addPackage(pkg);
+  }
+
+  ri.addCategory(cat);
+  REQUIRE(ri.findPackage(path) == nullptr);
+
+  Package *pkg = new Package(Package::ScriptType, "Package.lua", cat);
+  Version *ver = new Version("1", pkg);
+  ver->addSource(new Source({}, "google.com", ver));
+  pkg->addVersion(ver);
+  cat->addPackage(pkg);
+
+  REQUIRE(ri.findPackage(path) == pkg);
 }

@@ -68,6 +68,7 @@ public:
   const Category *category(const std::string &name) const;
 
   const PackageList &packages() const { return m_packages; }
+  const Package *findPackage(const Path &) const;
 
 private:
   static void loadV1(TiXmlElement *, Index *);

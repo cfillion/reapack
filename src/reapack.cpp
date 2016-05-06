@@ -144,7 +144,7 @@ void ReaPack::synchronizeAll()
     return;
 
   for(const Remote &remote : remotes)
-    tx->synchronize(remote, *m_config->install());
+    tx->synchronize(remote);
 
   tx->runTasks();
 }
@@ -315,9 +315,8 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
       enable(remote);
 
-      InstallOpts opts = *m_config->install();
-      opts.autoInstall = true;
-      tx->synchronize(remote, opts);
+      tx->options()->autoInstall = true;
+      tx->synchronize(remote);
 
       tx->runTasks();
     }
@@ -468,7 +467,7 @@ Transaction *ReaPack::setupTransaction()
     return m_tx;
 
   try {
-    m_tx = new Transaction;
+    m_tx = new Transaction(*m_config->install());
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());

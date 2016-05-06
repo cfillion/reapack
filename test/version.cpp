@@ -259,13 +259,31 @@ TEST_CASE("list files", M) {
   REQUIRE(ver.files() == expected);
 }
 
-TEST_CASE("drop sources for unknown platforms", M) {
+TEST_CASE("drop sources for other platforms", M) {
   MAKE_VERSION
   Source *src = new Source("a", "b", &ver);
   src->setPlatform(Platform::UnknownPlatform);
   ver.addSource(src);
 
   REQUIRE(ver.sources().size() == 0);
+}
+
+TEST_CASE("add dependency", M) {
+  MAKE_VERSION
+
+  CHECK(ver.dependencies().size() == 0);
+
+  ver.addDependency({Platform::GenericPlatform, "hello/world"});
+  CHECK(ver.dependencies().size() == 1);
+
+  REQUIRE(ver.dependency(0).path == "hello/world");
+}
+
+TEST_CASE("drop dependency for other platforms", M) {
+  MAKE_VERSION
+
+  ver.addDependency({Platform::UnknownPlatform, "hello/world"});
+  CHECK(ver.dependencies().size() == 0);
 }
 
 TEST_CASE("version author", M) {

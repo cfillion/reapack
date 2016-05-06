@@ -31,8 +31,8 @@
 
 using namespace std;
 
-Transaction::Transaction()
-  : m_isCancelled(false)
+Transaction::Transaction(const InstallOpts &opts)
+  : m_isCancelled(false), m_opts(opts)
 {
   m_registry = new Registry(Path::prefixRoot(Path::REGISTRY));
 
@@ -66,7 +66,7 @@ Transaction::~Transaction()
   delete m_registry;
 }
 
-void Transaction::synchronize(const Remote &remote, const InstallOpts &opts)
+void Transaction::synchronize(const Remote &remote)
 {
   // show the report dialog or "nothing to do" even if no task are ran
   m_receipt.setEnabled(true);
@@ -84,18 +84,18 @@ void Transaction::synchronize(const Remote &remote, const InstallOpts &opts)
     }
 
     for(const Package *pkg : ri->packages())
-      synchronize(pkg, opts);
+      synchronize(pkg);
   });
 }
 
-void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
+void Transaction::synchronize(const Package *pkg)
 {
   const auto &regEntry = m_registry->getEntry(pkg);
 
-  if(!regEntry && !opts.autoInstall)
+  if(!regEntry && !m_opts.autoInstall)
     return;
 
-  const Version *latest = pkg->lastVersion(opts.bleedingEdge, regEntry.version);
+  const Version *latest = pkg->lastVersion(m_opts.bleedingEdge, regEntry.version);
 
   // don't crash nor install a pre-release if autoInstall is on,
   // bleedingEdge is off and there is no stable release
@@ -149,7 +149,7 @@ void Transaction::install(const Version *ver)
   install(ver, m_registry->getEntry(ver->package()));
 }
 
-void Transaction::install(const Version *ver,
+bool Transaction::install(const Version *ver,
   const Registry::Entry &regEntry)
 {
   m_receipt.setEnabled(true);
@@ -173,14 +173,17 @@ void Transaction::install(const Version *ver,
           ver->fullName());
       }
 
-      return;
+      return false;
     }
   }
   catch(const reapack_error &e) {
     // handle database error from Registry::push
     addError(e.what(), ver->fullName());
-    return;
+    return false;
   }
+
+  if(!installDependencies(ver))
+    return false;
 
   // all green! (pronounce with a japanese accent)
   IndexPtr ri = ver->package()->category()->index()->shared_from_this();
@@ -205,6 +208,49 @@ void Transaction::install(const Version *ver,
 
   addTask(task);
   m_receipt.setEnabled(true);
+  return true;
+}
+
+bool Transaction::installDependencies(const Version *ver)
+{
+  for(const Dependency &dep : ver->dependencies()) {
+    printf("resolving %s\n", dep.path.c_str());
+    const Index *index = ver->package()->category()->index();
+    const Package *depPkg = index->findPackage(dep.path);
+
+    if(!depPkg) {
+      addError("Dependency not found: " + dep.path, ver->fullName());
+      return false;
+    }
+    else if(m_deps.count(depPkg)) {
+      // dependency is already queued for installation, do nothing.
+      continue;
+    }
+
+    const Registry::Entry &regEntry = m_registry->getEntry(depPkg);
+    const Version *depVer = nullptr;
+
+    if(regEntry) {
+      // dependency is installed, check for missing files if possible
+      depVer = depPkg->findVersion(regEntry.version);
+      if(!depVer || allFilesExists(ver->files()))
+        continue;
+    }
+    else {
+      // select the best available version
+      depVer = depPkg->lastVersion(m_opts.bleedingEdge); // TODO: minimum version
+      if(!depVer)
+        depVer = depPkg->lastVersion(true);
+    }
+
+    m_deps.insert(depPkg); // prevent circular dependency infinite loop
+    if(!install(depVer, regEntry)) {
+      m_deps.erase(depPkg);
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void Transaction::registerAll(const Remote &remote)

@@ -18,6 +18,8 @@
 #ifndef REAPACK_VERSION_HPP
 #define REAPACK_VERSION_HPP
 
+#include "platform.hpp"
+
 #include <boost/variant.hpp>
 #include <cstdint>
 #include <ctime>
@@ -30,9 +32,14 @@ class Package;
 class Source;
 class Path;
 
+struct Dependency {
+  Platform platform;
+  std::string path;
+};
+
 class Version {
 public:
-  typedef std::vector<Source *> SourceList;
+  typedef std::vector<Dependency> DependencyList;
   typedef std::multimap<Path, const Source *> SourceMap;
 
   Version();
@@ -66,6 +73,10 @@ public:
   const Source *source(size_t) const;
   const Source *mainSource() const { return m_mainSource; }
 
+  void addDependency(const Dependency &);
+  const DependencyList dependencies() const { return m_dependencies; }
+  const Dependency &dependency(size_t i) const { return m_dependencies[i]; }
+
   const std::set<Path> &files() const { return m_files; }
 
   int compare(const Version &) const;
@@ -94,6 +105,7 @@ private:
   const Source *m_mainSource;
 
   SourceMap m_sources;
+  DependencyList m_dependencies;
   std::set<Path> m_files;
 };
 

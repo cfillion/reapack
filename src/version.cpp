@@ -128,6 +128,12 @@ void Version::addSource(Source *source)
     m_mainSource = source;
 }
 
+void Version::addDependency(const Dependency &dep)
+{
+  if(dep.platform.test())
+    m_dependencies.push_back(dep);
+}
+
 void Version::setChangelog(const string &changelog)
 {
   m_changelog = changelog;
