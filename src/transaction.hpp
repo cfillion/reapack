@@ -96,7 +96,7 @@ private:
   std::multimap<std::string, IndexCallback> m_remotes;
   std::unordered_set<std::string> m_inhibited;
   std::unordered_set<IndexPtr> m_indexes;
-  std::unordered_set<const Package *> m_deps;
+  std::unordered_set<const Package *> m_installs;
   std::vector<Task *> m_tasks;
 
   DownloadQueue m_downloadQueue;

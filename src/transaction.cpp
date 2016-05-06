@@ -154,6 +154,10 @@ void Transaction::install(const Version *ver)
 bool Transaction::install(const Version *ver,
   const Registry::Entry &regEntry)
 {
+  // do nothing if the package is already queued for installation
+  if(m_installs.count(ver->package()))
+    return true;
+
   m_receipt.setEnabled(true);
 
   InstallTicket::Type type;
@@ -184,8 +188,16 @@ bool Transaction::install(const Version *ver,
     return false;
   }
 
-  if(!installDependencies(ver))
+  // don't try to reinstall this pacakge later as it would cause the install
+  // task to try renaming .new file twice (and failing the second time)
+  //
+  // also prevents circular dependencies from causing an infinite loop
+  m_installs.insert(ver->package());
+
+  if(!installDependencies(ver)) {
+    m_installs.erase(ver->package());
     return false;
+  }
 
   // all green! (pronounce with a japanese accent)
   IndexPtr ri = ver->package()->category()->index()->shared_from_this();
@@ -224,10 +236,6 @@ bool Transaction::installDependencies(const Version *ver)
       addError("Dependency not found: " + dep.path, ver->fullName());
       return false;
     }
-    else if(m_deps.count(depPkg)) {
-      // dependency is already queued for installation, do nothing.
-      continue;
-    }
 
     const Registry::Entry &regEntry = m_registry->getEntry(depPkg);
     const Version *depVer = nullptr;
@@ -245,11 +253,8 @@ bool Transaction::installDependencies(const Version *ver)
         depVer = depPkg->lastVersion(true);
     }
 
-    m_deps.insert(depPkg); // prevent circular dependency infinite loop
-    if(!install(depVer, regEntry)) {
-      m_deps.erase(depPkg);
+    if(!install(depVer, regEntry))
       return false;
-    }
   }
 
   return true;
