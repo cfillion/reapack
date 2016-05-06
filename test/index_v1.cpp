@@ -139,6 +139,8 @@ TEST_CASE("default source platform", M) {
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
     == Platform::GenericPlatform);
+  REQUIRE(ri->category(0)->package(0)->version(0)->dependency(0).platform
+    == Platform::GenericPlatform);
 }
 
 TEST_CASE("version changelog", M) {

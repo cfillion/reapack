@@ -2,7 +2,8 @@
   <category name="hello">
     <reapack name="a" type="script">
       <version name="1">
-        <source>hello</source>
+        <dependency>hello</dependency>
+        <source>world</source>
       </version>
     </reapack>
   </category>
