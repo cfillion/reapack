@@ -110,7 +110,8 @@ bool InstallTask::doCommit()
 #endif
 
     if(!FS::rename(paths.temp, paths.target)) {
-      transaction()->addError(FS::lastError(), paths.target.join());
+      transaction()->addError("Cannot rename to target: " + FS::lastError(),
+        paths.target.join());
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
