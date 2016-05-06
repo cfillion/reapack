@@ -216,6 +216,8 @@ void Contents::fillReport()
       stream() << NL;
 
     printVersion(ver);
+    for(const Dependency &dep : ver->dependencies())
+      printIndented("@" + dep.path);
     for(const Path &file : ver->files())
       printIndented(file.join());
   }
