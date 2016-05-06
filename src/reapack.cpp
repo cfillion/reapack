@@ -315,11 +315,9 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
       enable(remote);
 
-      if(m_tx) { // transaction is created by enable()
-        InstallOpts opts = *m_config->install();
-        opts.autoInstall = true;
-        tx->synchronize(remote, opts);
-      }
+      InstallOpts opts = *m_config->install();
+      opts.autoInstall = true;
+      tx->synchronize(remote, opts);
 
       tx->runTasks();
     }
