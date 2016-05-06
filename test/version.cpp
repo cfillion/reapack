@@ -22,7 +22,7 @@ TEST_CASE("construct null version", M) {
   const Version ver;
 
   REQUIRE(ver.size() == 0);
-  REQUIRE_FALSE(ver.isStable());
+  REQUIRE(ver.isStable());
   REQUIRE(ver.displayTime().empty());
   REQUIRE(ver.package() == nullptr);
   REQUIRE(ver.mainSource() == nullptr);

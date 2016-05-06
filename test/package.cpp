@@ -118,6 +118,44 @@ TEST_CASE("get latest stable version", M) {
   REQUIRE(pack.lastVersion(true) == alpha);
 }
 
+TEST_CASE("pre-release updates", M) {
+  Index ri("Remote Name");
+  Category cat("Category Name", &ri);
+  Package pack(Package::ScriptType, "a", &cat);
+
+  Version *stable1 = new Version("0.9", &pack);
+  stable1->addSource(new Source({}, "google.com", stable1));
+  pack.addVersion(stable1);
+
+  Version *alpha1 = new Version("1.0-alpha1", &pack);
+  alpha1->addSource(new Source({}, "google.com", alpha1));
+  pack.addVersion(alpha1);
+
+  Version *alpha2 = new Version("1.0-alpha2", &pack);
+  alpha2->addSource(new Source({}, "google.com", alpha2));
+  pack.addVersion(alpha2);
+
+  SECTION("pre-release to next pre-release")
+    REQUIRE(*pack.lastVersion(false, {"1.0-alpha1"}) == *alpha2);
+
+  SECTION("pre-release to latest stable") {
+    Version *stable2 = new Version("1.0", &pack);
+    stable2->addSource(new Source({}, "google.com", stable2));
+    pack.addVersion(stable2);
+
+    Version *stable3 = new Version("1.1", &pack);
+    stable3->addSource(new Source({}, "google.com", stable3));
+    pack.addVersion(stable3);
+
+    Version *beta = new Version("2.0-beta", &pack);
+    beta->addSource(new Source({}, "google.com", beta));
+    pack.addVersion(beta);
+
+    REQUIRE(*pack.lastVersion(false, {"1.0-alpha1"}) == *stable3);
+  }
+}
+
+
 TEST_CASE("drop empty version", M) {
   Package pack(Package::ScriptType, "a");
   pack.addVersion(new Version("1", &pack));

@@ -99,14 +99,19 @@ const Version *Package::version(const size_t index) const
   return *it;
 }
 
-const Version *Package::lastVersion(const bool prerelease) const
+const Version *Package::lastVersion(const bool pres, const Version &from) const
 {
+  if(m_versions.empty())
+    return nullptr;
+
   for(const Version *ver : m_versions | boost::adaptors::reversed) {
-    if(ver->isStable() || prerelease)
+    if(*ver < from)
+      break;
+    else if(ver->isStable() || pres)
       return ver;
   }
 
-  return nullptr;
+  return from.isStable() ? nullptr : *m_versions.rbegin();
 }
 
 const Version *Package::findVersion(const Version &ver) const

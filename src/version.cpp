@@ -28,7 +28,7 @@
 using namespace std;
 
 Version::Version()
-  : m_stable(false), m_time(), m_package(nullptr), m_mainSource(nullptr)
+  : m_stable(true), m_time(), m_package(nullptr), m_mainSource(nullptr)
 {
 }
 
