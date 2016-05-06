@@ -243,7 +243,7 @@ bool Transaction::installDependencies(const Version *ver)
     if(regEntry) {
       // dependency is installed, check for missing files if possible
       depVer = depPkg->findVersion(regEntry.version);
-      if(!depVer || allFilesExists(ver->files()))
+      if(!depVer || allFilesExists(depVer->files()))
         continue;
     }
     else {
