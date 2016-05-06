@@ -152,7 +152,7 @@ void Browser::onCommand(const int id, const int event)
     about(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
-    selectionDo(bind(&Browser::resetTarget, this, arg::_1));
+    selectionDo(bind(&Browser::resetActions, this, arg::_1));
     break;
   case ACTION_REFRESH:
     refresh(true);
@@ -800,6 +800,21 @@ void Browser::resetTarget(const int index)
   if(!entry->pin || !entry->canPin())
     m_actions.erase(entry);
 
+  updateAction(index);
+}
+
+void Browser::resetActions(const int index)
+{
+  Entry *entry = getEntry(index);
+  if(!m_actions.count(entry))
+    return;
+
+  if(entry->target)
+    entry->target = boost::none;
+  if(entry->pin)
+    entry->pin = boost::none;
+
+  m_actions.erase(entry);
   updateAction(index);
 }
 

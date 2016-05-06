@@ -112,6 +112,7 @@ private:
   void toggleFiltered(Package::Type);
   void setTarget(const int index, const Version *, bool toggle = true);
   void resetTarget(int index);
+  void resetActions(int index);
   void updateAction(const int index);
   void selectionDo(const std::function<void (int)> &);
   Tab currentTab() const;
