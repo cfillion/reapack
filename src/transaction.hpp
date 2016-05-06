@@ -59,7 +59,7 @@ public:
   bool runTasks();
 
   bool isCancelled() const { return m_isCancelled; }
-  const Receipt *receipt() const { return &m_receipt; }
+  const Receipt &receipt() const { return m_receipt; }
   size_t taskCount() const { return m_tasks.size(); }
 
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }

@@ -20,12 +20,12 @@
 
 #include "dialog.hpp"
 
+#include "receipt.hpp"
 #include "registry.hpp"
 
 #include <sstream>
 
 class Package;
-class Receipt;
 class Version;
 
 class ReportDialog : public Dialog {
@@ -51,7 +51,7 @@ private:
 
 class Report : public ReportDialog {
 public:
-  Report(const Receipt *);
+  Report(const Receipt &);
 
 protected:
   void fillReport() override;
@@ -62,7 +62,7 @@ private:
   void printErrors();
   void printRemovals();
 
-  const Receipt *m_receipt;
+  Receipt m_receipt;
 };
 
 class History : public ReportDialog {

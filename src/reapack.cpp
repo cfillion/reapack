@@ -491,15 +491,15 @@ Transaction *ReaPack::setupTransaction()
     Dialog::Destroy(m_progress);
     m_progress = nullptr;
 
-    const Receipt *receipt = m_tx->receipt();
+    const Receipt &receipt = m_tx->receipt();
 
-    if(m_tx->isCancelled() || !receipt->isEnabled())
+    if(m_tx->isCancelled() || !receipt.isEnabled())
       return;
 
     LockDialog managerLock(m_manager);
     LockDialog cleanupLock(m_browser);
 
-    if(m_tx->taskCount() == 0 && !receipt->hasErrors())
+    if(m_tx->taskCount() == 0 && !receipt.hasErrors())
       ShowMessageBox("Nothing to do!", "ReaPack", MB_OK);
     else
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);

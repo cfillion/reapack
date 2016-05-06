@@ -82,17 +82,17 @@ void ReportDialog::printIndented(const string &text)
     m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
 }
 
-Report::Report(const Receipt *receipt)
+Report::Report(const Receipt &receipt)
   : ReportDialog(), m_receipt(receipt)
 {
 }
 
 void Report::fillReport()
 {
-  const size_t installs = m_receipt->installs().size();
-  const size_t updates = m_receipt->updates().size();
-  const size_t removals = m_receipt->removals().size();
-  const size_t errors = m_receipt->errors().size();
+  const size_t installs = m_receipt.installs().size();
+  const size_t updates = m_receipt.updates().size();
+  const size_t removals = m_receipt.removals().size();
+  const size_t errors = m_receipt.errors().size();
 
   stream()
     << installs << " installed packages, "
@@ -102,7 +102,7 @@ void Report::fillReport()
     << NL
   ;
 
-  if(m_receipt->isRestartNeeded()) {
+  if(m_receipt.isRestartNeeded()) {
     stream()
       << NL
       << "Notice: One or more native REAPER extensions were installed." << NL
@@ -127,7 +127,7 @@ void Report::printInstalls()
 {
   printHeader("Installed packages");
 
-  for(const InstallTicket &ticket : m_receipt->installs())
+  for(const InstallTicket &ticket : m_receipt.installs())
     stream() << ticket.version->fullName() << NL;
 }
 
@@ -137,7 +137,7 @@ void Report::printUpdates()
 
   const auto start = stream().tellp();
 
-  for(const InstallTicket &ticket : m_receipt->updates()) {
+  for(const InstallTicket &ticket : m_receipt.updates()) {
     const Package *pkg = ticket.version->package();
     const Registry::Entry &regEntry = ticket.regEntry;
     const VersionSet &versions = pkg->versions();
@@ -163,7 +163,7 @@ void Report::printErrors()
 
   const auto start = stream().tellp();
 
-  for(const Receipt::Error &err : m_receipt->errors()) {
+  for(const Receipt::Error &err : m_receipt.errors()) {
     if(stream().tellp() != start)
       stream() << NL;
 
@@ -176,7 +176,7 @@ void Report::printRemovals()
 {
   printHeader("Removed files");
 
-  for(const Path &path : m_receipt->removals())
+  for(const Path &path : m_receipt.removals())
     stream() << path.join() << NL;
 }
 
