@@ -46,7 +46,7 @@ public:
   size_t size() const { return m_parts.size(); }
 
   std::string basename() const;
-  std::string dirname() const;
+  std::string dirname(const char sep = 0) const;
   std::string join(const char sep = 0) const;
   std::string first() const;
   std::string last() const;

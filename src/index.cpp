@@ -172,7 +172,7 @@ auto Index::links(const LinkType type) const -> LinkList
 
 const Package *Index::findPackage(const Path &path) const
 {
-  const Category *cat = category(path.dirname());
+  const Category *cat = category(path.dirname('/'));
 
   if(cat)
     return cat->package(path.basename());

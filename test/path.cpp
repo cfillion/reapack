@@ -95,10 +95,12 @@ TEST_CASE("modify path", M) {
 
 TEST_CASE("custom separator", M) {
   Path a;
-  a.append("hello");
-  a.append("world");
+  a.append("foo");
+  a.append("bar");
+  a.append("baz");
 
-  REQUIRE(a.join('-') == "hello-world");
+  REQUIRE(a.join('-') == "foo-bar-baz");
+  REQUIRE(a.dirname('-') == "foo-bar");
 }
 
 TEST_CASE("split input", M) {
