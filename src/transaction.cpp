@@ -242,6 +242,7 @@ bool Transaction::installDependencies(const Version *ver)
 
     if(regEntry) {
       // dependency is installed, check for missing files if possible
+      // TODO: minimum version. what happens if older version is pinned?
       depVer = depPkg->findVersion(regEntry.version);
       if(!depVer || allFilesExists(depVer->files()))
         continue;
