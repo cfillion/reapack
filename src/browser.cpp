@@ -608,7 +608,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
       display += '\x20';
 
     if(entry.target)
-      display += *entry.target == nullptr ? 'U' : 'I';
+      display += *entry.target == nullptr ? 'R' : 'I';
     if(entry.pin && entry.canPin())
       display += 'P';
 
