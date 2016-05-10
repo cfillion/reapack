@@ -243,6 +243,17 @@ TEST_CASE("add main source", M) {
   REQUIRE(ver.mainSource() == src);
 }
 
+TEST_CASE("duplicate sources", M) {
+  MAKE_VERSION
+
+  Source *src = new Source({}, "b", &ver);
+  ver.addSource(src);
+  ver.addSource(new Source({}, "b", &ver));
+
+  REQUIRE(ver.sources().size() == 2);
+  REQUIRE(ver.source(0) == src);
+}
+
 TEST_CASE("list files", M) {
   MAKE_VERSION
 
