@@ -20,6 +20,7 @@
 #include "encoding.hpp"
 #include "package.hpp"
 #include "resource.hpp"
+#include "source.hpp"
 #include "transaction.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
@@ -216,7 +217,17 @@ void Contents::fillReport()
       stream() << NL;
 
     printVersion(ver);
-    for(const Path &file : ver->files())
-      printIndented(file.join());
+
+    const auto &sources = ver->sources();
+    for(auto it = sources.begin(); it != sources.end();) {
+      const Path &path = it->first;
+      const string &file = path.join();
+      const Source *src = it->second;
+
+      printIndented(src->isMain() ? file + '*' : file);
+
+      // skip duplicate files
+      do { it++; } while(it != sources.end() && path == it->first);
+    }
   }
 }
