@@ -50,6 +50,7 @@ private:
   void uninstall();
   void refreshIndex();
   void about(int index);
+  void copyUrl(int index);
   void options();
 
   bool confirm() const;

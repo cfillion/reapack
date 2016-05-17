@@ -31,7 +31,7 @@
 using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-       ACTION_REFRESH, ACTION_SELECT, ACTION_UNSELECT,
+       ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
        ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE };
 
 Manager::Manager(ReaPack *reapack)
@@ -114,8 +114,11 @@ void Manager::onCommand(const int id, int)
     close();
     break;
   default:
-    if(id >> 8 == ACTION_ABOUT)
+    const int action = id >> 8;
+    if(action == ACTION_ABOUT)
       about(id & 0xff);
+    else if(action == ACTION_COPYURL)
+      copyUrl(id & 0xff);
     break;
   }
 }
@@ -146,6 +149,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   menu.addSeparator();
 
   menu.addAction(AUTO_STR("&Refresh"), ACTION_REFRESH);
+  menu.addAction(AUTO_STR("&Copy URL"), index | (ACTION_COPYURL << 8));
 
   const UINT uninstallAction =
     menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
@@ -262,6 +266,26 @@ void Manager::uninstall()
 void Manager::about(const int index)
 {
   m_reapack->about(getRemote(index), handle());
+}
+
+void Manager::copyUrl(const int index)
+{
+  const Remote &remote = getRemote(index);
+
+  if(remote.isNull())
+    return;
+
+  const auto_string &data = make_autostring(remote.url());
+  const size_t length = data.size() * sizeof(auto_char);
+
+  HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
+  memcpy(GlobalLock(mem), data.c_str(), length);
+  GlobalUnlock(mem);
+
+  OpenClipboard(handle());
+  EmptyClipboard();
+  SetClipboardData(CF_TEXT, mem);
+  CloseClipboard();
 }
 
 void Manager::options()
