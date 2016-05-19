@@ -23,7 +23,8 @@
 using namespace std;
 
 Source::Source(const string &file, const string &url, const Version *ver)
-  : m_type(Package::UnknownType), m_file(file), m_url(url), m_version(ver)
+  : m_type(Package::UnknownType), m_file(file), m_url(url), m_main(false),
+    m_version(ver)
 {
   if(m_url.empty())
     throw reapack_error("empty source url");

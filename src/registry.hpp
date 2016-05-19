@@ -49,7 +49,7 @@ public:
   Entry getEntry(const Package *) const;
   std::vector<Entry> getEntries(const std::string &) const;
   std::set<Path> getFiles(const Entry &) const;
-  std::string getMainFile(const Entry &) const;
+  std::vector<std::string> getMainFiles(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);
@@ -70,8 +70,7 @@ private:
   Statement *m_forgetEntry;
 
   Statement *m_getFiles;
-  Statement *m_getMainFile;
-  Statement *m_setMainFile;
+  Statement *m_getMainFiles;
   Statement *m_insertFile;
   Statement *m_clearFiles;
   Statement *m_forgetFiles;

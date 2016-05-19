@@ -168,13 +168,23 @@ TEST_CASE("full index", M) {
 
   const Version *ver = pack->version(0);
   REQUIRE(ver->name() == "1.0");
-  REQUIRE(ver->sources().size() == 1);
+  REQUIRE(ver->sources().size() == 2);
   REQUIRE(ver->changelog() == "Fixed a division by zero error.");
 
-  const Source *source = ver->source(0);
-  REQUIRE(source->platform() == Platform::GenericPlatform);
-  REQUIRE(source->file() == "test.lua");
-  REQUIRE(source->url() == "https://google.com/");
+  const Source *source1 = ver->source(1);
+  REQUIRE(source1->platform() == Platform::GenericPlatform);
+  REQUIRE(source1->file() == "test.lua");
+  REQUIRE(source1->isMain());
+  REQUIRE(source1->url() == "https://google.com/");
+
+  const Source *source2 = ver->source(0);
+  REQUIRE(source2->platform() == Platform::GenericPlatform);
+  REQUIRE(source2->file() == "background.png");
+  REQUIRE_FALSE(source2->isMain());
+  REQUIRE(source2->url() == "http://cfillion.tk/");
+
+  REQUIRE(ver->mainSources().size() == 1);
+  REQUIRE(ver->mainSources()[0] == source1);
 }
 
 TEST_CASE("read index metadata", M) {

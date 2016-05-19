@@ -57,13 +57,10 @@ Registry::Registry(const Path &path)
 
   // file queries
   m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
-  m_getMainFile = m_db.prepare(
-    "SELECT path FROM files WHERE main = 1 AND entry = ? LIMIT 1"
+  m_getMainFiles = m_db.prepare(
+    "SELECT path FROM files WHERE main = 1 AND entry = ?"
   );
-  m_setMainFile = m_db.prepare(
-    "UPDATE files SET main = 1 WHERE path = ? AND entry = ?"
-  );
-  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?, NULL)");
+  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?, ?)");
   m_clearFiles = m_db.prepare(
     "DELETE FROM files WHERE entry = ("
     "  SELECT id FROM entries WHERE remote = ? AND category = ? AND package = ?"
@@ -155,9 +152,14 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
 
   // register files
-  for(const Path &path : ver->files()) {
+  const auto &sources = ver->sources();
+  for(auto it = sources.begin(); it != sources.end();) {
+    const Path &path = it->first;
+    const Source *src = it->second;
+
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
+    m_insertFile->bind(3, src->isMain());
 
     try {
       m_insertFile->exec();
@@ -172,12 +174,9 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
         throw;
       }
     }
-  }
 
-  if(ver->mainSource()) {
-    m_setMainFile->bind(1, ver->mainSource()->targetPath().join('/'));
-    m_setMainFile->bind(2, entryId);
-    m_setMainFile->exec();
+    // skip duplicate files
+    do { it++; } while(it != sources.end() && path == it->first);
   }
 
   if(hasConflicts) {
@@ -268,20 +267,20 @@ set<Path> Registry::getFiles(const Entry &entry) const
   return list;
 }
 
-string Registry::getMainFile(const Entry &entry) const
+vector<string> Registry::getMainFiles(const Entry &entry) const
 {
   if(!entry)
     return {};
 
-  string mainFile;
+  vector<string> files;
 
-  m_getMainFile->bind(1, entry.id);
-  m_getMainFile->exec([&] {
-    mainFile = m_getMainFile->stringColumn(0);
-    return false;
+  m_getMainFiles->bind(1, entry.id);
+  m_getMainFiles->exec([&] {
+    files.push_back(m_getMainFiles->stringColumn(0));
+    return true;
   });
 
-  return mainFile;
+  return files;
 }
 
 void Registry::forget(const Entry &entry)

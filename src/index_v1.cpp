@@ -174,5 +174,9 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   Source *src = new Source(file, url, ver);
   src->setPlatform(platform);
   src->setTypeOverride(Package::getType(type));
+
+  if(node->Attribute("main"))
+    src->setMain(true);
+
   ver->addSource(src);
 }

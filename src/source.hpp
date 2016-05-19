@@ -35,10 +35,10 @@ public:
 
   void setTypeOverride(Package::Type t) { m_type = t; }
   Package::Type typeOverride() const { return m_type; }
-
-  bool isMain() const { return m_file.empty(); }
   const std::string &file() const;
   const std::string &url() const { return m_url; }
+  void setMain(bool main) { m_main = main; }
+  bool isMain() const { return m_main; }
 
   const Version *version() const { return m_version; }
   const Package *package() const;
@@ -51,6 +51,7 @@ private:
   Package::Type m_type;
   std::string m_file;
   std::string m_url;
+  bool m_main;
   const Version *m_version;
 };
 

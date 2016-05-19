@@ -90,7 +90,6 @@ TEST_CASE("get file list", M) {
   reg.push(ver);
 
   const set<Path> &files = reg.getFiles(reg.getEntry(&pkg));
-
   REQUIRE(files == ver->files());
 }
 
@@ -162,17 +161,24 @@ TEST_CASE("file conflicts", M) {
   REQUIRE(reg.getEntry(&pkg).id == 0); // never installed
 }
 
-TEST_CASE("get main file", M) {
+TEST_CASE("get main files", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE((reg.getMainFile({})).empty());
+  REQUIRE((reg.getMainFiles({})).empty());
 
-  Source *main = new Source({}, "url", ver);
-  ver->addSource(main);
+  Source *main1 = new Source({}, "url", ver);
+  main1->setMain(true);
+  ver->addSource(main1);
+
+  Source *main2 = new Source({}, "url", ver); // duplicate file
+  main2->setMain(true);
+  ver->addSource(main2);
 
   const Registry::Entry &entry = reg.push(ver);
-  REQUIRE(reg.getMainFile(entry) == main->targetPath().join('/'));
+
+  const vector<string> expected{main1->targetPath().join('/')};
+  REQUIRE(reg.getMainFiles(entry) == expected);
 }
 
 TEST_CASE("pin registry entry", M) {

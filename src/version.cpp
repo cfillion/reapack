@@ -28,12 +28,12 @@
 using namespace std;
 
 Version::Version()
-  : m_stable(true), m_time(), m_package(nullptr), m_mainSource(nullptr)
+  : m_stable(true), m_time(), m_package(nullptr)
 {
 }
 
 Version::Version(const string &str, const Package *pkg)
-  : m_time(), m_package(pkg), m_mainSource(nullptr)
+  : m_time(), m_package(pkg)
 {
   parse(str);
 }
@@ -41,7 +41,7 @@ Version::Version(const string &str, const Package *pkg)
 Version::Version(const Version &o, const Package *pkg)
   : m_name(o.m_name), m_segments(o.m_segments), m_stable(o.m_stable),
     m_author(o.m_author), m_changelog(o.m_changelog), m_time(o.m_time),
-    m_package(pkg), m_mainSource(nullptr)
+    m_package(pkg)
 {
 }
 
@@ -125,7 +125,7 @@ void Version::addSource(Source *source)
   m_sources.insert({path, source});
 
   if(source->isMain())
-    m_mainSource = source;
+    m_mainSources.push_back(source);
 }
 
 void Version::setChangelog(const string &changelog)

@@ -42,15 +42,11 @@ TEST_CASE("empty file name and no package", M) {
 }
 
 TEST_CASE("main source", M) {
-  SECTION("with file name") {
-    const Source source("filename", "url");
-    REQUIRE_FALSE(source.isMain());
-  }
+  Source source("filename", "url");
+  REQUIRE_FALSE(source.isMain());
 
-  SECTION("without file name") {
-    const Source source({}, "url");
-    REQUIRE(source.isMain());
-  }
+  source.setMain(true);
+  REQUIRE(source.isMain());
 }
 
 TEST_CASE("empty source url", M) {

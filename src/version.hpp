@@ -64,7 +64,7 @@ public:
   void addSource(Source *source);
   const SourceMap &sources() const { return m_sources; }
   const Source *source(size_t) const;
-  const Source *mainSource() const { return m_mainSource; }
+  const SourceList &mainSources() const { return m_mainSources; }
 
   const std::set<Path> &files() const { return m_files; }
 
@@ -91,7 +91,7 @@ private:
   std::tm m_time;
 
   const Package *m_package;
-  const Source *m_mainSource;
+  SourceList m_mainSources;
 
   SourceMap m_sources;
   std::set<Path> m_files;
