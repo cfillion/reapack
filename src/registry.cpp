@@ -80,8 +80,6 @@ void Registry::migrate()
   case 0:
     // new database!
     m_db.exec(
-      "PRAGMA user_version = 1;"
-
       "CREATE TABLE entries ("
       "  id INTEGER PRIMARY KEY,"
       "  remote TEXT NOT NULL,"
@@ -104,6 +102,8 @@ void Registry::migrate()
     );
     break;
   case 1:
+    m_db.exec("ALTER TABLE entries ADD COLUMN pinned INTEGER DEFAULT 0;");
+  case 2:
     // current schema version
     break;
   default:
@@ -111,6 +111,7 @@ void Registry::migrate()
       "The package registry was created by a newer version of ReaPack");
   }
 
+  m_db.exec("PRAGMA user_version = 2");
   m_db.commit();
 }
 
