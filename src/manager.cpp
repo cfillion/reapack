@@ -276,7 +276,7 @@ void Manager::copyUrl(const int index)
     return;
 
   const auto_string &data = make_autostring(remote.url());
-  const size_t length = data.size() * sizeof(auto_char);
+  const size_t length = (data.size() * sizeof(auto_char)) + 1; // null terminator
 
   HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
   memcpy(GlobalLock(mem), data.c_str(), length);
@@ -284,7 +284,11 @@ void Manager::copyUrl(const int index)
 
   OpenClipboard(handle());
   EmptyClipboard();
+#ifdef _WIN32
+  SetClipboardData(CF_UNICODETEXT, mem);
+#else
   SetClipboardData(CF_TEXT, mem);
+#endif
   CloseClipboard();
 }
 
