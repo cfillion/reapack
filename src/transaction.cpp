@@ -42,9 +42,13 @@ Transaction::Transaction()
   m_downloadQueue.onAbort([=] {
     m_isCancelled = true;
 
+    // clear the registration queue
+    queue<HostTicket>().swap(m_regQueue);
+
     for(Task *task : m_tasks)
       task->rollback();
 
+    // some downloads may run for a few ms more
     if(m_downloadQueue.idle())
       finish();
   });
