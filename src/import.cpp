@@ -19,6 +19,7 @@
 
 #include "download.hpp"
 #include "errors.hpp"
+#include "filesystem.hpp"
 #include "index.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
@@ -129,7 +130,8 @@ bool Import::import()
 
   try {
     IndexPtr index = Index::load({}, m_download->contents().c_str());
-    m_reapack->import({index->name(), m_download->url()}, handle());
+    if(m_reapack->import({index->name(), m_download->url()}, handle()))
+      FS::write(Index::pathFor(index->name()), m_download->contents());
 
     close();
 

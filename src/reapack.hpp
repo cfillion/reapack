@@ -68,7 +68,7 @@ public:
   void uninstall(const Remote &);
 
   void importRemote();
-  void import(const Remote &, HWND = nullptr);
+  bool import(const Remote &, HWND = nullptr);
   void manageRemotes();
   void aboutSelf();
   void about(const std::string &, HWND parent);

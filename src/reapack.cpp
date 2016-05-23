@@ -196,7 +196,7 @@ void ReaPack::importRemote()
   });
 }
 
-void ReaPack::import(const Remote &remote, HWND parent)
+bool ReaPack::import(const Remote &remote, HWND parent)
 {
   if(!parent)
     parent = m_mainWindow;
@@ -211,7 +211,7 @@ void ReaPack::import(const Remote &remote, HWND parent)
         AUTO_STR("This repository is protected and cannot be overwritten."),
         Import::TITLE, MB_OK);
 
-      return;
+      return false;
     }
     else if(existing.url() != remote.url()) {
       auto_char msg[1024] = {};
@@ -223,9 +223,7 @@ void ReaPack::import(const Remote &remote, HWND parent)
       const auto answer = MessageBox(parent, msg, Import::TITLE, MB_YESNO);
 
       if(answer != IDYES)
-        return;
-
-      FS::remove(Index::pathFor(remote.name()));
+        return false;
     }
     else if(existing.isEnabled()) {
       auto_char msg[1024] = {};
@@ -234,13 +232,13 @@ void ReaPack::import(const Remote &remote, HWND parent)
         make_autostring(remote.name()).c_str());
       MessageBox(parent, msg, Import::TITLE, MB_OK);
 
-      return;
+      return false;
     }
     else {
       Transaction *tx = setupTransaction();
 
       if(!tx)
-        return;
+        return true;
 
       enable(existing);
       tx->runTasks();
@@ -252,7 +250,7 @@ void ReaPack::import(const Remote &remote, HWND parent)
         make_autostring(remote.name()).c_str());
       MessageBox(parent, msg, Import::TITLE, MB_OK);
 
-      return;
+      return true;
     }
   }
 
@@ -267,6 +265,8 @@ void ReaPack::import(const Remote &remote, HWND parent)
     AUTO_STR("%s has been successfully imported into your repository list."),
     make_autostring(remote.name()).c_str());
   MessageBox(parent, msg, Import::TITLE, MB_OK);
+
+  return true;
 }
 
 void ReaPack::manageRemotes()
