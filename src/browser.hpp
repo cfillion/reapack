@@ -44,6 +44,7 @@ class Browser : public Dialog {
 public:
   Browser(ReaPack *);
   void refresh(bool stale = false);
+  void populate();
 
 protected:
   void onInit() override;
@@ -98,7 +99,6 @@ private:
 
   Entry makeEntry(const Package *, const Registry::Entry &) const;
 
-  void populate();
   void transferActions();
   bool match(const Entry &) const;
   void checkFilter();
