@@ -43,6 +43,10 @@ TEST_CASE("parse valid versions", M) {
     ver.parse("1.0");
     REQUIRE(ver.isStable());
   }
+
+  SECTION("equal to a null version") {
+    ver.parse("0");
+  }
 }
 
 TEST_CASE("parse invalid versions", M) {
@@ -61,11 +65,6 @@ TEST_CASE("parse invalid versions", M) {
 
     SECTION("empty") {
       ver.parse("");
-      FAIL();
-    }
-
-    SECTION("equal to a null version") {
-      ver.parse("0");
       FAIL();
     }
 

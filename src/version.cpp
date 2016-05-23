@@ -81,7 +81,7 @@ void Version::parse(const string &str)
 
   swap(m_segments, segments);
 
-  if(compare(Version()) < 1) {
+  if(m_segments.empty() || compare(Version()) < 0) {
     swap(m_segments, segments); // restore original value, after compare()
     throw reapack_error("invalid version name");
   }
