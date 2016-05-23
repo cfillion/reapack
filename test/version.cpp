@@ -63,6 +63,16 @@ TEST_CASE("parse invalid versions", M) {
       ver.parse("");
       FAIL();
     }
+
+    SECTION("equal to a null version") {
+      ver.parse("0");
+      FAIL();
+    }
+
+    SECTION("lower than a null version") {
+      ver.parse("0-beta");
+      FAIL();
+    }
   }
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "invalid version name");

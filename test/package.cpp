@@ -155,7 +155,6 @@ TEST_CASE("pre-release updates", M) {
   }
 }
 
-
 TEST_CASE("drop empty version", M) {
   Package pack(Package::ScriptType, "a");
   pack.addVersion(new Version("1", &pack));
