@@ -108,6 +108,8 @@ private:
   Entry *getEntry(int);
   void updateDisplayLabel();
   void displayButton();
+  void actionsButton();
+  void fillMenu(Menu &);
   bool isFiltered(Package::Type) const;
   void toggleFiltered(Package::Type);
   void setTarget(const int index, const Version *, bool toggle = true);
@@ -143,9 +145,10 @@ private:
 
   HWND m_filterHandle;
   HWND m_tabs;
-  HWND m_display;
+  HWND m_displayBtn;
+  HWND m_actionsBtn;
   ListView *m_list;
-  HWND m_apply;
+  HWND m_applyBtn;
 };
 
 #endif

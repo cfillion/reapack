@@ -60,12 +60,14 @@ Browser::Browser(ReaPack *reapack)
 
 void Browser::onInit()
 {
-  m_apply = getControl(IDAPPLY);
+  m_applyBtn = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
   m_tabs = getControl(IDC_TABS);
-  m_display = getControl(IDC_DISPLAY);
+  m_displayBtn = getControl(IDC_DISPLAY);
+  m_actionsBtn = getControl(IDC_ACTIONS);
 
-  disable(m_apply);
+  disable(m_applyBtn);
+  disable(m_actionsBtn);
 
   SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
   SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
@@ -85,6 +87,7 @@ void Browser::onInit()
   });
 
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
+  m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
   m_list->sortByColumn(1);
 
   updateDisplayLabel();
@@ -120,6 +123,9 @@ void Browser::onCommand(const int id, const int event)
   case IDC_UNSELECT:
     m_list->unselectAll();
     SetFocus(m_list->handle());
+    break;
+  case IDC_ACTIONS:
+    actionsButton();
     break;
   case ACTION_LATEST:
     installLatest(m_currentIndex);
@@ -197,9 +203,16 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   SetFocus(m_list->handle());
 
   m_currentIndex = m_list->itemUnderMouse();
-  const Entry *entry = getEntry(m_currentIndex);
 
   Menu menu;
+  fillMenu(menu);
+  menu.show(x, y, handle());
+}
+
+void Browser::fillMenu(Menu &menu)
+{
+  const Entry *entry = getEntry(m_currentIndex);
+
 
   if(m_list->selectionSize() > 1) {
     menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
@@ -212,7 +225,6 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   if(!entry) {
     menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
     menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
-    menu.show(x, y, handle());
     return;
   }
 
@@ -300,8 +312,6 @@ void Browser::onContextMenu(HWND target, const int x, const int y)
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT);
-
-  menu.show(x, y, handle());
 }
 
 void Browser::updateDisplayLabel()
@@ -314,13 +324,13 @@ void Browser::updateDisplayLabel()
   if(m_entries.size() != 1)
     btnLabel << AUTO_STR('s');
 
-  SetWindowText(m_display, btnLabel.str().c_str());
+  SetWindowText(m_displayBtn, btnLabel.str().c_str());
 }
 
 void Browser::displayButton()
 {
   RECT rect;
-  GetWindowRect(m_display, &rect);
+  GetWindowRect(m_displayBtn, &rect);
 
   static map<const auto_char *, Package::Type> types = {
     {AUTO_STR("&Scripts"), Package::ScriptType},
@@ -342,6 +352,18 @@ void Browser::displayButton()
   menu.addAction(AUTO_STR("Re&fresh repositories"), ACTION_REFRESH);
   menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
 
+  menu.show(rect.left, rect.bottom - 1, handle());
+}
+
+void Browser::actionsButton()
+{
+  RECT rect;
+  GetWindowRect(m_actionsBtn, &rect);
+
+  m_currentIndex = m_list->currentIndex();
+
+  Menu menu;
+  fillMenu(menu);
   menu.show(rect.left, rect.bottom - 1, handle());
 }
 
@@ -508,7 +530,7 @@ void Browser::transferActions()
   }
 
   if(m_actions.empty())
-    disable(m_apply);
+    disable(m_applyBtn);
 }
 
 auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
@@ -831,9 +853,9 @@ void Browser::updateAction(const int index)
     m_list->replaceRow(index, makeRow(*entry));
 
   if(m_actions.empty())
-    disable(m_apply);
+    disable(m_applyBtn);
   else
-    enable(m_apply);
+    enable(m_applyBtn);
 }
 
 void Browser::selectionDo(const function<void (int)> &func)
@@ -910,7 +932,7 @@ bool Browser::apply()
   }
 
   m_actions.clear();
-  disable(m_apply);
+  disable(m_applyBtn);
 
   if(!tx->runTasks()) {
     // this is an asynchronous transaction
