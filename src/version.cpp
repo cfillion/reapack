@@ -58,7 +58,7 @@ void Version::parse(const string &str)
   const auto &begin = sregex_iterator(str.begin(), str.end(), pattern);
   const sregex_iterator end;
 
-  size_t numeric = 0, alpha = 0;
+  size_t numbers = 0, letters = 0;
   vector<Segment> segments;
 
   for(sregex_iterator it = begin; it != end; it++) {
@@ -66,13 +66,16 @@ void Version::parse(const string &str)
     const char first = tolower(match[0]);
 
     if(first >= 'a' || first >= 'z') {
+      if(!numbers)
+        throw reapack_error("invalid version name");
+
       segments.push_back(match);
-      alpha++;
+      letters++;
     }
     else {
       try {
         segments.push_back(boost::lexical_cast<Numeric>(match));
-        numeric++;
+        numbers++;
       }
       catch(const boost::bad_lexical_cast &) {
         throw reapack_error("version segment overflow");
@@ -80,12 +83,12 @@ void Version::parse(const string &str)
     }
   }
 
-  if(!numeric)
+  if(!numbers)
     throw reapack_error("invalid version name");
 
   m_name = str;
   swap(m_segments, segments);
-  m_stable = alpha < 1;
+  m_stable = letters < 1;
 }
 
 bool Version::tryParse(const string &str)

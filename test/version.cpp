@@ -28,7 +28,7 @@ TEST_CASE("construct null version", M) {
   REQUIRE(ver.mainSources().empty());
 }
 
-TEST_CASE("parse version", M) {
+TEST_CASE("parse valid versions", M) {
   Version ver;
 
   SECTION("valid") {
@@ -43,14 +43,33 @@ TEST_CASE("parse version", M) {
     ver.parse("1.0");
     REQUIRE(ver.isStable());
   }
+}
 
-  SECTION("invalid") {
-    try { ver.parse("hello"); FAIL(); }
-    catch(const reapack_error &) {}
+TEST_CASE("parse invalid versions", M) {
+  Version ver;
 
-    REQUIRE(ver.name().empty());
-    REQUIRE(ver.size() == 0);
+  try {
+    SECTION("only letters") {
+      ver.parse("hello");
+      FAIL();
+    }
+
+    SECTION("leading letter") {
+      ver.parse("v1.0");
+      FAIL();
+    }
+
+    SECTION("empty") {
+      ver.parse("");
+      FAIL();
+    }
   }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "invalid version name");
+  }
+
+  REQUIRE(ver.name().empty());
+  REQUIRE(ver.size() == 0);
 }
 
 TEST_CASE("parse version failsafe", M) {
@@ -68,16 +87,6 @@ TEST_CASE("parse version failsafe", M) {
 
     REQUIRE(ver.name().empty());
     REQUIRE(ver.size() == 0);
-  }
-}
-
-TEST_CASE("construct invalid version", M) {
-  try {
-    Version ver("hello");
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version name");
   }
 }
 
