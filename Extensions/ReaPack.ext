@@ -1,4 +1,4 @@
-@version 0.10-beta
+@version 1.0rc1
 @author cfillion
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
@@ -7,44 +7,32 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  + add simple "Package Contents" view (browser and about box)
-  + add support for data packages (installed in REAPER's Data/ directory)
-  + browser: create "Refresh repositories" feature to update the package list
-  + browser: implement smarter filtering (multi-words, quotes, cross-column matches)
-  + browser: remember the previous type filtering choices
-  + config: add ReaTeam's JSFX repository to the defaults
-  + create "bleeding edge" mode to install pre-releases by default
-  + implement per-source type override
-  + synchronize: don't automatically upgrade packages from stable to pre-release
-  + treat version names containing letters as pre-releases
+  + implement pinning packages to current version (aka ignore updates)
+  + manager: add copy url action in the context menu
+  + manager: add refresh action in the context menu
+  + show a message box if critical api functions cannot be imported
+  + support multiple main (registered in Action list) files per package
   --
   Changed:
-  + about: put the repo's actual name instead of "this repository" (install/update button)
-  + browser: add "Select all" and "Unselect all" actions to the context menu in empty areas
-  + browser: add a link to the repository management window
-  + browser: better UI for filtering by package type
-  + browser: don't lose current selection when filtering
-  + browser: give focus to the filter box when clicking on the Clear button
-  + browser: move selection-wide actions to the context menu when >1 package are selected
-  + browser: only show the last available version in the list if it's actually newer
-  + browser: reload when importing/toggling/removing repositories
-  + browser: remember queued actions when reloading the list
-  + browser: show selection-wide actions even if the mouse isn't over an entry
-  + browser: tick the "Versions" submenu when a version is queued for install
-  + browser: warn if no repositories are enabled when opening the window
-  + config: enhance organization of the ini file (warning: some settings will be lost)
-  + ignore case when sorting list views
-  + import: always show the repository name in post-import message boxes
-  + import: don't interrupt REAPER use when displaying post-import message boxes
-  + registry: store original author information (non-breaking change)
-  + repo manager: add "Select all" and "Unselect all" actions to the context menu in empty areas
-  + show the self-registration error message above REAPER's splash screen
-  + synchronize: prevent upgrading to an older version
-  + tweak the text of a few message boxes
+  + browser: avoid reloading indexes unless they were updated by the transaction
+  + browser: show 'R' status instead of 'U' for queued uninstallation
+  + ignore newer pre+releases when updating from a pre+release if a newer stable exists
+  + import: save the downloaded index in the cache
+  + manager: remember selection when reloading the list
+  + pkg contents: mark main files with an asterisk
+  + progress: increase dialog display timeout to 100ms
+  + progress: start couting downloads at 1 (> 0%)
+  + task: better error message when install renaming step fails
   --
   Fixed:
-  + browser: don't repopulate the list twice when only synchronous tasks are ran
-  + browser: fix a crash occuring when clearing actions from the queued tab
-  + browser: fix handling of installation failures (don't mark pkgs as installed)
-  + config: launch migration only after having read the current settings
-  + don't crash if an index fails to load when opening an about dialog
+  + browser: fix a crash when selecting a version after a list refresh
+  + browser: initialize the display filter button label before loading the pkg list
+  + don't repeat "transaction cannot be created" errors for every task
+  + fix a possible buffer overflow on windows
+  + fix typos in the message shown if a transaction cannot be created
+  + manager: fix typo in confirmation dialog
+  + manager: restore enabled/disabled state when cancelling queued uninstallations
+  + report download errors when force+refreshing indexes
+  + transaction: don't forget package when uninstallation fails
+  + transaction: don't try to register empty file names
+  + version: improve validation
