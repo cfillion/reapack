@@ -506,17 +506,11 @@ Transaction *ReaPack::setupTransaction()
   });
 
   m_tx->setCleanupHandler([=] {
-    // refresh only once all onFinish slots were ran
-    if(m_browser) {
-      // don't reload indexes unless they were modified
-      if(m_tx->updatedIndexes())
-        m_browser->refresh();
-      else
-        m_browser->populate();
-    }
-
     delete m_tx;
     m_tx = nullptr;
+
+    // refresh only once all onFinish slots were ran
+    refreshBrowser();
   });
 
   return m_tx;
