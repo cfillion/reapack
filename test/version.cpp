@@ -28,6 +28,13 @@ TEST_CASE("construct null version", M) {
   REQUIRE(ver.mainSources().empty());
 }
 
+TEST_CASE("compare null versions", M) {
+  REQUIRE(Version("0-beta") > Version());
+  REQUIRE(Version("0") > Version());
+  REQUIRE(Version("0") != Version());
+  REQUIRE(Version() == Version());
+}
+
 TEST_CASE("parse valid versions", M) {
   Version ver;
 
@@ -68,10 +75,6 @@ TEST_CASE("parse invalid versions", M) {
       FAIL();
     }
 
-    SECTION("lower than a null version") {
-      ver.parse("0-beta");
-      FAIL();
-    }
   }
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "invalid version name");

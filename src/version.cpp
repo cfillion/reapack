@@ -66,6 +66,9 @@ void Version::parse(const string &str)
     const char first = tolower(match[0]);
 
     if(first >= 'a' || first >= 'z') {
+      if(segments.empty()) // got leading letters
+        throw reapack_error("invalid version name");
+
       segments.push_back(match);
       letters++;
     }
@@ -79,14 +82,11 @@ void Version::parse(const string &str)
     }
   }
 
-  swap(m_segments, segments);
-
-  if(m_segments.empty() || compare(Version()) < 0) {
-    swap(m_segments, segments); // restore original value, after compare()
+  if(segments.empty()) // version doesn't have any numbers
     throw reapack_error("invalid version name");
-  }
 
   m_name = str;
+  swap(m_segments, segments);
   m_stable = letters < 1;
 }
 
@@ -180,6 +180,13 @@ auto Version::segment(const size_t index) const -> Segment
 int Version::compare(const Version &o) const
 {
   const size_t biggest = max(size(), o.size());
+
+  switch(m_segments.empty() + o.m_segments.empty()) {
+  case 1:
+    return m_segments.empty() ? -1 : 1;
+  case 2:
+    return 0;
+  }
 
   for(size_t i = 0; i < biggest; i++) {
     const Segment &lseg = segment(i);
