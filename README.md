@@ -1,5 +1,9 @@
 # ReaPack: Package Manager for REAPER
 
+## User Guide
+
+https://github.com/cfillion/reapack/wiki
+
 ## Build Setup
 
 Download these files into the `vendor` directory:
