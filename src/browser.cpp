@@ -282,22 +282,20 @@ void Browser::fillMenu(Menu &menu)
     }
   }
 
+  const UINT pinIndex = menu.addAction(
+    AUTO_STR("&Pin current version"), ACTION_PIN);
+  if(!entry->canPin())
+    menu.disable(pinIndex);
+  if(entry->pin.value_or(entry->regEntry.pinned))
+    menu.check(pinIndex);
+
+
   const UINT uninstallIndex =
     menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
   if(!entry->test(InstalledFlag))
     menu.disable(uninstallIndex);
   else if(entry->target && *entry->target == nullptr)
     menu.check(uninstallIndex);
-
-  menu.addSeparator();
-
-  const UINT pinIndex = menu.addAction(
-    AUTO_STR("&Pin current version"), ACTION_PIN);
-
-  if(!entry->canPin())
-    menu.disable(pinIndex);
-  if(entry->pin.value_or(entry->regEntry.pinned))
-    menu.check(pinIndex);
 
   menu.addSeparator();
 
