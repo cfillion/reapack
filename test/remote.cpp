@@ -115,6 +115,7 @@ TEST_CASE("valide remote urls", M) {
 TEST_CASE("null remote", M) {
   Remote remote;
   REQUIRE(remote.isNull());
+  REQUIRE_FALSE(remote);
   CHECK(remote.isEnabled());
 
   SECTION("set name") {
@@ -133,6 +134,7 @@ TEST_CASE("null remote", M) {
     remote.setName("hello");
     remote.setUrl("world");
     REQUIRE_FALSE(remote.isNull());
+    REQUIRE(remote);
   }
 }
 

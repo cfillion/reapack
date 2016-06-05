@@ -205,7 +205,7 @@ bool ReaPack::import(const Remote &remote, HWND parent)
 
   const Remote &existing = remotes->get(remote.name());
 
-  if(!existing.isNull()) {
+  if(existing) {
     if(existing.isProtected()) {
       MessageBox(parent,
         AUTO_STR("This repository is protected and cannot be overwritten."),
@@ -297,7 +297,7 @@ void ReaPack::about(const string &remoteName, HWND parent)
 
 void ReaPack::about(const Remote &remote, HWND parent)
 {
-  if(remote.isNull())
+  if(!remote)
     return;
 
   fetchIndex(remote, [=] (IndexPtr index) {

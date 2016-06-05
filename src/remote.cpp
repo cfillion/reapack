@@ -119,7 +119,7 @@ string Remote::toString() const
 
 void RemoteList::add(const Remote &remote)
 {
-  if(!remote.isValid())
+  if(!remote)
     return;
 
   size_t index = 0;

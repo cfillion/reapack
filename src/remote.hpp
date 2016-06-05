@@ -45,7 +45,6 @@ public:
   const std::string &url() const { return m_url; }
 
   bool isNull() const { return m_name.empty() || m_url.empty(); }
-  bool isValid() const { return !isNull(); }
 
   void enable() { setEnabled(true); }
   void disable() { setEnabled(false); }
@@ -56,6 +55,7 @@ public:
   bool isProtected() const { return m_protected; }
 
   bool operator<(const Remote &o) const { return m_name < o.name(); }
+  operator bool() const { return !isNull(); }
 
 private:
   std::string m_name;

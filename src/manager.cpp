@@ -134,7 +134,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
   Menu menu;
 
-  if(remote.isNull()) {
+  if(!remote) {
     menu.addAction(AUTO_STR("&Select all"), ACTION_SELECT);
     menu.addAction(AUTO_STR("&Unselect all"), ACTION_UNSELECT);
     menu.show(x, y, handle());
