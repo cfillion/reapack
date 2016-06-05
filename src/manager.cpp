@@ -175,18 +175,25 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
 
 bool Manager::onKeyDown(const int key, const int mods)
 {
-  if(GetFocus() == m_list->handle() && mods & MOD_CONTROL && key == 'C') {
+  if(GetFocus() != m_list->handle())
+    return false;
+
+  if(mods == MOD_CONTROL && key == 'A')
+    m_list->selectAll();
+  else if(mods == (MOD_CONTROL | MOD_SHIFT) && key == 'A')
+    m_list->unselectAll();
+  else if(mods == MOD_CONTROL && key == 'C') {
     vector<string> values;
 
     for(const int index : m_list->selection(false))
       values.push_back(getRemote(index).url());
 
     setClipboard(values);
-
-    return true;
   }
+  else
+    return false;
 
-  return false;
+  return true;
 }
 
 void Manager::refresh()

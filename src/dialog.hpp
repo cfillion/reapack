@@ -98,6 +98,7 @@ public:
 protected:
   enum Modifiers {
     MOD_CONTROL = 1<<1,
+    MOD_SHIFT   = 1<<2,
   };
 
   Dialog(int templateId);

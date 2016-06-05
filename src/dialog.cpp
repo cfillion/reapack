@@ -97,6 +97,8 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
 
   if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
     modifiers |= MOD_CONTROL;
+  if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+    modifiers |= MOD_SHIFT;
 
   if(msg->message == WM_KEYDOWN && dialog->onKeyDown(msg->wParam, modifiers))
     return 1;
