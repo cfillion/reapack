@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <boost/range/adaptor/map.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <reaper_plugin_functions.h>
 
 using namespace std;
@@ -269,6 +270,12 @@ void Dialog::setClipboard(const string &text)
   SetClipboardData(CF_TEXT, mem);
 #endif
   CloseClipboard();
+}
+
+void Dialog::setClipboard(const vector<string> &values)
+{
+  if(!values.empty())
+    setClipboard(boost::algorithm::join(values, "\n"));
 }
 
 HWND Dialog::getControl(const int idc)

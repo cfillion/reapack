@@ -192,10 +192,12 @@ void Browser::onCommand(const int id, const int event)
 bool Browser::onKeyDown(const int key, const int mods)
 {
   if(GetFocus() == m_list->handle() && mods & MOD_CONTROL && key == 'C') {
-    const Entry *entry = getEntry(m_list->currentIndex());
+    vector<string> values;
 
-    if(entry)
-      setClipboard(getValue(NameColumn, *entry));
+    for(const int index : m_list->selection(false))
+      values.push_back(getValue(NameColumn, *getEntry(index)));
+
+    setClipboard(values);
 
     return true;
   }

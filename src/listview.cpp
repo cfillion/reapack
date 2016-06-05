@@ -204,7 +204,7 @@ int ListView::currentIndex() const
     return translateBack(internalIndex);
 }
 
-vector<int> ListView::selection() const
+vector<int> ListView::selection(const bool sort) const
 {
   int index = -1;
   vector<int> indexes;
@@ -213,7 +213,8 @@ vector<int> ListView::selection() const
     indexes.push_back(translateBack(index));
   }
 
-  std::sort(indexes.begin(), indexes.end());
+  if(sort)
+    std::sort(indexes.begin(), indexes.end());
 
   return indexes;
 }

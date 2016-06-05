@@ -54,7 +54,7 @@ public:
   int selectionSize() const;
   bool hasSelection() const { return selectionSize() > 0; }
   int currentIndex() const;
-  std::vector<int> selection() const;
+  std::vector<int> selection(bool sort = true) const;
   int itemUnderMouse() const;
   int rowCount() const { return (int)m_rows.size(); }
   int columnCount() const { return m_columnSize; }

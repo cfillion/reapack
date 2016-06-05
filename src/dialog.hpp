@@ -21,6 +21,7 @@
 #include <functional>
 #include <map>
 #include <set>
+#include <vector>
 
 #include <wdltypes.h>
 #include <reaper_plugin.h>
@@ -90,6 +91,7 @@ public:
   int startTimer(int elapse, int id = 0);
   void stopTimer(int id);
   void setClipboard(const std::string &);
+  void setClipboard(const std::vector<std::string> &);
 
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
