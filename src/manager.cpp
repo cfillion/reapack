@@ -173,6 +173,22 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   menu.show(x, y, handle());
 }
 
+bool Manager::onKeyDown(const int key, const int mods)
+{
+  if(GetFocus() == m_list->handle() && mods & MOD_CONTROL && key == 'C') {
+    vector<string> values;
+
+    for(const int index : m_list->selection(false))
+      values.push_back(getRemote(index).url());
+
+    setClipboard(values);
+
+    return true;
+  }
+
+  return false;
+}
+
 void Manager::refresh()
 {
   InhibitControl lock(m_list);

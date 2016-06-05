@@ -40,6 +40,7 @@ protected:
   void onInit() override;
   void onCommand(int, int) override;
   void onContextMenu(HWND, int x, int y) override;
+  bool onKeyDown(int, int) override;
 
 private:
   ListView::Row makeRow(const Remote &) const;
