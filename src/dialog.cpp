@@ -18,6 +18,7 @@
 #include "dialog.hpp"
 
 #include "control.hpp"
+#include "encoding.hpp"
 
 #include <algorithm>
 #include <boost/range/adaptor/map.hpp>
@@ -218,6 +219,25 @@ void Dialog::stopTimer(int id)
 {
   KillTimer(m_handle, id);
   m_timers.erase(id);
+}
+
+void Dialog::setClipboard(const string &text)
+{
+  const auto_string &data = make_autostring(text);
+  const size_t length = (data.size() * sizeof(auto_char)) + 1; // null terminator
+
+  HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
+  memcpy(GlobalLock(mem), data.c_str(), length);
+  GlobalUnlock(mem);
+
+  OpenClipboard(handle());
+  EmptyClipboard();
+#ifdef _WIN32
+  SetClipboardData(CF_UNICODETEXT, mem);
+#else
+  SetClipboardData(CF_TEXT, mem);
+#endif
+  CloseClipboard();
 }
 
 HWND Dialog::getControl(const int idc)

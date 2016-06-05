@@ -88,6 +88,7 @@ public:
   void setFocus();
   int startTimer(int elapse, int id = 0);
   void stopTimer(int id);
+  void setClipboard(const std::string &);
 
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
