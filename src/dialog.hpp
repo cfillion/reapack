@@ -85,6 +85,7 @@ public:
   void setVisible(bool, HWND);
   void close(INT_PTR = 0);
   void center();
+  bool hasFocus() const;
   void setFocus();
   int startTimer(int elapse, int id = 0);
   void stopTimer(int id);
@@ -93,6 +94,10 @@ public:
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
 protected:
+  enum Modifiers {
+    MOD_CONTROL = 1<<1,
+  };
+
   Dialog(int templateId);
   virtual ~Dialog();
 
@@ -119,9 +124,11 @@ protected:
   virtual void onCommand(int id, int event);
   virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onContextMenu(HWND, int x, int y);
+  virtual bool onKeyDown(int key, int mods);
 
 private:
   static WDL_DLGRET Proc(HWND, UINT, WPARAM, LPARAM);
+  static int HandleKey(MSG *, accelerator_register_t *);
   static DialogMap s_instances;
 
   const int m_template;
@@ -137,6 +144,7 @@ private:
   std::set<int> m_timers;
 
   CloseHandler m_closeHandler;
+  accelerator_register_t m_accel;
 };
 
 class LockDialog {

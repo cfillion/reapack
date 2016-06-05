@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <boost/range/adaptor/map.hpp>
+#include <reaper_plugin_functions.h>
 
 using namespace std;
 
@@ -85,15 +86,39 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   return false;
 }
 
+int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
+{
+  Dialog *dialog = reinterpret_cast<Dialog *>(accel->user);
+  if(!dialog || !dialog->hasFocus())
+    return 0; // not our window
+
+  int modifiers = 0;
+
+  if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+    modifiers |= MOD_CONTROL;
+
+  if(msg->message == WM_KEYDOWN && dialog->onKeyDown(msg->wParam, modifiers))
+    return 1;
+  else
+    return -1;
+}
+
 Dialog::Dialog(const int templateId)
   : m_template(templateId), m_isVisible(false), m_isEnabled(true),
     m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
-  // can't call reimplemented virtual methods here during object construction
+  m_accel.translateAccel = HandleKey;
+  m_accel.isLocal = true;
+  m_accel.user = this;
+  plugin_register("accelerator", &m_accel);
+
+  // don't call reimplemented virtual methods here during object construction
 }
 
 Dialog::~Dialog()
 {
+  plugin_register("-accelerator", &m_accel);
+
   s_instances.erase(m_handle);
 
   for(Control *control : m_controls | boost::adaptors::map_values)
@@ -189,6 +214,12 @@ void Dialog::center()
   SetWindowPos(m_handle, HWND_TOP, max(0, left), max(0, top), 0, 0, SWP_NOSIZE);
 }
 
+bool Dialog::hasFocus() const
+{
+  const HWND focused = GetFocus();
+  return focused == m_handle || IsChild(m_handle, focused);
+}
+
 void Dialog::setFocus()
 {
   show(); // hack to unminimize the window on OS X
@@ -230,7 +261,7 @@ void Dialog::setClipboard(const string &text)
   memcpy(GlobalLock(mem), data.c_str(), length);
   GlobalUnlock(mem);
 
-  OpenClipboard(handle());
+  OpenClipboard(m_handle);
   EmptyClipboard();
 #ifdef _WIN32
   SetClipboardData(CF_UNICODETEXT, mem);
@@ -281,4 +312,9 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 
 void Dialog::onContextMenu(HWND, int, int)
 {
+}
+
+bool Dialog::onKeyDown(int, int)
+{
+  return false;
 }

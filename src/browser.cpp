@@ -189,6 +189,20 @@ void Browser::onCommand(const int id, const int event)
   }
 }
 
+bool Browser::onKeyDown(const int key, const int mods)
+{
+  if(GetFocus() == m_list->handle() && mods & MOD_CONTROL && key == 'C') {
+    const Entry *entry = getEntry(m_list->currentIndex());
+
+    if(entry)
+      setClipboard(getValue(NameColumn, *entry));
+
+    return true;
+  }
+
+  return false;
+}
+
 void Browser::onTimer(const int id)
 {
   if(id == m_filterTimer)
