@@ -66,6 +66,9 @@ void Manager::onCommand(const int id, int)
   case IDC_IMPORT:
     m_reapack->importRemote();
     break;
+  case IDC_BROWSE:
+    m_reapack->browsePackages();
+    break;
   case IDC_OPTIONS:
     options();
     break;

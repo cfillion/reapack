@@ -64,5 +64,6 @@
 #define IDC_UNSELECT   227
 #define IDC_OPTIONS    228
 #define IDC_ACTIONS    229
+#define IDC_BROWSE     230
 
 #endif
