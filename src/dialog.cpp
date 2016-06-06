@@ -125,14 +125,14 @@ Dialog::~Dialog()
 {
   plugin_register("-accelerator", &m_accel);
 
-  s_instances.erase(m_handle);
+  const set<int> timers = m_timers; // make an immutable copy
+  for(const int id : timers)
+    stopTimer(id);
 
   for(Control *control : m_controls | boost::adaptors::map_values)
     delete control;
 
-  const set<int> timers = m_timers; // make an immutable copy
-  for(const int id : timers)
-    stopTimer(id);
+  s_instances.erase(m_handle);
 
   DestroyWindow(m_handle);
 }
