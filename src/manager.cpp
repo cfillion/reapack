@@ -67,7 +67,7 @@ void Manager::onCommand(const int id, int)
     m_reapack->importRemote();
     break;
   case IDC_BROWSE:
-    m_reapack->browsePackages();
+    launchBrowser();
     break;
   case IDC_OPTIONS:
     options();
@@ -321,6 +321,21 @@ void Manager::copyUrl(const int index)
 
   if(remote)
     setClipboard(remote.url());
+}
+
+void Manager::launchBrowser()
+{
+  const auto promptApply = [&] {
+    const auto_char *title = AUTO_STR("ReaPack Query");
+    const auto_char *msg = AUTO_STR("Apply unsaved changes?");
+    const int btn = MessageBox(handle(), msg, title, MB_YESNO);
+    return btn == IDYES;
+  };
+
+  if(m_changes && promptApply())
+    apply();
+
+  m_reapack->browsePackages();
 }
 
 void Manager::options()

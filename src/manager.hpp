@@ -54,6 +54,7 @@ private:
   void about(int index);
   void copyUrl(int index);
   void options();
+  void launchBrowser();
 
   void setChange(int);
   bool confirm() const;
