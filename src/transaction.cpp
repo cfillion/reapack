@@ -201,7 +201,8 @@ void Transaction::install(const Version *ver,
 
     for(const Registry::File &file : task->removedFiles()) {
       m_receipt.addRemoval(file.path);
-      // TODO: unregister file
+      if(file.main)
+        m_regQueue.push({false, regEntry, file});
     }
 
     const Registry::Entry newEntry = m_registry->push(ver);
