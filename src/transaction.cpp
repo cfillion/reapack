@@ -166,7 +166,7 @@ void Transaction::install(const Version *ver,
     type = InstallTicket::Install;
 
   // get current files before overwriting the entry
-  const set<Path> &currentFiles = m_registry->getFiles(regEntry);
+  const auto &currentFiles = m_registry->getFiles(regEntry);
 
   // prevent file conflicts (don't worry, the registry push is reverted in runTasks)
   try {
@@ -198,7 +198,11 @@ void Transaction::install(const Version *ver,
 
   task->onCommit([=] {
     m_receipt.addTicket({type, ver, regEntry});
-    m_receipt.addRemovals(task->removedFiles());
+
+    for(const Registry::File &file : task->removedFiles()) {
+      m_receipt.addRemoval(file.path);
+      // TODO: unregister file
+    }
 
     const Registry::Entry newEntry = m_registry->push(ver);
 
@@ -270,12 +274,12 @@ void Transaction::uninstall(const Registry::Entry &entry)
 {
   vector<Path> files;
 
-  for(const Path &path : m_registry->getFiles(entry)) {
-    if(FS::exists(path))
-      files.push_back(path);
+  for(const Registry::File &file : m_registry->getFiles(entry)) {
+    if(FS::exists(file.path))
+      files.push_back(file.path);
+    if(file.main)
+      m_regQueue.push({false, entry, file});
   }
-
-  registerInHost(false, entry);
 
   RemoveTask *task = new RemoveTask(files, this);
   task->onCommit([=] {
@@ -366,8 +370,8 @@ bool Transaction::runTasks()
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 {
   // don't actually do anything until commit() – which will calls registerQueued
-  for(const Registry::File &mainFile : m_registry->getMainFiles(entry))
-    m_regQueue.push({add, entry, mainFile});
+  for(const Registry::File &file : m_registry->getMainFiles(entry))
+    m_regQueue.push({add, entry, file});
 }
 
 void Transaction::registerQueued()

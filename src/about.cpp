@@ -201,12 +201,12 @@ void About::updatePackages()
 
 void About::updateInstalledFiles()
 {
-  set<Path> allFiles;
+  set<Registry::File> allFiles;
 
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
     for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
-      const set<Path> &files = reg.getFiles(entry);
+      const vector<Registry::File> &files = reg.getFiles(entry);
       allFiles.insert(files.begin(), files.end());
     }
   }
@@ -233,8 +233,12 @@ void About::updateInstalledFiles()
   else {
     stringstream stream;
 
-    for(const Path &path : allFiles)
-      stream << path.join() << "\r\n";
+    for(const Registry::File &file : allFiles) {
+      stream << file.path.join();
+      if(file.main)
+        stream << '*';
+      stream << "\r\n";
+    }
 
     SetWindowText(m_installedFiles, make_autostring(stream.str()).c_str());
   }

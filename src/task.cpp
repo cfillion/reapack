@@ -53,7 +53,7 @@ void Task::rollback()
 }
 
 InstallTask::InstallTask(const Version *ver,
-    const set<Path> &oldFiles, Transaction *t)
+    const vector<Registry::File> &oldFiles, Transaction *t)
   : Task(t), m_version(ver), m_oldFiles(move(oldFiles))
 {
 }
@@ -88,7 +88,8 @@ void InstallTask::saveSource(Download *dl, const Source *src)
 
   m_newFiles.push_back({targetPath, tmpPath});
 
-  const auto old = m_oldFiles.find(targetPath);
+  const auto old = find_if(m_oldFiles.begin(), m_oldFiles.end(),
+    [&](const Registry::File &f) { return f.path == targetPath; });
 
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
@@ -101,8 +102,8 @@ void InstallTask::saveSource(Download *dl, const Source *src)
 
 bool InstallTask::doCommit()
 {
-  for(const Path &path : m_oldFiles)
-    FS::remove(path);
+  for(const Registry::File &file : m_oldFiles)
+    FS::remove(file.path);
 
   for(const PathGroup &paths : m_newFiles) {
 #ifdef _WIN32

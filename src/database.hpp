@@ -61,6 +61,7 @@ public:
   void exec(const ExecCallback &);
 
   int intColumn(int index) const;
+  bool boolColumn(int index) const { return intColumn(index) != 0; }
   std::string stringColumn(int index) const;
 
 private:

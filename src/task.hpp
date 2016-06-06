@@ -19,6 +19,7 @@
 #define REAPACK_TASK_HPP
 
 #include "path.hpp"
+#include "registry.hpp"
 
 #include <boost/signals2.hpp>
 #include <set>
@@ -60,9 +61,10 @@ private:
 
 class InstallTask : public Task {
 public:
-  InstallTask(const Version *ver, const std::set<Path> &oldFiles, Transaction *);
+  InstallTask(const Version *ver, const std::vector<Registry::File> &oldFiles,
+    Transaction *);
 
-  const std::set<Path> &removedFiles() const { return m_oldFiles; }
+  const std::vector<Registry::File> &removedFiles() const { return m_oldFiles; }
 
 protected:
   void doStart() override;
@@ -75,7 +77,7 @@ private:
   void saveSource(Download *, const Source *);
 
   const Version *m_version;
-  std::set<Path> m_oldFiles;
+  std::vector<Registry::File> m_oldFiles;
   std::vector<PathGroup> m_newFiles;
 };
 

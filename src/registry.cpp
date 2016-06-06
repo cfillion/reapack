@@ -56,9 +56,8 @@ Registry::Registry(const Path &path)
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
 
   // file queries
-  m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
-  m_getMainFiles = m_db.prepare(
-    "SELECT path, type FROM files WHERE main = 1 AND entry = ?"
+  m_getFiles = m_db.prepare(
+    "SELECT path, main, type FROM files WHERE entry = ? ORDER BY path"
   );
   m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?, ?, ?)");
   m_clearFiles = m_db.prepare(
@@ -97,7 +96,7 @@ void Registry::migrate()
       "  entry INTEGER NOT NULL,"
       "  path TEXT UNIQUE NOT NULL,"
       "  main INTEGER NOT NULL,"
-      "  type INTEGER,"
+      "  type INTEGER NOT NULL,"
       "  FOREIGN KEY(entry) REFERENCES entries(id)"
       ");"
     );
@@ -222,7 +221,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
     entry.type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
     entry.version.tryParse(m_findEntry->stringColumn(col++));
     entry.version.setAuthor(m_findEntry->stringColumn(col++));
-    entry.pinned = m_findEntry->intColumn(col++) != 0;
+    entry.pinned = m_findEntry->boolColumn(col++);
 
     return false;
   });
@@ -246,7 +245,7 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
     entry.type = static_cast<Package::Type>(m_allEntries->intColumn(col++));
     entry.version.tryParse(m_allEntries->stringColumn(col++));
     entry.version.setAuthor(m_allEntries->stringColumn(col++));
-    entry.pinned = m_allEntries->intColumn(col++) != 0;
+    entry.pinned = m_allEntries->boolColumn(col++);
 
     list.push_back(entry);
 
@@ -256,33 +255,18 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
   return list;
 }
 
-set<Path> Registry::getFiles(const Entry &entry) const
+auto Registry::getFiles(const Entry &entry) const -> vector<File>
 {
   if(!entry) // skip processing for new packages
     return {};
 
-  set<Path> list;
+  vector<File> files;
 
   m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
-    list.insert(m_getFiles->stringColumn(0));
-    return true;
-  });
-
-  return list;
-}
-
-auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
-{
-  if(!entry)
-    return {};
-
-  vector<File> files;
-
-  m_getMainFiles->bind(1, entry.id);
-  m_getMainFiles->exec([&] {
-    File file{m_getMainFiles->stringColumn(0)};
-    file.type = static_cast<Package::Type>(m_getMainFiles->intColumn(1));
+    File file{m_getFiles->stringColumn(0)};
+    file.main = m_getFiles->boolColumn(1);
+    file.type = static_cast<Package::Type>(m_getFiles->intColumn(2));
 
     if(!file.type) // < v1.0rc2
       file.type = entry.type;
@@ -292,6 +276,20 @@ auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
   });
 
   return files;
+}
+
+auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
+{
+  if(!entry)
+    return {};
+
+  const vector<File> &allFiles = getFiles(entry);
+
+  vector<File> mainFiles;
+  copy_if(allFiles.begin(), allFiles.end(),
+    back_inserter(mainFiles), [&](const File &f) { return f.main; });
+
+  return mainFiles;
 }
 
 void Registry::forget(const Entry &entry)

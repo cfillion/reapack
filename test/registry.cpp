@@ -89,8 +89,11 @@ TEST_CASE("get file list", M) {
 
   reg.push(ver);
 
-  const set<Path> &files = reg.getFiles(reg.getEntry(&pkg));
-  REQUIRE(files == ver->files());
+  const vector<Registry::File> &files = reg.getFiles(reg.getEntry(&pkg));
+  REQUIRE(files.size() == 1);
+  REQUIRE(files[0].path == src->targetPath());
+  REQUIRE(files[0].main == false);
+  REQUIRE(files[0].type == pkg.type());
 }
 
 TEST_CASE("query all packages", M) {
@@ -182,6 +185,7 @@ TEST_CASE("get main files", M) {
   const vector<Registry::File> &current = reg.getMainFiles(entry);
   REQUIRE(current.size() == 1);
   REQUIRE(current[0].path == main1->targetPath());
+  REQUIRE(current[0].main == true);
   REQUIRE(current[0].type == Package::EffectType);
 }
 

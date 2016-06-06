@@ -53,6 +53,7 @@ public:
   const std::vector<InstallTicket> &installs() const { return m_installs; }
   const std::vector<InstallTicket> &updates() const { return m_updates; }
 
+  void addRemoval(const Path &p) { m_removals.insert(p); }
   void addRemovals(const std::set<Path> &);
   const std::set<Path> &removals() const { return m_removals; }
 
