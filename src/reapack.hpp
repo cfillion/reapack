@@ -54,6 +54,8 @@ public:
   gaccel_register_t importAction;
   gaccel_register_t configAction;
 
+  static std::string resourcePath();
+
   ReaPack(REAPER_PLUGIN_HINSTANCE);
   ~ReaPack();
 

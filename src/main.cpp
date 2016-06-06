@@ -109,7 +109,7 @@ static void menuHook(const char *name, HMENU handle, int f)
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 {
   Path expected;
-  expected.append(GetResourcePath());
+  expected.append(ReaPack::resourcePath());
   expected.append("UserPlugins");
   expected.append(REAPACK_FILE);
 

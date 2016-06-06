@@ -20,7 +20,6 @@
 #include "path.hpp"
 
 #ifdef _WIN32
-#undef UNICODE
 #include <windows.h>
 #else
 #include <swell/swell.h>
@@ -28,24 +27,24 @@
 
 using namespace std;
 
-static const char *GENERAL_GRP = "general";
-static const char *VERSION_KEY = "version";
+static const auto_char *GENERAL_GRP = AUTO_STR("general");
+static const auto_char *VERSION_KEY = AUTO_STR("version");
 
-static const char *INSTALL_GRP = "install";
-static const char *AUTOINSTALL_KEY = "autoinstall";
-static const char *PRERELEASES_KEY = "prereleases";
+static const auto_char *INSTALL_GRP = AUTO_STR("install");
+static const auto_char *AUTOINSTALL_KEY = AUTO_STR("autoinstall");
+static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
 
-static const char *BROWSER_GRP = "browser";
-static const char *TYPEFILTER_KEY = "typefilter";
+static const auto_char *BROWSER_GRP = AUTO_STR("browser");
+static const auto_char *TYPEFILTER_KEY = AUTO_STR("typefilter");
 
-static const char *SIZE_KEY = "size";
+static const auto_char *SIZE_KEY = AUTO_STR("size");
 
-static const char *REMOTES_GRP = "remotes";
-static const char *REMOTE_KEY  = "remote";
+static const auto_char *REMOTES_GRP = AUTO_STR("remotes");
+static const auto_char *REMOTE_KEY  = AUTO_STR("remote");
 
-static string ArrayKey(const string &key, const unsigned int i)
+static auto_string ArrayKey(const auto_string &key, const unsigned int i)
 {
-  return key + to_string(i);
+  return key + to_autostring(i);
 }
 
 static const int BUFFER_SIZE = 2083;
@@ -89,7 +88,7 @@ void Config::migrate()
 
 void Config::read(const Path &path)
 {
-  m_path = path.join();
+  m_path = make_autostring(path.join());
 
   m_install = {
     getUInt(INSTALL_GRP, AUTOINSTALL_KEY) > 0,
@@ -155,37 +154,39 @@ void Config::writeRemotes()
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-string Config::getString(const char *group, const string &key) const
+string Config::getString(const auto_char *group, const auto_string &key) const
 {
-  char buffer[BUFFER_SIZE];
-  GetPrivateProfileString(group, key.c_str(), "",
+  auto_char buffer[BUFFER_SIZE];
+  GetPrivateProfileString(group, key.c_str(), AUTO_STR(""),
     buffer, sizeof(buffer), m_path.c_str());
 
-  return buffer;
+  return from_autostring(buffer);
 }
 
-void Config::setString(const char *group,
-  const string &key, const string &val) const
+void Config::setString(const auto_char *group,
+  const auto_string &key, const string &val) const
 {
-  WritePrivateProfileString(group, key.c_str(), val.c_str(), m_path.c_str());
+  WritePrivateProfileString(group, key.c_str(),
+    make_autostring(val).c_str(), m_path.c_str());
 }
 
-unsigned int Config::getUInt(const char *group, const string &key) const
+unsigned int Config::getUInt(const auto_char *group, const auto_string &key) const
 {
   return GetPrivateProfileInt(group, key.c_str(), 0, m_path.c_str());
 }
 
-void Config::setUInt(const char *grp, const string &key, const unsigned int val) const
+void Config::setUInt(const auto_char *group, const auto_string &key,
+  const unsigned int val) const
 {
-  setString(grp, key, to_string(val));
+  setString(group, key, to_string(val));
 }
 
-void Config::deleteKey(const char *group, const string &key) const
+void Config::deleteKey(const auto_char *group, const auto_string &key) const
 {
   WritePrivateProfileString(group, key.c_str(), 0, m_path.c_str());
 }
 
-void Config::cleanupArray(const char *group, const string &key,
+void Config::cleanupArray(const auto_char *group, const auto_string &key,
   const unsigned int begin, const unsigned int end) const
 {
   for(unsigned int i = begin; i < end; i++)

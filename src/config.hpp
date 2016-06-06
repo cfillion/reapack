@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include "encoding.hpp"
 #include "remote.hpp"
 
 class Path;
@@ -46,17 +47,17 @@ public:
   BrowserOpts *browser() { return &m_browser; }
 
 private:
-  std::string getString(const char *, const std::string &) const;
-  void setString(const char *, const std::string &, const std::string &) const;
-  unsigned int getUInt(const char *, const std::string &) const;
-  void setUInt(const char *, const std::string &, unsigned int) const;
-  void deleteKey(const char *, const std::string &) const;
-  void cleanupArray(const char *, const std::string &,
+  std::string getString(const auto_char *, const auto_string &) const;
+  void setString(const auto_char *, const auto_string &, const std::string &) const;
+  unsigned int getUInt(const auto_char *, const auto_string &) const;
+  void setUInt(const auto_char *, const auto_string &, unsigned int) const;
+  void deleteKey(const auto_char *, const auto_string &) const;
+  void cleanupArray(const auto_char *, const auto_string &,
     unsigned int begin, unsigned int end) const;
 
   void migrate();
 
-  std::string m_path;
+  auto_string m_path;
   bool m_isFirstRun;
   unsigned int m_version;
   InstallOpts m_install;

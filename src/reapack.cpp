@@ -61,13 +61,24 @@ static void CleanupTempFiles()
 }
 #endif
 
+std::string ReaPack::resourcePath()
+{
+#ifdef _WIN32
+  auto_char path[MAX_PATH] = {};
+  _mbstowcs_l(path, GetResourcePath(), MAX_PATH, _create_locale(LC_ALL, ""));
+  return from_autostring(path);
+#else
+  return GetResourcePath();
+#endif
+}
+
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(),importAction(), configAction(),
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr),
     m_import(nullptr), m_manager(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
-  m_useRootPath = new UseRootPath(GetResourcePath());
+  m_useRootPath = new UseRootPath(resourcePath());
 
   Download::Init();
 
