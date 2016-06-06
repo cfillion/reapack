@@ -1,38 +1,24 @@
-@version 1.0rc1
+@version 1.0rc2
 @author cfillion
+@changelog
+  Added:
+  + browser: implement Ctrl+A, Ctrl+Shift+A and Ctrl+C shortcuts
+  + manager: implement Ctrl+A, Ctrl+Shift+A and Ctrl+C shortcuts
+  + version: support v0.0 and lesser
+  --
+  Changed:
+  + about: annotate main files with an asterisk
+  + browser: minor UI tweaks
+  + browser: restore actions button
+  + manager: add browse packages button
+  --
+  Fixed:
+  + revert "browser: avoid reloading indexes unless they were updated by the transaction"
+  + transaction: fix registration of scripts embedded in non-script packages
+  + transaction: fix removal of obsolete files
+  + transaction: unregister obsolete main files
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32] reaper_reapack32.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
-@changelog
-  Added:
-  + implement pinning packages to current version (aka ignore updates)
-  + manager: add copy url action in the context menu
-  + manager: add refresh action in the context menu
-  + show a message box if critical api functions cannot be imported
-  + support multiple main (registered in Action list) files per package
-  --
-  Changed:
-  + browser: avoid reloading indexes unless they were updated by the transaction
-  + browser: show 'R' status instead of 'U' for queued uninstallation
-  + ignore newer pre+releases when updating from a pre+release if a newer stable exists
-  + import: save the downloaded index in the cache
-  + manager: remember selection when reloading the list
-  + pkg contents: mark main files with an asterisk
-  + progress: increase dialog display timeout to 100ms
-  + progress: start couting downloads at 1 (> 0%)
-  + task: better error message when install renaming step fails
-  --
-  Fixed:
-  + browser: fix a crash when selecting a version after a list refresh
-  + browser: initialize the display filter button label before loading the pkg list
-  + don't repeat "transaction cannot be created" errors for every task
-  + fix a possible buffer overflow on windows
-  + fix typos in the message shown if a transaction cannot be created
-  + manager: fix typo in confirmation dialog
-  + manager: restore enabled/disabled state when cancelling queued uninstallations
-  + report download errors when force+refreshing indexes
-  + transaction: don't forget package when uninstallation fails
-  + transaction: don't try to register empty file names
-  + version: improve validation
