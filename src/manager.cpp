@@ -36,7 +36,7 @@ enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
-    m_reapack(reapack), m_config(reapack->config()), m_list(0)
+    m_reapack(reapack), m_config(reapack->config()), m_list(0), m_changes(0)
 {
 }
 
@@ -85,12 +85,10 @@ void Manager::onCommand(const int id, int)
     uninstall();
     break;
   case ACTION_AUTOINSTALL:
-    m_autoInstall = !m_autoInstall.value_or(m_config->install()->autoInstall);
-    enable(m_apply);
+    toggle(m_autoInstall, m_config->install()->autoInstall);
     break;
   case ACTION_BLEEDINGEDGE:
-    m_bleedingEdge = !m_bleedingEdge.value_or(m_config->install()->bleedingEdge);
-    enable(m_apply);
+    toggle(m_bleedingEdge, m_config->install()->bleedingEdge);
     break;
   case ACTION_SELECT:
     m_list->selectAll();
@@ -109,6 +107,7 @@ void Manager::onCommand(const int id, int)
       // IDOK -> continue to next case (IDCANCEL)
     }
     else {
+      setChange(-m_uninstall.size());
       m_uninstall.clear();
       refresh();
       break;
@@ -231,18 +230,21 @@ void Manager::setRemoteEnabled(const bool enabled)
     auto it = m_enableOverrides.find(remote);
 
     if(it == m_enableOverrides.end()) {
-      if(remote.isEnabled() != enabled)
-        m_enableOverrides.insert({remote, enabled});
+      if(remote.isEnabled() == enabled)
+        continue;
+
+      m_enableOverrides.insert({remote, enabled});
+      setChange(1);
     }
-    else if(remote.isEnabled() == enabled)
+    else if(remote.isEnabled() == enabled) {
       m_enableOverrides.erase(it);
+      setChange(-1);
+    }
     else
       it->second = enabled;
 
     m_list->replaceRow(index, makeRow(remote));
   }
-
-  enable(m_apply);
 }
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
@@ -283,10 +285,29 @@ void Manager::uninstall()
     }
 
     m_uninstall.insert(remote);
-    enable(m_apply);
+    setChange(1);
 
     m_list->removeRow(index);
   }
+}
+
+void Manager::toggle(boost::optional<bool> &setting, const bool current)
+{
+  setting = !setting.value_or(current);
+  setChange(*setting == current ? -1 : 1);
+}
+
+void Manager::setChange(const int increment)
+{
+  if(!m_changes && increment < 0)
+    return;
+
+  m_changes += increment;
+
+  if(m_changes)
+    enable(m_apply);
+  else
+    disable(m_apply);
 }
 
 void Manager::about(const int index)
@@ -343,6 +364,9 @@ bool Manager::confirm() const
 
 bool Manager::apply()
 {
+  if(!m_changes)
+    return true;
+
   Transaction *tx = m_reapack->setupTransaction();
 
   if(!tx)
@@ -376,7 +400,10 @@ void Manager::reset()
 {
   m_enableOverrides.clear();
   m_uninstall.clear();
+  m_autoInstall = boost::none;
+  m_bleedingEdge = boost::none;
 
+  m_changes = 0;
   disable(m_apply);
 }
 

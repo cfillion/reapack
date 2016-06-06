@@ -49,11 +49,13 @@ private:
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
   void uninstall();
+  void toggle(boost::optional<bool> &, bool current);
   void refreshIndex();
   void about(int index);
   void copyUrl(int index);
   void options();
 
+  void setChange(int);
   bool confirm() const;
   bool apply();
   void reset();
@@ -62,6 +64,7 @@ private:
   ReaPack *m_reapack;
   Config *m_config;
   ListView *m_list;
+  size_t m_changes;
 
   std::map<Remote, bool> m_enableOverrides;
   std::set<Remote> m_uninstall;
