@@ -165,6 +165,9 @@ void Transaction::install(const Version *ver,
   else
     type = InstallTicket::Install;
 
+  // get current files before overwriting the entry
+  const set<Path> &currentFiles = m_registry->getFiles(regEntry);
+
   // prevent file conflicts (don't worry, the registry push is reverted in runTasks)
   try {
     vector<Path> conflicts;
@@ -190,8 +193,6 @@ void Transaction::install(const Version *ver,
   IndexPtr ri = ver->package()->category()->index()->shared_from_this();
   if(!m_indexes.count(ri))
     m_indexes.insert(ri);
-
-  const set<Path> &currentFiles = m_registry->getFiles(regEntry);
 
   InstallTask *task = new InstallTask(ver, currentFiles, this);
 
