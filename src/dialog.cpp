@@ -93,14 +93,17 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
   if(!dialog || !dialog->hasFocus())
     return 0; // not our window
 
+  const int key = (int)msg->wParam;
   int modifiers = 0;
 
+  if(GetAsyncKeyState(VK_MENU) & 0x8000)
+    modifiers |= AltModifier;
   if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-    modifiers |= MOD_CONTROL;
+    modifiers |= CtrlModifier;
   if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
-    modifiers |= MOD_SHIFT;
+    modifiers |= ShiftModifier;
 
-  if(msg->message == WM_KEYDOWN && dialog->onKeyDown(msg->wParam, modifiers))
+  if(msg->message == WM_KEYDOWN && dialog->onKeyDown(key, modifiers))
     return 1;
   else
     return -1;

@@ -181,11 +181,11 @@ bool Manager::onKeyDown(const int key, const int mods)
   if(GetFocus() != m_list->handle())
     return false;
 
-  if(mods == MOD_CONTROL && key == 'A')
+  if(mods == CtrlModifier && key == 'A')
     m_list->selectAll();
-  else if(mods == (MOD_CONTROL | MOD_SHIFT) && key == 'A')
+  else if(mods == (CtrlModifier | ShiftModifier) && key == 'A')
     m_list->unselectAll();
-  else if(mods == MOD_CONTROL && key == 'C') {
+  else if(mods == CtrlModifier && key == 'C') {
     vector<string> values;
 
     for(const int index : m_list->selection(false))

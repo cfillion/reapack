@@ -54,10 +54,10 @@ protected:
 
 private:
   enum Flag {
-    UninstalledFlag = 1<<1,
-    InstalledFlag   = 1<<2,
-    OutOfDateFlag   = 1<<3,
-    ObsoleteFlag    = 1<<4,
+    UninstalledFlag = 1<<0,
+    InstalledFlag   = 1<<1,
+    OutOfDateFlag   = 1<<2,
+    ObsoleteFlag    = 1<<3,
   };
 
   struct Entry {
