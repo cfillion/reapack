@@ -365,7 +365,7 @@ bool Transaction::runTasks()
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 {
   // don't actually do anything until commit() – which will calls registerQueued
-  for(const string &mainFile : m_registry->getMainFiles(entry))
+  for(const Registry::File &mainFile : m_registry->getMainFiles(entry))
     m_regQueue.push({add, entry, mainFile});
 }
 
@@ -380,7 +380,7 @@ void Transaction::registerQueued()
       return;
     }
 
-    switch(reg.entry.type) {
+    switch(reg.file.type) {
     case Package::ScriptType:
       registerScript(reg);
       break;
@@ -408,11 +408,11 @@ void Transaction::registerScript(const HostTicket &reg)
   else
     section = MainSection;
 
-  const string &fullPath = Path::prefixRoot(reg.file).join();
+  const string &fullPath = Path::prefixRoot(reg.file.path).join();
   const bool isLast = m_regQueue.size() == 1;
 
   if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add)
-    addError("Script could not be registered in REAPER.", reg.file);
+    addError("This script could not be registered in REAPER.", reg.file.path.join());
 }
 
 void Transaction::inhibit(const Remote &remote)

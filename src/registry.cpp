@@ -58,9 +58,9 @@ Registry::Registry(const Path &path)
   // file queries
   m_getFiles = m_db.prepare("SELECT path FROM files WHERE entry = ?");
   m_getMainFiles = m_db.prepare(
-    "SELECT path FROM files WHERE main = 1 AND entry = ?"
+    "SELECT path, type FROM files WHERE main = 1 AND entry = ?"
   );
-  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?, ?)");
+  m_insertFile = m_db.prepare("INSERT INTO files VALUES(NULL, ?, ?, ?, ?)");
   m_clearFiles = m_db.prepare(
     "DELETE FROM files WHERE entry = ("
     "  SELECT id FROM entries WHERE remote = ? AND category = ? AND package = ?"
@@ -96,14 +96,17 @@ void Registry::migrate()
       "  id INTEGER PRIMARY KEY,"
       "  entry INTEGER NOT NULL,"
       "  path TEXT UNIQUE NOT NULL,"
-      "  main INTEGER DEFAULT 0,"
+      "  main INTEGER NOT NULL,"
+      "  type INTEGER,"
       "  FOREIGN KEY(entry) REFERENCES entries(id)"
       ");"
     );
     break;
   case 1:
-    m_db.exec("ALTER TABLE entries ADD COLUMN pinned INTEGER DEFAULT 0;");
+    m_db.exec("ALTER TABLE entries ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;");
   case 2:
+    m_db.exec("ALTER TABLE files ADD COLUMN type INTEGER NOT NULL DEFAULT 0;");
+  case 3:
     // current schema version
     break;
   default:
@@ -111,7 +114,7 @@ void Registry::migrate()
       "The package registry was created by a newer version of ReaPack");
   }
 
-  m_db.exec("PRAGMA user_version = 2");
+  m_db.exec("PRAGMA user_version = 3");
   m_db.commit();
 }
 
@@ -161,6 +164,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
     m_insertFile->bind(3, src->isMain());
+    m_insertFile->bind(4, src->typeOverride());
 
     try {
       m_insertFile->exec();
@@ -268,16 +272,22 @@ set<Path> Registry::getFiles(const Entry &entry) const
   return list;
 }
 
-vector<string> Registry::getMainFiles(const Entry &entry) const
+auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
 {
   if(!entry)
     return {};
 
-  vector<string> files;
+  vector<File> files;
 
   m_getMainFiles->bind(1, entry.id);
   m_getMainFiles->exec([&] {
-    files.push_back(m_getMainFiles->stringColumn(0));
+    File file{m_getMainFiles->stringColumn(0)};
+    file.type = static_cast<Package::Type>(m_getMainFiles->intColumn(1));
+
+    if(!file.type) // < v1.0rc2
+      file.type = entry.type;
+
+    files.push_back(file);
     return true;
   });
 

@@ -35,6 +35,7 @@ public:
 
   void setTypeOverride(Package::Type t) { m_type = t; }
   Package::Type typeOverride() const { return m_type; }
+  Package::Type type() const;
   const std::string &file() const;
   const std::string &url() const { return m_url; }
   void setMain(bool main) { m_main = main; }

@@ -23,10 +23,22 @@ TEST_CASE("source platform", M) {
 
 TEST_CASE("source type override", M) {
   Source src({}, "url");
+  REQUIRE(src.type() == Package::UnknownType);
   REQUIRE(src.typeOverride() == Package::UnknownType);
 
   src.setTypeOverride(Package::ScriptType);
+  REQUIRE(src.type() == Package::ScriptType);
   REQUIRE(src.typeOverride() == Package::ScriptType);
+}
+
+TEST_CASE("source type from package", M) {
+  Package pack(Package::EffectType, "package name");
+  Version ver("1.0", &pack);
+  Source src({}, "url", &ver);
+
+  REQUIRE(src.type() == Package::EffectType);
+  src.setTypeOverride(Package::ScriptType);
+  REQUIRE(src.type() == Package::ScriptType);
 }
 
 TEST_CASE("empty file name and no package", M) {

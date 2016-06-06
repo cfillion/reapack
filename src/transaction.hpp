@@ -36,7 +36,7 @@ struct InstallOpts;
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
-struct HostTicket { bool add; Registry::Entry entry; std::string file; };
+struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
 
 class Transaction {
 public:

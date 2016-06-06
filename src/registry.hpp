@@ -44,12 +44,17 @@ public:
     operator bool() const { return id != 0; }
   };
 
+  struct File {
+    Path path;
+    Package::Type type;
+  };
+
   Registry(const Path &path = {});
 
   Entry getEntry(const Package *) const;
   std::vector<Entry> getEntries(const std::string &) const;
   std::set<Path> getFiles(const Entry &) const;
-  std::vector<std::string> getMainFiles(const Entry &) const;
+  std::vector<File> getMainFiles(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);

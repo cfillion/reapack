@@ -169,16 +169,20 @@ TEST_CASE("get main files", M) {
 
   Source *main1 = new Source({}, "url", ver);
   main1->setMain(true);
+  main1->setTypeOverride(Package::EffectType);
   ver->addSource(main1);
 
-  Source *main2 = new Source({}, "url", ver); // duplicate file
+  Source *main2 = new Source({}, "url", ver); // duplicate file ignored
   main2->setMain(true);
+  main2->setTypeOverride(Package::EffectType);
   ver->addSource(main2);
 
   const Registry::Entry &entry = reg.push(ver);
 
-  const vector<string> expected{main1->targetPath().join('/')};
-  REQUIRE(reg.getMainFiles(entry) == expected);
+  const vector<Registry::File> &current = reg.getMainFiles(entry);
+  REQUIRE(current.size() == 1);
+  REQUIRE(current[0].path == main1->targetPath());
+  REQUIRE(current[0].type == Package::EffectType);
 }
 
 TEST_CASE("pin registry entry", M) {

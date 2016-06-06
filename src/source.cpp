@@ -35,14 +35,23 @@ const Package *Source::package() const
   return m_version ? m_version->package() : nullptr;
 }
 
+Package::Type Source::type() const
+{
+  if(m_type)
+    return m_type;
+  else if(const Package *pkg = package())
+    return pkg->type();
+  else
+    return Package::UnknownType;
+}
+
+
 const string &Source::file() const
 {
   if(!m_file.empty())
     return m_file;
 
-  const Package *pkg = package();
-
-  if(pkg)
+  if(const Package *pkg = package())
     return pkg->name();
   else
     throw reapack_error("empty file name and no package");
@@ -69,8 +78,7 @@ Path Source::targetPath() const
     throw reapack_error("category or index is unset");
 
   Path path;
-
-  const Package::Type type = m_type ? m_type : pkg->type();
+  const auto type = this->type();
 
   // select the target directory
   switch(type) {
