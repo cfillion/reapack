@@ -296,14 +296,14 @@ void ReaPack::manageRemotes()
   });
 }
 
-void ReaPack::aboutSelf()
+Remote ReaPack::remote(const string &name) const
 {
-  about("ReaPack", m_mainWindow);
+  return m_config->remotes()->get(name);
 }
 
-void ReaPack::about(const string &remoteName, HWND parent)
+void ReaPack::aboutSelf()
 {
-  about(m_config->remotes()->get(remoteName), parent);
+  about(remote("ReaPack"), m_mainWindow);
 }
 
 void ReaPack::about(const Remote &remote, HWND parent)

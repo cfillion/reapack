@@ -79,6 +79,8 @@ public:
   void refreshManager();
   void refreshBrowser();
 
+  Remote remote(const std::string &name) const;
+
   void fetchIndex(const Remote &remote, const IndexCallback &,
     HWND parent, bool stale = false);
   void fetchIndexes(const std::vector<Remote> &,

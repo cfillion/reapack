@@ -107,6 +107,7 @@ private:
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
   Entry *getEntry(int);
+  Remote getRemote(const Entry &) const;
   void updateDisplayLabel();
   void displayButton();
   void actionsButton();

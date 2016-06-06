@@ -236,7 +236,6 @@ void Browser::fillMenu(Menu &menu)
 {
   const Entry *entry = getEntry(m_currentIndex);
 
-
   if(m_list->selectionSize() > 1) {
     menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
     menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
@@ -312,10 +311,9 @@ void Browser::fillMenu(Menu &menu)
   if(entry->pin.value_or(entry->regEntry.pinned))
     menu.check(pinIndex);
 
-
   const UINT uninstallIndex =
     menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
-  if(!entry->test(InstalledFlag))
+  if(!entry->test(InstalledFlag) || getRemote(*entry).isProtected())
     menu.disable(uninstallIndex);
   else if(entry->target && *entry->target == nullptr)
     menu.check(uninstallIndex);
@@ -684,6 +682,11 @@ string Browser::getValue(const Column col, const Entry &entry) const
   return {}; // for MSVC
 }
 
+Remote Browser::getRemote(const Entry &entry) const
+{
+  return m_reapack->remote(getValue(RemoteColumn, entry));
+}
+
 bool Browser::match(const Entry &entry) const
 {
   switch(currentTab()) {
@@ -751,7 +754,7 @@ void Browser::contents(const int index)
 void Browser::about(const int index)
 {
   if(const Entry *entry = getEntry(index))
-    m_reapack->about(getValue(RemoteColumn, *entry), handle());
+    m_reapack->about(getRemote(*entry), handle());
 }
 
 void Browser::installLatest(const int index, const bool toggle)
@@ -793,7 +796,7 @@ void Browser::uninstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(entry && entry->test(InstalledFlag))
+  if(entry && entry->test(InstalledFlag) && !getRemote(*entry).isProtected())
     setTarget(index, nullptr, toggle);
 }
 
