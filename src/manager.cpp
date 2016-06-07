@@ -140,7 +140,6 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   const int index = m_list->itemUnderMouse();
   const Remote &remote = getRemote(index);
 
-
   Menu menu;
 
   if(!remote) {
@@ -171,12 +170,26 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
     AUTO_STR("&About %s..."), name.c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
-  if(isRemoteEnabled(remote))
-    menu.disable(enableAction);
-  else
-    menu.disable(disableAction);
+  bool allEnabled = true;
+  bool allDisabled = true;
+  bool allProtected = true;
 
-  if(remote.isProtected())
+  for(const int i : m_list->selection()) {
+    const Remote &r = getRemote(i);
+    if(isRemoteEnabled(r))
+      allDisabled = false;
+    else
+      allEnabled = false;
+
+    if(!r.isProtected())
+      allProtected = false;
+  };
+
+  if(allEnabled)
+    menu.disable(enableAction);
+  if(allDisabled)
+    menu.disable(disableAction);
+  if(allProtected)
     menu.disable(uninstallAction);
 
   menu.show(x, y, handle());
