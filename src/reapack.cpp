@@ -193,8 +193,11 @@ void ReaPack::uninstall(const Remote &remote)
 
 void ReaPack::importRemote()
 {
+  const bool autoClose = m_manager == nullptr;
+
   manageRemotes();
-  if(!m_manager->import())
+
+  if(!m_manager->import() && autoClose)
     m_manager->close();
 }
 
