@@ -17,6 +17,7 @@
 
 #include "import.hpp"
 
+#include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
@@ -24,10 +25,11 @@
 #include "reapack.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
+#include "transaction.hpp"
 
 using namespace std;
 
-const auto_char *Import::TITLE = AUTO_STR("ReaPack: Import a repository");
+static const auto_char *TITLE = AUTO_STR("ReaPack: Import a repository");
 
 Import::Import(ReaPack *reapack)
   : Dialog(IDD_IMPORT_DIALOG), m_reapack(reapack), m_download(nullptr)
@@ -109,8 +111,7 @@ void Import::fetch()
       return;
     }
 
-    if(!import())
-      SetFocus(m_url);
+    read();
   });
 
   dl->setCleanupHandler([=] {
@@ -124,24 +125,88 @@ void Import::fetch()
   dl->start();
 }
 
-bool Import::import()
+void Import::read()
 {
   assert(m_download);
 
   try {
     IndexPtr index = Index::load({}, m_download->contents().c_str());
-    if(m_reapack->import({index->name(), m_download->url()}, handle()))
-      FS::write(Index::pathFor(index->name()), m_download->contents());
-
-    close();
-
-    return true;
+    close(import({index->name(), m_download->url()}));
   }
   catch(const reapack_error &e) {
     const string msg = "The received file is invalid: " + string(e.what());
     MessageBox(handle(), make_autostring(msg).c_str(), TITLE, MB_OK);
-    return false;
+    SetFocus(m_url);
   }
+}
+
+bool Import::import(const Remote &remote)
+{
+  if(const Remote &existing = m_reapack->remote(remote.name())) {
+    if(existing.isProtected()) {
+      MessageBox(handle(),
+        AUTO_STR("This repository is protected and cannot be overwritten."),
+        TITLE, MB_OK);
+
+      return false;
+    }
+    else if(existing.url() != remote.url()) {
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("%s is already configured with a different URL.\r\n")
+        AUTO_STR("Do you want to overwrite it?"),
+        make_autostring(remote.name()).c_str());
+
+      const auto answer = MessageBox(handle(), msg, TITLE, MB_YESNO);
+
+      if(answer != IDYES)
+        return false;
+    }
+    else if(existing.isEnabled()) {
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("%s is already configured.\r\nNothing to do!"),
+        make_autostring(remote.name()).c_str());
+      MessageBox(handle(), msg, TITLE, MB_OK);
+
+      return false;
+    }
+    else {
+      Transaction *tx = m_reapack->setupTransaction();
+
+      if(!tx)
+        return true;
+
+      m_reapack->enable(existing);
+      tx->runTasks();
+
+      m_reapack->config()->write();
+
+      auto_char msg[1024] = {};
+      auto_snprintf(msg, auto_size(msg), AUTO_STR("%s has been enabled."),
+        make_autostring(remote.name()).c_str());
+      MessageBox(handle(), msg, TITLE, MB_OK);
+
+      return true;
+    }
+  }
+
+  Config *config = m_reapack->config();
+  config->remotes()->add(remote);
+  config->write();
+
+  FS::write(Index::pathFor(remote.name()), m_download->contents());
+
+  auto_char msg[1024] = {};
+  auto_snprintf(msg, auto_size(msg),
+    AUTO_STR("%s has been successfully imported into your repository list."),
+    make_autostring(remote.name()).c_str());
+  MessageBox(handle(), msg, TITLE, MB_OK);
+
+  m_reapack->refreshManager();
+  m_reapack->refreshBrowser();
+
+  return true;
 }
 
 void Import::setWaiting(const bool wait)

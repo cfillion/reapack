@@ -21,6 +21,7 @@
 #include "config.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
+#include "import.hpp"
 #include "index.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
@@ -64,7 +65,7 @@ void Manager::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_IMPORT:
-    m_reapack->importRemote();
+    Dialog::Show<Import>(instance(), handle(), m_reapack);
     break;
   case IDC_BROWSE:
     launchBrowser();
@@ -321,6 +322,11 @@ void Manager::copyUrl(const int index)
 
   if(remote)
     setClipboard(remote.url());
+}
+
+void Manager::triggerImport()
+{
+  SendMessage(handle(), WM_COMMAND, IDC_IMPORT, 0);
 }
 
 void Manager::launchBrowser()

@@ -35,6 +35,7 @@ public:
   Manager(ReaPack *);
 
   void refresh();
+  void triggerImport();
 
 protected:
   void onInit() override;
@@ -53,8 +54,8 @@ private:
   void refreshIndex();
   void about(int index);
   void copyUrl(int index);
-  void options();
   void launchBrowser();
+  void options();
 
   void setChange(int);
   bool confirm() const;

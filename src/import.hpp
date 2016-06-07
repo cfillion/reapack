@@ -26,12 +26,11 @@
 
 class Download;
 class ReaPack;
+class Remote;
 
 class Import : public Dialog
 {
 public:
-  static const auto_char *TITLE;
-
   Import(ReaPack *);
 
 protected:
@@ -41,7 +40,8 @@ protected:
 
 private:
   void fetch();
-  bool import();
+  void read();
+  bool import(const Remote &);
   void setWaiting(bool);
 
   ReaPack *m_reapack;

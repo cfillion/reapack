@@ -31,7 +31,6 @@
 class Browser;
 class Config;
 class DownloadQueue;
-class Import;
 class Index;
 class Manager;
 class Progress;
@@ -70,7 +69,6 @@ public:
   void uninstall(const Remote &);
 
   void importRemote();
-  bool import(const Remote &, HWND = nullptr);
   void manageRemotes();
   void aboutSelf();
   void about(const std::string &, HWND parent);
@@ -100,7 +98,6 @@ private:
   Transaction *m_tx;
   Progress *m_progress;
   Browser *m_browser;
-  Import *m_import;
   Manager *m_manager;
 
   REAPER_PLUGIN_HINSTANCE m_instance;

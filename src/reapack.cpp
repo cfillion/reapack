@@ -22,7 +22,6 @@
 #include "config.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
-#include "import.hpp"
 #include "index.hpp"
 #include "manager.hpp"
 #include "progress.hpp"
@@ -74,8 +73,8 @@ std::string ReaPack::resourcePath()
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(),importAction(), configAction(),
-    m_tx(nullptr), m_progress(nullptr), m_browser(nullptr),
-    m_import(nullptr), m_manager(nullptr), m_instance(instance)
+    m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
+    m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(resourcePath());
@@ -194,90 +193,8 @@ void ReaPack::uninstall(const Remote &remote)
 
 void ReaPack::importRemote()
 {
-  if(m_import) {
-    m_import->setFocus();
-    return;
-  }
-
-  m_import = Dialog::Create<Import>(m_instance, m_mainWindow, this);
-  m_import->show();
-  m_import->setCloseHandler([=] (INT_PTR) {
-    Dialog::Destroy(m_import);
-    m_import = nullptr;
-  });
-}
-
-bool ReaPack::import(const Remote &remote, HWND parent)
-{
-  if(!parent)
-    parent = m_mainWindow;
-
-  RemoteList *remotes = m_config->remotes();
-
-  const Remote &existing = remotes->get(remote.name());
-
-  if(existing) {
-    if(existing.isProtected()) {
-      MessageBox(parent,
-        AUTO_STR("This repository is protected and cannot be overwritten."),
-        Import::TITLE, MB_OK);
-
-      return false;
-    }
-    else if(existing.url() != remote.url()) {
-      auto_char msg[1024] = {};
-      auto_snprintf(msg, auto_size(msg),
-        AUTO_STR("%s is already configured with a different URL.\r\n")
-        AUTO_STR("Do you want to overwrite it?"),
-        make_autostring(remote.name()).c_str());
-
-      const auto answer = MessageBox(parent, msg, Import::TITLE, MB_YESNO);
-
-      if(answer != IDYES)
-        return false;
-    }
-    else if(existing.isEnabled()) {
-      auto_char msg[1024] = {};
-      auto_snprintf(msg, auto_size(msg),
-        AUTO_STR("%s is already configured.\r\nNothing to do!"),
-        make_autostring(remote.name()).c_str());
-      MessageBox(parent, msg, Import::TITLE, MB_OK);
-
-      return false;
-    }
-    else {
-      Transaction *tx = setupTransaction();
-
-      if(!tx)
-        return true;
-
-      enable(existing);
-      tx->runTasks();
-
-      m_config->write();
-
-      auto_char msg[1024] = {};
-      auto_snprintf(msg, auto_size(msg), AUTO_STR("%s has been enabled."),
-        make_autostring(remote.name()).c_str());
-      MessageBox(parent, msg, Import::TITLE, MB_OK);
-
-      return true;
-    }
-  }
-
-  remotes->add(remote);
-  m_config->write();
-
-  refreshManager();
-  refreshBrowser();
-
-  auto_char msg[1024] = {};
-  auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("%s has been successfully imported into your repository list."),
-    make_autostring(remote.name()).c_str());
-  MessageBox(parent, msg, Import::TITLE, MB_OK);
-
-  return true;
+  manageRemotes();
+  m_manager->triggerImport();
 }
 
 void ReaPack::manageRemotes()
