@@ -408,7 +408,7 @@ Transaction *ReaPack::setupTransaction()
       desc.c_str()
     );
 
-    MessageBox(m_mainWindow, msg, AUTO_STR("ReaPack \u2013 Fatal Error"), MB_OK);
+    MessageBox(m_mainWindow, msg, AUTO_STR("ReaPack"), MB_OK);
     return nullptr;
   }
 
