@@ -66,7 +66,9 @@ private:
   ReaPack *m_reapack;
   Config *m_config;
   ListView *m_list;
+
   size_t m_changes;
+  bool m_importing;
 
   std::map<Remote, bool> m_enableOverrides;
   std::set<Remote> m_uninstall;

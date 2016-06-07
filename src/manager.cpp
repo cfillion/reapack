@@ -37,7 +37,8 @@ enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
-    m_reapack(reapack), m_config(reapack->config()), m_list(0), m_changes(0)
+    m_reapack(reapack), m_config(reapack->config()), m_list(0),
+    m_changes(0), m_importing(false)
 {
 }
 
@@ -65,7 +66,12 @@ void Manager::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_IMPORT:
+    if(m_importing) // avoid opening the import dialog twice on windows
+      break;
+
+    m_importing = true;
     Dialog::Show<Import>(instance(), handle(), m_reapack);
+    m_importing = false;
     break;
   case IDC_BROWSE:
     launchBrowser();
