@@ -68,9 +68,6 @@ public:
   HWND parent() const { return m_parent; }
   HWND handle() const { return m_handle; }
 
-  bool isVisible() const { return m_isVisible; }
-  bool isEnabled() const { return m_isEnabled; }
-
   void enable() { enable(m_handle); }
   void enable(HWND handle) { setEnabled(true, handle); }
   void disable() { disable(m_handle); }
@@ -78,12 +75,14 @@ public:
   void setEnabled(bool enable) { setEnabled(enable, m_handle); }
   void setEnabled(bool, HWND);
 
+  bool isVisible() const { return m_isVisible; }
   void show() { show(m_handle); }
   void show(HWND handle) { setVisible(true, handle); }
   void hide() { hide(m_handle); }
   void hide(HWND handle) { setVisible(false, handle); }
   void setVisible(bool visible) { setVisible(visible, m_handle); }
   void setVisible(bool, HWND);
+
   void close(INT_PTR = 0);
   void center();
   bool hasFocus() const;
@@ -137,7 +136,6 @@ private:
 
   const int m_template;
   bool m_isVisible;
-  bool m_isEnabled;
   Modality m_mode;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
@@ -154,21 +152,20 @@ private:
 class LockDialog {
 public:
   LockDialog(Dialog *dlg)
-    : m_dialog(dlg), m_enabled(dlg && dlg->isEnabled())
+    : m_dialog(dlg)
   {
-    if(m_enabled)
+    if(m_dialog)
       m_dialog->disable();
   }
 
   ~LockDialog()
   {
-    if(m_enabled)
+    if(m_dialog)
       m_dialog->enable();
   }
 
 private:
   Dialog *m_dialog;
-  bool m_enabled;
 };
 
 #endif

@@ -194,7 +194,8 @@ void ReaPack::uninstall(const Remote &remote)
 void ReaPack::importRemote()
 {
   manageRemotes();
-  m_manager->triggerImport();
+  if(!m_manager->import())
+    m_manager->close();
 }
 
 void ReaPack::manageRemotes()

@@ -66,12 +66,7 @@ void Manager::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_IMPORT:
-    if(m_importing) // avoid opening the import dialog twice on windows
-      break;
-
-    m_importing = true;
-    Dialog::Show<Import>(instance(), handle(), m_reapack);
-    m_importing = false;
+    import();
     break;
   case IDC_BROWSE:
     launchBrowser();
@@ -330,9 +325,16 @@ void Manager::copyUrl(const int index)
     setClipboard(remote.url());
 }
 
-void Manager::triggerImport()
+bool Manager::import()
 {
-  SendMessage(handle(), WM_COMMAND, IDC_IMPORT, 0);
+  if(m_importing) // avoid opening the import dialog twice on windows
+    return true;
+
+  m_importing = true;
+  const auto ret = Dialog::Show<Import>(instance(), handle(), m_reapack);
+  m_importing = false;
+
+  return ret != 0;
 }
 
 void Manager::launchBrowser()

@@ -35,7 +35,7 @@ public:
   Manager(ReaPack *);
 
   void refresh();
-  void triggerImport();
+  bool import();
 
 protected:
   void onInit() override;

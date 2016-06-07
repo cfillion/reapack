@@ -65,11 +65,6 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     else
       dlg->onHide();
     break;
-#ifdef WM_ENABLE
-  case WM_ENABLE: // not supported by SWELL
-    dlg->m_isEnabled = wParam == 1;
-    break;
-#endif
   case WM_TIMER:
     dlg->onTimer((int)wParam);
     break;
@@ -110,7 +105,7 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
 }
 
 Dialog::Dialog(const int templateId)
-  : m_template(templateId), m_isVisible(false), m_isEnabled(true),
+  : m_template(templateId), m_isVisible(false),
     m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
   m_accel.translateAccel = HandleKey;
