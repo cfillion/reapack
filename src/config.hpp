@@ -38,6 +38,7 @@ class Config {
 public:
   Config();
 
+  void reset();
   void read(const Path &);
   void write();
 
@@ -49,7 +50,7 @@ public:
 private:
   std::string getString(const auto_char *, const auto_string &) const;
   void setString(const auto_char *, const auto_string &, const std::string &) const;
-  unsigned int getUInt(const auto_char *, const auto_string &) const;
+  unsigned int getUInt(const auto_char *, const auto_string &, unsigned int = 0) const;
   void setUInt(const auto_char *, const auto_string &, unsigned int) const;
   void deleteKey(const auto_char *, const auto_string &) const;
   void cleanupArray(const auto_char *, const auto_string &,

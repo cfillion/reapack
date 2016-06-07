@@ -33,7 +33,7 @@ using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
        ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE };
+       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_RESETCONFIG };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -91,6 +91,10 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_BLEEDINGEDGE:
     toggle(m_bleedingEdge, m_config->install()->bleedingEdge);
+    break;
+  case ACTION_RESETCONFIG:
+    m_config->reset();
+    refresh();
     break;
   case ACTION_SELECT:
     m_list->selectAll();
@@ -368,6 +372,10 @@ void Manager::options()
     AUTO_STR("Enable &pre-releases globally (bleeding edge)"), ACTION_BLEEDINGEDGE);
   if(m_bleedingEdge.value_or(m_config->install()->bleedingEdge))
     menu.check(index);
+
+  menu.addSeparator();
+
+  menu.addAction(AUTO_STR("&Restore default settings"), ACTION_RESETCONFIG);
 
   menu.show(rect.left, rect.bottom - 1, handle());
 }

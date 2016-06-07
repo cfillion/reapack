@@ -55,6 +55,36 @@ Config::Config()
 {
 }
 
+void Config::reset()
+{
+  m_install = {false, false};
+  m_browser = {0};
+
+  const vector<pair<string,string> > repos = {
+    {"ReaTeam Scripts",
+      "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
+    {"ReaTeam JSFX",
+      "https://github.com/ReaTeam/JSFX/raw/master/index.xml"},
+    {"MPL Scripts",
+      "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml"},
+    {"X-Raym Scripts",
+      "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml"},
+  };
+
+  restoreSelfRemote();
+
+  for(const auto &pair : repos) {
+    Remote remote = m_remotes.get(pair.first);
+
+    if(!remote)
+      remote.setEnabled(false); // disable by default
+
+    remote.setName(pair.first);
+    remote.setUrl(pair.second);
+    m_remotes.add(remote);
+  }
+}
+
 void Config::migrate()
 {
   const unsigned int version = getUInt(GENERAL_GRP, VERSION_KEY);
@@ -62,18 +92,7 @@ void Config::migrate()
   switch(version) {
   case 0:
     m_isFirstRun = true;
-
-    m_remotes.add({"ReaTeam Scripts",
-      "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml", false});
-
-    m_remotes.add({"ReaTeam JSFX",
-      "https://github.com/ReaTeam/JSFX/raw/master/index.xml", false});
-
-    m_remotes.add({"MPL Scripts",
-      "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml", false});
-
-    m_remotes.add({"X-Raym Scripts",
-      "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml", false});
+    reset();
     break;
   default:
     // configuration is up-to-date, don't write anything now
@@ -100,7 +119,6 @@ void Config::read(const Path &path)
   };
 
   readRemotes();
-  restoreSelfRemote();
   migrate();
 }
 
@@ -170,9 +188,10 @@ void Config::setString(const auto_char *group,
     make_autostring(val).c_str(), m_path.c_str());
 }
 
-unsigned int Config::getUInt(const auto_char *group, const auto_string &key) const
+unsigned int Config::getUInt(const auto_char *group,
+  const auto_string &key, const unsigned int fallback) const
 {
-  return GetPrivateProfileInt(group, key.c_str(), 0, m_path.c_str());
+  return GetPrivateProfileInt(group, key.c_str(), fallback, m_path.c_str());
 }
 
 void Config::setUInt(const auto_char *group, const auto_string &key,
