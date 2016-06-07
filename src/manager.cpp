@@ -108,7 +108,7 @@ void Manager::onCommand(const int id, int)
       // IDOK -> continue to next case (IDCANCEL)
     }
     else {
-      setChange(-m_uninstall.size());
+      setChange(-(int)m_uninstall.size());
       m_uninstall.clear();
       refresh();
       break;
