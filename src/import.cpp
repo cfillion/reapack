@@ -148,7 +148,7 @@ bool Import::import(const Remote &remote)
         AUTO_STR("This repository is protected and cannot be overwritten."),
         TITLE, MB_OK);
 
-      return false;
+      return true;
     }
     else if(existing.url() != remote.url()) {
       auto_char msg[1024] = {};
@@ -169,7 +169,7 @@ bool Import::import(const Remote &remote)
         make_autostring(remote.name()).c_str());
       MessageBox(handle(), msg, TITLE, MB_OK);
 
-      return false;
+      return true;
     }
     else {
       Transaction *tx = m_reapack->setupTransaction();
