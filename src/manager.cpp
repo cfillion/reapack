@@ -83,6 +83,9 @@ void Manager::onCommand(const int id, int)
   case ACTION_REFRESH:
     refreshIndex();
     break;
+  case ACTION_COPYURL:
+    copyUrl();
+    break;
   case ACTION_UNINSTALL:
     uninstall();
     break;
@@ -126,8 +129,6 @@ void Manager::onCommand(const int id, int)
     const int action = id >> 8;
     if(action == ACTION_ABOUT)
       about(id & 0xff);
-    else if(action == ACTION_COPYURL)
-      copyUrl(id & 0xff);
     break;
   }
 }
@@ -157,7 +158,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   menu.addSeparator();
 
   menu.addAction(AUTO_STR("&Refresh"), ACTION_REFRESH);
-  menu.addAction(AUTO_STR("&Copy URL"), index | (ACTION_COPYURL << 8));
+  menu.addAction(AUTO_STR("&Copy URL"), ACTION_COPYURL);
 
   const UINT uninstallAction =
     menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
@@ -204,14 +205,8 @@ bool Manager::onKeyDown(const int key, const int mods)
     m_list->selectAll();
   else if(mods == (CtrlModifier | ShiftModifier) && key == 'A')
     m_list->unselectAll();
-  else if(mods == CtrlModifier && key == 'C') {
-    vector<string> values;
-
-    for(const int index : m_list->selection(false))
-      values.push_back(getRemote(index).url());
-
-    setClipboard(values);
-  }
+  else if(mods == CtrlModifier && key == 'C')
+    copyUrl();
   else
     return false;
 
@@ -335,12 +330,14 @@ void Manager::about(const int index)
   m_reapack->about(getRemote(index), handle());
 }
 
-void Manager::copyUrl(const int index)
+void Manager::copyUrl()
 {
-  const Remote &remote = getRemote(index);
+  vector<string> values;
 
-  if(remote)
-    setClipboard(remote.url());
+  for(const int index : m_list->selection(false))
+    values.push_back(getRemote(index).url());
+
+  setClipboard(values);
 }
 
 bool Manager::import()

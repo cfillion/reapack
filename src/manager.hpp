@@ -53,7 +53,7 @@ private:
   void toggle(boost::optional<bool> &, bool current);
   void refreshIndex();
   void about(int index);
-  void copyUrl(int index);
+  void copyUrl();
   void launchBrowser();
   void options();
 
