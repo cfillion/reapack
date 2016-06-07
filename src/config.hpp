@@ -38,9 +38,11 @@ class Config {
 public:
   Config();
 
-  void reset();
   void read(const Path &);
   void write();
+
+  void resetOptions();
+  void restoreDefaultRemotes();
 
   bool isFirstRun() const { return m_isFirstRun; }
   RemoteList *remotes() { return &m_remotes; }
@@ -64,6 +66,7 @@ private:
   InstallOpts m_install;
   BrowserOpts m_browser;
 
+  void readOption(bool &, const auto_char *, const auto_string &);
   void readRemotes();
   void restoreSelfRemote();
   void writeRemotes();

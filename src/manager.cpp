@@ -93,7 +93,8 @@ void Manager::onCommand(const int id, int)
     toggle(m_bleedingEdge, m_config->install()->bleedingEdge);
     break;
   case ACTION_RESETCONFIG:
-    m_config->reset();
+    m_config->resetOptions();
+    m_config->restoreDefaultRemotes();
     refresh();
     break;
   case ACTION_SELECT:

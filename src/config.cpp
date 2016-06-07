@@ -50,16 +50,19 @@ static auto_string ArrayKey(const auto_string &key, const unsigned int i)
 static const int BUFFER_SIZE = 2083;
 
 Config::Config()
-  : m_isFirstRun(false), m_version(0), m_install(), m_browser(),
-    m_remotesIniSize(0)
+  : m_isFirstRun(false), m_version(0), m_remotesIniSize(0)
 {
+  resetOptions();
 }
 
-void Config::reset()
+void Config::resetOptions()
 {
   m_install = {false, false};
   m_browser = {0};
+}
 
+void Config::restoreDefaultRemotes()
+{
   const vector<pair<string,string> > repos = {
     {"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
@@ -70,8 +73,6 @@ void Config::reset()
     {"X-Raym Scripts",
       "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml"},
   };
-
-  restoreSelfRemote();
 
   for(const auto &pair : repos) {
     Remote remote = m_remotes.get(pair.first);
@@ -92,7 +93,7 @@ void Config::migrate()
   switch(version) {
   case 0:
     m_isFirstRun = true;
-    reset();
+    restoreDefaultRemotes();
     break;
   default:
     // configuration is up-to-date, don't write anything now
@@ -109,16 +110,16 @@ void Config::read(const Path &path)
 {
   m_path = make_autostring(path.join());
 
-  m_install = {
-    getUInt(INSTALL_GRP, AUTOINSTALL_KEY) > 0,
-    getUInt(INSTALL_GRP, PRERELEASES_KEY) > 0,
-  };
+  m_install.autoInstall = getUInt(INSTALL_GRP,
+    AUTOINSTALL_KEY, m_install.autoInstall) > 0;
+  m_install.bleedingEdge = getUInt(INSTALL_GRP,
+    PRERELEASES_KEY, m_install.bleedingEdge) > 0;
 
-  m_browser = {
-    getUInt(BROWSER_GRP, TYPEFILTER_KEY),
-  };
+  m_browser.typeFilter = getUInt(BROWSER_GRP,
+    TYPEFILTER_KEY, m_browser.typeFilter);
 
   readRemotes();
+  restoreSelfRemote();
   migrate();
 }
 
