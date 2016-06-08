@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="2fb9344407908eb332f25bfbf023094a35fc5a8c" name="ReaPack">
+<index version="1" commit="26ed36c5c1670193248af88e6d31eb816b67d729" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -175,6 +175,25 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.0rc2/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.0rc2/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.0rc2/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.0rc3" author="cfillion" time="2016-06-08T00:21:45Z">
+        <changelog><![CDATA[Added:
++ manager: add restore default settings feature
+--
+Changed:
++ browser: don't uninstall packages from protected repositories
++ import: open the manager along with the import dialog
++ manager: consider the whole selection when building the context menu
++ manager: disable the apply button when config is unchanged
++ manager: make copy url use the whole selection
++ manager: prompt to apply changes when clicking on browse packages button
+--
+Fixed:
++ win32: support unicode chars in REAPER resource path]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
