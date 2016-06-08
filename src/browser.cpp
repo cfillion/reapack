@@ -827,7 +827,7 @@ void Browser::setTarget(const int index, const Version *target, const bool toggl
 
   if(toggle && entry->target && *entry->target == target)
     resetTarget(index);
-  else if(entry) {
+  else {
     entry->target = target;
     m_actions.insert(entry);
     updateAction(index);
@@ -837,6 +837,7 @@ void Browser::setTarget(const int index, const Version *target, const bool toggl
 void Browser::resetTarget(const int index)
 {
   Entry *entry = getEntry(index);
+
   if(!entry->target)
     return;
 
