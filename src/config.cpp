@@ -61,6 +61,19 @@ void Config::resetOptions()
   m_browser = {0};
 }
 
+void Config::restoreSelfRemote()
+{
+  const string name = "ReaPack";
+  const string url = "https://github.com/cfillion/reapack/raw/master/index.xml";
+
+  Remote remote = m_remotes.get(name);
+  remote.setName(name);
+  remote.setUrl(url);
+  remote.protect();
+
+  m_remotes.add(remote);
+}
+
 void Config::restoreDefaultRemotes()
 {
   const vector<pair<string,string> > repos = {
@@ -133,19 +146,6 @@ void Config::write()
   setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
 
   writeRemotes();
-}
-
-void Config::restoreSelfRemote()
-{
-  const string name = "ReaPack";
-  const string url = "https://github.com/cfillion/reapack/raw/master/index.xml";
-
-  Remote remote = m_remotes.get(name);
-  remote.setName(name);
-  remote.setUrl(url);
-  remote.protect();
-
-  m_remotes.add(remote);
 }
 
 void Config::readRemotes()
