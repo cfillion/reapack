@@ -32,7 +32,7 @@
 
 using namespace std;
 
-const char *ReaPack::VERSION = "1.0rc2";
+const char *ReaPack::VERSION = "1.0rc3";
 const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 
 #ifdef _WIN32
