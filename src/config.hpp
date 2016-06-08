@@ -66,7 +66,6 @@ private:
   InstallOpts m_install;
   BrowserOpts m_browser;
 
-  void readOption(bool &, const auto_char *, const auto_string &);
   void readRemotes();
   void restoreSelfRemote();
   void writeRemotes();
