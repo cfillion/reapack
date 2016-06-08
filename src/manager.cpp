@@ -37,7 +37,7 @@ enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
-    m_reapack(reapack), m_config(reapack->config()), m_list(0),
+    m_reapack(reapack), m_config(reapack->config()), m_list(nullptr),
     m_changes(0), m_importing(false)
 {
 }
