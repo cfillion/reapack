@@ -1,19 +1,8 @@
-@version 1.0rc3
+@version 1.0
 @author cfillion
 @changelog
-  Added:
-  + manager: add restore default settings feature
-  --
   Changed:
-  + browser: don't uninstall packages from protected repositories
-  + import: open the manager along with the import dialog
-  + manager: consider the whole selection when building the context menu
-  + manager: disable the apply button when config is unchanged
-  + manager: make copy url use the whole selection
-  + manager: prompt to apply changes when clicking on browse packages button
-  --
-  Fixed:
-  + win32: support unicode chars in REAPER resource path
+  + make the transaction report dialog a little bigger
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
