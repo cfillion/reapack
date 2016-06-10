@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="26ed36c5c1670193248af88e6d31eb816b67d729" name="ReaPack">
+<index version="1" commit="7b06d31a2b806bfedb19172e2314ff274c1dd4a2" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -194,6 +194,14 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.0rc3/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.0" author="cfillion" time="2016-06-10T21:17:24Z">
+        <changelog><![CDATA[Changed:
++ make the transaction report dialog a little bigger]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
