@@ -220,6 +220,7 @@ Visit <http://www.gnu.org/licenses/> to get a copy of the\line
 GNU Lesser General Public License.\par}
 }
 ]]></description>
+    <link rel="website" href="http://reapack.com">Website</link>
     <link rel="website" href="https://github.com/cfillion/reapack/wiki">User Guide</link>
     <link rel="website" href="https://github.com/cfillion/reapack/issues">Bug Tracker</link>
     <link rel="website" href="https://github.com/cfillion/reapack/tree/master">Source Code</link>
