@@ -429,7 +429,7 @@ Transaction *ReaPack::setupTransaction()
       return;
 
     LockDialog managerLock(m_manager);
-    LockDialog cleanupLock(m_browser);
+    LockDialog browserLock(m_browser);
 
     if(m_tx->taskCount() > 0 || receipt.hasErrors())
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
