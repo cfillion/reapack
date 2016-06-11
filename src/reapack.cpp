@@ -431,9 +431,7 @@ Transaction *ReaPack::setupTransaction()
     LockDialog managerLock(m_manager);
     LockDialog cleanupLock(m_browser);
 
-    if(m_tx->taskCount() == 0 && !receipt.hasErrors())
-      ShowMessageBox("Nothing to do!", "ReaPack", MB_OK);
-    else
+    if(m_tx->taskCount() > 0 || receipt.hasErrors())
       Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
   });
 
