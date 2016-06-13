@@ -87,7 +87,7 @@ int Database::version() const
 
 int Database::errorCode() const
 {
-  return sqlite3_extended_errcode(m_db);
+  return sqlite3_errcode(m_db);
 }
 
 void Database::begin()

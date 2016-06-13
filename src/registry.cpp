@@ -169,7 +169,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
       m_insertFile->exec();
     }
     catch(const reapack_error &) {
-      if(conflicts && m_db.errorCode() == SQLITE_CONSTRAINT_UNIQUE) {
+      if(conflicts && m_db.errorCode() == SQLITE_CONSTRAINT) {
         hasConflicts = true;
         conflicts->push_back(path);
       }

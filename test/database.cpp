@@ -171,7 +171,7 @@ TEST_CASE("sqlite error code", M) {
   }
   catch(const reapack_error &) {}
 
-  REQUIRE(db.errorCode() == SQLITE_CONSTRAINT_UNIQUE);
+  REQUIRE(db.errorCode() == SQLITE_CONSTRAINT);
 }
 
 TEST_CASE("invalid string column", M) {
