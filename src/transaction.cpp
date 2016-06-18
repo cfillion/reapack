@@ -31,8 +31,8 @@
 
 using namespace std;
 
-Transaction::Transaction()
-  : m_isCancelled(false)
+Transaction::Transaction(Config *config)
+  : m_isCancelled(false), m_config(config)
 {
   m_registry = new Registry(Path::prefixRoot(Path::REGISTRY));
 
@@ -70,10 +70,14 @@ Transaction::~Transaction()
   delete m_registry;
 }
 
-void Transaction::synchronize(const Remote &remote, const InstallOpts &opts)
+void Transaction::synchronize(const Remote &remote, const bool forceAutoInstall)
 {
   // show the report dialog or "nothing to do" even if no task are ran
   m_receipt.setEnabled(true);
+
+  InstallOpts opts = *m_config->install();
+  if(forceAutoInstall)
+    opts.autoInstall = true;
 
   fetchIndex(remote, [=] {
     IndexPtr ri;
@@ -125,7 +129,7 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   if(m_remotes.count(name) > 1)
     return;
 
-  Download *dl = Index::fetch(remote, true);
+  Download *dl = Index::fetch(remote, true, *m_config->download());
 
   if(!dl) {
     // the index was last downloaded less than a few seconds ago

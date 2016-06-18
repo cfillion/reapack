@@ -92,7 +92,8 @@ void Import::fetch()
 
   setWaiting(true);
 
-  Download *dl = m_download = new Download({}, from_autostring(url));
+  const DownloadOpts &opts = *m_reapack->config()->download();
+  Download *dl = m_download = new Download({}, from_autostring(url), opts);
 
   dl->onFinish([=] {
     const Download::State state = dl->state();

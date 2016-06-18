@@ -34,6 +34,10 @@ struct BrowserOpts {
   unsigned int typeFilter;
 };
 
+struct DownloadOpts {
+  std::string proxy;
+};
+
 class Config {
 public:
   Config();
@@ -45,15 +49,21 @@ public:
   void restoreDefaultRemotes();
 
   bool isFirstRun() const { return m_isFirstRun; }
-  RemoteList *remotes() { return &m_remotes; }
   InstallOpts *install() { return &m_install; }
   BrowserOpts *browser() { return &m_browser; }
+  DownloadOpts *download() { return &m_download; }
+  RemoteList *remotes() { return &m_remotes; }
 
 private:
-  std::string getString(const auto_char *, const auto_string &) const;
-  void setString(const auto_char *, const auto_string &, const std::string &) const;
-  unsigned int getUInt(const auto_char *, const auto_string &, unsigned int = 0) const;
+  std::string getString(const auto_char *grp,
+    const auto_string &key, const std::string &fallback = {}) const;
+  void setString(const auto_char *grp,
+    const auto_string &key, const std::string &val) const;
+
+  unsigned int getUInt(const auto_char *grp,
+    const auto_string &key, unsigned int fallback = 0) const;
   void setUInt(const auto_char *, const auto_string &, unsigned int) const;
+
   void deleteKey(const auto_char *, const auto_string &) const;
   void cleanupArray(const auto_char *, const auto_string &,
     unsigned int begin, unsigned int end) const;
@@ -63,8 +73,10 @@ private:
   auto_string m_path;
   bool m_isFirstRun;
   unsigned int m_version;
+
   InstallOpts m_install;
   BrowserOpts m_browser;
+  DownloadOpts m_download;
 
   void readRemotes();
   void restoreSelfRemote();

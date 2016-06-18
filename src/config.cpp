@@ -37,6 +37,9 @@ static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
 static const auto_char *BROWSER_GRP = AUTO_STR("browser");
 static const auto_char *TYPEFILTER_KEY = AUTO_STR("typefilter");
 
+static const auto_char *DOWNLOAD_GRP = AUTO_STR("download");
+static const auto_char *PROXY_KEY = AUTO_STR("proxy");
+
 static const auto_char *SIZE_KEY = AUTO_STR("size");
 
 static const auto_char *REMOTES_GRP = AUTO_STR("remotes");
@@ -59,6 +62,7 @@ void Config::resetOptions()
 {
   m_install = {false, false};
   m_browser = {0};
+  m_download = {""};
 }
 
 void Config::restoreSelfRemote()
@@ -131,6 +135,8 @@ void Config::read(const Path &path)
   m_browser.typeFilter = getUInt(BROWSER_GRP,
     TYPEFILTER_KEY, m_browser.typeFilter);
 
+  m_download.proxy = getString(DOWNLOAD_GRP, PROXY_KEY, m_download.proxy);
+
   readRemotes();
   restoreSelfRemote();
   migrate();
@@ -144,6 +150,8 @@ void Config::write()
   setUInt(INSTALL_GRP, PRERELEASES_KEY, m_install.bleedingEdge);
 
   setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
+
+  setString(DOWNLOAD_GRP, PROXY_KEY, m_download.proxy);
 
   writeRemotes();
 }
@@ -173,10 +181,11 @@ void Config::writeRemotes()
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-string Config::getString(const auto_char *group, const auto_string &key) const
+string Config::getString(const auto_char *group,
+  const auto_string &key, const string &fallback) const
 {
   auto_char buffer[BUFFER_SIZE];
-  GetPrivateProfileString(group, key.c_str(), AUTO_STR(""),
+  GetPrivateProfileString(group, key.c_str(), make_autostring(fallback).c_str(),
     buffer, sizeof(buffer), m_path.c_str());
 
   return from_autostring(buffer);

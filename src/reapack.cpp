@@ -154,7 +154,7 @@ void ReaPack::synchronizeAll()
     return;
 
   for(const Remote &remote : remotes)
-    tx->synchronize(remote, *m_config->install());
+    tx->synchronize(remote);
 
   tx->runTasks();
 }
@@ -247,10 +247,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
       enable(remote);
 
-      InstallOpts opts = *m_config->install();
-      opts.autoInstall = true;
-      tx->synchronize(remote, opts);
-
+      tx->synchronize(remote, true);
       tx->runTasks();
     }
   }, parent);
@@ -326,7 +323,7 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
 void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
   HWND parent, const bool stale)
 {
-  Download *dl = Index::fetch(remote, stale);
+  Download *dl = Index::fetch(remote, stale, *m_config->download());
 
   if(!dl)
     return;
@@ -400,7 +397,7 @@ Transaction *ReaPack::setupTransaction()
     return m_tx;
 
   try {
-    m_tx = new Transaction;
+    m_tx = new Transaction(m_config);
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());

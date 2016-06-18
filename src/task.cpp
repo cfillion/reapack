@@ -17,6 +17,7 @@
 
 #include "task.hpp"
 
+#include "config.hpp"
 #include "filesystem.hpp"
 #include "source.hpp"
 #include "transaction.hpp"
@@ -66,7 +67,8 @@ void InstallTask::doStart()
     const Path &path = it->first;
     const Source *src = it->second;
 
-    Download *dl = new Download(src->fullName(), src->url());
+    const DownloadOpts &opts = *transaction()->config()->download();
+    Download *dl = new Download(src->fullName(), src->url(), opts);
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
 
     transaction()->downloadQueue()->push(dl);

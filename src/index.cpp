@@ -92,7 +92,8 @@ IndexPtr Index::load(const string &name, const char *data)
   return IndexPtr(ri);
 }
 
-Download *Index::fetch(const Remote &remote, const bool stale)
+Download *Index::fetch(const Remote &remote,
+  const bool stale, const DownloadOpts &opts)
 {
   time_t mtime = 0, now = time(nullptr);
 
@@ -103,7 +104,7 @@ Download *Index::fetch(const Remote &remote, const bool stale)
       return nullptr;
   }
 
-  return new Download(remote.name() + ".xml", remote.url());
+  return new Download(remote.name() + ".xml", remote.url(), opts);
 }
 
 Index::Index(const string &name)

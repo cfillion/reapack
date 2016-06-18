@@ -28,6 +28,7 @@
 #include <set>
 #include <unordered_set>
 
+class Config;
 class Index;
 class Path;
 class Remote;
@@ -43,13 +44,13 @@ public:
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef std::function<void()> CleanupHandler;
 
-  Transaction();
+  Transaction(Config *);
   ~Transaction();
 
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
-  void synchronize(const Remote &, const InstallOpts &);
+  void synchronize(const Remote &, bool forceAutoInstall = false);
   void install(const Version *);
   void setPinned(const Package *, bool pinned);
   void setPinned(const Registry::Entry &, bool pinned);
@@ -63,6 +64,7 @@ public:
   size_t taskCount() const { return m_tasks.size(); }
 
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
+  Config *config() { return m_config; }
 
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
@@ -87,6 +89,7 @@ private:
   void inhibit(const Remote &);
 
   bool m_isCancelled;
+  Config *m_config;
   Registry *m_registry;
   Receipt m_receipt;
 

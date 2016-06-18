@@ -40,8 +40,8 @@ void Download::Cleanup()
   curl_global_cleanup();
 }
 
-Download::Download(const string &name, const string &url)
-  : m_name(name), m_url(url), m_threadHandle(nullptr)
+Download::Download(const string &name, const string &url, const DownloadOpts &opts)
+  : m_name(name), m_url(url), m_opts(opts), m_threadHandle(nullptr)
 {
   reset();
 }
@@ -108,6 +108,8 @@ DWORD WINAPI Download::Worker(void *ptr)
   CURL *curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent);
+  curl_easy_setopt(curl, CURLOPT_PROXY, download->options().proxy.c_str());
+
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
   curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
