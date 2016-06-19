@@ -67,5 +67,6 @@
 #define IDC_ACTIONS    229
 #define IDC_BROWSE     230
 #define IDC_PROXY      231
+#define IDC_VERIFYPEER 232
 
 #endif

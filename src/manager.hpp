@@ -91,6 +91,7 @@ private:
 
   NetworkOpts *m_opts;
   HWND m_proxy;
+  HWND m_verifyPeer;
 };
 
 #endif

@@ -36,6 +36,7 @@ struct BrowserOpts {
 
 struct NetworkOpts {
   std::string proxy;
+  bool verifyPeer;
 };
 
 class Config {

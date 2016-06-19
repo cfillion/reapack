@@ -109,6 +109,8 @@ BEGIN
   EDITTEXT IDC_PROXY, 40, 5, 185, 14, ES_AUTOHSCROLL
   LTEXT "Example: host:port, [ipv6]:port or scheme://host:port",
     IDC_LABEL2, 40, 22, 190, 10
+  CHECKBOX "&Verify the authenticity of SSL certificates", IDC_VERIFYPEER,
+    5, 35, 220, 14, BS_AUTOCHECKBOX | WS_TABSTOP
   DEFPUSHBUTTON "&OK", IDOK, 142, 35, 40, 14
   PUSHBUTTON "&Cancel", IDCANCEL, 185, 35, 40, 14
 END

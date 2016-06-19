@@ -39,6 +39,7 @@ static const auto_char *TYPEFILTER_KEY = AUTO_STR("typefilter");
 
 static const auto_char *NETWORK_GRP = AUTO_STR("network");
 static const auto_char *PROXY_KEY = AUTO_STR("proxy");
+static const auto_char *VERIFYPEER_KEY = AUTO_STR("verifyPeer");
 
 static const auto_char *SIZE_KEY = AUTO_STR("size");
 
@@ -62,7 +63,7 @@ void Config::resetOptions()
 {
   m_install = {false, false};
   m_browser = {0};
-  m_network = {""};
+  m_network = {"", true};
 }
 
 void Config::restoreSelfRemote()
@@ -136,6 +137,8 @@ void Config::read(const Path &path)
     TYPEFILTER_KEY, m_browser.typeFilter);
 
   m_network.proxy = getString(NETWORK_GRP, PROXY_KEY, m_network.proxy);
+  m_network.verifyPeer = getUInt(NETWORK_GRP,
+    VERIFYPEER_KEY, m_network.verifyPeer) > 0;
 
   readRemotes();
   restoreSelfRemote();
@@ -152,6 +155,7 @@ void Config::write()
   setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
 
   setString(NETWORK_GRP, PROXY_KEY, m_network.proxy);
+  setUInt(NETWORK_GRP, VERIFYPEER_KEY, m_network.verifyPeer);
 
   writeRemotes();
 }
