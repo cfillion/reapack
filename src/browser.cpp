@@ -80,7 +80,7 @@ void Browser::onInit()
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR(""), 23},
-    {AUTO_STR("Package Name"), 380},
+    {AUTO_STR("Package"), 380},
     {AUTO_STR("Category"), 150},
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 95},
