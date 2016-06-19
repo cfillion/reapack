@@ -17,12 +17,9 @@
 
 #include "manager.hpp"
 
-#include "about.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
-#include "errors.hpp"
 #include "import.hpp"
-#include "index.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
@@ -33,7 +30,8 @@ using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
        ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_RESETCONFIG };
+       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_NETCONFIG,
+       ACTION_RESETCONFIG };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -94,6 +92,9 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_BLEEDINGEDGE:
     toggle(m_bleedingEdge, m_config->install()->bleedingEdge);
+    break;
+  case ACTION_NETCONFIG:
+    setupNetwork();
     break;
   case ACTION_RESETCONFIG:
     m_config->resetOptions();
@@ -384,11 +385,22 @@ void Manager::options()
   if(m_bleedingEdge.value_or(m_config->install()->bleedingEdge))
     menu.check(index);
 
+  menu.addAction(AUTO_STR("&Network settings..."), ACTION_NETCONFIG);
+
   menu.addSeparator();
 
   menu.addAction(AUTO_STR("&Restore default settings"), ACTION_RESETCONFIG);
 
   menu.show(rect.left, rect.bottom - 1, handle());
+}
+
+void Manager::setupNetwork()
+{
+  const auto ret = Dialog::Show<NetworkConfig>(instance(), handle(),
+    m_config->download());
+
+  if(ret == IDOK)
+    m_config->write();
 }
 
 bool Manager::confirm() const
@@ -473,4 +485,32 @@ Remote Manager::getRemote(const int index) const
   const string &remoteName = from_autostring(row[0]);
 
   return m_config->remotes()->get(remoteName);
+}
+
+NetworkConfig::NetworkConfig(DownloadOpts *opts)
+  : Dialog(IDD_NETCONF_DIALOG), m_opts(opts)
+{
+}
+
+void NetworkConfig::onInit()
+{
+  m_proxy = getControl(IDC_PROXY);
+  SetWindowText(m_proxy, make_autostring(m_opts->proxy).c_str());
+}
+
+void NetworkConfig::onCommand(const int id, int)
+{
+  switch(id) {
+  case IDOK:
+    apply();
+    // then close
+  case IDCANCEL:
+    close(id);
+    break;
+  }
+}
+
+void NetworkConfig::apply()
+{
+  m_opts->proxy = getText(m_proxy);
 }

@@ -29,6 +29,7 @@
 class Config;
 class ReaPack;
 class Remote;
+struct DownloadOpts;
 
 class Manager : public Dialog {
 public:
@@ -56,6 +57,7 @@ private:
   void copyUrl();
   void launchBrowser();
   void options();
+  void setupNetwork();
 
   void setChange(int);
   bool confirm() const;
@@ -74,6 +76,21 @@ private:
   std::set<Remote> m_uninstall;
   boost::optional<bool> m_autoInstall;
   boost::optional<bool> m_bleedingEdge;
+};
+
+class NetworkConfig : public Dialog {
+public:
+  NetworkConfig(DownloadOpts *);
+
+protected:
+  void onInit() override;
+  void onCommand(int, int) override;
+
+private:
+  void apply();
+
+  DownloadOpts *m_opts;
+  HWND m_proxy;
 };
 
 #endif

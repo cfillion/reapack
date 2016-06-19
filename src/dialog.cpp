@@ -283,6 +283,17 @@ HWND Dialog::getControl(const int idc)
   return GetDlgItem(m_handle, idc);
 }
 
+string Dialog::getText(HWND handle)
+{
+  auto_string buffer(4096, 0);
+  GetWindowText(handle, &buffer[0], (int)buffer.size());
+
+  // remove extra nulls from the string
+  buffer.resize(buffer.find(AUTO_STR('\0')));
+
+  return from_autostring(buffer);
+}
+
 void Dialog::onInit()
 {
 }

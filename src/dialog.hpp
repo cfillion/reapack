@@ -91,6 +91,8 @@ public:
   void stopTimer(int id);
   void setClipboard(const std::string &);
   void setClipboard(const std::vector<std::string> &);
+  HWND getControl(int idc);
+  std::string getText(HWND);
 
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
@@ -103,8 +105,6 @@ protected:
 
   Dialog(int templateId);
   virtual ~Dialog();
-
-  HWND getControl(int idc);
 
   template<class T, class... Args>
   T *createControl(int id, Args&&... args)

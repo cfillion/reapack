@@ -79,11 +79,7 @@ void Import::fetch()
   if(m_download)
    return;
 
-  auto_string url(4096, 0);
-  GetWindowText(m_url, &url[0], (int)url.size());
-
-  // remove extra nulls from the string
-  url.resize(url.find(AUTO_STR('\0')));
+  const string &url = getText(m_url);
 
   if(url.empty()) {
     close();
@@ -93,7 +89,7 @@ void Import::fetch()
   setWaiting(true);
 
   const DownloadOpts &opts = *m_reapack->config()->download();
-  Download *dl = m_download = new Download({}, from_autostring(url), opts);
+  Download *dl = m_download = new Download({}, url, opts);
 
   dl->onFinish([=] {
     const Download::State state = dl->state();
