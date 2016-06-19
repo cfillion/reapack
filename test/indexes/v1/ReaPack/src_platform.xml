@@ -1,0 +1,10 @@
+<index version="1">
+  <category name="catname">
+    <reapack name="packname" type="script">
+      <version name="1.0">
+        <source platform="windows" type="effect">https://google.com/</source>
+        <source platform="darwin" type="effect">https://google.com/</source>
+      </version>
+    </reapack>
+  </category>
+</index>

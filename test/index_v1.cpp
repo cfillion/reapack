@@ -232,3 +232,30 @@ TEST_CASE("read index name (from raw data only)") {
     REQUIRE(ri->name() == "");
   }
 }
+
+TEST_CASE("read source platform", M) {
+  UseRootPath root(RIPATH);
+
+  IndexPtr ri = Index::load("src_platform");
+
+  CHECK(ri->packages().size() == 1);
+
+#ifdef __APPLE__
+  const auto expected = Platform::DarwinPlatform;
+#elif _WIN32
+  const auto expected = Platform::WindowsPlatform;
+#endif
+
+  REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
+    == expected);
+}
+
+TEST_CASE("read source type override", M) {
+  UseRootPath root(RIPATH);
+
+  IndexPtr ri = Index::load("src_type");
+
+  CHECK(ri->packages().size() == 1);
+  REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->typeOverride()
+    == Package::EffectType);
+}
