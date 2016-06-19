@@ -397,7 +397,7 @@ void Manager::options()
 void Manager::setupNetwork()
 {
   const auto ret = Dialog::Show<NetworkConfig>(instance(), handle(),
-    m_config->download());
+    m_config->network());
 
   if(ret == IDOK)
     m_config->write();
@@ -487,7 +487,7 @@ Remote Manager::getRemote(const int index) const
   return m_config->remotes()->get(remoteName);
 }
 
-NetworkConfig::NetworkConfig(DownloadOpts *opts)
+NetworkConfig::NetworkConfig(NetworkOpts *opts)
   : Dialog(IDD_NETCONF_DIALOG), m_opts(opts)
 {
 }

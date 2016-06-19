@@ -35,7 +35,7 @@ class Index;
 class Path;
 class Remote;
 class TiXmlElement;
-struct DownloadOpts;
+struct NetworkOpts;
 
 struct Link { std::string name; std::string url; };
 
@@ -50,7 +50,7 @@ public:
   static Path pathFor(const std::string &name);
   static LinkType linkTypeFor(const char *rel);
   static IndexPtr load(const std::string &name, const char *data = nullptr);
-  static Download *fetch(const Remote &, bool stale, const DownloadOpts &);
+  static Download *fetch(const Remote &, bool stale, const NetworkOpts &);
 
   Index(const std::string &name);
   ~Index();

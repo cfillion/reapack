@@ -323,7 +323,7 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
 void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
   HWND parent, const bool stale)
 {
-  Download *dl = Index::fetch(remote, stale, *m_config->download());
+  Download *dl = Index::fetch(remote, stale, *m_config->network());
 
   if(!dl)
     return;

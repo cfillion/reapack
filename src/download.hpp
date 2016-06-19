@@ -47,12 +47,12 @@ public:
   static void Init();
   static void Cleanup();
 
-  Download(const std::string &name, const std::string &url, const DownloadOpts &);
+  Download(const std::string &name, const std::string &url, const NetworkOpts &);
   ~Download();
 
   const std::string &name() const { return m_name; }
   const std::string &url() const { return m_url; }
-  const DownloadOpts &options() const { return m_opts; }
+  const NetworkOpts &options() const { return m_opts; }
 
   State state();
   const std::string &contents();
@@ -87,7 +87,7 @@ private:
 
   std::string m_name;
   std::string m_url;
-  DownloadOpts m_opts;
+  NetworkOpts m_opts;
 
   WDL_Mutex m_mutex;
 

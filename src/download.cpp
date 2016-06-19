@@ -40,7 +40,7 @@ void Download::Cleanup()
   curl_global_cleanup();
 }
 
-Download::Download(const string &name, const string &url, const DownloadOpts &opts)
+Download::Download(const string &name, const string &url, const NetworkOpts &opts)
   : m_name(name), m_url(url), m_opts(opts), m_threadHandle(nullptr)
 {
   reset();

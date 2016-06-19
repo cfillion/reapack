@@ -129,7 +129,7 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   if(m_remotes.count(name) > 1)
     return;
 
-  Download *dl = Index::fetch(remote, true, *m_config->download());
+  Download *dl = Index::fetch(remote, true, *m_config->network());
 
   if(!dl) {
     // the index was last downloaded less than a few seconds ago

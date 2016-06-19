@@ -29,7 +29,7 @@
 class Config;
 class ReaPack;
 class Remote;
-struct DownloadOpts;
+struct NetworkOpts;
 
 class Manager : public Dialog {
 public:
@@ -80,7 +80,7 @@ private:
 
 class NetworkConfig : public Dialog {
 public:
-  NetworkConfig(DownloadOpts *);
+  NetworkConfig(NetworkOpts *);
 
 protected:
   void onInit() override;
@@ -89,7 +89,7 @@ protected:
 private:
   void apply();
 
-  DownloadOpts *m_opts;
+  NetworkOpts *m_opts;
   HWND m_proxy;
 };
 

@@ -88,7 +88,7 @@ void Import::fetch()
 
   setWaiting(true);
 
-  const DownloadOpts &opts = *m_reapack->config()->download();
+  const NetworkOpts &opts = *m_reapack->config()->network();
   Download *dl = m_download = new Download({}, url, opts);
 
   dl->onFinish([=] {

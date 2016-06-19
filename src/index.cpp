@@ -93,7 +93,7 @@ IndexPtr Index::load(const string &name, const char *data)
 }
 
 Download *Index::fetch(const Remote &remote,
-  const bool stale, const DownloadOpts &opts)
+  const bool stale, const NetworkOpts &opts)
 {
   time_t mtime = 0, now = time(nullptr);
 

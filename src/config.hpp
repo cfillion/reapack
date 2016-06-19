@@ -34,7 +34,7 @@ struct BrowserOpts {
   unsigned int typeFilter;
 };
 
-struct DownloadOpts {
+struct NetworkOpts {
   std::string proxy;
 };
 
@@ -51,7 +51,7 @@ public:
   bool isFirstRun() const { return m_isFirstRun; }
   InstallOpts *install() { return &m_install; }
   BrowserOpts *browser() { return &m_browser; }
-  DownloadOpts *download() { return &m_download; }
+  NetworkOpts *network() { return &m_network; }
   RemoteList *remotes() { return &m_remotes; }
 
 private:
@@ -76,7 +76,7 @@ private:
 
   InstallOpts m_install;
   BrowserOpts m_browser;
-  DownloadOpts m_download;
+  NetworkOpts m_network;
 
   void readRemotes();
   void restoreSelfRemote();
