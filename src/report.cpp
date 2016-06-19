@@ -225,6 +225,7 @@ void Contents::fillReport()
       const Source *src = it->second;
 
       printIndented(src->isMain() ? file + '*' : file);
+      printIndented("Source: " + src->url());
 
       // skip duplicate files
       do { it++; } while(it != sources.end() && path == it->first);

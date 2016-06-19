@@ -259,3 +259,12 @@ TEST_CASE("read source type override", M) {
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->typeOverride()
     == Package::EffectType);
 }
+
+TEST_CASE("read package description", M) {
+  UseRootPath root(RIPATH);
+
+  IndexPtr ri = Index::load("pkg_desc");
+
+  CHECK(ri->packages().size() == 1);
+  REQUIRE(ri->category(0)->package(0)->description() == "From the New World");
+}

@@ -218,3 +218,11 @@ TEST_CASE("full name", M) {
     REQUIRE(pack.fullName() == "Remote Name/Category Name/file.name");
   }
 }
+
+TEST_CASE("package description", M) {
+  Package pack(Package::ScriptType, "test.lua");
+  REQUIRE(pack.description().empty());
+
+  pack.setDescription("hello world");
+  REQUIRE(pack.description() == "hello world");
+}

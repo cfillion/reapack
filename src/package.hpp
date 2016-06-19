@@ -47,6 +47,8 @@ public:
   std::string displayType() const;
   const std::string &name() const { return m_name; }
   std::string fullName() const;
+  void setDescription(const std::string &d) { m_desc = d; }
+  std::string description() const { return m_desc; }
 
   void addVersion(const Version *ver);
   const VersionSet &versions() const { return m_versions; }
@@ -59,6 +61,7 @@ private:
 
   Type m_type;
   std::string m_name;
+  std::string m_desc;
   VersionSet m_versions;
 };
 

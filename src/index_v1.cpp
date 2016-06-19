@@ -108,8 +108,13 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
   const char *name = packNode->Attribute("name");
   if(!name) name = "";
 
+  const char *desc = packNode->Attribute("desc");
+  if(!desc) desc = "";
+
   Package *pack = new Package(Package::getType(type), name, cat);
   unique_ptr<Package> ptr(pack);
+
+  pack->setDescription(desc);
 
   TiXmlElement *verNode = packNode->FirstChildElement("version");
 

@@ -36,6 +36,7 @@ static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
 
 static const auto_char *BROWSER_GRP = AUTO_STR("browser");
 static const auto_char *TYPEFILTER_KEY = AUTO_STR("typefilter");
+static const auto_char *SHOWDESCS_KEY = AUTO_STR("showdescs");
 
 static const auto_char *NETWORK_GRP = AUTO_STR("network");
 static const auto_char *PROXY_KEY = AUTO_STR("proxy");
@@ -62,7 +63,7 @@ Config::Config()
 void Config::resetOptions()
 {
   m_install = {false, false};
-  m_browser = {0};
+  m_browser = {0, true};
   m_network = {"", true};
 }
 
@@ -135,6 +136,8 @@ void Config::read(const Path &path)
 
   m_browser.typeFilter = getUInt(BROWSER_GRP,
     TYPEFILTER_KEY, m_browser.typeFilter);
+  m_browser.showDescs = getUInt(BROWSER_GRP,
+    SHOWDESCS_KEY, m_browser.showDescs) > 0;
 
   m_network.proxy = getString(NETWORK_GRP, PROXY_KEY, m_network.proxy);
   m_network.verifyPeer = getUInt(NETWORK_GRP,
@@ -153,6 +156,7 @@ void Config::write()
   setUInt(INSTALL_GRP, PRERELEASES_KEY, m_install.bleedingEdge);
 
   setUInt(BROWSER_GRP, TYPEFILTER_KEY, m_browser.typeFilter);
+  setUInt(BROWSER_GRP, SHOWDESCS_KEY, m_browser.showDescs);
 
   setString(NETWORK_GRP, PROXY_KEY, m_network.proxy);
   setUInt(NETWORK_GRP, VERIFYPEER_KEY, m_network.verifyPeer);

@@ -114,6 +114,7 @@ private:
   void fillMenu(Menu &);
   bool isFiltered(Package::Type) const;
   void toggleFiltered(Package::Type);
+  void toggleDescs();
   void setTarget(const int index, const Version *, bool toggle = true);
   void resetTarget(int index);
   void resetActions(int index);

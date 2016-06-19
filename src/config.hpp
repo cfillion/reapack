@@ -32,6 +32,7 @@ struct InstallOpts {
 
 struct BrowserOpts {
   unsigned int typeFilter;
+  bool showDescs;
 };
 
 struct NetworkOpts {

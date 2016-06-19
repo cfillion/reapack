@@ -48,6 +48,7 @@ enum Action {
   ACTION_HISTORY,
   ACTION_ABOUT,
   ACTION_RESET_ALL,
+  ACTION_SHOWDESCS,
   ACTION_REFRESH,
   ACTION_MANAGE,
 };
@@ -159,6 +160,9 @@ void Browser::onCommand(const int id, const int event)
     break;
   case ACTION_RESET_ALL:
     selectionDo(bind(&Browser::resetActions, this, arg::_1));
+    break;
+  case ACTION_SHOWDESCS:
+    toggleDescs();
     break;
   case ACTION_REFRESH:
     refresh(true);
@@ -367,8 +371,14 @@ void Browser::displayButton()
       menu.check(index);
   }
 
+  const auto config = m_reapack->config()->browser();
   menu.addSeparator();
-  menu.addAction(AUTO_STR("Re&fresh repositories"), ACTION_REFRESH);
+
+  const auto i = menu.addAction(AUTO_STR("Show &descriptions"), ACTION_SHOWDESCS);
+  if(config->showDescs)
+    menu.check(i);
+
+  menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
   menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
 
   menu.show(rect.left, rect.bottom - 1, handle());
@@ -398,7 +408,7 @@ bool Browser::isFiltered(Package::Type type) const
     break;
   }
 
-  auto config = m_reapack->config()->browser();
+  const auto config = m_reapack->config()->browser();
   return ((config->typeFilter >> type) & 1) == 1;
 }
 
@@ -406,6 +416,13 @@ void Browser::toggleFiltered(const Package::Type type)
 {
   auto config = m_reapack->config()->browser();
   config->typeFilter ^= 1 << type;
+  fillList();
+}
+
+void Browser::toggleDescs()
+{
+  auto config = m_reapack->config()->browser();
+  config->showDescs = !config->showDescs;
   fillList();
 }
 
@@ -655,8 +672,18 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
     return display;
   }
-  case NameColumn:
-    return pkg ? pkg->name() : regEntry.package;
+  case NameColumn: {
+    const auto config = m_reapack->config()->browser();
+
+    if(pkg) {
+      if(!config->showDescs || pkg->description().empty())
+        return pkg->name();
+      else
+        return pkg->description();
+    }
+    else
+      return regEntry.package;
+  }
   case CategoryColumn:
     return pkg ? pkg->category()->name() : regEntry.category;
   case VersionColumn:
