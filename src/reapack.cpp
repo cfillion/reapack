@@ -72,7 +72,7 @@ std::string ReaPack::resourcePath()
 }
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : syncAction(), browseAction(),importAction(), configAction(),
+  : syncAction(), browseAction(), importAction(), configAction(),
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
     m_instance(instance)
 {
