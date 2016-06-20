@@ -63,20 +63,20 @@ void Browser::onInit()
 {
   m_applyBtn = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
-  m_tabs = getControl(IDC_TABS);
+  m_view = getControl(IDC_TABS);
   m_displayBtn = getControl(IDC_DISPLAY);
   m_actionsBtn = getControl(IDC_ACTIONS);
 
   disable(m_applyBtn);
   disable(m_actionsBtn);
 
-  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
-  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
-  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
-  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
-  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
-  SendMessage(m_tabs, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
-  SendMessage(m_tabs, CB_SETCURSEL, 0, 0);
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
+  SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
     {AUTO_STR(""), 23},
@@ -716,26 +716,26 @@ Remote Browser::getRemote(const Entry &entry) const
 
 bool Browser::match(const Entry &entry) const
 {
-  switch(currentTab()) {
-  case All:
+  switch(currentView()) {
+  case AllView:
     break;
-  case Queued:
+  case QueuedView:
     if(!m_actions.count(const_cast<Entry *>(&entry)))
       return false;
     break;
-  case Installed:
+  case InstalledView:
     if(!entry.test(InstalledFlag))
       return false;
     break;
-  case OutOfDate:
+  case OutOfDateView:
     if(!entry.test(OutOfDateFlag))
       return false;
     break;
-  case Uninstalled:
+  case UninstalledView:
     if(!entry.test(UninstalledFlag))
       return false;
     break;
-  case Obsolete:
+  case ObsoleteView:
     if(!entry.test(ObsoleteFlag))
       return false;
     break;
@@ -896,7 +896,7 @@ void Browser::updateAction(const int index)
   if(!entry)
     return;
 
-  if(currentTab() == Queued && !m_actions.count(entry)) {
+  if(currentView() == QueuedView && !m_actions.count(entry)) {
     m_list->removeRow(index);
     m_visibleEntries.erase(m_visibleEntries.begin() + index);
     updateDisplayLabel();
@@ -928,9 +928,9 @@ void Browser::selectionDo(const function<void (int)> &func)
   }
 }
 
-auto Browser::currentTab() const -> Tab
+auto Browser::currentView() const -> View
 {
-  return (Tab)SendMessage(m_tabs, CB_GETCURSEL, 0, 0);
+  return (View)SendMessage(m_view, CB_GETCURSEL, 0, 0);
 }
 
 bool Browser::confirm() const

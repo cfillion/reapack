@@ -88,13 +88,13 @@ private:
     RemoteColumn,
   };
 
-  enum Tab {
-    All,
-    Queued,
-    Installed,
-    OutOfDate,
-    Obsolete,
-    Uninstalled,
+  enum View {
+    AllView,
+    QueuedView,
+    InstalledView,
+    OutOfDateView,
+    ObsoleteView,
+    UninstalledView,
   };
 
   Entry makeEntry(const Package *, const Registry::Entry &) const;
@@ -120,7 +120,7 @@ private:
   void resetActions(int index);
   void updateAction(const int index);
   void selectionDo(const std::function<void (int)> &);
-  Tab currentTab() const;
+  View currentView() const;
   bool confirm() const;
   bool apply();
 
@@ -147,7 +147,7 @@ private:
   std::unordered_set<Entry *> m_actions;
 
   HWND m_filterHandle;
-  HWND m_tabs;
+  HWND m_view;
   HWND m_displayBtn;
   HWND m_actionsBtn;
   ListView *m_list;
