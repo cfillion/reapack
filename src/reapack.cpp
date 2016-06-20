@@ -98,10 +98,10 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
 
 ReaPack::~ReaPack()
 {
+  Dialog::DestroyAll();
+
   m_config->write();
   delete m_config;
-
-  Dialog::DestroyAll();
 
   Download::Cleanup();
 
