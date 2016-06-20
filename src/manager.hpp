@@ -41,13 +41,13 @@ public:
 protected:
   void onInit() override;
   void onCommand(int, int) override;
-  void onContextMenu(HWND, int x, int y) override;
   bool onKeyDown(int, int) override;
 
 private:
   ListView::Row makeRow(const Remote &) const;
 
   Remote getRemote(int index) const;
+  bool fillContextMenu(Menu &);
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
   void uninstall();

@@ -25,6 +25,8 @@
 
 #include "encoding.hpp"
 
+class Menu;
+
 class ListView : public Control {
 public:
   enum SortOrder { AscendingOrder, DescendingOrder };
@@ -34,6 +36,7 @@ public:
   typedef std::vector<auto_string> Row;
 
   typedef boost::signals2::signal<void ()> VoidSignal;
+  typedef boost::signals2::signal<bool (Menu &)> MenuSignal;
 
   ListView(const Columns &, HWND handle);
 
@@ -66,9 +69,11 @@ public:
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
   void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }
+  void onContextMenu(const MenuSignal::slot_type &slot) { m_onContextMenu.connect(slot); }
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
+  void onContextMenu(HWND, int, int) override;
 
 private:
   static int adjustWidth(int);
@@ -88,6 +93,7 @@ private:
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;
+  MenuSignal m_onContextMenu;
 };
 
 #endif

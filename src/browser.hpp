@@ -48,7 +48,6 @@ public:
 protected:
   void onInit() override;
   void onCommand(int, int) override;
-  void onContextMenu(HWND, int x, int y) override;
   void onTimer(int) override;
   bool onKeyDown(int, int) override;
   void onClose() override;
@@ -100,6 +99,7 @@ private:
 
   Entry makeEntry(const Package *, const Registry::Entry &) const;
 
+  bool fillContextMenu(Menu &);
   void populate();
   void transferActions();
   bool match(const Entry &) const;

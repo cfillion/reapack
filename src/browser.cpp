@@ -61,6 +61,8 @@ Browser::Browser(ReaPack *reapack)
 
 void Browser::onInit()
 {
+  namespace arg = std::placeholders;
+
   m_applyBtn = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
   m_view = getControl(IDC_TABS);
@@ -90,6 +92,7 @@ void Browser::onInit()
 
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
+  m_list->onContextMenu(bind(&Browser::fillContextMenu, this, arg::_1));
   m_list->sortByColumn(1);
 
   const auto config = m_reapack->config()->browser();
@@ -232,18 +235,13 @@ void Browser::onTimer(const int id)
     checkFilter();
 }
 
-void Browser::onContextMenu(HWND target, const int x, const int y)
+bool Browser::fillContextMenu(Menu &menu)
 {
-  if(target != m_list->handle())
-    return;
-
-  SetFocus(m_list->handle());
-
   m_currentIndex = m_list->itemUnderMouse();
 
-  Menu menu;
   fillMenu(menu);
-  menu.show(x, y, handle());
+
+  return true;
 }
 
 void Browser::fillMenu(Menu &menu)

@@ -17,6 +17,8 @@
 
 #include "listview.hpp"
 
+#include "menu.hpp"
+
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 
@@ -257,6 +259,18 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
     handleColumnClick(lParam);
     break;
   };
+}
+
+void ListView::onContextMenu(HWND dialog, int x, int y)
+{
+  SetFocus(handle());
+
+  Menu menu;
+
+  if(!m_onContextMenu(menu))
+    return;
+
+  menu.show(x, y, dialog);
 }
 
 void ListView::handleDoubleClick()

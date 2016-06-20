@@ -42,6 +42,8 @@ Manager::Manager(ReaPack *reapack)
 
 void Manager::onInit()
 {
+  namespace arg = std::placeholders;
+
   m_apply = getControl(IDAPPLY);
   disable(m_apply);
 
@@ -52,6 +54,7 @@ void Manager::onInit()
   });
 
   m_list->onActivate([=] { about(m_list->currentIndex()); });
+  m_list->onContextMenu(bind(&Manager::fillContextMenu, this, arg::_1));
 
   refresh();
 
@@ -134,21 +137,15 @@ void Manager::onCommand(const int id, int)
   }
 }
 
-void Manager::onContextMenu(HWND target, const int x, const int y)
+bool Manager::fillContextMenu(Menu &menu)
 {
-  if(target != m_list->handle())
-    return;
-
   const int index = m_list->itemUnderMouse();
   const Remote &remote = getRemote(index);
-
-  Menu menu;
 
   if(!remote) {
     menu.addAction(AUTO_STR("&Select all"), ACTION_SELECT);
     menu.addAction(AUTO_STR("&Unselect all"), ACTION_UNSELECT);
-    menu.show(x, y, handle());
-    return;
+    return true;
   }
 
   const UINT enableAction =
@@ -194,7 +191,7 @@ void Manager::onContextMenu(HWND target, const int x, const int y)
   if(allProtected)
     menu.disable(uninstallAction);
 
-  menu.show(x, y, handle());
+  return true;
 }
 
 bool Manager::onKeyDown(const int key, const int mods)

@@ -330,8 +330,22 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
     it->second->onNotify(info, lParam);
 }
 
-void Dialog::onContextMenu(HWND, int, int)
+void Dialog::onContextMenu(HWND, int x, int y)
 {
+  for(const auto &pair : m_controls) {
+    Control *ctrl = pair.second;
+
+    RECT rect;
+    GetWindowRect(ctrl->handle(), &rect);
+
+#ifndef _WIN32
+    // special treatment for SWELL
+    swap(rect.top, rect.bottom);
+#endif
+
+    if(y >= rect.top && y <= rect.bottom && x >= rect.left && x <= rect.right)
+      return ctrl->onContextMenu(m_handle, x, y);
+  }
 }
 
 bool Dialog::onKeyDown(int, int)
