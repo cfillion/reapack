@@ -70,6 +70,7 @@ void Browser::onInit()
   disable(m_applyBtn);
   disable(m_actionsBtn);
 
+  // don't forget to update order of enum View in header file
   SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
   SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
   SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
