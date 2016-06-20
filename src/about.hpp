@@ -25,6 +25,7 @@
 
 class Index;
 class ListView;
+class Menu;
 class Package;
 class RichEdit;
 class TabBar;
@@ -41,9 +42,9 @@ public:
 protected:
   void onInit() override;
   void onCommand(int, int) override;
-  void onContextMenu(HWND, int x, int y) override;
 
 private:
+  bool fillContextMenu(Menu &) const;
   void populate();
   void updatePackages();
   void updateInstalledFiles();

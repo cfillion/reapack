@@ -261,16 +261,17 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
   };
 }
 
-void ListView::onContextMenu(HWND dialog, int x, int y)
+bool ListView::onContextMenu(HWND dialog, int x, int y)
 {
   SetFocus(handle());
 
   Menu menu;
 
   if(!m_onContextMenu(menu))
-    return;
+    return false;
 
   menu.show(x, y, dialog);
+  return true;
 }
 
 void ListView::handleDoubleClick()

@@ -343,8 +343,10 @@ void Dialog::onContextMenu(HWND, int x, int y)
     swap(rect.top, rect.bottom);
 #endif
 
-    if(y >= rect.top && y <= rect.bottom && x >= rect.left && x <= rect.right)
-      return ctrl->onContextMenu(m_handle, x, y);
+    if(y >= rect.top && y <= rect.bottom && x >= rect.left && x <= rect.right) {
+      if(ctrl->onContextMenu(m_handle, x, y))
+        return;
+    }
   }
 }
 

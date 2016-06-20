@@ -73,7 +73,7 @@ public:
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
-  void onContextMenu(HWND, int, int) override;
+  bool onContextMenu(HWND, int, int) override;
 
 private:
   static int adjustWidth(int);

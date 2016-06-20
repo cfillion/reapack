@@ -61,8 +61,6 @@ Browser::Browser(ReaPack *reapack)
 
 void Browser::onInit()
 {
-  namespace arg = std::placeholders;
-
   m_applyBtn = getControl(IDAPPLY);
   m_filterHandle = getControl(IDC_FILTER);
   m_view = getControl(IDC_TABS);
@@ -92,7 +90,7 @@ void Browser::onInit()
 
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
-  m_list->onContextMenu(bind(&Browser::fillContextMenu, this, arg::_1));
+  m_list->onContextMenu(bind(&Browser::fillContextMenu, this, placeholders::_1));
   m_list->sortByColumn(1);
 
   const auto config = m_reapack->config()->browser();
@@ -106,8 +104,6 @@ void Browser::onInit()
 
 void Browser::onCommand(const int id, const int event)
 {
-  namespace arg = std::placeholders;
-
   switch(id) {
   case IDC_TABS:
     if(event == CBN_SELCHANGE)
@@ -139,19 +135,19 @@ void Browser::onCommand(const int id, const int event)
     installLatest(m_currentIndex);
     break;
   case ACTION_LATEST_ALL:
-    selectionDo(bind(&Browser::installLatest, this, arg::_1, false));
+    selectionDo(bind(&Browser::installLatest, this, placeholders::_1, false));
     break;
   case ACTION_REINSTALL:
     reinstall(m_currentIndex);
     break;
   case ACTION_REINSTALL_ALL:
-    selectionDo(bind(&Browser::reinstall, this, arg::_1, false));
+    selectionDo(bind(&Browser::reinstall, this, placeholders::_1, false));
     break;
   case ACTION_UNINSTALL:
     uninstall(m_currentIndex);
     break;
   case ACTION_UNINSTALL_ALL:
-    selectionDo(bind(&Browser::uninstall, this, arg::_1, false));
+    selectionDo(bind(&Browser::uninstall, this, placeholders::_1, false));
     break;
   case ACTION_PIN:
     togglePin(m_currentIndex);
@@ -166,7 +162,7 @@ void Browser::onCommand(const int id, const int event)
     about(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
-    selectionDo(bind(&Browser::resetActions, this, arg::_1));
+    selectionDo(bind(&Browser::resetActions, this, placeholders::_1));
     break;
   case ACTION_SHOWDESCS:
     toggleDescs();

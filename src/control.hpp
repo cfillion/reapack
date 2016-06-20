@@ -44,7 +44,7 @@ public:
 protected:
   friend Dialog;
   virtual void onNotify(LPNMHDR, LPARAM) {}
-  virtual void onContextMenu(HWND, int, int) {}
+  virtual bool onContextMenu(HWND, int, int) { return false; }
 
 private:
   HWND m_handle;

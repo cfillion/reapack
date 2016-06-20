@@ -61,6 +61,7 @@ void About::onInit()
 
   m_packages->sortByColumn(0);
   m_packages->onActivate(bind(&About::packageHistory, this));
+  m_packages->onContextMenu(bind(&About::fillContextMenu, this, placeholders::_1));
 
   m_installedFiles = getControl(IDC_LIST);
 
@@ -109,15 +110,15 @@ void About::onCommand(const int id, int)
   }
 }
 
-void About::onContextMenu(HWND target, const int x, const int y)
+bool About::fillContextMenu(Menu &menu) const
 {
-  if(target != m_packages->handle() || m_packages->currentIndex() < 0)
-    return;
+  if(m_packages->currentIndex() < 0)
+    return false;
 
-  Menu menu;
   menu.addAction(AUTO_STR("Package &Contents"), ACTION_CONTENTS);
   menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
-  menu.show(x, y, handle());
+
+  return true;
 }
 
 void About::populate()

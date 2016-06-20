@@ -42,8 +42,6 @@ Manager::Manager(ReaPack *reapack)
 
 void Manager::onInit()
 {
-  namespace arg = std::placeholders;
-
   m_apply = getControl(IDAPPLY);
   disable(m_apply);
 
@@ -54,7 +52,7 @@ void Manager::onInit()
   });
 
   m_list->onActivate([=] { about(m_list->currentIndex()); });
-  m_list->onContextMenu(bind(&Manager::fillContextMenu, this, arg::_1));
+  m_list->onContextMenu(bind(&Manager::fillContextMenu, this, placeholders::_1));
 
   refresh();
 
@@ -137,7 +135,7 @@ void Manager::onCommand(const int id, int)
   }
 }
 
-bool Manager::fillContextMenu(Menu &menu)
+bool Manager::fillContextMenu(Menu &menu) const
 {
   const int index = m_list->itemUnderMouse();
   const Remote &remote = getRemote(index);
