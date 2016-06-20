@@ -111,7 +111,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent);
   curl_easy_setopt(curl, CURLOPT_PROXY, opts.proxy.c_str());
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, opts.verifyPeer ? 1 : 0);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, opts.verifyPeer);
 
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
@@ -130,7 +130,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   const CURLcode res = curl_easy_perform(curl);
 
   if(download->isAborted()) {
-    download->finish(Aborted, "aborted");
+    download->finish(Aborted, "aborted by user");
     curl_easy_cleanup(curl);
     return 1;
   }
