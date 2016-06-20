@@ -99,7 +99,7 @@ private:
 
   Entry makeEntry(const Package *, const Registry::Entry &) const;
 
-  bool fillContextMenu(Menu &);
+  bool fillContextMenu(Menu &, int index);
   void populate();
   void transferActions();
   bool match(const Entry &) const;

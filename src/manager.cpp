@@ -52,7 +52,8 @@ void Manager::onInit()
   });
 
   m_list->onActivate([=] { about(m_list->currentIndex()); });
-  m_list->onContextMenu(bind(&Manager::fillContextMenu, this, placeholders::_1));
+  m_list->onContextMenu(bind(&Manager::fillContextMenu,
+    this, placeholders::_1, placeholders::_2));
 
   refresh();
 
@@ -135,9 +136,8 @@ void Manager::onCommand(const int id, int)
   }
 }
 
-bool Manager::fillContextMenu(Menu &menu) const
+bool Manager::fillContextMenu(Menu &menu, const int index) const
 {
-  const int index = m_list->itemUnderMouse();
   const Remote &remote = getRemote(index);
 
   if(!remote) {

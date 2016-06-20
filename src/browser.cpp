@@ -90,11 +90,12 @@ void Browser::onInit()
 
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
-  m_list->onContextMenu(bind(&Browser::fillContextMenu, this, placeholders::_1));
-  m_list->sortByColumn(1);
+  m_list->onContextMenu(bind(&Browser::fillContextMenu,
+    this, placeholders::_1, placeholders::_2));
 
   const auto config = m_reapack->config()->browser();
-  m_list->restore(config->list, 1);
+  if(!m_list->restore(config->list, 1))
+    m_list->sortByColumn(1);
 
   updateDisplayLabel();
   refresh();
@@ -231,10 +232,9 @@ void Browser::onTimer(const int id)
     checkFilter();
 }
 
-bool Browser::fillContextMenu(Menu &menu)
+bool Browser::fillContextMenu(Menu &menu, const int index)
 {
-  m_currentIndex = m_list->itemUnderMouse();
-
+  m_currentIndex = index;
   fillMenu(menu);
 
   return true;

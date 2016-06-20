@@ -44,7 +44,7 @@ protected:
   void onCommand(int, int) override;
 
 private:
-  bool fillContextMenu(Menu &) const;
+  bool fillContextMenu(Menu &, int index) const;
   void populate();
   void updatePackages();
   void updateInstalledFiles();

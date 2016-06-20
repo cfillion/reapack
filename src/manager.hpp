@@ -47,7 +47,7 @@ private:
   ListView::Row makeRow(const Remote &) const;
 
   Remote getRemote(int index) const;
-  bool fillContextMenu(Menu &) const;
+  bool fillContextMenu(Menu &, int index) const;
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
   void uninstall();

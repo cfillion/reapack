@@ -36,7 +36,7 @@ public:
   typedef std::vector<auto_string> Row;
 
   typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef boost::signals2::signal<bool (Menu &)> MenuSignal;
+  typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
 
   ListView(const Columns &, HWND handle);
 
@@ -64,7 +64,7 @@ public:
   int columnCount() const { return m_columnSize; }
   bool empty() const { return rowCount() < 1; }
 
-  void restore(const std::string &, int userVersion);
+  bool restore(const std::string &, int userVersion);
   std::string save() const;
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }

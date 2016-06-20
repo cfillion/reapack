@@ -61,7 +61,8 @@ void About::onInit()
 
   m_packages->sortByColumn(0);
   m_packages->onActivate(bind(&About::packageHistory, this));
-  m_packages->onContextMenu(bind(&About::fillContextMenu, this, placeholders::_1));
+  m_packages->onContextMenu(bind(&About::fillContextMenu,
+    this, placeholders::_1, placeholders::_2));
 
   m_installedFiles = getControl(IDC_LIST);
 
@@ -110,7 +111,7 @@ void About::onCommand(const int id, int)
   }
 }
 
-bool About::fillContextMenu(Menu &menu) const
+bool About::fillContextMenu(Menu &menu, const int) const
 {
   if(m_packages->currentIndex() < 0)
     return false;

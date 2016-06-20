@@ -330,11 +330,8 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
     it->second->onNotify(info, lParam);
 }
 
-void Dialog::onContextMenu(HWND, int x, int y)
+void Dialog::onContextMenu(HWND target, const int x, const int y)
 {
-  // target HWND is not always accurate:
-  // on OS X it does not match the listview when hovering the column header
-
   for(const auto &pair : m_controls) {
     Control *ctrl = pair.second;
 
@@ -349,7 +346,12 @@ void Dialog::onContextMenu(HWND, int x, int y)
     swap(rect.top, rect.bottom);
 #endif
 
-    if(y >= rect.top && y <= rect.bottom && x >= rect.left && x <= rect.right) {
+    // target HWND is not always accurate:
+    // on OS X it does not match the listview when hovering the column header
+    const bool inRect = y >= rect.top && y <= rect.bottom
+      && x >= rect.left && x <= rect.right;
+
+    if(target == ctrl->handle() || inRect) {
       if(ctrl->onContextMenu(m_handle, x, y))
         return;
     }

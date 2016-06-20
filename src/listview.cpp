@@ -265,12 +265,27 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 {
   SetFocus(handle());
 
+  int index = itemUnderMouse();
+
+#ifdef ListView_GetItemPosition // unsuported by SWELL
+  if(x == 0xffff) {
+    index = max(0, currentIndex());
+
+    POINT point{};
+    ListView_GetItemPosition(handle(), translate(index), &point);
+    ClientToScreen(handle(), &point);
+     x = point.x;
+     y = point.y;
+  }
+#endif
+
   Menu menu;
 
-  if(!m_onContextMenu(menu))
+  if(!m_onContextMenu(menu, index))
     return false;
 
   menu.show(x, y, dialog);
+
   return true;
 }
 
@@ -348,10 +363,13 @@ int ListView::adjustWidth(const int points)
 #endif
 }
 
-void ListView::restore(const string &data, const int userVersion)
+bool ListView::restore(const string &data, const int userVersion)
 {
   m_userVersion = userVersion; // for save()
   setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
+
+  if(data.empty())
+    return false;
 
   int col = -2;
   vector<int> order(m_columnSize);
@@ -372,13 +390,13 @@ void ListView::restore(const string &data, const int userVersion)
       right = stoi(second.c_str());
     }
     catch(logic_error &) {
-      return; // data is invalid! aborting.
+      return false; // data is invalid! aborting.
     }
 
     switch(col) {
     case -2: // version
       if(left != userVersion || right != VERSION)
-        return;
+        return false;
       break;
     case -1: // sort
       if(left < m_columnSize)
@@ -400,6 +418,8 @@ void ListView::restore(const string &data, const int userVersion)
     order[col] = col;
 
   ListView_SetColumnOrderArray(handle(), m_columnSize, &order[0]);
+
+  return true;
 }
 
 string ListView::save() const
