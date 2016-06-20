@@ -92,6 +92,9 @@ void Browser::onInit()
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
   m_list->sortByColumn(1);
 
+  const auto config = m_reapack->config()->browser();
+  m_list->restore(config->list, 1);
+
   updateDisplayLabel();
   refresh();
 
@@ -215,6 +218,12 @@ bool Browser::onKeyDown(const int key, const int mods)
     return false;
 
   return true;
+}
+
+void Browser::onClose()
+{
+  auto config = m_reapack->config()->browser();
+  config->list = m_list->save();
 }
 
 void Browser::onTimer(const int id)

@@ -156,6 +156,8 @@ void Dialog::Destroy(Dialog *dlg)
   if(dlg->isVisible())
     dlg->onHide();
 
+  dlg->onClose();
+
   delete dlg;
 }
 
@@ -335,4 +337,8 @@ void Dialog::onContextMenu(HWND, int, int)
 bool Dialog::onKeyDown(int, int)
 {
   return false;
+}
+
+void Dialog::onClose()
+{
 }

@@ -42,6 +42,7 @@ public:
   void replaceRow(int index, const Row &);
   void removeRow(int index);
   void resizeColumn(int index, int width);
+  int columnSize(int index) const;
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder);
   void clear();
@@ -60,6 +61,9 @@ public:
   int columnCount() const { return m_columnSize; }
   bool empty() const { return rowCount() < 1; }
 
+  void restore(const std::string &, int userVersion);
+  std::string save() const;
+
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
   void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }
 
@@ -76,6 +80,7 @@ private:
   int translate(int userIndex) const;
   int translateBack(int internalIndex) const;
 
+  int m_userVersion;
   int m_columnSize;
   int m_sortColumn;
   SortOrder m_sortOrder;

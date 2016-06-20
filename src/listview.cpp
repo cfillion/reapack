@@ -18,6 +18,7 @@
 #include "listview.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <sstream>
 
 #ifdef _WIN32
 #include <commctrl.h>
@@ -25,8 +26,12 @@
 
 using namespace std;
 
+static const unsigned short VERSION = 1;
+static const char FIELD_END = '\x20';
+static const char RECORD_END = ',';
+
 ListView::ListView(const Columns &columns, HWND handle)
-  : Control(handle), m_columnSize(0),
+  : Control(handle), m_userVersion(0), m_columnSize(0),
     m_sortColumn(-1), m_sortOrder(AscendingOrder)
 {
   for(const Column &col : columns)
@@ -114,6 +119,11 @@ void ListView::removeRow(const int userIndex)
 void ListView::resizeColumn(const int index, const int width)
 {
   ListView_SetColumnWidth(handle(), index, adjustWidth(width));
+}
+
+int ListView::columnSize(const int index) const
+{
+  return ListView_GetColumnWidth(handle(), index);
 }
 
 void ListView::sort()
@@ -321,4 +331,88 @@ int ListView::adjustWidth(const int points)
 #else
   return points;
 #endif
+}
+
+void ListView::restore(const string &data, const int userVersion)
+{
+  m_userVersion = userVersion; // for save()
+  setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
+
+  int col = -2;
+  vector<int> order(m_columnSize);
+  istringstream stream(data);
+
+  while(true) {
+    string line, first, second;
+    getline(stream, line, RECORD_END);
+
+    istringstream lineStream(line);
+    getline(lineStream, first, FIELD_END);
+    getline(lineStream, second, FIELD_END);
+
+    int left, right;
+
+    try {
+      left = stoi(first.c_str());
+      right = stoi(second.c_str());
+    }
+    catch(logic_error &) {
+      return; // data is invalid! aborting.
+    }
+
+    switch(col) {
+    case -2: // version
+      if(left != userVersion || right != VERSION)
+        return;
+      break;
+    case -1: // sort
+      if(left < m_columnSize)
+        sortByColumn(left, right == 0 ? AscendingOrder : DescendingOrder);
+      break;
+    default:
+      order[col] = left;
+      // raw size should not go through adjustSize (via resizeColumn)
+      ListView_SetColumnWidth(handle(), col, right);
+      break;
+    }
+
+    if(stream.eof() || ++col >= m_columnSize)
+      break;
+  }
+
+  // finish filling for other columns
+  for(col++; col < m_columnSize; col++)
+    order[col] = col;
+
+  ListView_SetColumnOrderArray(handle(), m_columnSize, &order[0]);
+}
+
+string ListView::save() const
+{
+  vector<int> order(m_columnSize);
+  ListView_GetColumnOrderArray(handle(), m_columnSize, &order[0]);
+
+  ostringstream stream;
+
+  stream
+    << m_userVersion << FIELD_END
+    << VERSION << RECORD_END;
+
+  stream
+    << m_sortColumn << FIELD_END
+    << m_sortOrder << RECORD_END;
+
+  int i = 0;
+  while(true) {
+    stream
+      << order[i] << FIELD_END
+      << columnSize(i);
+
+    if(++i < m_columnSize)
+      stream << RECORD_END;
+    else
+      break;
+  }
+
+  return stream.str();
 }

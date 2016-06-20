@@ -51,6 +51,7 @@ protected:
   void onContextMenu(HWND, int x, int y) override;
   void onTimer(int) override;
   bool onKeyDown(int, int) override;
+  void onClose() override;
 
 private:
   enum Flag {
