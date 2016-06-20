@@ -338,7 +338,7 @@ TEST_CASE("version date", M) {
 
   SECTION("out of range") {
     ver.setTime("2016-99-99T99:99:99Z");
-    ver.displayTime(); // no crash
+    REQUIRE(ver.displayTime() == "");
   }
 }
 

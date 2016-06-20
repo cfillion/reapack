@@ -23,6 +23,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cctype>
+#include <iomanip>
 #include <regex>
 
 using namespace std;
@@ -137,16 +138,13 @@ void Version::setChangelog(const string &changelog)
 
 void Version::setTime(const char *iso8601)
 {
-  unsigned int year, month, day;
-  size_t n = sscanf(iso8601, "%u-%u-%u", &year, &month, &day);
+  tm time = {};
 
-  if(n < 3 || year < 1900 || month < 1 || month > 12 || day < 1 || day > 31)
-    return;
+  istringstream stream(iso8601);
+  stream >> std::get_time(&time, "%Y-%m-%d");
 
-  m_time = {};
-  m_time.tm_year = year - 1900;
-  m_time.tm_mon = month - 1;
-  m_time.tm_mday = day;
+  if(stream.good())
+    swap(m_time, time);
 }
 
 string Version::displayTime() const
