@@ -332,8 +332,14 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 
 void Dialog::onContextMenu(HWND, int x, int y)
 {
+  // target HWND is not always accurate:
+  // on OS X it does not match the listview when hovering the column header
+
   for(const auto &pair : m_controls) {
     Control *ctrl = pair.second;
+
+    if(!IsWindowVisible(ctrl->handle()))
+      continue;
 
     RECT rect;
     GetWindowRect(ctrl->handle(), &rect);
