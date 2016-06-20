@@ -1,10 +1,11 @@
 @version 1.0
 @author cfillion
-@changelog
-  Changed:
-  + make the transaction report dialog a little bigger
+@description ReaPack: Package manager for REAPER
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32] reaper_reapack32.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
+@changelog
+  Changed:
+  + make the transaction report dialog a little bigger
