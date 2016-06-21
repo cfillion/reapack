@@ -338,6 +338,9 @@ void Dialog::onContextMenu(HWND target, const int x, const int y)
     if(!IsWindowVisible(ctrl->handle()))
       continue;
 
+    // target HWND is not always accurate:
+    // on OS X it does not match the listview when hovering the column header
+
     RECT rect;
     GetWindowRect(ctrl->handle(), &rect);
 
@@ -346,12 +349,8 @@ void Dialog::onContextMenu(HWND target, const int x, const int y)
     swap(rect.top, rect.bottom);
 #endif
 
-    // target HWND is not always accurate:
-    // on OS X it does not match the listview when hovering the column header
-    const bool inRect = y >= rect.top && y <= rect.bottom
-      && x >= rect.left && x <= rect.right;
-
-    if(target == ctrl->handle() || inRect) {
+    const POINT point{x, y};
+    if(target == ctrl->handle() || PtInRect(&rect, point)) {
       if(ctrl->onContextMenu(m_handle, x, y))
         return;
     }
