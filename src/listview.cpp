@@ -280,7 +280,8 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 #endif
 
   if(point.y < headerHeight) {
-    headerMenu(x, y);
+    if(m_userVersion) // show menu only if header is customizable
+      headerMenu(x, y);
     return true;
   }
 
@@ -387,7 +388,7 @@ void ListView::headerMenu(const int x, const int y)
   enum { ACTION_RESTORE = 800 };
 
   Menu menu;
-  menu.addAction(AUTO_STR("Restore defaults"), ACTION_RESTORE);
+  menu.addAction(AUTO_STR("Reset columns"), ACTION_RESTORE);
   const int id = menu.show(x, y, handle());
 
   if(id == ACTION_RESTORE)
