@@ -33,8 +33,7 @@ static const char FIELD_END = '\x20';
 static const char RECORD_END = ',';
 
 ListView::ListView(const Columns &columns, HWND handle)
-  : Control(handle), m_userVersion(0),
-    m_sortColumn(-1), m_sortOrder(AscendingOrder)
+  : Control(handle), m_userVersion(0), m_sort(), m_defaultSort()
 {
   for(const Column &col : columns)
     addColumn(col);
@@ -131,16 +130,13 @@ int ListView::columnSize(const int index) const
 
 void ListView::sort()
 {
-  if(m_sortColumn > -1)
-    sortByColumn(m_sortColumn, m_sortOrder);
-}
+  if(!m_sort)
+    return;
 
-void ListView::sortByColumn(const int index, const SortOrder order)
-{
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
     ListView *view = reinterpret_cast<ListView *>(param);
-    const int column = view->m_sortColumn;
+    const int column = view->m_sort->column;
 
     auto_string a = view->m_rows[aRow][column];
     boost::algorithm::to_lower(a);
@@ -150,7 +146,7 @@ void ListView::sortByColumn(const int index, const SortOrder order)
 
     const int ret = a.compare(b);
 
-    switch(view->m_sortOrder) {
+    switch(view->m_sort->order) {
     case AscendingOrder:
       return ret;
     case DescendingOrder:
@@ -159,30 +155,41 @@ void ListView::sortByColumn(const int index, const SortOrder order)
     }
   };
 
-  if(m_sortColumn > -1)
+  ListView_SortItems(handle(), compare, (LPARAM)this);
+}
+
+void ListView::sortByColumn(const int index, const SortOrder order)
+{
+  if(m_sort)
     setSortArrow(false);
 
-  m_sortColumn = index;
-  m_sortOrder = order;
-  setSortArrow(true);
+  const auto settings = Sort(index, order);
 
-  ListView_SortItems(handle(), compare, (LPARAM)this);
+  if(!m_sort)
+    m_defaultSort = settings;
+
+  m_sort = settings;
+
+  setSortArrow(true);
 }
 
 void ListView::setSortArrow(const bool set)
 {
+  if(!m_sort)
+    return;
+
   HWND header = ListView_GetHeader(handle());
 
   HDITEM item{};
   item.mask |= HDI_FORMAT;
 
-  if(!Header_GetItem(header, m_sortColumn, &item))
+  if(!Header_GetItem(header, m_sort->column, &item))
     return;
 
   item.fmt &= ~(HDF_SORTDOWN | HDF_SORTUP); // clear
 
   if(set) {
-    switch(m_sortOrder) {
+    switch(m_sort->order) {
     case AscendingOrder:
       item.fmt |= HDF_SORTUP;
       break;
@@ -191,7 +198,7 @@ void ListView::setSortArrow(const bool set)
     }
   }
 
-  Header_SetItem(header, m_sortColumn, &item);
+  Header_SetItem(header, m_sort->column, &item);
 }
 
 void ListView::clear()
@@ -324,8 +331,8 @@ void ListView::handleColumnClick(LPARAM lParam)
   const int col = info->iSubItem;
   SortOrder order = AscendingOrder;
 
-  if(col == m_sortColumn) {
-    switch(m_sortOrder) {
+  if(m_sort && col == m_sort->column) {
+    switch(m_sort->order) {
     case AscendingOrder:
       order = DescendingOrder;
       break;
@@ -336,11 +343,12 @@ void ListView::handleColumnClick(LPARAM lParam)
   }
 
   sortByColumn(col, order);
+  sort();
 }
 
 int ListView::translate(const int userIndex) const
 {
-  if(m_sortColumn < 0 || userIndex < 0)
+  if(!m_sort || userIndex < 0)
     return userIndex;
 
   for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
@@ -358,7 +366,7 @@ int ListView::translate(const int userIndex) const
 
 int ListView::translateBack(const int internalIndex) const
 {
-  if(m_sortColumn < 0 || internalIndex < 0)
+  if(!m_sort || internalIndex < 0)
     return internalIndex;
 
   LVITEM item{};
@@ -466,6 +474,13 @@ void ListView::restoreDefaults()
   }
 
   ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
+
+  if(m_sort && m_defaultSort) {
+    setSortArrow(false);
+    m_sort = m_defaultSort;
+    setSortArrow(true);
+    sort();
+  }
 }
 
 string ListView::save() const
@@ -479,9 +494,10 @@ string ListView::save() const
     << m_userVersion << FIELD_END
     << VERSION << RECORD_END;
 
+  Sort sort = m_sort.value_or(Sort());
   stream
-    << m_sortColumn << FIELD_END
-    << m_sortOrder << RECORD_END;
+    << sort.column << FIELD_END
+    << sort.order << RECORD_END;
 
   int i = 0;
   while(true) {

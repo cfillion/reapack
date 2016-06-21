@@ -93,9 +93,10 @@ void Browser::onInit()
   m_list->onContextMenu(bind(&Browser::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
 
+  m_list->sortByColumn(1);
+
   const auto config = m_reapack->config()->browser();
-  if(!m_list->restore(config->list, 1))
-    m_list->sortByColumn(1);
+  m_list->restore(config->list, 1);
 
   updateDisplayLabel();
   refresh();

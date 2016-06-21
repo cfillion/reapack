@@ -20,6 +20,7 @@
 
 #include "control.hpp"
 
+#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <vector>
 
@@ -77,6 +78,14 @@ protected:
   bool onContextMenu(HWND, int, int) override;
 
 private:
+  struct Sort {
+    Sort(int c = -1, SortOrder o = AscendingOrder)
+      : column(c), order(o) {}
+
+    int column;
+    SortOrder order;
+  };
+
   static int adjustWidth(int);
   void setExStyle(int style, bool enable);
   void addColumn(const Column &);
@@ -90,8 +99,8 @@ private:
   int m_userVersion;
   std::vector<Column> m_cols;
   std::vector<Row> m_rows;
-  int m_sortColumn;
-  SortOrder m_sortOrder;
+  boost::optional<Sort> m_sort;
+  boost::optional<Sort> m_defaultSort;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;
