@@ -33,7 +33,7 @@ static const char FIELD_END = '\x20';
 static const char RECORD_END = ',';
 
 ListView::ListView(const Columns &columns, HWND handle)
-  : Control(handle), m_userVersion(0), m_columnSize(0),
+  : Control(handle), m_userVersion(0),
     m_sortColumn(-1), m_sortOrder(AscendingOrder)
 {
   for(const Column &col : columns)
@@ -62,7 +62,8 @@ void ListView::addColumn(const Column &col)
   item.mask |= LVCF_TEXT;
   item.pszText = const_cast<auto_char *>(col.text.c_str());
 
-  ListView_InsertColumn(handle(), m_columnSize++, &item);
+  ListView_InsertColumn(handle(), columnCount(), &item);
+  m_cols.push_back(col);
 }
 
 int ListView::addRow(const Row &content)
@@ -85,7 +86,7 @@ void ListView::replaceRow(int index, const Row &content)
 {
   m_rows[index] = content;
 
-  const int cols = min(m_columnSize, (int)content.size());
+  const int cols = min(columnCount(), (int)content.size());
   index = translate(index);
 
   for(int i = 0; i < cols; i++) {
@@ -265,6 +266,24 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 {
   SetFocus(handle());
 
+  POINT point{x, y};
+  ScreenToClient(handle(), &point);
+
+#ifdef _WIN32
+  HWND header = ListView_GetHeader(handle());
+  RECT rect;
+  GetWindowRect(header, &rect);
+  const int headerHeight = rect.bottom - rect.top;
+#else
+  // point.y is negative on OS X when hovering the header
+  const int headerHeight = 0;
+#endif
+
+  if(point.y < headerHeight) {
+    headerMenu(x, y);
+    return true;
+  }
+
   int index = itemUnderMouse();
 
 #ifdef ListView_GetItemPosition // unsuported by SWELL
@@ -363,6 +382,18 @@ int ListView::adjustWidth(const int points)
 #endif
 }
 
+void ListView::headerMenu(const int x, const int y)
+{
+  enum { ACTION_RESTORE = 800 };
+
+  Menu menu;
+  menu.addAction(AUTO_STR("Restore defaults"), ACTION_RESTORE);
+  const int id = menu.show(x, y, handle());
+
+  if(id == ACTION_RESTORE)
+    restoreDefaults();
+}
+
 bool ListView::restore(const string &data, const int userVersion)
 {
   m_userVersion = userVersion; // for save()
@@ -372,7 +403,7 @@ bool ListView::restore(const string &data, const int userVersion)
     return false;
 
   int col = -2;
-  vector<int> order(m_columnSize);
+  vector<int> order(columnCount());
   istringstream stream(data);
 
   while(true) {
@@ -399,7 +430,7 @@ bool ListView::restore(const string &data, const int userVersion)
         return false;
       break;
     case -1: // sort
-      if(left < m_columnSize)
+      if(left < columnCount())
         sortByColumn(left, right == 0 ? AscendingOrder : DescendingOrder);
       break;
     default:
@@ -409,23 +440,37 @@ bool ListView::restore(const string &data, const int userVersion)
       break;
     }
 
-    if(stream.eof() || ++col >= m_columnSize)
+    if(stream.eof() || ++col >= columnCount())
       break;
   }
 
   // finish filling for other columns
-  for(col++; col < m_columnSize; col++)
+  for(col++; col < columnCount(); col++)
     order[col] = col;
 
-  ListView_SetColumnOrderArray(handle(), m_columnSize, &order[0]);
+  ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
 
   return true;
 }
 
+void ListView::restoreDefaults()
+{
+  vector<int> order(columnCount());
+
+  for(int i = 0; i < columnCount(); i++) {
+    order[i] = i;
+
+    const Column &col = m_cols[i];
+    resizeColumn(i, col.width);
+  }
+
+  ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
+}
+
 string ListView::save() const
 {
-  vector<int> order(m_columnSize);
-  ListView_GetColumnOrderArray(handle(), m_columnSize, &order[0]);
+  vector<int> order(columnCount());
+  ListView_GetColumnOrderArray(handle(), columnCount(), &order[0]);
 
   ostringstream stream;
 
@@ -443,7 +488,7 @@ string ListView::save() const
       << order[i] << FIELD_END
       << columnSize(i);
 
-    if(++i < m_columnSize)
+    if(++i < columnCount())
       stream << RECORD_END;
     else
       break;

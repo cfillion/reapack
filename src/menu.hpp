@@ -38,7 +38,7 @@ public:
   void addSeparator();
   Menu addMenu(const auto_char *label);
 
-  void show(int x, int y, HWND parent) const;
+  int show(int x, int y, HWND parent) const;
 
   void enableAll();
   void enable(UINT);

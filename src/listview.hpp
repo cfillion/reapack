@@ -61,10 +61,11 @@ public:
   std::vector<int> selection(bool sort = true) const;
   int itemUnderMouse() const;
   int rowCount() const { return (int)m_rows.size(); }
-  int columnCount() const { return m_columnSize; }
+  int columnCount() const { return (int)m_cols.size(); }
   bool empty() const { return rowCount() < 1; }
 
   bool restore(const std::string &, int userVersion);
+  void restoreDefaults();
   std::string save() const;
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
@@ -84,12 +85,13 @@ private:
   void handleColumnClick(LPARAM lpnmlistview);
   int translate(int userIndex) const;
   int translateBack(int internalIndex) const;
+  void headerMenu(int x, int y);
 
   int m_userVersion;
-  int m_columnSize;
+  std::vector<Column> m_cols;
+  std::vector<Row> m_rows;
   int m_sortColumn;
   SortOrder m_sortOrder;
-  std::vector<Row> m_rows;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;

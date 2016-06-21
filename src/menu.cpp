@@ -89,10 +89,15 @@ void Menu::append(MENUITEMINFO &mii)
   InsertMenuItem(m_handle, m_size++, true, &mii);
 }
 
-void Menu::show(const int x, const int y, HWND parent) const
+int Menu::show(const int x, const int y, HWND parent) const
 {
-  TrackPopupMenu(m_handle, TPM_TOPALIGN | TPM_LEFTALIGN,
+  const int command = TrackPopupMenu(m_handle,
+    TPM_TOPALIGN | TPM_LEFTALIGN | TPM_NONOTIFY | TPM_RETURNCMD,
     x, y, 0, parent, nullptr);
+
+  SendMessage(parent, WM_COMMAND, command, 0);
+
+  return command;
 }
 
 void Menu::disableAll()
