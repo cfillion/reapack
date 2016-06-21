@@ -51,7 +51,7 @@ void ListView::setExStyle(const int style, const bool enable)
   ListView_SetExtendedListViewStyleEx(handle(), style, enable ? style : 0);
 }
 
-void ListView::addColumn(const Column &col)
+int ListView::addColumn(const Column &col)
 {
   LVCOLUMN item{};
 
@@ -63,8 +63,11 @@ void ListView::addColumn(const Column &col)
     item.pszText = const_cast<auto_char *>(col.label.c_str());
   }
 
-  ListView_InsertColumn(handle(), columnCount(), &item);
+  const int index = columnCount();
+  ListView_InsertColumn(handle(), index, &item);
   m_cols.push_back(col);
+
+  return index;
 }
 
 int ListView::addRow(const Row &content)
@@ -138,7 +141,11 @@ void ListView::sort()
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
     ListView *view = reinterpret_cast<ListView *>(param);
+
     const int column = view->m_sort->column;
+    const auto it = view->m_sortFuncs.find(column);
+    if(it != view->m_sortFuncs.end())
+      return it->second((int)aRow, (int)bRow);
 
     auto_string a = view->m_rows[aRow][column];
     boost::algorithm::to_lower(a);

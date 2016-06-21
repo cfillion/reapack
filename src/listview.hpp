@@ -22,6 +22,7 @@
 
 #include <boost/optional.hpp>
 #include <boost/signals2.hpp>
+#include <functional>
 #include <vector>
 
 #include "encoding.hpp"
@@ -44,11 +45,13 @@ public:
 
     bool test(ColumnFlag f) const { return (flags & f) != 0; }
   };
+
   typedef std::vector<Column> Columns;
   typedef std::vector<auto_string> Row;
 
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
+  typedef std::function<int (int, int)> SortCallback;
 
   ListView(const Columns &, HWND handle);
 
@@ -56,25 +59,29 @@ public:
   const Row &row(int index) const { return m_rows[index]; }
   void replaceRow(int index, const Row &);
   void removeRow(int index);
-  void resizeColumn(int index, int width);
-  int columnWidth(int index) const;
-  void sort();
-  void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
+  int rowCount() const { return (int)m_rows.size(); }
+  bool empty() const { return rowCount() < 1; }
   void clear();
+  int currentIndex() const;
+  int itemUnderMouse() const;
+
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }
   void unselect(int index) { setSelected(index, false); }
   void selectAll() { select(-1); }
   void unselectAll() { unselect(-1); }
-
   int selectionSize() const;
   bool hasSelection() const { return selectionSize() > 0; }
-  int currentIndex() const;
   std::vector<int> selection(bool sort = true) const;
-  int itemUnderMouse() const;
-  int rowCount() const { return (int)m_rows.size(); }
+
+  int addColumn(const Column &);
+  void resizeColumn(int index, int width);
+  int columnWidth(int index) const;
   int columnCount() const { return (int)m_cols.size(); }
-  bool empty() const { return rowCount() < 1; }
+
+  void sort();
+  void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
+  void setSortCallback(int i, const SortCallback &cb) { m_sortFuncs[i] = cb; }
 
   bool restore(const std::string &, int userVersion);
   std::string save() const;
@@ -99,7 +106,6 @@ private:
 
   static int adjustWidth(int);
   void setExStyle(int style, bool enable);
-  void addColumn(const Column &);
   void setSortArrow(bool);
   void handleDoubleClick();
   void handleColumnClick(LPARAM lpnmlistview);
@@ -112,6 +118,7 @@ private:
   std::vector<Row> m_rows;
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
+  std::map<int, SortCallback> m_sortFuncs;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;
