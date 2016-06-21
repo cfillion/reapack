@@ -48,7 +48,7 @@ public:
   void resizeColumn(int index, int width);
   int columnSize(int index) const;
   void sort();
-  void sortByColumn(int index, SortOrder order = AscendingOrder);
+  void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void clear();
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }

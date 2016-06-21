@@ -158,14 +158,14 @@ void ListView::sort()
   ListView_SortItems(handle(), compare, (LPARAM)this);
 }
 
-void ListView::sortByColumn(const int index, const SortOrder order)
+void ListView::sortByColumn(const int index, const SortOrder order, const bool user)
 {
   if(m_sort)
     setSortArrow(false);
 
   const auto settings = Sort(index, order);
 
-  if(!m_sort)
+  if(!user)
     m_defaultSort = settings;
 
   m_sort = settings;
@@ -342,7 +342,7 @@ void ListView::handleColumnClick(LPARAM lParam)
     }
   }
 
-  sortByColumn(col, order);
+  sortByColumn(col, order, true);
   sort();
 }
 
@@ -440,7 +440,7 @@ bool ListView::restore(const string &data, const int userVersion)
       break;
     case -1: // sort
       if(left < columnCount())
-        sortByColumn(left, right == 0 ? AscendingOrder : DescendingOrder);
+        sortByColumn(left, right == 0 ? AscendingOrder : DescendingOrder, true);
       break;
     default:
       order[col] = left;
