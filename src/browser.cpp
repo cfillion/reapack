@@ -489,10 +489,6 @@ void Browser::refresh(const bool stale)
     if(!m_loaded) {
       m_loaded = true;
       show();
-
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-      m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-#endif
     }
   }, handle(), stale);
 }
