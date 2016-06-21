@@ -86,6 +86,7 @@ void Browser::onInit()
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 95},
     {AUTO_STR("Type"), 70},
+    {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
   });
 
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
@@ -642,10 +643,12 @@ ListView::Row Browser::makeRow(const Entry &entry) const
   const string &version = getValue(VersionColumn, entry);
   const string &author = getValue(AuthorColumn, entry);
   const string &type = getValue(TypeColumn, entry);
+  const string &remote = getValue(RemoteColumn, entry);
 
   return {
     make_autostring(state), make_autostring(name), make_autostring(category),
-    make_autostring(version), make_autostring(author), make_autostring(type)
+    make_autostring(version), make_autostring(author), make_autostring(type),
+    make_autostring(remote),
   };
 }
 
@@ -755,8 +758,9 @@ bool Browser::match(const Entry &entry) const
   const string &name = getValue(NameColumn, entry);
   const string &category = getValue(CategoryColumn, entry);
   const string &author = getValue(AuthorColumn, entry);
+  const string &remote = getValue(RemoteColumn, entry);
 
-  return m_filter.match(name + category + author);
+  return m_filter.match(name + category + author + remote);
 }
 
 auto Browser::getEntry(const int listIndex) -> Entry *

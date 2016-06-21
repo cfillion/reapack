@@ -33,7 +33,8 @@ public:
   enum SortOrder { AscendingOrder, DescendingOrder };
 
   enum ColumnFlag {
-    NoLabelFlag = 1<<0,
+    NoLabelFlag  = 1<<0,
+    CollapseFlag = 1<<1,
   };
 
   struct Column {
@@ -76,8 +77,8 @@ public:
   bool empty() const { return rowCount() < 1; }
 
   bool restore(const std::string &, int userVersion);
-  void restoreDefaults();
   std::string save() const;
+  void resetColumns();
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
   void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }

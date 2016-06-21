@@ -56,7 +56,7 @@ void ListView::addColumn(const Column &col)
   LVCOLUMN item{};
 
   item.mask |= LVCF_WIDTH;
-  item.cx = adjustWidth(col.width);
+  item.cx = col.test(CollapseFlag) ? 0 : adjustWidth(col.width);
 
   if(!col.test(NoLabelFlag)) {
     item.mask |= LVCF_TEXT;
@@ -412,10 +412,31 @@ void ListView::headerMenu(const int x, const int y)
   const int id = menu.show(x, y, handle());
 
   if(id == ACTION_RESTORE)
-    restoreDefaults();
+    resetColumns();
   else if(id >> 8 == 1) {
     const int col = id & 0xff;
     resizeColumn(col, columnWidth(col) ? 0 : m_cols[col].width);
+  }
+}
+
+void ListView::resetColumns()
+{
+  vector<int> order(columnCount());
+
+  for(int i = 0; i < columnCount(); i++) {
+    order[i] = i;
+
+    const Column &col = m_cols[i];
+    resizeColumn(i, col.test(CollapseFlag) ? 0 : col.width);
+  }
+
+  ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
+
+  if(m_sort && m_defaultSort) {
+    setSortArrow(false);
+    m_sort = m_defaultSort;
+    setSortArrow(true);
+    sort();
   }
 }
 
@@ -476,27 +497,6 @@ bool ListView::restore(const string &data, const int userVersion)
   ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
 
   return true;
-}
-
-void ListView::restoreDefaults()
-{
-  vector<int> order(columnCount());
-
-  for(int i = 0; i < columnCount(); i++) {
-    order[i] = i;
-
-    const Column &col = m_cols[i];
-    resizeColumn(i, col.width);
-  }
-
-  ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
-
-  if(m_sort && m_defaultSort) {
-    setSortArrow(false);
-    m_sort = m_defaultSort;
-    setSortArrow(true);
-    sort();
-  }
 }
 
 string ListView::save() const
