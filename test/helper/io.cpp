@@ -23,6 +23,12 @@ ostream &operator<<(ostream &os, const set<Path> &list)
   return os;
 }
 
+ostream &operator<<(ostream &os, const Time &time)
+{
+  os << time.toString();
+  return os;
+}
+
 ostream &operator<<(ostream &os, const Version &ver)
 {
   os << ver.name();

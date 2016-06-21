@@ -84,10 +84,10 @@ TEST_CASE("read version time", M) {
   IndexPtr ri = Index::load("time");
   CHECK(ri->packages().size() == 1);
 
-  const tm &time = ri->category(0)->package(0)->version(0)->time();
-  REQUIRE(time.tm_year == 2016 - 1900);
-  REQUIRE(time.tm_mon == 2 - 1);
-  REQUIRE(time.tm_mday == 12);
+  const Time &time = ri->category(0)->package(0)->version(0)->time();
+  REQUIRE(time.year() == 2016);
+  REQUIRE(time.month() == 2);
+  REQUIRE(time.day() == 12);
 }
 
 TEST_CASE("invalid version tag", M) {

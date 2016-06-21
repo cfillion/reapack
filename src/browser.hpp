@@ -86,6 +86,7 @@ private:
     AuthorColumn,
     TypeColumn,
     RemoteColumn,
+    TimeColumn,
   };
 
   enum View {

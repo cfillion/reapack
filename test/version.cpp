@@ -23,7 +23,7 @@ TEST_CASE("construct null version", M) {
 
   REQUIRE(ver.size() == 0);
   REQUIRE(ver.isStable());
-  REQUIRE(ver.displayTime().empty());
+  REQUIRE_FALSE(ver.time().isValid());
   REQUIRE(ver.package() == nullptr);
   REQUIRE(ver.mainSources().empty());
 }
@@ -317,29 +317,12 @@ TEST_CASE("version author", M) {
 
 TEST_CASE("version date", M) {
   Version ver("1.0");
-  CHECK(ver.time().tm_year == 0);
-  CHECK(ver.time().tm_mon == 0);
-  CHECK(ver.time().tm_mday == 0);
-  CHECK(ver.displayTime() == "");
 
-  SECTION("valid") {
-    ver.setTime("2016-02-12T01:16:40Z");
-    REQUIRE(ver.time().tm_year == 2016 - 1900);
-    REQUIRE(ver.time().tm_mon == 2 - 1);
-    REQUIRE(ver.time().tm_mday == 12);
-    REQUIRE(ver.displayTime() != "");
-  }
+  ver.setTime("2016-02-12T01:16:40Z");
+  REQUIRE(ver.time().year() == 2016);
 
-  SECTION("garbage") {
-    ver.setTime("hello world");
-    REQUIRE(ver.time().tm_year == 0);
-    REQUIRE(ver.displayTime() == "");
-  }
-
-  SECTION("out of range") {
-    ver.setTime("2016-99-99T99:99:99Z");
-    REQUIRE(ver.displayTime() == "");
-  }
+  ver.setTime("hello world");
+  REQUIRE(ver.time().year() == 2016);
 }
 
 TEST_CASE("copy version constructor", M) {
@@ -356,7 +339,7 @@ TEST_CASE("copy version constructor", M) {
   REQUIRE(copy1.isStable() == original.isStable());
   REQUIRE(copy1.author() == original.author());
   REQUIRE(copy1.changelog() == original.changelog());
-  REQUIRE(copy1.displayTime() == original.displayTime());
+  REQUIRE(copy1.time() == original.time());
   REQUIRE(copy1.package() == nullptr);
   REQUIRE(copy1.mainSources().empty());
   REQUIRE(copy1.sources().empty());

@@ -20,11 +20,12 @@
 
 #include <boost/variant.hpp>
 #include <cstdint>
-#include <ctime>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "time.hpp"
 
 class Package;
 class Source;
@@ -55,8 +56,7 @@ public:
   std::string displayAuthor() const;
 
   void setTime(const char *iso8601);
-  const std::tm &time() const { return m_time; }
-  std::string displayTime() const;
+  const Time &time() const { return m_time; }
 
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
@@ -88,7 +88,7 @@ private:
 
   std::string m_author;
   std::string m_changelog;
-  std::tm m_time;
+  Time m_time;
 
   const Package *m_package;
   SourceList m_mainSources;

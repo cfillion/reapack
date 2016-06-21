@@ -141,19 +141,22 @@ void ListView::sort()
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
     ListView *view = reinterpret_cast<ListView *>(param);
-
     const int column = view->m_sort->column;
+
+    int ret;
+
     const auto it = view->m_sortFuncs.find(column);
     if(it != view->m_sortFuncs.end())
-      return it->second((int)aRow, (int)bRow);
+      ret = it->second((int)aRow, (int)bRow);
+    else {
+      auto_string a = view->m_rows[aRow][column];
+      boost::algorithm::to_lower(a);
 
-    auto_string a = view->m_rows[aRow][column];
-    boost::algorithm::to_lower(a);
+      auto_string b = view->m_rows[bRow][column];
+      boost::algorithm::to_lower(b);
 
-    auto_string b = view->m_rows[bRow][column];
-    boost::algorithm::to_lower(b);
-
-    const int ret = a.compare(b);
+      ret = a.compare(b);
+    }
 
     switch(view->m_sort->order) {
     case AscendingOrder:
