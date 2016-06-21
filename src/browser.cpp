@@ -80,7 +80,7 @@ void Browser::onInit()
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR(""), 23},
+    {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
     {AUTO_STR("Package"), 380},
     {AUTO_STR("Category"), 150},
     {AUTO_STR("Version"), 80},

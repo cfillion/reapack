@@ -32,7 +32,17 @@ class ListView : public Control {
 public:
   enum SortOrder { AscendingOrder, DescendingOrder };
 
-  struct Column { auto_string text; int width; };
+  enum ColumnFlag {
+    NoLabelFlag = 1<<0,
+  };
+
+  struct Column {
+    auto_string label;
+    int width;
+    int flags;
+
+    bool test(ColumnFlag f) const { return (flags & f) != 0; }
+  };
   typedef std::vector<Column> Columns;
   typedef std::vector<auto_string> Row;
 
@@ -46,7 +56,7 @@ public:
   void replaceRow(int index, const Row &);
   void removeRow(int index);
   void resizeColumn(int index, int width);
-  int columnSize(int index) const;
+  int columnWidth(int index) const;
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void clear();

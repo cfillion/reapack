@@ -58,8 +58,10 @@ void ListView::addColumn(const Column &col)
   item.mask |= LVCF_WIDTH;
   item.cx = adjustWidth(col.width);
 
-  item.mask |= LVCF_TEXT;
-  item.pszText = const_cast<auto_char *>(col.text.c_str());
+  if(!col.test(NoLabelFlag)) {
+    item.mask |= LVCF_TEXT;
+    item.pszText = const_cast<auto_char *>(col.label.c_str());
+  }
 
   ListView_InsertColumn(handle(), columnCount(), &item);
   m_cols.push_back(col);
@@ -123,7 +125,7 @@ void ListView::resizeColumn(const int index, const int width)
   ListView_SetColumnWidth(handle(), index, adjustWidth(width));
 }
 
-int ListView::columnSize(const int index) const
+int ListView::columnWidth(const int index) const
 {
   return ListView_GetColumnWidth(handle(), index);
 }
@@ -396,11 +398,25 @@ void ListView::headerMenu(const int x, const int y)
   enum { ACTION_RESTORE = 800 };
 
   Menu menu;
+
+  for(int i = 0; i < columnCount(); i++) {
+    const auto id = menu.addAction(m_cols[i].label.c_str(), i | (1 << 8));
+
+    if(columnWidth(id))
+      menu.check(id);
+  }
+
+  menu.addSeparator();
   menu.addAction(AUTO_STR("Reset columns"), ACTION_RESTORE);
+
   const int id = menu.show(x, y, handle());
 
   if(id == ACTION_RESTORE)
     restoreDefaults();
+  else if(id >> 8 == 1) {
+    const int col = id & 0xff;
+    resizeColumn(col, columnWidth(col) ? 0 : m_cols[col].width);
+  }
 }
 
 bool ListView::restore(const string &data, const int userVersion)
@@ -503,7 +519,7 @@ string ListView::save() const
   while(true) {
     stream
       << order[i] << FIELD_END
-      << columnSize(i);
+      << columnWidth(i);
 
     if(++i < columnCount())
       stream << RECORD_END;
