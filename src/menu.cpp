@@ -95,6 +95,7 @@ int Menu::show(const int x, const int y, HWND parent) const
     TPM_TOPALIGN | TPM_LEFTALIGN | TPM_NONOTIFY | TPM_RETURNCMD,
     x, y, 0, parent, nullptr);
 
+  // both send the notification and return the command id
   SendMessage(parent, WM_COMMAND, command, 0);
 
   return command;

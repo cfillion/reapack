@@ -120,7 +120,6 @@ void ListView::removeRow(const int userIndex)
 
   ListView_DeleteItem(handle(), viewIndex);
   m_rows.erase(m_rows.begin() + userIndex);
-
 }
 
 void ListView::resizeColumn(const int index, const int width)
@@ -452,7 +451,7 @@ void ListView::resetColumns()
 
 bool ListView::restore(const string &data, const int userVersion)
 {
-  m_userVersion = userVersion; // for save()
+  m_userVersion = userVersion; // for save(). also enables advanced customization
   setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
 
   if(data.empty())

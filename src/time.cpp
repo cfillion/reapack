@@ -17,6 +17,7 @@
 
 #include "time.hpp"
 
+#include <array>
 #include <iomanip>
 #include <sstream>
 
@@ -57,35 +58,13 @@ string Time::toString() const
 
 int Time::compare(const Time &o) const
 {
-  if(year() > o.year())
-    return 1;
-  else if(year() < o.year())
-    return -1;
+  const array<int, 6> l{year(), month(), day(), hour(), minute(), second()};
+  const array<int, 6> r{o.year(), o.month(), o.day(), o.hour(), o.minute(), o.second()};
 
-  if(month() > o.month())
-    return 1;
-  else if(month() < o.month())
+  if(l < r)
     return -1;
-
-  if(day() > o.day())
+  else if(l > r)
     return 1;
-  else if(day() < o.day())
-    return -1;
-
-  if(hour() > o.hour())
-    return 1;
-  else if(hour() < o.hour())
-    return -1;
-
-  if(minute() > o.minute())
-    return 1;
-  else if(minute() < o.minute())
-    return -1;
-
-  if(second() > o.second())
-    return 1;
-  else if(second() < o.second())
-    return -1;
 
   return 0;
 }
