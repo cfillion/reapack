@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 set arch=%1%
 set program=%2%

@@ -59,24 +59,23 @@ vendor
 3. Download the latest [boost](http://www.boost.org/) and copy the
   `boost` subdirectory into `<reapack>\vendor`
 4. Download the latest [curl](http://curl.haxx.se/download.html) source
-  code and extract it on your computer
-5. Launch "Developer Command Prompt for VS2015" and run the following commands:
-  ```sh
-  cd Path\To\Curl\winbuild
-  
-  "%VCINSTALLDIR%\vcvarsall" x86_amd64
-  nmake /f Makefile.vc mode=static RTLIBCFG=static ENABLE_IDN=no MACHINE=x64
-  
-  "%VCINSTALLDIR%\vcvarsall" x86
-  nmake /f Makefile.vc mode=static RTLIBCFG=static ENABLE_IDN=no MACHINE=x86
+  code and extract it as `vendor/curl`:
   ```
-6. Copy `<curl directory>\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl`
-  to `<reapack directory>\vendor` as `libcurl64`
-7. Copy `<curl directory>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl`
-  to `<reapack directory>\vendor` as `libcurl32`
-8. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
+  reapack> tree vendor
+  vendor
+  ├── curl/
+  │   ├── builds/
+  │   │   └── ...
+  │   ├── winbuild/
+  │   │   ├── Makefile.vc
+  │   │   └── ...
+  │   └── ...
+  └── ...
+  ```
+5. Launch "Developer Command Prompt for VS2015" and run `build_deps.bat`
+6. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
-9. Run `rake` from this directory using
+7. Run `rake` from this directory using
   "Developer Command Prompt for VS2015"
-10. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
+8. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
    to your REAPER plugin folder
