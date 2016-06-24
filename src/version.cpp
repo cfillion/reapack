@@ -53,7 +53,7 @@ Version::~Version()
 
 void Version::parse(const string &str)
 {
-  static const regex pattern("\\d+|[a-zA-Z]+");
+  const regex pattern("\\d+|[a-zA-Z]+");
 
   const auto &begin = sregex_iterator(str.begin(), str.end(), pattern);
   const sregex_iterator end;

@@ -29,8 +29,8 @@ static char DATA_DELIMITER = '|';
 
 static bool ValidateName(const string &name)
 {
-  static const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]+");
-  static const regex invalidPattern("\\.+");
+  const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]+");
+  const regex invalidPattern("\\.+");
 
   smatch match, invalid;
   regex_match(name, match, validPattern);
@@ -44,7 +44,7 @@ static bool ValidateUrl(const string &url)
   using namespace std::regex_constants;
 
   // see http://tools.ietf.org/html/rfc3986#section-2
-  static const regex pattern(
+  const regex pattern(
     "^(?:[a-z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+$", icase);
 
   smatch match;

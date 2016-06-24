@@ -387,7 +387,7 @@ void Browser::displayButton()
   RECT rect;
   GetWindowRect(m_displayBtn, &rect);
 
-  static map<const auto_char *, Package::Type> types = {
+  map<const auto_char *, Package::Type> types = {
     {AUTO_STR("&Scripts"), Package::ScriptType},
     {AUTO_STR("&Effects"), Package::EffectType},
     {AUTO_STR("E&xtensions"), Package::ExtensionType},
