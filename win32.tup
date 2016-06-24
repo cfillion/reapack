@@ -27,6 +27,7 @@ SQLFLAGS += /DSQLITE_OMIT_CHECK /DSQLITE_OMIT_DECLTYPE /DSQLITE_OMIT_DEPRECATED
 LD := $(WRAP) link
 LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib
 LDFLAGS += vendor/libcurl@(SUFFIX)/lib/libcurl_a.lib
+LDFLAGS += vendor\deps\lib\ssleay32.lib vendor\deps\lib\libeay32.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
 LDFLAGS += $(TUP_VARIANTDIR)/build/vendor/sqlite3.o
 LDFLAGS += /DEBUG /OPT:REF /PDBALTPATH:%_PDB%
