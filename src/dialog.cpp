@@ -77,6 +77,12 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_CONTEXTMENU:
     dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
     break;
+  case WM_DESTROY:
+    if(dlg->isVisible())
+      dlg->onHide();
+
+    dlg->onClose();
+    break;
   };
 
   return false;
@@ -153,11 +159,6 @@ INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 
 void Dialog::Destroy(Dialog *dlg)
 {
-  if(dlg->isVisible())
-    dlg->onHide();
-
-  dlg->onClose();
-
   delete dlg;
 }
 
