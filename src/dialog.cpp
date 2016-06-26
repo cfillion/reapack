@@ -223,10 +223,10 @@ void Dialog::center()
   int top = (parentHeight - dialogHeight) / 2;
   top += parentRect.top;
 
-  const int verticalBias = (int)(parentHeight * 0.1);
+  const double verticalBias = (top - parentRect.top) * 0.3;
 
 #ifdef _WIN32
-  top -= verticalBias;
+  top -= (int)verticalBias;
 #else
   top += verticalBias; // according to SWELL, top means bottom.
 #endif
@@ -245,7 +245,7 @@ void Dialog::boundedMove(int x, int y)
   y = min(max(0, y), GetSystemMetrics(SM_CYSCREEN) - height);
 
   SetWindowPos(m_handle, nullptr, x, y,
-    0, 0, SWP_NOZORDER | SWP_NOSIZE);
+    0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 
 bool Dialog::hasFocus() const
@@ -348,7 +348,7 @@ void Dialog::restore(Serializer::Data &data)
   const auto &size = *it++;
 
   SetWindowPos(m_handle, nullptr, 0, 0,
-    size[0], size[1], SWP_NOZORDER | SWP_NOMOVE);
+    size[0], size[1], SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
   onResize();
 
   boundedMove(pos[0], pos[1]);
