@@ -86,8 +86,8 @@ void Browser::onInit()
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 95},
     {AUTO_STR("Type"), 70},
-    {AUTO_STR("Last Update"), 120, ListView::CollapseFlag},
     {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
+    {AUTO_STR("Last Update"), 120, ListView::CollapseFlag},
   });
 
   m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
@@ -96,7 +96,7 @@ void Browser::onInit()
     this, placeholders::_1, placeholders::_2));
 
   m_list->sortByColumn(1);
-  m_list->setSortCallback(6 /* last update */, [&] (const int ai, const int bi) {
+  m_list->setSortCallback(7 /* last update */, [&] (const int ai, const int bi) {
     const Entry &a = m_entries[ai];
     const Entry &b = m_entries[bi];
 
@@ -665,13 +665,13 @@ ListView::Row Browser::makeRow(const Entry &entry) const
   const string &version = getValue(VersionColumn, entry);
   const string &author = getValue(AuthorColumn, entry);
   const string &type = getValue(TypeColumn, entry);
-  const string &date = getValue(TimeColumn, entry);
   const string &remote = getValue(RemoteColumn, entry);
+  const string &date = getValue(TimeColumn, entry);
 
   return {
     make_autostring(state), make_autostring(name), make_autostring(category),
     make_autostring(version), make_autostring(author), make_autostring(type),
-    make_autostring(date), make_autostring(remote),
+    make_autostring(remote), make_autostring(date),
   };
 }
 
