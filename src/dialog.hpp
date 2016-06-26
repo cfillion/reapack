@@ -99,6 +99,7 @@ public:
 
   void close(INT_PTR = 0);
   void center();
+  void boundedMove(int x, int y);
   bool hasFocus() const;
   void setFocus();
   int startTimer(int elapse, int id = 0);

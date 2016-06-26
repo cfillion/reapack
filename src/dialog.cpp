@@ -213,19 +213,15 @@ void Dialog::center()
   GetWindowRect(m_handle, &dialogRect);
   GetWindowRect(m_parent, &parentRect);
 
-  const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
   const int parentWidth = parentRect.right - parentRect.left;
   const int dialogWidth = dialogRect.right - dialogRect.left;
-
   int left = (parentWidth - dialogWidth) / 2;
-  left = min(left + (int)parentRect.left, screenWidth - dialogWidth);
+  left += parentRect.left;
 
-  const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
   const int parentHeight = parentRect.bottom - parentRect.top;
   const int dialogHeight = dialogRect.bottom - dialogRect.top;
-
   int top = (parentHeight - dialogHeight) / 2;
-  top = min(top + (int)parentRect.top, screenHeight - dialogHeight);
+  top += parentRect.top;
 
   const int verticalBias = (int)(parentHeight * 0.1);
 
@@ -235,7 +231,20 @@ void Dialog::center()
   top += verticalBias; // according to SWELL, top means bottom.
 #endif
 
-  SetWindowPos(m_handle, HWND_TOP, max(0, left), max(0, top),
+  boundedMove(left, top);
+}
+
+void Dialog::boundedMove(int x, int y)
+{
+  RECT rect;
+  GetWindowRect(m_handle, &rect);
+
+  const int width = rect.right - rect.left, height = rect.bottom - rect.top;
+
+  x = min(max(0, x), GetSystemMetrics(SM_CXSCREEN) - width);
+  y = min(max(0, y), GetSystemMetrics(SM_CYSCREEN) - height);
+
+  SetWindowPos(m_handle, nullptr, x, y,
     0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
@@ -338,9 +347,11 @@ void Dialog::restore(Serializer::Data &data)
   const auto &pos = *it++;
   const auto &size = *it++;
 
-  SetWindowPos(m_handle, HWND_TOP, pos[0], pos[1],
-    size[0], size[1], SWP_NOZORDER);
+  SetWindowPos(m_handle, nullptr, 0, 0,
+    size[0], size[1], SWP_NOZORDER | SWP_NOMOVE);
   onResize();
+
+  boundedMove(pos[0], pos[1]);
 
   data.erase(data.begin(), it);
 }
