@@ -77,6 +77,16 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_CONTEXTMENU:
     dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
     break;
+  case WM_GETMINMAXINFO: {
+    MINMAXINFO *mmi = (MINMAXINFO *)lParam;
+    mmi->ptMinTrackSize.x = dlg->m_initialSize.x;
+    mmi->ptMinTrackSize.y = dlg->m_initialSize.y;
+    break;
+  }
+  case WM_SIZE:
+    if(wParam != SIZE_MINIMIZED)
+      dlg->onResize();
+    break;
   case WM_DESTROY:
     // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG
     // if the dialog resource is invalid (eg. because of an unloaded dll).
@@ -120,7 +130,7 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
 }
 
 Dialog::Dialog(const int templateId)
-  : m_template(templateId), m_isVisible(false),
+  : m_template(templateId), m_isVisible(false), m_initialSize(),
     m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
   m_accel.translateAccel = HandleKey;
@@ -307,8 +317,23 @@ string Dialog::getText(HWND handle)
   return from_autostring(buffer);
 }
 
+void Dialog::setAnchor(HWND handle, const int flags)
+{
+  const float left = (float)min(1, flags & AnchorLeft);
+  const float top = (float)min(1, flags & AnchorTop);
+  const float right = (float)min(1, flags & AnchorRight);
+  const float bottom = (float)min(1, flags & AnchorBottom);
+
+  m_resizer.init_itemhwnd(handle, left, top, right, bottom);
+}
+
 void Dialog::onInit()
 {
+  RECT rect;
+  GetWindowRect(m_handle, &rect);
+  m_initialSize = {rect.right - rect.left, rect.bottom - rect.top};
+
+  m_resizer.init(m_handle);
 }
 
 void Dialog::onShow()
@@ -371,6 +396,11 @@ void Dialog::onContextMenu(HWND target, const int x, const int y)
 bool Dialog::onKeyDown(int, int)
 {
   return false;
+}
+
+void Dialog::onResize()
+{
+  m_resizer.onResize();
 }
 
 void Dialog::onClose()

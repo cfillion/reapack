@@ -23,8 +23,9 @@
 #include <set>
 #include <vector>
 
-#include <wdltypes.h>
 #include <reaper_plugin.h>
+#include <wdltypes.h>
+#include <wingui/wndsize.h>
 
 class Dialog;
 typedef std::map<HWND, Dialog *> DialogMap;
@@ -38,6 +39,17 @@ public:
   enum Modality {
     Modeless,
     Modal,
+  };
+
+  enum AnchorFlags {
+    AnchorLeft   = 1<<0,
+    AnchorRight  = 1<<1,
+    AnchorTop    = 1<<2,
+    AnchorBottom = 1<<3,
+
+    AnchorLeftRight = AnchorLeft | AnchorRight,
+    AnchorTopBottom = AnchorTop | AnchorBottom,
+    AnchorAll = AnchorLeftRight | AnchorTopBottom,
   };
 
   template<class T, class... Args>
@@ -93,6 +105,7 @@ public:
   void setClipboard(const std::vector<std::string> &);
   HWND getControl(int idc);
   std::string getText(HWND);
+  void setAnchor(HWND, int flags);
 
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
@@ -129,6 +142,7 @@ protected:
   virtual void onNotify(LPNMHDR, LPARAM);
   virtual void onContextMenu(HWND, int x, int y);
   virtual bool onKeyDown(int key, int mods);
+  virtual void onResize();
 
 private:
   static WDL_DLGRET Proc(HWND, UINT, WPARAM, LPARAM);
@@ -137,6 +151,8 @@ private:
 
   const int m_template;
   bool m_isVisible;
+  POINT m_initialSize;
+  WDL_WndSizer m_resizer;
   Modality m_mode;
 
   REAPER_PLUGIN_HINSTANCE m_instance;

@@ -1,7 +1,8 @@
 WDL := vendor/WDL/WDL
+WDLSOURCE := $(WDL)/wingui/wndsize.cpp
 
 TINYXML := $(WDL)/tinyxml
-WDLSOURCE := $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp
+WDLSOURCE += $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp
 WDLSOURCE += $(TINYXML)/tinyxmlparser.cpp $(TINYXML)/tinyxmlerror.cpp
 
 include @(TUP_PLATFORM).tup

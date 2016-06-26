@@ -4,7 +4,7 @@ REAPACK_FILE = reaper_reapack@(SUFFIX).dylib
 
 CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
-CXXFLAGS += -Wno-unused-function -Wno-missing-braces
+CXXFLAGS += -Wno-unused-function -Wno-unused-private-field -Wno-missing-braces
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
 CXXFLAGS += -pipe -fPIC -O2 -std=c++14
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell

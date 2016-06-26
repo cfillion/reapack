@@ -115,6 +115,20 @@ void Browser::onInit()
   refresh();
 
   m_filterTimer = startTimer(200);
+
+  Dialog::onInit();
+  setAnchor(m_filterHandle, AnchorRight);
+  setAnchor(getControl(IDC_CLEAR), AnchorLeftRight);
+  setAnchor(getControl(IDC_LABEL2), AnchorLeftRight);
+  setAnchor(m_view, AnchorLeftRight);
+  setAnchor(m_displayBtn, AnchorLeftRight);
+  setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
+  setAnchor(getControl(IDC_SELECT), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_UNSELECT), AnchorTop | AnchorBottom);
+  setAnchor(m_actionsBtn, AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDOK), AnchorAll);
+  setAnchor(getControl(IDCANCEL), AnchorAll);
+  setAnchor(m_applyBtn, AnchorAll);
 }
 
 void Browser::onCommand(const int id, const int event)
