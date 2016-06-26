@@ -73,10 +73,9 @@ vendor
   │   └── ...
   └── ...
   ```
-5. Launch "Developer Command Prompt for VS2015" and run `build_deps.bat`
-6. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
+5. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
-7. Run `rake` from this directory using
+6. Run `build_deps.bat` and `rake` from this directory using
   "Developer Command Prompt for VS2015"
-8. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
+7. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
    to your REAPER plugin folder
