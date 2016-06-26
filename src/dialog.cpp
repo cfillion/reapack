@@ -142,9 +142,9 @@ Dialog::~Dialog()
   for(Control *control : m_controls | boost::adaptors::map_values)
     delete control;
 
-  DestroyWindow(m_handle);
-
   s_instances.erase(m_handle);
+
+  DestroyWindow(m_handle);
 }
 
 INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
@@ -190,6 +190,7 @@ void Dialog::close(const INT_PTR result)
     EndDialog(m_handle, result);
     break;
   case Modeless:
+    SendMessage(m_handle, WM_DESTROY, 0, (LPARAM)this);
     m_closeHandler(result);
     break;
   }
