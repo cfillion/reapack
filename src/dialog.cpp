@@ -133,9 +133,9 @@ Dialog::~Dialog()
   for(Control *control : m_controls | boost::adaptors::map_values)
     delete control;
 
-  s_instances.erase(m_handle);
-
   DestroyWindow(m_handle);
+
+  s_instances.erase(m_handle);
 }
 
 INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
