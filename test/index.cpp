@@ -87,13 +87,6 @@ TEST_CASE("future version", M) {
   }
 }
 
-TEST_CASE("unicode index path", M) {
-  UseRootPath root(RIPATH);
-
-  IndexPtr ri = Index::load("Новая папка");
-  REQUIRE(ri->name() == "Новая папка");
-}
-
 TEST_CASE("add a category", M) {
   Index ri("a");
   Category *cat = new Category("a", &ri);
