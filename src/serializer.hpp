@@ -20,19 +20,19 @@
 
 #include <array>
 #include <string>
-#include <vector>
+#include <list>
 
 class Serializer {
 public:
   typedef std::array<int, 2> Record;
-  typedef std::vector<Record> Vector;
+  typedef std::list<Record> Data;
 
   Serializer() : m_userVersion(0) {}
   int userVersion() const { return m_userVersion; }
   operator bool() const { return m_userVersion > 0; }
 
-  Vector read(const std::string &, int userVersion);
-  std::string write(const Vector &in) const;
+  Data read(const std::string &, int userVersion);
+  std::string write(const Data &in) const;
 
 private:
   int m_userVersion;

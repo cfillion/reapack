@@ -28,7 +28,7 @@
 using namespace std;
 
 ListView::ListView(const Columns &columns, HWND handle)
-  : Control(handle), m_sort(), m_defaultSort()
+  : Control(handle), m_customizable(false), m_sort(), m_defaultSort()
 {
   for(const Column &col : columns)
     addColumn(col);
@@ -293,7 +293,7 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 #endif
 
   if(point.y < headerHeight) {
-    if(m_serializer) // show menu only if header is customizable
+    if(m_customizable) // show menu only if header is customizable
       headerMenu(x, y);
     return true;
   }
@@ -444,18 +444,20 @@ void ListView::resetColumns()
   }
 }
 
-void ListView::restore(const string &input, const int userVersion)
+void ListView::restore(Serializer::Data &data)
 {
+  m_customizable = true;
   setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
 
-  const Serializer::Vector &data = m_serializer.read(input, userVersion);
   if(data.empty())
     return;
 
   int col = -1;
   vector<int> order(columnCount());
 
-  for(const auto &rec : data) {
+  while(!data.empty()) {
+    const auto &rec = data.front();
+
     const int left = rec[0];
     const int right = rec[1];
 
@@ -471,6 +473,8 @@ void ListView::restore(const string &input, const int userVersion)
       break;
     }
 
+    data.pop_front();
+
     if(++col >= columnCount())
       break;
   }
@@ -482,17 +486,14 @@ void ListView::restore(const string &input, const int userVersion)
   ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
 }
 
-string ListView::save() const
+void ListView::save(Serializer::Data &data) const
 {
   const Sort sort = m_sort.value_or(Sort());
   vector<int> order(columnCount());
   ListView_GetColumnOrderArray(handle(), columnCount(), &order[0]);
 
-  Serializer::Vector data;
   data.push_back({sort.column, sort.order});
 
   for(int i = 0; i < columnCount(); i++)
     data.push_back({order[i], columnWidth(i)});
-
-  return m_serializer.write(data);
 }

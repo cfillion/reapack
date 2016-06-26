@@ -42,6 +42,8 @@ Manager::Manager(ReaPack *reapack)
 
 void Manager::onInit()
 {
+  Dialog::onInit();
+
   m_apply = getControl(IDAPPLY);
   disable(m_apply);
 
@@ -489,6 +491,8 @@ NetworkConfig::NetworkConfig(NetworkOpts *opts)
 
 void NetworkConfig::onInit()
 {
+  Dialog::onInit();
+
   m_proxy = getControl(IDC_PROXY);
   SetWindowText(m_proxy, make_autostring(m_opts->proxy).c_str());
 

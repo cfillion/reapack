@@ -32,6 +32,8 @@ Progress::Progress(DownloadQueue *queue)
 
 void Progress::onInit()
 {
+  Dialog::onInit();
+
   m_label = getControl(IDC_LABEL);
   m_progress = GetDlgItem(handle(), IDC_PROGRESS);
 

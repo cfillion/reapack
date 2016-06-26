@@ -108,12 +108,6 @@ void Browser::onInit()
     return a.latest->time().compare(b.latest->time());
   });
 
-  const auto config = m_reapack->config()->browser();
-  m_list->restore(config->list, 1);
-
-  updateDisplayLabel();
-  refresh();
-
   m_filterTimer = startTimer(200);
 
   Dialog::onInit();
@@ -129,6 +123,14 @@ void Browser::onInit()
   setAnchor(getControl(IDOK), AnchorAll);
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_applyBtn, AnchorAll);
+
+  auto data = m_serializer.read(m_reapack->config()->browser()->state, 1);
+  Dialog::restore(data);
+  m_list->restore(data);
+  assert(data.empty());
+
+  updateDisplayLabel();
+  refresh();
 }
 
 void Browser::onCommand(const int id, const int event)
@@ -250,8 +252,10 @@ bool Browser::onKeyDown(const int key, const int mods)
 
 void Browser::onClose()
 {
-  auto config = m_reapack->config()->browser();
-  config->list = m_list->save();
+  Serializer::Data data;
+  Dialog::save(data);
+  m_list->save(data);
+  m_reapack->config()->browser()->state = m_serializer.write(data);
 }
 
 void Browser::onTimer(const int id)

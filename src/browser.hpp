@@ -154,6 +154,7 @@ private:
   HWND m_actionsBtn;
   ListView *m_list;
   HWND m_applyBtn;
+  Serializer m_serializer;
 };
 
 #endif

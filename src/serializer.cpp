@@ -25,14 +25,14 @@ static const char RECORD_END = ',';
 
 using namespace std;
 
-auto Serializer::read(const string &input, const int userVersion) -> Vector
+auto Serializer::read(const string &input, const int userVersion) -> Data
 {
   m_userVersion = userVersion;
 
   bool first = true;
   istringstream stream(input);
 
-  Vector out;
+  Data out;
 
   while(!stream.eof()) {
     string line;
@@ -73,7 +73,7 @@ auto Serializer::read(const string &input, const int userVersion) -> Vector
   return out;
 }
 
-string Serializer::write(const Vector &data) const
+string Serializer::write(const Data &data) const
 {
   if(!m_userVersion)
     return {};
@@ -84,9 +84,10 @@ string Serializer::write(const Vector &data) const
     << m_userVersion << FIELD_END
     << VERSION << RECORD_END;
 
-  size_t i = 0;
+  auto it = data.begin();
+
   while(true) {
-    const Record &rec = data[i];
+    const Record &rec = *it;
 
     size_t j = 0;
     while(true) {
@@ -98,7 +99,9 @@ string Serializer::write(const Vector &data) const
         break;
     }
 
-    if(++i < data.size())
+    it++;
+
+    if(it != data.end())
       stream << RECORD_END;
     else
       break;

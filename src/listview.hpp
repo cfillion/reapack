@@ -84,8 +84,8 @@ public:
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setSortCallback(int i, const SortCallback &cb) { m_sortFuncs[i] = cb; }
 
-  void restore(const std::string &, int userVersion);
-  std::string save() const;
+  void restore(Serializer::Data &);
+  void save(Serializer::Data &) const;
   void resetColumns();
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
@@ -114,7 +114,7 @@ private:
   int translateBack(int internalIndex) const;
   void headerMenu(int x, int y);
 
-  Serializer m_serializer;
+  bool m_customizable;
   std::vector<Column> m_cols;
   std::vector<Row> m_rows;
   boost::optional<Sort> m_sort;

@@ -18,6 +18,8 @@
 #ifndef REAPACK_DIALOG_HPP
 #define REAPACK_DIALOG_HPP
 
+#include "serializer.hpp"
+
 #include <functional>
 #include <map>
 #include <set>
@@ -106,6 +108,9 @@ public:
   HWND getControl(int idc);
   std::string getText(HWND);
   void setAnchor(HWND, int flags);
+
+  void restore(Serializer::Data &);
+  void save(Serializer::Data &) const;
 
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 

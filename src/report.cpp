@@ -40,6 +40,8 @@ ReportDialog::ReportDialog()
 
 void ReportDialog::onInit()
 {
+  Dialog::onInit();
+
   fillReport();
 
   const auto_string &str = make_autostring(m_stream.str());

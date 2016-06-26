@@ -45,6 +45,8 @@ About::About(IndexPtr index)
 
 void About::onInit()
 {
+  Dialog::onInit();
+
   m_about = createControl<RichEdit>(IDC_ABOUT);
 
   m_cats = createControl<ListView>(IDC_CATEGORIES, ListView::Columns{

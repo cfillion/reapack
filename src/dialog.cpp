@@ -235,7 +235,8 @@ void Dialog::center()
   top += verticalBias; // according to SWELL, top means bottom.
 #endif
 
-  SetWindowPos(m_handle, HWND_TOP, max(0, left), max(0, top), 0, 0, SWP_NOSIZE);
+  SetWindowPos(m_handle, HWND_TOP, max(0, left), max(0, top),
+    0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
 bool Dialog::hasFocus() const
@@ -327,18 +328,45 @@ void Dialog::setAnchor(HWND handle, const int flags)
   m_resizer.init_itemhwnd(handle, left, top, right, bottom);
 }
 
+void Dialog::restore(Serializer::Data &data)
+{
+  if(data.size() < 2)
+    return;
+
+  auto it = data.begin();
+
+  const auto &pos = *it++;
+  const auto &size = *it++;
+
+  SetWindowPos(m_handle, HWND_TOP, pos[0], pos[1],
+    size[0], size[1], SWP_NOZORDER);
+  onResize();
+
+  data.erase(data.begin(), it);
+}
+
+void Dialog::save(Serializer::Data &data) const
+{
+  RECT rect;
+  GetWindowRect(m_handle, &rect);
+
+  data.push_back({rect.left, rect.top});
+  data.push_back({rect.right - rect.left, rect.bottom - rect.top});
+}
+
 void Dialog::onInit()
 {
   RECT rect;
   GetWindowRect(m_handle, &rect);
   m_initialSize = {rect.right - rect.left, rect.bottom - rect.top};
 
+  center();
+
   m_resizer.init(m_handle);
 }
 
 void Dialog::onShow()
 {
-  center();
 }
 
 void Dialog::onHide()

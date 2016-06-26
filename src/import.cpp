@@ -38,6 +38,8 @@ Import::Import(ReaPack *reapack)
 
 void Import::onInit()
 {
+  Dialog::onInit();
+
   SetWindowText(handle(), TITLE);
 
   m_url = getControl(IDC_URL);

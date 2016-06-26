@@ -12,9 +12,10 @@ TEST_CASE("read from serialized data", M) {
   SECTION("valid") {
     const auto &out = s.read("1 1,1 2,3 4,5 6", 1);
     REQUIRE(out.size() == 3);
-    REQUIRE(out[0] == (Serializer::Record{1,2}));
-    REQUIRE(out[1] == (Serializer::Record{3,4}));
-    REQUIRE(out[2] == (Serializer::Record{5,6}));
+    auto it = out.begin();
+    REQUIRE(*it++ == (Serializer::Record{1,2}));
+    REQUIRE(*it++ == (Serializer::Record{3,4}));
+    REQUIRE(*it++ == (Serializer::Record{5,6}));
 
     REQUIRE(s.userVersion() == 1);
     REQUIRE(s);
@@ -37,13 +38,13 @@ TEST_CASE("read from serialized data", M) {
   SECTION("not an integer") {
     const auto &out = s.read("1 1,1 2,hello world,3 4", 1);
     REQUIRE(out.size() == 1);
-    REQUIRE(out[0] == (Serializer::Record{1,2}));
+    REQUIRE(out.front() == (Serializer::Record{1,2}));
   }
 
   SECTION("single field") {
     const auto &out = s.read("1 1,1 2,3,4 5", 1);
     REQUIRE(out.size() == 1);
-    REQUIRE(out[0] == (Serializer::Record{1,2}));
+    REQUIRE(out.front() == (Serializer::Record{1,2}));
   }
 
   SECTION("empty string") {
