@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "encoding.hpp"
+#include "serializer.hpp"
 
 class Menu;
 
@@ -83,7 +84,7 @@ public:
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setSortCallback(int i, const SortCallback &cb) { m_sortFuncs[i] = cb; }
 
-  bool restore(const std::string &, int userVersion);
+  void restore(const std::string &, int userVersion);
   std::string save() const;
   void resetColumns();
 
@@ -113,7 +114,7 @@ private:
   int translateBack(int internalIndex) const;
   void headerMenu(int x, int y);
 
-  int m_userVersion;
+  Serializer m_serializer;
   std::vector<Column> m_cols;
   std::vector<Row> m_rows;
   boost::optional<Sort> m_sort;

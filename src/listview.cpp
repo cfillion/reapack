@@ -20,7 +20,6 @@
 #include "menu.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include <sstream>
 
 #ifdef _WIN32
 #include <commctrl.h>
@@ -28,12 +27,8 @@
 
 using namespace std;
 
-static const unsigned short VERSION = 1;
-static const char FIELD_END = '\x20';
-static const char RECORD_END = ',';
-
 ListView::ListView(const Columns &columns, HWND handle)
-  : Control(handle), m_userVersion(0), m_sort(), m_defaultSort()
+  : Control(handle), m_sort(), m_defaultSort()
 {
   for(const Column &col : columns)
     addColumn(col);
@@ -298,7 +293,7 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 #endif
 
   if(point.y < headerHeight) {
-    if(m_userVersion) // show menu only if header is customizable
+    if(m_serializer) // show menu only if header is customizable
       headerMenu(x, y);
     return true;
   }
@@ -449,53 +444,34 @@ void ListView::resetColumns()
   }
 }
 
-bool ListView::restore(const string &data, const int userVersion)
+void ListView::restore(const string &input, const int userVersion)
 {
-  m_userVersion = userVersion; // for save(). also enables advanced customization
   setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
 
+  const Serializer::Vector &data = m_serializer.read(input, userVersion);
   if(data.empty())
-    return false;
+    return;
 
-  int col = -2;
+  int col = -1;
   vector<int> order(columnCount());
-  istringstream stream(data);
 
-  while(true) {
-    string line, first, second;
-    getline(stream, line, RECORD_END);
-
-    istringstream lineStream(line);
-    getline(lineStream, first, FIELD_END);
-    getline(lineStream, second, FIELD_END);
-
-    int left, right;
-
-    try {
-      left = stoi(first.c_str());
-      right = stoi(second.c_str());
-    }
-    catch(logic_error &) {
-      return false; // data is invalid! aborting.
-    }
+  for(const auto &rec : data) {
+    const int left = rec[0];
+    const int right = rec[1];
 
     switch(col) {
-    case -2: // version
-      if(left != userVersion || right != VERSION)
-        return false;
-      break;
     case -1: // sort
       if(left < columnCount())
         sortByColumn(left, right == 0 ? AscendingOrder : DescendingOrder, true);
       break;
-    default:
+    default: // column
       order[col] = left;
       // raw size should not go through adjustSize (via resizeColumn)
       ListView_SetColumnWidth(handle(), col, right);
       break;
     }
 
-    if(stream.eof() || ++col >= columnCount())
+    if(++col >= columnCount())
       break;
   }
 
@@ -504,37 +480,19 @@ bool ListView::restore(const string &data, const int userVersion)
     order[col] = col;
 
   ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
-
-  return true;
 }
 
 string ListView::save() const
 {
+  const Sort sort = m_sort.value_or(Sort());
   vector<int> order(columnCount());
   ListView_GetColumnOrderArray(handle(), columnCount(), &order[0]);
 
-  ostringstream stream;
+  Serializer::Vector data;
+  data.push_back({sort.column, sort.order});
 
-  stream
-    << m_userVersion << FIELD_END
-    << VERSION << RECORD_END;
+  for(int i = 0; i < columnCount(); i++)
+    data.push_back({order[i], columnWidth(i)});
 
-  Sort sort = m_sort.value_or(Sort());
-  stream
-    << sort.column << FIELD_END
-    << sort.order << RECORD_END;
-
-  int i = 0;
-  while(true) {
-    stream
-      << order[i] << FIELD_END
-      << columnWidth(i);
-
-    if(++i < columnCount())
-      stream << RECORD_END;
-    else
-      break;
-  }
-
-  return stream.str();
+  return m_serializer.write(data);
 }
