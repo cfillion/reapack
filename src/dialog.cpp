@@ -245,8 +245,23 @@ void Dialog::boundedMove(int x, int y)
 
   const int width = rect.right - rect.left, height = rect.bottom - rect.top;
 
-  x = min(max(0, x), GetSystemMetrics(SM_CXSCREEN) - width);
-  y = min(max(0, y), GetSystemMetrics(SM_CYSCREEN) - height);
+#ifdef SM_XVIRTUALSCREEN
+  const int screenX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+  const int screenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN) - abs(screenX);
+  const int screenY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+  const int screenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN) - abs(screenY);
+#else // for SWELL
+  RECT viewport;
+  SWELL_GetViewPort(&viewport, &rect, false);
+
+  const int screenX = viewport.left;
+  const int screenWidth = viewport.right - abs(screenX);
+  const int screenY = viewport.top;
+  const int screenHeight = viewport.bottom - abs(screenY);
+#endif
+
+  x = min(max(screenX, x), screenWidth - width);
+  y = min(max(screenY, y), screenHeight - height);
 
   SetWindowPos(m_handle, nullptr, x, y,
     0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
