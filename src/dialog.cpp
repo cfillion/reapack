@@ -25,6 +25,10 @@
 #include <boost/algorithm/string/join.hpp>
 #include <reaper_plugin_functions.h>
 
+#ifdef _WIN32
+#include <windowsx.h>
+#endif
+
 using namespace std;
 
 DialogMap Dialog::s_instances;
@@ -75,7 +79,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     dlg->onNotify((LPNMHDR)lParam, lParam);
     break;
   case WM_CONTEXTMENU:
-    dlg->onContextMenu((HWND)wParam, LOWORD(lParam), HIWORD(lParam));
+    dlg->onContextMenu((HWND)wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
     break;
   case WM_GETMINMAXINFO: {
     MINMAXINFO *mmi = (MINMAXINFO *)lParam;
