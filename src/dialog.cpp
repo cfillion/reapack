@@ -246,22 +246,24 @@ void Dialog::boundedMove(int x, int y)
   const int width = rect.right - rect.left, height = rect.bottom - rect.top;
 
 #ifdef SM_XVIRTUALSCREEN
-  const int screenX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-  const int screenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN) - abs(screenX);
-  const int screenY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-  const int screenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN) - abs(screenY);
-#else // for SWELL
+  // virtual screen = all screens combined
+  const int viewportX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+  const int viewportWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  const int viewportY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+  const int viewportHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+#else
+  // SWELL_GetViewPort only gives the rect of the current screen
   RECT viewport;
   SWELL_GetViewPort(&viewport, &rect, false);
 
-  const int screenX = viewport.left;
-  const int screenWidth = viewport.right - abs(screenX);
-  const int screenY = viewport.top;
-  const int screenHeight = viewport.bottom - abs(screenY);
+  const int viewportX = viewport.left;
+  const int viewportWidth = viewport.right;
+  const int viewportY = viewport.top;
+  const int viewportHeight = viewport.bottom;
 #endif
 
-  x = min(max(screenX, x), screenWidth - width);
-  y = min(max(screenY, y), screenHeight - height);
+  x = min(max(viewportX, x), viewportWidth - width - abs(viewportX));
+  y = min(max(viewportY, y), viewportHeight - height - abs(viewportY));
 
   SetWindowPos(m_handle, nullptr, x, y,
     0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
