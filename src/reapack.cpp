@@ -64,7 +64,8 @@ std::string ReaPack::resourcePath()
 {
 #ifdef _WIN32
   auto_char path[MAX_PATH] = {};
-  _mbstowcs_l(path, GetResourcePath(), MAX_PATH, _create_locale(LC_ALL, ""));
+  _mbstowcs_l(path, GetResourcePath(), auto_size(path) - 1,
+    _create_locale(LC_ALL, ""));
   return from_autostring(path);
 #else
   return GetResourcePath();
