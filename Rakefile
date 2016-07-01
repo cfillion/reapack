@@ -11,6 +11,10 @@ task :build, [:variants] do |_, args|
   vars = Array(args[:variants]) + args.extras
   vars.reject &:empty?
 
+  if Gem.win_platform? && ENV['VCINSTALLDIR'].nil?
+    raise "VCINSTALLDIR is unset. Is this Developer Command Prompt for Visual Studio?"
+  end
+
   sh 'tup', *vars, :verbose => false
 end
 
