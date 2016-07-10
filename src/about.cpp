@@ -36,8 +36,20 @@ using namespace std;
 
 enum { ACTION_ABOUT_PKG = 300 };
 
-AboutDialog::AboutDialog()
-  : Dialog(IDD_ABOUT_DIALOG), m_currentIndex(-255)
+static int getLinkControl(const Metadata::LinkType type)
+{
+  switch(type) {
+  case Metadata::WebsiteLink:
+    return IDC_WEBSITE;
+  case Metadata::DonationLink:
+    return IDC_DONATE;
+  default:
+    abort();
+  }
+}
+
+AboutDialog::AboutDialog(const Metadata *metadata)
+  : Dialog(IDD_ABOUT_DIALOG), m_metadata(metadata), m_currentIndex(-255)
 {
   RichEdit::Init();
 }
@@ -53,6 +65,16 @@ void AboutDialog::onInit()
 
   m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{});
 
+  string aboutText = m_metadata->about();
+  if(name == AUTO_STR("ReaPack")) {
+    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
+    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
+  }
+
+  RichEdit *desc = createControl<RichEdit>(IDC_ABOUT);
+  if(desc->setRichText(aboutText))
+    tabs()->addTab({AUTO_STR("About"), {desc->handle()}});
+
   m_menu = createMenu();
   m_menu->sortByColumn(0);
   m_menu->onSelect(bind(&AboutDialog::callUpdateList, this));
@@ -63,6 +85,7 @@ void AboutDialog::onInit()
   m_report = getControl(IDC_REPORT);
 
   populate();
+  populateLinks();
   m_menu->sort();
   callUpdateList();
 
@@ -70,6 +93,31 @@ void AboutDialog::onInit()
   m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
   m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
+}
+
+void AboutDialog::populateLinks()
+{
+  RECT rect;
+  GetWindowRect(getControl(IDC_WEBSITE), &rect);
+  ScreenToClient(handle(), (LPPOINT)&rect);
+  ScreenToClient(handle(), ((LPPOINT)&rect)+1);
+
+  const int shift = (rect.right - rect.left) + 4;
+
+  for(const auto &pair : m_metadata->links()) {
+    const int control = getLinkControl(pair.first);
+    if(!m_links.count(control)) {
+      HWND handle = getControl(control);
+      SetWindowPos(handle, nullptr, rect.left, rect.top, 0, 0,
+        SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+
+      show(handle);
+      rect.left += shift;
+
+      m_links[control] = {};
+    }
+    m_links[control].push_back(&pair.second);
+  }
 }
 
 void AboutDialog::onCommand(const int id, int)
@@ -105,15 +153,6 @@ void AboutDialog::callUpdateList()
   m_list->sort();
 }
 
-void AboutDialog::addLinks(const int ctrl, const vector<const Link *> &links)
-{
-  if(links.empty())
-    return;
-
-  m_links[ctrl] = links;
-  show(getControl(ctrl));
-}
-
 void AboutDialog::selectLink(const int ctrl)
 {
   const auto &links = m_links[ctrl];
@@ -145,7 +184,7 @@ void AboutDialog::openLink(const Link *link)
 }
 
 AboutRemote::AboutRemote(IndexPtr index)
-  : AboutDialog(), m_index(index)
+  : AboutDialog(index->metadata()), m_index(index)
 {
 }
 
@@ -194,24 +233,10 @@ void AboutRemote::populate()
   SetWindowText(installBtn, btnLabel);
   show(installBtn);
 
-  string aboutText = m_index->metadata()->about();
-
-  if(m_index->name() == "ReaPack") {
-    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
-    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
-  }
-
-  RichEdit *desc = createControl<RichEdit>(IDC_ABOUT);
-  if(desc->setRichText(aboutText))
-    tabs()->addTab({AUTO_STR("Description"), {desc->handle()}});
-
   tabs()->addTab({AUTO_STR("Packages"), {menu()->handle(), list()->handle()}});
   tabs()->addTab({AUTO_STR("Installed Files"), {report()}});
 
   list()->onActivate(bind(&AboutRemote::aboutPackage, this));
-
-  addLinks(IDC_WEBSITE, m_index->metadata()->links(Metadata::WebsiteLink));
-  addLinks(IDC_DONATE, m_index->metadata()->links(Metadata::DonationLink));
 
   menu()->addRow({AUTO_STR("<All Packages>")});
 
@@ -311,7 +336,7 @@ void AboutRemote::aboutPackage()
 }
 
 AboutPackage::AboutPackage(const Package *pkg)
-  : AboutDialog(), m_package(pkg)
+  : AboutDialog(new Metadata), m_package(pkg) // FIXME: remove `new Metadata` ASAP
 {
 }
 
@@ -338,10 +363,6 @@ ListView *AboutPackage::createList()
 
 void AboutPackage::populate()
 {
-  // RichEdit *desc = createControl<RichEdit>(IDC_ABOUT);
-  // if(desc->setRichText(aboutText))
-  //   tabs()->addTab({AUTO_STR("Documentation"), {desc->handle()}});
-
   tabs()->addTab({AUTO_STR("History"), {menu()->handle(),
     report()}});
   tabs()->addTab({AUTO_STR("Contents"), {menu()->handle(),

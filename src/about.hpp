@@ -27,6 +27,7 @@
 class Index;
 class ListView;
 class Menu;
+class Metadata;
 class Package;
 class RichEdit;
 class TabBar;
@@ -36,7 +37,7 @@ typedef std::shared_ptr<const Index> IndexPtr;
 
 class AboutDialog : public Dialog {
 public:
-  AboutDialog();
+  AboutDialog(const Metadata *);
 
 protected:
   void onInit() override;
@@ -54,13 +55,13 @@ protected:
   ListView *list() const { return m_list; }
   HWND report() const { return m_report; }
 
-  void addLinks(int control, const std::vector<const Link *> &);
-
 private:
+  void populateLinks();
   void selectLink(int control);
   void openLink(const Link *);
   void callUpdateList();
 
+  const Metadata *m_metadata;
   int m_currentIndex;
   TabBar *m_tabs;
   ListView *m_menu;

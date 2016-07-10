@@ -35,6 +35,7 @@ public:
   void setAbout(const std::string &rtf) { m_about = rtf; }
   const std::string &about() const { return m_about; }
   void addLink(const LinkType, const Link &);
+  const LinkMap &links() const { return m_links; }
   LinkList links(LinkType) const;
 
 private:
