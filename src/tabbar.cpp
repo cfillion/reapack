@@ -32,9 +32,6 @@ int TabBar::addTab(const Tab &tab)
 {
   int index = m_size++;
 
-  for(HWND control : tab.page)
-    ShowWindow(control, SW_HIDE);
-
   m_pages.push_back(tab.page);
 
   TCITEM item{};
@@ -62,13 +59,11 @@ void TabBar::setCurrentIndex(const int index)
 
 void TabBar::removeTab(const int index)
 {
-  if(!TabCtrl_DeleteItem(handle(), index))
-    return;
+  if(currentIndex() == index)
+    setCurrentIndex(index == 0 ? index + 1 : index - 1);
 
-  for(HWND control : m_pages[index])
-    ShowWindow(control, SW_HIDE);
-
-  m_pages.erase(m_pages.begin() + index);
+  if(TabCtrl_DeleteItem(handle(), index))
+    m_pages.erase(m_pages.begin() + index);
 }
 
 void TabBar::setFocus()

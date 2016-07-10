@@ -54,19 +54,18 @@
 #define IDC_WEBSITE    216
 #define IDC_DONATE     217
 #define IDC_ABOUT      218
-#define IDC_CATEGORIES 219
-#define IDC_PACKAGES   220
-#define IDC_GROUPBOX   221
-#define IDC_URL        222
-#define IDC_FILTER     223
-#define IDC_CLEAR      224
-#define IDC_DISPLAY    225
-#define IDC_SELECT     226
-#define IDC_UNSELECT   227
-#define IDC_OPTIONS    228
-#define IDC_ACTIONS    229
-#define IDC_BROWSE     230
-#define IDC_PROXY      231
-#define IDC_VERIFYPEER 232
+#define IDC_MENU       219
+#define IDC_GROUPBOX   220
+#define IDC_URL        221
+#define IDC_FILTER     222
+#define IDC_CLEAR      223
+#define IDC_DISPLAY    224
+#define IDC_SELECT     225
+#define IDC_UNSELECT   226
+#define IDC_OPTIONS    227
+#define IDC_ACTIONS    228
+#define IDC_BROWSE     228
+#define IDC_PROXY      229
+#define IDC_VERIFYPEER 230
 
 #endif

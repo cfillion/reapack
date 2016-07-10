@@ -71,8 +71,8 @@ public:
   void importRemote();
   void manageRemotes();
   void aboutSelf();
-  void about(const std::string &, HWND parent);
   void about(const Remote &, HWND parent);
+  void about(const Package *, HWND parent);
   void browsePackages();
   void refreshManager();
   void refreshBrowser();

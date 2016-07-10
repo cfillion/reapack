@@ -20,6 +20,7 @@
 
 #include "dialog.hpp"
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -33,38 +34,80 @@ struct Link;
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
-class About : public Dialog {
+class AboutDialog : public Dialog {
 public:
-  enum { InstallResult = 100 };
-
-  About(IndexPtr);
+  AboutDialog();
 
 protected:
   void onInit() override;
   void onCommand(int, int) override;
 
+  virtual const std::string &what() const = 0;
+  virtual ListView *createMenu() = 0;
+  virtual ListView *createList() = 0;
+
+  virtual void populate() = 0;
+  virtual void updateList(int) = 0;
+
+  TabBar *tabs() const { return m_tabs; }
+  ListView *menu() const { return m_menu; }
+  ListView *list() const { return m_list; }
+  HWND report() const { return m_report; }
+
+  void addLinks(int control, const std::vector<const Link *> &);
+
+private:
+  void selectLink(int control);
+  void openLink(const Link *);
+  void callUpdateList();
+
+  int m_currentIndex;
+  TabBar *m_tabs;
+  ListView *m_menu;
+  ListView *m_list;
+  HWND m_report;
+
+  std::map<int, std::vector<const Link *> > m_links;
+};
+
+class AboutRemote : public AboutDialog {
+public:
+  enum { InstallResult = 100 };
+
+  AboutRemote(IndexPtr);
+
+protected:
+  const std::string &what() const override;
+  ListView *createMenu() override;
+  ListView *createList() override;
+
+  void onCommand(int, int) override;
+  void populate() override;
+  void updateList(int) override;
+
 private:
   bool fillContextMenu(Menu &, int index) const;
-  void populate();
-  void updatePackages();
   void updateInstalledFiles();
-  void selectLink(int control, const std::vector<const Link *> &);
-  void openLink(const Link *);
-  void packageHistory();
-  void packageContents();
+  void aboutPackage();
 
   IndexPtr m_index;
-  int m_currentCat;
-
-  TabBar *m_tabs;
-  RichEdit *m_about;
-  ListView *m_cats;
-  ListView *m_packages;
-  HWND m_installedFiles;
-
-  std::vector<const Link *> m_websiteLinks;
-  std::vector<const Link *> m_donationLinks;
   const std::vector<const Package *> *m_packagesData;
+};
+
+class AboutPackage : public AboutDialog {
+public:
+  AboutPackage(const Package *);
+
+protected:
+  const std::string &what() const override;
+  ListView *createMenu() override;
+  ListView *createList() override;
+
+  void populate() override;
+  void updateList(int) override;
+
+private:
+  const Package *m_package;
 };
 
 #endif

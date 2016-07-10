@@ -238,9 +238,9 @@ void ReaPack::about(const Remote &remote, HWND parent)
     if(!index)
       return;
 
-    const auto ret = Dialog::Show<About>(m_instance, parent, index);
+    const auto ret = Dialog::Show<AboutRemote>(m_instance, parent, index);
 
-    if(ret == About::InstallResult) {
+    if(ret == AboutRemote::InstallResult) {
       Transaction *tx = setupTransaction();
 
       if(!tx)
@@ -252,6 +252,14 @@ void ReaPack::about(const Remote &remote, HWND parent)
       tx->runTasks();
     }
   }, parent);
+}
+
+void ReaPack::about(const Package *pkg, HWND parent)
+{
+  const auto ret = Dialog::Show<AboutPackage>(m_instance, parent, pkg);
+
+  switch(ret) {
+  }
 }
 
 void ReaPack::browsePackages()

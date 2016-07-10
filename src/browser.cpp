@@ -44,9 +44,8 @@ enum Action {
   ACTION_UNINSTALL,
   ACTION_UNINSTALL_ALL,
   ACTION_PIN,
-  ACTION_CONTENTS,
-  ACTION_HISTORY,
-  ACTION_ABOUT,
+  ACTION_ABOUT_PKG,
+  ACTION_ABOUT_REMOTE,
   ACTION_RESET_ALL,
   ACTION_SHOWDESCS,
   ACTION_REFRESH,
@@ -79,7 +78,7 @@ void Browser::onInit()
   SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
-  m_list = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
+  m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
     {AUTO_STR("Package"), 380},
     {AUTO_STR("Category"), 150},
@@ -90,7 +89,7 @@ void Browser::onInit()
     {AUTO_STR("Last Update"), 120, ListView::CollapseFlag},
   });
 
-  m_list->onActivate([=] { history(m_list->itemUnderMouse()); });
+  m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
   m_list->onContextMenu(bind(&Browser::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
@@ -183,14 +182,11 @@ void Browser::onCommand(const int id, const int event)
   case ACTION_PIN:
     togglePin(m_currentIndex);
     break;
-  case ACTION_CONTENTS:
-    contents(m_currentIndex);
+  case ACTION_ABOUT_PKG:
+    aboutPackage(m_currentIndex);
     break;
-  case ACTION_HISTORY:
-    history(m_currentIndex);
-    break;
-  case ACTION_ABOUT:
-    about(m_currentIndex);
+  case ACTION_ABOUT_REMOTE:
+    aboutRemote(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
     selectionDo(bind(&Browser::resetActions, this, placeholders::_1));
@@ -361,16 +357,13 @@ void Browser::fillMenu(Menu &menu)
   menu.addSeparator();
 
   menu.setEnabled(!entry->test(ObsoleteFlag),
-    menu.addAction(AUTO_STR("Package &Contents"), ACTION_CONTENTS));
-
-  menu.setEnabled(!entry->test(ObsoleteFlag),
-    menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY));
+    menu.addAction(AUTO_STR("Package &Overview..."), ACTION_ABOUT_PKG));
 
   auto_char aboutLabel[32] = {};
   const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
-  menu.addAction(aboutLabel, ACTION_ABOUT);
+  menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
 }
 
 void Browser::updateDisplayLabel()
@@ -800,23 +793,13 @@ auto Browser::getEntry(const int listIndex) -> Entry *
   return &m_entries[m_visibleEntries[listIndex]];
 }
 
-void Browser::history(const int index)
+void Browser::aboutPackage(const int index)
 {
-  const Entry *entry = getEntry(index);
-
-  if(entry && entry->package)
-    Dialog::Show<History>(instance(), handle(), entry->package);
+  if(const Entry *entry = getEntry(index))
+    m_reapack->about(entry->package, handle());
 }
 
-void Browser::contents(const int index)
-{
-  const Entry *entry = getEntry(index);
-
-  if(entry)
-    Dialog::Show<Contents>(instance(), handle(), entry->package);
-}
-
-void Browser::about(const int index)
+void Browser::aboutRemote(const int index)
 {
   if(const Entry *entry = getEntry(index))
     m_reapack->about(getRemote(*entry), handle());

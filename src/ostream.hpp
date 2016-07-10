@@ -15,37 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_REPORT_HPP
-#define REAPACK_REPORT_HPP
+#ifndef REAPACK_OSTREAM_HPP
+#define REAPACK_OSTREAM_HPP
 
-#include "dialog.hpp"
+#include <sstream>
 
-#include "ostream.hpp"
-#include "receipt.hpp"
-#include "registry.hpp"
-
-class Package;
 class Version;
 
-class Report : public Dialog {
+class OutputStream {
 public:
-  Report(const Receipt &);
+  OutputStream();
 
-protected:
-  void onInit() override;
+  std::ostringstream::pos_type tellp() { return m_stream.tellp(); }
+  std::string str() const { return m_stream.str(); }
 
-  virtual void fillReport();
+  void indented(const std::string &);
 
-  void printHeader(const char *);
-
-  void printInstalls();
-  void printUpdates();
-  void printErrors();
-  void printRemovals();
+  template<typename T>
+  OutputStream &operator<<(T t) { m_stream << t; return *this; }
+  OutputStream &operator<<(const Version &);
 
 private:
-  Receipt m_receipt;
-  OutputStream m_stream;
+  std::ostringstream m_stream;
 };
 
 #endif

@@ -22,6 +22,7 @@
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
+#include "ostream.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
 #include "report.hpp"
@@ -30,226 +31,92 @@
 #include "tabbar.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <sstream>
 
 using namespace std;
 
-enum { ACTION_HISTORY = 300, ACTION_CONTENTS };
+enum { ACTION_ABOUT_PKG = 300 };
 
-About::About(IndexPtr index)
-  : Dialog(IDD_ABOUT_DIALOG), m_index(index),
-    m_currentCat(-255)
+AboutDialog::AboutDialog()
+  : Dialog(IDD_ABOUT_DIALOG), m_currentIndex(-255)
 {
   RichEdit::Init();
 }
 
-void About::onInit()
+void AboutDialog::onInit()
 {
   Dialog::onInit();
 
-  m_about = createControl<RichEdit>(IDC_ABOUT);
+  auto_char title[255] = {};
+  const auto_string &name = make_autostring(what());
+  auto_snprintf(title, auto_size(title), AUTO_STR("About %s"), name.c_str());
+  SetWindowText(handle(), title);
 
-  m_cats = createControl<ListView>(IDC_CATEGORIES, ListView::Columns{
-    {AUTO_STR("Category"), 142}
-  });
+  m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{});
 
-  m_cats->onSelect(bind(&About::updatePackages, this));
+  m_menu = createMenu();
+  m_menu->sortByColumn(0);
+  m_menu->onSelect(bind(&AboutDialog::callUpdateList, this));
 
-  m_packages = createControl<ListView>(IDC_PACKAGES, ListView::Columns{
-    {AUTO_STR("Name"), 382},
-    {AUTO_STR("Version"), 80},
-    {AUTO_STR("Author"), 90},
-  });
+  m_list = createList();
+  m_list->sortByColumn(0);
 
-  m_packages->sortByColumn(0);
-  m_packages->onActivate(bind(&About::packageHistory, this));
-  m_packages->onContextMenu(bind(&About::fillContextMenu,
-    this, placeholders::_1, placeholders::_2));
-
-  m_installedFiles = getControl(IDC_LIST);
-
-  m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{
-    {AUTO_STR("Description"), {m_about->handle()}},
-    {AUTO_STR("Packages"), {m_cats->handle(), m_packages->handle()}},
-    {AUTO_STR("Installed Files"), {m_installedFiles}},
-  });
+  m_report = getControl(IDC_REPORT);
 
   populate();
+  m_menu->sort();
+  callUpdateList();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_cats->resizeColumn(m_cats->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-  m_packages->resizeColumn(m_packages->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+  m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
 }
 
-void About::onCommand(const int id, int)
+void AboutDialog::onCommand(const int id, int)
 {
   switch(id) {
-  case IDC_WEBSITE:
-    selectLink(id, m_websiteLinks);
-    break;
-  case IDC_DONATE:
-    selectLink(id, m_donationLinks);
-    break;
-  case IDC_INSTALL:
-    close(InstallResult);
-    break;
-  case ACTION_CONTENTS:
-    packageContents();
-    break;
-  case ACTION_HISTORY:
-    packageHistory();
-    break;
   case IDOK:
   case IDCANCEL:
     close();
     break;
   default:
-    if(id >> 8 == IDC_WEBSITE)
-      openLink(m_websiteLinks[id & 0xff]);
-    else if(id >> 8 == IDC_DONATE)
-      openLink(m_donationLinks[id & 0xff]);
+    if(m_links.count(id))
+      selectLink(id);
+    else if(m_links.count(id >> 8))
+      openLink(m_links[id >> 8][id & 0xff]);
     break;
   }
 }
 
-bool About::fillContextMenu(Menu &menu, const int) const
+void AboutDialog::callUpdateList()
 {
-  if(m_packages->currentIndex() < 0)
-    return false;
-
-  menu.addAction(AUTO_STR("Package &Contents"), ACTION_CONTENTS);
-  menu.addAction(AUTO_STR("Package &History"), ACTION_HISTORY);
-
-  return true;
-}
-
-void About::populate()
-{
-  auto_char title[32] = {};
-  const auto_string &name = make_autostring(m_index->name());
-  auto_snprintf(title, auto_size(title), AUTO_STR("About %s"), name.c_str());
-  SetWindowText(handle(), title);
-
-  auto_char btnLabel[32] = {};
-  auto_snprintf(btnLabel, auto_size(btnLabel),
-    AUTO_STR("Install/update %s"), name.c_str());
-  SetWindowText(getControl(IDC_INSTALL), btnLabel);
-
-  m_websiteLinks = m_index->links(Index::WebsiteLink);
-  if(m_websiteLinks.empty())
-    hide(getControl(IDC_WEBSITE));
-
-  m_donationLinks = m_index->links(Index::DonationLink);
-  if(m_donationLinks.empty())
-    hide(getControl(IDC_DONATE));
-
-  string aboutText = m_index->aboutText();
-
-  if(m_index->name() == "ReaPack") {
-    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
-    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
-  }
-
-  if(!m_about->setRichText(aboutText)) {
-    // if description is invalid or empty, don't display it
-    m_tabs->removeTab(0);
-    m_tabs->setCurrentIndex(0);
-  }
-
-  m_cats->addRow({AUTO_STR("<All Packages>")});
-
-  for(const Category *cat : m_index->categories())
-    m_cats->addRow({make_autostring(cat->name())});
-
-  m_cats->sortByColumn(0);
-
-  updatePackages();
-
-  updateInstalledFiles();
-}
-
-void About::updatePackages()
-{
-  const int index = m_cats->currentIndex();
+  const int index = m_menu->currentIndex();
 
   // do nothing when the selection is cleared, except for the initial execution
-  if(index == -1 && m_currentCat >= -1)
+  if((index < 0 && m_currentIndex >= -1) || index == m_currentIndex)
     return;
 
-  // -1: all packages, >0 selected category
-  const int catIndex = max(-1, index - 1);
+  InhibitControl lock(m_list);
+  m_list->clear();
 
-  if(catIndex == m_currentCat)
-    return;
-  else if(catIndex < 0)
-    m_packagesData = &m_index->packages();
-  else
-    m_packagesData = &m_index->category(catIndex)->packages();
+  updateList(index);
+  m_currentIndex = index;
 
-  InhibitControl lock(m_packages);
-  m_packages->clear();
-
-  for(const Package *pkg : *m_packagesData) {
-    const Version *lastVer = pkg->lastVersion();
-    const auto_string &name = make_autostring(pkg->name());
-    const auto_string &version = make_autostring(lastVer->name());
-    const auto_string &author = make_autostring(lastVer->displayAuthor());
-
-    m_packages->addRow({name, version, author});
-  }
-
-  m_currentCat = catIndex;
-  m_packages->sort();
+  m_list->sort();
 }
 
-void About::updateInstalledFiles()
+void AboutDialog::addLinks(const int ctrl, const vector<const Link *> &links)
 {
-  set<Registry::File> allFiles;
-
-  try {
-    Registry reg(Path::prefixRoot(Path::REGISTRY));
-    for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
-      const vector<Registry::File> &files = reg.getFiles(entry);
-      allFiles.insert(files.begin(), files.end());
-    }
-  }
-  catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-    auto_char msg[255] = {};
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("The file list is currently unavailable.\x20")
-      AUTO_STR("Retry later when all installation task are completed.\r\n")
-      AUTO_STR("\r\nError description: %s"),
-      desc.c_str());
-    SetWindowText(m_installedFiles, msg);
+  if(links.empty())
     return;
-  }
 
-  if(allFiles.empty()) {
-    SetWindowText(m_installedFiles,
-      AUTO_STR(
-      "This repository does not own any file on your computer at this time.\r\n")
-
-      AUTO_STR("It is either not yet installed or it does not provide ")
-      AUTO_STR("any package compatible with your system."));
-  }
-  else {
-    stringstream stream;
-
-    for(const Registry::File &file : allFiles) {
-      stream << file.path.join();
-      if(file.main)
-        stream << '*';
-      stream << "\r\n";
-    }
-
-    SetWindowText(m_installedFiles, make_autostring(stream.str()).c_str());
-  }
+  m_links[ctrl] = links;
+  show(getControl(ctrl));
 }
 
-void About::selectLink(const int ctrl, const vector<const Link *> &links)
+void AboutDialog::selectLink(const int ctrl)
 {
+  const auto &links = m_links[ctrl];
   const int count = (int)links.size();
 
   m_tabs->setFocus();
@@ -271,30 +138,252 @@ void About::selectLink(const int ctrl, const vector<const Link *> &links)
   menu.show(rect.left, rect.bottom - 1, handle());
 }
 
-void About::openLink(const Link *link)
+void AboutDialog::openLink(const Link *link)
 {
   const auto_string &url = make_autostring(link->url);
   ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
-void About::packageHistory()
+AboutRemote::AboutRemote(IndexPtr index)
+  : AboutDialog(), m_index(index)
 {
-  const int index = m_packages->currentIndex();
-
-  if(index < 0)
-    return;
-
-  const Package *pkg = m_packagesData->at(index);
-  Dialog::Show<History>(instance(), handle(), pkg);
 }
 
-void About::packageContents()
+const string &AboutRemote::what() const
 {
-  const int index = m_packages->currentIndex();
+  return m_index->name();
+}
+
+ListView *AboutRemote::createMenu()
+{
+  return createControl<ListView>(IDC_MENU, ListView::Columns{
+    {AUTO_STR("Category"), 142}
+  });
+}
+
+ListView *AboutRemote::createList()
+{
+  return createControl<ListView>(IDC_LIST, ListView::Columns{
+    {AUTO_STR("Name"), 382},
+    {AUTO_STR("Version"), 80},
+    {AUTO_STR("Author"), 90},
+  });
+}
+
+void AboutRemote::onCommand(const int id, const int event)
+{
+  switch(id) {
+  case IDC_INSTALL:
+    close(InstallResult);
+    break;
+  case ACTION_ABOUT_PKG:
+    aboutPackage();
+    break;
+  default:
+    AboutDialog::onCommand(id, event);
+    break;
+  }
+}
+
+void AboutRemote::populate()
+{
+  HWND installBtn = getControl(IDC_INSTALL);
+  auto_char btnLabel[32] = {};
+  auto_snprintf(btnLabel, auto_size(btnLabel),
+    AUTO_STR("Install/update %s"), make_autostring(what()).c_str());
+  SetWindowText(installBtn, btnLabel);
+  show(installBtn);
+
+  string aboutText = m_index->aboutText();
+
+  if(m_index->name() == "ReaPack") {
+    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
+    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
+  }
+
+  RichEdit *desc = createControl<RichEdit>(IDC_ABOUT);
+  if(desc->setRichText(aboutText))
+    tabs()->addTab({AUTO_STR("Description"), {desc->handle()}});
+
+  tabs()->addTab({AUTO_STR("Packages"), {menu()->handle(), list()->handle()}});
+  tabs()->addTab({AUTO_STR("Installed Files"), {report()}});
+
+  list()->onActivate(bind(&AboutRemote::aboutPackage, this));
+
+  addLinks(IDC_WEBSITE, m_index->links(Index::WebsiteLink));
+  addLinks(IDC_DONATE, m_index->links(Index::DonationLink));
+
+  menu()->addRow({AUTO_STR("<All Packages>")});
+
+  for(const Category *cat : m_index->categories())
+    menu()->addRow({make_autostring(cat->name())});
+
+  updateInstalledFiles();
+
+  list()->onContextMenu(bind(&AboutRemote::fillContextMenu,
+    this, placeholders::_1, placeholders::_2));
+}
+
+void AboutRemote::updateList(const int index)
+{
+  // -1: all packages, >0 selected category
+  const int catIndex = max(-1, index - 1);
+
+  if(catIndex < 0)
+    m_packagesData = &m_index->packages();
+  else
+    m_packagesData = &m_index->category(catIndex)->packages();
+
+  for(const Package *pkg : *m_packagesData) {
+    const Version *lastVer = pkg->lastVersion();
+    const auto_string &name = make_autostring(pkg->name());
+    const auto_string &version = make_autostring(lastVer->name());
+    const auto_string &author = make_autostring(lastVer->displayAuthor());
+
+    list()->addRow({name, version, author});
+  }
+}
+
+void AboutRemote::updateInstalledFiles()
+{
+  set<Registry::File> allFiles;
+
+  try {
+    Registry reg(Path::prefixRoot(Path::REGISTRY));
+    for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
+      const vector<Registry::File> &files = reg.getFiles(entry);
+      allFiles.insert(files.begin(), files.end());
+    }
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+    auto_char msg[255] = {};
+    auto_snprintf(msg, auto_size(msg),
+      AUTO_STR("The file list is currently unavailable.\x20")
+      AUTO_STR("Retry later when all installation task are completed.\r\n")
+      AUTO_STR("\r\nError description: %s"),
+      desc.c_str());
+    SetWindowText(report(), msg);
+    return;
+  }
+
+  if(allFiles.empty()) {
+    SetWindowText(report(),
+      AUTO_STR(
+      "This repository does not own any file on your computer at this time.\r\n")
+
+      AUTO_STR("It is either not yet installed or it does not provide ")
+      AUTO_STR("any package compatible with your system."));
+  }
+  else {
+    stringstream stream;
+
+    for(const Registry::File &file : allFiles) {
+      stream << file.path.join();
+      if(file.main)
+        stream << '*';
+      stream << "\r\n";
+    }
+
+    SetWindowText(report(), make_autostring(stream.str()).c_str());
+  }
+}
+
+bool AboutRemote::fillContextMenu(Menu &menu, const int) const
+{
+  if(list()->currentIndex() < 0)
+    return false;
+
+  menu.addAction(AUTO_STR("Package &Overview"), ACTION_ABOUT_PKG);
+
+  return true;
+}
+
+void AboutRemote::aboutPackage()
+{
+  const int index = list()->currentIndex();
 
   if(index < 0)
     return;
 
   const Package *pkg = m_packagesData->at(index);
-  Dialog::Show<Contents>(instance(), handle(), pkg);
+  Dialog::Show<AboutPackage>(instance(), handle(), pkg);
+}
+
+AboutPackage::AboutPackage(const Package *pkg)
+  : AboutDialog(), m_package(pkg)
+{
+}
+
+const string &AboutPackage::what() const
+{
+  return m_package->name();
+}
+
+ListView *AboutPackage::createMenu()
+{
+  return createControl<ListView>(IDC_MENU, ListView::Columns{
+    {AUTO_STR("Version"), 142}
+  });
+}
+
+ListView *AboutPackage::createList()
+{
+  return createControl<ListView>(IDC_LIST, ListView::Columns{
+    {AUTO_STR("File"), 251},
+    {AUTO_STR("Source"), 251},
+    {AUTO_STR("Main"), 50},
+  });
+}
+
+void AboutPackage::populate()
+{
+  // RichEdit *desc = createControl<RichEdit>(IDC_ABOUT);
+  // if(desc->setRichText(aboutText))
+  //   tabs()->addTab({AUTO_STR("Documentation"), {desc->handle()}});
+
+  tabs()->addTab({AUTO_STR("History"), {menu()->handle(),
+    report()}});
+  tabs()->addTab({AUTO_STR("Contents"), {menu()->handle(),
+    list()->handle()}});
+
+  RECT rect;
+  GetWindowRect(list()->handle(), &rect);
+  ScreenToClient(handle(), (LPPOINT)&rect);
+  ScreenToClient(handle(), ((LPPOINT)&rect)+1);
+
+  SetWindowPos(report(), nullptr, rect.left, rect.top,
+    rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
+
+  for(const Version *ver : m_package->versions())
+    menu()->addRow({make_autostring(ver->name())});
+
+  menu()->setSortCallback(0, [&] (const int a, const int b) {
+    return m_package->version(a)->compare(*m_package->version(b));
+  });
+  menu()->sortByColumn(0, ListView::DescendingOrder);
+  menu()->setSelected(menu()->rowCount() - 1, true);
+}
+
+void AboutPackage::updateList(const int index)
+{
+  if(index < 0)
+    return;
+
+  const Version *ver = m_package->version(index);
+  OutputStream stream;
+  stream << *ver;
+  SetWindowText(report(), make_autostring(stream.str()).c_str());
+
+  const auto &sources = ver->sources();
+  for(auto it = sources.begin(); it != sources.end();) {
+    const Path &path = it->first;
+    const Source *src = it->second;
+
+    list()->addRow({make_autostring(path.join()), make_autostring(src->url()),
+      make_autostring(src->isMain() ? "Yes" : "No")});
+
+    // skip duplicate files
+    do { it++; } while(it != sources.end() && path == it->first);
+  }
 }

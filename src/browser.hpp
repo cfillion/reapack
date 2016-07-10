@@ -131,9 +131,8 @@ private:
   void installVersion(int index, size_t verIndex);
   void uninstall(int index, bool toggle = true);
   void togglePin(int index);
-  void history(int index);
-  void contents(int index);
-  void about(int index);
+  void aboutRemote(int index);
+  void aboutPackage(int index);
 
   std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;

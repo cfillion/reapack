@@ -24,21 +24,15 @@
 #include "transaction.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
-#include <locale>
 
 using namespace std;
 
-static const string SEP(10, '=');
-const char * const ReportDialog::NL = "\r\n";
-
-ReportDialog::ReportDialog()
-  : Dialog(IDD_REPORT_DIALOG)
+Report::Report(const Receipt &receipt)
+  : Dialog(IDD_REPORT_DIALOG), m_receipt(receipt)
 {
-  // enable number formatting (ie. "1,234" instead of "1234")
-  m_stream.imbue(locale(""));
 }
 
-void ReportDialog::onInit()
+void Report::onInit()
 {
   Dialog::onInit();
 
@@ -48,46 +42,13 @@ void ReportDialog::onInit()
   SetDlgItemText(handle(), IDC_REPORT, str.c_str());
 }
 
-void ReportDialog::printHeader(const char *title)
+void Report::printHeader(const char *title)
 {
   if(m_stream.tellp())
-    m_stream << NL;
+    m_stream << "\r\n";
 
-  m_stream << SEP << ' ' << title << ": " << SEP << NL << NL;
-}
-
-void ReportDialog::printVersion(const Version *ver)
-{
-  stream() << 'v' << ver->name();
-
-  if(!ver->author().empty())
-    stream() << " by " << ver->author();
-
-  const string &date = ver->time().toString();
-  if(!date.empty())
-    stream() << " – " << date;
-
-  stream() << NL;
-}
-
-void ReportDialog::printChangelog(const Version *ver)
-{
-  const string &changelog = ver->changelog();
-  printIndented(changelog.empty() ? "No changelog" : changelog);
-}
-
-void ReportDialog::printIndented(const string &text)
-{
-  istringstream stream(text);
-  string line;
-
-  while(getline(stream, line, '\n'))
-    m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << NL;
-}
-
-Report::Report(const Receipt &receipt)
-  : ReportDialog(), m_receipt(receipt)
-{
+  const string sep(10, '=');
+  m_stream << sep << ' ' << title << ": " << sep << "\r\n\r\n";
 }
 
 void Report::fillReport()
@@ -97,20 +58,20 @@ void Report::fillReport()
   const size_t removals = m_receipt.removals().size();
   const size_t errors = m_receipt.errors().size();
 
-  stream()
+  m_stream
     << installs << " installed packages, "
     << updates << " updates, "
     << removals << " removed files and "
     << errors << " errors"
-    << NL
+    << "\r\n"
   ;
 
   if(m_receipt.isRestartNeeded()) {
-    stream()
-      << NL
-      << "Notice: One or more native REAPER extensions were installed." << NL
+    m_stream
+      << "\r\n"
+      << "Notice: One or more native REAPER extensions were installed.\r\n"
       << "The newly installed files won't be loaded until REAPER is restarted."
-      << NL;
+      << "\r\n";
   }
 
   if(errors)
@@ -131,31 +92,30 @@ void Report::printInstalls()
   printHeader("Installed packages");
 
   for(const InstallTicket &ticket : m_receipt.installs())
-    stream() << ticket.version->fullName() << NL;
+    m_stream << ticket.version->fullName() << "\r\n";
 }
 
 void Report::printUpdates()
 {
   printHeader("Updates");
 
-  const auto start = stream().tellp();
+  const auto start = m_stream.tellp();
 
   for(const InstallTicket &ticket : m_receipt.updates()) {
     const Package *pkg = ticket.version->package();
     const Registry::Entry &regEntry = ticket.regEntry;
     const VersionSet &versions = pkg->versions();
 
-    if(stream().tellp() != start)
-      stream() << NL;
+    if(m_stream.tellp() != start)
+      m_stream << "\r\n";
 
-    stream() << pkg->fullName() << ':' << NL;
+    m_stream << pkg->fullName() << ":\r\n";
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
       if(*ver <= regEntry.version)
         break;
 
-      printVersion(ver);
-      printChangelog(ver);
+      m_stream << *ver;
     }
   }
 }
@@ -164,14 +124,14 @@ void Report::printErrors()
 {
   printHeader("Errors");
 
-  const auto start = stream().tellp();
+  const auto start = m_stream.tellp();
 
   for(const Receipt::Error &err : m_receipt.errors()) {
-    if(stream().tellp() != start)
-      stream() << NL;
+    if(m_stream.tellp() != start)
+      m_stream << "\r\n";
 
-    stream() << err.title << ':' << NL;
-    printIndented(err.message);
+    m_stream << err.title << ":\r\n";
+    m_stream.indented(err.message);
   }
 }
 
@@ -180,57 +140,5 @@ void Report::printRemovals()
   printHeader("Removed files");
 
   for(const Path &path : m_receipt.removals())
-    stream() << path.join() << NL;
-}
-
-History::History(const Package *pkg)
-  : ReportDialog(), m_package(pkg)
-{
-}
-
-void History::fillReport()
-{
-  SetWindowText(handle(), AUTO_STR("Package History"));
-  SetWindowText(getControl(IDC_LABEL),
-    make_autostring(m_package->name()).c_str());
-
-  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
-    if(stream().tellp())
-      stream() << NL;
-
-    printVersion(ver);
-    printChangelog(ver);
-  }
-}
-
-Contents::Contents(const Package *pkg)
-  : ReportDialog(), m_package(pkg)
-{
-}
-
-void Contents::fillReport()
-{
-  SetWindowText(handle(), AUTO_STR("Package Contents"));
-  SetWindowText(getControl(IDC_LABEL),
-    make_autostring(m_package->name()).c_str());
-
-  for(const Version *ver : m_package->versions() | boost::adaptors::reversed) {
-    if(stream().tellp())
-      stream() << NL;
-
-    printVersion(ver);
-
-    const auto &sources = ver->sources();
-    for(auto it = sources.begin(); it != sources.end();) {
-      const Path &path = it->first;
-      const string &file = path.join();
-      const Source *src = it->second;
-
-      printIndented(src->isMain() ? file + '*' : file);
-      printIndented("Source: " + src->url());
-
-      // skip duplicate files
-      do { it++; } while(it != sources.end() && path == it->first);
-    }
-  }
+    m_stream << path.join() << "\r\n";
 }
