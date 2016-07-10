@@ -256,10 +256,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
 
 void ReaPack::about(const Package *pkg, HWND parent)
 {
-  const auto ret = Dialog::Show<AboutPackage>(m_instance, parent, pkg);
-
-  switch(ret) {
-  }
+  Dialog::Show<AboutPackage>(m_instance, parent, pkg);
 }
 
 void ReaPack::browsePackages()
