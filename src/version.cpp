@@ -135,14 +135,6 @@ void Version::setChangelog(const string &changelog)
   m_changelog = changelog;
 }
 
-void Version::setTime(const char *iso8601)
-{
-  const Time time(iso8601);
-
-  if(time)
-    m_time = time;
-}
-
 const Source *Version::source(const size_t index) const
 {
   auto it = m_sources.begin();

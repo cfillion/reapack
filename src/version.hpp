@@ -55,7 +55,7 @@ public:
   const std::string &author() const { return m_author; }
   std::string displayAuthor() const;
 
-  void setTime(const char *iso8601);
+  void setTime(const Time &time) { if(time) m_time = time; }
   const Time &time() const { return m_time; }
 
   void setChangelog(const std::string &);

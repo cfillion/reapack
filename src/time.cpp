@@ -23,7 +23,7 @@
 
 using namespace std;
 
-Time::Time(const string &iso8601) : m_tm()
+Time::Time(const char *iso8601) : m_tm()
 {
   tm time = {};
 

@@ -23,7 +23,7 @@
 
 class Time {
 public:
-  Time(const std::string &);
+  Time(const char *iso8601);
   Time(int year, int month, int day, int hour = 0, int minute = 0, int second = 0);
   Time(const std::tm &tm = {}) : m_tm(tm) {}
 
