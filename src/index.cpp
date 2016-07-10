@@ -24,8 +24,6 @@
 #include "path.hpp"
 #include "remote.hpp"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;
@@ -33,14 +31,6 @@ using namespace std;
 Path Index::pathFor(const string &name)
 {
   return Path::CACHE + (name + ".xml");
-}
-
-auto Index::linkTypeFor(const char *rel) -> LinkType
-{
-  if(!strcmp(rel, "donation"))
-    return DonationLink;
-
-  return WebsiteLink;
 }
 
 IndexPtr Index::load(const string &name, const char *data)
@@ -150,25 +140,6 @@ const Category *Index::category(const string &name) const
     return nullptr;
   else
     return category(it->second);
-}
-
-void Index::addLink(const LinkType type, const Link &link)
-{
-  if(boost::algorithm::starts_with(link.url, "http"))
-    m_links.insert({type, link});
-}
-
-auto Index::links(const LinkType type) const -> LinkList
-{
-  const auto begin = m_links.lower_bound(type);
-  const auto end = m_links.upper_bound(type);
-
-  LinkList list(m_links.count(type));
-
-  for(auto it = begin; it != end; it++)
-    list[distance(begin, it)] = &it->second;
-
-  return list;
 }
 
 Category::Category(const string &name, const Index *ri)

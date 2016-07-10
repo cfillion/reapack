@@ -56,7 +56,7 @@ void LoadMetadataV1(TiXmlElement *meta, Index *ri)
 
   if(node) {
     if(const char *rtf = node->GetText())
-      ri->setAboutText(rtf);
+      ri->metadata()->setAbout(rtf);
   }
 
   node = meta->FirstChildElement("link");
@@ -73,7 +73,7 @@ void LoadMetadataV1(TiXmlElement *meta, Index *ri)
     }
     else if(!url) url = name;
 
-    ri->addLink(Index::linkTypeFor(rel), {name, url});
+    ri->metadata()->addLink(Metadata::getLinkType(rel), {name, url});
 
     node = node->NextSiblingElement("link");
   }

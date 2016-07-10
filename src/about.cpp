@@ -194,7 +194,7 @@ void AboutRemote::populate()
   SetWindowText(installBtn, btnLabel);
   show(installBtn);
 
-  string aboutText = m_index->aboutText();
+  string aboutText = m_index->metadata()->about();
 
   if(m_index->name() == "ReaPack") {
     boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
@@ -210,8 +210,8 @@ void AboutRemote::populate()
 
   list()->onActivate(bind(&AboutRemote::aboutPackage, this));
 
-  addLinks(IDC_WEBSITE, m_index->links(Index::WebsiteLink));
-  addLinks(IDC_DONATE, m_index->links(Index::DonationLink));
+  addLinks(IDC_WEBSITE, m_index->metadata()->links(Metadata::WebsiteLink));
+  addLinks(IDC_DONATE, m_index->metadata()->links(Metadata::DonationLink));
 
   menu()->addRow({AUTO_STR("<All Packages>")});
 

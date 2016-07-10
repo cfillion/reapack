@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "metadata.hpp"
 #include "package.hpp"
 #include "source.hpp"
 
@@ -37,18 +38,11 @@ class Remote;
 class TiXmlElement;
 struct NetworkOpts;
 
-struct Link { std::string name; std::string url; };
-
 typedef std::shared_ptr<const Index> IndexPtr;
 
 class Index : public std::enable_shared_from_this<const Index> {
 public:
-  enum LinkType { WebsiteLink, DonationLink };
-  typedef std::multimap<LinkType, Link> LinkMap;
-  typedef std::vector<const Link *> LinkList;
-
   static Path pathFor(const std::string &name);
-  static LinkType linkTypeFor(const char *rel);
   static IndexPtr load(const std::string &name, const char *data = nullptr);
   static Download *fetch(const Remote &, bool stale, const NetworkOpts &);
 
@@ -58,10 +52,8 @@ public:
   void setName(const std::string &);
   const std::string &name() const { return m_name; }
 
-  void setAboutText(const std::string &rtf) { m_about = rtf; }
-  const std::string &aboutText() const { return m_about; }
-  void addLink(const LinkType, const Link &);
-  LinkList links(const LinkType type) const;
+  Metadata *metadata() { return &m_metadata; }
+  const Metadata *metadata() const { return &m_metadata; }
 
   void addCategory(const Category *cat);
   const CategoryList &categories() const { return m_categories; }
@@ -74,8 +66,7 @@ private:
   static void loadV1(TiXmlElement *, Index *);
 
   std::string m_name;
-  std::string m_about;
-  LinkMap m_links;
+  Metadata m_metadata;
   CategoryList m_categories;
   PackageList m_packages;
 

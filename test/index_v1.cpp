@@ -197,11 +197,11 @@ TEST_CASE("read index metadata", M) {
   }
 
   SECTION("description") {
-    REQUIRE(ri->aboutText() == "Chunky\nBacon");
+    REQUIRE(ri->metadata()->about() == "Chunky\nBacon");
   }
   
   SECTION("website links") {
-    const auto &links = ri->links(Index::WebsiteLink);
+    const auto &links = ri->metadata()->links(Metadata::WebsiteLink);
     REQUIRE(links.size() == 4);
     REQUIRE(links[0]->name == "http://cfillion.tk");
     REQUIRE(links[0]->url == "http://cfillion.tk");
@@ -214,7 +214,7 @@ TEST_CASE("read index metadata", M) {
   }
 
   SECTION("donation links") {
-    const auto &links = ri->links(Index::DonationLink);
+    const auto &links = ri->metadata()->links(Metadata::DonationLink);
     REQUIRE(links.size() == 1);
     REQUIRE(links[0]->name == "Donate");
     REQUIRE(links[0]->url == "http://paypal.com");
