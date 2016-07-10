@@ -36,18 +36,6 @@ using namespace std;
 
 enum { ACTION_ABOUT_PKG = 300 };
 
-static int getLinkControl(const Metadata::LinkType type)
-{
-  switch(type) {
-  case Metadata::WebsiteLink:
-    return IDC_WEBSITE;
-  case Metadata::DonationLink:
-    return IDC_DONATE;
-  default:
-    abort();
-  }
-}
-
 AboutDialog::AboutDialog(const Metadata *metadata)
   : Dialog(IDD_ABOUT_DIALOG), m_metadata(metadata), m_currentIndex(-255)
 {
@@ -97,6 +85,17 @@ void AboutDialog::onInit()
 
 void AboutDialog::populateLinks()
 {
+  const auto &getLinkControl = [](const Metadata::LinkType type) {
+    switch(type) {
+    case Metadata::WebsiteLink:
+      return IDC_WEBSITE;
+    case Metadata::DonationLink:
+      return IDC_DONATE;
+    }
+
+    return IDC_WEBSITE; // make MSVC happy
+  };
+
   RECT rect;
   GetWindowRect(getControl(IDC_WEBSITE), &rect);
   ScreenToClient(handle(), (LPPOINT)&rect);
