@@ -357,7 +357,7 @@ void Browser::fillMenu(Menu &menu)
   menu.addSeparator();
 
   menu.setEnabled(!entry->test(ObsoleteFlag),
-    menu.addAction(AUTO_STR("Package &Overview..."), ACTION_ABOUT_PKG));
+    menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG));
 
   auto_char aboutLabel[32] = {};
   const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));

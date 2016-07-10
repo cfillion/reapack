@@ -294,7 +294,7 @@ bool AboutRemote::fillContextMenu(Menu &menu, const int) const
   if(list()->currentIndex() < 0)
     return false;
 
-  menu.addAction(AUTO_STR("Package &Overview"), ACTION_ABOUT_PKG);
+  menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG);
 
   return true;
 }
