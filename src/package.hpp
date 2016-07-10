@@ -18,6 +18,7 @@
 #ifndef REAPACK_PACKAGE_HPP
 #define REAPACK_PACKAGE_HPP
 
+#include "metadata.hpp"
 #include "path.hpp"
 #include "version.hpp"
 
@@ -50,6 +51,9 @@ public:
   void setDescription(const std::string &d) { m_desc = d; }
   std::string description() const { return m_desc; }
 
+  Metadata *metadata() { return &m_metadata; }
+  const Metadata *metadata() const { return &m_metadata; }
+
   void addVersion(const Version *ver);
   const VersionSet &versions() const { return m_versions; }
   const Version *version(size_t index) const;
@@ -62,6 +66,7 @@ private:
   Type m_type;
   std::string m_name;
   std::string m_desc;
+  Metadata m_metadata;
   VersionSet m_versions;
 };
 

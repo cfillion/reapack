@@ -1,0 +1,16 @@
+<index version="1">
+  <category name="Test">
+    <reapack name="World" type="script">
+      <version name="1.0">
+        <source>http://google.com</source>
+      </version>
+      <metadata>
+        <link rel="website" href="http://cfillion.tk" />
+        <description><![CDATA[Chunky
+Bacon]]>
+        </description>
+        <link rel="donation" href="http://paypal.com">Donate</link>
+      </metadata>
+    </reapack>
+  </category>
+</index>

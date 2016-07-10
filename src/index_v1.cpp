@@ -23,11 +23,11 @@
 
 using namespace std;
 
-static void LoadMetadataV1(TiXmlElement *, Index *ri);
-static void LoadCategoryV1(TiXmlElement *, Index *ri);
-static void LoadPackageV1(TiXmlElement *, Category *cat);
-static void LoadVersionV1(TiXmlElement *, Package *pkg);
-static void LoadSourceV1(TiXmlElement *, Version *pkg);
+static void LoadMetadataV1(TiXmlElement *, Metadata *);
+static void LoadCategoryV1(TiXmlElement *, Index *);
+static void LoadPackageV1(TiXmlElement *, Category *);
+static void LoadVersionV1(TiXmlElement *, Package *);
+static void LoadSourceV1(TiXmlElement *, Version *);
 
 void Index::loadV1(TiXmlElement *root, Index *ri)
 {
@@ -47,16 +47,16 @@ void Index::loadV1(TiXmlElement *root, Index *ri)
   node = root->FirstChildElement("metadata");
 
   if(node)
-    LoadMetadataV1(node, ri);
+    LoadMetadataV1(node, ri->metadata());
 }
 
-void LoadMetadataV1(TiXmlElement *meta, Index *ri)
+void LoadMetadataV1(TiXmlElement *meta, Metadata *md)
 {
   TiXmlElement *node = meta->FirstChildElement("description");
 
   if(node) {
     if(const char *rtf = node->GetText())
-      ri->metadata()->setAbout(rtf);
+      md->setAbout(rtf);
   }
 
   node = meta->FirstChildElement("link");
@@ -73,7 +73,7 @@ void LoadMetadataV1(TiXmlElement *meta, Index *ri)
     }
     else if(!url) url = name;
 
-    ri->metadata()->addLink(Metadata::getLinkType(rel), {name, url});
+    md->addLink(Metadata::getLinkType(rel), {name, url});
 
     node = node->NextSiblingElement("link");
   }
@@ -116,13 +116,18 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
 
   pack->setDescription(desc);
 
-  TiXmlElement *verNode = packNode->FirstChildElement("version");
+  TiXmlElement *node = packNode->FirstChildElement("version");
 
-  while(verNode) {
-    LoadVersionV1(verNode, pack);
+  while(node) {
+    LoadVersionV1(node, pack);
 
-    verNode = verNode->NextSiblingElement("version");
+    node = node->NextSiblingElement("version");
   }
+
+  node = packNode->FirstChildElement("metadata");
+
+  if(node)
+    LoadMetadataV1(node, pack->metadata());
 
   cat->addPackage(pack);
 

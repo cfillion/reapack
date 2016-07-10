@@ -191,7 +191,7 @@ TEST_CASE("read index metadata", M) {
   UseRootPath root(RIPATH);
 
   IndexPtr ri = Index::load("metadata");
-  
+
   SECTION("name (ignored)") {
     REQUIRE(ri->name() == "metadata");
   }
@@ -199,7 +199,7 @@ TEST_CASE("read index metadata", M) {
   SECTION("description") {
     REQUIRE(ri->metadata()->about() == "Chunky\nBacon");
   }
-  
+
   SECTION("links") {
     REQUIRE(ri->metadata()->links().size() == 5);
 
@@ -216,6 +216,32 @@ TEST_CASE("read index metadata", M) {
 
     REQUIRE((++link)->second.name == "http://google.com");
     REQUIRE(link->second.url == "http://google.com");
+
+    REQUIRE((++link)->first == Metadata::DonationLink);
+    REQUIRE(link->second.name == "Donate");
+    REQUIRE(link->second.url == "http://paypal.com");
+  }
+}
+
+TEST_CASE("read package metadata", M) {
+  UseRootPath root(RIPATH);
+
+  IndexPtr ri = Index::load("pkg_metadata");
+  REQUIRE(ri->packages().size() == 1);
+
+  const Package *pkg = ri->packages()[0];
+
+  SECTION("description") {
+    REQUIRE(pkg->metadata()->about() == "Chunky\nBacon");
+  }
+
+  SECTION("links") {
+    REQUIRE(pkg->metadata()->links().size() == 2);
+
+    auto link = pkg->metadata()->links().begin();
+    REQUIRE(link->first == Metadata::WebsiteLink);
+    REQUIRE(link->second.name == "http://cfillion.tk");
+    REQUIRE(link->second.url == "http://cfillion.tk");
 
     REQUIRE((++link)->first == Metadata::DonationLink);
     REQUIRE(link->second.name == "Donate");

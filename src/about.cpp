@@ -335,7 +335,7 @@ void AboutRemote::aboutPackage()
 }
 
 AboutPackage::AboutPackage(const Package *pkg)
-  : AboutDialog(new Metadata), m_package(pkg) // FIXME: remove `new Metadata` ASAP
+  : AboutDialog(pkg->metadata()), m_package(pkg)
 {
 }
 
