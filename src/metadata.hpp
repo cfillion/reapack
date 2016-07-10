@@ -28,7 +28,6 @@ class Metadata {
 public:
   enum LinkType { WebsiteLink, DonationLink };
   typedef std::multimap<LinkType, Link> LinkMap;
-  typedef std::vector<const Link *> LinkList;
 
   static LinkType getLinkType(const char *rel);
 
@@ -36,7 +35,6 @@ public:
   const std::string &about() const { return m_about; }
   void addLink(const LinkType, const Link &);
   const LinkMap &links() const { return m_links; }
-  LinkList links(LinkType) const;
 
 private:
   std::string m_about;

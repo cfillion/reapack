@@ -32,17 +32,3 @@ void Metadata::addLink(const LinkType type, const Link &link)
   if(boost::algorithm::starts_with(link.url, "http"))
     m_links.insert({type, link});
 }
-
-auto Metadata::links(const LinkType type) const -> LinkList
-{
-  const auto begin = m_links.lower_bound(type);
-  const auto end = m_links.upper_bound(type);
-
-  LinkList list(m_links.count(type));
-
-  for(auto it = begin; it != end; it++)
-    list[distance(begin, it)] = &it->second;
-
-  return list;
-}
-

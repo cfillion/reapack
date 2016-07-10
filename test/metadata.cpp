@@ -8,30 +8,30 @@ static const char *M = "[metadata]";
 
 TEST_CASE("repository links", M) {
   Metadata md;
-  CHECK(md.links(Metadata::WebsiteLink).empty());
-  CHECK(md.links(Metadata::DonationLink).empty());
+  CHECK(md.links().empty());
 
   SECTION("website links") {
     md.addLink(Metadata::WebsiteLink, {"First", "http://example.com"});
-    REQUIRE(md.links(Metadata::WebsiteLink).size() == 1);
+    REQUIRE(md.links().count(Metadata::WebsiteLink) == 1);
     md.addLink(Metadata::WebsiteLink, {"Second", "http://example.com"});
 
-    const auto &links = md.links(Metadata::WebsiteLink);
-    REQUIRE(links.size() == 2);
-    REQUIRE(links[0]->name == "First");
-    REQUIRE(links[1]->name == "Second");
+    auto link = md.links().begin();
+    REQUIRE(link->first == Metadata::WebsiteLink);
+    REQUIRE(link->second.name == "First");
+    REQUIRE((++link)->second.name == "Second");
 
-    REQUIRE(md.links(Metadata::DonationLink).empty());
+    REQUIRE(md.links().count(Metadata::DonationLink) == 0);
   }
 
   SECTION("donation links") {
     md.addLink(Metadata::DonationLink, {"First", "http://example.com"});
-    REQUIRE(md.links(Metadata::DonationLink).size() == 1);
+    REQUIRE(md.links().count(Metadata::DonationLink) == 1);
+    REQUIRE(md.links().begin()->first == Metadata::DonationLink);
   }
 
   SECTION("drop invalid links") {
     md.addLink(Metadata::WebsiteLink, {"name", "not http(s)"});
-    REQUIRE(md.links(Metadata::WebsiteLink).empty());
+    REQUIRE(md.links().count(Metadata::WebsiteLink) == 0);
   }
 }
 

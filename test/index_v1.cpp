@@ -200,24 +200,26 @@ TEST_CASE("read index metadata", M) {
     REQUIRE(ri->metadata()->about() == "Chunky\nBacon");
   }
   
-  SECTION("website links") {
-    const auto &links = ri->metadata()->links(Metadata::WebsiteLink);
-    REQUIRE(links.size() == 4);
-    REQUIRE(links[0]->name == "http://cfillion.tk");
-    REQUIRE(links[0]->url == "http://cfillion.tk");
-    REQUIRE(links[1]->name == "https://github.com/cfillion");
-    REQUIRE(links[1]->url == "https://github.com/cfillion");
-    REQUIRE(links[2]->name == "http://twitter.com/cfi30");
-    REQUIRE(links[2]->url == "http://twitter.com/cfi30");
-    REQUIRE(links[3]->name == "http://google.com");
-    REQUIRE(links[3]->url == "http://google.com");
-  }
+  SECTION("links") {
+    REQUIRE(ri->metadata()->links().size() == 5);
 
-  SECTION("donation links") {
-    const auto &links = ri->metadata()->links(Metadata::DonationLink);
-    REQUIRE(links.size() == 1);
-    REQUIRE(links[0]->name == "Donate");
-    REQUIRE(links[0]->url == "http://paypal.com");
+    auto link = ri->metadata()->links().begin();
+    REQUIRE(link->first == Metadata::WebsiteLink);
+    REQUIRE(link->second.name == "http://cfillion.tk");
+    REQUIRE(link->second.url == "http://cfillion.tk");
+
+    REQUIRE((++link)->second.name == "https://github.com/cfillion");
+    REQUIRE(link->second.url == "https://github.com/cfillion");
+
+    REQUIRE((++link)->second.name == "http://twitter.com/cfi30");
+    REQUIRE(link->second.url == "http://twitter.com/cfi30");
+
+    REQUIRE((++link)->second.name == "http://google.com");
+    REQUIRE(link->second.url == "http://google.com");
+
+    REQUIRE((++link)->first == Metadata::DonationLink);
+    REQUIRE(link->second.name == "Donate");
+    REQUIRE(link->second.url == "http://paypal.com");
   }
 }
 
