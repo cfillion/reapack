@@ -67,5 +67,6 @@
 #define IDC_BROWSE     228
 #define IDC_PROXY      229
 #define IDC_VERIFYPEER 230
+#define IDC_SCREENSHOT 231
 
 #endif

@@ -91,6 +91,8 @@ void AboutDialog::populateLinks()
       return IDC_WEBSITE;
     case Metadata::DonationLink:
       return IDC_DONATE;
+    case Metadata::ScreenshotLink:
+      return IDC_SCREENSHOT;
     }
 
     return IDC_WEBSITE; // make MSVC happy

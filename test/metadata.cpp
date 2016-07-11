@@ -38,6 +38,7 @@ TEST_CASE("repository links", M) {
 TEST_CASE("link type from stmdng", M) {
   REQUIRE(Metadata::getLinkType("website") == Metadata::WebsiteLink);
   REQUIRE(Metadata::getLinkType("donation") == Metadata::DonationLink);
+  REQUIRE(Metadata::getLinkType("screenshot") == Metadata::ScreenshotLink);
   REQUIRE(Metadata::getLinkType("bacon") == Metadata::WebsiteLink);
 }
 

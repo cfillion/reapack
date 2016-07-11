@@ -23,6 +23,8 @@ auto Metadata::getLinkType(const char *rel) -> LinkType
 {
   if(!strcmp(rel, "donation"))
     return DonationLink;
+  else if(!strcmp(rel, "screenshot"))
+    return ScreenshotLink;
 
   return WebsiteLink;
 }

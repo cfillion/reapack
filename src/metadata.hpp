@@ -26,7 +26,12 @@ struct Link { std::string name; std::string url; };
 
 class Metadata {
 public:
-  enum LinkType { WebsiteLink, DonationLink };
+  enum LinkType {
+    WebsiteLink,
+    ScreenshotLink,
+    DonationLink,
+  };
+
   typedef std::multimap<LinkType, Link> LinkMap;
 
   static LinkType getLinkType(const char *rel);
