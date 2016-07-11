@@ -240,6 +240,8 @@ bool Browser::onKeyDown(const int key, const int mods)
 
     setClipboard(values);
   }
+  else if(!mods && key == VK_F5)
+    refresh(true);
   else
     return false;
 
