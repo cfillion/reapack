@@ -50,4 +50,10 @@ TEST_CASE("output version", M) {
     stream << ver;
     REQUIRE(stream.str() == "v1.2.3\r\n  + added super cool feature\r\n  + fixed all the bugs!\r\n");
   }
+
+  SECTION("changelog with empty lines") {
+    ver.setChangelog("line1\n\nline2");
+    stream << ver; // no crash!
+    REQUIRE(stream.str() == "v1.2.3\r\n  line1\r\n\r\n  line2\r\n");
+  }
 }

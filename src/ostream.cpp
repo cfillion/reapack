@@ -34,8 +34,14 @@ void OutputStream::indented(const string &text)
   istringstream stream(text);
   string line;
 
-  while(getline(stream, line, '\n'))
-    m_stream << "\x20\x20" << line.substr(line.find_first_not_of('\x20')) << "\r\n";
+  while(getline(stream, line, '\n')) {
+    const auto first = line.find_first_not_of('\x20');
+
+    if(first != string::npos)
+      m_stream << "\x20\x20" << line.substr(first);
+
+    m_stream << "\r\n";
+  }
 }
 
 OutputStream &OutputStream::operator<<(const Version &ver)
