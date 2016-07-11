@@ -30,6 +30,7 @@ class Menu;
 class Metadata;
 class Package;
 class RichEdit;
+class Source;
 class TabBar;
 struct Link;
 
@@ -87,7 +88,7 @@ protected:
   void updateList(int) override;
 
 private:
-  bool fillContextMenu(Menu &, int index) const;
+  bool fillContextMenu(Menu &, int) const;
   void updateInstalledFiles();
   void aboutPackage();
 
@@ -104,11 +105,16 @@ protected:
   ListView *createMenu() override;
   ListView *createList() override;
 
+  void onCommand(int, int) override;
   void populate() override;
   void updateList(int) override;
 
 private:
+  bool fillContextMenu(Menu &, int) const;
+  void copySourceUrl();
+
   const Package *m_package;
+  std::vector<const Source *> m_sources;
 };
 
 #endif

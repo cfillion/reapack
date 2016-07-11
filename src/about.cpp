@@ -34,7 +34,7 @@
 
 using namespace std;
 
-enum { ACTION_ABOUT_PKG = 300 };
+enum { ACTION_ABOUT_PKG = 300, ACTION_COPY_URL };
 
 AboutDialog::AboutDialog(const Metadata *metadata)
   : Dialog(IDD_ABOUT_DIALOG), m_metadata(metadata), m_currentIndex(-255)
@@ -339,6 +339,18 @@ AboutPackage::AboutPackage(const Package *pkg)
 {
 }
 
+void AboutPackage::onCommand(const int id, const int event)
+{
+  switch(id) {
+  case ACTION_COPY_URL:
+    copySourceUrl();
+    break;
+  default:
+    AboutDialog::onCommand(id, event);
+    break;
+  }
+}
+
 const string &AboutPackage::what() const
 {
   return m_package->name();
@@ -354,8 +366,7 @@ ListView *AboutPackage::createMenu()
 ListView *AboutPackage::createList()
 {
   return createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("File"), 251},
-    {AUTO_STR("Source"), 251},
+    {AUTO_STR("File"), 502},
     {AUTO_STR("Main"), 50},
   });
 }
@@ -383,6 +394,9 @@ void AboutPackage::populate()
   });
   menu()->sortByColumn(0, ListView::DescendingOrder);
   menu()->setSelected(menu()->rowCount() - 1, true);
+
+  list()->onContextMenu(bind(&AboutPackage::fillContextMenu,
+    this, placeholders::_1, placeholders::_2));
 }
 
 void AboutPackage::updateList(const int index)
@@ -395,15 +409,41 @@ void AboutPackage::updateList(const int index)
   stream << *ver;
   SetWindowText(report(), make_autostring(stream.str()).c_str());
 
+  vector<const Source *> uniqueSources;
+
   const auto &sources = ver->sources();
   for(auto it = sources.begin(); it != sources.end();) {
     const Path &path = it->first;
     const Source *src = it->second;
 
-    list()->addRow({make_autostring(path.join()), make_autostring(src->url()),
+    list()->addRow({make_autostring(path.join()),
       make_autostring(src->isMain() ? "Yes" : "No")});
+
+    uniqueSources.push_back(src);
 
     // skip duplicate files
     do { it++; } while(it != sources.end() && path == it->first);
   }
+
+  swap(m_sources, uniqueSources);
+}
+
+bool AboutPackage::fillContextMenu(Menu &menu, const int) const
+{
+  if(list()->currentIndex() < 0)
+    return false;
+
+  menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
+
+  return true;
+}
+
+void AboutPackage::copySourceUrl()
+{
+  const int index = list()->currentIndex();
+
+  if(index < 0)
+    return;
+
+  setClipboard(m_sources[index]->url());
 }
