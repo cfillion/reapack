@@ -114,16 +114,16 @@ TEST_CASE("source target path", M) {
   Source source("file.name", "url", &ver);
 
   Path expected;
-  expected.append("Scripts");
   expected.append("Index Name");
   expected.append("Category Name");
   expected.append("file.name");
 
-  SECTION("script")
+  SECTION("script") {
+    expected.prepend("Scripts");
     REQUIRE(source.targetPath() == expected);
+  }
 
   SECTION("effect") {
-    expected.removeFirst();
     expected.prepend("Effects");
     source.setTypeOverride(Package::EffectType);
     REQUIRE(source.targetPath() == expected);
@@ -138,7 +138,6 @@ TEST_CASE("source target path", M) {
   }
 
   SECTION("data") {
-    expected.removeFirst();
     expected.prepend("Data");
     source.setTypeOverride(Package::DataType);
     REQUIRE(source.targetPath() == expected);

@@ -73,11 +73,6 @@ string Package::fullName() const
   return m_category ? m_category->fullName() + "/" + m_name : m_name;
 }
 
-string Package::displayType() const
-{
-  return displayType(m_type);
-}
-
 void Package::addVersion(const Version *ver)
 {
   if(ver->package() != this)

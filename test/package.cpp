@@ -30,30 +30,20 @@ TEST_CASE("package type from string", M) {
 }
 
 TEST_CASE("package type to string", M) {
-  SECTION("unknown") {
+  SECTION("unknown")
     REQUIRE("Unknown" == Package::displayType(Package::UnknownType));
-    REQUIRE("Unknown" == Package(Package::UnknownType, "test").displayType());
-  }
 
-  SECTION("script") {
+  SECTION("script")
     REQUIRE("Script" == Package::displayType(Package::ScriptType));
-    REQUIRE("Script" == Package(Package::ScriptType, "test").displayType());
-  }
 
-  SECTION("extension") {
+  SECTION("extension")
     REQUIRE("Extension" == Package::displayType(Package::ExtensionType));
-    REQUIRE("Extension" == Package(Package::ExtensionType, "test").displayType());
-  }
 
-  SECTION("effect") {
+  SECTION("effect")
     REQUIRE("Effect" == Package::displayType(Package::EffectType));
-    REQUIRE("Effect" == Package(Package::EffectType, "test").displayType());
-  }
 
-  SECTION("data") {
+  SECTION("data")
     REQUIRE("Data" == Package::displayType(Package::DataType));
-    REQUIRE("Data" == Package(Package::DataType, "test").displayType());
-  }
 
   SECTION("unknown value")
     REQUIRE("Unknown" == Package::displayType(static_cast<Package::Type>(-1)));
