@@ -27,6 +27,9 @@ TEST_CASE("package type from string", M) {
 
   SECTION("data")
     REQUIRE(Package::getType("data") == Package::DataType);
+
+  SECTION("theme")
+    REQUIRE(Package::getType("theme") == Package::ThemeType);
 }
 
 TEST_CASE("package type to string", M) {
@@ -44,6 +47,9 @@ TEST_CASE("package type to string", M) {
 
   SECTION("data")
     REQUIRE("Data" == Package::displayType(Package::DataType));
+
+  SECTION("theme")
+    REQUIRE("Theme" == Package::displayType(Package::ThemeType));
 
   SECTION("unknown value")
     REQUIRE("Unknown" == Package::displayType(static_cast<Package::Type>(-1)));

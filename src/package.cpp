@@ -35,6 +35,8 @@ Package::Type Package::getType(const char *type)
     return EffectType;
   else if(!strcmp(type, "data"))
     return DataType;
+  else if(!strcmp(type, "theme"))
+    return ThemeType;
   else
     return UnknownType;
 }
@@ -50,6 +52,8 @@ string Package::displayType(const Type type)
     return "Effect";
   case DataType:
     return "Data";
+  case ThemeType:
+    return "Theme";
   default:
     return "Unknown";
   }

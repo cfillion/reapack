@@ -142,6 +142,14 @@ TEST_CASE("source target path", M) {
     source.setTypeOverride(Package::DataType);
     REQUIRE(source.targetPath() == expected);
   }
+
+  SECTION("theme") {
+    expected.clear();
+    expected.append("ColorThemes");
+    expected.append("file.name");
+    source.setTypeOverride(Package::ThemeType);
+    REQUIRE(source.targetPath() == expected);
+  }
 }
 
 TEST_CASE("target path with parent directory traversal", M) {

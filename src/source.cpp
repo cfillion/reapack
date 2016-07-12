@@ -94,6 +94,9 @@ Path Source::targetPath() const
   case Package::ExtensionType:
     path.append("UserPlugins");
     break;
+  case Package::ThemeType:
+    path.append("ColorThemes");
+    break;
   case Package::UnknownType:
     // The package has an unsupported type, so we return an empty path.
     // The empty path won't be used because the category will reject
@@ -114,6 +117,7 @@ Path Source::targetPath() const
     path += Path(cat->name()) + file();
     break;
   case Package::ExtensionType:
+  case Package::ThemeType:
     path.append(file(), false);
     break;
   case Package::UnknownType:

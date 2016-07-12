@@ -35,6 +35,7 @@ public:
     ExtensionType,
     EffectType,
     DataType,
+    ThemeType,
   };
 
   static Type getType(const char *);
