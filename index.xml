@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="7b06d31a2b806bfedb19172e2314ff274c1dd4a2" name="ReaPack">
+<index version="1" commit="228c6ffab133c3496b1a86140acb0d10d3d56718" name="ReaPack">
   <category name="Extensions">
-    <reapack name="ReaPack.ext" type="extension">
+    <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
         <changelog><![CDATA[Bug fixes:
 # fix removal of unneeded files
@@ -202,6 +202,40 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.0/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.1beta1" author="cfillion" time="2016-07-12T01:45:43Z">
+        <changelog><![CDATA[Added:
++ about: add "Copy source URL" menu item in package contents tab
++ about: implement per-package documentation
++ about: support screenshot links
++ add support for theme packages
++ browser: add Last Update column (collapsed by default)
++ browser: add Repository column (collapsed by default)
++ browser: add shortcut F5 to refresh the package list
++ browser: make the window user-resizable
++ browser: save and restore window size and position
++ download: add option to toggle SSL certificate verification
++ download: add support for proxy servers
++ listview: add feature to restore the columns to their default state
++ listview: allow user to collapse columns
++ listview: save and restore sort and column order
++ osx: add support for old OS X versions up to 10.7
+Changed:
++ browser: rename Package Name column to just Package
++ dialog: enhance centering bias logic
++ merge Package Contents and Packages History in a single dialog
++ show package descriptions by default instead of filenames
++ synchronize: remove "nothing to do" popup when no updates are available
+Fixed:
++ about: adjust position of link button depending on which buttons are visible
++ dialog: fix context menus being shown on the wrong monitor in some setups
++ dialog: improve window placement in multi-monitor setups
++ don't crash when encountering empty lines in changelogs
++ listview: fix context menu position when using Shift+F10 on Windows]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
