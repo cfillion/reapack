@@ -390,6 +390,7 @@ void Browser::displayButton()
     {AUTO_STR("&Scripts"), Package::ScriptType},
     {AUTO_STR("&Effects"), Package::EffectType},
     {AUTO_STR("E&xtensions"), Package::ExtensionType},
+    {AUTO_STR("&Themes"), Package::ThemeType},
     {AUTO_STR("&Other packages"), Package::UnknownType},
   };
 
@@ -433,6 +434,7 @@ bool Browser::isFiltered(Package::Type type) const
   case Package::ScriptType:
   case Package::EffectType:
   case Package::ExtensionType:
+  case Package::ThemeType:
     break;
   default:
     type = Package::UnknownType;
