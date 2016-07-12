@@ -1,4 +1,4 @@
-@version 1.0
+@version 1.1beta1
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -7,5 +7,31 @@
   [win32] reaper_reapack32.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
+  Added:
+  + about: add "Copy source URL" menu item in package contents tab
+  + about: implement per-package documentation
+  + about: support screenshot links
+  + add support for theme packages
+  + browser: add Last Update column (collapsed by default)
+  + browser: add Repository column (collapsed by default)
+  + browser: add shortcut F5 to refresh the package list
+  + browser: make the window user-resizable
+  + browser: save and restore window size and position
+  + download: add option to toggle SSL certificate verification
+  + download: add support for proxy servers
+  + listview: add feature to restore the columns to their default state
+  + listview: allow user to collapse columns
+  + listview: save and restore sort and column order
+  + osx: add support for old OS X versions up to 10.7
   Changed:
-  + make the transaction report dialog a little bigger
+  + browser: rename Package Name column to just Package
+  + dialog: enhance centering bias logic
+  + merge Package Contents and Packages History in a single dialog
+  + show package descriptions by default instead of filenames
+  + synchronize: remove "nothing to do" popup when no updates are available
+  Fixed:
+  + about: adjust position of link button depending on which buttons are visible
+  + dialog: fix context menus being shown on the wrong monitor in some setups
+  + dialog: improve window placement in multi-monitor setups
+  + don't crash when encountering empty lines in changelogs
+  + listview: fix context menu position when using Shift+F10 on Windows
