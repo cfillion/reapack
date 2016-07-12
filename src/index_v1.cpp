@@ -95,9 +95,8 @@ void LoadCategoryV1(TiXmlElement *catNode, Index *ri)
     packNode = packNode->NextSiblingElement("reapack");
   }
 
-  ri->addCategory(cat);
-
-  ptr.release();
+  if(ri->addCategory(cat))
+    ptr.release();
 }
 
 void LoadPackageV1(TiXmlElement *packNode, Category *cat)
@@ -129,9 +128,8 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
   if(node)
     LoadMetadataV1(node, pack->metadata());
 
-  cat->addPackage(pack);
-
-  ptr.release();
+  if(cat->addPackage(pack))
+    ptr.release();
 }
 
 void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
@@ -162,9 +160,8 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
       ver->setChangelog(changelog);
   }
 
-  pkg->addVersion(ver);
-
-  ptr.release();
+  if(pkg->addVersion(ver))
+    ptr.release();
 }
 
 void LoadSourceV1(TiXmlElement *node, Version *ver)
@@ -182,11 +179,14 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   if(!url) url = "";
 
   Source *src = new Source(file, url, ver);
+  unique_ptr<Source> ptr(src);
+
   src->setPlatform(platform);
   src->setTypeOverride(Package::getType(type));
 
   if(node->Attribute("main"))
     src->setMain(true);
 
-  ver->addSource(src);
+  if(ver->addSource(src))
+    ptr.release();
 }

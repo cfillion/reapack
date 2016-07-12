@@ -78,7 +78,7 @@ TEST_CASE("package versions are sorted", M) {
   Version *alpha = new Version("0.1", &pack);
   alpha->addSource(new Source({}, "google.com", alpha));
 
-  pack.addVersion(final);
+  REQUIRE(pack.addVersion(final));
   REQUIRE(final->package() == &pack);
   CHECK(pack.versions().size() == 1);
 
@@ -97,7 +97,7 @@ TEST_CASE("get latest stable version", M) {
 
   Version *alpha = new Version("2.0-alpha", &pack);
   alpha->addSource(new Source({}, "google.com", alpha));
-  pack.addVersion(alpha);
+  REQUIRE(pack.addVersion(alpha));
 
   SECTION("only prereleases are available")
     REQUIRE(pack.lastVersion(false) == nullptr);
@@ -153,8 +153,8 @@ TEST_CASE("pre-release updates", M) {
 
 TEST_CASE("drop empty version", M) {
   Package pack(Package::ScriptType, "a");
-  pack.addVersion(new Version("1", &pack));
-
+  const Version ver("1", &pack);
+  REQUIRE_FALSE(pack.addVersion(&ver));
   REQUIRE(pack.versions().empty());
   REQUIRE(pack.lastVersion() == nullptr);
 }

@@ -117,19 +117,21 @@ void Index::setName(const string &newName)
   m_name = newName;
 }
 
-void Index::addCategory(const Category *cat)
+bool Index::addCategory(const Category *cat)
 {
   if(cat->index() != this)
     throw reapack_error("category belongs to another index");
 
   if(cat->packages().empty())
-    return;
+    return false;
 
   m_catMap.insert({cat->name(), m_categories.size()});
   m_categories.push_back(cat);
 
   m_packages.insert(m_packages.end(),
     cat->packages().begin(), cat->packages().end());
+
+  return true;
 }
 
 const Category *Index::category(const string &name) const
@@ -160,18 +162,17 @@ string Category::fullName() const
   return m_index ? m_index->name() + "/" + m_name : m_name;
 }
 
-void Category::addPackage(const Package *pkg)
+bool Category::addPackage(const Package *pkg)
 {
   if(pkg->category() != this)
     throw reapack_error("package belongs to another category");
 
-  if(pkg->type() == Package::UnknownType)
-    return; // silently discard unknown package types
-  else if(pkg->versions().empty())
-    return;
+  if(pkg->type() == Package::UnknownType || pkg->versions().empty())
+    return false; // silently discard unknown package types
 
   m_pkgMap.insert({pkg->name(), m_packages.size()});
   m_packages.push_back(pkg);
+  return true;
 }
 
 const Package *Category::package(const string &name) const

@@ -55,7 +55,7 @@ public:
   Metadata *metadata() { return &m_metadata; }
   const Metadata *metadata() const { return &m_metadata; }
 
-  void addVersion(const Version *ver);
+  bool addVersion(const Version *ver);
   const VersionSet &versions() const { return m_versions; }
   const Version *version(size_t index) const;
   const Version *lastVersion(bool pres = true, const Version &from = {}) const;

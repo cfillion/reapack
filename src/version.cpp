@@ -115,12 +115,12 @@ string Version::displayAuthor() const
     return m_author;
 }
 
-void Version::addSource(Source *source)
+bool Version::addSource(const Source *source)
 {
-  if(!source->platform().test())
-    return;
-  else if(source->version() != this)
+  if(source->version() != this)
     throw reapack_error("source belongs to another version");
+  else if(!source->platform().test())
+    return false;
 
   const Path path = source->targetPath();
   m_files.insert(path);
@@ -128,6 +128,8 @@ void Version::addSource(Source *source)
 
   if(source->isMain())
     m_mainSources.push_back(source);
+
+  return true;
 }
 
 void Version::setChangelog(const string &changelog)

@@ -33,7 +33,7 @@ class Path;
 
 class Version {
 public:
-  typedef std::vector<Source *> SourceList;
+  typedef std::vector<const Source *> SourceList;
   typedef std::multimap<Path, const Source *> SourceMap;
 
   Version();
@@ -61,7 +61,7 @@ public:
   void setChangelog(const std::string &);
   const std::string &changelog() const { return m_changelog; }
 
-  void addSource(Source *source);
+  bool addSource(const Source *source);
   const SourceMap &sources() const { return m_sources; }
   const Source *source(size_t) const;
   const SourceList &mainSources() const { return m_mainSources; }

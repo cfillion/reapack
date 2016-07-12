@@ -77,15 +77,16 @@ string Package::fullName() const
   return m_category ? m_category->fullName() + "/" + m_name : m_name;
 }
 
-void Package::addVersion(const Version *ver)
+bool Package::addVersion(const Version *ver)
 {
   if(ver->package() != this)
     throw reapack_error("version belongs to another package");
 
   if(ver->sources().empty())
-    return;
+    return false;
 
   m_versions.insert(ver);
+  return true;
 }
 
 const Version *Package::version(const size_t index) const

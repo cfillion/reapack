@@ -230,7 +230,7 @@ TEST_CASE("add source", M) {
   CHECK(ver.sources().size() == 0);
 
   Source *src = new Source("a", "b", &ver);
-  ver.addSource(src);
+  REQUIRE(ver.addSource(src));
 
   CHECK(ver.sources().size() == 1);
   CHECK(ver.mainSources().empty());
@@ -300,10 +300,9 @@ TEST_CASE("list files", M) {
 
 TEST_CASE("drop sources for unknown platforms", M) {
   MAKE_VERSION
-  Source *src = new Source("a", "b", &ver);
-  src->setPlatform(Platform::UnknownPlatform);
-  ver.addSource(src);
-
+  Source src("a", "b", &ver);
+  src.setPlatform(Platform::UnknownPlatform);
+  REQUIRE_FALSE(ver.addSource(&src));
   REQUIRE(ver.sources().size() == 0);
 }
 
