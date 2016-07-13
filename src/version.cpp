@@ -74,6 +74,11 @@ void Version::parse(const string &str)
       letters++;
     }
     else {
+      // handle decimal-like version numbers like 1.05 as 1.0.5
+      const size_t leadingZeros = strspn(match.c_str(), "0");
+      if(leadingZeros > 0 && leadingZeros != match.size())
+        segments.insert(segments.end(), leadingZeros, 0);
+
       try {
         segments.push_back(boost::lexical_cast<Numeric>(match));
       }
