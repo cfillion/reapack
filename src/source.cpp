@@ -45,7 +45,6 @@ Package::Type Source::type() const
     return Package::UnknownType;
 }
 
-
 const string &Source::file() const
 {
   if(!m_file.empty())
@@ -54,7 +53,7 @@ const string &Source::file() const
   if(const Package *pkg = package())
     return pkg->name();
   else
-    throw reapack_error("empty file name and no package");
+    throw reapack_error("empty source file name and no package");
 }
 
 string Source::fullName() const

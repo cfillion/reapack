@@ -58,26 +58,23 @@ TEST_CASE("parse valid versions", M) {
 
 TEST_CASE("parse invalid versions", M) {
   Version ver;
+  string name;
+
+  SECTION("only letters")
+    name = "hello";
+
+  SECTION("leading letter")
+    name = "v1.0";
+
+  SECTION("empty")
+    name = {};
 
   try {
-    SECTION("only letters") {
-      ver.parse("hello");
-      FAIL();
-    }
-
-    SECTION("leading letter") {
-      ver.parse("v1.0");
-      FAIL();
-    }
-
-    SECTION("empty") {
-      ver.parse("");
-      FAIL();
-    }
-
+    ver.parse(name);
+    FAIL(string("'") + name + "' was accepted");
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version name");
+    REQUIRE(string(e.what()) == string("invalid version name '") + name + "'");
   }
 
   REQUIRE(ver.name().empty());
@@ -121,7 +118,7 @@ TEST_CASE("version segment overflow", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "version segment overflow");
+    REQUIRE(string(e.what()) == "version segment overflow in '9999999999999999999999'");
   }
 }
 

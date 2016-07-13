@@ -105,7 +105,7 @@ TEST_CASE("null package version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version name");
+    REQUIRE(string(e.what()) == "invalid version name ''");
   }
 }
 

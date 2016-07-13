@@ -41,7 +41,7 @@ TEST_CASE("source type from package", M) {
   REQUIRE(src.type() == Package::ScriptType);
 }
 
-TEST_CASE("empty file name and no package", M) {
+TEST_CASE("empty source file name and no package", M) {
   const Source source({}, "url");
 
   try {
@@ -49,7 +49,7 @@ TEST_CASE("empty file name and no package", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty file name and no package");
+    REQUIRE(string(e.what()) == "empty source file name and no package");
   }
 }
 
@@ -84,7 +84,7 @@ TEST_CASE("full name without version", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "empty file name and no package");
+      REQUIRE(string(e.what()) == "empty source file name and no package");
     }
   }
 }

@@ -58,7 +58,7 @@ public:
   void setTime(const Time &time) { if(time) m_time = time; }
   const Time &time() const { return m_time; }
 
-  void setChangelog(const std::string &);
+  void setChangelog(const std::string &cl) { m_changelog = cl; }
   const std::string &changelog() const { return m_changelog; }
 
   bool addSource(const Source *source);
