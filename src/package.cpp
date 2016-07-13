@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
 
+using boost::format;
 using namespace std;
 
 Package::Type Package::getType(const char *type)
@@ -81,11 +82,13 @@ bool Package::addVersion(const Version *ver)
 {
   if(ver->package() != this)
     throw reapack_error("version belongs to another package");
-
-  if(ver->sources().empty())
+  else if(ver->sources().empty())
     return false;
+  else if(m_versions.count(ver))
+    throw reapack_error(format("duplicate version '%1%'") % ver->fullName());
 
   m_versions.insert(ver);
+
   return true;
 }
 

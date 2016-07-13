@@ -175,6 +175,24 @@ TEST_CASE("add owned version", M) {
   }
 }
 
+TEST_CASE("add duplicate version", M) {
+  Index ri("r");
+  Category cat("c", &ri);
+  Package pack(Package::ScriptType, "p", &cat);
+
+  Version *ver = new Version("1", &pack);
+  ver->addSource(new Source({}, "google.com", ver));
+  pack.addVersion(ver);
+
+  try {
+    pack.addVersion(ver); // could also be an equivalent version with same value
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "duplicate version 'r/c/p v1'");
+  }
+}
+
 TEST_CASE("find matching version", M) {
   Index ri("Remote Name");
   Category cat("Category Name", &ri);

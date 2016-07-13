@@ -18,11 +18,13 @@
 #ifndef REAPACK_ERRORS_HPP
 #define REAPACK_ERRORS_HPP
 
+#include <boost/format.hpp>
 #include <stdexcept>
 
 class reapack_error : public std::runtime_error {
 public:
   reapack_error(const char *what) : std::runtime_error(what) {}
+  reapack_error(const boost::format &f) : std::runtime_error(f.str()) {}
 };
 
 #endif
