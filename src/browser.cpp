@@ -96,8 +96,8 @@ void Browser::onInit()
 
   m_list->sortByColumn(1);
   m_list->setSortCallback(7 /* last update */, [&] (const int ai, const int bi) {
-    const Entry &a = m_entries[ai];
-    const Entry &b = m_entries[bi];
+    const Entry &a = m_entries[m_visibleEntries[ai]];
+    const Entry &b = m_entries[m_visibleEntries[bi]];
 
     if(!a.latest)
       return -1;
