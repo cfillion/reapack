@@ -200,6 +200,10 @@ void Browser::onCommand(const int id, const int event)
   case ACTION_MANAGE:
     m_reapack->manageRemotes();
     break;
+  case ACTION_FILTERTYPE:
+    m_typeFilter = boost::none;
+    fillList();
+    break;
   case IDOK:
   case IDAPPLY:
     if(confirm()) {
@@ -217,8 +221,10 @@ void Browser::onCommand(const int id, const int event)
   default:
     if(id >> 8 == ACTION_VERSION)
       installVersion(m_currentIndex, id & 0xff);
-    else if(id >> 8 == ACTION_FILTERTYPE)
-      toggleFiltered(static_cast<Package::Type>(id & 0xff));
+    else if(id >> 8 == ACTION_FILTERTYPE) {
+      m_typeFilter = static_cast<Package::Type>(id & 0xff);
+      fillList();
+    }
     break;
   }
 }
@@ -383,9 +389,6 @@ void Browser::updateDisplayLabel()
 
 void Browser::displayButton()
 {
-  RECT rect;
-  GetWindowRect(m_displayBtn, &rect);
-
   static map<const auto_char *, Package::Type> types = {
     {AUTO_STR("&Scripts"), Package::ScriptType},
     {AUTO_STR("&Effects"), Package::EffectType},
@@ -395,12 +398,17 @@ void Browser::displayButton()
   };
 
   Menu menu;
+
+  auto index = menu.addAction(AUTO_STR("&All packages"), ACTION_FILTERTYPE);
+  if(!m_typeFilter)
+    menu.checkRadio(index);
+
   for(const auto &pair : types) {
-    const auto index = menu.addAction(pair.first,
+    auto index = menu.addAction(pair.first,
       pair.second | (ACTION_FILTERTYPE << 8));
 
-    if(!isFiltered(pair.second))
-      menu.check(index);
+    if(m_typeFilter && m_typeFilter == pair.second)
+      menu.checkRadio(index);
   }
 
   const auto config = m_reapack->config()->browser();
@@ -412,6 +420,9 @@ void Browser::displayButton()
 
   menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
   menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
+
+  RECT rect;
+  GetWindowRect(m_displayBtn, &rect);
 
   menu.show(rect.left, rect.bottom - 1, handle());
 }
@@ -430,6 +441,9 @@ void Browser::actionsButton()
 
 bool Browser::isFiltered(Package::Type type) const
 {
+  if(!m_typeFilter)
+    return false;
+
   switch(type) {
   case Package::ScriptType:
   case Package::EffectType:
@@ -441,15 +455,7 @@ bool Browser::isFiltered(Package::Type type) const
     break;
   }
 
-  const auto config = m_reapack->config()->browser();
-  return ((config->typeFilter >> type) & 1) == 1;
-}
-
-void Browser::toggleFiltered(const Package::Type type)
-{
-  auto config = m_reapack->config()->browser();
-  config->typeFilter ^= 1 << type;
-  fillList();
+  return m_typeFilter != type;
 }
 
 void Browser::toggleDescs()

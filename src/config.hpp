@@ -31,7 +31,6 @@ struct InstallOpts {
 };
 
 struct BrowserOpts {
-  unsigned int typeFilter;
   bool showDescs;
   std::string state;
 };

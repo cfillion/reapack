@@ -115,7 +115,6 @@ private:
   void actionsButton();
   void fillMenu(Menu &);
   bool isFiltered(Package::Type) const;
-  void toggleFiltered(Package::Type);
   void toggleDescs();
   void setTarget(const int index, const Version *, bool toggle = true);
   void resetTarget(int index);
@@ -143,6 +142,7 @@ private:
 
   int m_filterTimer;
   Filter m_filter;
+  boost::optional<Package::Type> m_typeFilter;
   std::vector<Entry> m_entries;
   std::vector<size_t> m_visibleEntries;
   std::unordered_set<Entry *> m_actions;
