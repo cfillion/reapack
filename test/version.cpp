@@ -101,11 +101,8 @@ TEST_CASE("parse version failsafe", M) {
 
 TEST_CASE("decimal version", M) {
   Version ver("5.05");
-  REQUIRE(ver == Version("5.0.5"));
-  REQUIRE(ver < Version("5.5"));
+  REQUIRE(ver == Version("5.5"));
   REQUIRE(ver < Version("5.50"));
-
-  REQUIRE(Version("5.005") == Version("5.0.0.5"));
 }
 
 TEST_CASE("5 version segments", M) {
