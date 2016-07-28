@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="228c6ffab133c3496b1a86140acb0d10d3d56718" name="ReaPack">
+<index version="1" commit="addb1fa3d3cdb61bee89720ba28666b91ebd3948" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -236,6 +236,19 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta1/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.1beta2" author="cfillion" time="2016-07-28T03:20:34Z">
+        <changelog><![CDATA[Changed:
++ browser: replace type filter toggles by an exclusive type filter
+Fixed:
++ browser: fix sorting by last update column when a type filter is enabled
++ fix a few possible memory leaks when loading repository indexes
++ fix a memory leak occuring when loading equivalent versions
++ progress: prevent briefly going over 100% before closing the dialog]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
