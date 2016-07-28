@@ -14,3 +14,4 @@
   + fix a few possible memory leaks when loading repository indexes
   + fix a memory leak occuring when loading equivalent versions
   + progress: prevent briefly going over 100% before closing the dialog
+  + report: don't always use plural in the overview line
