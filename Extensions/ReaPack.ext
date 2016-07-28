@@ -8,7 +8,7 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Changed:
-  + browser: replace type filter toggles by an exclusive type filter
+  + browser: change the type filter toggles to be exclusive
   Fixed:
   + browser: fix sorting by last update column when a type filter is enabled
   + fix a few possible memory leaks when loading repository indexes
