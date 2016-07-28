@@ -428,14 +428,13 @@ Transaction *ReaPack::setupTransaction()
 
     const Receipt &receipt = m_tx->receipt();
 
-    if(m_tx->isCancelled() || !receipt.isEnabled())
+    if(m_tx->isCancelled() || receipt.empty())
       return;
 
     LockDialog managerLock(m_manager);
     LockDialog browserLock(m_browser);
 
-    if(m_tx->taskCount() > 0 || receipt.hasErrors())
-      Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
+    Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
   });
 
   m_tx->setCleanupHandler([=] {

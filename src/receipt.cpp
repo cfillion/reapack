@@ -24,6 +24,15 @@ Receipt::Receipt()
 {
 }
 
+bool Receipt::empty() const
+{
+ return
+   m_installs.empty() &&
+   m_updates.empty() &&
+   m_removals.empty() &&
+   m_errors.empty();
+}
+
 void Receipt::addTicket(const InstallTicket &ticket)
 {
   switch(ticket.type) {

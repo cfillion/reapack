@@ -43,8 +43,7 @@ public:
 
   Receipt();
 
-  bool isEnabled() const { return m_enabled; }
-  void setEnabled(bool newVal) { m_enabled = newVal; }
+  bool empty() const;
 
   bool isRestartNeeded() const { return m_needRestart; }
   void setRestartNeeded(bool newVal) { m_needRestart = newVal; }

@@ -72,9 +72,6 @@ Transaction::~Transaction()
 
 void Transaction::synchronize(const Remote &remote, const bool forceAutoInstall)
 {
-  // show the report dialog or "nothing to do" even if no task are ran
-  m_receipt.setEnabled(true);
-
   InstallOpts opts = *m_config->install();
   if(forceAutoInstall)
     opts.autoInstall = true;
@@ -160,8 +157,6 @@ void Transaction::install(const Version *ver)
 void Transaction::install(const Version *ver,
   const Registry::Entry &regEntry)
 {
-  m_receipt.setEnabled(true);
-
   InstallTicket::Type type;
 
   if(regEntry && regEntry.version < *ver)
@@ -218,7 +213,6 @@ void Transaction::install(const Version *ver,
   });
 
   addTask(task);
-  m_receipt.setEnabled(true);
 }
 
 void Transaction::registerAll(const Remote &remote)
@@ -293,7 +287,6 @@ void Transaction::uninstall(const Registry::Entry &entry)
   });
 
   addTask(task);
-  m_receipt.setEnabled(true);
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
@@ -335,7 +328,6 @@ void Transaction::finish()
 void Transaction::addError(const string &message, const string &title)
 {
   m_receipt.addError({message, title});
-  m_receipt.setEnabled(true);
 }
 
 bool Transaction::allFilesExists(const set<Path> &list) const
