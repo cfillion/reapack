@@ -80,10 +80,10 @@ void Browser::onInit()
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
     {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
-    {AUTO_STR("Package"), 370},
-    {AUTO_STR("Category"), 150},
-    {AUTO_STR("Version"), 80},
-    {AUTO_STR("Author"), 120},
+    {AUTO_STR("Package"), 310},
+    {AUTO_STR("Category"), 100},
+    {AUTO_STR("Version"), 70},
+    {AUTO_STR("Author"), 105},
     {AUTO_STR("Type"), 70},
     {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
     {AUTO_STR("Last Update"), 120},
