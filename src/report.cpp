@@ -58,13 +58,19 @@ void Report::fillReport()
   const size_t removals = m_receipt.removals().size();
   const size_t errors = m_receipt.errors().size();
 
-  m_stream
-    << installs << " installed packages, "
-    << updates << " updates, "
-    << removals << " removed files and "
-    << errors << " errors"
-    << "\r\n"
-  ;
+  m_stream << installs << " installed package";
+  if(installs != 1) m_stream << 's';
+
+  m_stream << ", " << updates << " update";
+  if(updates != 1) m_stream << 's';
+
+  m_stream << ", " << removals << " removed file";
+  if(removals != 1) m_stream << 's';
+
+  m_stream << " and " << errors << " error";
+  if(errors != 1) m_stream << 's';
+
+  m_stream << "\r\n";
 
   if(m_receipt.isRestartNeeded()) {
     m_stream
