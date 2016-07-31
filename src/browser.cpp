@@ -805,7 +805,9 @@ auto Browser::getEntry(const int listIndex) -> Entry *
 
 void Browser::aboutPackage(const int index)
 {
-  if(const Entry *entry = getEntry(index))
+  const Entry *entry = getEntry(index);
+
+  if(entry && entry->package)
     m_reapack->about(entry->package, handle());
 }
 
