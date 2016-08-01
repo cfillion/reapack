@@ -373,7 +373,7 @@ void Manager::options()
   Menu menu;
 
   UINT index = menu.addAction(
-    AUTO_STR("&Install new packages automatically"), ACTION_AUTOINSTALL);
+    AUTO_STR("&Install new packages when synchronizing"), ACTION_AUTOINSTALL);
   if(m_autoInstall.value_or(m_config->install()->autoInstall))
     menu.check(index);
 
