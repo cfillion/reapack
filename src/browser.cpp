@@ -537,9 +537,9 @@ void Browser::populate()
 
     m_currentIndex = -1;
 
-    // prevent #fillList from trying to restore the selection
-    // (entry indexes may mismatch depending on the new repository contents,
-    // thus causing the wrong package to be selected)
+    // Prevent #fillList from trying to restore the selection as
+    // entry indexes may mismatch depending on the new repository contents
+    // thus causing the wrong package to be selected!
     m_visibleEntries.clear();
 
     for(IndexPtr index : m_indexes) {
@@ -550,10 +550,8 @@ void Browser::populate()
       for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
         const Category *cat = index->category(regEntry.category);
 
-        if(cat && cat->package(regEntry.package))
-          continue;
-
-        m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
+        if(!cat || !cat->package(regEntry.package))
+          m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
       }
     }
 
