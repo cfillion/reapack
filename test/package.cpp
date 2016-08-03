@@ -55,13 +55,35 @@ TEST_CASE("package type to string", M) {
     REQUIRE("Unknown" == Package::displayType(static_cast<Package::Type>(-1)));
 }
 
-TEST_CASE("empty package name", M) {
-  try {
-    Package pack(Package::ScriptType, string());
-    FAIL();
+TEST_CASE("invalid package name", M) {
+  SECTION("empty") {
+    try {
+      Package pack(Package::ScriptType, string());
+      FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "empty package name");
+    }
   }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty package name");
+
+  SECTION("slash") {
+    try {
+      Package pack(Package::ScriptType, "hello/world");
+      FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "invalid package name 'hello/world'");
+    }
+  }
+
+  SECTION("backslash") {
+    try {
+      Package pack(Package::ScriptType, "hello\\world");
+      FAIL();
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(string(e.what()) == "invalid package name 'hello\\world'");
+    }
   }
 }
 
