@@ -310,7 +310,7 @@ void Dialog::stopTimer(int id)
 void Dialog::setClipboard(const string &text)
 {
   const auto_string &data = make_autostring(text);
-  const size_t length = (data.size() * sizeof(auto_char)) + 1; // null terminator
+  const size_t length = (data.size() + 1) * sizeof(auto_char); // null terminator
 
   HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
   memcpy(GlobalLock(mem), data.c_str(), length);
