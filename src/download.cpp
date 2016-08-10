@@ -158,7 +158,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   }
   default:
     // strip body, only keep error description
-    contents.erase(contents.find("\n"));
+    contents.erase(contents.find("\r"));
     contents.erase(0, contents.find("\x20") + 1);
 
     download->finish(Failure, contents);
