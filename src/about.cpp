@@ -184,7 +184,7 @@ void AboutDialog::openLink(const Link *link)
   ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
-AboutRemote::AboutRemote(IndexPtr index)
+AboutRemote::AboutRemote(const IndexPtr &index)
   : AboutDialog(index->metadata()), m_index(index)
 {
 }

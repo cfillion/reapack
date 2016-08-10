@@ -76,7 +76,7 @@ class AboutRemote : public AboutDialog {
 public:
   enum { InstallResult = 100 };
 
-  AboutRemote(IndexPtr);
+  AboutRemote(const IndexPtr &);
 
 protected:
   const std::string &what() const override;
