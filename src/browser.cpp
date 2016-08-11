@@ -714,7 +714,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
     if(pkg)
       return pkg->displayName(config->showDescs);
     else
-      return regEntry.package;
+      return Package::displayName(regEntry.package,
+        regEntry.description, config->showDescs);
   }
   case CategoryColumn:
     return pkg ? pkg->category()->name() : regEntry.category;
