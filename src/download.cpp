@@ -17,6 +17,8 @@
 
 #include "download.hpp"
 
+#include "reapack.hpp"
+
 #include <boost/format.hpp>
 #include <curl/curl.h>
 
@@ -95,25 +97,17 @@ void Download::start()
 
 DWORD WINAPI Download::Worker(void *ptr)
 {
+  const auto userAgent = format("ReaPack/%s REAPER/%s")
+    % ReaPack::VERSION % GetAppVersion();
+
   Download *download = static_cast<Download *>(ptr);
+  const NetworkOpts &opts = download->options();
 
   string contents;
 
-  char userAgent[64] = {};
-#ifndef _WIN32
-  snprintf(userAgent, sizeof(userAgent),
-#else
-  // _snwprintf doesn't append a null byte if len >= count
-  // see https://msdn.microsoft.com/en-us/library/2ts7cx93.aspx
-  _snprintf(userAgent, sizeof(userAgent) - 1,
-#endif
-    "ReaPack/%s (REAPER v%s)", "1.0", GetAppVersion());
-
-  const NetworkOpts &opts = download->options();
-
   CURL *curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.str().c_str());
   curl_easy_setopt(curl, CURLOPT_PROXY, opts.proxy.c_str());
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, opts.verifyPeer);
 
