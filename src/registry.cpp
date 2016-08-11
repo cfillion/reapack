@@ -34,23 +34,24 @@ Registry::Registry(const Path &path)
 
   // entry queries
   m_insertEntry = m_db.prepare(
-    "INSERT INTO entries(remote, category, package, type, version, author)"
-    "VALUES(?, ?, ?, ?, ?, ?);"
+    "INSERT INTO entries(remote, category, package, desc, type, version, author)"
+    "VALUES(?, ?, ?, ?, ?, ?, ?);"
   );
 
   m_updateEntry = m_db.prepare(
-    "UPDATE entries SET type = ?, version = ?, author = ? WHERE id = ?"
+    "UPDATE entries "
+    "SET desc = ?, type = ?, version = ?, author = ? WHERE id = ?"
   );
 
   m_setPinned = m_db.prepare("UPDATE entries SET pinned = ? WHERE id = ?");
 
   m_findEntry = m_db.prepare(
-    "SELECT id, remote, category, package, type, version, author, pinned "
+    "SELECT id, remote, category, package, desc, type, version, author, pinned "
     "FROM entries WHERE remote = ? AND category = ? AND package = ? LIMIT 1"
   );
 
   m_allEntries = m_db.prepare(
-    "SELECT id, category, package, type, version, author, pinned "
+    "SELECT id, remote, category, package, desc, type, version, author, pinned "
     "FROM entries WHERE remote = ?"
   );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
@@ -84,6 +85,7 @@ void Registry::migrate()
       "  remote TEXT NOT NULL,"
       "  category TEXT NOT NULL,"
       "  package TEXT NOT NULL,"
+      "  desc TEXT NOT NULL,"
       "  type INTEGER NOT NULL,"
       "  version TEXT NOT NULL,"
       "  author TEXT NOT NULL,"
@@ -106,14 +108,16 @@ void Registry::migrate()
   case 2:
     m_db.exec("ALTER TABLE files ADD COLUMN type INTEGER NOT NULL DEFAULT 0;");
   case 3:
-    // current schema version
+    m_db.exec("ALTER TABLE entries ADD COLUMN desc TEXT NOT NULL DEFAULT '';");
+  case 4:
+    // schema is up to date
     break;
   default:
     throw reapack_error(
       "The package registry was created by a newer version of ReaPack");
   }
 
-  m_db.exec("PRAGMA user_version = 3");
+  m_db.exec("PRAGMA user_version = 4");
   m_db.commit();
 }
 
@@ -134,21 +138,23 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 
   int entryId = getEntry(ver->package()).id;
 
-  // register version
+  // register or update package and version
   if(entryId) {
-    m_updateEntry->bind(1, pkg->type());
-    m_updateEntry->bind(2, ver->name());
-    m_updateEntry->bind(3, ver->author());
-    m_updateEntry->bind(4, entryId);
+    m_updateEntry->bind(1, pkg->description());
+    m_updateEntry->bind(2, pkg->type());
+    m_updateEntry->bind(3, ver->name());
+    m_updateEntry->bind(4, ver->author());
+    m_updateEntry->bind(5, entryId);
     m_updateEntry->exec();
   }
   else {
     m_insertEntry->bind(1, ri->name());
     m_insertEntry->bind(2, cat->name());
     m_insertEntry->bind(3, pkg->name());
-    m_insertEntry->bind(4, pkg->type());
-    m_insertEntry->bind(5, ver->name());
-    m_insertEntry->bind(6, ver->author());
+    m_insertEntry->bind(4, pkg->description());
+    m_insertEntry->bind(5, pkg->type());
+    m_insertEntry->bind(6, ver->name());
+    m_insertEntry->bind(7, ver->author());
     m_insertEntry->exec();
 
     entryId = m_db.lastInsertId();
@@ -189,7 +195,8 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
   else {
     release();
-    return {entryId, ri->name(), cat->name(), pkg->name(), pkg->type(), *ver};
+    return {entryId, ri->name(), cat->name(),
+      pkg->name(), pkg->description(), pkg->type(), *ver};
   }
 }
 
@@ -212,17 +219,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   m_findEntry->bind(3, pkg->name());
 
   m_findEntry->exec([&] {
-    int col = 0;
-
-    entry.id = m_findEntry->intColumn(col++);
-    entry.remote = m_findEntry->stringColumn(col++);
-    entry.category = m_findEntry->stringColumn(col++);
-    entry.package = m_findEntry->stringColumn(col++);
-    entry.type = static_cast<Package::Type>(m_findEntry->intColumn(col++));
-    entry.version.tryParse(m_findEntry->stringColumn(col++));
-    entry.version.setAuthor(m_findEntry->stringColumn(col++));
-    entry.pinned = m_findEntry->boolColumn(col++);
-
+    fillEntry(m_findEntry, &entry);
     return false;
   });
 
@@ -235,18 +232,8 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
 
   m_allEntries->bind(1, remoteName);
   m_allEntries->exec([&] {
-    int col = 0;
-
     Entry entry{};
-    entry.id = m_allEntries->intColumn(col++);
-    entry.remote = remoteName;
-    entry.category = m_allEntries->stringColumn(col++);
-    entry.package = m_allEntries->stringColumn(col++);
-    entry.type = static_cast<Package::Type>(m_allEntries->intColumn(col++));
-    entry.version.tryParse(m_allEntries->stringColumn(col++));
-    entry.version.setAuthor(m_allEntries->stringColumn(col++));
-    entry.pinned = m_allEntries->boolColumn(col++);
-
+    fillEntry(m_allEntries, &entry);
     list.push_back(entry);
 
     return true;
@@ -328,4 +315,19 @@ void Registry::release()
 void Registry::commit()
 {
   m_db.commit();
+}
+
+void Registry::fillEntry(const Statement *stmt, Entry *entry) const
+{
+  int col = 0;
+
+  entry->id = stmt->intColumn(col++);
+  entry->remote = stmt->stringColumn(col++);
+  entry->category = stmt->stringColumn(col++);
+  entry->package = stmt->stringColumn(col++);
+  entry->description = stmt->stringColumn(col++);
+  entry->type = static_cast<Package::Type>(stmt->intColumn(col++));
+  entry->version.tryParse(stmt->stringColumn(col++));
+  entry->version.setAuthor(stmt->stringColumn(col++));
+  entry->pinned = stmt->boolColumn(col++);
 }

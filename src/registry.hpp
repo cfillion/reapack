@@ -37,6 +37,7 @@ public:
     std::string remote;
     std::string category;
     std::string package;
+    std::string description;
     Package::Type type;
     Version version;
     bool pinned;
@@ -68,6 +69,7 @@ public:
 
 private:
   void migrate();
+  void fillEntry(const Statement *, Entry *) const;
 
   Database m_db;
   Statement *m_insertEntry;

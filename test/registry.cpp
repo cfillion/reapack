@@ -17,11 +17,11 @@ static const char *M = "[registry]";
   Index ri("Remote Name"); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
-  Version *ver = new Version("1.0", &pkg); \
-  ver->setAuthor("John Doe"); \
-  Source *src = new Source("file", "url", ver); \
-  ver->addSource(src); \
-  pkg.addVersion(ver);
+  pkg.setDescription("Hello World"); \
+  Version ver("1.0", &pkg); \
+  ver.setAuthor("John Doe"); \
+  Source *src = new Source("file", "url", &ver); \
+  ver.addSource(src);
 
 TEST_CASE("query uninstalled package", M) {
   MAKE_PACKAGE
@@ -39,7 +39,7 @@ TEST_CASE("query installed package", M) {
 
   Registry reg;
 
-  const Registry::Entry &entry = reg.push(ver);
+  const Registry::Entry &entry = reg.push(&ver);
   REQUIRE(entry);
   REQUIRE(entry.id == 1);
   REQUIRE(entry.remote == "Remote Name");
@@ -54,6 +54,7 @@ TEST_CASE("query installed package", M) {
   REQUIRE(selectEntry.remote == entry.remote);
   REQUIRE(selectEntry.category == entry.category);
   REQUIRE(selectEntry.package == entry.package);
+  REQUIRE(selectEntry.description == entry.description);
   REQUIRE(selectEntry.type == entry.type);
   REQUIRE(selectEntry.version == entry.version);
   REQUIRE(selectEntry.version.author() == entry.version.author());
@@ -62,18 +63,17 @@ TEST_CASE("query installed package", M) {
 TEST_CASE("bump version", M) {
   MAKE_PACKAGE
 
-  Version *ver2 = new Version("2.0", &pkg);
-  ver2->addSource(new Source("file", "url", ver2));
+  Version ver2("2.0", &pkg);
+  ver2.addSource(new Source("file", "url", &ver2));
 
   Registry reg;
-  reg.push(ver);
-  pkg.addVersion(ver2);
+  reg.push(&ver);
 
   const Registry::Entry &entry1 = reg.getEntry(&pkg);
   REQUIRE(entry1.version.name() == "1.0");
   CHECK(entry1.version.author() == "John Doe");
 
-  reg.push(ver2);
+  reg.push(&ver2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
   REQUIRE(entry2.version.name() == "2.0");
   CHECK(entry2.version.author() == "");
@@ -87,7 +87,7 @@ TEST_CASE("get file list", M) {
   Registry reg;
   REQUIRE(reg.getFiles(reg.getEntry(&pkg)).empty());
 
-  reg.push(ver);
+  reg.push(&ver);
 
   const vector<Registry::File> &files = reg.getFiles(reg.getEntry(&pkg));
   REQUIRE(files.size() == 1);
@@ -104,7 +104,7 @@ TEST_CASE("query all packages", M) {
   Registry reg;
   REQUIRE(reg.getEntries(remote).empty());
 
-  reg.push(ver);
+  reg.push(&ver);
 
   const vector<Registry::Entry> &entries = reg.getEntries(remote);
   REQUIRE(entries.size() == 1);
@@ -121,7 +121,7 @@ TEST_CASE("forget registry entry", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  reg.forget(reg.push(ver));
+  reg.forget(reg.push(&ver));
 
   const Registry::Entry &afterForget = reg.getEntry(&pkg);
   REQUIRE(afterForget.id == 0); // uninstalled
@@ -132,23 +132,22 @@ TEST_CASE("file conflicts", M) {
 
   {
     MAKE_PACKAGE
-    reg.push(ver);
+    reg.push(&ver);
   }
 
   Index ri("Remote Name");
   Category cat("Category Name", &ri);
   Package pkg(Package::ScriptType, "Duplicate Package", &cat);
-  Version *ver = new Version("1.0", &pkg);
-  Source *src1 = new Source("file", "url", ver);
-  Source *src2 = new Source("file2", "url", ver);
-  ver->addSource(src1);
-  ver->addSource(src2);
-  pkg.addVersion(ver);
+  Version ver("1.0", &pkg);
+  Source *src1 = new Source("file", "url", &ver);
+  ver.addSource(src1);
+  Source *src2 = new Source("file2", "url", &ver);
+  ver.addSource(src2);
 
   CHECK(reg.getEntry(&pkg).id == 0); // uninstalled
 
   try {
-    reg.push(ver);
+    reg.push(&ver);
     FAIL("duplicate is accepted");
   }
   catch(const reapack_error &) {}
@@ -156,7 +155,7 @@ TEST_CASE("file conflicts", M) {
   CHECK(reg.getEntry(&pkg).id == 0); // still uninstalled
 
   vector<Path> conflicts;
-  reg.push(ver, &conflicts);
+  reg.push(&ver, &conflicts);
 
   REQUIRE(conflicts.size() == 1);
   REQUIRE(conflicts[0] == src1->targetPath());
@@ -170,17 +169,17 @@ TEST_CASE("get main files", M) {
   Registry reg;
   REQUIRE((reg.getMainFiles({})).empty());
 
-  Source *main1 = new Source({}, "url", ver);
+  Source *main1 = new Source({}, "url", &ver);
   main1->setMain(true);
   main1->setTypeOverride(Package::EffectType);
-  ver->addSource(main1);
+  ver.addSource(main1);
 
-  Source *main2 = new Source({}, "url", ver); // duplicate file ignored
+  Source *main2 = new Source({}, "url", &ver); // duplicate file ignored
   main2->setMain(true);
   main2->setTypeOverride(Package::EffectType);
-  ver->addSource(main2);
+  ver.addSource(main2);
 
-  const Registry::Entry &entry = reg.push(ver);
+  const Registry::Entry &entry = reg.push(&ver);
 
   const vector<Registry::File> &current = reg.getMainFiles(entry);
   REQUIRE(current.size() == 1);
@@ -193,7 +192,7 @@ TEST_CASE("pin registry entry", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  reg.push(ver);
+  reg.push(&ver);
 
   const Registry::Entry &entry = reg.getEntry(&pkg);
   REQUIRE_FALSE(entry.pinned);
