@@ -355,7 +355,10 @@ void AboutPackage::onCommand(const int id, const int event)
 
 const string &AboutPackage::what() const
 {
-  return m_package->name();
+  if(!m_package->description().empty())
+    return m_package->description();
+  else
+    return m_package->name();
 }
 
 ListView *AboutPackage::createMenu()

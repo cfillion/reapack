@@ -50,7 +50,7 @@ public:
   const std::string &name() const { return m_name; }
   std::string fullName() const;
   void setDescription(const std::string &d) { m_desc = d; }
-  std::string description() const { return m_desc; }
+  const std::string &description() const { return m_desc; }
 
   Metadata *metadata() { return &m_metadata; }
   const Metadata *metadata() const { return &m_metadata; }
