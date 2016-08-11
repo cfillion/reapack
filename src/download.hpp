@@ -44,15 +44,21 @@ public:
     Aborted,
   };
 
+  enum Flag {
+    NoCacheFlag = 1<<0,
+  };
+
   static void Init();
   static void Cleanup();
 
-  Download(const std::string &name, const std::string &url, const NetworkOpts &);
+  Download(const std::string &name, const std::string &url,
+    const NetworkOpts &, int flags = 0);
   ~Download();
 
   const std::string &name() const { return m_name; }
   const std::string &url() const { return m_url; }
   const NetworkOpts &options() const { return m_opts; }
+  bool has(Flag f) const { return (m_flags & f) != 0; }
 
   State state();
   const std::string &contents();
@@ -88,6 +94,7 @@ private:
   std::string m_name;
   std::string m_url;
   NetworkOpts m_opts;
+  int m_flags;
 
   WDL_Mutex m_mutex;
 

@@ -94,7 +94,8 @@ Download *Index::fetch(const Remote &remote,
       return nullptr;
   }
 
-  return new Download(remote.name() + ".xml", remote.url(), opts);
+  return new Download(remote.name() + ".xml", remote.url(),
+    opts, Download::NoCacheFlag);
 }
 
 Index::Index(const string &name)

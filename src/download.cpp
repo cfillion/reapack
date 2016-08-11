@@ -40,8 +40,10 @@ void Download::Cleanup()
   curl_global_cleanup();
 }
 
-Download::Download(const string &name, const string &url, const NetworkOpts &opts)
-  : m_name(name), m_url(url), m_opts(opts), m_threadHandle(nullptr)
+Download::Download(const string &name, const string &url,
+  const NetworkOpts &opts, const int flags)
+  : m_name(name), m_url(url), m_opts(opts),
+    m_flags(flags), m_threadHandle(nullptr)
 {
   reset();
 }
@@ -128,16 +130,26 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
   curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
 
+  curl_slist *headers = nullptr;
+  if(download->has(NoCacheFlag))
+    headers = curl_slist_append(headers, "Cache-Control: no-cache");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
   const CURLcode res = curl_easy_perform(curl);
+
+  const auto cleanup = [=] {
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+  };
 
   if(download->isAborted()) {
     download->finish(Aborted, "aborted by user");
-    curl_easy_cleanup(curl);
+    cleanup();
     return 1;
   }
   else if(res != CURLE_OK) {
     download->finish(Failure, curl_easy_strerror(res));
-    curl_easy_cleanup(curl);
+    cleanup();
     return 1;
   }
 
@@ -166,7 +178,7 @@ DWORD WINAPI Download::Worker(void *ptr)
     break;
   }
 
-  curl_easy_cleanup(curl);
+  cleanup();
 
   return 0;
 }
