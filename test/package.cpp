@@ -236,22 +236,29 @@ TEST_CASE("find matching version", M) {
 
 TEST_CASE("full name", M) {
   SECTION("no category") {
-    Package pack(Package::ScriptType, "file.name");
+    const Package pack(Package::ScriptType, "file.name");
     REQUIRE(pack.fullName() == "file.name");
   }
 
   SECTION("with category") {
-    Category cat("Category Name");
-    Package pack(Package::ScriptType, "file.name", &cat);
+    const Category cat("Category Name");
+    const Package pack(Package::ScriptType, "file.name", &cat);
     REQUIRE(pack.fullName() == "Category Name/file.name");
   }
 
   SECTION("with index") {
-    Index ri("Remote Name");
-    Category cat("Category Name", &ri);
-    Package pack(Package::ScriptType, "file.name", &cat);
+    const Index ri("Remote Name");
+    const Category cat("Category Name", &ri);
+    const Package pack(Package::ScriptType, "file.name", &cat);
 
     REQUIRE(pack.fullName() == "Remote Name/Category Name/file.name");
+  }
+
+  SECTION("with description") {
+    const Category cat("Category Name");
+    Package pack(Package::ScriptType, "file.name", &cat);
+    pack.setDescription("Hello World");
+    REQUIRE(pack.fullName() == "Category Name/Hello World");
   }
 }
 
@@ -261,4 +268,16 @@ TEST_CASE("package description", M) {
 
   pack.setDescription("hello world");
   REQUIRE(pack.description() == "hello world");
+}
+
+TEST_CASE("package display name", M) {
+  Package pack(Package::ScriptType, "test.lua");
+  REQUIRE(pack.displayName() == "test.lua");
+  REQUIRE(pack.displayName(false) == "test.lua");
+  REQUIRE(pack.displayName(true) == "test.lua");
+
+  pack.setDescription("hello world");
+  REQUIRE(pack.displayName() == "hello world");
+  REQUIRE(pack.displayName(false) == "test.lua");
+  REQUIRE(pack.displayName(true) == "hello world");
 }

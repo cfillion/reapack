@@ -60,6 +60,15 @@ string Package::displayType(const Type type)
   }
 }
 
+const string &Package::displayName(const string &name,
+  const string &desc, const bool enableDesc)
+{
+  if(!enableDesc || desc.empty())
+    return name;
+  else
+    return desc;
+}
+
 Package::Package(const Type type, const string &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
@@ -77,7 +86,7 @@ Package::~Package()
 
 string Package::fullName() const
 {
-  return m_category ? m_category->fullName() + "/" + m_name : m_name;
+  return m_category ? m_category->fullName() + "/" + displayName() : displayName();
 }
 
 bool Package::addVersion(const Version *ver)

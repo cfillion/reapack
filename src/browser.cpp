@@ -711,12 +711,8 @@ string Browser::getValue(const Column col, const Entry &entry) const
   case NameColumn: {
     const auto config = m_reapack->config()->browser();
 
-    if(pkg) {
-      if(!config->showDescs || pkg->description().empty())
-        return pkg->name();
-      else
-        return pkg->description();
-    }
+    if(pkg)
+      return pkg->displayName(config->showDescs);
     else
       return regEntry.package;
   }
