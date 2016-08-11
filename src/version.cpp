@@ -68,7 +68,7 @@ void Version::parse(const string &str)
 
     if(first >= 'a' || first >= 'z') {
       if(segments.empty()) // got leading letters
-        throw reapack_error(format("invalid version name '%1%'") % str);
+        throw reapack_error(format("invalid version name '%s'") % str);
 
       segments.push_back(match);
       letters++;
@@ -78,13 +78,13 @@ void Version::parse(const string &str)
         segments.push_back(boost::lexical_cast<Numeric>(match));
       }
       catch(const boost::bad_lexical_cast &) {
-        throw reapack_error(format("version segment overflow in '%1%'") % str);
+        throw reapack_error(format("version segment overflow in '%s'") % str);
       }
     }
   }
 
   if(segments.empty()) // version doesn't have any numbers
-    throw reapack_error(format("invalid version name '%1%'") % str);
+    throw reapack_error(format("invalid version name '%s'") % str);
 
   m_name = str;
   swap(m_segments, segments);
