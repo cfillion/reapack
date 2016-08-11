@@ -17,10 +17,12 @@
 
 #include "download.hpp"
 
+#include <boost/format.hpp>
 #include <curl/curl.h>
 
 #include <reaper_plugin_functions.h>
 
+using boost::format;
 using namespace std;
 
 Download::Queue Download::s_finished;
@@ -135,12 +137,15 @@ DWORD WINAPI Download::Worker(void *ptr)
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-  const CURLcode res = curl_easy_perform(curl);
+  char errbuf[CURL_ERROR_SIZE];
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
   const auto cleanup = [=] {
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
   };
+
+  const CURLcode res = curl_easy_perform(curl);
 
   if(download->isAborted()) {
     download->finish(Aborted, "aborted by user");
@@ -148,7 +153,8 @@ DWORD WINAPI Download::Worker(void *ptr)
     return 1;
   }
   else if(res != CURLE_OK) {
-    download->finish(Failure, curl_easy_strerror(res));
+    const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
+    download->finish(Failure, err.str());
     cleanup();
     return 1;
   }
