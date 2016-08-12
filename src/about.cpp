@@ -204,7 +204,7 @@ ListView *AboutRemote::createMenu()
 ListView *AboutRemote::createList()
 {
   return createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Name"), 382},
+    {AUTO_STR("Package"), 382},
     {AUTO_STR("Version"), 80},
     {AUTO_STR("Author"), 90},
   });
@@ -262,7 +262,7 @@ void AboutRemote::updateList(const int index)
 
   for(const Package *pkg : *m_packagesData) {
     const Version *lastVer = pkg->lastVersion();
-    const auto_string &name = make_autostring(pkg->name());
+    const auto_string &name = make_autostring(pkg->displayName());
     const auto_string &version = make_autostring(lastVer->name());
     const auto_string &author = make_autostring(lastVer->displayAuthor());
 
