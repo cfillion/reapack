@@ -18,6 +18,7 @@
 #ifndef REAPACK_DATABASE_HPP
 #define REAPACK_DATABASE_HPP
 
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
@@ -31,13 +32,16 @@ class Statement;
 
 class Database {
 public:
+  struct Version { int16_t major; int16_t minor; };
+
   Database(const std::string &filename = std::string());
   ~Database();
 
   Statement *prepare(const char *sql);
   void exec(const char *sql);
-  int lastInsertId() const;
-  int version() const;
+  int64_t lastInsertId() const;
+  Version version() const;
+  void setVersion(const Version &);
   int errorCode() const;
   void begin();
   void commit();
@@ -56,11 +60,11 @@ public:
   typedef std::function<bool (void)> ExecCallback;
 
   void bind(int index, const std::string &text);
-  void bind(int index, int integer);
+  void bind(int index, int64_t integer);
   void exec();
   void exec(const ExecCallback &);
 
-  int intColumn(int index) const;
+  int64_t intColumn(int index) const;
   bool boolColumn(int index) const { return intColumn(index) != 0; }
   std::string stringColumn(int index) const;
 

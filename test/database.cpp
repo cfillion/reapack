@@ -95,12 +95,18 @@ TEST_CASE("bind values and clear", M) {
   }
 }
 
-TEST_CASE("version", M) {
+TEST_CASE("database version", M) {
   Database db;
-  REQUIRE(db.version() == 0);
+  REQUIRE(db.version().major == 0);
+  REQUIRE(db.version().minor == 0);
 
-  db.exec("PRAGMA user_version = 1");
-  REQUIRE(db.version() == 1);
+  db.setVersion({0, 1});
+  REQUIRE(db.version().major == 0);
+  REQUIRE(db.version().minor == 1);
+
+  db.setVersion({32767, 32767});
+  REQUIRE(db.version().major == 32767);
+  REQUIRE(db.version().minor == 32767);
 }
 
 TEST_CASE("foreign keys", M) {
@@ -159,6 +165,29 @@ TEST_CASE("bind temporary strings", M) {
   });
 
   REQUIRE(got == "hello");
+}
+
+TEST_CASE("get integers from sqlite", M) {
+  Database db;
+  db.exec("CREATE TABLE a(test INTEGER NOT NULL)");
+
+  Statement *insert = db.prepare("INSERT INTO a VALUES(?)");
+
+  insert->bind(1, 2147483647);
+  insert->exec();
+  insert->bind(1, 4294967295);
+  insert->exec();
+
+  vector<sqlite3_int64> signedVals;
+  Statement *select = db.prepare("SELECT test FROM a");
+  select->exec([&] {
+    signedVals.push_back(select->intColumn(0));
+    return true;
+  });
+
+  CHECK(signedVals.size() == 2);
+  REQUIRE(signedVals[0] == 2147483647);
+  REQUIRE(signedVals[1] == 4294967295);
 }
 
 TEST_CASE("sqlite error code", M) {

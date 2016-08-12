@@ -33,7 +33,7 @@ class Version;
 class Registry {
 public:
   struct Entry {
-    int id;
+    int64_t id;
     std::string remote;
     std::string category;
     std::string package;

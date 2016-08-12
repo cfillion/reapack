@@ -19,6 +19,7 @@
 
 #include "errors.hpp"
 
+#include <cinttypes>
 #include <sqlite3.h>
 
 using namespace std;
@@ -67,22 +68,31 @@ reapack_error Database::lastError() const
   return reapack_error(sqlite3_errmsg(m_db));
 }
 
-int Database::lastInsertId() const
+int64_t Database::lastInsertId() const
 {
-  return (int)sqlite3_last_insert_rowid(m_db);
+  return sqlite3_last_insert_rowid(m_db);
 }
 
-int Database::version() const
+auto Database::version() const -> Version
 {
-  int version = 0;
+  int32_t version = 0;
 
   Statement stmt("PRAGMA user_version", this);
   stmt.exec([&] {
-    version = stmt.intColumn(0);
+    version = static_cast<int32_t>(stmt.intColumn(0));
     return false;
   });
 
-  return version;
+  return {static_cast<int16_t>(version >> 16), static_cast<int16_t>(version)};
+}
+
+void Database::setVersion(const Version &version)
+{
+  int32_t value = version.minor | (int32_t)version.major << 16;
+
+  char sql[255] = {};
+  sprintf(sql, "PRAGMA user_version = %" PRId32, value);
+  exec(sql);
 }
 
 int Database::errorCode() const
@@ -121,9 +131,9 @@ void Statement::bind(const int index, const string &text)
     throw m_db->lastError();
 }
 
-void Statement::bind(const int index, const int integer)
+void Statement::bind(const int index, const int64_t integer)
 {
-  if(sqlite3_bind_int(m_stmt, index, integer))
+  if(sqlite3_bind_int64(m_stmt, index, integer))
     throw m_db->lastError();
 }
 
@@ -151,9 +161,9 @@ void Statement::exec(const ExecCallback &callback)
   }
 }
 
-int Statement::intColumn(const int index) const
+int64_t Statement::intColumn(const int index) const
 {
-  return sqlite3_column_int(m_stmt, index);
+  return sqlite3_column_int64(m_stmt, index);
 }
 
 string Statement::stringColumn(const int index) const
