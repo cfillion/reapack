@@ -691,10 +691,10 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
   switch(col) {
   case StateColumn: {
-    if(entry.test(ObsoleteFlag))
-      display += 'o';
-    else if(entry.regEntry.pinned)
+    if(entry.regEntry.pinned)
       display += 'p';
+    else if(entry.test(ObsoleteFlag))
+      display += 'o';
     else if(entry.test(OutOfDateFlag))
       display += 'u';
     else if(entry.test(InstalledFlag))
