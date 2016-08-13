@@ -619,12 +619,13 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
 
     current = pkg->findVersion(regEntry.version);
   }
-  else {
-    if(!latest) // show latest pre-release if no stable version is available
-      latest = pkg->lastVersion(true);
-
+  else
     flags |= UninstalledFlag;
-  }
+
+  // Show latest pre-release if no stable version is available,
+  // or the newest available version if older than current installed version.
+  if(!latest)
+    latest = pkg->lastVersion(true);
 
   return {flags, regEntry, pkg, latest, current};
 }
