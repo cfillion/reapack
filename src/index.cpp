@@ -88,7 +88,7 @@ Download *Index::fetch(const Remote &remote,
   time_t mtime = 0, now = time(nullptr);
 
   if(FS::mtime(pathFor(remote.name()), &mtime)) {
-    const time_t threshold = stale ? 2 : (7 * 24 * 3600);
+    const time_t threshold = stale ? 0 : (7 * 24 * 3600);
 
     if(mtime > now - threshold)
       return nullptr;
