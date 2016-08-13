@@ -27,21 +27,43 @@
 using boost::format;
 using namespace std;
 
+static const int DOWNLOAD_TIMEOUT = 15;
+static const int CONCURRENT_DOWNLOADS = 3;
+
 Download::Queue Download::s_finished;
 WDL_Mutex Download::s_mutex;
 size_t Download::s_running = 0;
 
-static const int DOWNLOAD_TIMEOUT = 15;
-static const int CONCURRENT_DOWNLOADS = 3;
+static CURLSH *g_curlShare = nullptr;
+static WDL_Mutex g_curlMutex;
+
+static void LockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
+{
+  g_curlMutex.Enter();
+}
+
+static void UnlockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
+{
+  g_curlMutex.Leave();
+}
 
 void Download::Init()
 {
   curl_global_init(CURL_GLOBAL_DEFAULT);
+
+  g_curlShare = curl_share_init();
+  assert(g_curlShare);
+
+  curl_share_setopt(g_curlShare, CURLSHOPT_LOCKFUNC, LockCurlMutex);
+  curl_share_setopt(g_curlShare, CURLSHOPT_UNLOCKFUNC, UnlockCurlMutex);
+  curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+  curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 }
 
 void Download::Cleanup()
 {
   curl_global_cleanup();
+  curl_share_cleanup(g_curlShare);
 }
 
 Download::Download(const string &name, const string &url,
@@ -125,6 +147,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
   curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
   curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
+  curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
 
   curl_slist *headers = nullptr;
   if(download->has(NoCacheFlag))
