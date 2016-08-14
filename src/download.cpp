@@ -140,15 +140,14 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+  curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
+  curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
 
-  curl_easy_setopt(curl, CURLOPT_HEADER, true);
   curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
   curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
   curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
-  curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
-  curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
 
   curl_slist *headers = nullptr;
   if(download->has(NoCacheFlag))
@@ -158,33 +157,19 @@ DWORD WINAPI Download::Worker(void *ptr)
   char errbuf[CURL_ERROR_SIZE];
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
-  const auto cleanup = [=] {
-    curl_slist_free_all(headers);
-    curl_easy_cleanup(curl);
-  };
-
   const CURLcode res = curl_easy_perform(curl);
 
-  if(download->isAborted()) {
+  if(download->isAborted())
     download->finish(Aborted, "aborted by user");
-    cleanup();
-    return 1;
-  }
   else if(res != CURLE_OK) {
     const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
     download->finish(Failure, err.str());
-    cleanup();
-    return 1;
   }
+  else
+    download->finish(Success, contents);
 
-  // strip headers
-  long headerSize = 0;
-  curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
-  contents.erase(0, headerSize);
-
-  download->finish(Success, contents);
-
-  cleanup();
+  curl_slist_free_all(headers);
+  curl_easy_cleanup(curl);
 
   return 0;
 }
