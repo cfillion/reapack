@@ -148,6 +148,7 @@ DWORD WINAPI Download::Worker(void *ptr)
   curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
   curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
   curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
+  curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
 
   curl_slist *headers = nullptr;
   if(download->has(NoCacheFlag))
@@ -176,30 +177,12 @@ DWORD WINAPI Download::Worker(void *ptr)
     return 1;
   }
 
-  int status = 0;
-  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+  // strip headers
+  long headerSize = 0;
+  curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
+  contents.erase(0, headerSize);
 
-  // accept a status of 0 for the file:// protocol
-  switch(status) {
-  case 0: // for the file:// protocol
-  case 200: // HTTP OK
-  {
-    // strip headers
-    long headerSize = 0;
-    curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
-    contents.erase(0, headerSize);
-
-    download->finish(Success, contents);
-    break;
-  }
-  default:
-    // strip body, only keep error description
-    contents.erase(contents.find("\r"));
-    contents.erase(0, contents.find("\x20") + 1);
-
-    download->finish(Failure, contents);
-    break;
-  }
+  download->finish(Success, contents);
 
   cleanup();
 
