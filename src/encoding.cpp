@@ -18,15 +18,14 @@
 #include "encoding.hpp"
 
 #ifdef _WIN32
-#include <windows.h>
 
-auto_string make_autostring(const std::string &input)
+auto_string make_autostring(const std::string &input, UINT codepage)
 {
-  const int size = MultiByteToWideChar(CP_UTF8, 0,
+  const int size = MultiByteToWideChar(codepage, 0,
     &input[0], -1, nullptr, 0) - 1;
 
   auto_string output(size, 0);
-  MultiByteToWideChar(CP_UTF8, 0, &input[0], -1, &output[0], size);
+  MultiByteToWideChar(codepage, 0, &input[0], -1, &output[0], size);
 
   return output;
 }
@@ -42,4 +41,5 @@ std::string from_autostring(const auto_string &input)
 
   return output;
 }
+
 #endif

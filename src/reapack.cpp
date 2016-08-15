@@ -63,10 +63,8 @@ static void CleanupTempFiles()
 std::string ReaPack::resourcePath()
 {
 #ifdef _WIN32
-  auto_char path[MAX_PATH] = {};
-  _mbstowcs_l(path, GetResourcePath(), auto_size(path) - 1,
-    _create_locale(LC_ALL, ""));
-  return from_autostring(path);
+  // convert from current system encoding to unicode...
+  return from_autostring(make_autostring(GetResourcePath(), CP_ACP));
 #else
   return GetResourcePath();
 #endif

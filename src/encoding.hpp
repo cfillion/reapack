@@ -27,13 +27,15 @@
 
 #ifdef _WIN32
 
+#include <windows.h>
+
 typedef wchar_t auto_char;
 typedef std::wstring auto_string;
 
 #define AUTO_STR(text) L##text
 #define to_autostring std::to_wstring
 #define auto_snprintf(buf, size, ...) _snwprintf(buf, size - 1,  __VA_ARGS__)
-auto_string make_autostring(const std::string &);
+auto_string make_autostring(const std::string &, UINT codepage = CP_UTF8);
 #define make_autocstring(cstr) make_autostring(cstr).c_str() // temporary string!
 std::string from_autostring(const auto_string &);
 
