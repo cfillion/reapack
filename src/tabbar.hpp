@@ -36,6 +36,7 @@ public:
   void setCurrentIndex(int);
   void removeTab(int);
   void setFocus();
+  int count() const;
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
@@ -43,7 +44,6 @@ protected:
 private:
   void switchPage();
 
-  int m_size;
   int m_lastPage;
   std::vector<Page> m_pages;
 };

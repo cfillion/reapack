@@ -30,7 +30,7 @@ TabBar::TabBar(const Tabs &tabs, HWND handle)
 
 int TabBar::addTab(const Tab &tab)
 {
-  int index = m_size++;
+  int index = count();
 
   m_pages.push_back(tab.page);
 
@@ -68,10 +68,16 @@ void TabBar::removeTab(const int index)
 
 void TabBar::setFocus()
 {
-  if(m_lastPage < 0 || (size_t)m_lastPage >= m_pages.size())
-    return;
+  const int index = currentIndex();
 
-  SetFocus(m_pages[m_lastPage].front());
+  if(index > -1)
+    SetFocus(m_pages[index].front());
+}
+
+int TabBar::count() const
+{
+  return TabCtrl_GetItemCount(handle());
+}
 }
 
 void TabBar::onNotify(LPNMHDR info, LPARAM)
