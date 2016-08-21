@@ -59,7 +59,6 @@ protected:
   void onCommand(int, int) override;
 
 private:
-  void clear();
   void selectLink(int control);
   void openLink(const Link *);
   void updateList();

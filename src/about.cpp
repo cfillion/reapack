@@ -78,23 +78,7 @@ void About::onCommand(const int id, int)
   }
 }
 
-void About::setDelegate(const DelegatePtr &model)
-{
-  clear();
-
-  m_delegate = model;
-  m_delegate->init(this);
-  m_menu->sort();
-
-  updateList();
-
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-#endif
-}
-
-void About::clear()
+void About::setDelegate(const DelegatePtr &delegate)
 {
   m_tabs->clear();
   m_menu->reset();
@@ -104,8 +88,6 @@ void About::clear()
 
   m_delegate = nullptr;
   m_links.clear();
-
-  m_currentIndex = -255;
 
   const int controls[] = {
     IDC_ABOUT,
@@ -120,6 +102,18 @@ void About::clear()
 
   for(const int control : controls)
     hide(getControl(control));
+
+  m_delegate = delegate;
+  m_delegate->init(this);
+  m_menu->sort();
+
+  m_currentIndex = -255;
+  updateList();
+
+#ifdef LVSCW_AUTOSIZE_USEHEADER
+  m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+#endif
 }
 
 void About::setTitle(const string &what)
@@ -215,7 +209,7 @@ void About::updateList()
   const int index = m_menu->currentIndex();
 
   // do nothing when the selection is cleared, except for the initial execution
-  if((index < 0 && m_currentIndex >= -1) || index == m_currentIndex)
+  if((index < 0 && m_currentIndex != -255) || index == m_currentIndex)
     return;
 
   InhibitControl lock(m_list);
