@@ -95,6 +95,27 @@ void Browser::onInit()
     this, placeholders::_1, placeholders::_2));
 
   m_list->sortByColumn(1);
+
+  m_list->setSortCallback(3 /* version */, [&] (const int ai, const int bi) {
+    const Entry &a = m_entries[m_visibleEntries[ai]];
+    const Entry &b = m_entries[m_visibleEntries[bi]];
+
+    const Version *l = nullptr;
+    const Version *r = nullptr;
+
+    if(a.test(InstalledFlag))
+      l = &a.regEntry.version;
+    else
+      l = a.latest;
+
+    if(b.test(InstalledFlag))
+      r = &b.regEntry.version;
+    else
+      r = b.latest;
+
+    return l->compare(*r);
+  });
+
   m_list->setSortCallback(7 /* last update */, [&] (const int ai, const int bi) {
     const Entry &a = m_entries[m_visibleEntries[ai]];
     const Entry &b = m_entries[m_visibleEntries[bi]];
