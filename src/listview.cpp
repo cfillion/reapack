@@ -317,13 +317,14 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 
 #ifdef ListView_GetItemPosition // unsuported by SWELL
   if(x == 0xffff) {
+    // adjust context menu position when using Shift+F10 on Windows
     index = max(0, currentIndex());
 
     POINT point{};
     ListView_GetItemPosition(handle(), translate(index), &point);
     ClientToScreen(handle(), &point);
-     x = point.x;
-     y = point.y;
+    x = point.x;
+    y = point.y;
   }
 #endif
 
