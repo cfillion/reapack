@@ -70,8 +70,6 @@ void About::onCommand(const int id, int)
   default:
     if(m_links.count(id))
       selectLink(id);
-    else if(m_links.count(id >> 8))
-      openLink(m_links[id >> 8][id & 0xff]);
     else if(m_delegate)
       m_delegate->onCommand(id);
     break;
@@ -208,7 +206,11 @@ void About::selectLink(const int ctrl)
 
   RECT rect;
   GetWindowRect(getControl(ctrl), &rect);
-  menu.show(rect.left, rect.bottom - 1, handle());
+
+  const int choice = menu.show(rect.left, rect.bottom - 1, handle());
+
+  if(choice >> 8 == ctrl)
+    openLink(links[choice & 0xff]);
 }
 
 void About::openLink(const Link *link)
