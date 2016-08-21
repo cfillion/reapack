@@ -47,6 +47,7 @@ public:
 
   void setTitle(const std::string &);
   void setMetadata(const Metadata *, bool substitution = false);
+  void setAction(const std::string &);
 
   TabBar *tabs() const { return m_tabs; }
   RichEdit *desc() const { return m_desc; }
@@ -88,8 +89,7 @@ protected:
 
 class AboutIndexDelegate : public AboutDelegate {
 public:
-  AboutIndexDelegate(const IndexPtr &index, ReaPack *reapack)
-    : m_index(index), m_reapack(reapack) {}
+  AboutIndexDelegate(const IndexPtr &, ReaPack *);
 
 protected:
   void init(About *) override;
@@ -112,7 +112,7 @@ private:
 
 class AboutPackageDelegate : public AboutDelegate {
 public:
-  AboutPackageDelegate(const Package *);
+  AboutPackageDelegate(const Package *, ReaPack *);
 
 protected:
   void init(About *) override;
@@ -124,6 +124,7 @@ private:
   void copySourceUrl();
 
   const Package *m_package;
+  ReaPack *m_reapack;
   IndexPtr m_index; // keeps the package loaded in memory
   std::vector<const Source *> m_sources;
 

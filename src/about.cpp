@@ -100,7 +100,7 @@ void About::setDelegate(const DelegatePtr &delegate)
     IDC_WEBSITE,
     IDC_SCREENSHOT,
     IDC_DONATE,
-    IDC_INSTALL,
+    IDC_ACTION,
   };
 
   for(const int control : controls)
@@ -185,6 +185,13 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   }
 }
 
+void About::setAction(const string &label)
+{
+  HWND btn = getControl(IDC_ACTION);
+  SetWindowText(btn, make_autostring(label).c_str());
+  show(btn);
+}
+
 void About::selectLink(const int ctrl)
 {
   const auto &links = m_links[ctrl];
@@ -233,12 +240,18 @@ void About::updateList()
   m_list->sort();
 }
 
+AboutIndexDelegate::AboutIndexDelegate(const IndexPtr &index, ReaPack *reapack)
+  : m_index(index), m_reapack(reapack)
+{
+}
+
 void AboutIndexDelegate::init(About *dialog)
 {
   m_dialog = dialog;
 
   dialog->setTitle(m_index->name());
   dialog->setMetadata(m_index->metadata(), m_index->name() == "ReaPack");
+  dialog->setAction("Install/update " + m_index->name());
 
   // restore report size after being possibly modified by AboutPackageDelegate
   RECT rect;
@@ -247,13 +260,6 @@ void AboutIndexDelegate::init(About *dialog)
   ScreenToClient(dialog->handle(), ((LPPOINT)&rect)+1);
   SetWindowPos(dialog->report(), nullptr, rect.left, rect.top,
     rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
-
-  HWND installBtn = dialog->getControl(IDC_INSTALL);
-  auto_char btnLabel[32] = {};
-  auto_snprintf(btnLabel, auto_size(btnLabel),
-    AUTO_STR("Install/update %s"), make_autostring(m_index->name()).c_str());
-  SetWindowText(installBtn, btnLabel);
-  dialog->show(installBtn);
 
   dialog->tabs()->addTab({AUTO_STR("Packages"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
@@ -360,7 +366,7 @@ void AboutIndexDelegate::onCommand(const int id)
   case ACTION_ABOUT_PKG:
     aboutPackage();
     break;
-  case IDC_INSTALL:
+  case IDC_ACTION:
     install();
     break;
   }
@@ -374,7 +380,7 @@ void AboutIndexDelegate::aboutPackage()
     return;
 
   const Package *pkg = m_packagesData->at(index);
-  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg));
+  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, m_reapack));
 }
 
 void AboutIndexDelegate::install()
@@ -385,7 +391,7 @@ void AboutIndexDelegate::install()
   menu.addAction(AUTO_STR("Install all packages in this repository"), INSTALL_ALL);
   menu.addAction(AUTO_STR("Update installed packages only"), UPDATE_ONLY);
 
-  const int choice = menu.show(m_dialog->getControl(IDC_INSTALL), m_dialog->handle());
+  const int choice = menu.show(m_dialog->getControl(IDC_ACTION), m_dialog->handle());
 
   if(!choice)
     return;
@@ -411,8 +417,9 @@ void AboutIndexDelegate::install()
   tx->runTasks();
 }
 
-AboutPackageDelegate::AboutPackageDelegate(const Package *pkg)
-  : m_package(pkg), m_index(pkg->category()->index()->shared_from_this())
+AboutPackageDelegate::AboutPackageDelegate(const Package *pkg, ReaPack *reapack)
+  : m_package(pkg), m_reapack(reapack),
+    m_index(pkg->category()->index()->shared_from_this())
 {
 }
 
@@ -422,6 +429,7 @@ void AboutPackageDelegate::init(About *dialog)
 
   dialog->setTitle(m_package->displayName());
   dialog->setMetadata(m_package->metadata());
+  dialog->setAction("About " + m_index->name());
 
   dialog->tabs()->addTab({AUTO_STR("History"), {dialog->menu()->handle(), dialog->report()}});
   dialog->tabs()->addTab({AUTO_STR("Contents"), {dialog->menu()->handle(), dialog->list()->handle()}});
@@ -492,6 +500,9 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
 void AboutPackageDelegate::onCommand(const int id)
 {
   switch(id) {
+  case IDC_ACTION:
+    m_dialog->setDelegate(make_shared<AboutIndexDelegate>(m_index, m_reapack));
+    break;
   case ACTION_COPY_URL:
     copySourceUrl();
     break;

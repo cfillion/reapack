@@ -50,7 +50,7 @@
 #define IDC_LIST       212
 #define IDC_IMPORT     213
 #define IDC_TABS       214
-#define IDC_INSTALL    215
+#define IDC_ACTION     215
 #define IDC_WEBSITE    216
 #define IDC_DONATE     217
 #define IDC_ABOUT      218
@@ -63,7 +63,6 @@
 #define IDC_SELECT     225
 #define IDC_UNSELECT   226
 #define IDC_OPTIONS    227
-#define IDC_ACTIONS    228
 #define IDC_BROWSE     228
 #define IDC_PROXY      229
 #define IDC_VERIFYPEER 230

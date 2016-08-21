@@ -64,7 +64,7 @@ void Browser::onInit()
   m_filterHandle = getControl(IDC_FILTER);
   m_view = getControl(IDC_TABS);
   m_displayBtn = getControl(IDC_DISPLAY);
-  m_actionsBtn = getControl(IDC_ACTIONS);
+  m_actionsBtn = getControl(IDC_ACTION);
 
   disable(m_applyBtn);
   disable(m_actionsBtn);
@@ -179,7 +179,7 @@ void Browser::onCommand(const int id, const int event)
     m_list->unselectAll();
     SetFocus(m_list->handle());
     break;
-  case IDC_ACTIONS:
+  case IDC_ACTION:
     actionsButton();
     break;
   case ACTION_LATEST:

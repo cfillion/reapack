@@ -259,7 +259,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
 void ReaPack::about(const Package *pkg)
 {
   setupAbout();
-  m_about->setDelegate(std::make_shared<AboutPackageDelegate>(pkg));
+  m_about->setDelegate(std::make_shared<AboutPackageDelegate>(pkg, this));
   m_about->show();
 }
 
