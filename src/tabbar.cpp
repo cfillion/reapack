@@ -30,7 +30,7 @@ TabBar::TabBar(HWND handle, const Tabs &tabs)
 
 int TabBar::addTab(const Tab &tab)
 {
-  int index = count();
+  const int index = count();
 
   m_pages.push_back(tab.page);
 
