@@ -362,7 +362,6 @@ void AboutIndexDelegate::onCommand(const int id)
     break;
   case IDC_INSTALL:
     install();
-    m_dialog->close();
     break;
   }
 }
@@ -380,10 +379,26 @@ void AboutIndexDelegate::aboutPackage()
 
 void AboutIndexDelegate::install()
 {
+  enum { INSTALL_ALL = 80, UPDATE_ONLY };
+
+  Menu menu;
+  menu.addAction(AUTO_STR("Install all packages in this repository"), INSTALL_ALL);
+  menu.addAction(AUTO_STR("Update installed packages only"), UPDATE_ONLY);
+
+  const int choice = menu.show(m_dialog->getControl(IDC_INSTALL), m_dialog->handle());
+
+  if(!choice)
+    return;
+
   const Remote &remote = m_reapack->remote(m_index->name());
 
-  if(!remote)
+  if(!remote) {
+    // In case the user uninstalled the repository while this dialog was opened
+    MessageBox(m_dialog->handle(),
+      AUTO_STR("This repository cannot be found in your current configuration."),
+      AUTO_STR("ReaPack"), MB_OK);
     return;
+  }
 
   Transaction *tx = m_reapack->setupTransaction();
 
@@ -392,7 +407,7 @@ void AboutIndexDelegate::install()
 
   m_reapack->enable(remote);
 
-  tx->synchronize(remote, true);
+  tx->synchronize(remote, choice == INSTALL_ALL);
   tx->runTasks();
 }
 
