@@ -80,6 +80,11 @@ void About::onCommand(const int id, int)
 
 void About::setDelegate(const DelegatePtr &delegate)
 {
+#ifdef _WIN32
+  // preventing fast blinking on windows
+  SendMessage(handle(), WM_SETREDRAW, false, 0);
+#endif
+
   m_tabs->clear();
   m_menu->reset();
   m_menu->sortByColumn(0);
@@ -115,9 +120,13 @@ void About::setDelegate(const DelegatePtr &delegate)
   m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
 
+#ifdef _WIN32
+  SendMessage(handle(), WM_SETREDRAW, true, 0);
+
   // This is required on Windows to get the first tab to be fully draw,
   // but I have no idea why...
   InvalidateRect(handle(), nullptr, true);
+#endif
 }
 
 void About::setTitle(const string &what)
