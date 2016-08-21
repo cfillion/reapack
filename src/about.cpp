@@ -389,13 +389,11 @@ const Package *AboutIndexDelegate::currentPackage() const
 
 void AboutIndexDelegate::findInBrowser()
 {
-  const Package *pkg = currentPackage();
-  if(!pkg)
-    return;
-
   Browser *browser = m_reapack->browsePackages();
   if(!browser)
     return;
+
+  const Package *pkg = currentPackage();
 
   string filter = "\"";
   filter += pkg->displayName(m_reapack->config()->browser.showDescs);
@@ -409,9 +407,7 @@ void AboutIndexDelegate::findInBrowser()
 void AboutIndexDelegate::aboutPackage()
 {
   const Package *pkg = currentPackage();
-
-  if(pkg)
-    m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, m_reapack));
+  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, m_reapack));
 }
 
 void AboutIndexDelegate::install()
