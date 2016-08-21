@@ -60,23 +60,13 @@ void About::onInit()
   m_report = getControl(IDC_REPORT);
 }
 
-void About::onCommand(const int id, int event)
+void About::onCommand(const int id, int)
 {
   switch(id) {
   case IDOK:
   case IDCANCEL:
     close();
     break;
-#ifdef _WIN32
-  case IDC_ABOUT:
-    if(event == EN_SETFOCUS)
-      HideCaret(m_desc->handle());
-    break;
-  case IDC_REPORT:
-    if(event == EN_SETFOCUS)
-      HideCaret(m_report);
-    break;
-#endif
   default:
     if(m_links.count(id))
       selectLink(id);
