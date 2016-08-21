@@ -144,7 +144,7 @@ void Browser::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_applyBtn, AnchorAll);
 
-  auto data = m_serializer.read(m_reapack->config()->browser()->state, 1);
+  auto data = m_serializer.read(m_reapack->config()->browser.state, 1);
   Dialog::restore(data);
   m_list->restore(data);
   assert(data.empty());
@@ -280,7 +280,7 @@ void Browser::onClose()
   Serializer::Data data;
   Dialog::save(data);
   m_list->save(data);
-  m_reapack->config()->browser()->state = m_serializer.write(data);
+  m_reapack->config()->browser.state = m_serializer.write(data);
 }
 
 void Browser::onTimer(const int id)
@@ -432,11 +432,10 @@ void Browser::displayButton()
       menu.checkRadio(index);
   }
 
-  const auto config = m_reapack->config()->browser();
   menu.addSeparator();
 
   const auto i = menu.addAction(AUTO_STR("Show &descriptions"), ACTION_SHOWDESCS);
-  if(config->showDescs)
+  if(m_reapack->config()->browser.showDescs)
     menu.check(i);
 
   menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
@@ -481,8 +480,8 @@ bool Browser::isFiltered(Package::Type type) const
 
 void Browser::toggleDescs()
 {
-  auto config = m_reapack->config()->browser();
-  config->showDescs = !config->showDescs;
+  auto &config = m_reapack->config()->browser;
+  config.showDescs = !config.showDescs;
   fillList();
 }
 
@@ -510,7 +509,7 @@ void Browser::refresh(const bool stale)
   if(m_loading)
     return;
 
-  const vector<Remote> &remotes = m_reapack->config()->remotes()->getEnabled();
+  const vector<Remote> &remotes = m_reapack->config()->remotes.getEnabled();
 
   if(!m_loaded && remotes.empty()) {
     m_loaded = true;
@@ -626,7 +625,7 @@ void Browser::transferActions()
 auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
   const -> Entry
 {
-  const auto &instOpts = *m_reapack->config()->install();
+  const auto &instOpts = m_reapack->config()->install;
   const Version *latest = pkg->lastVersion(instOpts.bleedingEdge, regEntry.version);
   const Version *current = nullptr;
 
@@ -731,13 +730,13 @@ string Browser::getValue(const Column col, const Entry &entry) const
     return display;
   }
   case NameColumn: {
-    const auto config = m_reapack->config()->browser();
+    const auto &config = m_reapack->config()->browser;
 
     if(pkg)
-      return pkg->displayName(config->showDescs);
+      return pkg->displayName(config.showDescs);
     else
       return Package::displayName(regEntry.package,
-        regEntry.description, config->showDescs);
+        regEntry.description, config.showDescs);
   }
   case CategoryColumn:
     return pkg ? pkg->category()->name() : regEntry.category;

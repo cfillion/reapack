@@ -90,8 +90,7 @@ void Import::fetch()
 
   setWaiting(true);
 
-  const NetworkOpts &opts = *m_reapack->config()->network();
-  Download *dl = m_download = new Download({}, url, opts);
+  Download *dl = m_download = new Download({}, url, m_reapack->config()->network);
 
   dl->onFinish([=] {
     const Download::State state = dl->state();
@@ -191,7 +190,7 @@ bool Import::import(const Remote &remote)
   }
 
   Config *config = m_reapack->config();
-  config->remotes()->add(remote);
+  config->remotes.add(remote);
   config->write();
 
   FS::write(Index::pathFor(remote.name()), m_download->contents());

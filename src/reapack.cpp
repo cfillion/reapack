@@ -140,7 +140,7 @@ bool ReaPack::execActions(const int id, const int)
 
 void ReaPack::synchronizeAll()
 {
-  const vector<Remote> &remotes = m_config->remotes()->getEnabled();
+  const vector<Remote> &remotes = m_config->remotes.getEnabled();
 
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
@@ -171,7 +171,7 @@ void ReaPack::setRemoteEnabled(const bool enable, const Remote &remote)
     if(m_tx->isCancelled())
       return;
 
-    m_config->remotes()->add(copy);
+    m_config->remotes.add(copy);
     refreshManager();
   });
 }
@@ -186,7 +186,7 @@ void ReaPack::uninstall(const Remote &remote)
 
   m_tx->onFinish([=] {
     if(!m_tx->isCancelled())
-      m_config->remotes()->remove(remote);
+      m_config->remotes.remove(remote);
   });
 }
 
@@ -218,7 +218,7 @@ void ReaPack::manageRemotes()
 
 Remote ReaPack::remote(const string &name) const
 {
-  return m_config->remotes()->get(name);
+  return m_config->remotes.get(name);
 }
 
 void ReaPack::aboutSelf()
@@ -333,7 +333,7 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
 void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
   HWND parent, const bool stale)
 {
-  Download *dl = Index::fetch(remote, stale, *m_config->network());
+  Download *dl = Index::fetch(remote, stale, m_config->network);
 
   if(!dl)
     return;

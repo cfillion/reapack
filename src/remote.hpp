@@ -66,6 +66,9 @@ private:
 
 class RemoteList {
 public:
+  RemoteList() {}
+  RemoteList(const RemoteList &) = delete;
+
   void add(const Remote &);
   void remove(const Remote &remote) { remove(remote.name()); }
   void remove(const std::string &name);

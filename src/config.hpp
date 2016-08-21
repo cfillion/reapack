@@ -51,10 +51,11 @@ public:
   void restoreDefaultRemotes();
 
   bool isFirstRun() const { return m_isFirstRun; }
-  InstallOpts *install() { return &m_install; }
-  BrowserOpts *browser() { return &m_browser; }
-  NetworkOpts *network() { return &m_network; }
-  RemoteList *remotes() { return &m_remotes; }
+
+  InstallOpts install;
+  BrowserOpts browser;
+  NetworkOpts network;
+  RemoteList remotes;
 
 private:
   std::string getString(const auto_char *grp,
@@ -76,14 +77,9 @@ private:
   bool m_isFirstRun;
   unsigned int m_version;
 
-  InstallOpts m_install;
-  BrowserOpts m_browser;
-  NetworkOpts m_network;
-
   void readRemotes();
   void restoreSelfRemote();
   void writeRemotes();
-  RemoteList m_remotes;
   unsigned int m_remotesIniSize;
 };
 

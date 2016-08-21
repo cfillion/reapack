@@ -70,11 +70,13 @@ Transaction::~Transaction()
   delete m_registry;
 }
 
-void Transaction::synchronize(const Remote &remote, const bool forceAutoInstall)
+void Transaction::synchronize(const Remote &remote,
+  const boost::optional<bool> forceAutoInstall)
 {
-  InstallOpts opts = *m_config->install();
+  InstallOpts opts = m_config->install;
+
   if(forceAutoInstall)
-    opts.autoInstall = true;
+    opts.autoInstall = *forceAutoInstall;
 
   fetchIndex(remote, [=] {
     IndexPtr ri;
@@ -126,7 +128,7 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   if(m_remotes.count(name) > 1)
     return;
 
-  Download *dl = Index::fetch(remote, true, *m_config->network());
+  Download *dl = Index::fetch(remote, true, m_config->network);
 
   if(!dl) {
     // the index was last downloaded less than a few seconds ago

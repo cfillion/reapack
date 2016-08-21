@@ -92,10 +92,10 @@ void Manager::onCommand(const int id, int)
     uninstall();
     break;
   case ACTION_AUTOINSTALL:
-    toggle(m_autoInstall, m_config->install()->autoInstall);
+    toggle(m_autoInstall, m_config->install.autoInstall);
     break;
   case ACTION_BLEEDINGEDGE:
-    toggle(m_bleedingEdge, m_config->install()->bleedingEdge);
+    toggle(m_bleedingEdge, m_config->install.bleedingEdge);
     break;
   case ACTION_NETCONFIG:
     setupNetwork();
@@ -222,7 +222,7 @@ void Manager::refresh()
 
   m_list->clear();
 
-  for(const Remote &remote : *m_config->remotes()) {
+  for(const Remote &remote : m_config->remotes) {
     if(m_uninstall.count(remote))
       continue;
 
@@ -374,12 +374,12 @@ void Manager::options()
 
   UINT index = menu.addAction(
     AUTO_STR("&Install new packages when synchronizing"), ACTION_AUTOINSTALL);
-  if(m_autoInstall.value_or(m_config->install()->autoInstall))
+  if(m_autoInstall.value_or(m_config->install.autoInstall))
     menu.check(index);
 
   index = menu.addAction(
     AUTO_STR("Enable &pre-releases globally (bleeding edge)"), ACTION_BLEEDINGEDGE);
-  if(m_bleedingEdge.value_or(m_config->install()->bleedingEdge))
+  if(m_bleedingEdge.value_or(m_config->install.bleedingEdge))
     menu.check(index);
 
   menu.addAction(AUTO_STR("&Network settings..."), ACTION_NETCONFIG);
@@ -393,10 +393,7 @@ void Manager::options()
 
 void Manager::setupNetwork()
 {
-  const auto ret = Dialog::Show<NetworkConfig>(instance(), handle(),
-    m_config->network());
-
-  if(ret == IDOK)
+  if(IDOK == Dialog::Show<NetworkConfig>(instance(), handle(), &m_config->network))
     m_config->write();
 }
 
@@ -430,10 +427,10 @@ bool Manager::apply()
     return false;
 
   if(m_autoInstall)
-    m_config->install()->autoInstall = m_autoInstall.value();
+    m_config->install.autoInstall = m_autoInstall.value();
 
   if(m_bleedingEdge)
-    m_config->install()->bleedingEdge = m_bleedingEdge.value();
+    m_config->install.bleedingEdge = m_bleedingEdge.value();
 
   for(const auto &pair : m_enableOverrides) {
     const Remote &remote = pair.first;
@@ -481,7 +478,7 @@ Remote Manager::getRemote(const int index) const
   const ListView::Row &row = m_list->row(index);
   const string &remoteName = from_autostring(row[0]);
 
-  return m_config->remotes()->get(remoteName);
+  return m_config->remotes.get(remoteName);
 }
 
 NetworkConfig::NetworkConfig(NetworkOpts *opts)

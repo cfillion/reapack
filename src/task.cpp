@@ -67,7 +67,7 @@ void InstallTask::doStart()
     const Path &path = it->first;
     const Source *src = it->second;
 
-    const NetworkOpts &opts = *transaction()->config()->network();
+    const NetworkOpts &opts = transaction()->config()->network;
     Download *dl = new Download(src->fullName(), src->url(), opts);
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
 

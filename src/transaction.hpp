@@ -22,6 +22,7 @@
 #include "receipt.hpp"
 #include "registry.hpp"
 
+#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
 #include <memory>
@@ -50,7 +51,8 @@ public:
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
-  void synchronize(const Remote &, bool forceAutoInstall = false);
+  void synchronize(const Remote &,
+    boost::optional<bool> forceAutoInstall = boost::none);
   void install(const Version *);
   void setPinned(const Package *, bool pinned);
   void setPinned(const Registry::Entry &, bool pinned);
@@ -63,7 +65,7 @@ public:
   const Receipt &receipt() const { return m_receipt; }
 
   DownloadQueue *downloadQueue() { return &m_downloadQueue; }
-  Config *config() { return m_config; }
+  const Config *config() { return m_config; }
 
   bool saveFile(Download *, const Path &);
   void addError(const std::string &msg, const std::string &title);
@@ -88,7 +90,7 @@ private:
   void inhibit(const Remote &);
 
   bool m_isCancelled;
-  Config *m_config;
+  const Config *m_config;
   Registry *m_registry;
   Receipt m_receipt;
 

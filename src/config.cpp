@@ -62,9 +62,9 @@ Config::Config()
 
 void Config::resetOptions()
 {
-  m_install = {false, false};
-  m_browser = {true, ""};
-  m_network = {"", true};
+  install = {false, false};
+  browser = {true, ""};
+  network = {"", true};
 }
 
 void Config::restoreSelfRemote()
@@ -72,12 +72,12 @@ void Config::restoreSelfRemote()
   const string name = "ReaPack";
   const string url = "https://github.com/cfillion/reapack/raw/master/index.xml";
 
-  Remote remote = m_remotes.get(name);
+  Remote remote = remotes.get(name);
   remote.setName(name);
   remote.setUrl(url);
   remote.protect();
 
-  m_remotes.add(remote);
+  remotes.add(remote);
 }
 
 void Config::restoreDefaultRemotes()
@@ -94,14 +94,14 @@ void Config::restoreDefaultRemotes()
   };
 
   for(const auto &pair : repos) {
-    Remote remote = m_remotes.get(pair.first);
+    Remote remote = remotes.get(pair.first);
 
     if(!remote)
       remote.setEnabled(false); // disable by default
 
     remote.setName(pair.first);
     remote.setUrl(pair.second);
-    m_remotes.add(remote);
+    remotes.add(remote);
   }
 }
 
@@ -129,18 +129,18 @@ void Config::read(const Path &path)
 {
   m_path = make_autostring(path.join());
 
-  m_install.autoInstall = getUInt(INSTALL_GRP,
-    AUTOINSTALL_KEY, m_install.autoInstall) > 0;
-  m_install.bleedingEdge = getUInt(INSTALL_GRP,
-    PRERELEASES_KEY, m_install.bleedingEdge) > 0;
+  install.autoInstall = getUInt(INSTALL_GRP,
+    AUTOINSTALL_KEY, install.autoInstall) > 0;
+  install.bleedingEdge = getUInt(INSTALL_GRP,
+    PRERELEASES_KEY, install.bleedingEdge) > 0;
 
-  m_browser.showDescs = getUInt(BROWSER_GRP,
-    SHOWDESCS_KEY, m_browser.showDescs) > 0;
-  m_browser.state = getString(BROWSER_GRP, STATE_KEY, m_browser.state);
+  browser.showDescs = getUInt(BROWSER_GRP,
+    SHOWDESCS_KEY, browser.showDescs) > 0;
+  browser.state = getString(BROWSER_GRP, STATE_KEY, browser.state);
 
-  m_network.proxy = getString(NETWORK_GRP, PROXY_KEY, m_network.proxy);
-  m_network.verifyPeer = getUInt(NETWORK_GRP,
-    VERIFYPEER_KEY, m_network.verifyPeer) > 0;
+  network.proxy = getString(NETWORK_GRP, PROXY_KEY, network.proxy);
+  network.verifyPeer = getUInt(NETWORK_GRP,
+    VERIFYPEER_KEY, network.verifyPeer) > 0;
 
   readRemotes();
   restoreSelfRemote();
@@ -151,14 +151,14 @@ void Config::write()
 {
   setUInt(GENERAL_GRP, VERSION_KEY, m_version);
 
-  setUInt(INSTALL_GRP, AUTOINSTALL_KEY, m_install.autoInstall);
-  setUInt(INSTALL_GRP, PRERELEASES_KEY, m_install.bleedingEdge);
+  setUInt(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
+  setUInt(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
 
-  setUInt(BROWSER_GRP, SHOWDESCS_KEY, m_browser.showDescs);
-  setString(BROWSER_GRP, STATE_KEY, m_browser.state);
+  setUInt(BROWSER_GRP, SHOWDESCS_KEY, browser.showDescs);
+  setString(BROWSER_GRP, STATE_KEY, browser.state);
 
-  setString(NETWORK_GRP, PROXY_KEY, m_network.proxy);
-  setUInt(NETWORK_GRP, VERIFYPEER_KEY, m_network.verifyPeer);
+  setString(NETWORK_GRP, PROXY_KEY, network.proxy);
+  setUInt(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
 
   writeRemotes();
 }
@@ -170,18 +170,17 @@ void Config::readRemotes()
   for(unsigned int i = 0; i < m_remotesIniSize; i++) {
     const string data = getString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i));
 
-    m_remotes.add(Remote::fromString(data));
+    remotes.add(Remote::fromString(data));
   }
 }
 
 void Config::writeRemotes()
 {
   unsigned int i = 0;
-  m_remotesIniSize = max((unsigned int)m_remotes.size(), m_remotesIniSize);
+  m_remotesIniSize = max((unsigned int)remotes.size(), m_remotesIniSize);
 
-  for(auto it = m_remotes.begin(); it != m_remotes.end(); it++, i++) {
+  for(auto it = remotes.begin(); it != remotes.end(); it++, i++)
     setString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i), it->toString());
-  }
 
   cleanupArray(REMOTES_GRP, REMOTE_KEY, i, m_remotesIniSize);
 
