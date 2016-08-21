@@ -307,7 +307,7 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
   const int headerHeight = 0;
 #endif
 
-  if(point.y < headerHeight) {
+  if(point.y < headerHeight && x != -1) {
     if(m_customizable) // show menu only if header is customizable
       headerMenu(x, y);
     return true;
@@ -316,12 +316,13 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
   int index = itemUnderMouse();
 
 #ifdef ListView_GetItemPosition // unsuported by SWELL
-  if(x == 0xffff) {
-    // adjust context menu position when using Shift+F10 on Windows
-    index = max(0, currentIndex());
+  // adjust the context menu's position when using Shift+F10 on Windows
+  if(x == -1) {
+    index = currentIndex();
 
+    // find the location of the current item or of the first item
     POINT point{};
-    ListView_GetItemPosition(handle(), translate(index), &point);
+    ListView_GetItemPosition(handle(), translate(max(0, index)), &point);
     ClientToScreen(handle(), &point);
     x = point.x;
     y = point.y;
