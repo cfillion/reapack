@@ -261,6 +261,12 @@ void AboutIndexDelegate::init(About *dialog)
   dialog->list()->addColumn({AUTO_STR("Version"), 80});
   dialog->list()->addColumn({AUTO_STR("Author"), 90});
 
+  dialog->list()->setSortCallback(1, [&] (const int a, const int b) {
+    const Version *l = m_packagesData->at(a)->lastVersion();
+    const Version *r = m_packagesData->at(b)->lastVersion();
+    return l->compare(*r);
+  });
+
   initInstalledFiles();
 }
 
