@@ -101,6 +101,14 @@ int Menu::show(const int x, const int y, HWND parent) const
   return command;
 }
 
+int Menu::show(HWND control, HWND parent) const
+{
+  RECT rect;
+  GetWindowRect(control, &rect);
+
+  return show(rect.left, rect.bottom - 1, parent);
+}
+
 void Menu::disableAll()
 {
   for(UINT i = 0; i < m_size; i++)

@@ -204,10 +204,7 @@ void About::selectLink(const int ctrl)
     menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
   }
 
-  RECT rect;
-  GetWindowRect(getControl(ctrl), &rect);
-
-  const int choice = menu.show(rect.left, rect.bottom - 1, handle());
+  const int choice = menu.show(getControl(ctrl), handle());
 
   if(choice >> 8 == ctrl)
     openLink(links[choice & 0xff]);

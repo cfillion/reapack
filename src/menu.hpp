@@ -39,6 +39,7 @@ public:
   Menu addMenu(const auto_char *label);
 
   int show(int x, int y, HWND parent) const;
+  int show(HWND control, HWND parent) const;
 
   void enableAll();
   void enable(UINT);

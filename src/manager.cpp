@@ -367,9 +367,6 @@ void Manager::launchBrowser()
 
 void Manager::options()
 {
-  RECT rect;
-  GetWindowRect(getControl(IDC_OPTIONS), &rect);
-
   Menu menu;
 
   UINT index = menu.addAction(
@@ -388,7 +385,7 @@ void Manager::options()
 
   menu.addAction(AUTO_STR("&Restore default settings"), ACTION_RESETCONFIG);
 
-  menu.show(rect.left, rect.bottom - 1, handle());
+  menu.show(getControl(IDC_OPTIONS), handle());
 }
 
 void Manager::setupNetwork()

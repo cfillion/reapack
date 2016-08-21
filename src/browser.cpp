@@ -441,22 +441,16 @@ void Browser::displayButton()
   menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
   menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
 
-  RECT rect;
-  GetWindowRect(m_displayBtn, &rect);
-
-  menu.show(rect.left, rect.bottom - 1, handle());
+  menu.show(m_displayBtn, handle());
 }
 
 void Browser::actionsButton()
 {
-  RECT rect;
-  GetWindowRect(m_actionsBtn, &rect);
-
   m_currentIndex = m_list->currentIndex();
 
   Menu menu;
   fillMenu(menu);
-  menu.show(rect.left, rect.bottom - 1, handle());
+  menu.show(m_actionsBtn, handle());
 }
 
 bool Browser::isFiltered(Package::Type type) const
