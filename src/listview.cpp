@@ -321,11 +321,15 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
     index = currentIndex();
 
     // find the location of the current item or of the first item
-    POINT point{};
-    ListView_GetItemPosition(handle(), translate(max(0, index)), &point);
-    ClientToScreen(handle(), &point);
-    x = point.x;
-    y = point.y;
+    POINT itemPos{};
+    ListView_GetItemPosition(handle(), translate(max(0, index)), &itemPos);
+    ClientToScreen(handle(), &itemPos);
+
+    RECT controlRect;
+    GetWindowRect(handle(), &controlRect);
+
+    x = max(controlRect.left, min(itemPos.x, controlRect.right));
+    y = max(controlRect.top, min(itemPos.y, controlRect.bottom));
   }
 #endif
 
