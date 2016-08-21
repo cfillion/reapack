@@ -22,15 +22,15 @@ Download these files into the `vendor` directory:
 The `vendor` directory structure should be as follow:
 
 ```
-reapack> tree vendor
+reapack> tree vendor
 vendor
 ├── WDL/
-│   └── WDL/
-│       ├── MersenneTwister.h
-│       ├── adpcm_decode.h
-│       ├── adpcm_encode.h
-│       ├── assocarray.h
-│       └── ...
+│   └── WDL/
+│       ├── MersenneTwister.h
+│       ├── adpcm_decode.h
+│       ├── adpcm_encode.h
+│       ├── assocarray.h
+│       └── ...
 ├── catch.hpp
 ├── reaper_plugin.h
 └── reaper_plugin_functions.h
@@ -42,7 +42,7 @@ vendor
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Run `rake` from this directory
-4. Copy or link `x64/bin/reaper_reapack64.dylib` or `x64/bin/reaper_reapack32.dylib`
+4. Copy or link `x64/bin/reaper_reapack64.dylib` or `x86/bin/reaper_reapack32.dylib`
    to REAPER's extension directory
 
 ### Windows
