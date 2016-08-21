@@ -124,6 +124,10 @@ void About::setDelegate(const DelegatePtr &delegate)
   m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
   m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
+
+  // This is required on Windows to get the first tab to be fully draw,
+  // but I have no idea why...
+  InvalidateRect(handle(), nullptr, true);
 }
 
 void About::setTitle(const string &what)
