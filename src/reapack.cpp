@@ -263,18 +263,18 @@ void ReaPack::about(const Package *pkg)
   m_about->show();
 }
 
-void ReaPack::browsePackages()
+Browser *ReaPack::browsePackages()
 {
   if(m_browser) {
     m_browser->setFocus();
-    return;
+    return m_browser;
   }
   else if(m_tx) {
     ShowMessageBox(
       "This feature cannot be used while packages are being installed. "
       "Try again later.", "Browse packages", MB_OK
     );
-    return;
+    return nullptr;
   }
 
   m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, this);
@@ -282,6 +282,8 @@ void ReaPack::browsePackages()
     Dialog::Destroy(m_browser);
     m_browser = nullptr;
   });
+
+  return m_browser;
 }
 
 void ReaPack::fetchIndex(const Remote &remote,

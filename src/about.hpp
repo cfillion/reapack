@@ -100,6 +100,8 @@ protected:
 
 private:
   void initInstalledFiles();
+  const Package *currentPackage() const;
+  void findInBrowser();
   void aboutPackage();
   void install();
 

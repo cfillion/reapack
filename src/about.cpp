@@ -17,6 +17,7 @@
 
 #include "about.hpp"
 
+#include "browser.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
@@ -36,7 +37,7 @@
 
 using namespace std;
 
-enum { ACTION_ABOUT_PKG = 300, ACTION_COPY_URL };
+enum { ACTION_ABOUT_PKG = 300, ACTION_FIND_IN_BROWSER, ACTION_COPY_URL };
 
 About::About() : Dialog(IDD_ABOUT_DIALOG)
 {
@@ -355,6 +356,7 @@ bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
+  menu.addAction(AUTO_STR("Find in the &browser"), ACTION_FIND_IN_BROWSER);
   menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG);
 
   return true;
@@ -363,6 +365,9 @@ bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
 void AboutIndexDelegate::onCommand(const int id)
 {
   switch(id) {
+  case ACTION_FIND_IN_BROWSER:
+    findInBrowser();
+    break;
   case ACTION_ABOUT_PKG:
     aboutPackage();
     break;
@@ -372,15 +377,41 @@ void AboutIndexDelegate::onCommand(const int id)
   }
 }
 
-void AboutIndexDelegate::aboutPackage()
+const Package *AboutIndexDelegate::currentPackage() const
 {
   const int index = m_dialog->list()->currentIndex();
 
   if(index < 0)
+    return nullptr;
+  else
+    return m_packagesData->at(index);
+}
+
+void AboutIndexDelegate::findInBrowser()
+{
+  const Package *pkg = currentPackage();
+  if(!pkg)
     return;
 
-  const Package *pkg = m_packagesData->at(index);
-  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, m_reapack));
+  Browser *browser = m_reapack->browsePackages();
+  if(!browser)
+    return;
+
+  string filter = "\"";
+  filter += pkg->displayName(m_reapack->config()->browser.showDescs);
+  filter += "\" \"";
+  filter += m_index->name();
+  filter += '"';
+
+  browser->setFilter(filter);
+}
+
+void AboutIndexDelegate::aboutPackage()
+{
+  const Package *pkg = currentPackage();
+
+  if(pkg)
+    m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, m_reapack));
 }
 
 void AboutIndexDelegate::install()

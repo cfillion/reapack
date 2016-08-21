@@ -167,9 +167,7 @@ void Browser::onCommand(const int id, const int event)
     m_checkFilter = true;
     break;
   case IDC_CLEAR:
-    SetWindowText(m_filterHandle, AUTO_STR(""));
-    checkFilter();
-    SetFocus(m_filterHandle);
+    setFilter({});
     break;
   case IDC_SELECT:
     m_list->selectAll();
@@ -538,6 +536,13 @@ void Browser::refresh(const bool stale)
       show();
     }
   }, handle(), stale);
+}
+
+void Browser::setFilter(const string &newFilter)
+{
+  SetWindowText(m_filterHandle, make_autostring(newFilter).c_str());
+  checkFilter();
+  SetFocus(m_filterHandle);
 }
 
 void Browser::populate()

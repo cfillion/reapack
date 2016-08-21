@@ -74,7 +74,7 @@ public:
   void aboutSelf();
   void about(const Remote &, HWND parent);
   void about(const Package *);
-  void browsePackages();
+  Browser *browsePackages();
   void refreshManager();
   void refreshBrowser();
 

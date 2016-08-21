@@ -44,6 +44,7 @@ class Browser : public Dialog {
 public:
   Browser(ReaPack *);
   void refresh(bool stale = false);
+  void setFilter(const std::string &);
 
 protected:
   void onInit() override;
