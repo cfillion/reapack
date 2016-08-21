@@ -38,7 +38,7 @@ using namespace std;
 
 enum { ACTION_ABOUT_PKG = 300, ACTION_COPY_URL };
 
-About::About() : Dialog(IDD_ABOUT_DIALOG), m_currentIndex(-255)
+About::About() : Dialog(IDD_ABOUT_DIALOG)
 {
   RichEdit::Init();
 }
@@ -81,6 +81,7 @@ void About::onCommand(const int id, int)
 void About::setDelegate(const DelegatePtr &model)
 {
   clear();
+
   m_delegate = model;
   m_delegate->init(this);
   m_menu->sort();
@@ -103,6 +104,8 @@ void About::clear()
 
   m_delegate = nullptr;
   m_links.clear();
+
+  m_currentIndex = -255;
 
   const int controls[] = {
     IDC_ABOUT,
