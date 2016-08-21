@@ -30,12 +30,14 @@ public:
   struct Tab { auto_string text; Page page; };
   typedef std::vector<Tab> Tabs;
 
-  TabBar(const Tabs &tabs, HWND handle);
+  TabBar(HWND handle, const Tabs &tabs = {});
   int addTab(const Tab &);
   int currentIndex() const;
   void setCurrentIndex(int);
   void removeTab(int);
   void setFocus();
+  int count() const;
+  void clear();
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
@@ -43,7 +45,6 @@ protected:
 private:
   void switchPage();
 
-  int m_size;
   int m_lastPage;
   std::vector<Page> m_pages;
 };

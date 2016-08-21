@@ -52,6 +52,11 @@ bool RichEdit::setRichText(const string &rtf)
 
   NSTextView *textView = (NSTextView *)handle();
 
+  // Manually clear the view so that invalid content will always result
+  // in this function to return false. Without this, the old text would be
+  // retained, length would stay the same and we would return true.
+  [textView setString: @""];
+
   [textView
     replaceCharactersInRange: NSMakeRange(0, [[textView string] length])
     withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
@@ -59,10 +64,10 @@ bool RichEdit::setRichText(const string &rtf)
 
   // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
   const BOOL isEditable = textView.isEditable;
-  [textView setEditable:YES];
-  [textView setEnabledTextCheckingTypes:NSTextCheckingTypeLink];
-  [textView checkTextInDocument:nil];
-  [textView setEditable:isEditable];
+  [textView setEditable: YES];
+  [textView setEnabledTextCheckingTypes: NSTextCheckingTypeLink];
+  [textView checkTextInDocument: nil];
+  [textView setEditable: isEditable];
 
   return [[textView string] length];
 }

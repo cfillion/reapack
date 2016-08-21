@@ -25,10 +25,12 @@
 #include "ostream.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
+#include "remote.hpp"
 #include "report.hpp"
 #include "resource.hpp"
 #include "richedit.hpp"
 #include "tabbar.hpp"
+#include "transaction.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
 
@@ -36,55 +38,117 @@ using namespace std;
 
 enum { ACTION_ABOUT_PKG = 300, ACTION_COPY_URL };
 
-AboutDialog::AboutDialog(const Metadata *metadata)
-  : Dialog(IDD_ABOUT_DIALOG), m_metadata(metadata), m_currentIndex(-255)
+About::About() : Dialog(IDD_ABOUT_DIALOG)
 {
   RichEdit::Init();
 }
 
-void AboutDialog::onInit()
+void About::onInit()
 {
   Dialog::onInit();
 
-  auto_char title[255] = {};
-  const auto_string &name = make_autostring(what());
-  auto_snprintf(title, auto_size(title), AUTO_STR("About %s"), name.c_str());
-  SetWindowText(handle(), title);
+  m_tabs = createControl<TabBar>(IDC_TABS);
+  m_desc = createControl<RichEdit>(IDC_ABOUT);
 
-  m_tabs = createControl<TabBar>(IDC_TABS, TabBar::Tabs{});
+  m_menu = createControl<ListView>(IDC_MENU);
+  m_menu->onSelect(bind(&About::updateList, this));
 
-  string aboutText = m_metadata->about();
-  if(name == AUTO_STR("ReaPack")) {
-    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
-    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
-  }
-
-  RichEdit *desc = createControl<RichEdit>(IDC_ABOUT);
-  if(desc->setRichText(aboutText))
-    tabs()->addTab({AUTO_STR("About"), {desc->handle()}});
-
-  m_menu = createMenu();
-  m_menu->sortByColumn(0);
-  m_menu->onSelect(bind(&AboutDialog::callUpdateList, this));
-
-  m_list = createList();
-  m_list->sortByColumn(0);
+  m_list = createControl<ListView>(IDC_LIST);
+  m_list->onContextMenu([=] (Menu &m, int i) { return m_delegate->fillContextMenu(m, i); });
+  m_list->onActivate([=] { m_delegate->itemActivated(); });
 
   m_report = getControl(IDC_REPORT);
+}
 
-  populate();
-  populateLinks();
+void About::onCommand(const int id, int)
+{
+  switch(id) {
+  case IDOK:
+  case IDCANCEL:
+    close();
+    break;
+  default:
+    if(m_links.count(id))
+      selectLink(id);
+    else if(m_links.count(id >> 8))
+      openLink(m_links[id >> 8][id & 0xff]);
+    else if(m_delegate)
+      m_delegate->onCommand(id);
+    break;
+  }
+}
+
+void About::setDelegate(const DelegatePtr &delegate)
+{
+#ifdef _WIN32
+  // preventing fast blinking on windows
+  SendMessage(handle(), WM_SETREDRAW, false, 0);
+#endif
+
+  m_tabs->clear();
+  m_menu->reset();
+  m_menu->sortByColumn(0);
+  m_list->reset();
+  m_list->sortByColumn(0);
+
+  m_delegate = nullptr;
+  m_links.clear();
+
+  const int controls[] = {
+    IDC_ABOUT,
+    IDC_MENU,
+    IDC_LIST,
+    IDC_REPORT,
+    IDC_WEBSITE,
+    IDC_SCREENSHOT,
+    IDC_DONATE,
+    IDC_INSTALL,
+  };
+
+  for(const int control : controls)
+    hide(getControl(control));
+
+  m_delegate = delegate;
+  m_delegate->init(this);
   m_menu->sort();
-  callUpdateList();
+
+  m_currentIndex = -255;
+  updateList();
 
 #ifdef LVSCW_AUTOSIZE_USEHEADER
   m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
   m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
 #endif
+
+#ifdef _WIN32
+  SendMessage(handle(), WM_SETREDRAW, true, 0);
+
+  // This is required on Windows to get the first tab to be fully draw,
+  // but I have no idea why...
+  InvalidateRect(handle(), nullptr, true);
+#endif
 }
 
-void AboutDialog::populateLinks()
+void About::setTitle(const string &what)
 {
+  auto_char title[255] = {};
+  auto_snprintf(title, auto_size(title),
+    AUTO_STR("About %s"), make_autostring(what).c_str());
+  SetWindowText(handle(), title);
+}
+
+void About::setMetadata(const Metadata *metadata, const bool substitution)
+{
+  string aboutText = metadata->about();
+
+  if(substitution) {
+    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
+    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
+  }
+
+  if(m_desc->setRichText(aboutText))
+    m_tabs->addTab({AUTO_STR("About"), {m_desc->handle()}});
+
   const auto &getLinkControl = [](const Metadata::LinkType type) {
     switch(type) {
     case Metadata::WebsiteLink:
@@ -105,56 +169,25 @@ void AboutDialog::populateLinks()
 
   const int shift = (rect.right - rect.left) + 4;
 
-  for(const auto &pair : m_metadata->links()) {
+  for(const auto &pair : metadata->links()) {
     const int control = getLinkControl(pair.first);
+
     if(!m_links.count(control)) {
       HWND handle = getControl(control);
+
       SetWindowPos(handle, nullptr, rect.left, rect.top, 0, 0,
         SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 
       show(handle);
       rect.left += shift;
-
       m_links[control] = {};
     }
+
     m_links[control].push_back(&pair.second);
   }
 }
 
-void AboutDialog::onCommand(const int id, int)
-{
-  switch(id) {
-  case IDOK:
-  case IDCANCEL:
-    close();
-    break;
-  default:
-    if(m_links.count(id))
-      selectLink(id);
-    else if(m_links.count(id >> 8))
-      openLink(m_links[id >> 8][id & 0xff]);
-    break;
-  }
-}
-
-void AboutDialog::callUpdateList()
-{
-  const int index = m_menu->currentIndex();
-
-  // do nothing when the selection is cleared, except for the initial execution
-  if((index < 0 && m_currentIndex >= -1) || index == m_currentIndex)
-    return;
-
-  InhibitControl lock(m_list);
-  m_list->clear();
-
-  updateList(index);
-  m_currentIndex = index;
-
-  m_list->sort();
-}
-
-void AboutDialog::selectLink(const int ctrl)
+void About::selectLink(const int ctrl)
 {
   const auto &links = m_links[ctrl];
   const int count = (int)links.size();
@@ -178,99 +211,76 @@ void AboutDialog::selectLink(const int ctrl)
   menu.show(rect.left, rect.bottom - 1, handle());
 }
 
-void AboutDialog::openLink(const Link *link)
+void About::openLink(const Link *link)
 {
   const auto_string &url = make_autostring(link->url);
   ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
-AboutRemote::AboutRemote(const IndexPtr &index)
-  : AboutDialog(index->metadata()), m_index(index)
+void About::updateList()
 {
+  const int index = m_menu->currentIndex();
+
+  // do nothing when the selection is cleared, except for the initial execution
+  if((index < 0 && m_currentIndex != -255) || index == m_currentIndex)
+    return;
+
+  InhibitControl lock(m_list);
+  m_list->clear();
+
+  m_delegate->updateList(index);
+  m_currentIndex = index;
+
+  m_list->sort();
 }
 
-const string &AboutRemote::what() const
+void AboutIndexDelegate::init(About *dialog)
 {
-  return m_index->name();
-}
+  m_dialog = dialog;
 
-ListView *AboutRemote::createMenu()
-{
-  return createControl<ListView>(IDC_MENU, ListView::Columns{
-    {AUTO_STR("Category"), 142}
-  });
-}
+  dialog->setTitle(m_index->name());
+  dialog->setMetadata(m_index->metadata(), m_index->name() == "ReaPack");
 
-ListView *AboutRemote::createList()
-{
-  return createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Package"), 382},
-    {AUTO_STR("Version"), 80},
-    {AUTO_STR("Author"), 90},
-  });
-}
+  // restore report size after being possibly modified by AboutPackageDelegate
+  RECT rect;
+  GetWindowRect(dialog->desc()->handle(), &rect);
+  ScreenToClient(dialog->handle(), (LPPOINT)&rect);
+  ScreenToClient(dialog->handle(), ((LPPOINT)&rect)+1);
+  SetWindowPos(dialog->report(), nullptr, rect.left, rect.top,
+    rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
 
-void AboutRemote::onCommand(const int id, const int event)
-{
-  switch(id) {
-  case IDC_INSTALL:
-    close(InstallResult);
-    break;
-  case ACTION_ABOUT_PKG:
-    aboutPackage();
-    break;
-  default:
-    AboutDialog::onCommand(id, event);
-    break;
-  }
-}
-
-void AboutRemote::populate()
-{
-  HWND installBtn = getControl(IDC_INSTALL);
+  HWND installBtn = dialog->getControl(IDC_INSTALL);
   auto_char btnLabel[32] = {};
   auto_snprintf(btnLabel, auto_size(btnLabel),
-    AUTO_STR("Install/update %s"), make_autostring(what()).c_str());
+    AUTO_STR("Install/update %s"), make_autostring(m_index->name()).c_str());
   SetWindowText(installBtn, btnLabel);
-  show(installBtn);
+  dialog->show(installBtn);
 
-  tabs()->addTab({AUTO_STR("Packages"), {menu()->handle(), list()->handle()}});
-  tabs()->addTab({AUTO_STR("Installed Files"), {report()}});
+  dialog->tabs()->addTab({AUTO_STR("Packages"),
+    {dialog->menu()->handle(), dialog->list()->handle()}});
+  dialog->tabs()->addTab({AUTO_STR("Installed Files"), {dialog->report()}});
 
-  list()->onActivate(bind(&AboutRemote::aboutPackage, this));
+  dialog->menu()->addColumn({AUTO_STR("Category"), 142});
 
-  menu()->addRow({AUTO_STR("<All Packages>")});
+  dialog->menu()->addRow({AUTO_STR("<All Packages>")});
 
   for(const Category *cat : m_index->categories())
-    menu()->addRow({make_autostring(cat->name())});
+    dialog->menu()->addRow({make_autostring(cat->name())});
 
-  updateInstalledFiles();
+  dialog->list()->addColumn({AUTO_STR("Package"), 382});
+  dialog->list()->addColumn({AUTO_STR("Version"), 80});
+  dialog->list()->addColumn({AUTO_STR("Author"), 90});
 
-  list()->onContextMenu(bind(&AboutRemote::fillContextMenu,
-    this, placeholders::_1, placeholders::_2));
+  dialog->list()->setSortCallback(1, [&] (const int a, const int b) {
+    const Version *l = m_packagesData->at(a)->lastVersion();
+    const Version *r = m_packagesData->at(b)->lastVersion();
+    return l->compare(*r);
+  });
+
+  initInstalledFiles();
 }
 
-void AboutRemote::updateList(const int index)
-{
-  // -1: all packages, >0 selected category
-  const int catIndex = max(-1, index - 1);
-
-  if(catIndex < 0)
-    m_packagesData = &m_index->packages();
-  else
-    m_packagesData = &m_index->category(catIndex)->packages();
-
-  for(const Package *pkg : *m_packagesData) {
-    const Version *lastVer = pkg->lastVersion();
-    const auto_string &name = make_autostring(pkg->displayName());
-    const auto_string &version = make_autostring(lastVer->name());
-    const auto_string &author = make_autostring(lastVer->displayAuthor());
-
-    list()->addRow({name, version, author});
-  }
-}
-
-void AboutRemote::updateInstalledFiles()
+void AboutIndexDelegate::initInstalledFiles()
 {
   set<Registry::File> allFiles;
 
@@ -289,12 +299,12 @@ void AboutRemote::updateInstalledFiles()
       AUTO_STR("Retry later when all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
-    SetWindowText(report(), msg);
+    SetWindowText(m_dialog->report(), msg);
     return;
   }
 
   if(allFiles.empty()) {
-    SetWindowText(report(),
+    SetWindowText(m_dialog->report(),
       AUTO_STR(
       "This repository does not own any file on your computer at this time.\r\n")
 
@@ -311,13 +321,33 @@ void AboutRemote::updateInstalledFiles()
       stream << "\r\n";
     }
 
-    SetWindowText(report(), make_autostring(stream.str()).c_str());
+    SetWindowText(m_dialog->report(), make_autostring(stream.str()).c_str());
   }
 }
 
-bool AboutRemote::fillContextMenu(Menu &menu, const int) const
+void AboutIndexDelegate::updateList(const int index)
 {
-  if(list()->currentIndex() < 0)
+  // -1: all packages, >0 selected category
+  const int catIndex = index - 1;
+
+  if(catIndex < 0)
+    m_packagesData = &m_index->packages();
+  else
+    m_packagesData = &m_index->category(catIndex)->packages();
+
+  for(const Package *pkg : *m_packagesData) {
+    const Version *lastVer = pkg->lastVersion();
+    const auto_string &name = make_autostring(pkg->displayName());
+    const auto_string &version = make_autostring(lastVer->name());
+    const auto_string &author = make_autostring(lastVer->displayAuthor());
+
+    m_dialog->list()->addRow({name, version, author});
+  }
+}
+
+bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
+{
+  if(index < 0)
     return false;
 
   menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG);
@@ -325,83 +355,88 @@ bool AboutRemote::fillContextMenu(Menu &menu, const int) const
   return true;
 }
 
-void AboutRemote::aboutPackage()
+void AboutIndexDelegate::onCommand(const int id)
 {
-  const int index = list()->currentIndex();
+  switch(id) {
+  case ACTION_ABOUT_PKG:
+    aboutPackage();
+    break;
+  case IDC_INSTALL:
+    install();
+    m_dialog->close();
+    break;
+  }
+}
+
+void AboutIndexDelegate::aboutPackage()
+{
+  const int index = m_dialog->list()->currentIndex();
 
   if(index < 0)
     return;
 
   const Package *pkg = m_packagesData->at(index);
-  Dialog::Show<AboutPackage>(instance(), handle(), pkg);
+  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg));
 }
 
-AboutPackage::AboutPackage(const Package *pkg)
-  : AboutDialog(pkg->metadata()), m_package(pkg)
+void AboutIndexDelegate::install()
+{
+  const Remote &remote = m_reapack->remote(m_index->name());
+
+  if(!remote)
+    return;
+
+  Transaction *tx = m_reapack->setupTransaction();
+
+  if(!tx)
+    return;
+
+  m_reapack->enable(remote);
+
+  tx->synchronize(remote, true);
+  tx->runTasks();
+}
+
+AboutPackageDelegate::AboutPackageDelegate(const Package *pkg)
+  : m_package(pkg), m_index(pkg->category()->index()->shared_from_this())
 {
 }
 
-void AboutPackage::onCommand(const int id, const int event)
+void AboutPackageDelegate::init(About *dialog)
 {
-  switch(id) {
-  case ACTION_COPY_URL:
-    copySourceUrl();
-    break;
-  default:
-    AboutDialog::onCommand(id, event);
-    break;
-  }
-}
+  m_dialog = dialog;
 
-const string &AboutPackage::what() const
-{
-  return m_package->displayName();
-}
+  dialog->setTitle(m_package->displayName());
+  dialog->setMetadata(m_package->metadata());
 
-ListView *AboutPackage::createMenu()
-{
-  return createControl<ListView>(IDC_MENU, ListView::Columns{
-    {AUTO_STR("Version"), 142}
-  });
-}
-
-ListView *AboutPackage::createList()
-{
-  return createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("File"), 502},
-    {AUTO_STR("Main"), 50},
-  });
-}
-
-void AboutPackage::populate()
-{
-  tabs()->addTab({AUTO_STR("History"), {menu()->handle(),
-    report()}});
-  tabs()->addTab({AUTO_STR("Contents"), {menu()->handle(),
-    list()->handle()}});
+  dialog->tabs()->addTab({AUTO_STR("History"), {dialog->menu()->handle(), dialog->report()}});
+  dialog->tabs()->addTab({AUTO_STR("Contents"), {dialog->menu()->handle(), dialog->list()->handle()}});
 
   RECT rect;
-  GetWindowRect(list()->handle(), &rect);
-  ScreenToClient(handle(), (LPPOINT)&rect);
-  ScreenToClient(handle(), ((LPPOINT)&rect)+1);
+  GetWindowRect(dialog->list()->handle(), &rect);
+  ScreenToClient(dialog->handle(), (LPPOINT)&rect);
+  ScreenToClient(dialog->handle(), ((LPPOINT)&rect)+1);
 
-  SetWindowPos(report(), nullptr, rect.left, rect.top,
+  SetWindowPos(dialog->report(), nullptr, rect.left, rect.top,
     rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
 
-  for(const Version *ver : m_package->versions())
-    menu()->addRow({make_autostring(ver->name())});
+  dialog->menu()->addColumn({AUTO_STR("Version"), 142});
 
-  menu()->setSortCallback(0, [&] (const int a, const int b) {
+  dialog->list()->addColumn({AUTO_STR("File"), 502});
+  dialog->list()->addColumn({AUTO_STR("Main"), 50});
+
+  for(const Version *ver : m_package->versions())
+    dialog->menu()->addRow({make_autostring(ver->name())});
+
+  dialog->menu()->setSortCallback(0, [&] (const int a, const int b) {
     return m_package->version(a)->compare(*m_package->version(b));
   });
-  menu()->sortByColumn(0, ListView::DescendingOrder);
-  menu()->setSelected(menu()->rowCount() - 1, true);
 
-  list()->onContextMenu(bind(&AboutPackage::fillContextMenu,
-    this, placeholders::_1, placeholders::_2));
+  dialog->menu()->sortByColumn(0, ListView::DescendingOrder);
+  dialog->menu()->setSelected(dialog->menu()->rowCount() - 1, true);
 }
 
-void AboutPackage::updateList(const int index)
+void AboutPackageDelegate::updateList(const int index)
 {
   if(index < 0)
     return;
@@ -409,7 +444,7 @@ void AboutPackage::updateList(const int index)
   const Version *ver = m_package->version(index);
   OutputStream stream;
   stream << *ver;
-  SetWindowText(report(), make_autostring(stream.str()).c_str());
+  SetWindowText(m_dialog->report(), make_autostring(stream.str()).c_str());
 
   vector<const Source *> uniqueSources;
 
@@ -418,7 +453,7 @@ void AboutPackage::updateList(const int index)
     const Path &path = it->first;
     const Source *src = it->second;
 
-    list()->addRow({make_autostring(path.join()),
+    m_dialog->list()->addRow({make_autostring(path.join()),
       make_autostring(src->isMain() ? "Yes" : "No")});
 
     uniqueSources.push_back(src);
@@ -430,9 +465,9 @@ void AboutPackage::updateList(const int index)
   swap(m_sources, uniqueSources);
 }
 
-bool AboutPackage::fillContextMenu(Menu &menu, const int) const
+bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
 {
-  if(list()->currentIndex() < 0)
+  if(index < 0)
     return false;
 
   menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
@@ -440,12 +475,21 @@ bool AboutPackage::fillContextMenu(Menu &menu, const int) const
   return true;
 }
 
-void AboutPackage::copySourceUrl()
+void AboutPackageDelegate::onCommand(const int id)
 {
-  const int index = list()->currentIndex();
+  switch(id) {
+  case ACTION_COPY_URL:
+    copySourceUrl();
+    break;
+  }
+}
+
+void AboutPackageDelegate::copySourceUrl()
+{
+  const int index = m_dialog->list()->currentIndex();
 
   if(index < 0)
     return;
 
-  setClipboard(m_sources[index]->url());
+  m_dialog->setClipboard(m_sources[index]->url());
 }

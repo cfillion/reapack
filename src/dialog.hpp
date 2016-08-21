@@ -133,7 +133,7 @@ protected:
 
     HWND handle = getControl(id);
 
-    T *ctrl = new T(args..., handle);
+    T *ctrl = new T(handle, args...);
     m_controls[id] = ctrl;
 
     return ctrl;

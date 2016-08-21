@@ -21,8 +21,8 @@
 #include <commctrl.h>
 #endif
 
-TabBar::TabBar(const Tabs &tabs, HWND handle)
-  : Control(handle), m_size(0), m_lastPage(-1)
+TabBar::TabBar(HWND handle, const Tabs &tabs)
+  : Control(handle), m_lastPage(-1)
 {
   for(const Tab &tab : tabs)
     addTab(tab);
@@ -30,7 +30,7 @@ TabBar::TabBar(const Tabs &tabs, HWND handle)
 
 int TabBar::addTab(const Tab &tab)
 {
-  int index = m_size++;
+  const int index = count();
 
   m_pages.push_back(tab.page);
 
@@ -68,10 +68,27 @@ void TabBar::removeTab(const int index)
 
 void TabBar::setFocus()
 {
-  if(m_lastPage < 0 || (size_t)m_lastPage >= m_pages.size())
-    return;
+  const int index = currentIndex();
 
-  SetFocus(m_pages[m_lastPage].front());
+  if(index > -1)
+    SetFocus(m_pages[index].front());
+}
+
+int TabBar::count() const
+{
+  return TabCtrl_GetItemCount(handle());
+}
+
+void TabBar::clear()
+{
+  m_pages.clear();
+
+#ifdef TabCtrl_DeleteAllItems
+  TabCtrl_DeleteAllItems(handle());
+#else
+  for(int i = count(); i > 0; i--)
+    TabCtrl_DeleteItem(handle(), i - 1);
+#endif
 }
 
 void TabBar::onNotify(LPNMHDR info, LPARAM)
