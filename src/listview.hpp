@@ -54,7 +54,7 @@ public:
   typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
   typedef std::function<int (int, int)> SortCallback;
 
-  ListView(const Columns &, HWND handle);
+  ListView(HWND handle, const Columns & = {});
 
   int addRow(const Row &);
   const Row &row(int index) const { return m_rows[index]; }
@@ -63,6 +63,7 @@ public:
   int rowCount() const { return (int)m_rows.size(); }
   bool empty() const { return rowCount() < 1; }
   void clear();
+  void reset();
   int currentIndex() const;
   int itemUnderMouse() const;
 

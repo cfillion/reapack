@@ -73,7 +73,7 @@ std::string ReaPack::resourcePath()
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(), importAction(), configAction(),
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
-    m_instance(instance)
+    m_about(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(resourcePath());
@@ -226,6 +226,19 @@ void ReaPack::aboutSelf()
   about(remote("ReaPack"), m_mainWindow);
 }
 
+void ReaPack::setupAbout()
+{
+  if(m_about)
+    return;
+
+  m_about = Dialog::Create<About>(m_instance, m_mainWindow);
+
+  m_about->setCloseHandler([=] (INT_PTR) {
+    Dialog::Destroy(m_about);
+    m_about = nullptr;
+  });
+}
+
 void ReaPack::about(const Remote &remote, HWND parent)
 {
   if(!remote)
@@ -236,25 +249,18 @@ void ReaPack::about(const Remote &remote, HWND parent)
     if(!index)
       return;
 
-    const auto ret = Dialog::Show<AboutRemote>(m_instance, parent, index);
+    setupAbout();
+    m_about->setDelegate(std::make_shared<AboutIndexDelegate>(index, this));
+    m_about->show();
 
-    if(ret == AboutRemote::InstallResult) {
-      Transaction *tx = setupTransaction();
-
-      if(!tx)
-        return;
-
-      enable(remote);
-
-      tx->synchronize(remote, true);
-      tx->runTasks();
-    }
   }, parent);
 }
 
-void ReaPack::about(const Package *pkg, HWND parent)
+void ReaPack::about(const Package *pkg)
 {
-  Dialog::Show<AboutPackage>(m_instance, parent, pkg);
+  setupAbout();
+  m_about->setDelegate(std::make_shared<AboutPackageDelegate>(pkg));
+  m_about->show();
 }
 
 void ReaPack::browsePackages()

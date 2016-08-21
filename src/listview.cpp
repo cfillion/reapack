@@ -27,7 +27,7 @@
 
 using namespace std;
 
-ListView::ListView(const Columns &columns, HWND handle)
+ListView::ListView(HWND handle, const Columns &columns)
   : Control(handle), m_customizable(false), m_sort(), m_defaultSort()
 {
   for(const Column &col : columns)
@@ -212,6 +212,21 @@ void ListView::clear()
   ListView_DeleteAllItems(handle());
 
   m_rows.clear();
+}
+
+void ListView::reset()
+{
+  clear();
+
+  for(int i = columnCount(); i > 0; i--)
+    ListView_DeleteColumn(handle(), i - 1);
+
+  m_cols.clear();
+
+  m_customizable = false;
+  m_sort = boost::none;
+  m_defaultSort = boost::none;
+  m_sortFuncs.clear();
 }
 
 void ListView::setSelected(const int index, const bool select)

@@ -24,11 +24,13 @@
 #include <memory>
 #include <vector>
 
+class AboutDelegate;
 class Index;
 class ListView;
 class Menu;
 class Metadata;
 class Package;
+class ReaPack;
 class RichEdit;
 class Source;
 class TabBar;
@@ -36,85 +38,97 @@ struct Link;
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
-class AboutDialog : public Dialog {
+class About : public Dialog {
 public:
-  AboutDialog(const Metadata *);
+  typedef std::shared_ptr<AboutDelegate> DelegatePtr;
+
+  About();
+  void setDelegate(const DelegatePtr &);
+
+  void setTitle(const std::string &);
+  void setMetadata(const Metadata *, bool substitution = false);
+
+  TabBar *tabs() const { return m_tabs; }
+  RichEdit *desc() const { return m_desc; }
+  ListView *menu() const { return m_menu; }
+  ListView *list() const { return m_list; }
+  HWND report() const { return m_report; }
 
 protected:
   void onInit() override;
   void onCommand(int, int) override;
 
-  virtual const std::string &what() const = 0;
-  virtual ListView *createMenu() = 0;
-  virtual ListView *createList() = 0;
-
-  virtual void populate() = 0;
-  virtual void updateList(int) = 0;
-
-  TabBar *tabs() const { return m_tabs; }
-  ListView *menu() const { return m_menu; }
-  ListView *list() const { return m_list; }
-  HWND report() const { return m_report; }
-
 private:
-  void populateLinks();
+  void clear();
   void selectLink(int control);
   void openLink(const Link *);
-  void callUpdateList();
+  void updateList();
 
-  const Metadata *m_metadata;
   int m_currentIndex;
+  std::map<int, std::vector<const Link *> > m_links;
+
   TabBar *m_tabs;
+  RichEdit *m_desc;
   ListView *m_menu;
   ListView *m_list;
   HWND m_report;
 
-  std::map<int, std::vector<const Link *> > m_links;
+  DelegatePtr m_delegate;
 };
 
-class AboutRemote : public AboutDialog {
-public:
-  enum { InstallResult = 100 };
+class AboutDelegate {
+protected:
+  friend About;
 
-  AboutRemote(const IndexPtr &);
+  virtual void init(About *) = 0;
+  virtual void updateList(int) {}
+  virtual bool fillContextMenu(Menu &, int) const { return false; }
+  virtual void itemActivated() {};
+  virtual void onCommand(int) {};
+};
+
+class AboutIndexDelegate : public AboutDelegate {
+public:
+  AboutIndexDelegate(const IndexPtr &index, ReaPack *reapack)
+    : m_index(index), m_reapack(reapack) {}
 
 protected:
-  const std::string &what() const override;
-  ListView *createMenu() override;
-  ListView *createList() override;
-
-  void onCommand(int, int) override;
-  void populate() override;
+  void init(About *) override;
   void updateList(int) override;
+  bool fillContextMenu(Menu &, int) const override;
+  void itemActivated() override { aboutPackage(); }
+  void onCommand(int) override;
 
 private:
-  bool fillContextMenu(Menu &, int) const;
-  void updateInstalledFiles();
+  void initInstalledFiles();
   void aboutPackage();
+  void install();
 
   IndexPtr m_index;
   const std::vector<const Package *> *m_packagesData;
+
+  ReaPack *m_reapack;
+  About *m_dialog;
 };
 
-class AboutPackage : public AboutDialog {
+class AboutPackageDelegate : public AboutDelegate {
 public:
-  AboutPackage(const Package *);
+  AboutPackageDelegate(const Package *);
 
 protected:
-  const std::string &what() const override;
-  ListView *createMenu() override;
-  ListView *createList() override;
-
-  void onCommand(int, int) override;
-  void populate() override;
+  void init(About *) override;
   void updateList(int) override;
+  bool fillContextMenu(Menu &, int) const override;
+  void onCommand(int) override;
 
 private:
-  bool fillContextMenu(Menu &, int) const;
   void copySourceUrl();
 
   const Package *m_package;
+  IndexPtr m_index; // keeps the package loaded in memory
   std::vector<const Source *> m_sources;
+
+  About *m_dialog;
 };
 
 #endif

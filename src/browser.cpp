@@ -804,7 +804,7 @@ void Browser::aboutPackage(const int index)
   const Entry *entry = getEntry(index);
 
   if(entry && entry->package)
-    m_reapack->about(entry->package, handle());
+    m_reapack->about(entry->package);
 }
 
 void Browser::aboutRemote(const int index)

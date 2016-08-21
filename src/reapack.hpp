@@ -28,6 +28,7 @@
 
 #include <reaper_plugin.h>
 
+class About;
 class Browser;
 class Config;
 class DownloadQueue;
@@ -72,7 +73,7 @@ public:
   void manageRemotes();
   void aboutSelf();
   void about(const Remote &, HWND parent);
-  void about(const Package *, HWND parent);
+  void about(const Package *);
   void browsePackages();
   void refreshManager();
   void refreshBrowser();
@@ -91,6 +92,7 @@ private:
   void registerSelf();
   void doFetchIndex(const Remote &remote, DownloadQueue *, HWND, bool stale);
   IndexPtr loadIndex(const Remote &remote, HWND);
+  void setupAbout();
 
   std::map<int, ActionCallback> m_actions;
 
@@ -99,6 +101,7 @@ private:
   Progress *m_progress;
   Browser *m_browser;
   Manager *m_manager;
+  About *m_about;
 
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;

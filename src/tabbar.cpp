@@ -21,8 +21,8 @@
 #include <commctrl.h>
 #endif
 
-TabBar::TabBar(const Tabs &tabs, HWND handle)
-  : Control(handle), m_size(0), m_lastPage(-1)
+TabBar::TabBar(HWND handle, const Tabs &tabs)
+  : Control(handle), m_lastPage(-1)
 {
   for(const Tab &tab : tabs)
     addTab(tab);
@@ -78,6 +78,17 @@ int TabBar::count() const
 {
   return TabCtrl_GetItemCount(handle());
 }
+
+void TabBar::clear()
+{
+  m_pages.clear();
+
+#ifdef TabCtrl_DeleteAllItems
+  TabCtrl_DeleteAllItems(handle());
+#else
+  for(int i = count(); i > 0; i--)
+    TabCtrl_DeleteItem(handle(), i - 1);
+#endif
 }
 
 void TabBar::onNotify(LPNMHDR info, LPARAM)
