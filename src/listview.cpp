@@ -345,10 +345,8 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 
 void ListView::handleDoubleClick()
 {
-  const int index = itemUnderMouse();
-
   // user double clicked on an item
-  if(index > -1)
+  if(itemUnderMouse() > -1 && currentIndex() > -1)
     m_onActivate();
 }
 
