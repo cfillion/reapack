@@ -71,11 +71,7 @@ public:
   void addError(const std::string &msg, const std::string &title);
 
 private:
-  typedef std::function<void ()> IndexCallback;
-
-  void fetchIndex(const Remote &, const IndexCallback &cb);
-  void saveIndex(Download *, const std::string &remoteName);
-
+  void fetchIndex(const Remote &, const std::function<void ()> &);
   void synchronize(const Package *, const InstallOpts &);
   void install(const Version *, const Registry::Entry &);
   void addTask(Task *);
@@ -94,7 +90,7 @@ private:
   Registry *m_registry;
   Receipt m_receipt;
 
-  std::multimap<std::string, IndexCallback> m_remotes;
+  std::unordered_set<std::string> m_syncedRemotes;
   std::unordered_set<std::string> m_inhibited;
   std::unordered_set<IndexPtr> m_indexes;
   std::vector<Task *> m_tasks;

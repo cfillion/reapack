@@ -73,6 +73,11 @@ Transaction::~Transaction()
 void Transaction::synchronize(const Remote &remote,
   const boost::optional<bool> forceAutoInstall)
 {
+  if(m_syncedRemotes.count(remote.name()))
+    return;
+
+  m_syncedRemotes.insert(remote.name());
+
   InstallOpts opts = m_config->install;
 
   if(forceAutoInstall)
@@ -104,8 +109,8 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
 
   const Version *latest = pkg->lastVersion(opts.bleedingEdge, regEntry.version);
 
-  // don't crash nor install a pre-release if autoInstall is on,
-  // bleedingEdge is off and there is no stable release
+  // don't crash nor install a pre-release if autoInstall is on with
+  // bleedingEdge mode off and there is no stable release
   if(!latest)
     return;
 
@@ -119,15 +124,8 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   install(latest, regEntry);
 }
 
-void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
+void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
 {
-  // add the callback to the list, and start the download if it's the first one
-  const string &name = remote.name();
-  m_remotes.insert({name, cb});
-
-  if(m_remotes.count(name) > 1)
-    return;
-
   Download *dl = Index::fetch(remote, true, m_config->network);
 
   if(!dl) {
@@ -137,18 +135,10 @@ void Transaction::fetchIndex(const Remote &remote, const IndexCallback &cb)
   }
 
   m_downloadQueue.push(dl);
-  dl->onFinish(bind(&Transaction::saveIndex, this, dl, name));
-}
-
-void Transaction::saveIndex(Download *dl, const string &name)
-{
-  if(!saveFile(dl, Index::pathFor(name)))
-    return;
-
-  const auto end = m_remotes.upper_bound(name);
-
-  for(auto it = m_remotes.lower_bound(name); it != end; it++)
-    it->second();
+  dl->onFinish([=] {
+    if(saveFile(dl, Index::pathFor(dl->name())))
+      cb();
+  });
 }
 
 void Transaction::install(const Version *ver)
@@ -202,6 +192,7 @@ void Transaction::install(const Version *ver,
 
     for(const Registry::File &file : task->removedFiles()) {
       m_receipt.addRemoval(file.path);
+
       if(file.main)
         m_regQueue.push({false, regEntry, file});
     }
@@ -350,6 +341,10 @@ void Transaction::addTask(Task *task)
 
 bool Transaction::runTasks()
 {
+  // do nothing if we are still downloading indexes for synchronization
+  if(!m_downloadQueue.idle())
+    return false;
+
   m_registry->restore();
 
   while(!m_taskQueue.empty()) {
@@ -357,8 +352,10 @@ bool Transaction::runTasks()
     m_taskQueue.pop();
   }
 
-  m_registry->savepoint(); // get ready for new tasks
+  // get ready for new tasks
+  m_registry->savepoint();
 
+  // return false if transaction is still in progress
   if(!m_downloadQueue.idle())
     return false;
 
@@ -425,9 +422,9 @@ void Transaction::inhibit(const Remote &remote)
   // AND prevents files from this remote from being registered in REAPER
   // (UNregistering is not affected)
 
-  const auto it = m_remotes.find(remote.name());
-  if(it != m_remotes.end())
-    m_remotes.erase(it);
+  const auto it = m_syncedRemotes.find(remote.name());
+  if(it != m_syncedRemotes.end())
+    m_syncedRemotes.erase(it);
 
   m_inhibited.insert(remote.name());
 }
