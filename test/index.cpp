@@ -217,3 +217,20 @@ TEST_CASE("set index name", M) {
     REQUIRE(ri.name() == "hello");
   }
 }
+
+TEST_CASE("find package", M) {
+  Index ri("index name");
+  Category *cat = new Category("cat", &ri);
+  Package *pack = new Package(Package::ScriptType, "pkg", cat);
+  Version *ver = new Version("1", pack);
+  Source *source = new Source({}, "google.com", ver);
+
+  ver->addSource(source);
+  pack->addVersion(ver);
+  cat->addPackage(pack);
+  ri.addCategory(cat);
+
+  REQUIRE(ri.find("a", "b") == nullptr);
+  REQUIRE(ri.find("cat", "b") == nullptr);
+  REQUIRE(ri.find("cat", "pkg") == pack);
+}

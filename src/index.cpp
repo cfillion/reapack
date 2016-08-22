@@ -145,6 +145,14 @@ const Category *Index::category(const string &name) const
     return category(it->second);
 }
 
+const Package *Index::find(const string &catName, const string &pkgName) const
+{
+  if(const Category *cat = category(catName))
+    return cat->package(pkgName);
+  else
+    return nullptr;
+}
+
 Category::Category(const string &name, const Index *ri)
   : m_index(ri), m_name(name)
 {

@@ -567,9 +567,7 @@ void Browser::populate()
 
       // obsolete packages
       for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
-        const Category *cat = index->category(regEntry.category);
-
-        if(!cat || !cat->package(regEntry.package))
+        if(!index->find(regEntry.category, regEntry.package))
           m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
       }
     }

@@ -59,6 +59,7 @@ public:
   const CategoryList &categories() const { return m_categories; }
   const Category *category(size_t i) const { return m_categories[i]; }
   const Category *category(const std::string &name) const;
+  const Package *find(const std::string &cat, const std::string &pkg) const;
 
   const PackageList &packages() const { return m_packages; }
 
