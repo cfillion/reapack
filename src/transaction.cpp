@@ -341,10 +341,6 @@ void Transaction::addTask(Task *task)
 
 bool Transaction::runTasks()
 {
-  // do nothing if we are still downloading indexes for synchronization
-  if(!m_downloadQueue.idle())
-    return false;
-
   m_registry->restore();
 
   while(!m_taskQueue.empty()) {
