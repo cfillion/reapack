@@ -62,8 +62,8 @@ void Download::Init()
 
 void Download::Cleanup()
 {
-  curl_global_cleanup();
   curl_share_cleanup(g_curlShare);
+  curl_global_cleanup();
 }
 
 Download::Download(const string &name, const string &url,
