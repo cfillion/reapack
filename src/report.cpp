@@ -40,6 +40,8 @@ void Report::onInit()
 
   const auto_string &str = make_autostring(m_stream.str());
   SetDlgItemText(handle(), IDC_REPORT, str.c_str());
+
+  SetFocus(getControl(IDOK));
 }
 
 void Report::printHeader(const char *title)
