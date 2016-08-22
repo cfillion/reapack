@@ -34,6 +34,8 @@
 #include "transaction.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -394,14 +396,11 @@ void AboutIndexDelegate::findInBrowser()
     return;
 
   const Package *pkg = currentPackage();
+  const string &name = pkg->displayName(m_reapack->config()->browser.showDescs);
 
-  string filter = "\"";
-  filter += pkg->displayName(m_reapack->config()->browser.showDescs);
-  filter += "\" \"";
-  filter += m_index->name();
-  filter += '"';
-
-  browser->setFilter(filter);
+  ostringstream stream;
+  stream << quoted(name) << ' ' << quoted(m_index->name());
+  browser->setFilter(stream.str());
 }
 
 void AboutIndexDelegate::aboutPackage()
