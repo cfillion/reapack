@@ -561,7 +561,7 @@ void Browser::populate()
     // thus causing the wrong package to be selected!
     m_visibleEntries.clear();
 
-    for(IndexPtr index : m_indexes) {
+    for(const IndexPtr &index : m_indexes) {
       for(const Package *pkg : index->packages())
         m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
 

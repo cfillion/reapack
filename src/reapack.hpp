@@ -43,7 +43,7 @@ typedef std::shared_ptr<const Index> IndexPtr;
 class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
-  typedef std::function<void (IndexPtr)> IndexCallback;
+  typedef std::function<void (const IndexPtr &)> IndexCallback;
   typedef std::function<void (const std::vector<IndexPtr> &)> IndexesCallback;
 
   static const char *VERSION;

@@ -244,7 +244,7 @@ void ReaPack::about(const Remote &remote, HWND parent)
   if(!remote)
     return;
 
-  fetchIndex(remote, [=] (IndexPtr index) {
+  fetchIndex(remote, [=] (const IndexPtr &index) {
     // do nothing if the index could not be loaded
     if(!index)
       return;
