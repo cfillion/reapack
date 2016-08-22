@@ -40,7 +40,7 @@ static const auto_char *STATE_KEY = AUTO_STR("state");
 
 static const auto_char *NETWORK_GRP = AUTO_STR("network");
 static const auto_char *PROXY_KEY = AUTO_STR("proxy");
-static const auto_char *VERIFYPEER_KEY = AUTO_STR("verifyPeer");
+static const auto_char *VERIFYPEER_KEY = AUTO_STR("verifypeer");
 
 static const auto_char *SIZE_KEY = AUTO_STR("size");
 
