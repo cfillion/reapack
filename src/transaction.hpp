@@ -37,6 +37,7 @@ class Task;
 struct InstallOpts;
 
 typedef std::shared_ptr<const Index> IndexPtr;
+typedef std::shared_ptr<Task> TaskPtr;
 
 struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
 
@@ -46,7 +47,6 @@ public:
   typedef std::function<void()> CleanupHandler;
 
   Transaction(Config *);
-  ~Transaction();
 
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
@@ -74,7 +74,7 @@ private:
   void fetchIndex(const Remote &, const std::function<void ()> &);
   void synchronize(const Package *, const InstallOpts &);
   void install(const Version *, const Registry::Entry &);
-  void addTask(Task *);
+  void addTask(const TaskPtr &);
 
   bool allFilesExists(const std::set<Path> &) const;
 
@@ -87,13 +87,13 @@ private:
 
   bool m_isCancelled;
   const Config *m_config;
-  Registry *m_registry;
+  Registry m_registry;
   Receipt m_receipt;
 
   std::unordered_set<std::string> m_syncedRemotes;
   std::unordered_set<std::string> m_inhibited;
   std::unordered_set<IndexPtr> m_indexes;
-  std::vector<Task *> m_tasks;
+  std::vector<TaskPtr> m_tasks;
 
   DownloadQueue m_downloadQueue;
   std::queue<Task *> m_taskQueue;

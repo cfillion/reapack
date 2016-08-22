@@ -32,12 +32,11 @@
 using namespace std;
 
 Transaction::Transaction(Config *config)
-  : m_isCancelled(false), m_config(config)
+  : m_isCancelled(false), m_config(config),
+    m_registry(Path::prefixRoot(Path::REGISTRY))
 {
-  m_registry = new Registry(Path::prefixRoot(Path::REGISTRY));
-
   // don't keep pre-install pushes (for conflict checks); released in runTasks
-  m_registry->savepoint();
+  m_registry.savepoint();
 
   m_downloadQueue.onAbort([=] {
     m_isCancelled = true;
@@ -45,7 +44,7 @@ Transaction::Transaction(Config *config)
     // clear the registration queue
     queue<HostTicket>().swap(m_regQueue);
 
-    for(Task *task : m_tasks)
+    for(const TaskPtr &task : m_tasks)
       task->rollback();
 
     // some downloads may run for a few ms more
@@ -60,14 +59,6 @@ Transaction::Transaction(Config *config)
     else
       runTasks();
   });
-}
-
-Transaction::~Transaction()
-{
-  for(Task *task : m_tasks)
-    delete task;
-
-  delete m_registry;
 }
 
 void Transaction::synchronize(const Remote &remote,
@@ -102,7 +93,7 @@ void Transaction::synchronize(const Remote &remote,
 
 void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
 {
-  const auto &regEntry = m_registry->getEntry(pkg);
+  const auto &regEntry = m_registry.getEntry(pkg);
 
   if(!regEntry && !opts.autoInstall)
     return;
@@ -143,7 +134,7 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
 
 void Transaction::install(const Version *ver)
 {
-  install(ver, m_registry->getEntry(ver->package()));
+  install(ver, m_registry.getEntry(ver->package()));
 }
 
 void Transaction::install(const Version *ver,
@@ -157,12 +148,12 @@ void Transaction::install(const Version *ver,
     type = InstallTicket::Install;
 
   // get current files before overwriting the entry
-  const auto &currentFiles = m_registry->getFiles(regEntry);
+  const auto &currentFiles = m_registry.getFiles(regEntry);
 
   // prevent file conflicts (don't worry, the registry push is reverted in runTasks)
   try {
     vector<Path> conflicts;
-    m_registry->push(ver, &conflicts);
+    m_registry.push(ver, &conflicts);
 
     if(!conflicts.empty()) {
       for(const Path &path : conflicts) {
@@ -185,7 +176,7 @@ void Transaction::install(const Version *ver,
   if(!m_indexes.count(ri))
     m_indexes.insert(ri);
 
-  InstallTask *task = new InstallTask(ver, currentFiles, this);
+  auto task = make_shared<InstallTask>(ver, currentFiles, this);
 
   task->onCommit([=] {
     m_receipt.addTicket({type, ver, regEntry});
@@ -197,7 +188,7 @@ void Transaction::install(const Version *ver,
         m_regQueue.push({false, regEntry, file});
     }
 
-    const Registry::Entry newEntry = m_registry->push(ver);
+    const Registry::Entry newEntry = m_registry.push(ver);
 
     if(newEntry.type == Package::ExtensionType)
       m_receipt.setRestartNeeded(true);
@@ -210,7 +201,7 @@ void Transaction::install(const Version *ver,
 
 void Transaction::registerAll(const Remote &remote)
 {
-  const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
+  const vector<Registry::Entry> &entries = m_registry.getEntries(remote.name());
 
   for(const auto &entry : entries)
     registerInHost(remote.isEnabled(), entry);
@@ -224,11 +215,12 @@ void Transaction::setPinned(const Package *pkg, const bool pinned)
   // pkg may or may not be installed yet at this point,
   // waiting for the install task to be commited before querying the registry
 
-  DummyTask *task = new DummyTask(this);
+  auto task = make_shared<DummyTask>(this);
+
   task->onCommit([=] {
-    const Registry::Entry &entry = m_registry->getEntry(pkg);
+    const Registry::Entry &entry = m_registry.getEntry(pkg);
     if(entry)
-      m_registry->setPinned(entry, pinned);
+      m_registry.setPinned(entry, pinned);
   });
 
   addTask(task);
@@ -236,7 +228,7 @@ void Transaction::setPinned(const Package *pkg, const bool pinned)
 
 void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
 {
-  DummyTask *task = new DummyTask(this);
+  auto task = make_shared<DummyTask>(this);
   task->onCommit(bind(&Registry::setPinned, m_registry, entry, pinned));
 
   addTask(task);
@@ -253,7 +245,7 @@ void Transaction::uninstall(const Remote &remote)
       addError(FS::lastError(), indexPath.join());
   }
 
-  const vector<Registry::Entry> &entries = m_registry->getEntries(remote.name());
+  const vector<Registry::Entry> &entries = m_registry.getEntries(remote.name());
 
   if(entries.empty())
     return;
@@ -266,16 +258,17 @@ void Transaction::uninstall(const Registry::Entry &entry)
 {
   vector<Path> files;
 
-  for(const Registry::File &file : m_registry->getFiles(entry)) {
+  for(const Registry::File &file : m_registry.getFiles(entry)) {
     if(FS::exists(file.path))
       files.push_back(file.path);
     if(file.main)
       m_regQueue.push({false, entry, file});
   }
 
-  RemoveTask *task = new RemoveTask(files, this);
+  auto task = make_shared<RemoveTask>(files, this);
+
   task->onCommit([=] {
-    m_registry->forget(entry);
+    m_registry.forget(entry);
     m_receipt.addRemovals(task->removedFiles());
   });
 
@@ -302,10 +295,10 @@ void Transaction::finish()
   // called when the download queue is done, or if there is nothing to do
 
   if(!m_isCancelled) {
-    for(Task *task : m_tasks)
+    for(const TaskPtr &task : m_tasks)
       task->commit();
 
-    m_registry->commit();
+    m_registry.commit();
 
     registerQueued();
   }
@@ -333,15 +326,15 @@ bool Transaction::allFilesExists(const set<Path> &list) const
   return true;
 }
 
-void Transaction::addTask(Task *task)
+void Transaction::addTask(const TaskPtr &task)
 {
   m_tasks.push_back(task);
-  m_taskQueue.push(task);
+  m_taskQueue.push(task.get());
 }
 
 bool Transaction::runTasks()
 {
-  m_registry->restore();
+  m_registry.restore();
 
   while(!m_taskQueue.empty()) {
     m_taskQueue.front()->start();
@@ -349,7 +342,7 @@ bool Transaction::runTasks()
   }
 
   // get ready for new tasks
-  m_registry->savepoint();
+  m_registry.savepoint();
 
   // return false if transaction is still in progress
   if(!m_downloadQueue.idle())
@@ -362,7 +355,7 @@ bool Transaction::runTasks()
 void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
 {
   // don't actually do anything until commit() – which will calls registerQueued
-  for(const Registry::File &file : m_registry->getMainFiles(entry))
+  for(const Registry::File &file : m_registry.getMainFiles(entry))
     m_regQueue.push({add, entry, file});
 }
 
