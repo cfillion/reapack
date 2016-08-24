@@ -98,7 +98,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   else if(regEntry.pinned || *latest < regEntry.version)
     return;
 
-  m_taskQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
+  m_currentQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
 }
 
 void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
@@ -121,7 +121,7 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
 void Transaction::install(const Version *ver, const bool pin)
 {
   const auto &oldEntry = m_registry.getEntry(ver->package());
-  m_taskQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
+  m_currentQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
 }
 
 void Transaction::registerAll(const Remote &remote)
@@ -137,7 +137,7 @@ void Transaction::registerAll(const Remote &remote)
 
 void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
 {
-  m_taskQueue.push(make_shared<PinTask>(entry, pinned, this));
+  m_currentQueue.push(make_shared<PinTask>(entry, pinned, this));
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -157,7 +157,7 @@ void Transaction::uninstall(const Remote &remote)
 
 void Transaction::uninstall(const Registry::Entry &entry)
 {
-  m_taskQueue.push(make_shared<UninstallTask>(entry, this));
+  m_currentQueue.push(make_shared<UninstallTask>(entry, this));
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
@@ -177,26 +177,35 @@ bool Transaction::saveFile(Download *dl, const Path &path)
 
 bool Transaction::runTasks()
 {
+  if(!m_currentQueue.empty()) {
+    m_taskQueues.push(m_currentQueue);
+    queue<TaskPtr>().swap(m_currentQueue);
+  }
+
   // do nothing if there are running tasks
   if(!commitTasks())
     return false;
 
-  m_registry.savepoint();
+  while(!m_taskQueues.empty()) {
+    m_registry.savepoint();
 
-  while(!m_taskQueue.empty()) {
-    const TaskPtr &task = m_taskQueue.front();
+    TaskQueue &queue = m_taskQueues.front();
 
-    if(task->start())
-      m_runningTasks.push(task);
+    while(!queue.empty()) {
+      const TaskPtr &task = queue.front();
 
-    m_taskQueue.pop();
+      if(task->start())
+        m_runningTasks.push(task);
+
+      queue.pop();
+    }
+
+    m_registry.restore();
+    m_taskQueues.pop();
+
+    if(!commitTasks())
+      return false;
   }
-
-  m_registry.restore();
-
-  // return false if transaction is still in progress
-  if(!commitTasks())
-    return false;
 
   finish();
   return true;
@@ -229,7 +238,8 @@ void Transaction::finish()
   }
 
   assert(m_downloadQueue.idle());
-  assert(m_taskQueue.empty());
+  assert(m_currentQueue.empty());
+  assert(m_taskQueues.empty());
   assert(m_regQueue.empty());
 
   m_onFinish();

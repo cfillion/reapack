@@ -36,6 +36,7 @@ class Task;
 struct InstallOpts;
 
 typedef std::shared_ptr<Task> TaskPtr;
+typedef std::queue<TaskPtr> TaskQueue;
 
 struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
 
@@ -88,8 +89,9 @@ private:
   std::unordered_set<std::string> m_inhibited;
 
   DownloadQueue m_downloadQueue;
-  std::queue<TaskPtr> m_taskQueue;
-  std::queue<TaskPtr> m_runningTasks;
+  TaskQueue m_currentQueue;
+  TaskQueue m_runningTasks;
+  std::queue<TaskQueue> m_taskQueues;
   std::queue<HostTicket> m_regQueue;
 
   VoidSignal m_onFinish;
