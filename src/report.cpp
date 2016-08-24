@@ -111,7 +111,6 @@ void Report::printUpdates()
 
   for(const InstallTicket &ticket : m_receipt.updates()) {
     const Package *pkg = ticket.version->package();
-    const Registry::Entry &regEntry = ticket.regEntry;
     const VersionSet &versions = pkg->versions();
 
     if(m_stream.tellp() != start)
@@ -120,7 +119,7 @@ void Report::printUpdates()
     m_stream << pkg->fullName() << ":\r\n";
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
-      if(*ver <= regEntry.version)
+      if(*ver <= ticket.previous.version)
         break;
 
       m_stream << *ver;

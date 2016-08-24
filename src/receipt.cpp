@@ -17,7 +17,7 @@
 
 #include "receipt.hpp"
 
-#include "transaction.hpp"
+using namespace std;
 
 Receipt::Receipt()
   : m_enabled(false), m_needRestart(false)
@@ -26,11 +26,11 @@ Receipt::Receipt()
 
 bool Receipt::empty() const
 {
- return
-   m_installs.empty() &&
-   m_updates.empty() &&
-   m_removals.empty() &&
-   m_errors.empty();
+  return
+    m_installs.empty() &&
+    m_updates.empty() &&
+    m_removals.empty() &&
+    m_errors.empty();
 }
 
 void Receipt::addTicket(const InstallTicket &ticket)
@@ -45,7 +45,7 @@ void Receipt::addTicket(const InstallTicket &ticket)
   }
 }
 
-void Receipt::addRemovals(const std::set<Path> &pathList)
+void Receipt::addRemovals(const set<Path> &pathList)
 {
   m_removals.insert(pathList.begin(), pathList.end());
 }

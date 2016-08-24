@@ -30,13 +30,11 @@
 #include <unordered_set>
 
 class Config;
-class Index;
 class Path;
 class Remote;
 class Task;
 struct InstallOpts;
 
-typedef std::shared_ptr<const Index> IndexPtr;
 typedef std::shared_ptr<Task> TaskPtr;
 
 struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
@@ -53,8 +51,7 @@ public:
 
   void synchronize(const Remote &,
     boost::optional<bool> forceAutoInstall = boost::none);
-  void install(const Version *);
-  void setPinned(const Package *, bool pinned);
+  void install(const Version *, bool pin = false);
   void setPinned(const Registry::Entry &, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
@@ -62,28 +59,25 @@ public:
   bool runTasks();
 
   bool isCancelled() const { return m_isCancelled; }
-  const Receipt &receipt() const { return m_receipt; }
 
-  DownloadQueue *downloadQueue() { return &m_downloadQueue; }
+  Receipt *receipt() { return &m_receipt; }
+  Registry *registry() { return &m_registry; }
   const Config *config() { return m_config; }
+  DownloadQueue *downloadQueue() { return &m_downloadQueue; }
 
+  void registerAll(bool add, const Registry::Entry &);
+  void registerFile(const HostTicket &t) { m_regQueue.push(t); }
   bool saveFile(Download *, const Path &);
-  void addError(const std::string &msg, const std::string &title);
 
 private:
   void fetchIndex(const Remote &, const std::function<void ()> &);
   void synchronize(const Package *, const InstallOpts &);
-  void install(const Version *, const Registry::Entry &);
-  void addTask(const TaskPtr &);
-
   bool allFilesExists(const std::set<Path> &) const;
-
-  void registerInHost(bool add, const Registry::Entry &);
   void registerQueued();
   void registerScript(const HostTicket &);
-
-  void finish();
   void inhibit(const Remote &);
+  bool commitTasks();
+  void finish();
 
   bool m_isCancelled;
   const Config *m_config;
@@ -92,11 +86,10 @@ private:
 
   std::unordered_set<std::string> m_syncedRemotes;
   std::unordered_set<std::string> m_inhibited;
-  std::unordered_set<IndexPtr> m_indexes;
-  std::vector<TaskPtr> m_tasks;
 
   DownloadQueue m_downloadQueue;
-  std::queue<Task *> m_taskQueue;
+  std::queue<TaskPtr> m_taskQueue;
+  std::queue<TaskPtr> m_runningTasks;
   std::queue<HostTicket> m_regQueue;
 
   VoidSignal m_onFinish;

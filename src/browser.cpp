@@ -1012,19 +1012,14 @@ bool Browser::apply()
       const Version *target = *entry->target;
 
       if(target)
-        tx->install(target);
+        tx->install(target, entry->pin.value_or(false));
       else
         tx->uninstall(entry->regEntry);
 
       entry->target = boost::none;
     }
-
-    if(entry->pin) {
-      if(entry->regEntry)
-        tx->setPinned(entry->regEntry, *entry->pin);
-      else
-        tx->setPinned(entry->package, *entry->pin);
-
+    else if(entry->pin) {
+      tx->setPinned(entry->regEntry, *entry->pin);
       entry->pin = boost::none;
     }
   }

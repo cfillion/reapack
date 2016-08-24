@@ -31,7 +31,7 @@ struct InstallTicket {
 
   Type type;
   const Version *version;
-  Registry::Entry regEntry;
+  Registry::Entry previous;
 };
 
 class Receipt {
