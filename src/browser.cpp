@@ -589,7 +589,7 @@ void Browser::populate()
 
 void Browser::transferActions()
 {
-  unordered_set<Entry *> oldActions;
+  list<Entry *> oldActions;
   swap(m_actions, oldActions);
 
   for(Entry *oldEntry : oldActions) {
@@ -612,7 +612,7 @@ void Browser::transferActions()
     if(oldEntry->pin)
       entryIt->pin = *oldEntry->pin;
 
-    m_actions.insert(&*entryIt);
+    m_actions.push_back(&*entryIt);
   }
 
   if(m_actions.empty())
@@ -773,7 +773,7 @@ bool Browser::match(const Entry &entry) const
   case AllView:
     break;
   case QueuedView:
-    if(!m_actions.count(const_cast<Entry *>(&entry)))
+    if(!hasAction(&entry))
       return false;
     break;
   case InstalledView:
@@ -881,17 +881,17 @@ void Browser::togglePin(const int index)
 
   const bool newVal = !entry->pin.value_or(entry->regEntry.pinned);
 
-  if(newVal == entry->regEntry.pinned) {
+  if(newVal == entry->regEntry.pinned)
     entry->pin = boost::none;
-    if(!entry->target)
-      m_actions.erase(entry);
-  }
-  else {
+  else
     entry->pin = newVal;
-    m_actions.insert(entry);
-  }
 
   updateAction(index);
+}
+
+bool Browser::hasAction(const Entry *entry) const
+{
+  return count(m_actions.begin(), m_actions.end(), entry) > 0;
 }
 
 void Browser::setTarget(const int index, const Version *target, const bool toggle)
@@ -899,32 +899,28 @@ void Browser::setTarget(const int index, const Version *target, const bool toggl
   Entry *entry = getEntry(index);
 
   if(toggle && entry->target && *entry->target == target)
-    resetTarget(index);
-  else {
+    entry->target = boost::none;
+  else
     entry->target = target;
-    m_actions.insert(entry);
-    updateAction(index);
-  }
+
+  updateAction(index);
 }
 
 void Browser::resetTarget(const int index)
 {
   Entry *entry = getEntry(index);
 
-  if(!entry->target)
-    return;
-
-  entry->target = boost::none;
-  if(!entry->pin || !entry->canPin())
-    m_actions.erase(entry);
-
-  updateAction(index);
+  if(entry->target) {
+    entry->target = boost::none;
+    updateAction(index);
+  }
 }
 
 void Browser::resetActions(const int index)
 {
   Entry *entry = getEntry(index);
-  if(!m_actions.count(entry))
+
+  if(!hasAction(entry))
     return;
 
   if(entry->target)
@@ -932,7 +928,6 @@ void Browser::resetActions(const int index)
   if(entry->pin)
     entry->pin = boost::none;
 
-  m_actions.erase(entry);
   updateAction(index);
 }
 
@@ -942,7 +937,15 @@ void Browser::updateAction(const int index)
   if(!entry)
     return;
 
-  if(currentView() == QueuedView && !m_actions.count(entry)) {
+  const auto it = find(m_actions.begin(), m_actions.end(), entry);
+  if(!entry->target && (!entry->pin || !entry->canPin())) {
+    if(it != m_actions.end())
+      m_actions.erase(it);
+  }
+  else if(it == m_actions.end())
+    m_actions.push_back(entry);
+
+  if(currentView() == QueuedView && !hasAction(entry)) {
     m_list->removeRow(index);
     m_visibleEntries.erase(m_visibleEntries.begin() + index);
     updateDisplayLabel();

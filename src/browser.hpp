@@ -26,10 +26,10 @@
 
 #include <boost/optional.hpp>
 #include <functional>
+#include <list>
 #include <map>
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 class Index;
@@ -117,6 +117,7 @@ private:
   void fillMenu(Menu &);
   bool isFiltered(Package::Type) const;
   void toggleDescs();
+  bool hasAction(const Entry *) const;
   void setTarget(const int index, const Version *, bool toggle = true);
   void resetTarget(int index);
   void resetActions(int index);
@@ -146,7 +147,7 @@ private:
   boost::optional<Package::Type> m_typeFilter;
   std::vector<Entry> m_entries;
   std::vector<size_t> m_visibleEntries;
-  std::unordered_set<Entry *> m_actions;
+  std::list<Entry *> m_actions;
 
   HWND m_filterHandle;
   HWND m_view;
