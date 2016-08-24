@@ -36,6 +36,7 @@ class Index;
 class ListView;
 class Menu;
 class ReaPack;
+class Remote;
 class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;

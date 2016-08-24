@@ -25,7 +25,6 @@ TEST_CASE("construct null version", M) {
   REQUIRE(ver.isStable());
   REQUIRE_FALSE(ver.time().isValid());
   REQUIRE(ver.package() == nullptr);
-  REQUIRE(ver.mainSources().empty());
 }
 
 TEST_CASE("compare null versions", M) {
@@ -230,9 +229,6 @@ TEST_CASE("add source", M) {
   REQUIRE(ver.addSource(src));
 
   CHECK(ver.sources().size() == 1);
-  CHECK(ver.mainSources().empty());
-
-  REQUIRE(src->version() == &ver);
   REQUIRE(ver.source(0) == src);
 }
 
@@ -252,30 +248,14 @@ TEST_CASE("add owned source", M) {
   }
 }
 
-TEST_CASE("add main sources", M) {
-  MAKE_VERSION
-
-  Source *src1 = new Source({}, "b", &ver);
-  src1->setMain(true);
-  ver.addSource(src1);
-
-  Source *src2 = new Source({}, "b", &ver);
-  src2->setMain(true);
-  ver.addSource(src2);
-
-  REQUIRE(ver.mainSources().size() == 2);
-  REQUIRE(ver.mainSources()[0] == src1);
-  REQUIRE(ver.mainSources()[1] == src2);
-}
-
 TEST_CASE("duplicate sources", M) {
   MAKE_VERSION
 
   Source *src = new Source({}, "b", &ver);
-  ver.addSource(src);
-  ver.addSource(new Source({}, "b", &ver));
+  CHECK(ver.addSource(src) == true);
+  REQUIRE(ver.addSource(src) == false);
 
-  REQUIRE(ver.sources().size() == 2);
+  REQUIRE(ver.sources().size() == 1);
   REQUIRE(ver.source(0) == src);
 }
 
@@ -337,7 +317,6 @@ TEST_CASE("copy version constructor", M) {
   REQUIRE(copy1.changelog() == original.changelog());
   REQUIRE(copy1.time() == original.time());
   REQUIRE(copy1.package() == nullptr);
-  REQUIRE(copy1.mainSources().empty());
   REQUIRE(copy1.sources().empty());
 
   const Version copy2(original, &pkg);

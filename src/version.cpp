@@ -48,8 +48,8 @@ Version::Version(const Version &o, const Package *pkg)
 
 Version::~Version()
 {
-  for(const auto &pair : m_sources)
-    delete pair.second;
+  for(const Source *source : m_sources)
+    delete source;
 }
 
 void Version::parse(const string &str)
@@ -124,23 +124,14 @@ bool Version::addSource(const Source *source)
     return false;
 
   const Path path = source->targetPath();
-  m_files.insert(path);
-  m_sources.insert({path, source});
 
-  if(source->isMain())
-    m_mainSources.push_back(source);
+  if(m_files.count(path))
+    return false;
+
+  m_files.insert(path);
+  m_sources.push_back(source);
 
   return true;
-}
-
-const Source *Version::source(const size_t index) const
-{
-  auto it = m_sources.begin();
-
-  for(size_t i = 0; i < index; i++)
-    it++;
-
-  return it->second;
 }
 
 auto Version::segment(const size_t index) const -> Segment

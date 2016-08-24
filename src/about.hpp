@@ -128,7 +128,7 @@ private:
   const Package *m_package;
   ReaPack *m_reapack;
   IndexPtr m_index; // keeps the package loaded in memory
-  std::vector<const Source *> m_sources;
+  const std::vector<const Source *> *m_sources;
 
   About *m_dialog;
 };

@@ -24,9 +24,6 @@
 
 class Category;
 
-class Package;
-typedef std::vector<const Package *> PackageList;
-
 class Package {
 public:
   enum Type {
@@ -74,5 +71,7 @@ private:
   Metadata m_metadata;
   VersionSet m_versions;
 };
+
+typedef std::vector<const Package *> PackageList;
 
 #endif

@@ -36,6 +36,8 @@ TEST_CASE("source type from package", M) {
   Version ver("1.0", &pack);
   Source src({}, "url", &ver);
 
+  REQUIRE(src.version() == &ver);
+
   REQUIRE(src.type() == Package::EffectType);
   src.setTypeOverride(Package::ScriptType);
   REQUIRE(src.type() == Package::ScriptType);

@@ -60,20 +60,12 @@ bool InstallTask::start()
     return false;
   }
 
-  const auto &sources = m_version->sources();
-
-  for(auto it = sources.begin(); it != sources.end();) {
-    const Path &path = it->first;
-    const Source *src = it->second;
-
+  for(const Source *src : m_version->sources()) {
     const NetworkOpts &opts = tx()->config()->network;
     Download *dl = new Download(src->fullName(), src->url(), opts);
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
 
     tx()->downloadQueue()->push(dl);
-
-    // skip duplicate files
-    do { it++; } while(it != sources.end() && path == it->first);
   }
 
   return true;

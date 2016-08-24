@@ -494,23 +494,12 @@ void AboutPackageDelegate::updateList(const int index)
   stream << *ver;
   SetWindowText(m_dialog->report(), make_autostring(stream.str()).c_str());
 
-  vector<const Source *> uniqueSources;
+  m_sources = &ver->sources();
 
-  const auto &sources = ver->sources();
-  for(auto it = sources.begin(); it != sources.end();) {
-    const Path &path = it->first;
-    const Source *src = it->second;
-
-    m_dialog->list()->addRow({make_autostring(path.join()),
+  for(const Source *src : ver->sources()) {
+    m_dialog->list()->addRow({make_autostring(src->targetPath().join()),
       make_autostring(src->isMain() ? "Yes" : "No")});
-
-    uniqueSources.push_back(src);
-
-    // skip duplicate files
-    do { it++; } while(it != sources.end() && path == it->first);
   }
-
-  swap(m_sources, uniqueSources);
 }
 
 bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
@@ -542,5 +531,5 @@ void AboutPackageDelegate::copySourceUrl()
   if(index < 0)
     return;
 
-  m_dialog->setClipboard(m_sources[index]->url());
+  m_dialog->setClipboard(m_sources->at(index)->url());
 }

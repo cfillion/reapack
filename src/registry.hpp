@@ -21,14 +21,10 @@
 #include <set>
 #include <string>
 
-#include "path.hpp"
 #include "database.hpp"
 #include "package.hpp"
-
-class Package;
-class Path;
-class Remote;
-class Version;
+#include "path.hpp"
+#include "version.hpp"
 
 class Registry {
 public:

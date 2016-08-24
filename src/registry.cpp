@@ -167,10 +167,8 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
 
   // register files
-  const auto &sources = ver->sources();
-  for(auto it = sources.begin(); it != sources.end();) {
-    const Path &path = it->first;
-    const Source *src = it->second;
+  for(const Source *src : ver->sources()) {
+    const Path &path = src->targetPath();
 
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
@@ -190,9 +188,6 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
         throw;
       }
     }
-
-    // skip duplicate files
-    do { it++; } while(it != sources.end() && path == it->first);
   }
 
   if(hasConflicts) {

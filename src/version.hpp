@@ -34,7 +34,6 @@ class Path;
 class Version {
 public:
   typedef std::vector<const Source *> SourceList;
-  typedef std::multimap<Path, const Source *> SourceMap;
 
   Version();
   Version(const std::string &, const Package * = nullptr);
@@ -62,9 +61,8 @@ public:
   const std::string &changelog() const { return m_changelog; }
 
   bool addSource(const Source *source);
-  const SourceMap &sources() const { return m_sources; }
-  const Source *source(size_t) const;
-  const SourceList &mainSources() const { return m_mainSources; }
+  const SourceList &sources() const { return m_sources; }
+  const Source *source(size_t i) const { return m_sources[i]; }
 
   const std::set<Path> &files() const { return m_files; }
 
@@ -91,13 +89,12 @@ private:
   Time m_time;
 
   const Package *m_package;
-  SourceList m_mainSources;
 
-  SourceMap m_sources;
+  SourceList m_sources;
   std::set<Path> m_files;
 };
 
-class VersionPtrCompare {
+class CompareVersionPtr {
 public:
   bool operator()(const Version *l, const Version *r) const
   {
@@ -105,6 +102,6 @@ public:
   }
 };
 
-typedef std::set<const Version *, VersionPtrCompare> VersionSet;
+typedef std::set<const Version *, CompareVersionPtr> VersionSet;
 
 #endif
