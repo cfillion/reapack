@@ -2,7 +2,7 @@
 
 #include <platform.hpp>
 
-#include <map>
+#include <utility>
 
 using namespace std;
 
@@ -41,7 +41,7 @@ TEST_CASE("platform from string", M) {
 }
 
 TEST_CASE("test platform", M) {
-  const map<Platform, bool> expected {
+  const pair<Platform, bool> expected[] = {
     {Platform::GenericPlatform, true},
 
 #ifdef __APPLE__
