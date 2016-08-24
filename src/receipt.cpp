@@ -17,6 +17,8 @@
 
 #include "receipt.hpp"
 
+#include "index.hpp"
+
 using namespace std;
 
 Receipt::Receipt()
@@ -43,6 +45,9 @@ void Receipt::addTicket(const InstallTicket &ticket)
     m_installs.push_back(ticket);
     break;
   }
+
+  m_indexes.insert(ticket.version->package()->category()
+    ->index()->shared_from_this());
 }
 
 void Receipt::addRemovals(const set<Path> &pathList)

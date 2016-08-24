@@ -20,11 +20,15 @@
 
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "registry.hpp"
 
+class Index;
 class Path;
+
+typedef std::shared_ptr<const Index> IndexPtr;
 
 struct InstallTicket {
   enum Type { Install, Upgrade };
@@ -68,6 +72,8 @@ private:
   std::vector<InstallTicket> m_updates;
   std::set<Path> m_removals;
   std::vector<Error> m_errors;
+
+  std::unordered_set<IndexPtr> m_indexes; // keep them alive!
 };
 
 #endif
