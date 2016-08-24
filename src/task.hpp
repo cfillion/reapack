@@ -21,55 +21,40 @@
 #include "path.hpp"
 #include "registry.hpp"
 
-#include <boost/signals2.hpp>
 #include <set>
 #include <vector>
 
 class Download;
+class Index;
 class Source;
 class Transaction;
 class Version;
 
+typedef std::shared_ptr<const Index> IndexPtr;
+
 class Task {
 public:
-  typedef boost::signals2::signal<void ()> Signal;
-  typedef Signal::slot_type Callback;
-
   Task(Transaction *parent);
   virtual ~Task() {}
 
-  void onCommit(const Callback &callback) { m_onCommit.connect(callback); }
-  bool isCancelled() const { return m_isCancelled; }
-
-  void start();
-  void commit();
-  void rollback();
+  virtual bool start() { return true; }
+  virtual void commit() = 0;
+  virtual void rollback() {}
 
 protected:
-  Transaction *transaction() const { return m_transaction; }
-
-  virtual void doStart() = 0;
-  virtual bool doCommit() = 0;
-  virtual void doRollback() = 0;
+  Transaction *tx() const { return m_tx; }
 
 private:
-  Transaction *m_transaction;
-  bool m_isCancelled;
-
-  Signal m_onCommit;
+  Transaction *m_tx;
 };
 
 class InstallTask : public Task {
 public:
-  InstallTask(const Version *ver, const std::vector<Registry::File> &oldFiles,
-    Transaction *);
+  InstallTask(const Version *ver, bool pin, const Registry::Entry &, Transaction *);
 
-  const std::vector<Registry::File> &removedFiles() const { return m_oldFiles; }
-
-protected:
-  void doStart() override;
-  bool doCommit() override;
-  void doRollback() override;
+  bool start() override;
+  void commit() override;
+  void rollback() override;
 
 private:
   struct PathGroup { Path target; Path temp; };
@@ -77,34 +62,37 @@ private:
   void saveSource(Download *, const Source *);
 
   const Version *m_version;
+  bool m_pin;
+  Registry::Entry m_oldEntry;
+  IndexPtr m_index; // keep in memory
   std::vector<Registry::File> m_oldFiles;
   std::vector<PathGroup> m_newFiles;
 };
 
-class RemoveTask : public Task {
+class UninstallTask : public Task {
 public:
-  RemoveTask(const std::vector<Path> &files, Transaction *);
-
-  const std::set<Path> &removedFiles() const { return m_removedFiles; }
+  UninstallTask(const Registry::Entry &, Transaction *);
 
 protected:
-  void doStart() override {}
-  bool doCommit() override;
-  void doRollback() override {}
+  bool start() override;
+  void commit() override;
 
 private:
-  std::vector<Path> m_files;
+  Registry::Entry m_entry;
+  std::vector<Registry::File> m_files;
   std::set<Path> m_removedFiles;
 };
 
-class DummyTask : public Task {
+class PinTask : public Task {
 public:
-  DummyTask(Transaction *t) : Task(t) {}
+  PinTask(const Registry::Entry &, bool pin, Transaction *);
 
 protected:
-  void doStart() override {}
-  bool doCommit() override { return true; }
-  void doRollback() override {}
+  void commit() override;
+
+private:
+  Registry::Entry m_entry;
+  bool m_pin;
 };
 
 #endif

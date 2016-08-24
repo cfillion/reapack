@@ -18,69 +18,70 @@
 #include "task.hpp"
 
 #include "config.hpp"
+#include "errors.hpp"
 #include "filesystem.hpp"
-#include "source.hpp"
+#include "index.hpp"
 #include "transaction.hpp"
-#include "version.hpp"
 
 using namespace std;
 
-Task::Task(Transaction *transaction)
-  : m_transaction(transaction), m_isCancelled(false)
+Task::Task(Transaction *tx) : m_tx(tx)
 {
 }
 
-void Task::start()
-{
-  doStart();
-}
-
-void Task::commit()
-{
-  if(m_isCancelled)
-    return;
-
-  if(doCommit())
-    m_onCommit();
-}
-
-void Task::rollback()
-{
-  m_isCancelled = true;
-
-  // it's the transaction queue's job to abort the running downloads, not ours
-
-  doRollback();
-}
-
-InstallTask::InstallTask(const Version *ver,
-    const vector<Registry::File> &oldFiles, Transaction *t)
-  : Task(t), m_version(ver), m_oldFiles(move(oldFiles))
+InstallTask::InstallTask(const Version *ver, const bool pin,
+    const Registry::Entry &re, Transaction *tx)
+  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(move(re)),
+    m_index(ver->package()->category()->index()->shared_from_this())
 {
 }
 
-void InstallTask::doStart()
+bool InstallTask::start()
 {
+  // get current files before overwriting the entry
+  m_oldFiles = tx()->registry()->getFiles(m_oldEntry);
+
+  // prevent file conflicts (don't worry, the registry push is reverted)
+  try {
+    vector<Path> conflicts;
+    tx()->registry()->push(m_version, &conflicts);
+
+    if(!conflicts.empty()) {
+      for(const Path &path : conflicts) {
+        tx()->receipt()->addError({"Conflict: " + path.join() +
+          " is already owned by another package", m_version->fullName()});
+      }
+
+      return false;
+    }
+  }
+  catch(const reapack_error &e) {
+    tx()->receipt()->addError({e.what(), m_version->fullName()});
+    return false;
+  }
+
   const auto &sources = m_version->sources();
 
   for(auto it = sources.begin(); it != sources.end();) {
     const Path &path = it->first;
     const Source *src = it->second;
 
-    const NetworkOpts &opts = transaction()->config()->network;
+    const NetworkOpts &opts = tx()->config()->network;
     Download *dl = new Download(src->fullName(), src->url(), opts);
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
 
-    transaction()->downloadQueue()->push(dl);
+    tx()->downloadQueue()->push(dl);
 
     // skip duplicate files
     do { it++; } while(it != sources.end() && path == it->first);
   }
+
+  return true;
 }
 
 void InstallTask::saveSource(Download *dl, const Source *src)
 {
-  if(isCancelled())
+  if(dl->state() == Download::Aborted)
     return;
 
   const Path &targetPath = src->targetPath();
@@ -96,57 +97,101 @@ void InstallTask::saveSource(Download *dl, const Source *src)
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
 
-  if(!transaction()->saveFile(dl, tmpPath)) {
+  if(!tx()->saveFile(dl, tmpPath)) {
     rollback();
     return;
   }
 }
 
-bool InstallTask::doCommit()
+void InstallTask::commit()
 {
-  for(const Registry::File &file : m_oldFiles)
-    FS::remove(file.path);
-
   for(const PathGroup &paths : m_newFiles) {
 #ifdef _WIN32
+    // TODO: rename to .old
     FS::remove(paths.target);
 #endif
 
     if(!FS::rename(paths.temp, paths.target)) {
-      transaction()->addError("Cannot rename to target: " + FS::lastError(),
-        paths.target.join());
+      tx()->receipt()->addError({"Cannot rename to target: " + FS::lastError(),
+        paths.target.join()});
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
       rollback();
-      return false;
+      return;
     }
   }
 
-  return true;
+  for(const Registry::File &file : m_oldFiles) {
+    if(FS::remove(file.path))
+      tx()->receipt()->addRemoval(file.path);
+
+    if(file.main)
+      tx()->registerFile({false, m_oldEntry, file});
+  }
+
+  InstallTicket::Type type;
+
+  if(m_oldEntry && m_oldEntry.version < *m_version)
+    type = InstallTicket::Upgrade;
+  else
+    type = InstallTicket::Install;
+
+  tx()->receipt()->addTicket({type, m_version, m_oldEntry});
+
+  const Registry::Entry newEntry = tx()->registry()->push(m_version);
+
+  if(newEntry.type == Package::ExtensionType)
+    tx()->receipt()->setRestartNeeded(true);
+
+  if(m_pin)
+    tx()->registry()->setPinned(newEntry, true);
+
+  tx()->registerAll(true, newEntry);
 }
 
-void InstallTask::doRollback()
+void InstallTask::rollback()
 {
   for(const PathGroup &paths : m_newFiles)
     FS::removeRecursive(paths.temp);
-
-  m_newFiles.clear();
 }
 
-RemoveTask::RemoveTask(const vector<Path> &files, Transaction *t)
-  : Task(t), m_files(move(files))
+UninstallTask::UninstallTask(const Registry::Entry &re, Transaction *tx)
+  : Task(tx), m_entry(move(re))
 {
 }
 
-bool RemoveTask::doCommit()
+bool UninstallTask::start()
 {
-  for(const Path &path : m_files) {
-    if(FS::removeRecursive(path))
-      m_removedFiles.insert(path);
-    else
-      transaction()->addError(FS::lastError(), path.join());
-  }
+  tx()->registry()->getFiles(m_entry).swap(m_files);
 
   return true;
+}
+
+void UninstallTask::commit()
+{
+  for(const auto &file : m_files) {
+    if(!FS::exists(file.path))
+      continue;
+
+    if(FS::removeRecursive(file.path))
+      tx()->receipt()->addRemoval(file.path);
+    else
+      tx()->receipt()->addError({FS::lastError(), file.path.join()});
+
+    if(file.main)
+      tx()->registerFile({false, m_entry, file});
+  }
+
+  tx()->registry()->forget(m_entry);
+}
+
+PinTask::PinTask(const Registry::Entry &re, const bool pin, Transaction *tx)
+  : Task(tx), m_entry(move(re)), m_pin(pin)
+{
+}
+
+void PinTask::commit()
+{
+  tx()->registry()->setPinned(m_entry, m_pin);
 }

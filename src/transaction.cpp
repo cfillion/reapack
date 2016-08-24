@@ -40,25 +40,11 @@ Transaction::Transaction(Config *config)
 
   m_downloadQueue.onAbort([=] {
     m_isCancelled = true;
-
-    // clear the registration queue
     queue<HostTicket>().swap(m_regQueue);
-
-    for(const TaskPtr &task : m_tasks)
-      task->rollback();
-
-    // some downloads may run for a few ms more
-    if(m_downloadQueue.idle())
-      finish();
   });
 
   // run tasks after fetching indexes
-  m_downloadQueue.onDone([=] {
-    if(m_tasks.empty())
-      finish();
-    else
-      runTasks();
-  });
+  m_downloadQueue.onDone(bind(&Transaction::runTasks, this));
 }
 
 void Transaction::synchronize(const Remote &remote,
@@ -82,7 +68,7 @@ void Transaction::synchronize(const Remote &remote,
     }
     catch(const reapack_error &e) {
       // index file is invalid (load error)
-      addError(e.what(), remote.name());
+      m_receipt.addError({e.what(), remote.name()});
       return;
     }
 
@@ -112,7 +98,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   else if(regEntry.pinned || *latest < regEntry.version)
     return;
 
-  install(latest, regEntry);
+  m_currentQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
 }
 
 void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
@@ -132,71 +118,10 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   });
 }
 
-void Transaction::install(const Version *ver)
+void Transaction::install(const Version *ver, const bool pin)
 {
-  install(ver, m_registry.getEntry(ver->package()));
-}
-
-void Transaction::install(const Version *ver,
-  const Registry::Entry &regEntry)
-{
-  InstallTicket::Type type;
-
-  if(regEntry && regEntry.version < *ver)
-    type = InstallTicket::Upgrade;
-  else
-    type = InstallTicket::Install;
-
-  // get current files before overwriting the entry
-  const auto &currentFiles = m_registry.getFiles(regEntry);
-
-  // prevent file conflicts (don't worry, the registry push is reverted in runTasks)
-  try {
-    vector<Path> conflicts;
-    m_registry.push(ver, &conflicts);
-
-    if(!conflicts.empty()) {
-      for(const Path &path : conflicts) {
-        addError("Conflict: " + path.join() +
-          " is already owned by another package",
-          ver->fullName());
-      }
-
-      return;
-    }
-  }
-  catch(const reapack_error &e) {
-    // handle database error from Registry::push
-    addError(e.what(), ver->fullName());
-    return;
-  }
-
-  // all green! (pronounce with a japanese accent)
-  IndexPtr ri = ver->package()->category()->index()->shared_from_this();
-  if(!m_indexes.count(ri))
-    m_indexes.insert(ri);
-
-  auto task = make_shared<InstallTask>(ver, currentFiles, this);
-
-  task->onCommit([=] {
-    m_receipt.addTicket({type, ver, regEntry});
-
-    for(const Registry::File &file : task->removedFiles()) {
-      m_receipt.addRemoval(file.path);
-
-      if(file.main)
-        m_regQueue.push({false, regEntry, file});
-    }
-
-    const Registry::Entry newEntry = m_registry.push(ver);
-
-    if(newEntry.type == Package::ExtensionType)
-      m_receipt.setRestartNeeded(true);
-
-    registerInHost(true, newEntry);
-  });
-
-  addTask(task);
+  const auto &oldEntry = m_registry.getEntry(ver->package());
+  m_currentQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
 }
 
 void Transaction::registerAll(const Remote &remote)
@@ -204,34 +129,15 @@ void Transaction::registerAll(const Remote &remote)
   const vector<Registry::Entry> &entries = m_registry.getEntries(remote.name());
 
   for(const auto &entry : entries)
-    registerInHost(remote.isEnabled(), entry);
+    registerAll(remote.isEnabled(), entry);
 
   if(!remote.isEnabled())
     inhibit(remote);
 }
 
-void Transaction::setPinned(const Package *pkg, const bool pinned)
-{
-  // pkg may or may not be installed yet at this point,
-  // waiting for the install task to be commited before querying the registry
-
-  auto task = make_shared<DummyTask>(this);
-
-  task->onCommit([=] {
-    const Registry::Entry &entry = m_registry.getEntry(pkg);
-    if(entry)
-      m_registry.setPinned(entry, pinned);
-  });
-
-  addTask(task);
-}
-
 void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
 {
-  auto task = make_shared<DummyTask>(this);
-  task->onCommit(bind(&Registry::setPinned, m_registry, entry, pinned));
-
-  addTask(task);
+  m_currentQueue.push(make_shared<PinTask>(entry, pinned, this));
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -242,49 +148,83 @@ void Transaction::uninstall(const Remote &remote)
 
   if(FS::exists(indexPath)) {
     if(!FS::remove(indexPath))
-      addError(FS::lastError(), indexPath.join());
+      m_receipt.addError({FS::lastError(), indexPath.join()});
   }
 
-  const vector<Registry::Entry> &entries = m_registry.getEntries(remote.name());
-
-  if(entries.empty())
-    return;
-
-  for(const auto &entry : entries)
+  for(const auto &entry : m_registry.getEntries(remote.name()))
     uninstall(entry);
 }
 
 void Transaction::uninstall(const Registry::Entry &entry)
 {
-  vector<Path> files;
-
-  for(const Registry::File &file : m_registry.getFiles(entry)) {
-    if(FS::exists(file.path))
-      files.push_back(file.path);
-    if(file.main)
-      m_regQueue.push({false, entry, file});
-  }
-
-  auto task = make_shared<RemoveTask>(files, this);
-
-  task->onCommit([=] {
-    m_registry.forget(entry);
-    m_receipt.addRemovals(task->removedFiles());
-  });
-
-  addTask(task);
+  m_currentQueue.push(make_shared<UninstallTask>(entry, this));
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
 {
   if(dl->state() != Download::Success) {
-    addError(dl->contents(), dl->url());
+    m_receipt.addError({dl->contents(), dl->url()});
     return false;
   }
 
   if(!FS::write(path, dl->contents())) {
-    addError(FS::lastError(), path.join());
+    m_receipt.addError({FS::lastError(), path.join()});
     return false;
+  }
+
+  return true;
+}
+
+bool Transaction::runTasks()
+{
+  if(!m_currentQueue.empty()) {
+    m_taskQueues.push(m_currentQueue);
+    queue<TaskPtr>().swap(m_currentQueue);
+  }
+
+  // do nothing if there are running tasks
+  if(!commitTasks())
+    return false;
+
+  while(!m_taskQueues.empty()) {
+    m_registry.savepoint();
+
+    TaskQueue &queue = m_taskQueues.front();
+
+    while(!queue.empty()) {
+      const TaskPtr &task = queue.front();
+
+      if(task->start())
+        m_runningTasks.push(task);
+
+      queue.pop();
+    }
+
+    m_registry.restore();
+    m_taskQueues.pop();
+
+    if(!commitTasks())
+      return false;
+  }
+
+  finish();
+  return true;
+}
+
+bool Transaction::commitTasks()
+{
+  // wait until all running tasks are ready
+  if(!m_downloadQueue.idle())
+    return false;
+
+  // finish current tasks
+  while(!m_runningTasks.empty()) {
+    if(m_isCancelled)
+      m_runningTasks.front()->rollback();
+    else
+      m_runningTasks.front()->commit();
+
+    m_runningTasks.pop();
   }
 
   return true;
@@ -292,28 +232,18 @@ bool Transaction::saveFile(Download *dl, const Path &path)
 
 void Transaction::finish()
 {
-  // called when the download queue is done, or if there is nothing to do
-
   if(!m_isCancelled) {
-    for(const TaskPtr &task : m_tasks)
-      task->commit();
-
     m_registry.commit();
-
     registerQueued();
   }
 
   assert(m_downloadQueue.idle());
-  assert(m_taskQueue.empty());
+  assert(m_currentQueue.empty());
+  assert(m_taskQueues.empty());
   assert(m_regQueue.empty());
 
   m_onFinish();
   m_cleanupHandler();
-}
-
-void Transaction::addError(const string &message, const string &title)
-{
-  m_receipt.addError({message, title});
 }
 
 bool Transaction::allFilesExists(const set<Path> &list) const
@@ -326,37 +256,11 @@ bool Transaction::allFilesExists(const set<Path> &list) const
   return true;
 }
 
-void Transaction::addTask(const TaskPtr &task)
-{
-  m_tasks.push_back(task);
-  m_taskQueue.push(task.get());
-}
-
-bool Transaction::runTasks()
-{
-  m_registry.restore();
-
-  while(!m_taskQueue.empty()) {
-    m_taskQueue.front()->start();
-    m_taskQueue.pop();
-  }
-
-  // get ready for new tasks
-  m_registry.savepoint();
-
-  // return false if transaction is still in progress
-  if(!m_downloadQueue.idle())
-    return false;
-
-  finish();
-  return true;
-}
-
-void Transaction::registerInHost(const bool add, const Registry::Entry &entry)
+void Transaction::registerAll(const bool add, const Registry::Entry &entry)
 {
   // don't actually do anything until commit() – which will calls registerQueued
   for(const Registry::File &file : m_registry.getMainFiles(entry))
-    m_regQueue.push({add, entry, file});
+    registerFile({add, entry, file});
 }
 
 void Transaction::registerQueued()
@@ -401,8 +305,10 @@ void Transaction::registerScript(const HostTicket &reg)
   const string &fullPath = Path::prefixRoot(reg.file.path).join();
   const bool isLast = m_regQueue.size() == 1;
 
-  if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add)
-    addError("This script could not be registered in REAPER.", reg.file.path.join());
+  if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add) {
+    m_receipt.addError({"This script could not be registered in REAPER.",
+      reg.file.path.join()});
+  }
 }
 
 void Transaction::inhibit(const Remote &remote)

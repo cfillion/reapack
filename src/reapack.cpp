@@ -432,15 +432,13 @@ Transaction *ReaPack::setupTransaction()
     Dialog::Destroy(m_progress);
     m_progress = nullptr;
 
-    const Receipt &receipt = m_tx->receipt();
-
-    if(m_tx->isCancelled() || receipt.empty())
+    if(m_tx->isCancelled() || m_tx->receipt()->empty())
       return;
 
     LockDialog managerLock(m_manager);
     LockDialog browserLock(m_browser);
 
-    Dialog::Show<Report>(m_instance, m_mainWindow, receipt);
+    Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
   });
 
   m_tx->setCleanupHandler([=] {
