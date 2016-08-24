@@ -30,8 +30,8 @@ using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
        ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_NETCONFIG,
-       ACTION_RESETCONFIG };
+       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
+       ACTION_NETCONFIG, ACTION_RESETCONFIG };
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -96,6 +96,9 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_BLEEDINGEDGE:
     toggle(m_bleedingEdge, m_config->install.bleedingEdge);
+    break;
+  case ACTION_PROMPTOBSOLETE:
+    toggle(m_promptObsolete, m_config->install.promptObsolete);
     break;
   case ACTION_NETCONFIG:
     setupNetwork();
@@ -379,6 +382,11 @@ void Manager::options()
   if(m_bleedingEdge.value_or(m_config->install.bleedingEdge))
     menu.check(index);
 
+  index = menu.addAction(
+    AUTO_STR("Prompt to uninstall obsolete packages"), ACTION_PROMPTOBSOLETE);
+  if(m_promptObsolete.value_or(m_config->install.promptObsolete))
+    menu.check(index);
+
   menu.addAction(AUTO_STR("&Network settings..."), ACTION_NETCONFIG);
 
   menu.addSeparator();
@@ -429,6 +437,9 @@ bool Manager::apply()
   if(m_bleedingEdge)
     m_config->install.bleedingEdge = m_bleedingEdge.value();
 
+  if(m_promptObsolete)
+    m_config->install.promptObsolete = m_promptObsolete.value();
+
   for(const auto &pair : m_enableOverrides) {
     const Remote &remote = pair.first;
     const bool enable = pair.second;
@@ -453,6 +464,7 @@ void Manager::reset()
   m_uninstall.clear();
   m_autoInstall = boost::none;
   m_bleedingEdge = boost::none;
+  m_promptObsolete = boost::none;
 
   m_changes = 0;
   disable(m_apply);

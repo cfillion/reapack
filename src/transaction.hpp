@@ -43,11 +43,13 @@ class Transaction {
 public:
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef std::function<void()> CleanupHandler;
+  typedef std::function<bool(std::vector<Registry::Entry> &)> ObsoleteHandler;
 
   Transaction(Config *);
 
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
+  void setObsoleteHandler(const ObsoleteHandler &cb) { m_promptObsolete = cb; }
 
   void synchronize(const Remote &,
     boost::optional<bool> forceAutoInstall = boost::none);
@@ -97,6 +99,7 @@ private:
 
   std::unordered_set<std::string> m_syncedRemotes;
   std::unordered_set<std::string> m_inhibited;
+  std::unordered_set<Registry::Entry> m_obsolete;
 
   DownloadQueue m_downloadQueue;
   TaskQueue m_currentQueue;
@@ -106,6 +109,7 @@ private:
 
   VoidSignal m_onFinish;
   CleanupHandler m_cleanupHandler;
+  ObsoleteHandler m_promptObsolete;
 };
 
 #endif

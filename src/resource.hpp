@@ -41,6 +41,7 @@
 #define IDD_IMPORT_DIALOG   104
 #define IDD_BROWSER_DIALOG  105
 #define IDD_NETCONF_DIALOG  106
+#define IDD_QUERY_DIALOG    107
 
 #define IDC_LABEL      200
 #define IDC_LABEL2     201
@@ -67,5 +68,6 @@
 #define IDC_PROXY      229
 #define IDC_VERIFYPEER 230
 #define IDC_SCREENSHOT 231
+#define IDC_ENABLE     232
 
 #endif

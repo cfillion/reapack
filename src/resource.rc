@@ -115,3 +115,19 @@ BEGIN
   DEFPUSHBUTTON "&OK", IDOK, 132, 50, 40, 14
   PUSHBUTTON "&Cancel", IDCANCEL, 175, 50, 40, 14
 END
+
+IDD_QUERY_DIALOG DIALOGEX 0, 0, 350, 200
+STYLE DIALOG_STYLE
+FONT DIALOG_FONT
+CAPTION "ReaPack Query"
+BEGIN
+  LTEXT "The following packages were removed from their repositories and are no longer available:",
+    IDC_LABEL, 5, 5, 340, 10
+  GROUPBOX "Obsolete packages", IDC_GROUPBOX, 2, 18, 346, 160
+  CONTROL "", IDC_LIST, WC_LISTVIEW, LVS_REPORT | LVS_SHOWSELALWAYS |
+    LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP, 7, 29, 336, 146
+  CHECKBOX "&Prompt when obsolete packages are found",
+    IDC_ENABLE, 5, 181, 201, 14, BS_AUTOCHECKBOX | WS_TABSTOP
+  DEFPUSHBUTTON "&Uninstall selected", IDOK, 212, 181, 85, 14
+  PUSHBUTTON "&Ignore", IDCANCEL, 300, 181, 45, 14
+END

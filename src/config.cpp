@@ -33,6 +33,7 @@ static const auto_char *VERSION_KEY = AUTO_STR("version");
 static const auto_char *INSTALL_GRP = AUTO_STR("install");
 static const auto_char *AUTOINSTALL_KEY = AUTO_STR("autoinstall");
 static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
+static const auto_char *PROMPTOBSOLETE_KEY = AUTO_STR("promptobsolete");
 
 static const auto_char *BROWSER_GRP = AUTO_STR("browser");
 static const auto_char *SHOWDESCS_KEY = AUTO_STR("showdescs");
@@ -62,7 +63,7 @@ Config::Config()
 
 void Config::resetOptions()
 {
-  install = {false, false};
+  install = {false, false, true};
   browser = {true, ""};
   network = {"", true};
 }
@@ -133,6 +134,8 @@ void Config::read(const Path &path)
     AUTOINSTALL_KEY, install.autoInstall) > 0;
   install.bleedingEdge = getUInt(INSTALL_GRP,
     PRERELEASES_KEY, install.bleedingEdge) > 0;
+  install.promptObsolete = getUInt(INSTALL_GRP,
+    PROMPTOBSOLETE_KEY, install.promptObsolete) > 0;
 
   browser.showDescs = getUInt(BROWSER_GRP,
     SHOWDESCS_KEY, browser.showDescs) > 0;
@@ -153,6 +156,7 @@ void Config::write()
 
   setUInt(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
   setUInt(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
+  setUInt(INSTALL_GRP, PROMPTOBSOLETE_KEY, install.promptObsolete);
 
   setUInt(BROWSER_GRP, SHOWDESCS_KEY, browser.showDescs);
   setString(BROWSER_GRP, STATE_KEY, browser.state);

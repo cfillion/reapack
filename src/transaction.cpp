@@ -74,6 +74,13 @@ void Transaction::synchronize(const Remote &remote,
 
     for(const Package *pkg : ri->packages())
       synchronize(pkg, opts);
+
+    if(m_config->install.promptObsolete) {
+      for(const Registry::Entry &entry : m_registry.getEntries(ri->name())) {
+        if(!ri->find(entry.category, entry.package))
+          m_obsolete.insert(entry);
+      }
+    }
   });
 }
 
@@ -186,6 +193,20 @@ bool Transaction::runTasks()
   // do nothing if there are running tasks
   if(!commitTasks())
     return false;
+
+  if(m_config->install.promptObsolete && !m_obsolete.empty()) {
+    vector<Registry::Entry> selected;
+    selected.insert(selected.end(), m_obsolete.begin(), m_obsolete.end());
+    m_obsolete.clear();
+
+    if(m_promptObsolete(selected)) {
+      if(m_taskQueues.empty())
+        m_taskQueues.push({});
+
+      for(const auto &entry : selected)
+        m_taskQueues.back().push(make_shared<UninstallTask>(entry, this));
+    }
+  }
 
   while(!m_taskQueues.empty()) {
     m_registry.savepoint();

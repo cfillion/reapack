@@ -25,6 +25,7 @@
 #include "index.hpp"
 #include "manager.hpp"
 #include "progress.hpp"
+#include "query.hpp"
 #include "report.hpp"
 #include "transaction.hpp"
 
@@ -439,6 +440,11 @@ Transaction *ReaPack::setupTransaction()
     LockDialog browserLock(m_browser);
 
     Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
+  });
+
+  m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
+    return Dialog::Show<ObsoleteQuery>(m_instance, m_progress->handle(),
+      &entries, &m_config->install.promptObsolete) == IDOK;
   });
 
   m_tx->setCleanupHandler([=] {

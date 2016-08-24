@@ -39,6 +39,7 @@ public:
     bool pinned;
 
     operator bool() const { return id != 0; }
+    bool operator==(const Entry &o) const { return id == o.id; }
   };
 
   struct File {
@@ -82,5 +83,16 @@ private:
 
   size_t m_savePoint;
 };
+
+namespace std
+{
+  template<> struct hash<Registry::Entry>
+  {
+    std::size_t operator()(const Registry::Entry &e) const
+    {
+      return std::hash<int64_t>()(e.id);
+    }
+  };
+}
 
 #endif

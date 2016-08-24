@@ -28,6 +28,7 @@ class Path;
 struct InstallOpts {
   bool autoInstall;
   bool bleedingEdge;
+  bool promptObsolete;
 };
 
 struct BrowserOpts {

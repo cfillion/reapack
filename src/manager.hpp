@@ -75,6 +75,7 @@ private:
   std::map<Remote, bool> m_enableOverrides;
   std::set<Remote> m_uninstall;
   boost::optional<bool> m_autoInstall;
+  boost::optional<bool> m_promptObsolete;
   boost::optional<bool> m_bleedingEdge;
 };
 
