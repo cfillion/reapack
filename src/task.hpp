@@ -21,6 +21,7 @@
 #include "path.hpp"
 #include "registry.hpp"
 
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -41,7 +42,10 @@ public:
   virtual void commit() = 0;
   virtual void rollback() {}
 
+  bool operator<(const Task &o) { return priority() < o.priority(); }
+
 protected:
+  virtual int priority() const { return 0; }
   Transaction *tx() const { return m_tx; }
 
 private:
@@ -74,6 +78,7 @@ public:
   UninstallTask(const Registry::Entry &, Transaction *);
 
 protected:
+  int priority() const override { return 1; }
   bool start() override;
   void commit() override;
 
@@ -94,5 +99,17 @@ private:
   Registry::Entry m_entry;
   bool m_pin;
 };
+
+typedef std::shared_ptr<Task> TaskPtr;
+
+class CompareTaskPtr {
+public:
+  bool operator()(const TaskPtr &l, const TaskPtr &r) const
+  {
+    return *l < *r;
+  }
+};
+
+typedef std::priority_queue<TaskPtr, std::vector<TaskPtr>, CompareTaskPtr> TaskQueue;
 
 #endif

@@ -21,6 +21,7 @@
 #include "download.hpp"
 #include "receipt.hpp"
 #include "registry.hpp"
+#include "task.hpp"
 
 #include <boost/optional.hpp>
 #include <boost/signals2.hpp>
@@ -34,9 +35,6 @@ class Path;
 class Remote;
 class Task;
 struct InstallOpts;
-
-typedef std::shared_ptr<Task> TaskPtr;
-typedef std::queue<TaskPtr> TaskQueue;
 
 struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
 
@@ -90,8 +88,8 @@ private:
 
   DownloadQueue m_downloadQueue;
   TaskQueue m_currentQueue;
-  TaskQueue m_runningTasks;
   std::queue<TaskQueue> m_taskQueues;
+  std::queue<TaskPtr> m_runningTasks;
   std::queue<HostTicket> m_regQueue;
 
   VoidSignal m_onFinish;

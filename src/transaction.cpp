@@ -179,7 +179,7 @@ bool Transaction::runTasks()
 {
   if(!m_currentQueue.empty()) {
     m_taskQueues.push(m_currentQueue);
-    queue<TaskPtr>().swap(m_currentQueue);
+    TaskQueue().swap(m_currentQueue);
   }
 
   // do nothing if there are running tasks
@@ -189,10 +189,10 @@ bool Transaction::runTasks()
   while(!m_taskQueues.empty()) {
     m_registry.savepoint();
 
-    TaskQueue &queue = m_taskQueues.front();
+    auto &queue = m_taskQueues.front();
 
     while(!queue.empty()) {
-      const TaskPtr &task = queue.front();
+      const TaskPtr &task = queue.top();
 
       if(task->start())
         m_runningTasks.push(task);
