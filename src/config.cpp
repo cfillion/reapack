@@ -82,7 +82,7 @@ void Config::restoreSelfRemote()
 
 void Config::restoreDefaultRemotes()
 {
-  const vector<pair<string,string> > repos = {
+  const pair<string,string> repos[] = {
     {"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
     {"ReaTeam JSFX",

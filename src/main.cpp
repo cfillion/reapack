@@ -19,8 +19,6 @@
 #include "menu.hpp"
 #include "reapack.hpp"
 
-#include <vector>
-
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
 
@@ -35,7 +33,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
 {
   struct ApiFunc { void **ptr; const char *name; bool required; };
 
-  const vector<ApiFunc> funcs = {
+  const ApiFunc funcs[] = {
 
     REQUIRED_API(AddExtensionsMainMenu),
     REQUIRED_API(file_exists),
@@ -49,6 +47,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
     REQUIRED_API(Splash_GetWnd),             // v4.7
 
     OPTIONAL_API(AddRemoveReaScript),        // v5.12
+
   };
 
   for(const ApiFunc &func : funcs) {
