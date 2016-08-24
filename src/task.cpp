@@ -165,6 +165,9 @@ bool UninstallTask::start()
 {
   tx()->registry()->getFiles(m_entry).swap(m_files);
 
+  // allow conflicting packages to be installed
+  tx()->registry()->forget(m_entry);
+
   return true;
 }
 
