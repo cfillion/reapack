@@ -33,8 +33,6 @@ class Path;
 
 class Version {
 public:
-  typedef std::vector<const Source *> SourceList;
-
   Version();
   Version(const std::string &, const Package * = nullptr);
   Version(const Version &, const Package * = nullptr);
@@ -61,7 +59,7 @@ public:
   const std::string &changelog() const { return m_changelog; }
 
   bool addSource(const Source *source);
-  const SourceList &sources() const { return m_sources; }
+  const auto &sources() const { return m_sources; }
   const Source *source(size_t i) const { return m_sources[i]; }
 
   const std::set<Path> &files() const { return m_files; }
@@ -87,21 +85,9 @@ private:
   std::string m_author;
   std::string m_changelog;
   Time m_time;
-
   const Package *m_package;
-
-  SourceList m_sources;
+  std::vector<const Source *> m_sources;
   std::set<Path> m_files;
 };
-
-class CompareVersionPtr {
-public:
-  bool operator()(const Version *l, const Version *r) const
-  {
-    return *l < *r;
-  }
-};
-
-typedef std::set<const Version *, CompareVersionPtr> VersionSet;
 
 #endif

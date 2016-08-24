@@ -29,9 +29,6 @@
 #include <wdltypes.h>
 #include <wingui/wndsize.h>
 
-class Dialog;
-typedef std::map<HWND, Dialog *> DialogMap;
-
 class Control;
 
 class Dialog {
@@ -153,7 +150,7 @@ protected:
 private:
   static WDL_DLGRET Proc(HWND, UINT, WPARAM, LPARAM);
   static int HandleKey(MSG *, accelerator_register_t *);
-  static DialogMap s_instances;
+  static std::map<HWND, Dialog *> s_instances;
 
   const int m_template;
   bool m_isVisible;

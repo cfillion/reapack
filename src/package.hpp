@@ -57,21 +57,28 @@ public:
   const Metadata *metadata() const { return &m_metadata; }
 
   bool addVersion(const Version *ver);
-  const VersionSet &versions() const { return m_versions; }
+  const auto &versions() const { return m_versions; }
   const Version *version(size_t index) const;
   const Version *lastVersion(bool pres = true, const Version &from = {}) const;
   const Version *findVersion(const Version &) const;
 
 private:
+  class CompareVersion {
+  public:
+    bool operator()(const Version *l, const Version *r) const
+    {
+      return *l < *r;
+    }
+  };
+
   const Category *m_category;
 
   Type m_type;
   std::string m_name;
   std::string m_desc;
   Metadata m_metadata;
-  VersionSet m_versions;
-};
+  std::set<const Version *, CompareVersion> m_versions;
 
-typedef std::vector<const Package *> PackageList;
+};
 
 #endif

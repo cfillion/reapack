@@ -32,18 +32,16 @@ public:
     DonationLink,
   };
 
-  typedef std::multimap<LinkType, Link> LinkMap;
-
   static LinkType getLinkType(const char *rel);
 
   void setAbout(const std::string &rtf) { m_about = rtf; }
   const std::string &about() const { return m_about; }
   void addLink(const LinkType, const Link &);
-  const LinkMap &links() const { return m_links; }
+  const auto &links() const { return m_links; }
 
 private:
   std::string m_about;
-  LinkMap m_links;
+  std::multimap<LinkType, Link> m_links;
 };
 
 #endif

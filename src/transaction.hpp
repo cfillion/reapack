@@ -33,8 +33,9 @@
 class Config;
 class Path;
 class Remote;
-class Task;
 struct InstallOpts;
+
+typedef std::shared_ptr<Task> TaskPtr;
 
 struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
 
@@ -69,6 +70,17 @@ public:
   bool saveFile(Download *, const Path &);
 
 private:
+  class CompareTask {
+  public:
+    bool operator()(const TaskPtr &l, const TaskPtr &r) const
+    {
+      return *l < *r;
+    }
+  };
+
+  typedef std::priority_queue<TaskPtr,
+    std::vector<TaskPtr>, CompareTask> TaskQueue;
+
   void fetchIndex(const Remote &, const std::function<void ()> &);
   void synchronize(const Package *, const InstallOpts &);
   bool allFilesExists(const std::set<Path> &) const;

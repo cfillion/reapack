@@ -111,7 +111,7 @@ void Report::printUpdates()
 
   for(const InstallTicket &ticket : m_receipt.updates()) {
     const Package *pkg = ticket.version->package();
-    const VersionSet &versions = pkg->versions();
+    const auto &versions = pkg->versions();
 
     if(m_stream.tellp() != start)
       m_stream << "\r\n";

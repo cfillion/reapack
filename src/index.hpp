@@ -28,9 +28,6 @@
 #include "package.hpp"
 #include "source.hpp"
 
-class Category;
-typedef std::vector<const Category *> CategoryList;
-
 class Download;
 class Index;
 class Path;
@@ -56,20 +53,20 @@ public:
   const Metadata *metadata() const { return &m_metadata; }
 
   bool addCategory(const Category *cat);
-  const CategoryList &categories() const { return m_categories; }
+  const auto &categories() const { return m_categories; }
   const Category *category(size_t i) const { return m_categories[i]; }
   const Category *category(const std::string &name) const;
   const Package *find(const std::string &cat, const std::string &pkg) const;
 
-  const PackageList &packages() const { return m_packages; }
+  const std::vector<const Package *> &packages() const { return m_packages; }
 
 private:
   static void loadV1(TiXmlElement *, Index *);
 
   std::string m_name;
   Metadata m_metadata;
-  CategoryList m_categories;
-  PackageList m_packages;
+  std::vector<const Category *> m_categories;
+  std::vector<const Package *> m_packages;
 
   std::unordered_map<std::string, size_t> m_catMap;
 };
@@ -84,7 +81,7 @@ public:
   std::string fullName() const;
 
   bool addPackage(const Package *pack);
-  const PackageList &packages() const { return m_packages; }
+  const auto &packages() const { return m_packages; }
   const Package *package(size_t i) const { return m_packages[i]; }
   const Package *package(const std::string &name) const;
 
@@ -92,8 +89,7 @@ private:
   const Index *m_index;
 
   std::string m_name;
-  PackageList m_packages;
-
+  std::vector<const Package *> m_packages;
   std::unordered_map<std::string, size_t> m_pkgMap;
 };
 

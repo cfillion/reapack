@@ -31,7 +31,7 @@
 
 using namespace std;
 
-DialogMap Dialog::s_instances;
+std::map<HWND, Dialog *> Dialog::s_instances;
 
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -187,7 +187,7 @@ void Dialog::Destroy(Dialog *dlg)
 
 void Dialog::DestroyAll()
 {
-  const DialogMap map = s_instances; // make an immutable copy
+  const auto map = s_instances; // make an immutable copy
   for(Dialog *dlg : map | boost::adaptors::map_values)
     Destroy(dlg);
 }

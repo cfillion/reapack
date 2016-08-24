@@ -21,7 +21,6 @@
 #include "path.hpp"
 #include "registry.hpp"
 
-#include <queue>
 #include <set>
 #include <vector>
 
@@ -99,17 +98,5 @@ private:
   Registry::Entry m_entry;
   bool m_pin;
 };
-
-typedef std::shared_ptr<Task> TaskPtr;
-
-class CompareTaskPtr {
-public:
-  bool operator()(const TaskPtr &l, const TaskPtr &r) const
-  {
-    return *l < *r;
-  }
-};
-
-typedef std::priority_queue<TaskPtr, std::vector<TaskPtr>, CompareTaskPtr> TaskQueue;
 
 #endif
