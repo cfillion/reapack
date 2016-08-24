@@ -112,6 +112,7 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   }
 
   m_downloadQueue.push(dl);
+
   dl->onFinish([=] {
     if(saveFile(dl, Index::pathFor(dl->name())))
       cb();

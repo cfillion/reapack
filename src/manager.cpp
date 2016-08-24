@@ -510,6 +510,5 @@ void NetworkConfig::onCommand(const int id, int)
 void NetworkConfig::apply()
 {
   m_opts->proxy = getText(m_proxy);
-  m_opts->verifyPeer = SendMessage(m_verifyPeer,
-    BM_GETCHECK, 0, 0) == BST_CHECKED;
+  m_opts->verifyPeer = SendMessage(m_verifyPeer, BM_GETCHECK, 0, 0) == BST_CHECKED;
 }
