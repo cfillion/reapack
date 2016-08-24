@@ -62,6 +62,9 @@ int ListView::addColumn(const Column &col)
   ListView_InsertColumn(handle(), index, &item);
   m_cols.push_back(col);
 
+  if(m_sort && m_sort->column == index)
+    setSortArrow(true);
+
   return index;
 }
 
