@@ -920,9 +920,6 @@ void Browser::resetActions(const int index)
 {
   Entry *entry = getEntry(index);
 
-  if(!hasAction(entry))
-    return;
-
   if(entry->target)
     entry->target = boost::none;
   if(entry->pin)
