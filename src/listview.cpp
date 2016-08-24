@@ -278,6 +278,26 @@ int ListView::itemUnderMouse() const
   return translateBack(info.iItem);
 }
 
+int ListView::scroll() const
+{
+  return ListView_GetTopIndex(handle());
+}
+
+void ListView::setScroll(const int index)
+{
+#ifdef ListView_GetItemPosition
+  if(index < 0)
+    return;
+
+  RECT rect;
+  ListView_GetViewRect(handle(), &rect);
+
+  POINT itemPos{};
+  if(ListView_GetItemPosition(handle(), index - 1, &itemPos))
+    ListView_Scroll(handle(), abs(rect.left) + itemPos.x, abs(rect.top) + itemPos.y);
+#endif
+}
+
 void ListView::onNotify(LPNMHDR info, LPARAM lParam)
 {
   switch(info->code) {

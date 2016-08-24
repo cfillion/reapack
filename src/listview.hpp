@@ -66,6 +66,8 @@ public:
   void reset();
   int currentIndex() const;
   int itemUnderMouse() const;
+  int scroll() const;
+  void setScroll(int);
 
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }

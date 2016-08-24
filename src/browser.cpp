@@ -651,6 +651,8 @@ void Browser::fillList()
 {
   InhibitControl freeze(m_list);
 
+  const int scroll = m_list->scroll();
+
   // store the indexes to the selected entries if they still exists
   // and m_visibleEntries hasn't been emptied
   const vector<int> selection = m_list->selection();
@@ -675,6 +677,7 @@ void Browser::fillList()
     m_visibleEntries.push_back(i);
   }
 
+  m_list->setScroll(scroll);
   m_list->sort();
 
   updateDisplayLabel();
