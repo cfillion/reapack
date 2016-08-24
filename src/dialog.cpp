@@ -413,8 +413,11 @@ void Dialog::onCommand(const int id, int)
 {
   switch(id) {
   case IDOK:
+    close(1);
+    break;
   case IDCANCEL:
-    close(id);
+    close(0);
+    break;
   }
 }
 
