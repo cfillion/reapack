@@ -31,7 +31,7 @@ Task::Task(Transaction *tx) : m_tx(tx)
 
 InstallTask::InstallTask(const Version *ver, const bool pin,
     const Registry::Entry &re, Transaction *tx)
-  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(move(re)),
+  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(move(re)), m_fail(false),
     m_index(ver->package()->category()->index()->shared_from_this())
 {
 }
@@ -97,6 +97,9 @@ void InstallTask::saveSource(Download *dl, const Source *src)
 
 void InstallTask::commit()
 {
+  if(m_fail)
+    return;
+
   for(const PathGroup &paths : m_newFiles) {
 #ifdef _WIN32
     // TODO: rename to .old
@@ -146,6 +149,8 @@ void InstallTask::rollback()
 {
   for(const PathGroup &paths : m_newFiles)
     FS::removeRecursive(paths.temp);
+
+  m_fail = true;
 }
 
 UninstallTask::UninstallTask(const Registry::Entry &re, Transaction *tx)
