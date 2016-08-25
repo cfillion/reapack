@@ -110,46 +110,38 @@ TEST_CASE("full name with version", M) {
 TEST_CASE("source target path", M) {
   Index ri("Index Name");
   Category cat("Category Name", &ri);
-  Package pack(Package::ScriptType, "package name", &cat);
+  Package pack(Package::UnknownType, "package name", &cat);
   Version ver("1.0", &pack);
 
   Source source("file.name", "url", &ver);
 
-  Path expected;
-  expected.append("Index Name");
-  expected.append("Category Name");
-  expected.append("file.name");
-
   SECTION("script") {
-    expected.prepend("Scripts");
+    source.setTypeOverride(Package::ScriptType);
+    const Path expected("Scripts/Index Name/Category Name/file.name");
     REQUIRE(source.targetPath() == expected);
   }
 
   SECTION("effect") {
-    expected.prepend("Effects");
     source.setTypeOverride(Package::EffectType);
+    const Path expected("Effects/Index Name/Category Name/file.name");
     REQUIRE(source.targetPath() == expected);
   }
 
   SECTION("extension") {
-    expected.clear();
-    expected.append("UserPlugins");
-    expected.append("file.name");
     source.setTypeOverride(Package::ExtensionType);
+    const Path expected("UserPlugins/file.name");
     REQUIRE(source.targetPath() == expected);
   }
 
   SECTION("data") {
-    expected.prepend("Data");
     source.setTypeOverride(Package::DataType);
+    const Path expected("Data/file.name");
     REQUIRE(source.targetPath() == expected);
   }
 
   SECTION("theme") {
-    expected.clear();
-    expected.append("ColorThemes");
-    expected.append("file.name");
     source.setTypeOverride(Package::ThemeType);
+    const Path expected("ColorThemes/file.name");
     REQUIRE(source.targetPath() == expected);
   }
 }

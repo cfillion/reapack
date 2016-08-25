@@ -109,7 +109,6 @@ Path Source::targetPath() const
   switch(type) {
   case Package::ScriptType:
   case Package::EffectType:
-  case Package::DataType:
     path.append(cat->index()->name());
 
     // only allow directory traversal up to the index name
@@ -117,6 +116,7 @@ Path Source::targetPath() const
     break;
   case Package::ExtensionType:
   case Package::ThemeType:
+  case Package::DataType:
     path.append(file(), false);
     break;
   case Package::UnknownType:
