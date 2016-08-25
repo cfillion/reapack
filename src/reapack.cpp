@@ -443,7 +443,11 @@ Transaction *ReaPack::setupTransaction()
   });
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
-    return Dialog::Show<ObsoleteQuery>(m_instance, m_progress->handle(),
+    LockDialog progressLock(m_progress);
+    LockDialog managerLock(m_manager);
+    LockDialog browserLock(m_browser);
+
+    return Dialog::Show<ObsoleteQuery>(m_instance, m_mainWindow,
       &entries, &m_config->install.promptObsolete) == IDOK;
   });
 
