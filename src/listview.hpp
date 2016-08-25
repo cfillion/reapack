@@ -68,6 +68,7 @@ public:
   int itemUnderMouse() const;
   int scroll() const;
   void setScroll(int);
+  void autoSizeHeader();
 
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }

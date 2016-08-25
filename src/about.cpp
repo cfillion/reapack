@@ -116,10 +116,8 @@ void About::setDelegate(const DelegatePtr &delegate)
   m_currentIndex = -255;
   updateList();
 
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_menu->resizeColumn(m_menu->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-#endif
+  m_menu->autoSizeHeader();
+  m_list->autoSizeHeader();
 
 #ifdef _WIN32
   SendMessage(handle(), WM_SETREDRAW, true, 0);

@@ -298,6 +298,13 @@ void ListView::setScroll(const int index)
 #endif
 }
 
+void ListView::autoSizeHeader()
+{
+#ifdef LVSCW_AUTOSIZE_USEHEADER
+  resizeColumn(columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
+#endif
+}
+
 void ListView::onNotify(LPNMHDR info, LPARAM lParam)
 {
   switch(info->code) {

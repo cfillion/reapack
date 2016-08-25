@@ -59,9 +59,7 @@ void Manager::onInit()
 
   refresh();
 
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-#endif
+  m_list->autoSizeHeader();
 }
 
 void Manager::onCommand(const int id, int)

@@ -59,9 +59,7 @@ void ObsoleteQuery::onInit()
     m_list->addRow({make_autostring(stream.str())});
   }
 
-#ifdef LVSCW_AUTOSIZE_USEHEADER
-  m_list->resizeColumn(m_list->columnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-#endif
+  m_list->autoSizeHeader();
 
   SendMessage(m_enableCtrl, BM_SETCHECK, BST_CHECKED, 0);
 
@@ -90,8 +88,10 @@ void ObsoleteQuery::onCommand(const int id, int event)
 
 void ObsoleteQuery::prepare()
 {
-    vector<Registry::Entry> selected;
-    for(int index : m_list->selection())
-      selected.emplace_back(m_entries->at(index));
-    m_entries->swap(selected);
+  vector<Registry::Entry> selected;
+
+  for(int index : m_list->selection())
+    selected.emplace_back(m_entries->at(index));
+
+  m_entries->swap(selected);
 }
