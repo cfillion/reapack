@@ -6,17 +6,17 @@ set vendor=%self%\vendor
 set curl=%vendor%\curl
 
 if "%1%"=="curl32" (
-  del "%curl%\builds\"* /Q /S
   cd "%curl%\winbuild"
   nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x86
   xcopy /y /s %curl%\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl %vendor%\libcurl32\
+  rmdir "%curl%\builds" /Q /S
   exit /b
 )
 if "%1%"=="curl64" (
-  del "%curl%\builds\"* /Q /S
   cd "%curl%\winbuild"
   nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x64
   xcopy /y /s %curl%\builds\libcurl-vc-x64-release-static-ipv6-sspi-winssl %vendor%\libcurl64\
+  rmdir "%curl%\builds" /Q /S
   exit /b
 )
 
