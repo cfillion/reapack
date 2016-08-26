@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="cbac9e41c5b036baa6eefec9225115e76028cbf1" name="ReaPack">
+<index version="1" commit="99308dd2ea0b68bc2bac1fd49e439769319504b3" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -250,6 +250,52 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta2/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.1beta3" author="cfillion" time="2016-08-26T22:59:13Z">
+        <changelog><![CDATA[Added:
++ about repo: add "find in browser" action in the package context menu
++ about: add "about {repository}" button in the package's about dialog
++ about: ask whether to install all packages or update installed packages
++ about: merge the about dialogs and make it modeless [p=1716746]
++ synchronize: prompt to uninstall obsolete packages [#8]
+Changed:
++ about: show package descriptions in Contents tab
++ about: use package description in dialog title
++ allow a conflicting pkg to be installed if the other is getting uninstalled
++ browser: preserve insertion order of actions
++ browser: show stored description of obsolete packages
++ browser: show the newest available version even if it's older than the one currently installed
++ download: share dns cache and ssl sessions between connections
++ index: remove ".xml" suffix from the download display name
++ manager: rename option "Install new packages automatically" to "Install new packages when synchronizing"
++ package: ensure package names do not contain slashes
++ registry: store package descriptions offline
++ richedit: stop moving the caret to the end of the document on windows
++ show package descriptions in progress and report dialogs
++ transaction: process uninstallation tasks before any other task
++ transaction: wait for current tasks to be finished before processing new ones
++ write data files directly into the Data directory (for toolbar icons)
+Fixed:
++ about repository: don't sort the version column lexicographically
++ browser: always reset pin when clearing actions
++ browser: don't sort the version column lexicographically
++ browser: fix crash when double-clicking on an obsolete package [p=1713186]
++ browser: fix display of pinned state for obsolete packages
++ browser: remember scroll position when reloading the list on windows
++ dialog: fix wrong amount of memory allocated for clipboard copy
++ download: bypass cache when fetching index files
++ download: enable all content encodings known by curl
++ download: enhance reporting of download errors
++ download: fix http error reporting when connecting through a proxy
++ index: always re-download indexes when requested
++ listview: fix Shift+F10 on Windows (bis)
++ registry: accept databases written by compatible newer versions of ReaPack
++ report: make Return key always close the dialog on windows
++ win32: fix resource path encoding issue in some setups [p=1718542]]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
