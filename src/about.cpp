@@ -122,8 +122,8 @@ void About::setDelegate(const DelegatePtr &delegate)
 #ifdef _WIN32
   SendMessage(handle(), WM_SETREDRAW, true, 0);
 
-  // This is required on Windows to get the first tab to be fully draw,
-  // but I have no idea why...
+  // Without this the first tab would not be redrawn completely on Windows.
+  // Though I have no idea why...
   InvalidateRect(handle(), nullptr, true);
 #endif
 }
