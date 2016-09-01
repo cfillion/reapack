@@ -808,7 +808,7 @@ bool Browser::match(const Entry &entry) const
   const string &author = getValue(AuthorColumn, entry);
   const string &remote = getValue(RemoteColumn, entry);
 
-  return m_filter.match(name + category + author + remote);
+  return m_filter.match({name, category, author, remote});
 }
 
 auto Browser::getEntry(const int listIndex) -> Entry *

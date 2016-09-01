@@ -8,13 +8,13 @@ static const char *M = "[filter]";
 
 TEST_CASE("basic matching", M) {
   Filter f;
-  REQUIRE(f.match("world"));
+  REQUIRE(f.match({"world"}));
 
   f.set("hello");
 
-  REQUIRE(f.match("hello"));
-  REQUIRE(f.match("HELLO"));
-  REQUIRE_FALSE(f.match("world"));
+  REQUIRE(f.match({"hello"}));
+  REQUIRE(f.match({"HELLO"}));
+  REQUIRE_FALSE(f.match({"world"}));
 }
 
 TEST_CASE("get/set filter", M) {
@@ -23,11 +23,11 @@ TEST_CASE("get/set filter", M) {
 
   f.set("hello");
   REQUIRE(f.get() == "hello");
-  REQUIRE(f.match("hello"));
+  REQUIRE(f.match({"hello"}));
 
   f.set("world");
   REQUIRE(f.get() == "world");
-  REQUIRE(f.match("world"));
+  REQUIRE(f.match({"world"}));
 }
 
 TEST_CASE("filter operators", M) {
@@ -52,28 +52,28 @@ TEST_CASE("word matching", M) {
   Filter f;
   f.set("hello world");
 
-  REQUIRE_FALSE(f.match("hello"));
-  REQUIRE(f.match("hello world"));
-  REQUIRE(f.match("helloworld"));
-  REQUIRE(f.match("hello test world"));
+  REQUIRE_FALSE(f.match({"hello"}));
+  REQUIRE(f.match({"hello world"}));
+  REQUIRE(f.match({"helloworld"}));
+  REQUIRE(f.match({"hello test world"}));
 }
 
 TEST_CASE("double quote matching", M) {
   Filter f;
   f.set("\"hello world\"");
 
-  REQUIRE(f.match("hello world"));
-  REQUIRE_FALSE(f.match("helloworld"));
-  REQUIRE_FALSE(f.match("hello test world"));
+  REQUIRE(f.match({"hello world"}));
+  REQUIRE_FALSE(f.match({"helloworld"}));
+  REQUIRE_FALSE(f.match({"hello test world"}));
 }
 
 TEST_CASE("single quote matching", M) {
   Filter f;
   f.set("'hello world'");
 
-  REQUIRE(f.match("hello world"));
-  REQUIRE_FALSE(f.match("helloworld"));
-  REQUIRE_FALSE(f.match("hello test world"));
+  REQUIRE(f.match({"hello world"}));
+  REQUIRE_FALSE(f.match({"helloworld"}));
+  REQUIRE_FALSE(f.match({"hello test world"}));
 }
 
 TEST_CASE("mixing quotes", M) {
@@ -82,14 +82,95 @@ TEST_CASE("mixing quotes", M) {
   SECTION("double in single") {
     f.set("'hello \"world\"'");
 
-    REQUIRE(f.match("hello \"world\""));
-    REQUIRE_FALSE(f.match("hello world"));
+    REQUIRE(f.match({"hello \"world\""}));
+    REQUIRE_FALSE(f.match({"hello world"}));
   }
 
   SECTION("single in double") {
     f.set("\"hello 'world'\"");
 
-    REQUIRE(f.match("hello 'world'"));
-    REQUIRE_FALSE(f.match("hello world"));
+    REQUIRE(f.match({"hello 'world'"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
   }
+}
+
+TEST_CASE("start of string", M) {
+  Filter f;
+
+  SECTION("normal") {
+    f.set("^hello");
+
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE_FALSE(f.match({"puts 'hello world'"}));
+  }
+
+  SECTION("middle") {
+    f.set("hel^lo");
+
+    REQUIRE(f.match({"hel^lo world"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
+  }
+
+  SECTION("single") {
+    f.set("^");
+    REQUIRE(f.match({"hel^lo world"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
+  }
+
+  SECTION("quote before") {
+    f.set("'^hello'");
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE_FALSE(f.match({"world hello"}));
+  }
+
+  SECTION("quote after") {
+    f.set("^'hello");
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE_FALSE(f.match({"world hello"}));
+  }
+}
+
+TEST_CASE("end of string", M) {
+  Filter f;
+
+  SECTION("normal") {
+    f.set("world$");
+
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE_FALSE(f.match({"'hello world'.upcase"}));
+  }
+
+  SECTION("middle") {
+    f.set("hel$lo");
+
+    REQUIRE(f.match({"hel$lo world"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
+  }
+
+  SECTION("single") {
+    f.set("$");
+    REQUIRE(f.match({"hel$lo world"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
+  }
+
+  SECTION("quote before") {
+    f.set("'hello'$");
+    REQUIRE(f.match({"hello"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
+  }
+
+  SECTION("quote after") {
+    f.set("'hello$'");
+    REQUIRE(f.match({"hello"}));
+    REQUIRE_FALSE(f.match({"hello world"}));
+  }
+}
+
+TEST_CASE("row matching", M) {
+  Filter f;
+  f.set("hello world");
+
+  REQUIRE_FALSE(f.match({"hello"}));
+  REQUIRE(f.match({"hello", "world"}));
+  REQUIRE(f.match({"hello", "test", "world"}));
 }

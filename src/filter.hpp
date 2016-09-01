@@ -29,15 +29,28 @@ public:
   const std::string get() const { return m_input; }
   void set(const std::string &);
 
-  bool match(const std::string &) const;
+  bool match(const std::vector<std::string> &) const;
 
   Filter &operator=(const std::string &f) { set(f); return *this; }
   bool operator==(const std::string &f) const { return m_input == f; }
   bool operator!=(const std::string &f) const { return !(*this == f); }
 
 private:
+  enum Flag {
+    StartAnchorFlag = 1<<0,
+    EndAnchorFlag = 1<<1,
+  };
+
+  struct Token {
+    std::string buf;
+    int flags;
+
+    bool test(Flag f) const { return (flags & f) != 0; }
+    bool match(const std::string &) const;
+  };
+
   std::string m_input;
-  std::vector<std::string> m_words;
+  std::vector<Token> m_tokens;
 };
 
 #endif

@@ -18,6 +18,7 @@
 #include "filter.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <unordered_set>
 
 using namespace std;
 
@@ -25,49 +26,80 @@ void Filter::set(const string &input)
 {
   enum State { Default, DoubleQuote, SingleQuote };
 
-  string buf;
+  Token token{};
   State state = Default;
   m_input = input;
 
-  m_words.clear();
+  m_tokens.clear();
 
   auto push = [&] {
     state = Default;
 
-    if(!buf.empty()) {
-      m_words.push_back(buf);
-      buf.clear();
+    size_t size = token.buf.size();
+
+    if(!size)
+      return;
+    if(size > 1 && token.buf[0] == '^') {
+      token.flags |= StartAnchorFlag;
+      token.buf.erase(0, 1);
+      size--;
     }
+    if(size > 1 && token.buf[size - 1] == '$') {
+      token.flags |= EndAnchorFlag;
+      token.buf.erase(size - 1, 1);
+      size--;
+    }
+
+    m_tokens.emplace_back(token);
+    token = Token();
   };
 
   for(const char c : input) {
     if(c == '"' && state != SingleQuote) {
       if(state == DoubleQuote)
-        push();
+        state = Default;
       else
         state = DoubleQuote;
     }
     else if(c == '\'' && state != DoubleQuote) {
       if(state == SingleQuote)
-        push();
+        state = Default;
       else
         state = SingleQuote;
     }
     else if(c == '\x20' && state == Default)
       push();
     else
-      buf += c;
+      token.buf += c;
   }
 
   push();
 }
 
-bool Filter::match(const string &str) const
+bool Filter::match(const vector<string> &rows) const
 {
-  for(const string &word : m_words) {
-    if(!boost::icontains(str, word))
-      return false;
+  unordered_set<const Token *> matches;
+
+  for(const string &str : rows) {
+    for(const Token &token : m_tokens) {
+      if(token.match(str))
+        matches.insert(&token);
+    }
   }
 
-  return true;
+  return matches.size() == m_tokens.size();
+}
+
+bool Filter::Token::match(const string &str) const
+{
+  bool match = true;
+
+  if(test(StartAnchorFlag))
+    match = match && boost::istarts_with(str, buf);
+  if(test(EndAnchorFlag))
+    match = match && boost::iends_with(str, buf);
+
+  match = match && boost::icontains(str, buf);
+
+  return match;
 }
