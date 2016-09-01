@@ -174,3 +174,68 @@ TEST_CASE("row matching", M) {
   REQUIRE(f.match({"hello", "world"}));
   REQUIRE(f.match({"hello", "test", "world"}));
 }
+
+TEST_CASE("OR operator", M) {
+  Filter f;
+
+  SECTION("normal") {
+    f.set("hello OR bacon");
+
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE(f.match({"chunky bacon"}));
+    REQUIRE_FALSE(f.match({"not matching"}));
+    REQUIRE_FALSE(f.match({"OR"}));
+  }
+
+  SECTION("anchor") {
+    f.set("world OR ^bacon");
+
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE_FALSE(f.match({"chunky bacon"}));
+    REQUIRE(f.match({"bacon"}));
+  }
+
+  SECTION("quoted") {
+    f.set("hello 'OR' bacon");
+
+    REQUIRE_FALSE(f.match({"hello world"}));
+    REQUIRE(f.match({"hello OR bacon"}));
+  }
+}
+
+TEST_CASE("NOT operator", M) {
+  Filter f;
+
+  SECTION("normal") {
+    f.set("hello NOT bacon");
+
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE_FALSE(f.match({"chunky bacon"}));
+    REQUIRE_FALSE(f.match({"hello NOT bacon"}));
+  }
+
+  SECTION("row matching") {
+    f.set("NOT bacon");
+
+    REQUIRE_FALSE(f.match({"hello", "bacon", "world"}));
+    REQUIRE(f.match({"hello", "world"}));
+  }
+
+  SECTION("preceded by OR") {
+    f.set("hello OR NOT bacon");
+    REQUIRE(f.match({"hello bacon"}));
+    REQUIRE(f.match({"hello", "bacon"}));
+  }
+
+  SECTION("followed by OR") {
+    f.set("NOT bacon OR hello");
+    REQUIRE(f.match({"hello bacon"}));
+    REQUIRE(f.match({"hello", "bacon"}));
+  }
+}
+
+TEST_CASE("empty filter", M) {
+  const Filter f("");
+
+  REQUIRE(f.match({"hello world"}));
+}

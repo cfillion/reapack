@@ -38,19 +38,21 @@ public:
 private:
   enum Flag {
     StartAnchorFlag = 1<<0,
-    EndAnchorFlag = 1<<1,
+    EndAnchorFlag   = 1<<1,
+    QuotedFlag      = 1<<2,
+    NotFlag         = 1<<3,
   };
 
   struct Token {
     std::string buf;
     int flags;
 
-    bool test(Flag f) const { return (flags & f) != 0; }
     bool match(const std::string &) const;
+    bool test(Flag f) const { return (flags & f) != 0; }
   };
 
   std::string m_input;
-  std::vector<Token> m_tokens;
+  std::vector<std::vector<Token> > m_tokens;
 };
 
 #endif

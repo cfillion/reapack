@@ -26,19 +26,35 @@ void Filter::set(const string &input)
 {
   enum State { Default, DoubleQuote, SingleQuote };
 
-  Token token{};
-  State state = Default;
   m_input = input;
-
   m_tokens.clear();
 
+  Token token{};
+  vector<Token> group;
+  State state = Default;
+
+  bool append = false;
+
   auto push = [&] {
-    state = Default;
 
     size_t size = token.buf.size();
 
     if(!size)
       return;
+
+    if(!token.test(QuotedFlag)) {
+      if(token.buf == "OR") {
+        token = Token();
+        append = true;
+        return;
+      }
+      else if(token.buf == "NOT") {
+        token.buf.clear();
+        token.flags |= NotFlag;
+        return;
+      }
+    }
+
     if(size > 1 && token.buf[0] == '^') {
       token.flags |= StartAnchorFlag;
       token.buf.erase(0, 1);
@@ -50,7 +66,14 @@ void Filter::set(const string &input)
       size--;
     }
 
-    m_tokens.emplace_back(token);
+    if(append)
+      append = false;
+    else if(!group.empty()) {
+      m_tokens.emplace_back(group);
+      group = vector<Token>();
+    }
+
+    group.emplace_back(token);
     token = Token();
   };
 
@@ -60,12 +83,16 @@ void Filter::set(const string &input)
         state = Default;
       else
         state = DoubleQuote;
+
+      token.flags |= QuotedFlag;
     }
     else if(c == '\'' && state != DoubleQuote) {
       if(state == SingleQuote)
         state = Default;
       else
         state = SingleQuote;
+
+      token.flags |= QuotedFlag;
     }
     else if(c == '\x20' && state == Default)
       push();
@@ -74,20 +101,35 @@ void Filter::set(const string &input)
   }
 
   push();
+
+  if(!group.empty())
+    m_tokens.emplace_back(group);
 }
 
 bool Filter::match(const vector<string> &rows) const
 {
-  unordered_set<const Token *> matches;
+  for(const vector<Token> &group : m_tokens) {
+    bool match = false;
 
-  for(const string &str : rows) {
-    for(const Token &token : m_tokens) {
-      if(token.match(str))
-        matches.insert(&token);
+    for(const Token &token : group) {
+      for(const string &str : rows) {
+        if(token.match(str))
+          match = true;
+        else if(token.test(NotFlag)) {
+          match = false;
+          break;
+        }
+      }
+
+      if(match)
+        break;
     }
+
+    if(!match)
+      return false;
   }
 
-  return matches.size() == m_tokens.size();
+  return true;
 }
 
 bool Filter::Token::match(const string &str) const
@@ -101,5 +143,5 @@ bool Filter::Token::match(const string &str) const
 
   match = match && boost::icontains(str, buf);
 
-  return match;
+  return match ^ test(NotFlag);
 }
