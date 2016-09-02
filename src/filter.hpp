@@ -23,8 +23,7 @@
 
 class Filter {
 public:
-  Filter() {}
-  Filter(const std::string &input) { set(input); }
+  Filter(const std::string & = {});
 
   const std::string get() const { return m_input; }
   void set(const std::string &);
@@ -36,23 +35,62 @@ public:
   bool operator!=(const std::string &f) const { return !(*this == f); }
 
 private:
-  enum Flag {
-    StartAnchorFlag = 1<<0,
-    EndAnchorFlag   = 1<<1,
-    QuotedFlag      = 1<<2,
-    NotFlag         = 1<<3,
+  class Node {
+  public:
+    virtual bool match(const std::vector<std::string> &) const = 0;
   };
 
-  struct Token {
-    std::string buf;
-    int flags;
+  typedef std::shared_ptr<Node> NodePtr;
 
-    bool match(const std::string &) const;
+  class Group : public Node {
+  public:
+    enum Type {
+      MatchAll,
+      MatchAny,
+    };
+
+    Group(Type type, Group *parent = nullptr)
+      : m_parent(parent), m_type(type), m_open(true) {}
+
+    Group *parent() const { return m_parent; }
+    Group *subgroup_any();
+    Group *subgroup_all();
+
+    bool empty() const { return m_nodes.empty(); }
+    void clear() { m_nodes.clear(); }
+    void push(const NodePtr &);
+
+    bool open() const { return m_open; }
+    bool match(const std::vector<std::string> &) const override;
+
+  private:
+    Group *m_parent;
+    Type m_type;
+    bool m_open;
+    std::vector<NodePtr> m_nodes;
+  };
+
+  class Token : public Node {
+  public:
+    enum Flag {
+      StartAnchorFlag = 1<<0,
+      EndAnchorFlag   = 1<<1,
+      QuotedFlag      = 1<<2,
+      NotFlag         = 1<<3,
+    };
+
+    Token() : flags(0) {}
+
+    int flags;
+    std::string buf;
+
+    bool match(const std::vector<std::string> &) const override;
+    bool matchRow(const std::string &) const;
     bool test(Flag f) const { return (flags & f) != 0; }
   };
 
   std::string m_input;
-  std::vector<std::vector<Token> > m_tokens;
+  Group m_root;
 };
 
 #endif

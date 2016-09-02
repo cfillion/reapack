@@ -22,58 +22,72 @@
 
 using namespace std;
 
+Filter::Filter(const string &input)
+  : m_root(Group::MatchAll)
+{
+  set(input);
+}
+
 void Filter::set(const string &input)
 {
   enum State { Default, DoubleQuote, SingleQuote };
 
   m_input = input;
-  m_tokens.clear();
+  m_root.clear();
 
-  Token token{};
-  vector<Token> group;
+  Group *group = &m_root;
+  auto token = make_shared<Token>();
   State state = Default;
 
-  bool append = false;
-
   auto push = [&] {
-    size_t size = token.buf.size();
+    size_t size = token->buf.size();
 
     if(!size)
       return;
 
-    if(!token.test(QuotedFlag)) {
-      if(token.buf == "OR") {
-        token = Token();
-        append = true;
+    if(!token->test(Token::QuotedFlag)) {
+      if(token->buf == "NOT") {
+        token->buf.clear();
+        token->flags ^= Token::NotFlag;
         return;
       }
-      else if(token.buf == "NOT") {
-        token.buf.clear();
-        token.flags ^= NotFlag;
+      else if(token->buf == "OR") {
+        token->buf.clear();
+        if(!group->empty())
+          group = group->subgroup_any();
+        return;
+      }
+      else if(token->buf == "(") {
+        token->buf.clear();
+        group = group->subgroup_all();
+        return;
+      }
+      else if(token->buf == ")") {
+        token->buf.clear();
+        if(group != &m_root)
+          group = group->parent();
         return;
       }
     }
 
-    if(size > 1 && token.buf[0] == '^') {
-      token.flags |= StartAnchorFlag;
-      token.buf.erase(0, 1);
+    if(size > 1 && token->buf[0] == '^') {
+      token->flags |= Token::StartAnchorFlag;
+      token->buf.erase(0, 1);
       size--;
     }
-    if(size > 1 && token.buf[size - 1] == '$') {
-      token.flags |= EndAnchorFlag;
-      token.buf.erase(size - 1, 1);
+    if(size > 1 && token->buf[size - 1] == '$') {
+      token->flags |= Token::EndAnchorFlag;
+      token->buf.erase(size - 1, 1);
       size--;
     }
 
-    if(append)
-      append = false;
-    else if(!group.empty()) {
-      m_tokens.emplace_back(group);
-      group = vector<Token>();
-    }
+    group->push(token);
 
-    group.emplace_back(token);
-    token = Token();
+    // close previous OR group
+    if(!group->open())
+      group = group->parent();
+
+    token = make_shared<Token>();
   };
 
   for(const char c : input) {
@@ -83,7 +97,7 @@ void Filter::set(const string &input)
       else
         state = DoubleQuote;
 
-      token.flags |= QuotedFlag;
+      token->flags |= Token::QuotedFlag;
     }
     else if(c == '\'' && state != DoubleQuote) {
       if(state == SingleQuote)
@@ -91,47 +105,90 @@ void Filter::set(const string &input)
       else
         state = SingleQuote;
 
-      token.flags |= QuotedFlag;
+      token->flags |= Token::QuotedFlag;
     }
     else if(c == '\x20' && state == Default)
       push();
     else
-      token.buf += c;
+      token->buf += c;
   }
 
   push();
-
-  if(!group.empty())
-    m_tokens.emplace_back(group);
 }
 
 bool Filter::match(const vector<string> &rows) const
 {
-  for(const vector<Token> &group : m_tokens) {
-    bool match = false;
+  return m_root.match(rows);
+}
 
-    for(const Token &token : group) {
-      for(const string &str : rows) {
-        if(token.match(str))
-          match = true;
-        else if(token.test(NotFlag)) {
-          match = false;
-          break;
-        }
-      }
+Filter::Group *Filter::Group::subgroup_any()
+{
+  if(m_type == Group::MatchAny) {
+    m_open = true;
+    return this;
+  }
 
-      if(match)
-        break;
+  NodePtr prev;
+  if(!m_nodes.empty()) {
+    prev = m_nodes.back();
+    m_nodes.pop_back();
+  }
+
+  auto newGroup = make_shared<Group>(Group::MatchAny, this);
+  m_nodes.push_back(newGroup);
+
+  if(prev)
+    newGroup->m_nodes.push_back(prev);
+
+  return newGroup.get();
+}
+
+Filter::Group *Filter::Group::subgroup_all()
+{
+  // always make a subgroup of this type
+
+  auto newGroup = make_shared<Group>(Group::MatchAll, this);
+  m_nodes.push_back(newGroup);
+  return newGroup.get();
+}
+
+void Filter::Group::push(const NodePtr &node)
+{
+  m_nodes.push_back(node);
+
+  if(m_type == MatchAny)
+    m_open = false;
+}
+
+bool Filter::Group::match(const vector<string> &rows) const
+{
+  for(const NodePtr &node : m_nodes) {
+    if(node->match(rows)) {
+      if(m_type == MatchAny)
+        return true;
     }
-
-    if(!match)
+    else if(m_type == MatchAll)
       return false;
   }
 
-  return true;
+  return m_type == MatchAll;
 }
 
-bool Filter::Token::match(const string &str) const
+bool Filter::Token::match(const vector<string> &rows) const
+{
+  bool match = false;
+
+  for(const string &row : rows) {
+    if(matchRow(row))
+      match = true;
+    else if(test(NotFlag))
+      return false;
+  }
+
+  return match;
+}
+
+bool Filter::Token::matchRow(const string &str) const
 {
   bool match = true;
 

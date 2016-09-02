@@ -8,6 +8,7 @@ static const char *M = "[filter]";
 
 TEST_CASE("basic matching", M) {
   Filter f;
+  REQUIRE(f.match({}));
   REQUIRE(f.match({"world"}));
 
   f.set("hello");
@@ -201,6 +202,19 @@ TEST_CASE("OR operator", M) {
     REQUIRE_FALSE(f.match({"hello world"}));
     REQUIRE(f.match({"hello OR bacon"}));
   }
+
+  SECTION("reset") {
+    f.set("hello OR bacon world");
+
+    REQUIRE_FALSE(f.match({"world"}));
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE(f.match({"bacon world"}));
+  }
+
+  SECTION("single") {
+    f.set("OR");
+    REQUIRE(f.match({"anything"}));
+  }
 }
 
 TEST_CASE("NOT operator", M) {
@@ -240,8 +254,18 @@ TEST_CASE("NOT operator", M) {
   }
 }
 
-TEST_CASE("empty filter", M) {
-  const Filter f("");
+TEST_CASE("AND grouping", M) {
+  Filter f;
 
-  REQUIRE(f.match({"hello world"}));
+  SECTION("normal") {
+    f.set("( hello world ) OR ( NOT hello bacon )");
+
+    REQUIRE(f.match({"hello world"}));
+    REQUIRE(f.match({"chunky bacon"}));
+    REQUIRE_FALSE(f.match({"hello chunky bacon"}));
+  }
+
+  SECTION("close without opening") {
+    f.set(") test");
+  }
 }
