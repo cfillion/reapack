@@ -28,7 +28,7 @@ public:
   const std::string get() const { return m_input; }
   void set(const std::string &);
 
-  bool match(const std::vector<std::string> &) const;
+  bool match(const std::vector<std::string> &rows) const { return m_root.match(rows); }
 
   Filter &operator=(const std::string &f) { set(f); return *this; }
   bool operator==(const std::string &f) const { return m_input == f; }
@@ -37,7 +37,20 @@ public:
 private:
   class Node {
   public:
+    enum Flag {
+      StartAnchorFlag = 1<<0,
+      EndAnchorFlag   = 1<<1,
+      QuotedFlag      = 1<<2,
+      NotFlag         = 1<<3,
+    };
+
+    Node(int flags) : m_flags(flags) {}
+
     virtual bool match(const std::vector<std::string> &) const = 0;
+    bool test(Flag f) const { return (m_flags & f) != 0; }
+
+  private:
+    int m_flags;
   };
 
   typedef std::shared_ptr<Node> NodePtr;
@@ -49,21 +62,14 @@ private:
       MatchAny,
     };
 
-    Group(Type type, Group *parent = nullptr)
-      : m_parent(parent), m_type(type), m_open(true) {}
-
-    Group *parent() const { return m_parent; }
-    Group *subgroup_any();
-    Group *subgroup_all();
-
-    bool empty() const { return m_nodes.empty(); }
+    Group(Type type, int flags = 0, Group *parent = nullptr);
     void clear() { m_nodes.clear(); }
-    void push(const NodePtr &);
-
-    bool open() const { return m_open; }
+    Group *push(std::string, int *flags);
     bool match(const std::vector<std::string> &) const override;
 
   private:
+    void push(const NodePtr &);
+
     Group *m_parent;
     Type m_type;
     bool m_open;
@@ -72,21 +78,12 @@ private:
 
   class Token : public Node {
   public:
-    enum Flag {
-      StartAnchorFlag = 1<<0,
-      EndAnchorFlag   = 1<<1,
-      QuotedFlag      = 1<<2,
-      NotFlag         = 1<<3,
-    };
-
-    Token() : flags(0) {}
-
-    int flags;
-    std::string buf;
-
+    Token(const std::string &buf, int flags);
     bool match(const std::vector<std::string> &) const override;
     bool matchRow(const std::string &) const;
-    bool test(Flag f) const { return (flags & f) != 0; }
+
+  private:
+    std::string m_buf;
   };
 
   std::string m_input;

@@ -35,60 +35,10 @@ void Filter::set(const string &input)
   m_input = input;
   m_root.clear();
 
-  Group *group = &m_root;
-  auto token = make_shared<Token>();
+  string buf;
+  int flags = 0;
   State state = Default;
-
-  auto push = [&] {
-    size_t size = token->buf.size();
-
-    if(!size)
-      return;
-
-    if(!token->test(Token::QuotedFlag)) {
-      if(token->buf == "NOT") {
-        token->buf.clear();
-        token->flags ^= Token::NotFlag;
-        return;
-      }
-      else if(token->buf == "OR") {
-        token->buf.clear();
-        if(!group->empty())
-          group = group->subgroup_any();
-        return;
-      }
-      else if(token->buf == "(") {
-        token->buf.clear();
-        group = group->subgroup_all();
-        return;
-      }
-      else if(token->buf == ")") {
-        token->buf.clear();
-        if(group != &m_root)
-          group = group->parent();
-        return;
-      }
-    }
-
-    if(size > 1 && token->buf[0] == '^') {
-      token->flags |= Token::StartAnchorFlag;
-      token->buf.erase(0, 1);
-      size--;
-    }
-    if(size > 1 && token->buf[size - 1] == '$') {
-      token->flags |= Token::EndAnchorFlag;
-      token->buf.erase(size - 1, 1);
-      size--;
-    }
-
-    group->push(token);
-
-    // close previous OR group
-    if(!group->open())
-      group = group->parent();
-
-    token = make_shared<Token>();
-  };
+  Group *group = &m_root;
 
   for(const char c : input) {
     if(c == '"' && state != SingleQuote) {
@@ -97,7 +47,7 @@ void Filter::set(const string &input)
       else
         state = DoubleQuote;
 
-      token->flags |= Token::QuotedFlag;
+      flags |= Node::QuotedFlag;
     }
     else if(c == '\'' && state != DoubleQuote) {
       if(state == SingleQuote)
@@ -105,51 +55,88 @@ void Filter::set(const string &input)
       else
         state = SingleQuote;
 
-      token->flags |= Token::QuotedFlag;
+      flags |= Node::QuotedFlag;
     }
-    else if(c == '\x20' && state == Default)
-      push();
+    else if(c == '\x20' && state == Default) {
+      group = group->push(buf, &flags);
+      buf.clear();
+    }
     else
-      token->buf += c;
+      buf += c;
   }
 
-  push();
+  group->push(buf, &flags);
 }
 
-bool Filter::match(const vector<string> &rows) const
+Filter::Group::Group(Type type, int flags, Group *parent)
+  : Node(flags), m_parent(parent), m_type(type), m_open(true)
 {
-  return m_root.match(rows);
 }
 
-Filter::Group *Filter::Group::subgroup_any()
+Filter::Group *Filter::Group::push(string buf, int *flags)
 {
-  if(m_type == Group::MatchAny) {
-    m_open = true;
+  size_t size = buf.size();
+
+  if(!size)
     return this;
+
+  if((*flags & QuotedFlag) == 0) {
+    if(buf == "NOT") {
+      *flags ^= Token::NotFlag;
+      return this;
+    }
+    else if(buf == "OR") {
+      if(m_nodes.empty())
+        return this;
+      else if(m_type == Group::MatchAny) {
+        m_open = true;
+        return this;
+      }
+
+      NodePtr prev;
+      if(!m_nodes.empty()) {
+        prev = m_nodes.back();
+        m_nodes.pop_back();
+      }
+
+      auto newGroup = make_shared<Group>(Group::MatchAny, 0, this);
+      m_nodes.push_back(newGroup);
+
+      if(prev)
+        newGroup->m_nodes.push_back(prev);
+
+      return newGroup.get();
+    }
+    else if(buf == "(") {
+      auto newGroup = make_shared<Group>(Group::MatchAll, *flags, this);
+      m_nodes.push_back(newGroup);
+      *flags = 0;
+      return newGroup.get();
+    }
+    else if(buf == ")")
+      return m_parent ? m_parent : this;
   }
 
-  NodePtr prev;
-  if(!m_nodes.empty()) {
-    prev = m_nodes.back();
-    m_nodes.pop_back();
+  if(size > 1 && buf[0] == '^') {
+    *flags |= Node::StartAnchorFlag;
+    buf.erase(0, 1);
+    size--;
+  }
+  if(size > 1 && buf[size - 1] == '$') {
+    *flags |= Node::EndAnchorFlag;
+    buf.erase(size - 1, 1);
+    size--;
   }
 
-  auto newGroup = make_shared<Group>(Group::MatchAny, this);
-  m_nodes.push_back(newGroup);
+  Group *group = this;
 
-  if(prev)
-    newGroup->m_nodes.push_back(prev);
+  while(!group->m_open)
+    group = group->m_parent;
 
-  return newGroup.get();
-}
+  group->push(make_shared<Token>(buf, *flags));
+  *flags = 0;
 
-Filter::Group *Filter::Group::subgroup_all()
-{
-  // always make a subgroup of this type
-
-  auto newGroup = make_shared<Group>(Group::MatchAll, this);
-  m_nodes.push_back(newGroup);
-  return newGroup.get();
+  return group;
 }
 
 void Filter::Group::push(const NodePtr &node)
@@ -163,7 +150,7 @@ void Filter::Group::push(const NodePtr &node)
 bool Filter::Group::match(const vector<string> &rows) const
 {
   for(const NodePtr &node : m_nodes) {
-    if(node->match(rows)) {
+    if(node->match(rows) ^ test(NotFlag)) {
       if(m_type == MatchAny)
         return true;
     }
@@ -172,6 +159,11 @@ bool Filter::Group::match(const vector<string> &rows) const
   }
 
   return m_type == MatchAll;
+}
+
+Filter::Token::Token(const std::string &buf, int flags)
+  : Node(flags), m_buf(buf)
+{
 }
 
 bool Filter::Token::match(const vector<string> &rows) const
@@ -193,11 +185,11 @@ bool Filter::Token::matchRow(const string &str) const
   bool match = true;
 
   if(test(StartAnchorFlag))
-    match = match && boost::istarts_with(str, buf);
+    match = match && boost::istarts_with(str, m_buf);
   if(test(EndAnchorFlag))
-    match = match && boost::iends_with(str, buf);
+    match = match && boost::iends_with(str, m_buf);
 
-  match = match && boost::icontains(str, buf);
+  match = match && boost::icontains(str, m_buf);
 
   return match ^ test(NotFlag);
 }

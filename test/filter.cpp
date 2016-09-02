@@ -268,4 +268,12 @@ TEST_CASE("AND grouping", M) {
   SECTION("close without opening") {
     f.set(") test");
   }
+
+  SECTION("NOT + AND grouping") {
+    f.set("NOT ( apple OR orange )");
+
+    REQUIRE_FALSE(f.match({"apple"}));
+    REQUIRE_FALSE(f.match({"orange"}));
+    REQUIRE(f.match({"test"}));
+  }
 }
