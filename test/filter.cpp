@@ -232,6 +232,12 @@ TEST_CASE("NOT operator", M) {
     REQUIRE(f.match({"hello bacon"}));
     REQUIRE(f.match({"hello", "bacon"}));
   }
+
+  SECTION("NOT NOT") {
+    f.set("NOT NOT hello");
+    REQUIRE(f.match({"hello"}));
+    REQUIRE_FALSE(f.match({"world"}));
+  }
 }
 
 TEST_CASE("empty filter", M) {

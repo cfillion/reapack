@@ -36,7 +36,6 @@ void Filter::set(const string &input)
   bool append = false;
 
   auto push = [&] {
-
     size_t size = token.buf.size();
 
     if(!size)
@@ -50,7 +49,7 @@ void Filter::set(const string &input)
       }
       else if(token.buf == "NOT") {
         token.buf.clear();
-        token.flags |= NotFlag;
+        token.flags ^= NotFlag;
         return;
       }
     }
