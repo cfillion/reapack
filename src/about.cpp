@@ -397,7 +397,7 @@ void AboutIndexDelegate::findInBrowser()
   const string &name = pkg->displayName(m_reapack->config()->browser.showDescs);
 
   ostringstream stream;
-  stream << quoted(name) << ' ' << quoted(m_index->name());
+  stream << '^' << quoted(name) << "$ ^" << quoted(m_index->name()) << '$';
   browser->setFilter(stream.str());
 }
 
