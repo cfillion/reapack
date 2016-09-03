@@ -18,6 +18,7 @@
 #ifndef REAPACK_FILTER_HPP
 #define REAPACK_FILTER_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
 
