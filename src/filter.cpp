@@ -88,7 +88,7 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
     else if(buf == "OR") {
       if(m_nodes.empty())
         return this;
-      else if(m_type == Group::MatchAny) {
+      else if(m_type == MatchAny) {
         m_open = true;
         return this;
       }
@@ -99,7 +99,7 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
         m_nodes.pop_back();
       }
 
-      auto newGroup = make_shared<Group>(Group::MatchAny, 0, this);
+      auto newGroup = make_shared<Group>(MatchAny, 0, this);
       m_nodes.push_back(newGroup);
 
       if(prev)
@@ -108,13 +108,24 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
       return newGroup.get();
     }
     else if(buf == "(") {
-      auto newGroup = make_shared<Group>(Group::MatchAll, *flags, this);
+      auto newGroup = make_shared<Group>(MatchAll, *flags, this);
       m_nodes.push_back(newGroup);
       *flags = 0;
       return newGroup.get();
     }
-    else if(buf == ")")
-      return m_parent ? m_parent : this;
+    else if(buf == ")") {
+      Group *parent = this;
+
+      while(parent->m_parent) {
+        const Type type = parent->m_type;
+        parent = parent->m_parent;
+
+        if(type == MatchAll)
+          break;
+      }
+
+      return parent;
+    }
   }
 
   if(size > 1 && buf[0] == '^') {
@@ -128,10 +139,7 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
     size--;
   }
 
-  Group *group = this;
-
-  while(!group->m_open)
-    group = group->m_parent;
+  Group *group = m_open ? this : m_parent;
 
   group->push(make_shared<Token>(buf, *flags));
   *flags = 0;

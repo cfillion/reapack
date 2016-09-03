@@ -270,10 +270,30 @@ TEST_CASE("AND grouping", M) {
   }
 
   SECTION("NOT + AND grouping") {
-    f.set("NOT ( apple OR orange )");
+    f.set("NOT ( apple orange ) bacon");
+
+    REQUIRE(f.match({"bacon"}));
+    REQUIRE_FALSE(f.match({"apple bacon"}));
+    REQUIRE_FALSE(f.match({"orange bacon"}));
+  }
+
+  SECTION("NOT + AND + OR grouping") {
+    f.set("NOT ( apple OR orange ) OR bacon");
 
     REQUIRE_FALSE(f.match({"apple"}));
     REQUIRE_FALSE(f.match({"orange"}));
     REQUIRE(f.match({"test"}));
+    REQUIRE(f.match({"apple bacon"}));
+    REQUIRE(f.match({"bacon"}));
+  }
+
+  SECTION("nested groups") {
+    f.set("NOT ( ( apple OR orange ) OR bacon )");
+
+    REQUIRE_FALSE(f.match({"apple"}));
+    REQUIRE_FALSE(f.match({"orange"}));
+    REQUIRE(f.match({"test"}));
+    REQUIRE_FALSE(f.match({"apple bacon"}));
+    REQUIRE_FALSE(f.match({"bacon"}));
   }
 }
