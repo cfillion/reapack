@@ -273,8 +273,9 @@ TEST_CASE("AND grouping", M) {
     f.set("NOT ( apple orange ) bacon");
 
     REQUIRE(f.match({"bacon"}));
-    REQUIRE_FALSE(f.match({"apple bacon"}));
-    REQUIRE_FALSE(f.match({"orange bacon"}));
+    REQUIRE(f.match({"apple bacon"}));
+    REQUIRE(f.match({"orange bacon"}));
+    REQUIRE_FALSE(f.match({"apple bacon orange"}));
   }
 
   SECTION("NOT + AND + OR grouping") {

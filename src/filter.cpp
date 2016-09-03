@@ -18,7 +18,6 @@
 #include "filter.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include <unordered_set>
 
 using namespace std;
 
@@ -158,15 +157,15 @@ void Filter::Group::push(const NodePtr &node)
 bool Filter::Group::match(const vector<string> &rows) const
 {
   for(const NodePtr &node : m_nodes) {
-    if(node->match(rows) ^ test(NotFlag)) {
+    if(node->match(rows)) {
       if(m_type == MatchAny)
         return true;
     }
     else if(m_type == MatchAll)
-      return false;
+      return test(NotFlag);
   }
 
-  return m_type == MatchAll;
+  return m_type == MatchAll && !test(NotFlag);
 }
 
 Filter::Token::Token(const std::string &buf, int flags)
