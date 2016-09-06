@@ -60,7 +60,17 @@ void About::onInit()
   m_list->onContextMenu([=] (Menu &m, int i) { return m_delegate->fillContextMenu(m, i); });
   m_list->onActivate([=] { m_delegate->itemActivated(); });
 
-  m_report = getControl(IDC_REPORT);
+  setAnchor(m_tabs->handle(), AnchorRight | AnchorBottom);
+  setAnchor(m_desc->handle(), AnchorRight | AnchorBottom);
+  setAnchor(m_menu->handle(), AnchorBottom);
+  setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
+  setAnchor(getControl(IDC_REPORT), AnchorRight | AnchorBottom);
+  setAnchor(getControl(IDC_CHANGELOG), AnchorRight | AnchorBottom);
+  setAnchor(getControl(IDC_WEBSITE), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_DONATE), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_SCREENSHOT), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_ACTION), AnchorAll);
+  setAnchor(getControl(IDOK), AnchorAll);
 }
 
 void About::onCommand(const int id, int)
@@ -99,6 +109,7 @@ void About::setDelegate(const DelegatePtr &delegate)
     IDC_ABOUT,
     IDC_MENU,
     IDC_LIST,
+    IDC_CHANGELOG,
     IDC_REPORT,
     IDC_WEBSITE,
     IDC_SCREENSHOT,
@@ -254,17 +265,10 @@ void AboutIndexDelegate::init(About *dialog)
   dialog->setMetadata(m_index->metadata(), m_index->name() == "ReaPack");
   dialog->setAction("Install/update " + m_index->name());
 
-  // restore report size after being possibly modified by AboutPackageDelegate
-  RECT rect;
-  GetWindowRect(dialog->desc()->handle(), &rect);
-  ScreenToClient(dialog->handle(), (LPPOINT)&rect);
-  ScreenToClient(dialog->handle(), ((LPPOINT)&rect)+1);
-  SetWindowPos(dialog->report(), nullptr, rect.left, rect.top,
-    rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
-
   dialog->tabs()->addTab({AUTO_STR("Packages"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
-  dialog->tabs()->addTab({AUTO_STR("Installed Files"), {dialog->report()}});
+  dialog->tabs()->addTab({AUTO_STR("Installed Files"),
+    {dialog->getControl(IDC_REPORT)}});
 
   dialog->menu()->addColumn({AUTO_STR("Category"), 142});
 
@@ -288,6 +292,8 @@ void AboutIndexDelegate::init(About *dialog)
 
 void AboutIndexDelegate::initInstalledFiles()
 {
+  HWND report = m_dialog->getControl(IDC_REPORT);
+
   set<Registry::File> allFiles;
 
   try {
@@ -305,12 +311,12 @@ void AboutIndexDelegate::initInstalledFiles()
       AUTO_STR("Retry later when all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
-    SetWindowText(m_dialog->report(), msg);
+    SetWindowText(report, msg);
     return;
   }
 
   if(allFiles.empty()) {
-    SetWindowText(m_dialog->report(),
+    SetWindowText(report,
       AUTO_STR(
       "This repository does not own any file on your computer at this time.\r\n")
 
@@ -327,7 +333,7 @@ void AboutIndexDelegate::initInstalledFiles()
       stream << "\r\n";
     }
 
-    SetWindowText(m_dialog->report(), make_autostring(stream.str()).c_str());
+    SetWindowText(report, make_autostring(stream.str()).c_str());
   }
 }
 
@@ -455,16 +461,10 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->setMetadata(m_package->metadata());
   dialog->setAction("About " + m_index->name());
 
-  dialog->tabs()->addTab({AUTO_STR("History"), {dialog->menu()->handle(), dialog->report()}});
-  dialog->tabs()->addTab({AUTO_STR("Contents"), {dialog->menu()->handle(), dialog->list()->handle()}});
-
-  RECT rect;
-  GetWindowRect(dialog->list()->handle(), &rect);
-  ScreenToClient(dialog->handle(), (LPPOINT)&rect);
-  ScreenToClient(dialog->handle(), ((LPPOINT)&rect)+1);
-
-  SetWindowPos(dialog->report(), nullptr, rect.left, rect.top,
-    rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
+  dialog->tabs()->addTab({AUTO_STR("History"),
+    {dialog->menu()->handle(), dialog->getControl(IDC_CHANGELOG)}});
+  dialog->tabs()->addTab({AUTO_STR("Contents"),
+    {dialog->menu()->handle(), dialog->list()->handle()}});
 
   dialog->menu()->addColumn({AUTO_STR("Version"), 142});
 
@@ -490,7 +490,8 @@ void AboutPackageDelegate::updateList(const int index)
   const Version *ver = m_package->version(index);
   OutputStream stream;
   stream << *ver;
-  SetWindowText(m_dialog->report(), make_autostring(stream.str()).c_str());
+  SetWindowText(m_dialog->getControl(IDC_CHANGELOG),
+    make_autostring(stream.str()).c_str());
 
   m_sources = &ver->sources();
 

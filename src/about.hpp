@@ -53,7 +53,6 @@ public:
   RichEdit *desc() const { return m_desc; }
   ListView *menu() const { return m_menu; }
   ListView *list() const { return m_list; }
-  HWND report() const { return m_report; }
 
 protected:
   void onInit() override;
@@ -71,7 +70,6 @@ private:
   RichEdit *m_desc;
   ListView *m_menu;
   ListView *m_list;
-  HWND m_report;
 
   DelegatePtr m_delegate;
 };

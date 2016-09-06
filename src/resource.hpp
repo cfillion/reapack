@@ -69,5 +69,6 @@
 #define IDC_VERIFYPEER 230
 #define IDC_SCREENSHOT 231
 #define IDC_ENABLE     232
+#define IDC_CHANGELOG  233
 
 #endif
