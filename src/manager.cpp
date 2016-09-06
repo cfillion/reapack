@@ -48,8 +48,8 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Name"), 110},
-    {AUTO_STR("Index URL"), 350},
+    {AUTO_STR("Name"), 140},
+    {AUTO_STR("Index URL"), 440},
     {AUTO_STR("State"), 60},
   });
 
