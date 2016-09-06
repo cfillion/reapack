@@ -30,7 +30,8 @@ STYLE DIALOG_STYLE
 FONT DIALOG_FONT
 CAPTION "ReaPack Configuration"
 BEGIN
-  LTEXT "Remote repositories:", IDC_LABEL, 5, 5, 390, 10
+  LTEXT "The repositories enabled in this list are used to populate the package list:",
+    IDC_LABEL, 5, 5, 390, 10
   CONTROL "", IDC_LIST, WC_LISTVIEW, LVS_REPORT | LVS_SHOWSELALWAYS |
     WS_BORDER | WS_TABSTOP, 5, 18, 390, 190
   PUSHBUTTON "&Browse Packages...", IDC_BROWSE, 5, 211, 75, 14
