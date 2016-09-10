@@ -96,10 +96,6 @@ void Config::restoreDefaultRemotes()
 
   for(const auto &pair : repos) {
     Remote remote = remotes.get(pair.first);
-
-    if(!remote)
-      remote.setEnabled(false); // disable by default
-
     remote.setName(pair.first);
     remote.setUrl(pair.second);
     remotes.add(remote);
