@@ -429,11 +429,11 @@ bool Manager::apply()
   if(!tx)
     return false;
 
-  bool promptSync = false;
+  bool syncAll = false;
 
   if(m_autoInstall) {
     m_config->install.autoInstall = m_autoInstall.value();
-    promptSync = m_config->install.autoInstall;
+    syncAll = m_autoInstall.value();
   }
 
   if(m_bleedingEdge)
@@ -449,19 +449,16 @@ bool Manager::apply()
     if(m_uninstall.find(remote) == m_uninstall.end()) {
       m_reapack->setRemoteEnabled(enable, remote);
 
-      if(enable)
-        promptSync = true;
+      if(enable && !syncAll)
+        tx->synchronize(remote);
     }
   }
 
   for(const Remote &remote : m_uninstall)
     m_reapack->uninstall(remote);
 
-  if(promptSync && MessageBox(handle(),
-      AUTO_STR("Synchronize packages (install/update) now?"),
-      AUTO_STR("ReaPack Query"), MB_YESNO) == IDYES) {
+  if(syncAll)
     m_reapack->synchronizeAll();
-  }
 
   tx->runTasks();
   m_config->write();
