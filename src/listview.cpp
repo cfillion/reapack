@@ -146,6 +146,11 @@ void ListView::sort()
     if(it != view->m_sortFuncs.end())
       ret = it->second((int)aRow, (int)bRow);
     else {
+      if(view->m_rows[aRow].size() <= (size_t)column)
+        return -1;
+      else if(view->m_rows[bRow].size() <= (size_t)column)
+        return 1;
+
       auto_string a = view->m_rows[aRow][column];
       boost::algorithm::to_lower(a);
 
