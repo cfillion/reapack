@@ -48,6 +48,8 @@ void ListView::setExStyle(const int style, const bool enable)
 
 int ListView::addColumn(const Column &col)
 {
+  assert(m_rows.empty());
+
   LVCOLUMN item{};
 
   item.mask |= LVCF_WIDTH;
@@ -86,12 +88,12 @@ int ListView::addRow(const Row &content)
 
 void ListView::replaceRow(int index, const Row &content)
 {
-  m_rows[index] = content;
+  assert(content.size() == m_cols.size());
 
-  const int cols = min(columnCount(), (int)content.size());
+  m_rows[index] = content;
   index = translate(index);
 
-  for(int i = 0; i < cols; i++) {
+  for(int i = 0; i < columnCount(); i++) {
     auto_char *text = const_cast<auto_char *>(content[i].c_str());
     ListView_SetItemText(handle(), index, i, text);
   }
@@ -146,11 +148,6 @@ void ListView::sort()
     if(it != view->m_sortFuncs.end())
       ret = it->second((int)aRow, (int)bRow);
     else {
-      if(view->m_rows[aRow].size() <= (size_t)column)
-        return -1;
-      else if(view->m_rows[bRow].size() <= (size_t)column)
-        return 1;
-
       auto_string a = view->m_rows[aRow][column];
       boost::algorithm::to_lower(a);
 
