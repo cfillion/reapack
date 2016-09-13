@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="99308dd2ea0b68bc2bac1fd49e439769319504b3" name="ReaPack">
+<index version="1" commit="9eb3f3054e4c7cacd947588ac39b1d26793ede5a" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -296,6 +296,23 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1beta3/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.1rc1" author="cfillion" time="2016-09-13T20:57:21Z">
+        <changelog><![CDATA[Added:
++ filter: implement ^ and $ anchors to match start and end of string
++ filter: implement NOT, OR and ( ) grouping operators à la REAPER
++ manager: synchronize after enabling a repo or the auto install mode [p=1726030]
+Changed:
++ about repo: add ^anchors$ to when setting the browser's filter
++ about: make the window user-resizable [#10]
++ config: enable all repositories by default [p=1726030]
++ manager: make the window bigger [#10]
+Fixed:
++ win32: update curl to v7.50.2 (bugfix for wine)]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
