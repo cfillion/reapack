@@ -17,4 +17,4 @@
   + config: enable all repositories by default [p=1726030]
   + manager: make the window bigger [#10]
   Fixed:
-  + win32: update curl to v7.50.2 (bugfix for wine)
+  + win32: update curl to v7.50.2 (bugfix for wine) [p=1717444]
