@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="9eb3f3054e4c7cacd947588ac39b1d26793ede5a" name="ReaPack">
+<index version="1" commit="8d237f456bef736f0d2453557916f3b12ff83af1" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -308,7 +308,7 @@ Changed:
 + config: enable all repositories by default [p=1726030]
 + manager: make the window bigger [#10]
 Fixed:
-+ win32: update curl to v7.50.2 (bugfix for wine)]]></changelog>
++ win32: update curl to v7.50.2 (bugfix for wine) [p=1717444]]]></changelog>
         <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack32.dylib</source>
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack32.dll</source>
