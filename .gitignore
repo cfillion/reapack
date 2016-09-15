@@ -2,7 +2,7 @@
 .tup/
 bin/
 build/
-vendor/
+vendor/*
 !vendor/.gitkeep
 resource.rc_mac*
 resource.res
