@@ -87,7 +87,7 @@ private:
   void synchronize(const Package *, const InstallOpts &);
   bool allFilesExists(const std::set<Path> &) const;
   void registerQueued();
-  void registerScript(const HostTicket &);
+  void registerScript(const HostTicket &, bool isLast);
   void inhibit(const Remote &);
   bool commitTasks();
   void finish();

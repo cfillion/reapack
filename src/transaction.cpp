@@ -298,7 +298,7 @@ void Transaction::registerQueued()
 
     switch(reg.file.type) {
     case Package::ScriptType:
-      registerScript(reg);
+      registerScript(reg, m_regQueue.size() == 1);
       break;
     default:
       break;
@@ -308,7 +308,7 @@ void Transaction::registerQueued()
   }
 }
 
-void Transaction::registerScript(const HostTicket &reg)
+void Transaction::registerScript(const HostTicket &reg, const bool isLast)
 {
   enum Section { MainSection = 0, MidiEditorSection = 32060 };
 
@@ -325,8 +325,6 @@ void Transaction::registerScript(const HostTicket &reg)
     section = MainSection;
 
   const string &fullPath = Path::prefixRoot(reg.file.path).join();
-  const bool isLast = m_regQueue.size() == 1;
-
   if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add) {
     m_receipt.addError({"This script could not be registered in REAPER.",
       reg.file.path.join()});
