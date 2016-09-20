@@ -8,7 +8,8 @@ CXXFLAGS += -Wno-unused-function -Wno-unused-private-field -Wno-missing-braces
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
 CXXFLAGS += -pipe -fPIC -O2 -std=c++14
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
-CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DREAPACK_FILE=\"$(REAPACK_FILE)\"
+CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DSWELL_APP_PREFIX=SWELL_REAPACK
+CXXFLAGS += -DREAPACK_FILE=\"$(REAPACK_FILE)\"
 CXXFLAGS += -arch @(ARCH) -mmacosx-version-min=10.7 -stdlib=libc++
 
 WDLFLAGS := -std=c++98 -w
