@@ -137,6 +137,8 @@ void About::setDelegate(const DelegatePtr &delegate)
   // Though I have no idea why...
   InvalidateRect(handle(), nullptr, true);
 #endif
+
+  show();
 }
 
 void About::setTitle(const string &what)

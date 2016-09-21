@@ -67,6 +67,7 @@ private:
 
     int flags;
     Registry::Entry regEntry;
+    IndexPtr index;
     const Package *package;
     const Version *latest;
     const Version *current;
@@ -100,10 +101,10 @@ private:
     UninstalledView,
   };
 
-  Entry makeEntry(const Package *, const Registry::Entry &) const;
+  Entry makeEntry(const Package *, const Registry::Entry &, const IndexPtr &) const;
 
   bool fillContextMenu(Menu &, int index);
-  void populate();
+  void populate(const std::vector<IndexPtr> &);
   void transferActions();
   bool match(const Entry &) const;
   void checkFilter();
@@ -136,7 +137,6 @@ private:
   void aboutRemote(int index);
   void aboutPackage(int index);
 
-  std::vector<IndexPtr> m_indexes;
   ReaPack *m_reapack;
   bool m_loading;
   bool m_loaded;

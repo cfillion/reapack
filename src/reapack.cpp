@@ -224,13 +224,16 @@ Remote ReaPack::remote(const string &name) const
 
 void ReaPack::aboutSelf()
 {
-  about(remote("ReaPack"), m_mainWindow);
+  fetchIndex(remote("ReaPack"), [=] (const IndexPtr &index) {
+    if(index)
+      about()->setDelegate(make_shared<AboutIndexDelegate>(index, this));
+  }, m_mainWindow);
 }
 
-void ReaPack::setupAbout()
+About *ReaPack::about()
 {
   if(m_about)
-    return;
+    return m_about;
 
   m_about = Dialog::Create<About>(m_instance, m_mainWindow);
 
@@ -238,30 +241,8 @@ void ReaPack::setupAbout()
     Dialog::Destroy(m_about);
     m_about = nullptr;
   });
-}
 
-void ReaPack::about(const Remote &remote, HWND parent)
-{
-  if(!remote)
-    return;
-
-  fetchIndex(remote, [=] (const IndexPtr &index) {
-    // do nothing if the index could not be loaded
-    if(!index)
-      return;
-
-    setupAbout();
-    m_about->setDelegate(std::make_shared<AboutIndexDelegate>(index, this));
-    m_about->show();
-
-  }, parent);
-}
-
-void ReaPack::about(const Package *pkg)
-{
-  setupAbout();
-  m_about->setDelegate(std::make_shared<AboutPackageDelegate>(pkg, this));
-  m_about->show();
+  return m_about;
 }
 
 Browser *ReaPack::browsePackages()

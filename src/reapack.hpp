@@ -72,8 +72,7 @@ public:
   void importRemote();
   void manageRemotes();
   void aboutSelf();
-  void about(const Remote &, HWND parent);
-  void about(const Package *);
+  About *about();
   Browser *browsePackages();
   void refreshManager();
   void refreshBrowser();
@@ -92,7 +91,6 @@ private:
   void registerSelf();
   void doFetchIndex(const Remote &remote, DownloadQueue *, HWND, bool stale);
   IndexPtr loadIndex(const Remote &remote, HWND);
-  void setupAbout();
 
   std::map<int, ActionCallback> m_actions;
 

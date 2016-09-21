@@ -17,6 +17,7 @@
 
 #include "manager.hpp"
 
+#include "about.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
 #include "import.hpp"
@@ -326,7 +327,11 @@ void Manager::setChange(const int increment)
 
 void Manager::about(const int index)
 {
-  m_reapack->about(getRemote(index), handle());
+  const Remote &remote = getRemote(index);
+  m_reapack->fetchIndex(remote, [=] (const IndexPtr &index) {
+    if(index)
+      m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(index, m_reapack));
+  }, handle());
 }
 
 void Manager::copyUrl()

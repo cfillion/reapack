@@ -17,13 +17,13 @@
 
 #include "browser.hpp"
 
+#include "about.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
-#include "report.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
 
@@ -517,7 +517,7 @@ void Browser::refresh(const bool stale)
 
   m_loading = true;
 
-  m_reapack->fetchIndexes(remotes, [=] (vector<IndexPtr> indexes) {
+  m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
     // if the user wanted to close the window while we were downloading stuff
     if(m_loaded && !isVisible()) {
       close();
@@ -526,10 +526,7 @@ void Browser::refresh(const bool stale)
 
     m_loading = false;
 
-    // keep the old indexes around a little bit longer for use by #populate
-    indexes.swap(m_indexes);
-
-    populate();
+    populate(indexes);
 
     if(!m_loaded) {
       m_loaded = true;
@@ -545,7 +542,7 @@ void Browser::setFilter(const string &newFilter)
   SetFocus(m_filterHandle);
 }
 
-void Browser::populate()
+void Browser::populate(const vector<IndexPtr> &indexes)
 {
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
@@ -561,14 +558,14 @@ void Browser::populate()
     // thus causing the wrong package to be selected!
     m_visibleEntries.clear();
 
-    for(const IndexPtr &index : m_indexes) {
+    for(const IndexPtr &index : indexes) {
       for(const Package *pkg : index->packages())
-        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg)));
+        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg), index));
 
       // obsolete packages
       for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
         if(!index->find(regEntry.category, regEntry.package))
-          m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry});
+          m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry, index});
       }
     }
 
@@ -619,7 +616,8 @@ void Browser::transferActions()
     disable(m_applyBtn);
 }
 
-auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
+auto Browser::makeEntry(const Package *pkg,
+    const Registry::Entry &regEntry, const IndexPtr &index)
   const -> Entry
 {
   const auto &instOpts = m_reapack->config()->install;
@@ -644,7 +642,7 @@ auto Browser::makeEntry(const Package *pkg, const Registry::Entry &regEntry)
   if(!latest)
     latest = pkg->lastVersion(true);
 
-  return {flags, regEntry, pkg, latest, current};
+  return {flags, regEntry, index, pkg, latest, current};
 }
 
 void Browser::fillList()
@@ -824,13 +822,13 @@ void Browser::aboutPackage(const int index)
   const Entry *entry = getEntry(index);
 
   if(entry && entry->package)
-    m_reapack->about(entry->package);
+    m_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(entry->package, m_reapack));
 }
 
 void Browser::aboutRemote(const int index)
 {
   if(const Entry *entry = getEntry(index))
-    m_reapack->about(getRemote(*entry), handle());
+    m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(entry->index, m_reapack));
 }
 
 void Browser::installLatest(const int index, const bool toggle)
