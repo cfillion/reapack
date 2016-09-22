@@ -137,15 +137,14 @@ string Path::basename() const
   return m_parts.back();
 }
 
-string Path::dirname() const
+Path Path::dirname() const
 {
   if(empty())
     return {};
 
   Path dir(*this);
   dir.removeLast();
-
-  return dir.join();
+  return dir;
 }
 
 string Path::join(const char sep) const

@@ -24,14 +24,14 @@ TEST_CASE("prepend and append path components", M) {
   REQUIRE(path.empty());
   REQUIRE(path.size() == 0);
   REQUIRE(path.join() == string());
-  REQUIRE(path.dirname() == string());
-  REQUIRE(path.basename() == string());
+  REQUIRE(path.dirname().empty());
+  REQUIRE(path.basename().empty());
 
   path.prepend("world");
   REQUIRE_FALSE(path.empty());
   REQUIRE(path.size() == 1);
   REQUIRE(path.join() == "world");
-  REQUIRE(path.dirname() == string());
+  REQUIRE(path.dirname().empty());
   REQUIRE(path.basename() == "world");
 
   path.prepend("hello");
@@ -41,18 +41,17 @@ TEST_CASE("prepend and append path components", M) {
 #else
   REQUIRE(path.join() == "hello\\world");
 #endif
-  REQUIRE(path.dirname() == "hello");
+  REQUIRE(path.dirname().join() == "hello");
   REQUIRE(path.basename() == "world");
 
   path.append("test");
   REQUIRE(path.size() == 3);
 #ifndef _WIN32
   REQUIRE(path.join() == "hello/world/test");
-  REQUIRE(path.dirname() == "hello/world");
 #else
   REQUIRE(path.join() == "hello\\world\\test");
-  REQUIRE(path.dirname() == "hello\\world");
 #endif
+  REQUIRE(path.dirname() == Path("hello/world"));
   REQUIRE(path.basename() == "test");
 }
 
