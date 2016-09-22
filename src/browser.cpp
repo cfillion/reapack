@@ -517,9 +517,9 @@ void Browser::updateAbout()
     return;
 
   if(about->testDelegate<AboutIndexDelegate>())
-    about->setDelegate(make_shared<AboutIndexDelegate>(entry->index, m_reapack));
+    about->setDelegate(make_shared<AboutIndexDelegate>(entry->index, m_reapack), false);
   else if(about->testDelegate<AboutPackageDelegate>() && entry->package)
-    about->setDelegate(make_shared<AboutPackageDelegate>(entry->package, m_reapack));
+    about->setDelegate(make_shared<AboutPackageDelegate>(entry->package, m_reapack), false);
 }
 
 void Browser::refresh(const bool stale)

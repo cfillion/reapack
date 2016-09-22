@@ -89,7 +89,7 @@ void About::onCommand(const int id, int)
   }
 }
 
-void About::setDelegate(const DelegatePtr &delegate)
+void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 {
 #ifdef _WIN32
   // preventing fast blinking on windows
@@ -138,8 +138,8 @@ void About::setDelegate(const DelegatePtr &delegate)
   InvalidateRect(handle(), nullptr, true);
 #endif
 
-  if(!isVisible())
-    show();
+  if(focus)
+    setFocus(); // this also calls show();
 }
 
 void About::setTitle(const string &what)

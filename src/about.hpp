@@ -43,7 +43,7 @@ public:
   typedef std::shared_ptr<AboutDelegate> DelegatePtr;
 
   About();
-  void setDelegate(const DelegatePtr &);
+  void setDelegate(const DelegatePtr &, bool focus = true);
   template<typename T>
   bool testDelegate() { return dynamic_cast<T *>(m_delegate.get()) != nullptr; }
 
