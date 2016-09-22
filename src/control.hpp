@@ -31,8 +31,11 @@ public:
   static void inhibitRedraw(HWND handle, const bool inhibit)
   {
 #ifdef WM_SETREDRAW
-    // WM_SETREDRAW is not supported by SWELL
+    // not supported by SWELL
     SendMessage(handle, WM_SETREDRAW, !inhibit, 0);
+
+    if(!inhibit)
+      InvalidateRect(handle, nullptr, true);
 #endif
   }
 

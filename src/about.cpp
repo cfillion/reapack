@@ -128,12 +128,6 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
   m_menu->autoSizeHeader();
   m_list->autoSizeHeader();
 
-#ifdef _WIN32
-  // Without this the first tab would not be redrawn completely on Windows.
-  // Though I have no idea why...
-  InvalidateRect(handle(), nullptr, true);
-#endif
-
   if(focus)
     setFocus(); // this also calls show();
 }
