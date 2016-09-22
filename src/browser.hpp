@@ -109,6 +109,7 @@ private:
   void transferActions();
   bool match(const Entry &) const;
   void updateFilter();
+  void updateAbout();
   void fillList();
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;

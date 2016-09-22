@@ -52,7 +52,7 @@ enum Action {
   ACTION_MANAGE,
 };
 
-enum Timers { TIMER_FILTER = 100 };
+enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser(ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
@@ -288,23 +288,16 @@ void Browser::onTimer(const int id)
   case TIMER_FILTER:
     updateFilter();
     break;
+  case TIMER_ABOUT:
+    updateAbout();
+    break;
   }
 }
 
 void Browser::onSelection()
 {
   setEnabled(m_list->hasSelection(), m_actionsBtn);
-
-  About *about = m_reapack->about(false);
-  const Entry *entry = getEntry(m_list->currentIndex());
-
-  if(!about || !entry)
-    return;
-
-  if(about->testDelegate<AboutIndexDelegate>())
-    about->setDelegate(make_shared<AboutIndexDelegate>(entry->index, m_reapack));
-  else if(about->testDelegate<AboutPackageDelegate>() && entry->package)
-    about->setDelegate(make_shared<AboutPackageDelegate>(entry->package, m_reapack));
+  startTimer(100, TIMER_ABOUT);
 }
 
 bool Browser::fillContextMenu(Menu &menu, const int index)
@@ -511,6 +504,22 @@ void Browser::updateFilter()
     m_filter = filter;
     fillList();
   }
+}
+
+void Browser::updateAbout()
+{
+  stopTimer(TIMER_ABOUT);
+
+  About *about = m_reapack->about(false);
+  const Entry *entry = getEntry(m_list->currentIndex());
+
+  if(!about || !entry)
+    return;
+
+  if(about->testDelegate<AboutIndexDelegate>())
+    about->setDelegate(make_shared<AboutIndexDelegate>(entry->index, m_reapack));
+  else if(about->testDelegate<AboutPackageDelegate>() && entry->package)
+    about->setDelegate(make_shared<AboutPackageDelegate>(entry->package, m_reapack));
 }
 
 void Browser::refresh(const bool stale)
