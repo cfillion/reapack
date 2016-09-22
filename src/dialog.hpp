@@ -171,8 +171,7 @@ private:
 
 class LockDialog {
 public:
-  LockDialog(Dialog *dlg)
-    : m_dialog(dlg)
+  LockDialog(Dialog *dlg) : m_dialog(dlg)
   {
     if(m_dialog)
       m_dialog->disable();

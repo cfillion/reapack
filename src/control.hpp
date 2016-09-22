@@ -28,18 +28,18 @@ class Dialog;
 
 class Control {
 public:
+  static void inhibitRedraw(HWND handle, const bool inhibit)
+  {
+#ifdef WM_SETREDRAW
+    // WM_SETREDRAW is not supported by SWELL
+    SendMessage(handle, WM_SETREDRAW, !inhibit, 0);
+#endif
+  }
+
   Control(HWND handle) : m_handle(handle) {}
   virtual ~Control() {}
 
   HWND handle() const { return m_handle; }
-
-  void inhibitRedraw(const bool inhibit)
-  {
-#ifdef WM_SETREDRAW
-    // WM_SETREDRAW is not supported by SWELL
-    SendMessage(m_handle, WM_SETREDRAW, !inhibit, 0);
-#endif
-  }
 
 protected:
   friend Dialog;
@@ -53,18 +53,27 @@ private:
 class InhibitControl {
 public:
   InhibitControl(Control *ctrl)
-    : m_control(ctrl)
+    : m_handle(ctrl->handle())
   {
-    m_control->inhibitRedraw(true);
+    block();
+  }
+
+  InhibitControl(HWND handle)
+    : m_handle(handle)
+  {
+    block();
   }
 
   ~InhibitControl()
   {
-    m_control->inhibitRedraw(false);
+    unblock();
   }
 
+  void block() { Control::inhibitRedraw(m_handle, true); }
+  void unblock() { Control::inhibitRedraw(m_handle, false); }
+
 private:
-  Control *m_control;
+  HWND m_handle;
 };
 
 #endif

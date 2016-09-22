@@ -91,10 +91,8 @@ void About::onCommand(const int id, int)
 
 void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 {
-#ifdef _WIN32
-  // preventing fast blinking on windows
-  SendMessage(handle(), WM_SETREDRAW, false, 0);
-#endif
+  // prevent fast flickering on Windows
+  InhibitControl block(handle());
 
   m_tabs->clear();
   m_menu->reset();
@@ -131,8 +129,6 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
   m_list->autoSizeHeader();
 
 #ifdef _WIN32
-  SendMessage(handle(), WM_SETREDRAW, true, 0);
-
   // Without this the first tab would not be redrawn completely on Windows.
   // Though I have no idea why...
   InvalidateRect(handle(), nullptr, true);

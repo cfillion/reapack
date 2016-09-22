@@ -104,6 +104,8 @@ void TabBar::onNotify(LPNMHDR info, LPARAM)
 
 void TabBar::switchPage()
 {
+  InhibitControl block(m_parent->handle());
+
   if(m_lastPage > -1) {
     for(HWND control : m_pages[m_lastPage])
       ShowWindow(control, SW_HIDE);
