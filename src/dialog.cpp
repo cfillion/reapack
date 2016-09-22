@@ -286,14 +286,16 @@ void Dialog::setEnabled(const bool enabled, HWND handle)
   EnableWindow(handle, enabled);
 }
 
-int Dialog::startTimer(const int ms, int id)
+int Dialog::startTimer(const int ms, int id, const bool replace)
 {
   if(id == 0) {
     if(m_timers.empty())
       id = 1;
     else
-      id = *m_timers.rbegin();
+      id = *m_timers.rbegin() + 1;
   }
+  else if(!replace && m_timers.count(id))
+    return 0;
 
   m_timers.insert(id);
   SetTimer(m_handle, id, ms, nullptr);

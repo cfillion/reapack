@@ -213,10 +213,12 @@ void Import::setWaiting(const bool wait)
   setEnabled(!wait, m_url);
 
 #ifndef PBM_SETMARQUEE
+  const int timerId = 1;
+
   if(wait)
-    startTimer(42, 1);
+    startTimer(42, timerId);
   else
-    stopTimer(1);
+    stopTimer(timerId);
 
   m_fakePos = 0;
   SendMessage(m_progress, PBM_SETPOS, 0, 0);

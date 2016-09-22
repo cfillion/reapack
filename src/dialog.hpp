@@ -99,7 +99,7 @@ public:
   void boundedMove(int x, int y);
   bool hasFocus() const;
   void setFocus();
-  int startTimer(int elapse, int id = 0);
+  int startTimer(int elapse, int id = 0, bool replace = true);
   void stopTimer(int id);
   void setClipboard(const std::string &);
   void setClipboard(const std::vector<std::string> &);

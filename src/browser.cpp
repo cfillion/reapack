@@ -52,9 +52,11 @@ enum Action {
   ACTION_MANAGE,
 };
 
+enum Timers { TIMER_FILTER = 100 };
+
 Browser::Browser(ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
-    m_loading(false), m_loaded(false), m_checkFilter(false), m_currentIndex(-1)
+    m_loading(false), m_loaded(false), m_currentIndex(-1)
 {
 }
 
@@ -128,8 +130,6 @@ void Browser::onInit()
     return a.latest->time().compare(b.latest->time());
   });
 
-  m_filterTimer = startTimer(200);
-
   Dialog::onInit();
   setAnchor(m_filterHandle, AnchorRight);
   setAnchor(getControl(IDC_CLEAR), AnchorLeftRight);
@@ -164,7 +164,8 @@ void Browser::onCommand(const int id, const int event)
     displayButton();
     break;
   case IDC_FILTER:
-    m_checkFilter = true;
+    if(event == EN_CHANGE)
+      startTimer(200, TIMER_FILTER, false);
     break;
   case IDC_CLEAR:
     setFilter({});
@@ -283,8 +284,11 @@ void Browser::onClose()
 
 void Browser::onTimer(const int id)
 {
-  if(id == m_filterTimer)
-    checkFilter();
+  switch(id) {
+  case TIMER_FILTER:
+    updateFilter();
+    break;
+  }
 }
 
 void Browser::onSelection()
@@ -493,12 +497,9 @@ void Browser::toggleDescs()
   fillList();
 }
 
-void Browser::checkFilter()
+void Browser::updateFilter()
 {
-  if(!m_checkFilter)
-    return;
-
-  m_checkFilter = false;
+  stopTimer(TIMER_FILTER);
 
   auto_string wideFilter(4096, 0);
   GetWindowText(m_filterHandle, &wideFilter[0], (int)wideFilter.size());
@@ -554,7 +555,7 @@ void Browser::refresh(const bool stale)
 void Browser::setFilter(const string &newFilter)
 {
   SetWindowText(m_filterHandle, make_autostring(newFilter).c_str());
-  checkFilter();
+  updateFilter(); // don't wait for the timer, update now!
   SetFocus(m_filterHandle);
 }
 

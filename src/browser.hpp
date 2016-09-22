@@ -108,7 +108,7 @@ private:
   void populate(const std::vector<IndexPtr> &);
   void transferActions();
   bool match(const Entry &) const;
-  void checkFilter();
+  void updateFilter();
   void fillList();
   std::string getValue(Column, const Entry &entry) const;
   ListView::Row makeRow(const Entry &) const;
@@ -141,10 +141,8 @@ private:
   ReaPack *m_reapack;
   bool m_loading;
   bool m_loaded;
-  bool m_checkFilter;
   int m_currentIndex;
 
-  int m_filterTimer;
   Filter m_filter;
   boost::optional<Package::Type> m_typeFilter;
   std::vector<Entry> m_entries;
