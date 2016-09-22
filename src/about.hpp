@@ -44,6 +44,8 @@ public:
 
   About();
   void setDelegate(const DelegatePtr &);
+  template<typename T>
+  bool testDelegate() { return dynamic_cast<T *>(m_delegate.get()) != nullptr; }
 
   void setTitle(const std::string &);
   void setMetadata(const Metadata *, bool substitution = false);

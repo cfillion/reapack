@@ -50,7 +50,7 @@ void About::onInit()
 {
   Dialog::onInit();
 
-  m_tabs = createControl<TabBar>(IDC_TABS);
+  m_tabs = createControl<TabBar>(IDC_TABS, this);
   m_desc = createControl<RichEdit>(IDC_ABOUT);
 
   m_menu = createControl<ListView>(IDC_MENU);
@@ -138,7 +138,8 @@ void About::setDelegate(const DelegatePtr &delegate)
   InvalidateRect(handle(), nullptr, true);
 #endif
 
-  show();
+  if(!isVisible())
+    show();
 }
 
 void About::setTitle(const string &what)

@@ -72,7 +72,7 @@ public:
   void importRemote();
   void manageRemotes();
   void aboutSelf();
-  About *about();
+  About *about(bool instantiate = true);
   Browser *browsePackages();
   void refreshManager();
   void refreshBrowser();

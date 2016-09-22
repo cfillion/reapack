@@ -90,7 +90,7 @@ void Browser::onInit()
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
-  m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_actionsBtn); });
+  m_list->onSelect(bind(&Browser::onSelection, this));
   m_list->onContextMenu(bind(&Browser::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
 
@@ -285,6 +285,22 @@ void Browser::onTimer(const int id)
 {
   if(id == m_filterTimer)
     checkFilter();
+}
+
+void Browser::onSelection()
+{
+  setEnabled(m_list->hasSelection(), m_actionsBtn);
+
+  About *about = m_reapack->about(false);
+  const Entry *entry = getEntry(m_list->currentIndex());
+
+  if(!about || !entry)
+    return;
+
+  if(about->testDelegate<AboutIndexDelegate>())
+    about->setDelegate(make_shared<AboutIndexDelegate>(entry->index, m_reapack));
+  else if(about->testDelegate<AboutPackageDelegate>() && entry->package)
+    about->setDelegate(make_shared<AboutPackageDelegate>(entry->package, m_reapack));
 }
 
 bool Browser::fillContextMenu(Menu &menu, const int index)

@@ -103,6 +103,7 @@ private:
 
   Entry makeEntry(const Package *, const Registry::Entry &, const IndexPtr &) const;
 
+  void onSelection();
   bool fillContextMenu(Menu &, int index);
   void populate(const std::vector<IndexPtr> &);
   void transferActions();

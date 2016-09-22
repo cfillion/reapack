@@ -230,10 +230,12 @@ void ReaPack::aboutSelf()
   }, m_mainWindow);
 }
 
-About *ReaPack::about()
+About *ReaPack::about(const bool instantiate)
 {
   if(m_about)
     return m_about;
+  else if(!instantiate)
+    return nullptr;
 
   m_about = Dialog::Create<About>(m_instance, m_mainWindow);
 

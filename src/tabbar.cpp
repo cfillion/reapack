@@ -17,12 +17,14 @@
 
 #include "tabbar.hpp"
 
+#include "dialog.hpp"
+
 #ifdef _WIN32
 #include <commctrl.h>
 #endif
 
-TabBar::TabBar(HWND handle, const Tabs &tabs)
-  : Control(handle), m_lastPage(-1)
+TabBar::TabBar(HWND handle, Dialog *parent, const Tabs &tabs)
+  : Control(handle), m_parent(parent), m_lastPage(-1)
 {
   for(const Tab &tab : tabs)
     addTab(tab);
@@ -70,7 +72,7 @@ void TabBar::setFocus()
 {
   const int index = currentIndex();
 
-  if(index > -1)
+  if(index > -1 && m_parent->hasFocus())
     SetFocus(m_pages[index].front());
 }
 
@@ -123,5 +125,5 @@ void TabBar::switchPage()
   for(HWND control : page)
     ShowWindow(control, SW_SHOW);
 
-  SetFocus(page.front());
+  setFocus();
 }

@@ -24,13 +24,15 @@
 
 #include "encoding.hpp"
 
+class Dialog;
+
 class TabBar : public Control {
 public:
   typedef std::vector<HWND> Page;
   struct Tab { auto_string text; Page page; };
   typedef std::vector<Tab> Tabs;
 
-  TabBar(HWND handle, const Tabs &tabs = {});
+  TabBar(HWND handle, Dialog *parent, const Tabs &tabs = {});
   int addTab(const Tab &);
   int currentIndex() const;
   void setCurrentIndex(int);
@@ -45,6 +47,7 @@ protected:
 private:
   void switchPage();
 
+  Dialog *m_parent;
   int m_lastPage;
   std::vector<Page> m_pages;
 };
