@@ -91,6 +91,12 @@ void About::onCommand(const int id, int)
 
 void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 {
+  if(focus)
+    setFocus(); // this also calls show();
+
+  if(m_delegate && delegate->data() == m_delegate->data())
+    return;
+
   // prevent fast flickering on Windows
   InhibitControl block(handle());
 
@@ -127,9 +133,6 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 
   m_menu->autoSizeHeader();
   m_list->autoSizeHeader();
-
-  if(focus)
-    setFocus(); // this also calls show();
 }
 
 void About::setTitle(const string &what)

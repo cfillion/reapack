@@ -85,6 +85,8 @@ protected:
   virtual bool fillContextMenu(Menu &, int) const { return false; }
   virtual void itemActivated() {};
   virtual void onCommand(int) {};
+
+  virtual const void *data() const = 0;
 };
 
 class AboutIndexDelegate : public AboutDelegate {
@@ -97,6 +99,9 @@ protected:
   bool fillContextMenu(Menu &, int) const override;
   void itemActivated() override { aboutPackage(); }
   void onCommand(int) override;
+
+  const void *data() const override
+  { return reinterpret_cast<const void *>(m_index.get()); }
 
 private:
   void initInstalledFiles();
@@ -121,6 +126,9 @@ protected:
   void updateList(int) override;
   bool fillContextMenu(Menu &, int) const override;
   void onCommand(int) override;
+
+  const void *data() const override
+  { return reinterpret_cast<const void *>(m_package); }
 
 private:
   void copySourceUrl();
