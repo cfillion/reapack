@@ -18,6 +18,8 @@
 #ifndef REAPACK_CONTROL_HPP
 #define REAPACK_CONTROL_HPP
 
+#include <map>
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -28,17 +30,6 @@ class Dialog;
 
 class Control {
 public:
-  static void inhibitRedraw(HWND handle, const bool inhibit)
-  {
-#ifdef WM_SETREDRAW
-    // not supported by SWELL
-    SendMessage(handle, WM_SETREDRAW, !inhibit, 0);
-
-    if(!inhibit)
-      InvalidateRect(handle, nullptr, true);
-#endif
-  }
-
   Control(HWND handle) : m_handle(handle) {}
   virtual ~Control() {}
 
@@ -46,6 +37,7 @@ public:
 
 protected:
   friend Dialog;
+
   virtual void onNotify(LPNMHDR, LPARAM) {}
   virtual bool onContextMenu(HWND, int, int) { return false; }
 
@@ -55,27 +47,27 @@ private:
 
 class InhibitControl {
 public:
-  InhibitControl(Control *ctrl)
-    : m_handle(ctrl->handle())
+  InhibitControl(Control *ctrl) : m_handle(ctrl->handle())
   {
-    block();
+    inhibitRedraw(true);
   }
 
   InhibitControl(HWND handle)
     : m_handle(handle)
   {
-    block();
+    inhibitRedraw(true);
   }
 
   ~InhibitControl()
   {
-    unblock();
+    inhibitRedraw(false);
   }
 
-  void block() { Control::inhibitRedraw(m_handle, true); }
-  void unblock() { Control::inhibitRedraw(m_handle, false); }
-
 private:
+  static std::map<HWND, InhibitControl *> s_lock;
+
+  void inhibitRedraw(const bool inhibit);
+
   HWND m_handle;
 };
 
