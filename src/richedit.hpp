@@ -30,6 +30,8 @@ public:
   ~RichEdit();
 
   bool setRichText(const std::string &);
+  std::string toPlainText() const;
+  unsigned long length() const;
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;

@@ -25,6 +25,7 @@
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "resource.hpp"
+#include "richedit.hpp"
 #include "transaction.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -583,10 +584,23 @@ void Browser::populate(const vector<IndexPtr> &indexes)
     // entry indexes may mismatch depending on the new repository contents
     // thus causing the wrong package to be selected!
     m_visibleEntries.clear();
+#ifdef _WIN32
+    HWND editorHandle = CreateWindow(MSFTEDIT_CLASS, L"", 4, 0, 0, 80, 80,
+      nullptr, nullptr, instance(), nullptr);
+#else
+    // The WS_HSCROLL flag is required for SWELL to build a multiline control
+    // and WS_VSCROLL would cause it to be wrapped by a NSScrollView instead
+    const auto ES_MULTILINE = 4;
+    SWELL_MakeSetCurParms(1, 1, 0, 0, handle(), false, false);
+    HWND editorHandle = SWELL_MakeEditField(4242, 0, 0, 80, 80,
+      SWELL_NOT_WS_VISIBLE | WS_HSCROLL | ES_MULTILINE);
+#endif
+
+    RichEdit editor(editorHandle);
 
     for(const IndexPtr &index : indexes) {
       for(const Package *pkg : index->packages())
-        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg), index));
+        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg), index, &editor));
 
       // obsolete packages
       for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
@@ -594,6 +608,8 @@ void Browser::populate(const vector<IndexPtr> &indexes)
           m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry, index});
       }
     }
+
+    DestroyWindow(editorHandle);
 
     transferActions();
     fillList();
@@ -643,7 +659,7 @@ void Browser::transferActions()
 }
 
 auto Browser::makeEntry(const Package *pkg,
-    const Registry::Entry &regEntry, const IndexPtr &index)
+    const Registry::Entry &regEntry, const IndexPtr &index, RichEdit *editor)
   const -> Entry
 {
   const auto &instOpts = m_reapack->config()->install;
@@ -668,7 +684,11 @@ auto Browser::makeEntry(const Package *pkg,
   if(!latest)
     latest = pkg->lastVersion(true);
 
-  return {flags, regEntry, index, pkg, latest, current};
+  string about;
+  if(editor->setRichText(pkg->metadata()->about()))
+    about = editor->toPlainText();
+
+  return {flags, regEntry, index, pkg, latest, current, about};
 }
 
 void Browser::fillList()
@@ -832,7 +852,7 @@ bool Browser::match(const Entry &entry) const
   const string &author = getValue(AuthorColumn, entry);
   const string &remote = getValue(RemoteColumn, entry);
 
-  return m_filter.match({name, category, author, remote});
+  return m_filter.match({name, category, author, remote, entry.about});
 }
 
 auto Browser::getEntry(const int listIndex) -> Entry *

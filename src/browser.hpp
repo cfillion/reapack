@@ -37,6 +37,7 @@ class ListView;
 class Menu;
 class ReaPack;
 class Remote;
+class RichEdit;
 class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;
@@ -71,6 +72,7 @@ private:
     const Package *package;
     const Version *latest;
     const Version *current;
+    std::string about;
 
     boost::optional<const Version *> target;
     boost::optional<bool> pin;
@@ -101,7 +103,8 @@ private:
     UninstalledView,
   };
 
-  Entry makeEntry(const Package *, const Registry::Entry &, const IndexPtr &) const;
+  Entry makeEntry(const Package *, const Registry::Entry &,
+    const IndexPtr &, RichEdit *) const;
 
   void onSelection();
   bool fillContextMenu(Menu &, int index);

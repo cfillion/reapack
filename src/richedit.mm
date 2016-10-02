@@ -46,8 +46,8 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 bool RichEdit::setRichText(const string &rtf)
 {
   NSString *str = [NSString
-    stringWithCString:rtf.c_str()
-    encoding:NSUTF8StringEncoding
+    stringWithCString: rtf.c_str()
+    encoding: NSUTF8StringEncoding
   ];
 
   NSTextView *textView = (NSTextView *)handle();
@@ -58,7 +58,7 @@ bool RichEdit::setRichText(const string &rtf)
   [textView setString: @""];
 
   [textView
-    replaceCharactersInRange: NSMakeRange(0, [[textView string] length])
+    replaceCharactersInRange: NSMakeRange(0, length())
     withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
   ];
 
@@ -69,5 +69,18 @@ bool RichEdit::setRichText(const string &rtf)
   [textView checkTextInDocument: nil];
   [textView setEditable: isEditable];
 
+  return length();
+}
+
+string RichEdit::toPlainText() const
+{
+  NSTextView *textView = (NSTextView *)handle();
+  NSString *text = [textView string];
+  return [text UTF8String];
+}
+
+unsigned long RichEdit::length() const
+{
+  NSTextView *textView = (NSTextView *)handle();
   return [[textView string] length];
 }

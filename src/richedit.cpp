@@ -30,6 +30,8 @@
 
 using namespace std;
 
+static const auto CP_UNICODE = 1200;
+
 static void HandleLink(ENLINK *info, HWND handle)
 {
   const CHARRANGE &range = info->chrg;
@@ -89,10 +91,7 @@ bool RichEdit::setRichText(const string &rtf)
   if(es.dwError)
     return false;
 
-  GETTEXTLENGTHEX tl{};
-  LONG length = (LONG)SendMessage(handle(), EM_GETTEXTLENGTHEX, (WPARAM)&tl, 0);
-
-  if(!length)
+  if(!length())
     return false;
 
   // scale down a little bit, by default everything is way to big
@@ -100,4 +99,26 @@ bool RichEdit::setRichText(const string &rtf)
 
   return true;
 }
+
+string RichEdit::toPlainText() const
+{
+  const auto size = length() + 1; // including a null terminator
+  const GETTEXTEX gt{size * sizeof(auto_char), GT_NOHIDDENTEXT, CP_UNICODE};
+
+  auto_string buffer(size, 0);
+
+  if(!SendMessage(handle(), EM_GETTEXTEX, (WPARAM)&gt, (LPARAM)&buffer[0]))
+    return {};
+
+  buffer.resize(size - 1); // remove the extra null terminator
+
+  return from_autostring(buffer);
+}
+
+unsigned long RichEdit::length() const
+{
+  GETTEXTLENGTHEX tl{GTL_NUMCHARS, CP_UNICODE};
+  return (unsigned long)SendMessage(handle(), EM_GETTEXTLENGTHEX, (WPARAM)&tl, 0);
+}
+
 #endif
