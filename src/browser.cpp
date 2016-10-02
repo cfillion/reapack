@@ -602,7 +602,7 @@ void Browser::populate(const vector<IndexPtr> &indexes)
     const auto_string &desc = make_autostring(e.what());
     auto_char msg[255] = {};
     auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not read from its package registry.\r\n")
+      AUTO_STR("ReaPack could not read from the local package registry.\r\n")
       AUTO_STR("Retry later once all installation task are completed.\r\n")
       AUTO_STR("\r\nError description: %s"),
       desc.c_str());
