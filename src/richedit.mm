@@ -43,7 +43,7 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-bool RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const string &rtf, const bool pretty)
 {
   NSString *str = [NSString
     stringWithCString: rtf.c_str()
@@ -62,12 +62,14 @@ bool RichEdit::setRichText(const string &rtf)
     withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
   ];
 
-  // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
-  const BOOL isEditable = textView.isEditable;
-  [textView setEditable: YES];
-  [textView setEnabledTextCheckingTypes: NSTextCheckingTypeLink];
-  [textView checkTextInDocument: nil];
-  [textView setEditable: isEditable];
+  if(pretty) {
+    // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
+    const BOOL isEditable = textView.isEditable;
+    [textView setEditable: YES];
+    [textView setEnabledTextCheckingTypes: NSTextCheckingTypeLink];
+    [textView checkTextInDocument: nil];
+    [textView setEditable: isEditable];
+   }
 
   return length();
 }

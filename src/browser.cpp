@@ -685,7 +685,7 @@ auto Browser::makeEntry(const Package *pkg,
     latest = pkg->lastVersion(true);
 
   string about;
-  if(editor->setRichText(pkg->metadata()->about()))
+  if(editor->setRichText(pkg->metadata()->about(), false))
     about = editor->toPlainText();
 
   return {flags, regEntry, index, pkg, latest, current, about};

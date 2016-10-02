@@ -73,7 +73,7 @@ void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
   };
 }
 
-bool RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const string &rtf, const bool pretty)
 {
   stringstream stream(rtf);
 
@@ -94,8 +94,10 @@ bool RichEdit::setRichText(const string &rtf)
   if(!length())
     return false;
 
-  // scale down a little bit, by default everything is way to big
-  SendMessage(handle(), EM_SETZOOM, 3, 4);
+  if(pretty) {
+    // scale down a little bit, by default everything is way to big
+    SendMessage(handle(), EM_SETZOOM, 3, 4);
+  }
 
   return true;
 }
