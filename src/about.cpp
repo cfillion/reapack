@@ -43,7 +43,6 @@ enum { ACTION_ABOUT_PKG = 300, ACTION_FIND_IN_BROWSER, ACTION_COPY_URL };
 
 About::About() : Dialog(IDD_ABOUT_DIALOG)
 {
-  RichEdit::Init();
 }
 
 void About::onInit()

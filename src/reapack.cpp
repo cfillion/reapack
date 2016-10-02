@@ -27,6 +27,7 @@
 #include "progress.hpp"
 #include "query.hpp"
 #include "report.hpp"
+#include "richedit.hpp"
 #include "transaction.hpp"
 
 #include <reaper_plugin_functions.h>
@@ -80,6 +81,7 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   m_useRootPath = new UseRootPath(resourcePath());
 
   Download::Init();
+  RichEdit::Init();
 
   FS::mkdir(Path::CACHE);
 
