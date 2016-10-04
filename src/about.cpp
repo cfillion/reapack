@@ -463,8 +463,8 @@ void AboutPackageDelegate::init(About *dialog)
 
   dialog->menu()->addColumn({AUTO_STR("Version"), 142});
 
-  dialog->list()->addColumn({AUTO_STR("File"), 502});
-  dialog->list()->addColumn({AUTO_STR("Main"), 50});
+  dialog->list()->addColumn({AUTO_STR("File"), 484});
+  dialog->list()->addColumn({AUTO_STR("Action List"), 74});
 
   for(const Version *ver : m_package->versions())
     dialog->menu()->addRow({make_autostring(ver->name())});
@@ -491,8 +491,15 @@ void AboutPackageDelegate::updateList(const int index)
   m_sources = &ver->sources();
 
   for(const Source *src : ver->sources()) {
+    string actionList;
+
+    if(src->isMain() && src->type() == Package::ScriptType)
+      actionList = "Yes";
+    else
+      actionList = "No";
+
     m_dialog->list()->addRow({make_autostring(src->targetPath().join()),
-      make_autostring(src->isMain() ? "Yes" : "No")});
+      make_autostring(actionList)});
   }
 }
 
