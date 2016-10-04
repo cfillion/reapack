@@ -51,13 +51,15 @@ void RichEdit::Init()
   LoadLibrary(AUTO_STR("Msftedit.dll"));
 }
 
-RichEdit::RichEdit(HWND handle)
-  : Control(handle)
+RichEdit::RichEdit(HWND handle, const bool pretty)
+  : Control(handle), m_pretty(pretty)
 {
-  SendMessage(handle, EM_AUTOURLDETECT, true, 0);
-  SendMessage(handle, EM_SETEVENTMASK, 0, ENM_LINK);
-  SendMessage(handle, EM_SETEDITSTYLE,
-    SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
+  if(pretty) {
+    SendMessage(handle, EM_AUTOURLDETECT, true, 0);
+    SendMessage(handle, EM_SETEVENTMASK, 0, ENM_LINK);
+    SendMessage(handle, EM_SETEDITSTYLE,
+      SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
+  }
 }
 
 RichEdit::~RichEdit()
@@ -73,7 +75,7 @@ void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
   };
 }
 
-bool RichEdit::setRichText(const string &rtf, const bool pretty)
+bool RichEdit::setRichText(const string &rtf)
 {
   stringstream stream(rtf);
 
@@ -94,7 +96,7 @@ bool RichEdit::setRichText(const string &rtf, const bool pretty)
   if(!length())
     return false;
 
-  if(pretty) {
+  if(m_pretty) {
     // scale down a little bit, by default everything is way to big
     SendMessage(handle(), EM_SETZOOM, 3, 4);
   }

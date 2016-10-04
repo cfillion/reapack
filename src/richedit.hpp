@@ -26,15 +26,18 @@ class RichEdit : public Control {
 public:
   static void Init();
 
-  RichEdit(HWND);
+  RichEdit(HWND, bool pretty = true);
   ~RichEdit();
 
-  bool setRichText(const std::string &, bool pretty = true);
+  bool setRichText(const std::string &);
   std::string toPlainText() const;
   unsigned long length() const;
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
+
+private:
+  bool m_pretty;
 };
 
 #endif

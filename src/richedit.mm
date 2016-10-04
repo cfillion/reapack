@@ -25,17 +25,18 @@ void RichEdit::Init()
 {
 }
 
-RichEdit::RichEdit(HWND handle)
-  : Control(handle)
+RichEdit::RichEdit(HWND handle, const bool pretty)
+  : Control(handle), m_pretty(pretty)
 {
   // hack: restore NSTextView's default mouse cursors (eg. hover links)
   // this is an incomplete fix for the hyperlink's shy tooltips
-  SetCapture(handle);
+  if(m_pretty)
+    SetCapture(handle);
 }
 
 RichEdit::~RichEdit()
 {
-  if(GetCapture() == handle())
+  if(m_pretty && GetCapture() == handle())
     ReleaseCapture();
 }
 
@@ -43,7 +44,7 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-bool RichEdit::setRichText(const string &rtf, const bool pretty)
+bool RichEdit::setRichText(const string &rtf)
 {
   NSString *str = [NSString
     stringWithCString: rtf.c_str()
@@ -62,7 +63,7 @@ bool RichEdit::setRichText(const string &rtf, const bool pretty)
     withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
   ];
 
-  if(pretty) {
+  if(m_pretty) {
     // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
     const BOOL isEditable = textView.isEditable;
     [textView setEditable: YES];

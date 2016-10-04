@@ -596,7 +596,7 @@ void Browser::populate(const vector<IndexPtr> &indexes)
       SWELL_NOT_WS_VISIBLE | WS_HSCROLL | ES_MULTILINE);
 #endif
 
-    RichEdit editor(editorHandle);
+    RichEdit editor(editorHandle, false);
 
     for(const IndexPtr &index : indexes) {
       for(const Package *pkg : index->packages())
@@ -685,7 +685,7 @@ auto Browser::makeEntry(const Package *pkg,
     latest = pkg->lastVersion(true);
 
   string about;
-  if(editor->setRichText(pkg->metadata()->about(), false))
+  if(editor->setRichText(pkg->metadata()->about()))
     about = editor->toPlainText();
 
   return {flags, regEntry, index, pkg, latest, current, about};
