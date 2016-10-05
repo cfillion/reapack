@@ -99,10 +99,20 @@ TEST_CASE("database version", M) {
   Database db;
   REQUIRE(db.version().major == 0);
   REQUIRE(db.version().minor == 0);
+  REQUIRE_FALSE(db.version());
+  REQUIRE_FALSE(db.version() < (Database::Version{0, 0}));
+  REQUIRE(db.version() < (Database::Version{0, 1}));
+  REQUIRE(db.version() < (Database::Version{1, 0}));
 
   db.setVersion({0, 1});
   REQUIRE(db.version().major == 0);
   REQUIRE(db.version().minor == 1);
+  REQUIRE(db.version());
+
+  db.setVersion({1, 2});
+  REQUIRE(db.version() < (Database::Version{2, 3}));
+  REQUIRE_FALSE(db.version() < (Database::Version{1, 1}));
+  REQUIRE_FALSE(db.version() < (Database::Version{0, 3}));
 
   db.setVersion({32767, 32767});
   REQUIRE(db.version().major == 32767);

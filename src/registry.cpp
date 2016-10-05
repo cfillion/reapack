@@ -74,12 +74,10 @@ Registry::Registry(const Path &path)
 
 void Registry::migrate()
 {
-  const Database::Version &version = m_db.version();
+  const Database::Version &current = m_db.version();
+  const Database::Version version{0, 4};
 
-  m_db.begin();
-  m_db.setVersion({0, 4});
-
-  if(!version.major && !version.minor) {
+  if(!current) {
     // new database!
     m_db.exec(
       "CREATE TABLE entries ("
@@ -104,27 +102,35 @@ void Registry::migrate()
       "  FOREIGN KEY(entry) REFERENCES entries(id)"
       ");"
     );
-  }
 
-  switch(version.major) {
-  case 0:
-    // current major schema version
-    break;
-  default:
-    throw reapack_error(
-      "The package registry was created by a newer version of ReaPack");
-  }
+    m_db.setVersion(version);
 
-  switch(version.minor) {
-  case 1:
-    m_db.exec("ALTER TABLE entries ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;");
-  case 2:
-    m_db.exec("ALTER TABLE files ADD COLUMN type INTEGER NOT NULL DEFAULT 0;");
-  case 3:
-    m_db.exec("ALTER TABLE entries ADD COLUMN desc TEXT NOT NULL DEFAULT '';");
+    return;
   }
+  else if(current < version) {
+    m_db.begin();
 
-  m_db.commit();
+    switch(current.major) {
+    case 0:
+      // current major schema version
+      break;
+    default:
+      throw reapack_error(
+        "The package registry was created by a newer version of ReaPack");
+    }
+
+    switch(current.minor) {
+    case 1:
+      m_db.exec("ALTER TABLE entries ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;");
+    case 2:
+      m_db.exec("ALTER TABLE files ADD COLUMN type INTEGER NOT NULL DEFAULT 0;");
+    case 3:
+      m_db.exec("ALTER TABLE entries ADD COLUMN desc TEXT NOT NULL DEFAULT '';");
+    }
+
+    m_db.setVersion(version);
+    m_db.commit();
+  }
 }
 
 auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry

@@ -32,7 +32,17 @@ class Statement;
 
 class Database {
 public:
-  struct Version { int16_t major; int16_t minor; };
+  struct Version {
+    int16_t major;
+    int16_t minor;
+
+    operator bool() const { return major || minor; }
+
+    bool operator<(const Version &o) const
+    {
+      return major == o.major ? minor < o.minor : major < o.major;
+    }
+  };
 
   Database(const std::string &filename = std::string());
   ~Database();
