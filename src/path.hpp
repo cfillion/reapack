@@ -25,6 +25,7 @@ class UseRootPath;
 
 class Path {
 public:
+  static Path DATA;
   static Path CACHE;
   static Path CONFIG;
   static Path REGISTRY;

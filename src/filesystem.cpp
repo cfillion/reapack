@@ -94,7 +94,7 @@ bool FS::remove(const Path &path)
   // Then let's move it somewhere else. And delete it on next startup.
   // Windows is so great!
 
-  Path workaroundPath = Path::CACHE;
+  Path workaroundPath = Path::DATA;
   workaroundPath.append("old_" + path.last() + ".tmp");
 
   return rename(path, workaroundPath);
