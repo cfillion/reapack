@@ -33,7 +33,7 @@
 #include "tabbar.hpp"
 #include "transaction.hpp"
 
-#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
 #include <iomanip>
 #include <sstream>
 
@@ -463,8 +463,8 @@ void AboutPackageDelegate::init(About *dialog)
 
   dialog->menu()->addColumn({AUTO_STR("Version"), 142});
 
-  dialog->list()->addColumn({AUTO_STR("File"), 484});
-  dialog->list()->addColumn({AUTO_STR("Action List"), 74});
+  dialog->list()->addColumn({AUTO_STR("File"), 474});
+  dialog->list()->addColumn({AUTO_STR("Action List"), 84});
 
   for(const Version *ver : m_package->versions())
     dialog->menu()->addRow({make_autostring(ver->name())});
@@ -479,6 +479,11 @@ void AboutPackageDelegate::init(About *dialog)
 
 void AboutPackageDelegate::updateList(const int index)
 {
+  static const map<Source::Section, string> sectionMap{
+    {Source::MainSection, "Main"},
+    {Source::MIDIEditorSection, "MIDI Editor"},
+  };
+
   if(index < 0)
     return;
 
@@ -491,10 +496,26 @@ void AboutPackageDelegate::updateList(const int index)
   m_sources = &ver->sources();
 
   for(const Source *src : ver->sources()) {
+    int sections = src->sections();
     string actionList;
 
-    if(src->sections() && src->type() == Package::ScriptType)
-      actionList = "Yes";
+    if(sections && src->type() == Package::ScriptType) {
+      vector<string> sectionNames;
+
+      for(const auto &pair : sectionMap) {
+        if(sections & pair.first) {
+          sectionNames.push_back(pair.second);
+          sections &= ~pair.first;
+        }
+      }
+
+      if(sections) // In case we forgot to add a section to sectionMap!
+        sectionNames.push_back("Other");
+
+      actionList = "Yes (";
+      actionList += boost::algorithm::join(sectionNames, ", ");
+      actionList += ')';
+    }
     else
       actionList = "No";
 
