@@ -323,7 +323,7 @@ void AboutIndexDelegate::initInstalledFiles()
 
     for(const Registry::File &file : allFiles) {
       stream << file.path.join();
-      if(file.main)
+      if(file.sections) // is this file registered in the action list?
         stream << '*';
       stream << "\r\n";
     }
@@ -493,7 +493,7 @@ void AboutPackageDelegate::updateList(const int index)
   for(const Source *src : ver->sources()) {
     string actionList;
 
-    if(src->isMain() && src->type() == Package::ScriptType)
+    if(src->sections() && src->type() == Package::ScriptType)
       actionList = "Yes";
     else
       actionList = "No";

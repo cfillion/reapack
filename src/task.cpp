@@ -121,8 +121,7 @@ void InstallTask::commit()
     if(FS::remove(file.path))
       tx()->receipt()->addRemoval(file.path);
 
-    if(file.main)
-      tx()->registerFile({false, m_oldEntry, file});
+    tx()->registerFile({false, m_oldEntry, file});
   }
 
   InstallTicket::Type type;
@@ -179,8 +178,7 @@ void UninstallTask::commit()
     else
       tx()->receipt()->addError({FS::lastError(), file.path.join()});
 
-    if(file.main)
-      tx()->registerFile({false, m_entry, file});
+    tx()->registerFile({false, m_entry, file});
   }
 
   tx()->registry()->forget(m_entry);

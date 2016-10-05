@@ -20,10 +20,24 @@
 #include "errors.hpp"
 #include "index.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 
+auto Source::getSection(const char *name) -> Section
+{
+  if(!strcmp(name, "main"))
+    return MainSection;
+  else if(!strcmp(name, "midi_editor"))
+    return MIDIEditorSection;
+  else if(!strcmp(name, "true"))
+    return ImplicitSection;
+  else
+    return UnknownSection;
+}
+
 Source::Source(const string &file, const string &url, const Version *ver)
-  : m_type(Package::UnknownType), m_file(file), m_url(url), m_main(false),
+  : m_type(Package::UnknownType), m_file(file), m_url(url), m_sections(0),
     m_version(ver)
 {
   if(m_url.empty())
@@ -54,6 +68,28 @@ const string &Source::file() const
     return pkg->name();
   else
     throw reapack_error("empty source file name and no package");
+}
+
+void Source::setSections(int sections)
+{
+  if(sections == ImplicitSection) {
+    // for compatibility with v1.0
+
+    const Package *pkg = package();
+    const Category *cat = pkg ? pkg->category() : nullptr;
+    if(!cat)
+      throw reapack_error("cannot resolve implicit section: category is unset");
+
+    string category = Path(cat->name()).first();
+    boost::algorithm::to_lower(category);
+
+    if(category == "midi editor")
+      sections = MIDIEditorSection;
+    else
+      sections = MainSection;
+  }
+
+  m_sections = sections;
 }
 
 string Source::fullName() const

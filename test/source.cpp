@@ -55,12 +55,50 @@ TEST_CASE("empty source file name and no package", M) {
   }
 }
 
+TEST_CASE("parse file section", M) {
+  REQUIRE(-1 == Source::getSection("true"));
+  REQUIRE(0 == Source::getSection("hello"));
+  REQUIRE(Source::MainSection == Source::getSection("main"));
+  REQUIRE(Source::MIDIEditorSection == Source::getSection("midi_editor"));
+}
+
 TEST_CASE("main source", M) {
   Source source("filename", "url");
-  REQUIRE_FALSE(source.isMain());
+  REQUIRE(source.sections() == 0);
 
-  source.setMain(true);
-  REQUIRE(source.isMain());
+  source.setSections(Source::MainSection | Source::MIDIEditorSection);
+  REQUIRE(source.sections() == (Source::MainSection | Source::MIDIEditorSection));
+}
+
+TEST_CASE("implicit source section") {
+  SECTION("main") {
+    Category cat("Category Name");
+    Package pack(Package::UnknownType, "package name", &cat);
+    Version ver("1.0", &pack);
+
+    Source source("filename", "url", &ver);
+    source.setSections(Source::ImplicitSection);
+    REQUIRE(source.sections() == Source::MainSection);
+  }
+
+  SECTION("midi editor") {
+    Category cat("midi Editor/somthing else");
+    Package pack(Package::UnknownType, "package name", &cat);
+    Version ver("1.0", &pack);
+
+    Source source("filename", "url", &ver);
+    source.setSections(Source::ImplicitSection);
+    REQUIRE(source.sections() == Source::MIDIEditorSection);
+  }
+
+  SECTION("no category") {
+    Source source("filename", "url");
+    try {
+      source.setSections(Source::ImplicitSection);
+      FAIL(); // should throw (or crash if buggy, but not do nothing)
+    }
+    catch(const reapack_error &) {}
+  }
 }
 
 TEST_CASE("empty source url", M) {

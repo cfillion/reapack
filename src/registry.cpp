@@ -178,7 +178,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
-    m_insertFile->bind(3, src->isMain());
+    m_insertFile->bind(3, src->sections());
     m_insertFile->bind(4, src->typeOverride());
 
     try {
@@ -259,7 +259,7 @@ auto Registry::getFiles(const Entry &entry) const -> vector<File>
   m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
     File file{m_getFiles->stringColumn(0)};
-    file.main = m_getFiles->boolColumn(1);
+    file.sections = m_getFiles->intColumn(1);
     file.type = static_cast<Package::Type>(m_getFiles->intColumn(2));
 
     if(!file.type) // < v1.0rc2
@@ -281,7 +281,7 @@ auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
 
   vector<File> mainFiles;
   copy_if(allFiles.begin(), allFiles.end(),
-    back_inserter(mainFiles), [&](const File &f) { return f.main; });
+    back_inserter(mainFiles), [&](const File &f) { return f.sections; });
 
   return mainFiles;
 }

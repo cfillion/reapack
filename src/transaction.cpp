@@ -25,8 +25,6 @@
 #include "remote.hpp"
 #include "task.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <reaper_plugin_functions.h>
 
 using namespace std;
@@ -308,26 +306,45 @@ void Transaction::registerQueued()
   }
 }
 
-void Transaction::registerScript(const HostTicket &reg, const bool isLast)
+void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 {
-  enum Section { MainSection = 0, MidiEditorSection = 32060 };
+  static const map<Source::Section, int> sectionMap{
+    {Source::MainSection, 0},
+    {Source::MIDIEditorSection, 32060},
+  };
 
-  if(!AddRemoveReaScript)
-    return; // do nothing if REAPER < v5.12
-
-  Section section;
-  string category = Path(reg.entry.category).first();
-  boost::algorithm::to_lower(category);
-
-  if(category == "midi editor")
-    section = MidiEditorSection;
-  else
-    section = MainSection;
+  if(!AddRemoveReaScript || !reg.file.sections)
+    return; // do nothing if REAPER < v5.12 and skip non-main files
 
   const string &fullPath = Path::prefixRoot(reg.file.path).join();
-  if(!AddRemoveReaScript(reg.add, section, fullPath.c_str(), isLast) && reg.add) {
-    m_receipt.addError({"This script could not be registered in REAPER.",
-      reg.file.path.join()});
+
+  vector<int> sections;
+
+  for(const auto &pair : sectionMap) {
+    if(reg.file.sections & pair.first)
+      sections.push_back(pair.second);
+  }
+
+  assert(!sections.empty()); // is a section missing in sectionMap?
+
+  bool enableError = reg.add;
+  auto it = sections.begin();
+
+  while(true) {
+    const int section = *it++;
+    const bool isLastSection = it == sections.end();
+
+    int id = AddRemoveReaScript(reg.add, section, fullPath.c_str(),
+      isLastCall && isLastSection);
+
+    if(!id && enableError) {
+      m_receipt.addError({"This script could not be registered in REAPER.",
+        reg.file.path.join()});
+      enableError = false;
+    }
+
+    if(isLastSection)
+      break;
   }
 }
 

@@ -27,6 +27,16 @@ class Version;
 
 class Source {
 public:
+  enum Section {
+    UnknownSection    = 0,
+    MainSection       = 1<<0,
+    MIDIEditorSection = 1<<1,
+
+    ImplicitSection   = -1, // for compatibility with v1.0
+  };
+
+  static Section getSection(const char *);
+
   Source(const std::string &file, const std::string &url,
     const Version * = nullptr);
 
@@ -38,8 +48,8 @@ public:
   Package::Type type() const;
   const std::string &file() const;
   const std::string &url() const { return m_url; }
-  void setMain(bool main) { m_main = main; }
-  bool isMain() const { return m_main; }
+  void setSections(int);
+  int sections() const { return m_sections; }
 
   const Version *version() const { return m_version; }
   const Package *package() const;
@@ -52,7 +62,7 @@ private:
   Package::Type m_type;
   std::string m_file;
   std::string m_url;
-  bool m_main;
+  int m_sections;
   const Version *m_version;
 };
 

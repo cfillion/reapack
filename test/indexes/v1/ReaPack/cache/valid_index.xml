@@ -2,7 +2,7 @@
   <category name="Category Name">
     <reapack name="Hello World.lua" type="script">
       <version name="1.0">
-        <source platform="all" file="test.lua" main="true">https://google.com/</source>
+        <source platform="all" file="test.lua" main="main">https://google.com/</source>
         <source platform="all" file="background.png">http://cfillion.tk/</source>
         <changelog>Fixed a division by zero error.</changelog>
       </version>

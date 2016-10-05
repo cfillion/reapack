@@ -1,0 +1,9 @@
+<index version="1">
+  <category name="MIDI Editor">
+    <reapack name="packname" type="script">
+      <version name="1.0">
+        <source main=" main  midi_editor  HELLO   ">https://google.com/</source>
+      </version>
+    </reapack>
+  </category>
+</index>

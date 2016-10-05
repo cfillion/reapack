@@ -92,7 +92,7 @@ TEST_CASE("get file list", M) {
   const vector<Registry::File> &files = reg.getFiles(reg.getEntry(&pkg));
   REQUIRE(files.size() == 1);
   REQUIRE(files[0].path == src->targetPath());
-  REQUIRE(files[0].main == false);
+  REQUIRE(files[0].sections == 0);
   REQUIRE(files[0].type == pkg.type());
 }
 
@@ -170,12 +170,12 @@ TEST_CASE("get main files", M) {
   REQUIRE((reg.getMainFiles({})).empty());
 
   Source *main1 = new Source({}, "url", &ver);
-  main1->setMain(true);
+  main1->setSections(Source::MIDIEditorSection);
   main1->setTypeOverride(Package::EffectType);
   ver.addSource(main1);
 
   Source *main2 = new Source({}, "url", &ver); // duplicate file ignored
-  main2->setMain(true);
+  main2->setSections(Source::MainSection);
   main2->setTypeOverride(Package::EffectType);
   ver.addSource(main2);
 
@@ -184,7 +184,7 @@ TEST_CASE("get main files", M) {
   const vector<Registry::File> &current = reg.getMainFiles(entry);
   REQUIRE(current.size() == 1);
   REQUIRE(current[0].path == main1->targetPath());
-  REQUIRE(current[0].main == true);
+  REQUIRE(current[0].sections == Source::MIDIEditorSection);
   REQUIRE(current[0].type == Package::EffectType);
 }
 
