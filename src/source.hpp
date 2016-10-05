@@ -36,6 +36,7 @@ public:
   };
 
   static Section getSection(const char *);
+  static Section detectSection(const std::string &category);
 
   Source(const std::string &file, const std::string &url,
     const Version * = nullptr);

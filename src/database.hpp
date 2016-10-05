@@ -69,6 +69,9 @@ class Statement {
 public:
   typedef std::function<bool (void)> ExecCallback;
 
+  Statement(const char *sql, const Database *db);
+  ~Statement();
+
   void bind(int index, const std::string &text);
   void bind(int index, int64_t integer);
   void exec();
@@ -80,9 +83,6 @@ public:
 
 private:
   friend Database;
-
-  Statement(const char *sql, const Database *db);
-  ~Statement();
 
   const Database *m_db;
   sqlite3_stmt *m_stmt;

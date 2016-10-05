@@ -82,7 +82,7 @@ TEST_CASE("implicit source section") {
   }
 
   SECTION("midi editor") {
-    Category cat("midi Editor/somthing else");
+    Category cat("MIDI Editor");
     Package pack(Package::UnknownType, "package name", &cat);
     Version ver("1.0", &pack);
 
@@ -99,6 +99,15 @@ TEST_CASE("implicit source section") {
     }
     catch(const reapack_error &) {}
   }
+}
+
+TEST_CASE("implicit section detection", M) {
+  REQUIRE(Source::MainSection == Source::detectSection("Hello World"));
+  REQUIRE(Source::MainSection == Source::detectSection("Hello/World"));
+  REQUIRE(Source::MainSection == Source::detectSection("Hello/midi editor"));
+
+  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor"));
+  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor/Hello"));
 }
 
 TEST_CASE("empty source url", M) {

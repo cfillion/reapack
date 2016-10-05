@@ -66,6 +66,7 @@ public:
 
 private:
   void migrate();
+  void convertImplicitSections();
   void fillEntry(const Statement *, Entry *) const;
 
   Database m_db;

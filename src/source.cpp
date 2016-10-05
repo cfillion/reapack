@@ -36,6 +36,19 @@ auto Source::getSection(const char *name) -> Section
     return UnknownSection;
 }
 
+auto Source::detectSection(const string &category) -> Section
+{
+  // this is for compatibility with v1.0
+
+  string topcategory = Path(category).first();
+  boost::algorithm::to_lower(topcategory);
+
+  if(topcategory == "midi editor")
+    return MIDIEditorSection;
+  else
+    return MainSection;
+}
+
 Source::Source(const string &file, const string &url, const Version *ver)
   : m_type(Package::UnknownType), m_file(file), m_url(url), m_sections(0),
     m_version(ver)
@@ -73,20 +86,12 @@ const string &Source::file() const
 void Source::setSections(int sections)
 {
   if(sections == ImplicitSection) {
-    // for compatibility with v1.0
-
     const Package *pkg = package();
     const Category *cat = pkg ? pkg->category() : nullptr;
     if(!cat)
       throw reapack_error("cannot resolve implicit section: category is unset");
 
-    string category = Path(cat->name()).first();
-    boost::algorithm::to_lower(category);
-
-    if(category == "midi editor")
-      sections = MIDIEditorSection;
-    else
-      sections = MainSection;
+    sections = detectSection(cat->name());
   }
 
   m_sections = sections;
