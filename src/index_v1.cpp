@@ -19,6 +19,7 @@
 
 #include "errors.hpp"
 
+#include <sstream>
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;
@@ -175,6 +176,9 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   const char *file = node->Attribute("file");
   if(!file) file = "";
 
+  const char *main = node->Attribute("main");
+  if(!main) main = "";
+
   const char *url = node->GetText();
   if(!url) url = "";
 
@@ -184,8 +188,12 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   src->setPlatform(platform);
   src->setTypeOverride(Package::getType(type));
 
-  if(node->Attribute("main"))
-    src->setMain(true);
+  int sections = 0;
+  string section;
+  istringstream mainStream(main);
+  while(getline(mainStream, section, '\x20'))
+    sections |= Source::getSection(section.c_str());
+  src->setSections(sections);
 
   if(ver->addSource(src))
     ptr.release();

@@ -74,8 +74,8 @@ Registry::Registry(const Path &path)
 
 void Registry::migrate()
 {
+  const Database::Version version{0, 5};
   const Database::Version &current = m_db.version();
-  const Database::Version version{0, 4};
 
   if(!current) {
     // new database!
@@ -126,6 +126,8 @@ void Registry::migrate()
       m_db.exec("ALTER TABLE files ADD COLUMN type INTEGER NOT NULL DEFAULT 0;");
     case 3:
       m_db.exec("ALTER TABLE entries ADD COLUMN desc TEXT NOT NULL DEFAULT '';");
+    case 4:
+      convertImplicitSections();
     }
 
     m_db.setVersion(version);
@@ -178,7 +180,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 
     m_insertFile->bind(1, entryId);
     m_insertFile->bind(2, path.join('/'));
-    m_insertFile->bind(3, src->isMain());
+    m_insertFile->bind(3, src->sections());
     m_insertFile->bind(4, src->typeOverride());
 
     try {
@@ -259,7 +261,7 @@ auto Registry::getFiles(const Entry &entry) const -> vector<File>
   m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
     File file{m_getFiles->stringColumn(0)};
-    file.main = m_getFiles->boolColumn(1);
+    file.sections = m_getFiles->intColumn(1);
     file.type = static_cast<Package::Type>(m_getFiles->intColumn(2));
 
     if(!file.type) // < v1.0rc2
@@ -281,7 +283,7 @@ auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
 
   vector<File> mainFiles;
   copy_if(allFiles.begin(), allFiles.end(),
-    back_inserter(mainFiles), [&](const File &f) { return f.main; });
+    back_inserter(mainFiles), [&](const File &f) { return f.sections; });
 
   return mainFiles;
 }
@@ -322,6 +324,25 @@ void Registry::release()
 void Registry::commit()
 {
   m_db.commit();
+}
+
+void Registry::convertImplicitSections()
+{
+  // convert from v1.0 main=true format to v1.1 flag format
+
+  Statement entries("SELECT id, category FROM entries", &m_db);
+  entries.exec([&] {
+    const int id = entries.intColumn(0);
+    const string &category = entries.stringColumn(1);
+    const int section = Source::detectSection(category);
+
+    Statement update("UPDATE files SET main = ? WHERE entry = ? AND main != 0", &m_db);
+    update.bind(1, section);
+    update.bind(2, id);
+    update.exec();
+
+    return true;
+  });
 }
 
 void Registry::fillEntry(const Statement *stmt, Entry *entry) const

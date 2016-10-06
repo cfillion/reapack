@@ -44,7 +44,7 @@ public:
 
   struct File {
     Path path;
-    bool main;
+    int sections;
     Package::Type type;
 
     bool operator<(const File &o) const { return path < o.path; }
@@ -66,6 +66,7 @@ public:
 
 private:
   void migrate();
+  void convertImplicitSections();
   void fillEntry(const Statement *, Entry *) const;
 
   Database m_db;

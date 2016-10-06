@@ -174,13 +174,13 @@ TEST_CASE("full index", M) {
   const Source *source1 = ver->source(0);
   REQUIRE(source1->platform() == Platform::GenericPlatform);
   REQUIRE(source1->file() == "test.lua");
-  REQUIRE(source1->isMain());
+  REQUIRE(source1->sections() == Source::MainSection);
   REQUIRE(source1->url() == "https://google.com/");
 
   const Source *source2 = ver->source(1);
   REQUIRE(source2->platform() == Platform::GenericPlatform);
   REQUIRE(source2->file() == "background.png");
-  REQUIRE_FALSE(source2->isMain());
+  REQUIRE_FALSE(source2->sections() == Source::MainSection);
   REQUIRE(source2->url() == "http://cfillion.tk/");
 }
 
@@ -292,4 +292,14 @@ TEST_CASE("read package description", M) {
 
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->description() == "From the New World");
+}
+
+TEST_CASE("read multiple sections", M) {
+  UseRootPath root(RIPATH);
+
+  IndexPtr ri = Index::load("explicit_sections");
+
+  CHECK(ri->packages().size() == 1);
+  REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->sections()
+    == (Source::MainSection | Source::MIDIEditorSection));
 }
