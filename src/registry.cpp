@@ -261,7 +261,7 @@ auto Registry::getFiles(const Entry &entry) const -> vector<File>
   m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
     File file{m_getFiles->stringColumn(0)};
-    file.sections = m_getFiles->intColumn(1);
+    file.sections = static_cast<int>(m_getFiles->intColumn(1));
     file.type = static_cast<Package::Type>(m_getFiles->intColumn(2));
 
     if(!file.type) // < v1.0rc2
@@ -332,9 +332,9 @@ void Registry::convertImplicitSections()
 
   Statement entries("SELECT id, category FROM entries", &m_db);
   entries.exec([&] {
-    const int id = entries.intColumn(0);
+    const auto id = entries.intColumn(0);
     const string &category = entries.stringColumn(1);
-    const int section = Source::detectSection(category);
+    const auto section = Source::detectSection(category);
 
     Statement update("UPDATE files SET main = ? WHERE entry = ? AND main != 0", &m_db);
     update.bind(1, section);
