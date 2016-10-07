@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="8d237f456bef736f0d2453557916f3b12ff83af1" name="ReaPack">
+<index version="1" commit="01b6cf2e240cf0c76cbc83401d9ed591e557d521" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -313,6 +313,24 @@ Fixed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc1/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.1rc2" author="cfillion" time="2016-10-07T07:44:42Z">
+        <changelog><![CDATA[Added:
++ support multiple action list sections for scripts [p=1732794]
+Changed:
++ about pkg: display in which Action List section the files are registered
++ browser: make the about window follow browser selection [p=1730194]
++ browser: clarify package registry read failure error message
++ move the repo index cache to <respath>/ReaPack/cache/ subfolder
++ source: ignore AL registration information of non-script files
+Fixed:
++ about: don't reset the dialog when the content remains the same
++ registry: don't downgrade the db version when higher than current
++ tabbar: avoid flickering on wine when switching tab]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc2/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc2/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc2/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc2/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
