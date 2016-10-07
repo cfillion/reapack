@@ -499,7 +499,7 @@ void AboutPackageDelegate::updateList(const int index)
     int sections = src->sections();
     string actionList;
 
-    if(sections && src->type() == Package::ScriptType) {
+    if(sections) {
       vector<string> sectionNames;
 
       for(const auto &pair : sectionMap) {

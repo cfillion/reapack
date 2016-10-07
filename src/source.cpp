@@ -38,7 +38,7 @@ auto Source::getSection(const char *name) -> Section
 
 auto Source::detectSection(const string &category) -> Section
 {
-  // this is for compatibility with v1.0
+  // this is for compatibility with indexes made for v1.0
 
   string topcategory = Path(category).first();
   boost::algorithm::to_lower(topcategory);
@@ -85,9 +85,12 @@ const string &Source::file() const
 
 void Source::setSections(int sections)
 {
-  if(sections == ImplicitSection) {
+  if(type() != Package::ScriptType)
+    return;
+  else if(sections == ImplicitSection) {
     const Package *pkg = package();
     const Category *cat = pkg ? pkg->category() : nullptr;
+
     if(!cat)
       throw reapack_error("cannot resolve implicit section: category is unset");
 

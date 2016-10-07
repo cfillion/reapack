@@ -62,18 +62,42 @@ TEST_CASE("parse file section", M) {
   REQUIRE(Source::MIDIEditorSection == Source::getSection("midi_editor"));
 }
 
-TEST_CASE("main source", M) {
-  Source source("filename", "url");
-  REQUIRE(source.sections() == 0);
+TEST_CASE("explicit source section", M) {
+  SECTION("script type override") {
+    Source source("filename", "url");
+    REQUIRE(source.sections() == 0);
 
-  source.setSections(Source::MainSection | Source::MIDIEditorSection);
-  REQUIRE(source.sections() == (Source::MainSection | Source::MIDIEditorSection));
+    source.setTypeOverride(Package::ScriptType);
+    source.setSections(Source::MainSection | Source::MIDIEditorSection);
+    REQUIRE(source.sections() == (Source::MainSection | Source::MIDIEditorSection));
+  }
+
+  SECTION("other type override") {
+    Source source("filename", "url");
+    source.setTypeOverride(Package::EffectType);
+    source.setSections(Source::MainSection);
+    REQUIRE(source.sections() == 0);
+  }
+
+  SECTION("package type") {
+    Package pack(Package::ScriptType, "package name");
+    Version ver("1.0", &pack);
+    Source source("filename", "url", &ver);
+    source.setSections(Source::MainSection);
+    REQUIRE(source.sections() == Source::MainSection);
+  }
+
+  SECTION("no package, no type override") {
+    Source source("filename", "url");
+    source.setSections(Source::MainSection);
+    // should not crash!
+  }
 }
 
 TEST_CASE("implicit source section") {
   SECTION("main") {
     Category cat("Category Name");
-    Package pack(Package::UnknownType, "package name", &cat);
+    Package pack(Package::ScriptType, "package name", &cat);
     Version ver("1.0", &pack);
 
     Source source("filename", "url", &ver);
@@ -83,7 +107,7 @@ TEST_CASE("implicit source section") {
 
   SECTION("midi editor") {
     Category cat("MIDI Editor");
-    Package pack(Package::UnknownType, "package name", &cat);
+    Package pack(Package::ScriptType, "package name", &cat);
     Version ver("1.0", &pack);
 
     Source source("filename", "url", &ver);
@@ -93,6 +117,8 @@ TEST_CASE("implicit source section") {
 
   SECTION("no category") {
     Source source("filename", "url");
+    source.setTypeOverride(Package::ScriptType);
+
     try {
       source.setSections(Source::ImplicitSection);
       FAIL(); // should throw (or crash if buggy, but not do nothing)
