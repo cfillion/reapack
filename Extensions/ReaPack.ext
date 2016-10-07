@@ -1,4 +1,4 @@
-@version 1.1rc1
+@version 1.1rc2
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -8,13 +8,14 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  + filter: implement ^ and $ anchors to match start and end of string
-  + filter: implement NOT, OR and ( ) grouping operators à la REAPER
-  + manager: synchronize after enabling a repo or the auto install mode [p=1726030]
+  + support multiple action list sections for scripts [p=1732794]
   Changed:
-  + about repo: add ^anchors$ to when setting the browser's filter
-  + about: make the window user-resizable [#10]
-  + config: enable all repositories by default [p=1726030]
-  + manager: make the window bigger [#10]
+  + about pkg: display in which Action List section the files are registered
+  + browser: make the about window follow browser selection [p=1730194]
+  + browser: clarify package registry read failure error message
+  + move the repo index cache to <respath>/ReaPack/cache/ subfolder
+  + source: ignore AL registration information of non-script files
   Fixed:
-  + win32: update curl to v7.50.2 (bugfix for wine) [p=1717444]
+  + about: don't reset the dialog when the content remains the same
+  + registry: don't downgrade the db version when higher than current
+  + tabbar: avoid flickering on wine when switching tab
