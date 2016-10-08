@@ -39,10 +39,9 @@ Version::Version(const string &str, const Package *pkg)
   parse(str);
 }
 
-Version::Version(const Version &o, const Package *pkg)
+Version::Version(const Version &o)
   : m_name(o.m_name), m_segments(o.m_segments), m_stable(o.m_stable),
-    m_author(o.m_author), m_changelog(o.m_changelog), m_time(o.m_time),
-    m_package(pkg)
+    m_author(o.m_author), m_package(nullptr)
 {
 }
 

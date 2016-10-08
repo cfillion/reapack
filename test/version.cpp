@@ -309,16 +309,13 @@ TEST_CASE("copy version constructor", M) {
   original.setChangelog("Initial release");
   original.setTime("2016-02-12T01:16:40Z");
 
-  const Version copy1(original);
-  REQUIRE(copy1.name() == "1.1test");
-  REQUIRE(copy1.size() == original.size());
-  REQUIRE(copy1.isStable() == original.isStable());
-  REQUIRE(copy1.author() == original.author());
-  REQUIRE(copy1.changelog() == original.changelog());
-  REQUIRE(copy1.time() == original.time());
-  REQUIRE(copy1.package() == nullptr);
-  REQUIRE(copy1.sources().empty());
-
-  const Version copy2(original, &pkg);
-  REQUIRE(copy2.package() == &pkg);
+  const Version copy(original);
+  REQUIRE(copy.name() == "1.1test");
+  REQUIRE(copy.size() == original.size());
+  REQUIRE(copy.isStable() == original.isStable());
+  REQUIRE(copy.author() == original.author());
+  REQUIRE(copy.changelog().empty());
+  REQUIRE_FALSE(copy.time().isValid());
+  REQUIRE(copy.package() == nullptr);
+  REQUIRE(copy.sources().empty());
 }

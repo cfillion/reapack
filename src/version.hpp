@@ -35,7 +35,7 @@ class Version {
 public:
   Version();
   Version(const std::string &, const Package * = nullptr);
-  Version(const Version &, const Package * = nullptr);
+  Version(const Version &);
   ~Version();
 
   void parse(const std::string &);
