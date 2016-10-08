@@ -121,8 +121,8 @@ void Report::printUpdates()
     for(const Version *ver : versions | boost::adaptors::reversed) {
       if(*ver <= ticket.previous.version)
         break;
-
-      m_stream << *ver;
+      else if(*ver <= *ticket.version)
+        m_stream << *ver;
     }
   }
 }
