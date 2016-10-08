@@ -405,7 +405,7 @@ void AboutIndexDelegate::findInBrowser()
 void AboutIndexDelegate::aboutPackage()
 {
   const Package *pkg = currentPackage();
-  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, m_reapack));
+  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, nullptr, m_reapack));
 }
 
 void AboutIndexDelegate::install()
@@ -442,8 +442,9 @@ void AboutIndexDelegate::install()
   tx->runTasks();
 }
 
-AboutPackageDelegate::AboutPackageDelegate(const Package *pkg, ReaPack *reapack)
-  : m_package(pkg), m_reapack(reapack),
+AboutPackageDelegate::AboutPackageDelegate(const Package *pkg,
+    const Version *ver, ReaPack *reapack)
+  : m_package(pkg), m_current(ver), m_reapack(reapack),
     m_index(pkg->category()->index()->shared_from_this())
 {
 }
@@ -466,15 +467,21 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->list()->addColumn({AUTO_STR("File"), 474});
   dialog->list()->addColumn({AUTO_STR("Action List"), 84});
 
-  for(const Version *ver : m_package->versions())
-    dialog->menu()->addRow({make_autostring(ver->name())});
+  for(const Version *ver : m_package->versions()) {
+    const auto index = dialog->menu()->addRow({make_autostring(ver->name())});
+
+    if(m_current && *ver == *m_current)
+      dialog->menu()->select(index);
+  }
 
   dialog->menu()->setSortCallback(0, [&] (const int a, const int b) {
     return m_package->version(a)->compare(*m_package->version(b));
   });
 
   dialog->menu()->sortByColumn(0, ListView::DescendingOrder);
-  dialog->menu()->setSelected(dialog->menu()->rowCount() - 1, true);
+
+  if(!dialog->menu()->hasSelection())
+    dialog->menu()->select(dialog->menu()->rowCount() - 1);
 }
 
 void AboutPackageDelegate::updateList(const int index)

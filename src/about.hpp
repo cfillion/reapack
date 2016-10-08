@@ -34,6 +34,7 @@ class ReaPack;
 class RichEdit;
 class Source;
 class TabBar;
+class Version;
 struct Link;
 
 typedef std::shared_ptr<const Index> IndexPtr;
@@ -119,7 +120,7 @@ private:
 
 class AboutPackageDelegate : public AboutDelegate {
 public:
-  AboutPackageDelegate(const Package *, ReaPack *);
+  AboutPackageDelegate(const Package *, const Version *current, ReaPack *);
 
 protected:
   void init(About *) override;
@@ -134,6 +135,7 @@ private:
   void copySourceUrl();
 
   const Package *m_package;
+  const Version *m_current;
   ReaPack *m_reapack;
   IndexPtr m_index; // keeps the package loaded in memory
   const std::vector<const Source *> *m_sources;
