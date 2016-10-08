@@ -405,7 +405,16 @@ void AboutIndexDelegate::findInBrowser()
 void AboutIndexDelegate::aboutPackage()
 {
   const Package *pkg = currentPackage();
-  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, nullptr, m_reapack));
+
+  Version current;
+
+  try {
+    Registry reg(Path::prefixRoot(Path::REGISTRY));
+    current = reg.getEntry(pkg).version;
+  }
+  catch(const reapack_error &) {}
+
+  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, current, m_reapack));
 }
 
 void AboutIndexDelegate::install()
@@ -443,7 +452,7 @@ void AboutIndexDelegate::install()
 }
 
 AboutPackageDelegate::AboutPackageDelegate(const Package *pkg,
-    const Version *ver, ReaPack *reapack)
+    const Version &ver, ReaPack *reapack)
   : m_package(pkg), m_current(ver), m_reapack(reapack),
     m_index(pkg->category()->index()->shared_from_this())
 {
@@ -470,7 +479,7 @@ void AboutPackageDelegate::init(About *dialog)
   for(const Version *ver : m_package->versions()) {
     const auto index = dialog->menu()->addRow({make_autostring(ver->name())});
 
-    if(m_current && *ver == *m_current)
+    if(m_current == *ver)
       dialog->menu()->select(index);
   }
 

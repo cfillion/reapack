@@ -849,7 +849,7 @@ void Browser::aboutPackage(const int index)
   const Entry *entry = getEntry(index);
 
   if(entry && entry->package)
-    m_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(entry->package, entry->current, m_reapack));
+    m_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(entry->package, entry->regEntry.version, m_reapack));
 }
 
 void Browser::aboutRemote(const int index)
