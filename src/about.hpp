@@ -131,7 +131,9 @@ protected:
   { return reinterpret_cast<const void *>(m_package); }
 
 private:
+  const Source *currentSource() const;
   void copySourceUrl();
+  void locate();
 
   const Package *m_package;
   Version m_current;

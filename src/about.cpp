@@ -39,7 +39,10 @@
 
 using namespace std;
 
-enum { ACTION_ABOUT_PKG = 300, ACTION_FIND_IN_BROWSER, ACTION_COPY_URL };
+enum {
+  ACTION_ABOUT_PKG = 300, ACTION_FIND_IN_BROWSER,
+  ACTION_COPY_URL, ACTION_LOCATE
+};
 
 About::About() : Dialog(IDD_ABOUT_DIALOG)
 {
@@ -546,6 +549,8 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
     return false;
 
   menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
+  menu.setEnabled(m_current.size() > 0,
+    menu.addAction(AUTO_STR("Locate in explorer/finder"), ACTION_LOCATE));
 
   return true;
 }
@@ -559,15 +564,35 @@ void AboutPackageDelegate::onCommand(const int id)
   case ACTION_COPY_URL:
     copySourceUrl();
     break;
+  case ACTION_LOCATE:
+    locate();
+    break;
   }
 }
 
-void AboutPackageDelegate::copySourceUrl()
+const Source *AboutPackageDelegate::currentSource() const
 {
   const int index = m_dialog->list()->currentIndex();
 
   if(index < 0)
-    return;
+    return nullptr;
+  else
+    return m_sources->at(index);
+}
 
-  m_dialog->setClipboard(m_sources->at(index)->url());
+void AboutPackageDelegate::copySourceUrl()
+{
+  if(const Source *src = currentSource())
+    m_dialog->setClipboard(src->url());
+}
+
+void AboutPackageDelegate::locate()
+{
+  if(const Source *src = currentSource()) {
+    stringstream arg;
+    arg << "/select," << quoted(Path::prefixRoot(src->targetPath()).join());
+
+    ShellExecute(nullptr, nullptr, AUTO_STR("explorer.exe"),
+      make_autostring(arg.str()).c_str(), nullptr, SW_SHOW);
+  }
 }
