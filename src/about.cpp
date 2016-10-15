@@ -20,6 +20,7 @@
 #include "browser.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
+#include "filesystem.hpp"
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
@@ -548,8 +549,10 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
+  const Source *src = m_sources->at(index);
+
   menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
-  menu.setEnabled(m_current.size() > 0,
+  menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
     menu.addAction(AUTO_STR("Locate in explorer/finder"), ACTION_LOCATE));
 
   return true;
@@ -589,10 +592,11 @@ void AboutPackageDelegate::copySourceUrl()
 void AboutPackageDelegate::locate()
 {
   if(const Source *src = currentSource()) {
-    stringstream arg;
-    arg << "/select," << quoted(Path::prefixRoot(src->targetPath()).join());
+    string arg = "/select,\"";
+    arg += Path::prefixRoot(src->targetPath()).join();
+    arg += '"';
 
-    ShellExecute(nullptr, nullptr, AUTO_STR("explorer.exe"),
-      make_autostring(arg.str()).c_str(), nullptr, SW_SHOW);
+    ShellExecute(nullptr, AUTO_STR("open"), AUTO_STR("explorer.exe"),
+      make_autostring(arg).c_str(), nullptr, SW_SHOW);
   }
 }
