@@ -518,9 +518,9 @@ void Browser::updateAbout()
   const auto index = m_list->currentIndex();
 
   if(about->testDelegate<AboutIndexDelegate>())
-    aboutRemote(index);
+    aboutRemote(index, false);
   else if(about->testDelegate<AboutPackageDelegate>())
-    aboutPackage(index);
+    aboutPackage(index, false);
 }
 
 void Browser::refresh(const bool stale)
@@ -844,21 +844,21 @@ auto Browser::getEntry(const int listIndex) -> Entry *
   return &m_entries[m_visibleEntries[listIndex]];
 }
 
-void Browser::aboutPackage(const int index)
+void Browser::aboutPackage(const int index, const bool focus)
 {
   const Entry *entry = getEntry(index);
 
   if(entry && entry->package) {
     m_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(
-      entry->package, entry->regEntry.version, m_reapack));
+      entry->package, entry->regEntry.version, m_reapack), focus);
   }
 }
 
-void Browser::aboutRemote(const int index)
+void Browser::aboutRemote(const int index, const bool focus)
 {
   if(const Entry *entry = getEntry(index)) {
     m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(
-      entry->index, m_reapack));
+      entry->index, m_reapack), focus);
   }
 }
 

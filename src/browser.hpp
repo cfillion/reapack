@@ -136,8 +136,8 @@ private:
   void installVersion(int index, size_t verIndex);
   void uninstall(int index, bool toggle = true);
   void togglePin(int index);
-  void aboutRemote(int index);
-  void aboutPackage(int index);
+  void aboutRemote(int index, bool focus = true);
+  void aboutPackage(int index, bool focus = true);
 
   ReaPack *m_reapack;
   bool m_loading;
