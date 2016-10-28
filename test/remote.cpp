@@ -78,6 +78,11 @@ TEST_CASE("construct invalid remote", M) {
   }
 }
 
+TEST_CASE("unicode name") {
+  SECTION("cyrillic")
+    Remote remote("Новая папка", "url");
+}
+
 TEST_CASE("set invalid values", M) {
   Remote remote;
   
