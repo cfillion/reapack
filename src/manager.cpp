@@ -287,76 +287,79 @@ void Manager::refresh()
   m_list->sort();
 }
 
-void Manager::setRemoteEnabled(const bool enabled)
+void Manager::setMods(const ModsCallback &cb, const bool updateRow)
 {
   for(const int index : m_list->selection()) {
     const Remote &remote = getRemote(index);
 
-    auto it = m_enableOverrides.find(remote);
+    auto it = m_mods.find(remote);
 
-    if(it == m_enableOverrides.end()) {
-      if(remote.isEnabled() == enabled)
+    if(it == m_mods.end()) {
+      RemoteMods mods;
+      cb(remote, &mods);
+
+      if(!mods)
         continue;
 
-      m_enableOverrides.insert({remote, enabled});
+      m_mods.insert({remote, mods});
       setChange(1);
     }
-    else if(remote.isEnabled() == enabled) {
-      m_enableOverrides.erase(it);
-      setChange(-1);
-    }
-    else
-      it->second = enabled;
+    else {
+      RemoteMods *mods = &it->second;
+      cb(remote, mods);
 
-    m_list->replaceRow(index, makeRow(remote));
+      if(!*mods) {
+        m_mods.erase(it);
+        setChange(-1);
+      }
+    }
+
+    if(updateRow)
+      m_list->replaceRow(index, makeRow(remote));
   }
+}
+
+void Manager::setRemoteEnabled(const bool enabled)
+{
+  setMods([=](const Remote &remote, RemoteMods *mods) {
+    if(remote.isEnabled() == enabled)
+      mods->enable = boost::none;
+    else
+      mods->enable = enabled;
+  }, true);
 }
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
 {
-  const auto it = m_enableOverrides.find(remote);
+  const auto it = m_mods.find(remote);
 
-  if(it == m_enableOverrides.end())
+  if(it == m_mods.end())
     return remote.isEnabled();
   else
-    return it->second;
+    return it->second.enable.value_or(remote.isEnabled());
 }
 
 void Manager::setRemoteAutoInstall(const tribool &enabled)
 {
-  using namespace boost::logic;
-
-  for(const int index : m_list->selection()) {
-    const Remote &remote = getRemote(index);
+  setMods([=](const Remote &remote, RemoteMods *mods) {
     const bool same = remote.autoInstall() == enabled
       || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
 
-    auto it = m_autoInstallOverrides.find(remote);
-
-    if(it == m_autoInstallOverrides.end()) {
-      if(same)
-        continue;
-
-      m_autoInstallOverrides.insert({remote, enabled});
-      setChange(1);
-    }
-    else if(same) {
-      m_autoInstallOverrides.erase(it);
-      setChange(-1);
-    }
+    if(same)
+      mods->autoInstall = boost::none;
     else
-      it->second = enabled;
-  }
+      mods->autoInstall = enabled;
+  }, true);
 }
 
 tribool Manager::remoteAutoInstall(const Remote &remote) const
 {
-  const auto it = m_autoInstallOverrides.find(remote);
+  const auto it = m_mods.find(remote);
 
-  if(it == m_autoInstallOverrides.end())
+  if(it == m_mods.end())
     return remote.autoInstall();
   else
-    return it->second;
+    return it->second.autoInstall.value_or(remote.autoInstall());
 }
 
 void Manager::refreshIndex()
@@ -534,27 +537,25 @@ bool Manager::apply()
   if(m_promptObsolete)
     m_config->install.promptObsolete = m_promptObsolete.value();
 
-  for(const auto &pair : m_enableOverrides) {
-    const Remote &remote = pair.first;
-    const bool enable = pair.second;
+  for(const auto &pair : m_mods) {
+    Remote remote = pair.first;
+    const RemoteMods &mods = pair.second;
 
-    if(m_uninstall.find(remote) == m_uninstall.end()) {
-      m_reapack->setRemoteEnabled(enable, remote);
+    if(m_uninstall.find(remote) != m_uninstall.end())
+      continue;
 
-      if(enable && !syncAll)
+    if(mods.enable) {
+      m_reapack->setRemoteEnabled(*mods.enable, remote);
+
+      if(*mods.enable && !syncAll)
         tx->synchronize(remote);
     }
-  }
-
-  for(const auto &pair : m_autoInstallOverrides) {
-    Remote remote = pair.first;
-    const tribool &enable = pair.second;
-
-    if(m_uninstall.find(remote) == m_uninstall.end()) {
-      remote.setAutoInstall(enable);
+    if(mods.autoInstall) {
+      remote.setAutoInstall(*mods.autoInstall);
       m_config->remotes.add(remote);
 
-      if(isRemoteEnabled(remote) && enable && !syncAll)
+      const bool isEnabled = mods.enable.value_or(remote.isEnabled());
+      if(isEnabled && *mods.autoInstall && !syncAll)
         tx->synchronize(remote);
     }
   }
@@ -574,8 +575,7 @@ bool Manager::apply()
 
 void Manager::reset()
 {
-  m_enableOverrides.clear();
-  m_autoInstallOverrides.clear();
+  m_mods.clear();
   m_uninstall.clear();
   m_autoInstall = boost::none;
   m_bleedingEdge = boost::none;

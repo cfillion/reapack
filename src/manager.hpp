@@ -47,10 +47,19 @@ protected:
   bool onKeyDown(int, int) override;
 
 private:
+  struct RemoteMods {
+    boost::optional<bool> enable;
+    boost::optional<tribool> autoInstall;
+    operator bool() const { return enable || autoInstall; }
+  };
+
+  typedef std::function<void (const Remote &, RemoteMods *)> ModsCallback;
+
   ListView::Row makeRow(const Remote &) const;
 
   Remote getRemote(int index) const;
   bool fillContextMenu(Menu &, int index) const;
+  void setMods(const ModsCallback &, bool updateRow = false);
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
   void setRemoteAutoInstall(const tribool &);
@@ -77,9 +86,8 @@ private:
   size_t m_changes;
   bool m_importing;
 
-  std::map<Remote, bool> m_enableOverrides;
+  std::map<Remote, RemoteMods> m_mods;
   std::set<Remote> m_uninstall;
-  std::map<Remote, tribool> m_autoInstallOverrides;
   boost::optional<bool> m_autoInstall;
   boost::optional<bool> m_bleedingEdge;
   boost::optional<bool> m_promptObsolete;
