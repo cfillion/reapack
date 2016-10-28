@@ -58,6 +58,14 @@ void Manager::onInit()
   m_list->onContextMenu(bind(&Manager::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
 
+  setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
+  setAnchor(getControl(IDC_IMPORT), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_BROWSE), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_OPTIONS), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDOK), AnchorAll);
+  setAnchor(getControl(IDCANCEL), AnchorAll);
+  setAnchor(m_apply, AnchorAll);
+
   refresh();
 
   m_list->autoSizeHeader();
