@@ -17,9 +17,9 @@
 
 #include "remote.hpp"
 
-#include "encoding.hpp"
 #include "errors.hpp"
 
+#include <boost/lexical_cast.hpp>
 #include <regex>
 #include <sstream>
 
@@ -27,7 +27,7 @@ using namespace std;
 
 static char DATA_DELIMITER = '|';
 
-static bool ValidateName(const string &name)
+static bool validateName(const string &name)
 {
   static const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]+");
   static const regex invalidPattern("\\.+");
@@ -39,7 +39,7 @@ static bool ValidateName(const string &name)
   return !match.empty() && invalid.empty();
 }
 
-static bool ValidateUrl(const string &url)
+static bool validateUrl(const string &url)
 {
   using namespace std::regex_constants;
 
@@ -53,7 +53,7 @@ static bool ValidateUrl(const string &url)
   return !match.empty();
 }
 
-Remote Remote::fromString(const string &data, ReadCode *code)
+Remote Remote::fromString(const string &data)
 {
   istringstream stream(data);
 
@@ -66,22 +66,17 @@ Remote Remote::fromString(const string &data, ReadCode *code)
   string enabled;
   getline(stream, enabled, DATA_DELIMITER);
 
-  if(!ValidateName(name)) {
-    if(code)
-      *code = InvalidName;
-  }
-  else if(!ValidateUrl(url)) {
-    if(code)
-      *code = InvalidUrl;
-  }
-  else {
-    if(code)
-      *code = Success;
+  if(!validateName(name) || !validateUrl(url))
+    return {};
 
-    return {name, url, enabled == "1"};
-  }
+  Remote remote(name, url);
 
-  return {};
+  try {
+    remote.setEnabled(boost::lexical_cast<bool>(enabled));
+  }
+  catch(const boost::bad_lexical_cast &) {}
+
+  return remote;
 }
 
 Remote::Remote()
@@ -98,7 +93,7 @@ Remote::Remote(const string &name, const string &url, const bool enabled)
 
 void Remote::setName(const string &name)
 {
-  if(!ValidateName(name))
+  if(!validateName(name))
     throw reapack_error("invalid name");
   else
     m_name = name;
@@ -106,7 +101,7 @@ void Remote::setName(const string &name)
 
 void Remote::setUrl(const string &url)
 {
-  if(!ValidateUrl(url))
+  if(!validateUrl(url))
     throw reapack_error("invalid url");
   else
     m_url = url;

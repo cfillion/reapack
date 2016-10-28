@@ -24,14 +24,7 @@
 
 class Remote {
 public:
-  enum ReadCode {
-    Success,
-    ReadFailure,
-    InvalidName,
-    InvalidUrl,
-  };
-
-  static Remote fromString(const std::string &data, ReadCode *code = nullptr);
+  static Remote fromString(const std::string &data);
 
   Remote();
   Remote(const std::string &name, const std::string &url, bool enabled = true);

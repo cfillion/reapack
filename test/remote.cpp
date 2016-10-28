@@ -186,22 +186,15 @@ TEST_CASE("get remote by name", M) {
 }
 
 TEST_CASE("unserialize remote", M) {
-  SECTION("invalid name") {
-    Remote::ReadCode code;
-    REQUIRE(Remote::fromString("&", &code).isNull());
-    REQUIRE(code == Remote::InvalidName);
-  }
+  SECTION("invalid name")
+    REQUIRE_FALSE(Remote::fromString("&"));
 
-  SECTION("invalid name") {
-    Remote::ReadCode code;
-    REQUIRE(Remote::fromString("name||false", &code).isNull());
-    REQUIRE(code == Remote::InvalidUrl);
-  }
+  SECTION("invalid name")
+    REQUIRE_FALSE(Remote::fromString("name||false"));
 
   SECTION("valid enabled") {
-    Remote::ReadCode code;
-    Remote remote = Remote::fromString("name|url|1", &code);
-    REQUIRE(code == Remote::Success);
+    Remote remote = Remote::fromString("name|url|1");
+    REQUIRE(remote);
 
     REQUIRE(remote.name() == "name");
     REQUIRE(remote.url() == "url");
