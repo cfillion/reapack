@@ -192,7 +192,7 @@ TEST_CASE("unserialize remote", M) {
   SECTION("invalid name")
     REQUIRE_FALSE(Remote::fromString("name||false"));
 
-  SECTION("valid enabled") {
+  SECTION("enabled") {
     Remote remote = Remote::fromString("name|url|1");
     REQUIRE(remote);
 
@@ -201,22 +201,43 @@ TEST_CASE("unserialize remote", M) {
     REQUIRE(remote.isEnabled());
   }
 
-  SECTION("valid disabled") {
+  SECTION("disabled") {
     Remote remote = Remote::fromString("name|url|0");
     REQUIRE(remote.name() == "name");
     REQUIRE(remote.url() == "url");
     REQUIRE_FALSE(remote.isEnabled());
   }
+
+  SECTION("missing auto-install") {
+    Remote remote = Remote::fromString("name|url|1");
+    REQUIRE(boost::logic::indeterminate(remote.autoInstall()));
+  }
+
+  SECTION("indeterminate auto-install") {
+    Remote remote = Remote::fromString("name|url|1|2");
+    REQUIRE(boost::logic::indeterminate(remote.autoInstall()));
+  }
+
+  SECTION("auto-install enabled") {
+    Remote remote = Remote::fromString("name|url|1|1");
+    REQUIRE(remote.autoInstall());
+  }
+
+  SECTION("auto-install enabled") {
+    Remote remote = Remote::fromString("name|url|1|0");
+    REQUIRE(remote.autoInstall() == false);
+  }
 }
 
 TEST_CASE("serialize remote", M) {
-  SECTION("enabled") {
-    REQUIRE(Remote("name", "url", true).toString() == "name|url|1");
-  }
+  SECTION("default")
+    REQUIRE(Remote("name", "url").toString() == "name|url|1|2");
 
-  SECTION("disabled") {
-    REQUIRE(Remote("name", "url", false).toString() == "name|url|0");
-  }
+  SECTION("enabled")
+    REQUIRE(Remote("name", "url", true, true).toString() == "name|url|1|1");
+
+  SECTION("disabled")
+    REQUIRE(Remote("name", "url", false, false).toString() == "name|url|0|0");
 }
 
 TEST_CASE("get enabled remotes", M) {

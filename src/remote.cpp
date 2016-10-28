@@ -20,6 +20,7 @@
 #include "errors.hpp"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/logic/tribool_io.hpp>
 #include <regex>
 #include <sstream>
 
@@ -66,6 +67,9 @@ Remote Remote::fromString(const string &data)
   string enabled;
   getline(stream, enabled, DATA_DELIMITER);
 
+  string autoInstall;
+  getline(stream, autoInstall, DATA_DELIMITER);
+
   if(!validateName(name) || !validateUrl(url))
     return {};
 
@@ -76,16 +80,21 @@ Remote Remote::fromString(const string &data)
   }
   catch(const boost::bad_lexical_cast &) {}
 
+  try {
+    remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
+  }
+  catch(const boost::bad_lexical_cast &) {}
+
   return remote;
 }
 
 Remote::Remote()
-  : m_enabled(true), m_protected(false)
+  : m_enabled(true), m_protected(false), m_autoInstall(boost::logic::indeterminate)
 {
 }
 
-Remote::Remote(const string &name, const string &url, const bool enabled)
-  : m_enabled(enabled), m_protected(false)
+Remote::Remote(const string &name, const string &url, const bool enabled, const tribool &autoInstall)
+  : m_enabled(enabled), m_protected(false), m_autoInstall(autoInstall)
 {
   setName(name);
   setUrl(url);
@@ -109,7 +118,13 @@ void Remote::setUrl(const string &url)
 
 string Remote::toString() const
 {
-  return m_name + DATA_DELIMITER + m_url + DATA_DELIMITER + to_string(m_enabled);
+  ostringstream out;
+  out << m_name << DATA_DELIMITER;
+  out << m_url << DATA_DELIMITER;
+  out << m_enabled << DATA_DELIMITER;
+  out << m_autoInstall;
+
+  return out.str();
 }
 
 void RemoteList::add(const Remote &remote)

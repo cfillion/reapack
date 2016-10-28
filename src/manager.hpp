@@ -22,6 +22,7 @@
 
 #include "listview.hpp"
 
+#include <boost/logic/tribool.hpp>
 #include <boost/optional.hpp>
 #include <map>
 #include <set>
@@ -30,6 +31,8 @@ class Config;
 class ReaPack;
 class Remote;
 struct NetworkOpts;
+
+typedef boost::logic::tribool tribool;
 
 class Manager : public Dialog {
 public:
@@ -50,6 +53,8 @@ private:
   bool fillContextMenu(Menu &, int index) const;
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;
+  void setRemoteAutoInstall(const tribool &);
+  tribool remoteAutoInstall(const Remote &) const;
   void uninstall();
   void toggle(boost::optional<bool> &, bool current);
   void refreshIndex();
@@ -74,6 +79,7 @@ private:
 
   std::map<Remote, bool> m_enableOverrides;
   std::set<Remote> m_uninstall;
+  std::map<Remote, tribool> m_autoInstallOverrides;
   boost::optional<bool> m_autoInstall;
   boost::optional<bool> m_bleedingEdge;
   boost::optional<bool> m_promptObsolete;

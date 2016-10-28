@@ -31,6 +31,7 @@ using namespace std;
 
 enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
        ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
+       ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
        ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
        ACTION_NETCONFIG, ACTION_RESETCONFIG };
 
@@ -91,6 +92,15 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_REFRESH:
     refreshIndex();
+    break;
+  case ACTION_AUTOINSTALL_GLOBAL:
+    setRemoteAutoInstall(boost::logic::indeterminate);
+    break;
+  case ACTION_AUTOINSTALL_OFF:
+    setRemoteAutoInstall(false);
+    break;
+  case ACTION_AUTOINSTALL_ON:
+    setRemoteAutoInstall(true);
     break;
   case ACTION_COPYURL:
     copyUrl();
@@ -166,6 +176,15 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   menu.addSeparator();
 
   menu.addAction(AUTO_STR("&Refresh"), ACTION_REFRESH);
+
+  Menu autoInstallMenu = menu.addMenu("&Install new packages");
+  const UINT autoInstallGlobal =
+    autoInstallMenu.addAction("Use &global setting", ACTION_AUTOINSTALL_GLOBAL);
+  const UINT autoInstallOff =
+    autoInstallMenu.addAction("Manually", ACTION_AUTOINSTALL_OFF);
+  const UINT autoInstallOn =
+    autoInstallMenu.addAction("When synchronizing", ACTION_AUTOINSTALL_ON);
+
   menu.addAction(AUTO_STR("&Copy URL"), ACTION_COPYURL);
 
   const UINT uninstallAction =
@@ -182,6 +201,9 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   bool allEnabled = true;
   bool allDisabled = true;
   bool allProtected = true;
+  bool allAutoInstallGlobal = true;
+  bool allAutoInstallOff = true;
+  bool allAutoInstallOn = true;
 
   for(const int i : m_list->selection()) {
     const Remote &r = getRemote(i);
@@ -192,6 +214,19 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
     if(!r.isProtected())
       allProtected = false;
+
+    const tribool &autoInstall = remoteAutoInstall(r);
+    if(boost::logic::indeterminate(autoInstall)) {
+      allAutoInstallOff = false;
+      allAutoInstallOn = false;
+    }
+    else {
+      allAutoInstallGlobal = false;
+      if(autoInstall)
+        allAutoInstallOff = false;
+      else if(!autoInstall)
+        allAutoInstallOn = false;
+    }
   };
 
   if(allEnabled)
@@ -200,6 +235,13 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
     menu.disable(disableAction);
   if(allProtected)
     menu.disable(uninstallAction);
+
+  if(allAutoInstallGlobal)
+    autoInstallMenu.check(autoInstallGlobal);
+  else if(allAutoInstallOff)
+    autoInstallMenu.check(autoInstallOff);
+  else if(allAutoInstallOn)
+    autoInstallMenu.check(autoInstallOn);
 
   return true;
 }
@@ -276,6 +318,43 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 
   if(it == m_enableOverrides.end())
     return remote.isEnabled();
+  else
+    return it->second;
+}
+
+void Manager::setRemoteAutoInstall(const tribool &enabled)
+{
+  using namespace boost::logic;
+
+  for(const int index : m_list->selection()) {
+    const Remote &remote = getRemote(index);
+    const bool same = remote.autoInstall() == enabled
+      || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
+
+    auto it = m_autoInstallOverrides.find(remote);
+
+    if(it == m_autoInstallOverrides.end()) {
+      if(same)
+        continue;
+
+      m_autoInstallOverrides.insert({remote, enabled});
+      setChange(1);
+    }
+    else if(same) {
+      m_autoInstallOverrides.erase(it);
+      setChange(-1);
+    }
+    else
+      it->second = enabled;
+  }
+}
+
+tribool Manager::remoteAutoInstall(const Remote &remote) const
+{
+  const auto it = m_autoInstallOverrides.find(remote);
+
+  if(it == m_autoInstallOverrides.end())
+    return remote.autoInstall();
   else
     return it->second;
 }
@@ -467,6 +546,19 @@ bool Manager::apply()
     }
   }
 
+  for(const auto &pair : m_autoInstallOverrides) {
+    Remote remote = pair.first;
+    const tribool &enable = pair.second;
+
+    if(m_uninstall.find(remote) == m_uninstall.end()) {
+      remote.setAutoInstall(enable);
+      m_config->remotes.add(remote);
+
+      if(isRemoteEnabled(remote) && enable && !syncAll)
+        tx->synchronize(remote);
+    }
+  }
+
   for(const Remote &remote : m_uninstall)
     m_reapack->uninstall(remote);
 
@@ -483,6 +575,7 @@ bool Manager::apply()
 void Manager::reset()
 {
   m_enableOverrides.clear();
+  m_autoInstallOverrides.clear();
   m_uninstall.clear();
   m_autoInstall = boost::none;
   m_bleedingEdge = boost::none;

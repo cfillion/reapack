@@ -57,6 +57,8 @@ void Transaction::synchronize(const Remote &remote,
 
   if(forceAutoInstall)
     opts.autoInstall = *forceAutoInstall;
+  else if(!boost::logic::indeterminate(remote.autoInstall()))
+    opts.autoInstall = remote.autoInstall();
 
   fetchIndex(remote, [=] {
     IndexPtr ri;

@@ -18,16 +18,20 @@
 #ifndef REAPACK_REMOTE_HPP
 #define REAPACK_REMOTE_HPP
 
+#include <boost/logic/tribool.hpp>
 #include <map>
 #include <string>
 #include <vector>
+
+typedef boost::logic::tribool tribool;
 
 class Remote {
 public:
   static Remote fromString(const std::string &data);
 
   Remote();
-  Remote(const std::string &name, const std::string &url, bool enabled = true);
+  Remote(const std::string &name, const std::string &url, bool enabled = true,
+    const tribool &autoInstall = boost::logic::indeterminate);
 
   std::string toString() const;
 
@@ -44,6 +48,9 @@ public:
   void setEnabled(const bool enabled) { m_enabled = enabled; }
   bool isEnabled() const { return m_enabled; }
 
+  void setAutoInstall(const tribool &autoInstall) { m_autoInstall = autoInstall; }
+  tribool autoInstall() const { return m_autoInstall; }
+
   void protect() { m_protected = true; }
   bool isProtected() const { return m_protected; }
 
@@ -55,6 +62,7 @@ private:
   std::string m_url;
   bool m_enabled;
   bool m_protected;
+  tribool m_autoInstall;
 };
 
 class RemoteList {
