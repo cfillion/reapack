@@ -30,12 +30,18 @@ static char DATA_DELIMITER = '|';
 
 static bool validateName(const string &name)
 {
-  static const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]{4,24}");
+  using namespace std::regex_constants;
+
+  // see https://en.wikipedia.org/wiki/Filename#Reserved%5Fcharacters%5Fand%5Fwords
+  static const regex validPattern("[^*\\\\:<>?/|\"[:cntrl:]]{4,24}");
+  static const regex invalidPattern(
+    "[\\.\x20].+|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d", icase);
 
   smatch match, invalid;
   regex_match(name, match, validPattern);
+  regex_match(name, invalid, invalidPattern);
 
-  return !match.empty();
+  return !match.empty() && invalid.empty();
 }
 
 static bool validateUrl(const string &url)
@@ -44,7 +50,7 @@ static bool validateUrl(const string &url)
 
   // see http://tools.ietf.org/html/rfc3986#section-2
   static const regex pattern(
-    "^(?:[a-z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+$", icase);
+    "(?:[a-z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+", icase);
 
   smatch match;
   regex_match(url, match, pattern);

@@ -18,69 +18,77 @@ TEST_CASE("construct remote", M) {
   REQUIRE_FALSE(remote.isProtected());
 }
 
-TEST_CASE("construct invalid remote", M) {
-  SECTION("empty name") {
-    try {
-      Remote remote({}, "url");
-      FAIL();
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid name");
+TEST_CASE("remote name validation", M) {
+  SECTION("invalid") {
+    const string invalidNames[] = {
+      "",
+      "ab/cd",
+      "ab\\cd",
+      "..",
+      ".",
+      "....",
+      ".hidden",
+      "trailing.",
+      "   leading",
+      "trailing   ",
+      "ctrl\4chars",
+
+      // Windows device names...
+      "CLOCK$",
+      "COM1",
+      "LPT2",
+      "lpt1",
+    };
+
+    for(const string &name : invalidNames) {
+      try {
+        Remote remote(name, "url");
+        FAIL("'" + name + "' was allowed");
+      }
+      catch(const reapack_error &e) {
+        REQUIRE(string(e.what()) == "invalid name");
+      }
     }
   }
 
-  SECTION("invalid name") {
-    try {
-      Remote remote("a/", "url");
-      FAIL();
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid name");
-    }
-  }
+  SECTION("valid") {
+    const string validNames[] = {
+      "1234",
+      "hello world",
+      "hello_world",
+      "Новая папка",
+      "Hello ~World~",
+      "Repository #1"
+    };
 
-  SECTION("directory traversal in name") {
-    try {
-      Remote remote("..", "url");
-      FAIL("dotdot was allowed");
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid name");
-    }
-
-    try {
-      Remote remote(".", "url");
-      FAIL("single dot was allowed");
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid name");
-    }
-  }
-
-  SECTION("empty url") {
-    try {
-      Remote remote("name", {});
-      FAIL();
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid url");
-    }
-  }
-
-  SECTION("invalid url") {
-    try {
-      Remote remote("name", "hello world");
-      FAIL();
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid url");
+    for(const string &name : validNames) {
+      try {
+        Remote remote(name, "url");
+      }
+      catch(const reapack_error &e) {
+        FAIL("'" + name + "' was denied (" + e.what() + ')');
+      }
     }
   }
 }
 
-TEST_CASE("unicode name") {
-  SECTION("cyrillic")
-    Remote remote("Новая папка", "url");
+TEST_CASE("remote url validation", M) {
+  SECTION("invalid") {
+    const string invalidUrls[] = {
+      "",
+      "hello world", // space should be %20
+    };
+
+    for(const string &url : invalidUrls) {
+      try {
+        Remote remote("hello", url);
+        FAIL("'" + url + "' was allowed");
+      }
+      catch(const reapack_error &e) {
+        REQUIRE(string(e.what()) == "invalid url");
+      }
+    }
+  }
 }
 
 TEST_CASE("set invalid values", M) {
