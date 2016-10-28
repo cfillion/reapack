@@ -192,7 +192,7 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   menu.addSeparator();
 
-  auto_char aboutLabel[32] = {};
+  auto_char aboutLabel[35] = {};
   const auto_string &name = make_autostring(remote.name());
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());

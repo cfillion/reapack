@@ -30,7 +30,7 @@ static char DATA_DELIMITER = '|';
 
 static bool validateName(const string &name)
 {
-  static const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]+");
+  static const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]{4,24}");
   static const regex invalidPattern("\\.+");
 
   smatch match, invalid;

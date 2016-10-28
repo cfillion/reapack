@@ -283,6 +283,6 @@ TEST_CASE("remove two remotes", M) {
 }
 
 TEST_CASE("compare remotes", M) {
-  REQUIRE(Remote("a", "a") < Remote("b", "a"));
-  REQUIRE_FALSE(Remote("a", "a") < Remote("a", "b"));
+  REQUIRE(Remote("aaaa", "aaaa") < Remote("bbbb", "aaaa"));
+  REQUIRE_FALSE(Remote("aaaa", "aaaa") < Remote("aaaa", "bbbb"));
 }
