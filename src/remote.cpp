@@ -31,13 +31,11 @@ static char DATA_DELIMITER = '|';
 static bool validateName(const string &name)
 {
   static const regex validPattern("[^~#%&*{}\\\\:<>?/+|\"]{4,24}");
-  static const regex invalidPattern("\\.+");
 
   smatch match, invalid;
   regex_match(name, match, validPattern);
-  regex_match(name, invalid, invalidPattern);
 
-  return !match.empty() && invalid.empty();
+  return !match.empty();
 }
 
 static bool validateUrl(const string &url)
