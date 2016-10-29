@@ -156,9 +156,9 @@ string Path::join(const char sep) const
     const string &part = *it;
 
     if(!path.empty())
-      path.insert(path.end(), sep ? sep : SEPARATOR);
+      path += sep ? sep : SEPARATOR;
 
-    path.append(part);
+    path += part;
   }
 
   return path;
