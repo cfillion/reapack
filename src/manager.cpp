@@ -177,13 +177,13 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   menu.addAction(AUTO_STR("&Refresh"), ACTION_REFRESH);
 
-  Menu autoInstallMenu = menu.addMenu("&Install new packages");
-  const UINT autoInstallGlobal =
-    autoInstallMenu.addAction("Use &global setting", ACTION_AUTOINSTALL_GLOBAL);
-  const UINT autoInstallOff =
-    autoInstallMenu.addAction("Manually", ACTION_AUTOINSTALL_OFF);
-  const UINT autoInstallOn =
-    autoInstallMenu.addAction("When synchronizing", ACTION_AUTOINSTALL_ON);
+  Menu autoInstallMenu = menu.addMenu(AUTO_STR("&Install new packages"));
+  const UINT autoInstallGlobal = autoInstallMenu.addAction(
+    AUTO_STR("Use &global setting"), ACTION_AUTOINSTALL_GLOBAL);
+  const UINT autoInstallOff = autoInstallMenu.addAction(
+    AUTO_STR("Manually"), ACTION_AUTOINSTALL_OFF);
+  const UINT autoInstallOn = autoInstallMenu.addAction(
+    AUTO_STR("When synchronizing"), ACTION_AUTOINSTALL_ON);
 
   menu.addAction(AUTO_STR("&Copy URL"), ACTION_COPYURL);
 
