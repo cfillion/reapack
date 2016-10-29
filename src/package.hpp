@@ -31,6 +31,7 @@ public:
     ScriptType,
     ExtensionType,
     EffectType,
+    VSTEffectType,
     DataType,
     ThemeType,
   };

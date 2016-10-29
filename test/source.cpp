@@ -200,6 +200,12 @@ TEST_CASE("source target path", M) {
     REQUIRE(source.targetPath() == expected);
   }
 
+  SECTION("vst effect") {
+    source.setTypeOverride(Package::VSTEffectType);
+    const Path expected("VST Effects/file.name");
+    REQUIRE(source.targetPath() == expected);
+  }
+
   SECTION("extension") {
     source.setTypeOverride(Package::ExtensionType);
     const Path expected("UserPlugins/file.name");

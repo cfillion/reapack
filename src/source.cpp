@@ -131,6 +131,9 @@ Path Source::targetPath() const
   case Package::EffectType:
     path.append("Effects");
     break;
+  case Package::VSTEffectType:
+    path.append("VST Effects");
+    break;
   case Package::DataType:
     path.append("Data");
     break;
@@ -161,6 +164,7 @@ Path Source::targetPath() const
   case Package::ExtensionType:
   case Package::ThemeType:
   case Package::DataType:
+  case Package::VSTEffectType:
     path.append(file(), false);
     break;
   case Package::UnknownType:

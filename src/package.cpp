@@ -34,6 +34,8 @@ Package::Type Package::getType(const char *type)
     return ExtensionType;
   else if(!strcmp(type, "effect"))
     return EffectType;
+  else if(!strcmp(type, "vsteffect"))
+    return VSTEffectType;
   else if(!strcmp(type, "data"))
     return DataType;
   else if(!strcmp(type, "theme"))
@@ -50,6 +52,7 @@ string Package::displayType(const Type type)
   case ExtensionType:
     return "Extension";
   case EffectType:
+  case VSTEffectType:
     return "Effect";
   case DataType:
     return "Data";

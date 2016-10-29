@@ -25,6 +25,9 @@ TEST_CASE("package type from string", M) {
   SECTION("effect")
     REQUIRE(Package::getType("effect") == Package::EffectType);
 
+  SECTION("vsteffect")
+    REQUIRE(Package::getType("vsteffect") == Package::VSTEffectType);
+
   SECTION("data")
     REQUIRE(Package::getType("data") == Package::DataType);
 
@@ -44,6 +47,9 @@ TEST_CASE("package type to string", M) {
 
   SECTION("effect")
     REQUIRE("Effect" == Package::displayType(Package::EffectType));
+
+  SECTION("vsteffect")
+    REQUIRE("Effect" == Package::displayType(Package::VSTEffectType));
 
   SECTION("data")
     REQUIRE("Data" == Package::displayType(Package::DataType));

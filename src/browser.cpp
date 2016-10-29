@@ -475,6 +475,9 @@ bool Browser::isFiltered(Package::Type type) const
   case Package::ExtensionType:
   case Package::ThemeType:
     break;
+  case Package::VSTEffectType:
+    type = Package::EffectType;
+    break;
   default:
     type = Package::UnknownType;
     break;
