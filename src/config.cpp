@@ -93,7 +93,7 @@ void Config::restoreDefaultRemotes()
     {"ReaTeam JSFX",
       "https://github.com/ReaTeam/JSFX/raw/master/index.xml"},
     {"ReaTeam Themes",
-      "https://github.com/ReaTeam/Themes/raw/master/index.xml", true, false},
+      "https://github.com/ReaTeam/Themes/raw/master/index.xml"},
     {"MPL Scripts",
       "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml"},
     {"X-Raym Scripts",
