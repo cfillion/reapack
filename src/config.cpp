@@ -83,23 +83,25 @@ void Config::restoreSelfRemote()
 
 void Config::restoreDefaultRemotes()
 {
-  const pair<string,string> repos[] = {
+  Remote self = remotes.get("ReaPack");
+  self.setEnabled(true);
+  remotes.add(self);
+
+  const Remote repos[] = {
     {"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
     {"ReaTeam JSFX",
       "https://github.com/ReaTeam/JSFX/raw/master/index.xml"},
+    {"ReaTeam Themes",
+      "https://github.com/ReaTeam/Themes/raw/master/index.xml", true, false},
     {"MPL Scripts",
       "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml"},
     {"X-Raym Scripts",
       "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml"},
   };
 
-  for(const auto &pair : repos) {
-    Remote remote = remotes.get(pair.first);
-    remote.setName(pair.first);
-    remote.setUrl(pair.second);
-    remotes.add(remote);
-  }
+  for(const Remote &repo : repos)
+    remotes.add(repo);
 }
 
 void Config::migrate()
@@ -107,7 +109,8 @@ void Config::migrate()
   const unsigned int version = getUInt(GENERAL_GRP, VERSION_KEY);
 
   switch(version) {
-  case 0:
+  case 0: // v1.0
+  case 1: // v1.1
     m_isFirstRun = true;
     restoreDefaultRemotes();
     break;
@@ -118,7 +121,7 @@ void Config::migrate()
     return;
   };
 
-  m_version = 1;
+  m_version = 2;
   write();
 }
 
