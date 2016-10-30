@@ -1,4 +1,4 @@
-@version 1.1rc2
+@version 1.1rc3
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -8,14 +8,13 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  + support multiple action list sections for scripts [p=1732794]
+  * about pkg: contents: add "Locate in explorer/finder" context menu action
+  * config: add ReaTeam/Themes to the default repositories
+  * config: enable all default repos on upgrade from previous version
+  * implement per-repository override for the "Install new packages" setting
   Changed:
-  + about pkg: display in which Action List section the files are registered
-  + browser: make the about window follow browser selection [p=1730194]
-  + browser: clarify package registry read failure error message
-  + move the repo index cache to <respath>/ReaPack/cache/ subfolder
-  + source: ignore AL registration information of non-script files
+  * about pkg: auto-select the current version
+  * manager: make the window user-resizable [#10]
+  * remote: improve name validation (now limited to 4..24 chars)
   Fixed:
-  + about: don't reset the dialog when the content remains the same
-  + registry: don't downgrade the db version when higher than current
-  + tabbar: avoid flickering on wine when switching tab
+  * report: only display changes up to the newly installed version
