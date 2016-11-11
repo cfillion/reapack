@@ -43,7 +43,7 @@ const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 // Surely there must be a better way...
 static void CleanupTempFiles()
 {
-  const Path &path = Path::prefixRoot(Path::CACHE + "*.tmp");
+  const Path &path = Path::prefixRoot(Path::DATA + "*.tmp");
   const auto_string &pattern = make_autostring(path.join());
 
   WIN32_FIND_DATA fd = {};
