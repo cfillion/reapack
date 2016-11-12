@@ -426,6 +426,7 @@ void Browser::displayButton()
     {AUTO_STR("&Effects"), Package::EffectType},
     {AUTO_STR("E&xtensions"), Package::ExtensionType},
     {AUTO_STR("&Themes"), Package::ThemeType},
+    {AUTO_STR("&Language Packs"), Package::LangPackType},
     {AUTO_STR("&Other packages"), Package::UnknownType},
   };
 
@@ -470,12 +471,14 @@ bool Browser::isFiltered(Package::Type type) const
     return false;
 
   switch(type) {
+  case Package::UnknownType:
   case Package::ScriptType:
   case Package::EffectType:
   case Package::ExtensionType:
   case Package::ThemeType:
+  case Package::LangPackType:
     break;
-  default:
+  case Package::DataType:
     type = Package::UnknownType;
     break;
   }
