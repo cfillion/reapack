@@ -217,6 +217,12 @@ TEST_CASE("source target path", M) {
     const Path expected("ColorThemes/file.name");
     REQUIRE(source.targetPath() == expected);
   }
+
+  SECTION("langpack") {
+    source.setTypeOverride(Package::LangPackType);
+    const Path expected("LangPack/file.name");
+    REQUIRE(source.targetPath() == expected);
+  }
 }
 
 TEST_CASE("target path with parent directory traversal", M) {

@@ -38,6 +38,8 @@ Package::Type Package::getType(const char *type)
     return DataType;
   else if(!strcmp(type, "theme"))
     return ThemeType;
+  else if(!strcmp(type, "langpack"))
+    return LangPackType;
   else
     return UnknownType;
 }
@@ -55,6 +57,8 @@ string Package::displayType(const Type type)
     return "Data";
   case ThemeType:
     return "Theme";
+  case LangPackType:
+    return "Language Pack";
   default:
     return "Unknown";
   }

@@ -33,6 +33,7 @@ public:
     EffectType,
     DataType,
     ThemeType,
+    LangPackType,
   };
 
   static Type getType(const char *);

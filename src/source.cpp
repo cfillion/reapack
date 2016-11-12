@@ -140,6 +140,9 @@ Path Source::targetPath() const
   case Package::ThemeType:
     path.append("ColorThemes");
     break;
+  case Package::LangPackType:
+    path.append("LangPack");
+    break;
   case Package::UnknownType:
     // The package has an unsupported type, so we return an empty path.
     // The empty path won't be used because the category will reject
@@ -161,6 +164,7 @@ Path Source::targetPath() const
   case Package::ExtensionType:
   case Package::ThemeType:
   case Package::DataType:
+  case Package::LangPackType:
     path.append(file(), false);
     break;
   case Package::UnknownType:
