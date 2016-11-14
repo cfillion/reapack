@@ -1,4 +1,4 @@
-@version 1.1rc3
+@version 1.1rc4
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -8,13 +8,7 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  * about pkg: contents: add "Locate in explorer/finder" context menu action
-  * config: add ReaTeam/Themes to the default repositories
-  * config: enable all default repos on upgrade from previous version
-  * implement per-repository override for the "Install new packages" setting
-  Changed:
-  * about pkg: auto-select the current version
-  * manager: make the window user-resizable [#10]
-  * remote: improve name validation (now limited to 4..24 chars)
+  * add support for Language Pack packages [p=1753437]
+  * browser: add Language Packs filtering option
   Fixed:
-  * report: only display changes up to the newly installed version
+  * win32: fix temporary file removal (was broken since v1.1rc2) [p=1755742]
