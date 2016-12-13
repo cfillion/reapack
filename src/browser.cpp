@@ -185,7 +185,7 @@ void Browser::onCommand(const int id, const int event)
     installLatest(m_currentIndex);
     break;
   case ACTION_LATEST_ALL:
-    selectionDo(bind(&Browser::installLatest, this, placeholders::_1, false));
+    installLatestAll();
     break;
   case ACTION_REINSTALL:
     reinstall(m_currentIndex);
@@ -863,6 +863,31 @@ void Browser::aboutRemote(const int index, const bool focus)
     m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(
       entry->index, m_reapack), focus);
   }
+}
+
+void Browser::installLatestAll()
+{
+  InstallOpts &installOpts = m_reapack->config()->install;
+  const bool isEverything = (size_t)m_list->selectionSize() == m_entries.size();
+
+  if(isEverything && !installOpts.autoInstall) {
+    const int btn = MessageBox(handle(),
+      AUTO_STR("Do you want ReaPack to install new packages automatically when")
+      AUTO_STR(" synchronizing in the future?\r\n\r\nThis setting can also be")
+      AUTO_STR(" customized globally or on a per-repository basis in")
+      AUTO_STR(" ReaPack > Manage repositories."),
+      AUTO_STR("Install every available packages"), MB_YESNOCANCEL);
+
+    switch(btn) {
+    case IDYES:
+      installOpts.autoInstall = true;
+      break;
+    case IDCANCEL:
+      return;
+    }
+  }
+
+  selectionDo(bind(&Browser::installLatest, this, placeholders::_1, false));
 }
 
 void Browser::installLatest(const int index, const bool toggle)

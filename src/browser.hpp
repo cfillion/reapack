@@ -132,6 +132,7 @@ private:
   bool apply();
 
   void installLatest(int index, bool toggle = true);
+  void installLatestAll();
   void reinstall(int index, bool toggle = true);
   void installVersion(int index, size_t verIndex);
   void uninstall(int index, bool toggle = true);
