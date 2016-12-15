@@ -81,10 +81,10 @@ protected:
   friend About;
 
   virtual void init(About *) = 0;
-  virtual void updateList(int) {}
-  virtual bool fillContextMenu(Menu &, int) const { return false; }
-  virtual void itemActivated() {};
-  virtual void onCommand(int) {};
+  virtual void updateList(int) = 0;
+  virtual bool fillContextMenu(Menu &, int) const = 0;
+  virtual void itemActivated() = 0;
+  virtual void onCommand(int) = 0;
 
   virtual const void *data() const = 0;
 };
