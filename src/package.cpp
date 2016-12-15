@@ -117,25 +117,25 @@ const Version *Package::version(const size_t index) const
   return *it;
 }
 
-const Version *Package::lastVersion(const bool pres, const Version &from) const
+const Version *Package::lastVersion(const bool pres, const VersionName &from) const
 {
   if(m_versions.empty())
     return nullptr;
 
   for(const Version *ver : m_versions | boost::adaptors::reversed) {
-    if(*ver < from)
+    if(ver->name() < from)
       break;
-    else if(ver->isStable() || pres)
+    else if(ver->name().isStable() || pres)
       return ver;
   }
 
   return from.isStable() ? nullptr : *m_versions.rbegin();
 }
 
-const Version *Package::findVersion(const Version &ver) const
+const Version *Package::findVersion(const VersionName &ver) const
 {
   const auto &it = find_if(m_versions.begin(), m_versions.end(),
-    [=] (const Version *cur) { return *cur == ver; });
+    [=] (const Version *cur) { return cur->name() == ver; });
 
   if(it == m_versions.end())
     return nullptr;

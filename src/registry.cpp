@@ -156,7 +156,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   if(entryId) {
     m_updateEntry->bind(1, pkg->description());
     m_updateEntry->bind(2, pkg->type());
-    m_updateEntry->bind(3, ver->name());
+    m_updateEntry->bind(3, ver->name().toString());
     m_updateEntry->bind(4, ver->author());
     m_updateEntry->bind(5, entryId);
     m_updateEntry->exec();
@@ -167,7 +167,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     m_insertEntry->bind(3, pkg->name());
     m_insertEntry->bind(4, pkg->description());
     m_insertEntry->bind(5, pkg->type());
-    m_insertEntry->bind(6, ver->name());
+    m_insertEntry->bind(6, ver->name().toString());
     m_insertEntry->bind(7, ver->author());
     m_insertEntry->exec();
 
@@ -205,7 +205,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   else {
     release();
     return {entryId, ri->name(), cat->name(),
-      pkg->name(), pkg->description(), pkg->type(), *ver};
+      pkg->name(), pkg->description(), pkg->type(), ver->name(), ver->author()};
   }
 }
 
@@ -356,6 +356,6 @@ void Registry::fillEntry(const Statement *stmt, Entry *entry) const
   entry->description = stmt->stringColumn(col++);
   entry->type = static_cast<Package::Type>(stmt->intColumn(col++));
   entry->version.tryParse(stmt->stringColumn(col++));
-  entry->version.setAuthor(stmt->stringColumn(col++));
+  entry->author = stmt->stringColumn(col++);
   entry->pinned = stmt->boolColumn(col++);
 }

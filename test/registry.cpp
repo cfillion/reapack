@@ -31,7 +31,7 @@ TEST_CASE("query uninstalled package", M) {
   const Registry::Entry &entry = reg.getEntry(&pkg);
   REQUIRE_FALSE(entry);
   REQUIRE(entry.id == 0);
-  REQUIRE(entry.version == Version());
+  REQUIRE(entry.version == VersionName());
 }
 
 TEST_CASE("query installed package", M) {
@@ -46,8 +46,8 @@ TEST_CASE("query installed package", M) {
   REQUIRE(entry.category == "Category Name");
   REQUIRE(entry.package == "Hello");
   REQUIRE(entry.type == Package::ScriptType);
-  REQUIRE(entry.version.name() == "1.0");
-  REQUIRE(entry.version.author() == "John Doe");
+  REQUIRE(entry.version.toString() == "1.0");
+  REQUIRE(entry.author == "John Doe");
 
   const Registry::Entry &selectEntry = reg.getEntry(&pkg);
   REQUIRE(selectEntry.id == entry.id);
@@ -57,7 +57,7 @@ TEST_CASE("query installed package", M) {
   REQUIRE(selectEntry.description == entry.description);
   REQUIRE(selectEntry.type == entry.type);
   REQUIRE(selectEntry.version == entry.version);
-  REQUIRE(selectEntry.version.author() == entry.version.author());
+  REQUIRE(selectEntry.author == entry.author);
 }
 
 TEST_CASE("bump version", M) {
@@ -70,13 +70,13 @@ TEST_CASE("bump version", M) {
   reg.push(&ver);
 
   const Registry::Entry &entry1 = reg.getEntry(&pkg);
-  REQUIRE(entry1.version.name() == "1.0");
-  CHECK(entry1.version.author() == "John Doe");
+  REQUIRE(entry1.version.toString() == "1.0");
+  CHECK(entry1.author == "John Doe");
 
   reg.push(&ver2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
-  REQUIRE(entry2.version.name() == "2.0");
-  CHECK(entry2.version.author() == "");
+  REQUIRE(entry2.version.toString() == "2.0");
+  CHECK(entry2.author == "");
   
   REQUIRE(entry2.id == entry1.id);
 }
@@ -113,8 +113,8 @@ TEST_CASE("query all packages", M) {
   REQUIRE(entries[0].category == "Category Name");
   REQUIRE(entries[0].package == "Hello");
   REQUIRE(entries[0].type == Package::ScriptType);
-  REQUIRE(entries[0].version.name() == "1.0");
-  REQUIRE(entries[0].version.author() == "John Doe");
+  REQUIRE(entries[0].version.toString() == "1.0");
+  REQUIRE(entries[0].author == "John Doe");
 }
 
 TEST_CASE("forget registry entry", M) {

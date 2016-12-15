@@ -46,7 +46,7 @@ void OutputStream::indented(const string &text)
 
 OutputStream &OutputStream::operator<<(const Version &ver)
 {
-  m_stream << 'v' << ver.name();
+  m_stream << 'v' << ver.name().toString();
 
   if(!ver.author().empty())
     m_stream << " by " << ver.author();

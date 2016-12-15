@@ -98,11 +98,11 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   if(!latest)
     return;
 
-  if(regEntry.version == *latest) {
+  if(regEntry.version == latest->name()) {
     if(allFilesExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
-  else if(regEntry.pinned || *latest < regEntry.version)
+  else if(regEntry.pinned || latest->name() < regEntry.version)
     return;
 
   m_currentQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));

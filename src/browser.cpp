@@ -102,18 +102,18 @@ void Browser::onInit()
     const Entry &a = m_entries[m_visibleEntries[ai]];
     const Entry &b = m_entries[m_visibleEntries[bi]];
 
-    const Version *l = nullptr;
-    const Version *r = nullptr;
+    const VersionName *l = nullptr;
+    const VersionName *r = nullptr;
 
     if(a.test(InstalledFlag))
       l = &a.regEntry.version;
     else
-      l = a.latest;
+      l = &a.latest->name();
 
     if(b.test(InstalledFlag))
       r = &b.regEntry.version;
     else
-      r = b.latest;
+      r = &b.latest->name();
 
     return l->compare(*r);
   });
@@ -331,7 +331,7 @@ void Browser::fillMenu(Menu &menu)
       auto_char installLabel[32] = {};
       auto_snprintf(installLabel, auto_size(installLabel),
         AUTO_STR("U&pdate to v%s"),
-        make_autostring(entry->latest->name()).c_str());
+        make_autostring(entry->latest->name().toString()).c_str());
 
       const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
       if(entry->target && *entry->target == entry->latest)
@@ -341,7 +341,7 @@ void Browser::fillMenu(Menu &menu)
     auto_char reinstallLabel[32] = {};
     auto_snprintf(reinstallLabel, auto_size(reinstallLabel),
       AUTO_STR("&Reinstall v%s"),
-      make_autostring(entry->regEntry.version.name()).c_str());
+      make_autostring(entry->regEntry.version.toString()).c_str());
 
     const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
     if(!entry->current || entry->test(ObsoleteFlag))
@@ -353,7 +353,7 @@ void Browser::fillMenu(Menu &menu)
     auto_char installLabel[32] = {};
     auto_snprintf(installLabel, auto_size(installLabel),
       AUTO_STR("&Install v%s"),
-      make_autostring(entry->latest->name()).c_str());
+      make_autostring(entry->latest->name().toString()).c_str());
 
     const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
     if(entry->target && *entry->target == entry->latest)
@@ -369,7 +369,8 @@ void Browser::fillMenu(Menu &menu)
     int verIndex = (int)versions.size();
     for(const Version *ver : versions | boost::adaptors::reversed) {
       const UINT actionIndex = versionMenu.addAction(
-        make_autostring(ver->name()).c_str(), --verIndex | (ACTION_VERSION << 8));
+        make_autostring(ver->name().toString()).c_str(),
+        --verIndex | (ACTION_VERSION << 8));
 
       if(entry->target ? *entry->target == ver : ver == entry->current) {
         if(entry->target && ver != entry->latest)
@@ -629,7 +630,7 @@ void Browser::transferActions()
 
       if(target) {
         const Package *pkg = entryIt->package;
-        if(!pkg || !(target = pkg->findVersion(*target)))
+        if(!pkg || !(target = pkg->findVersion(target->name())))
           continue;
       }
 
@@ -659,7 +660,7 @@ auto Browser::makeEntry(const Package *pkg,
   if(regEntry) {
     flags |= InstalledFlag;
 
-    if(latest && regEntry.version < *latest)
+    if(latest && regEntry.version < latest->name())
       flags |= OutOfDateFlag;
 
     current = pkg->findVersion(regEntry.version);
@@ -770,18 +771,18 @@ string Browser::getValue(const Column col, const Entry &entry) const
     return pkg ? pkg->category()->name() : regEntry.category;
   case VersionColumn:
     if(entry.test(InstalledFlag))
-      display = regEntry.version.name();
+      display = regEntry.version.toString();
 
-    if(ver && (!regEntry || *ver > regEntry.version)) {
+    if(ver && (!regEntry || ver->name() > regEntry.version)) {
       if(!display.empty())
         display += '\x20';
 
-      display += '(' + ver->name() + ')';
+      display += '(' + ver->name().toString() + ')';
     }
 
     return display;
   case AuthorColumn:
-    return ver ? ver->displayAuthor() : regEntry.version.displayAuthor();
+    return ver ? ver->displayAuthor() : Version::displayAuthor(regEntry.author);
   case TypeColumn:
     return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
   case RemoteColumn:

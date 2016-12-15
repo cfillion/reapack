@@ -126,7 +126,7 @@ void InstallTask::commit()
 
   InstallTicket::Type type;
 
-  if(m_oldEntry && m_oldEntry.version < *m_version)
+  if(m_oldEntry && m_oldEntry.version < m_version->name())
     type = InstallTicket::Upgrade;
   else
     type = InstallTicket::Install;

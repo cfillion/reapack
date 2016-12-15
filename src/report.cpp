@@ -119,9 +119,9 @@ void Report::printUpdates()
     m_stream << pkg->fullName() << ":\r\n";
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
-      if(*ver <= ticket.previous.version)
+      if(ver->name() <= ticket.previous.version)
         break;
-      else if(*ver <= *ticket.version)
+      else if(ver->name() <= ticket.version->name())
         m_stream << *ver;
     }
   }

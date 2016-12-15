@@ -28,20 +28,16 @@
 using boost::format;
 using namespace std;
 
-Version::Version()
-  : m_stable(true), m_time(), m_package(nullptr)
+string Version::displayAuthor(const string &author)
 {
+  if(author.empty())
+    return "Unknown";
+  else
+    return author;
 }
 
 Version::Version(const string &str, const Package *pkg)
-  : m_time(), m_package(pkg)
-{
-  parse(str);
-}
-
-Version::Version(const Version &o)
-  : m_name(o.m_name), m_segments(o.m_segments), m_stable(o.m_stable),
-    m_author(o.m_author), m_package(nullptr)
+  : m_name(str), m_time(), m_package(pkg)
 {
 }
 
@@ -51,7 +47,47 @@ Version::~Version()
     delete source;
 }
 
-void Version::parse(const string &str)
+string Version::fullName() const
+{
+  string name = m_package->fullName();
+  name += " v";
+  name += m_name.toString();
+
+  return name;
+}
+
+bool Version::addSource(const Source *source)
+{
+  if(source->version() != this)
+    throw reapack_error("source belongs to another version");
+  else if(!source->platform().test())
+    return false;
+
+  const Path path = source->targetPath();
+
+  if(m_files.count(path))
+    return false;
+
+  m_files.insert(path);
+  m_sources.push_back(source);
+
+  return true;
+}
+
+VersionName::VersionName() : m_stable(true)
+{}
+
+VersionName::VersionName(const string &str)
+{
+  parse(str);
+}
+
+VersionName::VersionName(const VersionName &o)
+  : m_string(o.m_string), m_segments(o.m_segments), m_stable(o.m_stable)
+{
+}
+
+void VersionName::parse(const string &str)
 {
   static const regex pattern("\\d+|[a-zA-Z]+");
 
@@ -85,12 +121,12 @@ void Version::parse(const string &str)
   if(segments.empty()) // version doesn't have any numbers
     throw reapack_error(format("invalid version name '%s'") % str);
 
-  m_name = str;
+  m_string = str;
   swap(m_segments, segments);
   m_stable = letters < 1;
 }
 
-bool Version::tryParse(const string &str)
+bool VersionName::tryParse(const string &str)
 {
   try {
     parse(str);
@@ -101,42 +137,7 @@ bool Version::tryParse(const string &str)
   }
 }
 
-string Version::fullName() const
-{
-  string name = m_package->fullName();
-  name += " v";
-  name += m_name;
-
-  return name;
-}
-
-string Version::displayAuthor() const
-{
-  if(m_author.empty())
-    return "Unknown";
-  else
-    return m_author;
-}
-
-bool Version::addSource(const Source *source)
-{
-  if(source->version() != this)
-    throw reapack_error("source belongs to another version");
-  else if(!source->platform().test())
-    return false;
-
-  const Path path = source->targetPath();
-
-  if(m_files.count(path))
-    return false;
-
-  m_files.insert(path);
-  m_sources.push_back(source);
-
-  return true;
-}
-
-auto Version::segment(const size_t index) const -> Segment
+auto VersionName::segment(const size_t index) const -> Segment
 {
   if(index < size())
     return m_segments[index];
@@ -144,7 +145,7 @@ auto Version::segment(const size_t index) const -> Segment
     return 0;
 }
 
-int Version::compare(const Version &o) const
+int VersionName::compare(const VersionName &o) const
 {
   const size_t biggest = max(size(), o.size());
 

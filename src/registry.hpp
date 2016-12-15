@@ -35,7 +35,8 @@ public:
     std::string package;
     std::string description;
     Package::Type type;
-    Version version;
+    VersionName version;
+    std::string author;
     bool pinned;
 
     operator bool() const { return id != 0; }

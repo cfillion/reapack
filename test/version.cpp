@@ -19,27 +19,25 @@ using namespace std;
 static const char *M = "[version]";
 
 TEST_CASE("construct null version", M) {
-  const Version ver;
+  const VersionName ver;
 
   REQUIRE(ver.size() == 0);
   REQUIRE(ver.isStable());
-  REQUIRE_FALSE(ver.time().isValid());
-  REQUIRE(ver.package() == nullptr);
 }
 
 TEST_CASE("compare null versions", M) {
-  REQUIRE(Version("0-beta") > Version());
-  REQUIRE(Version("0") > Version());
-  REQUIRE(Version("0") != Version());
-  REQUIRE(Version() == Version());
+  REQUIRE(VersionName("0-beta") > VersionName());
+  REQUIRE(VersionName("0") > VersionName());
+  REQUIRE(VersionName("0") != VersionName());
+  REQUIRE(VersionName() == VersionName());
 }
 
 TEST_CASE("parse valid versions", M) {
-  Version ver;
+  VersionName ver;
 
   SECTION("valid") {
     ver.parse("1.0.1");
-    REQUIRE(ver.name() == "1.0.1");
+    REQUIRE(ver.toString() == "1.0.1");
     REQUIRE(ver.size() == 3);
   }
 
@@ -56,7 +54,7 @@ TEST_CASE("parse valid versions", M) {
 }
 
 TEST_CASE("parse invalid versions", M) {
-  Version ver;
+  VersionName ver;
   string name;
 
   SECTION("only letters")
@@ -76,44 +74,44 @@ TEST_CASE("parse invalid versions", M) {
     REQUIRE(string(e.what()) == string("invalid version name '") + name + "'");
   }
 
-  REQUIRE(ver.name().empty());
+  REQUIRE(ver.toString().empty());
   REQUIRE(ver.size() == 0);
 }
 
 TEST_CASE("parse version failsafe", M) {
-  Version ver;
+  VersionName ver;
 
   SECTION("valid") {
     REQUIRE(ver.tryParse("1.0"));
 
-    REQUIRE(ver.name() == "1.0");
+    REQUIRE(ver.toString() == "1.0");
     REQUIRE(ver.size() == 2);
   }
 
   SECTION("invalid") {
     REQUIRE_FALSE(ver.tryParse("hello"));
 
-    REQUIRE(ver.name().empty());
+    REQUIRE(ver.toString().empty());
     REQUIRE(ver.size() == 0);
   }
 }
 
 TEST_CASE("decimal version", M) {
-  Version ver("5.05");
-  REQUIRE(ver == Version("5.5"));
-  REQUIRE(ver < Version("5.50"));
+  VersionName ver("5.05");
+  REQUIRE(ver == VersionName("5.5"));
+  REQUIRE(ver < VersionName("5.50"));
 }
 
 TEST_CASE("5 version segments", M) {
-  REQUIRE(Version("1.1.1.1.0") < Version("1.1.1.1.1"));
-  REQUIRE(Version("1.1.1.1.1") == Version("1.1.1.1.1"));
-  REQUIRE(Version("1.1.1.1.1") < Version("1.1.1.1.2"));
-  REQUIRE(Version("1.1.1.1.1") < Version("1.1.1.2.0"));
+  REQUIRE(VersionName("1.1.1.1.0") < VersionName("1.1.1.1.1"));
+  REQUIRE(VersionName("1.1.1.1.1") == VersionName("1.1.1.1.1"));
+  REQUIRE(VersionName("1.1.1.1.1") < VersionName("1.1.1.1.2"));
+  REQUIRE(VersionName("1.1.1.1.1") < VersionName("1.1.1.2.0"));
 }
 
 TEST_CASE("version segment overflow", M) {
   try {
-    Version ver("9999999999999999999999");
+    VersionName ver("9999999999999999999999");
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -123,70 +121,79 @@ TEST_CASE("version segment overflow", M) {
 
 TEST_CASE("compare versions", M) {
   SECTION("equality") {
-    REQUIRE(Version("1.0").compare(Version("1.0")) == 0);
+    REQUIRE(VersionName("1.0").compare({"1.0"}) == 0);
 
-    REQUIRE(Version("1.0") == Version("1.0"));
-    REQUIRE_FALSE(Version("1.0") == Version("1.1"));
+    REQUIRE(VersionName("1.0") == VersionName("1.0"));
+    REQUIRE_FALSE(VersionName("1.0") == VersionName("1.1"));
   }
 
   SECTION("inequality") {
-    REQUIRE_FALSE(Version("1.0") != Version("1.0"));
-    REQUIRE(Version("1.0") != Version("1.1"));
+    REQUIRE_FALSE(VersionName("1.0") != VersionName("1.0"));
+    REQUIRE(VersionName("1.0") != VersionName("1.1"));
   }
 
   SECTION("less than") {
-    REQUIRE(Version("1.0").compare(Version("1.1")) == -1);
+    REQUIRE(VersionName("1.0").compare({"1.1"}) == -1);
 
-    REQUIRE(Version("1.0") < Version("1.1"));
-    REQUIRE_FALSE(Version("1.0") < Version("1.0"));
-    REQUIRE_FALSE(Version("1.1") < Version("1.0"));
+    REQUIRE(VersionName("1.0") < VersionName("1.1"));
+    REQUIRE_FALSE(VersionName("1.0") < VersionName("1.0"));
+    REQUIRE_FALSE(VersionName("1.1") < VersionName("1.0"));
   }
 
   SECTION("less than or equal") {
-    REQUIRE(Version("1.0") <= Version("1.1"));
-    REQUIRE(Version("1.0") <= Version("1.0"));
-    REQUIRE_FALSE(Version("1.1") <= Version("1.0"));
+    REQUIRE(VersionName("1.0") <= VersionName("1.1"));
+    REQUIRE(VersionName("1.0") <= VersionName("1.0"));
+    REQUIRE_FALSE(VersionName("1.1") <= VersionName("1.0"));
   }
 
   SECTION("greater than") {
-    REQUIRE(Version("1.1").compare(Version("1.0")) == 1);
+    REQUIRE(VersionName("1.1").compare({"1.0"}) == 1);
 
-    REQUIRE_FALSE(Version("1.0") > Version("1.1"));
-    REQUIRE_FALSE(Version("1.0") > Version("1.0"));
-    REQUIRE(Version("1.1") > Version("1.0"));
+    REQUIRE_FALSE(VersionName("1.0") > VersionName("1.1"));
+    REQUIRE_FALSE(VersionName("1.0") > VersionName("1.0"));
+    REQUIRE(VersionName("1.1") > VersionName("1.0"));
   }
 
   SECTION("greater than or equal") {
-    REQUIRE_FALSE(Version("1.0") >= Version("1.1"));
-    REQUIRE(Version("1.0") >= Version("1.0"));
-    REQUIRE(Version("1.1") >= Version("1.0"));
+    REQUIRE_FALSE(VersionName("1.0") >= VersionName("1.1"));
+    REQUIRE(VersionName("1.0") >= VersionName("1.0"));
+    REQUIRE(VersionName("1.1") >= VersionName("1.0"));
   }
 }
 
 TEST_CASE("compare versions with more or less segments", M) {
-  REQUIRE(Version("1") == Version("1.0.0.0"));
-  REQUIRE(Version("1") != Version("1.0.0.1"));
+  REQUIRE(VersionName("1") == VersionName("1.0.0.0"));
+  REQUIRE(VersionName("1") != VersionName("1.0.0.1"));
 
-  REQUIRE(Version("1.0.0.0") == Version("1"));
-  REQUIRE(Version("1.0.0.1") != Version("1"));
+  REQUIRE(VersionName("1.0.0.0") == VersionName("1"));
+  REQUIRE(VersionName("1.0.0.1") != VersionName("1"));
 }
 
 TEST_CASE("prerelease versions", M) {
   SECTION("detect") {
-    REQUIRE(Version("1.0").isStable());
-    REQUIRE_FALSE(Version("1.0b").isStable());
-    REQUIRE_FALSE(Version("1.0-beta").isStable());
-    REQUIRE_FALSE(Version("1.0-beta1").isStable());
+    REQUIRE(VersionName("1.0").isStable());
+    REQUIRE_FALSE(VersionName("1.0b").isStable());
+    REQUIRE_FALSE(VersionName("1.0-beta").isStable());
+    REQUIRE_FALSE(VersionName("1.0-beta1").isStable());
   }
 
   SECTION("compare") {
-    REQUIRE(Version("0.9") < Version("1.0a"));
-    REQUIRE(Version("1.0a.2") < Version("1.0b.1"));
-    REQUIRE(Version("1.0-beta1") < Version("1.0"));
+    REQUIRE(VersionName("0.9") < VersionName("1.0a"));
+    REQUIRE(VersionName("1.0a.2") < VersionName("1.0b.1"));
+    REQUIRE(VersionName("1.0-beta1") < VersionName("1.0"));
 
-    REQUIRE(Version("1.0b") < Version("1.0.1"));
-    REQUIRE(Version("1.0.1") > Version("1.0b"));
+    REQUIRE(VersionName("1.0b") < VersionName("1.0.1"));
+    REQUIRE(VersionName("1.0.1") > VersionName("1.0b"));
   }
+}
+
+TEST_CASE("copy version constructor", M) {
+  const VersionName original("1.1test");
+  const VersionName copy(original);
+
+  REQUIRE(copy.toString() == "1.1test");
+  REQUIRE(copy.size() == original.size());
+  REQUIRE(copy.isStable() == original.isStable());
 }
 
 TEST_CASE("version full name", M) {
@@ -264,9 +271,14 @@ TEST_CASE("drop sources for unknown platforms", M) {
 TEST_CASE("version author", M) {
   Version ver("1.0");
   CHECK(ver.author().empty());
+  REQUIRE(ver.displayAuthor() == "Unknown");
 
   ver.setAuthor("cfillion");
   REQUIRE(ver.author() == "cfillion");
+  REQUIRE(ver.displayAuthor() == ver.author());
+
+  REQUIRE(Version::displayAuthor({}) == "Unknown");
+  REQUIRE(Version::displayAuthor("cfillion") == "cfillion");
 }
 
 TEST_CASE("version date", M) {
@@ -277,25 +289,4 @@ TEST_CASE("version date", M) {
 
   ver.setTime("hello world");
   REQUIRE(ver.time().year() == 2016);
-}
-
-TEST_CASE("copy version constructor", M) {
-  Index ri("Remote Name");
-  Category cat("Category Name", &ri);
-  Package pkg(Package::ScriptType, "Hello", &cat);
-
-  Version original("1.1test", &pkg);
-  original.setAuthor("John Doe");
-  original.setChangelog("Initial release");
-  original.setTime("2016-02-12T01:16:40Z");
-
-  const Version copy(original);
-  REQUIRE(copy.name() == "1.1test");
-  REQUIRE(copy.size() == original.size());
-  REQUIRE(copy.isStable() == original.isStable());
-  REQUIRE(copy.author() == original.author());
-  REQUIRE(copy.changelog().empty());
-  REQUIRE_FALSE(copy.time().isValid());
-  REQUIRE(copy.package() == nullptr);
-  REQUIRE(copy.sources().empty());
 }

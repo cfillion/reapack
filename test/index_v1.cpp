@@ -167,7 +167,7 @@ TEST_CASE("full index", M) {
 
   REQUIRE(pack->versions().size() == 1);
   const Version *ver = pack->version(0);
-  REQUIRE(ver->name() == "1.0");
+  REQUIRE(ver->name() == VersionName("1.0"));
   REQUIRE(ver->changelog() == "Fixed a division by zero error.");
 
   REQUIRE(ver->sources().size() == 2);

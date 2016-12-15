@@ -296,7 +296,7 @@ void AboutIndexDelegate::init(About *dialog)
   dialog->list()->setSortCallback(1, [&] (const int a, const int b) {
     const Version *l = m_packagesData->at(a)->lastVersion();
     const Version *r = m_packagesData->at(b)->lastVersion();
-    return l->compare(*r);
+    return l->name().compare(r->name());
   });
 
   initInstalledFiles();
@@ -362,7 +362,7 @@ void AboutIndexDelegate::updateList(const int index)
   for(const Package *pkg : *m_packagesData) {
     const Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->displayName());
-    const auto_string &version = make_autostring(lastVer->name());
+    const auto_string &version = make_autostring(lastVer->name().toString());
     const auto_string &author = make_autostring(lastVer->displayAuthor());
 
     m_dialog->list()->addRow({name, version, author});
@@ -423,7 +423,7 @@ void AboutIndexDelegate::aboutPackage()
 {
   const Package *pkg = currentPackage();
 
-  Version current;
+  VersionName current;
 
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
@@ -475,7 +475,7 @@ void AboutIndexDelegate::install()
 }
 
 AboutPackageDelegate::AboutPackageDelegate(const Package *pkg,
-    const Version &ver, ReaPack *reapack)
+    const VersionName &ver, ReaPack *reapack)
   : m_package(pkg), m_current(ver), m_reapack(reapack),
     m_index(pkg->category()->index()->shared_from_this())
 {
@@ -500,14 +500,15 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->list()->addColumn({AUTO_STR("Action List"), 84});
 
   for(const Version *ver : m_package->versions()) {
-    const auto index = dialog->menu()->addRow({make_autostring(ver->name())});
+    const auto index = dialog->menu()->addRow({
+      make_autostring(ver->name().toString())});
 
-    if(m_current == *ver)
+    if(m_current == ver->name())
       dialog->menu()->select(index);
   }
 
   dialog->menu()->setSortCallback(0, [&] (const int a, const int b) {
-    return m_package->version(a)->compare(*m_package->version(b));
+    return m_package->version(a)->name().compare(m_package->version(b)->name());
   });
 
   dialog->menu()->sortByColumn(0, ListView::DescendingOrder);

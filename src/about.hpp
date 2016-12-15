@@ -122,7 +122,7 @@ private:
 
 class AboutPackageDelegate : public AboutDelegate {
 public:
-  AboutPackageDelegate(const Package *, const Version &current, ReaPack *);
+  AboutPackageDelegate(const Package *, const VersionName &current, ReaPack *);
 
 protected:
   void init(About *) override;
@@ -141,7 +141,7 @@ private:
   void locate();
 
   const Package *m_package;
-  Version m_current;
+  VersionName m_current;
   ReaPack *m_reapack;
   IndexPtr m_index; // keeps the package loaded in memory
   const std::vector<const Source *> *m_sources;

@@ -60,15 +60,15 @@ public:
   bool addVersion(const Version *ver);
   const auto &versions() const { return m_versions; }
   const Version *version(size_t index) const;
-  const Version *lastVersion(bool pres = true, const Version &from = {}) const;
-  const Version *findVersion(const Version &) const;
+  const Version *lastVersion(bool pres = true, const VersionName &from = {}) const;
+  const Version *findVersion(const VersionName &) const;
 
 private:
   class CompareVersion {
   public:
     bool operator()(const Version *l, const Version *r) const
     {
-      return *l < *r;
+      return l->name() < r->name();
     }
   };
 

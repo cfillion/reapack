@@ -160,7 +160,7 @@ TEST_CASE("pre-release updates", M) {
   pack.addVersion(alpha2);
 
   SECTION("pre-release to next pre-release")
-    REQUIRE(*pack.lastVersion(false, {"1.0-alpha1"}) == *alpha2);
+    REQUIRE(pack.lastVersion(false, {"1.0-alpha1"}) == alpha2);
 
   SECTION("pre-release to latest stable") {
     Version *stable2 = new Version("1.0", &pack);
@@ -175,7 +175,7 @@ TEST_CASE("pre-release updates", M) {
     beta->addSource(new Source({}, "google.com", beta));
     pack.addVersion(beta);
 
-    REQUIRE(*pack.lastVersion(false, {"1.0-alpha1"}) == *stable3);
+    REQUIRE(pack.lastVersion(false, {"1.0-alpha1"}) == stable3);
   }
 }
 
@@ -231,13 +231,13 @@ TEST_CASE("find matching version", M) {
   Version *ver = new Version("1", &pack);
   ver->addSource(new Source({}, "google.com", ver));
 
-  REQUIRE(pack.findVersion(Version("1")) == nullptr);
-  REQUIRE(pack.findVersion(Version("2")) == nullptr);
+  REQUIRE(pack.findVersion({"1"}) == nullptr);
+  REQUIRE(pack.findVersion({"2"}) == nullptr);
 
   pack.addVersion(ver);
 
-  REQUIRE(pack.findVersion(Version("1")) == ver);
-  REQUIRE(pack.findVersion(Version("2")) == nullptr);
+  REQUIRE(pack.findVersion({"1"}) == ver);
+  REQUIRE(pack.findVersion({"2"}) == nullptr);
 }
 
 TEST_CASE("package full name", M) {

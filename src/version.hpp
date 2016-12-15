@@ -28,29 +28,55 @@
 #include "time.hpp"
 
 class Package;
-class Source;
 class Path;
+class Source;
 
-class Version {
+class VersionName {
 public:
-  Version();
-  Version(const std::string &, const Package * = nullptr);
-  Version(const Version &);
-  ~Version();
+  VersionName();
+  VersionName(const std::string &);
+  VersionName(const VersionName &);
 
   void parse(const std::string &);
   bool tryParse(const std::string &);
 
-  const std::string &name() const { return m_name; }
-  std::string fullName() const;
   size_t size() const { return m_segments.size(); }
   bool isStable() const { return m_stable; }
+  const std::string &toString() const { return m_string; }
 
+  int compare(const VersionName &) const;
+  bool operator<(const VersionName &o) const { return compare(o) < 0; }
+  bool operator<=(const VersionName &o) const { return compare(o) <= 0; }
+  bool operator>(const VersionName &o) const { return compare(o) > 0; }
+  bool operator>=(const VersionName &o) const { return compare(o) >= 0; }
+  bool operator==(const VersionName &o) const { return compare(o) == 0; }
+  bool operator!=(const VersionName &o) const { return compare(o) != 0; }
+
+private:
+  typedef uint16_t Numeric;
+  typedef boost::variant<Numeric, std::string> Segment;
+
+  Segment segment(size_t i) const;
+
+  std::string m_string;
+  std::vector<Segment> m_segments;
+  bool m_stable;
+};
+
+class Version {
+public:
+  static std::string displayAuthor(const std::string &name);
+
+  Version(const std::string &, const Package * = nullptr);
+  ~Version();
+
+  const VersionName &name() const { return m_name; }
   const Package *package() const { return m_package; }
+  std::string fullName() const;
 
   void setAuthor(const std::string &author) { m_author = author; }
   const std::string &author() const { return m_author; }
-  std::string displayAuthor() const;
+  std::string displayAuthor() const { return displayAuthor(m_author); }
 
   void setTime(const Time &time) { if(time) m_time = time; }
   const Time &time() const { return m_time; }
@@ -64,24 +90,8 @@ public:
 
   const std::set<Path> &files() const { return m_files; }
 
-  int compare(const Version &) const;
-  bool operator<(const Version &o) const { return compare(o) < 0; }
-  bool operator<=(const Version &o) const { return compare(o) <= 0; }
-  bool operator>(const Version &o) const { return compare(o) > 0; }
-  bool operator>=(const Version &o) const { return compare(o) >= 0; }
-  bool operator==(const Version &o) const { return compare(o) == 0; }
-  bool operator!=(const Version &o) const { return compare(o) != 0; }
-
 private:
-  typedef uint16_t Numeric;
-  typedef boost::variant<Numeric, std::string> Segment;
-
-  Segment segment(size_t i) const;
-
-  std::string m_name;
-  std::vector<Segment> m_segments;
-  bool m_stable;
-
+  VersionName m_name;
   std::string m_author;
   std::string m_changelog;
   Time m_time;

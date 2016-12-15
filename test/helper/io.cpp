@@ -31,6 +31,6 @@ ostream &operator<<(ostream &os, const Time &time)
 
 ostream &operator<<(ostream &os, const Version &ver)
 {
-  os << ver.name();
+  os << ver.name().toString();
   return os;
 }
