@@ -10,11 +10,10 @@
 
 using namespace std;
 
-#define MAKE_VERSION \
-  Index ri("Remote Name"); \
+#define MAKE_PACKAGE \
+  Index ri("Index Name"); \
   Category cat("Category Name", &ri); \
-  Package pkg(Package::ScriptType, "Hello", &cat); \
-  Version ver("1", &pkg);
+  Package pkg(Package::ScriptType, "Package Name", &cat); \
 
 static const char *M = "[version]";
 
@@ -197,17 +196,16 @@ TEST_CASE("copy version constructor", M) {
 }
 
 TEST_CASE("version full name", M) {
-  Index ri("Index Name");
-  Category cat("Category Name", &ri);
-  Package pkg(Package::UnknownType, "file.name", &cat);
-  Version ver("1.0", &pkg);
+  MAKE_PACKAGE;
 
-  REQUIRE(ver.fullName() == "Index Name/Category Name/file.name v1.0");
+  Version ver("1.0", &pkg);
+  REQUIRE(ver.fullName() == "Index Name/Category Name/Package Name v1.0");
 }
 
 TEST_CASE("add source", M) {
-  MAKE_VERSION
+  MAKE_PACKAGE;
 
+  Version ver("1.0", &pkg);
   CHECK(ver.sources().size() == 0);
 
   Source *src = new Source("a", "b", &ver);
@@ -218,13 +216,12 @@ TEST_CASE("add source", M) {
 }
 
 TEST_CASE("add owned source", M) {
-  MAKE_VERSION
-
-  Version ver2("1");
+  Version ver1("1", nullptr);
+  Version ver2("1", nullptr);
   Source *src = new Source("a", "b", &ver2);
 
   try {
-    ver.addSource(src);
+    ver1.addSource(src);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -234,7 +231,8 @@ TEST_CASE("add owned source", M) {
 }
 
 TEST_CASE("duplicate sources", M) {
-  MAKE_VERSION
+  MAKE_PACKAGE;
+  Version ver("1.0", &pkg);
 
   Source *src = new Source({}, "b", &ver);
   CHECK(ver.addSource(src) == true);
@@ -245,14 +243,15 @@ TEST_CASE("duplicate sources", M) {
 }
 
 TEST_CASE("list files", M) {
-  MAKE_VERSION
+  MAKE_PACKAGE;
+  Version ver("1.0", &pkg);
 
   Source *src1 = new Source("file", "url", &ver);
   ver.addSource(src1);
 
   Path path1;
   path1.append("Scripts");
-  path1.append("Remote Name");
+  path1.append("Index Name");
   path1.append("Category Name");
   path1.append("file");
 
@@ -261,7 +260,8 @@ TEST_CASE("list files", M) {
 }
 
 TEST_CASE("drop sources for unknown platforms", M) {
-  MAKE_VERSION
+  MAKE_PACKAGE;
+  Version ver("1.0", &pkg);
   Source src("a", "b", &ver);
   src.setPlatform(Platform::UnknownPlatform);
   REQUIRE_FALSE(ver.addSource(&src));
@@ -269,7 +269,7 @@ TEST_CASE("drop sources for unknown platforms", M) {
 }
 
 TEST_CASE("version author", M) {
-  Version ver("1.0");
+  Version ver("1.0", nullptr);
   CHECK(ver.author().empty());
   REQUIRE(ver.displayAuthor() == "Unknown");
 
@@ -282,7 +282,7 @@ TEST_CASE("version author", M) {
 }
 
 TEST_CASE("version date", M) {
-  Version ver("1.0");
+  Version ver("1.0", nullptr);
 
   ver.setTime("2016-02-12T01:16:40Z");
   REQUIRE(ver.time().year() == 2016);

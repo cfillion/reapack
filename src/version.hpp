@@ -67,7 +67,7 @@ class Version {
 public:
   static std::string displayAuthor(const std::string &name);
 
-  Version(const std::string &, const Package * = nullptr);
+  Version(const std::string &, const Package *);
   ~Version();
 
   const VersionName &name() const { return m_name; }

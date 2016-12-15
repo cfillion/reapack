@@ -26,7 +26,7 @@ TEST_CASE("test indent string", M) {
 
 TEST_CASE("output version", M) {
   OutputStream stream;
-  Version ver("1.2.3");
+  Version ver("1.2.3", nullptr);
 
   SECTION("empty version") {
     stream << ver;
