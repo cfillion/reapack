@@ -59,6 +59,7 @@ public:
 protected:
   void onInit() override;
   void onCommand(int, int) override;
+  bool onKeyDown(int, int) override;
 
 private:
   void selectLink(int control);
@@ -84,6 +85,7 @@ protected:
   virtual void updateList(int) = 0;
   virtual bool fillContextMenu(Menu &, int) const = 0;
   virtual void itemActivated() = 0;
+  virtual void itemCopy() = 0;
   virtual void onCommand(int) = 0;
 
   virtual const void *data() const = 0;
@@ -98,6 +100,7 @@ protected:
   void updateList(int) override;
   bool fillContextMenu(Menu &, int) const override;
   void itemActivated() override { aboutPackage(); }
+  void itemCopy() override;
   void onCommand(int) override;
 
   const void *data() const override
@@ -126,6 +129,7 @@ protected:
   void updateList(int) override;
   bool fillContextMenu(Menu &, int) const override;
   void itemActivated() override { locate(); }
+  void itemCopy() override { copySourceUrl(); }
   void onCommand(int) override;
 
   const void *data() const override

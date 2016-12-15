@@ -92,6 +92,19 @@ void About::onCommand(const int id, int)
   }
 }
 
+bool About::onKeyDown(const int key, const int mods)
+{
+  if(GetFocus() != m_list->handle())
+    return false;
+
+  if(mods == CtrlModifier && key == 'C')
+    m_delegate->itemCopy();
+  else
+    return false;
+
+  return true;
+}
+
 void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 {
   if(focus)
@@ -419,6 +432,12 @@ void AboutIndexDelegate::aboutPackage()
   catch(const reapack_error &) {}
 
   m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, current, m_reapack));
+}
+
+void AboutIndexDelegate::itemCopy()
+{
+  if(const Package *pkg = currentPackage())
+    m_dialog->setClipboard(pkg->displayName(m_reapack->config()->browser.showDescs));
 }
 
 void AboutIndexDelegate::install()
