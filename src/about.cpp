@@ -611,8 +611,13 @@ void AboutPackageDelegate::copySourceUrl()
 void AboutPackageDelegate::locate()
 {
   if(const Source *src = currentSource()) {
+    const Path &path = src->targetPath();
+
+    if(!FS::exists(path))
+      return;
+
     string arg = "/select,\"";
-    arg += Path::prefixRoot(src->targetPath()).join();
+    arg += Path::prefixRoot(path).join();
     arg += '"';
 
     ShellExecute(nullptr, AUTO_STR("open"), AUTO_STR("explorer.exe"),
