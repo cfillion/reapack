@@ -125,6 +125,7 @@ protected:
   void init(About *) override;
   void updateList(int) override;
   bool fillContextMenu(Menu &, int) const override;
+  void itemActivated() override { locate(); }
   void onCommand(int) override;
 
   const void *data() const override
