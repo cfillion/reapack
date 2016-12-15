@@ -73,7 +73,7 @@ private:
 
 class Category {
 public:
-  Category(const std::string &name, const Index * = nullptr);
+  Category(const std::string &name, const Index *);
   ~Category();
 
   const Index *index() const { return m_index; }

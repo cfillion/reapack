@@ -41,7 +41,7 @@ public:
   static const std::string &displayName(const std::string &name,
     const std::string &desc, bool enableDesc = true);
 
-  Package(const Type, const std::string &name, const Category * = nullptr);
+  Package(const Type, const std::string &name, const Category *);
   ~Package();
 
   const Category *category() const { return m_category; }

@@ -103,8 +103,11 @@ bool Version::tryParse(const string &str)
 
 string Version::fullName() const
 {
-  const string fName = 'v' + m_name;
-  return m_package ? m_package->fullName() + " " + fName : fName;
+  string name = m_package->fullName();
+  name += " v";
+  name += m_name;
+
+  return name;
 }
 
 string Version::displayAuthor() const

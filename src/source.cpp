@@ -57,45 +57,28 @@ Source::Source(const string &file, const string &url, const Version *ver)
     throw reapack_error("empty source url");
 }
 
-const Package *Source::package() const
-{
-  return m_version ? m_version->package() : nullptr;
-}
-
 Package::Type Source::type() const
 {
   if(m_type)
     return m_type;
-  else if(const Package *pkg = package())
-    return pkg->type();
   else
-    return Package::UnknownType;
+    return m_version->package()->type();
 }
 
 const string &Source::file() const
 {
   if(!m_file.empty())
     return m_file;
-
-  if(const Package *pkg = package())
-    return pkg->name();
   else
-    throw reapack_error("empty source file name and no package");
+    return m_version->package()->name();
 }
 
 void Source::setSections(int sections)
 {
   if(type() != Package::ScriptType)
     return;
-  else if(sections == ImplicitSection) {
-    const Package *pkg = package();
-    const Category *cat = pkg ? pkg->category() : nullptr;
-
-    if(!cat)
-      throw reapack_error("cannot resolve implicit section: category is unset");
-
-    sections = detectSection(cat->name());
-  }
+  else if(sections == ImplicitSection)
+    sections = detectSection(m_version->package()->category()->name());
 
   m_sections = sections;
 }
@@ -112,14 +95,6 @@ string Source::fullName() const
 
 Path Source::targetPath() const
 {
-  const Package *pkg = package();
-  if(!pkg)
-    throw reapack_error("no package associated with this source");
-
-  const Category *cat = pkg->category();
-  if(!cat || !cat->index())
-    throw reapack_error("category or index is unset");
-
   Path path;
   const auto type = this->type();
 
@@ -144,23 +119,25 @@ Path Source::targetPath() const
     path.append("LangPack");
     break;
   case Package::UnknownType:
-    // The package has an unsupported type, so we return an empty path.
+    // The package has an unsupported type, so we make an empty path.
     // The empty path won't be used because the category will reject
     // this package right away. Maybe the parser should not bother with loading
     // unsupported packages at all anyway... But then in the future
     // we might want to display unsupported packages in the interface.
-    return path;
+    break;
   }
 
   // append the rest of the path
   switch(type) {
   case Package::ScriptType:
-  case Package::EffectType:
+  case Package::EffectType: {
+    const Category *cat = m_version->package()->category();
     path.append(cat->index()->name());
 
     // only allow directory traversal up to the index name
     path += Path(cat->name()) + file();
     break;
+  }
   case Package::ExtensionType:
   case Package::ThemeType:
   case Package::DataType:
@@ -168,7 +145,7 @@ Path Source::targetPath() const
     path.append(file(), false);
     break;
   case Package::UnknownType:
-    break; // will never happens, but compiler are dumb
+    break;
   }
 
   return path;

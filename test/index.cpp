@@ -151,11 +151,11 @@ TEST_CASE("add a package", M) {
 }
 
 TEST_CASE("add owned package", M) {
-  Category cat1("a");
+  Category cat1("a", nullptr);
   Package *pack = new Package(Package::ScriptType, "name", &cat1);
 
   try {
-    Category cat2("b");
+    Category cat2("b", nullptr);
     cat2.addPackage(pack);
     FAIL();
   }
@@ -166,14 +166,14 @@ TEST_CASE("add owned package", M) {
 }
 
 TEST_CASE("drop empty package", M) {
-  Category cat("a");
+  Category cat("a", nullptr);
   const Package pkg(Package::ScriptType, "name", &cat);
   REQUIRE_FALSE(cat.addPackage(&pkg));
   REQUIRE(cat.packages().empty());
 }
 
 TEST_CASE("drop unknown package", M) {
-  Category cat("a");
+  Category cat("a", nullptr);
   const Package pkg(Package::UnknownType, "name", &cat);
   REQUIRE_FALSE(cat.addPackage(&pkg));
   REQUIRE(cat.packages().size() == 0);
@@ -190,9 +190,6 @@ TEST_CASE("empty category name", M) {
 }
 
 TEST_CASE("category full name", M) {
-  Category cat1("Category Name");
-  REQUIRE(cat1.fullName() == "Category Name");
-
   Index ri("Remote Name");
   Category cat2("Category Name", &ri);
   REQUIRE(cat2.fullName() == "Remote Name/Category Name");

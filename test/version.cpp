@@ -190,34 +190,12 @@ TEST_CASE("prerelease versions", M) {
 }
 
 TEST_CASE("version full name", M) {
-  SECTION("no package") {
-    Version ver("1.0");
-    REQUIRE(ver.fullName() == "v1.0");
-  }
+  Index ri("Index Name");
+  Category cat("Category Name", &ri);
+  Package pkg(Package::UnknownType, "file.name", &cat);
+  Version ver("1.0", &pkg);
 
-  SECTION("with package") {
-    Package pkg(Package::UnknownType, "file.name");
-    Version ver("1.0", &pkg);
-
-    REQUIRE(ver.fullName() == "file.name v1.0");
-  }
-
-  SECTION("with category") {
-    Category cat("Category Name");
-    Package pkg(Package::UnknownType, "file.name", &cat);
-    Version ver("1.0", &pkg);
-
-    REQUIRE(ver.fullName() == "Category Name/file.name v1.0");
-  }
-
-  SECTION("with index") {
-    Index ri("Remote Name");
-    Category cat("Category Name", &ri);
-    Package pkg(Package::UnknownType, "file.name", &cat);
-    Version ver("1.0", &pkg);
-
-    REQUIRE(ver.fullName() == "Remote Name/Category Name/file.name v1.0");
-  }
+  REQUIRE(ver.fullName() == "Index Name/Category Name/file.name v1.0");
 }
 
 TEST_CASE("add source", M) {
@@ -302,7 +280,9 @@ TEST_CASE("version date", M) {
 }
 
 TEST_CASE("copy version constructor", M) {
-  const Package pkg(Package::UnknownType, "Hello");
+  Index ri("Remote Name");
+  Category cat("Category Name", &ri);
+  Package pkg(Package::ScriptType, "Hello", &cat);
 
   Version original("1.1test", &pkg);
   original.setAuthor("John Doe");

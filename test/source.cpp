@@ -10,8 +10,16 @@ using namespace std;
 
 static const char *M = "[source]";
 
+#define MAKE_VERSION \
+  Index ri("Index Name"); \
+  Category cat("Category Name", &ri); \
+  Package pkg(Package::DataType, "Package Name", &cat); \
+  Version ver("1.0", &pkg);
+
 TEST_CASE("source platform", M) {
-  Source src({}, "url");
+  MAKE_VERSION;
+
+  Source src({}, "url", &ver);
   REQUIRE(src.platform() == Platform::GenericPlatform);
 
   src.setPlatform(Platform::UnknownPlatform);
@@ -22,8 +30,10 @@ TEST_CASE("source platform", M) {
 }
 
 TEST_CASE("source type override", M) {
-  Source src({}, "url");
-  REQUIRE(src.type() == Package::UnknownType);
+  MAKE_VERSION;
+
+  Source src({}, "url", &ver);
+  REQUIRE(src.type() == Package::DataType);
   REQUIRE(src.typeOverride() == Package::UnknownType);
 
   src.setTypeOverride(Package::ScriptType);
@@ -32,27 +42,15 @@ TEST_CASE("source type override", M) {
 }
 
 TEST_CASE("source type from package", M) {
-  Package pack(Package::EffectType, "package name");
-  Version ver("1.0", &pack);
+  MAKE_VERSION;
   Source src({}, "url", &ver);
 
   REQUIRE(src.version() == &ver);
 
-  REQUIRE(src.type() == Package::EffectType);
+  REQUIRE(src.type() == Package::DataType);
+
   src.setTypeOverride(Package::ScriptType);
   REQUIRE(src.type() == Package::ScriptType);
-}
-
-TEST_CASE("empty source file name and no package", M) {
-  const Source source({}, "url");
-
-  try {
-    (void)source.file();
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty source file name and no package");
-  }
 }
 
 TEST_CASE("parse file section", M) {
@@ -63,40 +61,32 @@ TEST_CASE("parse file section", M) {
 }
 
 TEST_CASE("explicit source section", M) {
-  SECTION("script type override") {
-    Source source("filename", "url");
+  MAKE_VERSION;
+
+  SECTION("script type") {
+    Source source("filename", "url", &ver);
     REQUIRE(source.sections() == 0);
 
     source.setTypeOverride(Package::ScriptType);
+    CHECK(source.type() == Package::ScriptType);
+
     source.setSections(Source::MainSection | Source::MIDIEditorSection);
     REQUIRE(source.sections() == (Source::MainSection | Source::MIDIEditorSection));
   }
 
-  SECTION("other type override") {
-    Source source("filename", "url");
-    source.setTypeOverride(Package::EffectType);
-    source.setSections(Source::MainSection);
-    REQUIRE(source.sections() == 0);
-  }
-
-  SECTION("package type") {
-    Package pack(Package::ScriptType, "package name");
-    Version ver("1.0", &pack);
+  SECTION("other type") {
     Source source("filename", "url", &ver);
     source.setSections(Source::MainSection);
-    REQUIRE(source.sections() == Source::MainSection);
-  }
-
-  SECTION("no package, no type override") {
-    Source source("filename", "url");
-    source.setSections(Source::MainSection);
-    // should not crash!
+    CHECK(source.type() == Package::DataType);
+    REQUIRE(source.sections() == 0);
   }
 }
 
 TEST_CASE("implicit source section") {
+  Index ri("Index Name");
+
   SECTION("main") {
-    Category cat("Category Name");
+    Category cat("Category Name", &ri);
     Package pack(Package::ScriptType, "package name", &cat);
     Version ver("1.0", &pack);
 
@@ -106,24 +96,13 @@ TEST_CASE("implicit source section") {
   }
 
   SECTION("midi editor") {
-    Category cat("MIDI Editor");
+    Category cat("MIDI Editor", &ri);
     Package pack(Package::ScriptType, "package name", &cat);
     Version ver("1.0", &pack);
 
     Source source("filename", "url", &ver);
     source.setSections(Source::ImplicitSection);
     REQUIRE(source.sections() == Source::MIDIEditorSection);
-  }
-
-  SECTION("no category") {
-    Source source("filename", "url");
-    source.setTypeOverride(Package::ScriptType);
-
-    try {
-      source.setSections(Source::ImplicitSection);
-      FAIL(); // should throw (or crash if buggy, but not do nothing)
-    }
-    catch(const reapack_error &) {}
   }
 }
 
@@ -137,8 +116,10 @@ TEST_CASE("implicit section detection", M) {
 }
 
 TEST_CASE("empty source url", M) {
+  MAKE_VERSION;
+
   try {
-    const Source source("filename", {});
+    const Source source("filename", {}, &ver);
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -146,34 +127,16 @@ TEST_CASE("empty source url", M) {
   }
 }
 
-TEST_CASE("full name without version", M) {
-  SECTION("with file name") {
-    const Source source("path/to/file", "b");
-    REQUIRE(source.fullName() == "file");
-  }
+TEST_CASE("source full name", M) {
+  MAKE_VERSION;
 
-  SECTION("without file name") {
-    try {
-      const Source source({}, "b");
-      (void)source.fullName();
-      FAIL();
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "empty source file name and no package");
-    }
-  }
-}
-
-TEST_CASE("full name with version", M) {
   SECTION("with file name") {
-    Version ver("1.0");
     const Source source("path/to/file", "b", &ver);
 
-    REQUIRE(source.fullName() == "v1.0 (file)");
+    REQUIRE(source.fullName() == ver.fullName() + " (file)");
   }
 
   SECTION("without file name") {
-    Version ver("1.0");
     const Source source({}, "b", &ver);
 
     REQUIRE(source.fullName() == ver.fullName());
@@ -181,10 +144,7 @@ TEST_CASE("full name with version", M) {
 }
 
 TEST_CASE("source target path", M) {
-  Index ri("Index Name");
-  Category cat("Category Name", &ri);
-  Package pack(Package::UnknownType, "package name", &cat);
-  Version ver("1.0", &pack);
+  MAKE_VERSION;
 
   Source source("file.name", "url", &ver);
 
@@ -251,17 +211,6 @@ TEST_CASE("target path with parent directory traversal", M) {
   }
 }
 
-TEST_CASE("target path without package", M) {
-  try {
-    const Source source("a", "b");
-    (void)source.targetPath();
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "no package associated with this source");
-  }
-}
-
 TEST_CASE("target path for unknown package type", M) {
   Index ri("name");
   Category cat("name", &ri);
@@ -285,18 +234,4 @@ TEST_CASE("directory traversal in category name", M) {
   expected.append("file.name");
 
   REQUIRE(src.targetPath() == expected);
-}
-
-TEST_CASE("target path without category", M) {
-  Package pack(Package::ScriptType, "file.name");
-  Version ver("1.0", &pack);
-  Source src({}, "url", &ver);
-
-  try {
-    src.targetPath();
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "category or index is unset");
-  }
 }

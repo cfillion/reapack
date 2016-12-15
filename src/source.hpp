@@ -38,8 +38,7 @@ public:
   static Section getSection(const char *);
   static Section detectSection(const std::string &category);
 
-  Source(const std::string &file, const std::string &url,
-    const Version * = nullptr);
+  Source(const std::string &file, const std::string &url, const Version *);
 
   void setPlatform(Platform p) { m_platform = p; }
   Platform platform() const { return m_platform; }
@@ -53,7 +52,6 @@ public:
   int sections() const { return m_sections; }
 
   const Version *version() const { return m_version; }
-  const Package *package() const;
 
   std::string fullName() const;
   Path targetPath() const;
@@ -64,6 +62,7 @@ private:
   std::string m_file;
   std::string m_url;
   int m_sections;
+  Path m_targetPath;
   const Version *m_version;
 };
 

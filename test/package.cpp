@@ -64,7 +64,7 @@ TEST_CASE("package type to string", M) {
 TEST_CASE("invalid package name", M) {
   SECTION("empty") {
     try {
-      Package pack(Package::ScriptType, string());
+      Package pack(Package::ScriptType, string(), nullptr);
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -74,7 +74,7 @@ TEST_CASE("invalid package name", M) {
 
   SECTION("slash") {
     try {
-      Package pack(Package::ScriptType, "hello/world");
+      Package pack(Package::ScriptType, "hello/world", nullptr);
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -84,7 +84,7 @@ TEST_CASE("invalid package name", M) {
 
   SECTION("backslash") {
     try {
-      Package pack(Package::ScriptType, "hello\\world");
+      Package pack(Package::ScriptType, "hello\\world", nullptr);
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -180,7 +180,7 @@ TEST_CASE("pre-release updates", M) {
 }
 
 TEST_CASE("drop empty version", M) {
-  Package pack(Package::ScriptType, "a");
+  Package pack(Package::ScriptType, "a", nullptr);
   const Version ver("1", &pack);
   REQUIRE_FALSE(pack.addVersion(&ver));
   REQUIRE(pack.versions().empty());
@@ -188,8 +188,8 @@ TEST_CASE("drop empty version", M) {
 }
 
 TEST_CASE("add owned version", M) {
-  Package pack1(Package::ScriptType, "a");
-  Package pack2(Package::ScriptType, "a");
+  Package pack1(Package::ScriptType, "a", nullptr);
+  Package pack2(Package::ScriptType, "a", nullptr);
 
   Version *ver = new Version("1", &pack1);
 
@@ -240,36 +240,19 @@ TEST_CASE("find matching version", M) {
   REQUIRE(pack.findVersion(Version("2")) == nullptr);
 }
 
-TEST_CASE("full name", M) {
-  SECTION("no category") {
-    const Package pack(Package::ScriptType, "file.name");
-    REQUIRE(pack.fullName() == "file.name");
-  }
+TEST_CASE("package full name", M) {
+  const Index ri("Index Name");
+  const Category cat("Category Name", &ri);
+  Package pack(Package::ScriptType, "file.name", &cat);
 
-  SECTION("with category") {
-    const Category cat("Category Name");
-    const Package pack(Package::ScriptType, "file.name", &cat);
-    REQUIRE(pack.fullName() == "Category Name/file.name");
-  }
+  REQUIRE(pack.fullName() == "Index Name/Category Name/file.name");
 
-  SECTION("with index") {
-    const Index ri("Remote Name");
-    const Category cat("Category Name", &ri);
-    const Package pack(Package::ScriptType, "file.name", &cat);
-
-    REQUIRE(pack.fullName() == "Remote Name/Category Name/file.name");
-  }
-
-  SECTION("with description") {
-    const Category cat("Category Name");
-    Package pack(Package::ScriptType, "file.name", &cat);
-    pack.setDescription("Hello World");
-    REQUIRE(pack.fullName() == "Category Name/Hello World");
-  }
+  pack.setDescription("Hello World");
+  REQUIRE(pack.fullName() == "Index Name/Category Name/Hello World");
 }
 
 TEST_CASE("package description", M) {
-  Package pack(Package::ScriptType, "test.lua");
+  Package pack(Package::ScriptType, "test.lua", nullptr);
   REQUIRE(pack.description().empty());
 
   pack.setDescription("hello world");
@@ -277,7 +260,7 @@ TEST_CASE("package description", M) {
 }
 
 TEST_CASE("package display name", M) {
-  Package pack(Package::ScriptType, "test.lua");
+  Package pack(Package::ScriptType, "test.lua", nullptr);
   REQUIRE(pack.displayName() == "test.lua");
   REQUIRE(pack.displayName(false) == "test.lua");
   REQUIRE(pack.displayName(true) == "test.lua");
