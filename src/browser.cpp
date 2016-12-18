@@ -480,6 +480,7 @@ bool Browser::isFiltered(Package::Type type) const
   case Package::LangPackType:
     break;
   case Package::DataType:
+  case Package::WebInterfaceType:
     type = Package::UnknownType;
     break;
   }

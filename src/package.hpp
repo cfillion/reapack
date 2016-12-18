@@ -34,6 +34,7 @@ public:
     DataType,
     ThemeType,
     LangPackType,
+    WebInterfaceType,
   };
 
   static Type getType(const char *);

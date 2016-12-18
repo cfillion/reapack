@@ -118,6 +118,9 @@ Path Source::targetPath() const
   case Package::LangPackType:
     path.append("LangPack");
     break;
+  case Package::WebInterfaceType:
+    path.append("reaper_www_root");
+    break;
   case Package::UnknownType:
     // The package has an unsupported type, so we make an empty path.
     // The empty path won't be used because the category will reject
@@ -142,6 +145,7 @@ Path Source::targetPath() const
   case Package::ThemeType:
   case Package::DataType:
   case Package::LangPackType:
+  case Package::WebInterfaceType:
     path.append(file(), false);
     break;
   case Package::UnknownType:

@@ -40,6 +40,8 @@ Package::Type Package::getType(const char *type)
     return ThemeType;
   else if(!strcmp(type, "langpack"))
     return LangPackType;
+  else if(!strcmp(type, "www"))
+    return WebInterfaceType;
   else
     return UnknownType;
 }
@@ -59,6 +61,8 @@ string Package::displayType(const Type type)
     return "Theme";
   case LangPackType:
     return "Language Pack";
+  case WebInterfaceType:
+    return "Web Interface";
   default:
     return "Unknown";
   }

@@ -183,6 +183,12 @@ TEST_CASE("source target path", M) {
     const Path expected("LangPack/file.name");
     REQUIRE(source.targetPath() == expected);
   }
+
+  SECTION("web interface") {
+    source.setTypeOverride(Package::WebInterfaceType);
+    const Path expected("reaper_www_root/file.name");
+    REQUIRE(source.targetPath() == expected);
+  }
 }
 
 TEST_CASE("target path with parent directory traversal", M) {

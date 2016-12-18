@@ -33,6 +33,9 @@ TEST_CASE("package type from string", M) {
 
   SECTION("langpack")
     REQUIRE(Package::getType("langpack") == Package::LangPackType);
+
+  SECTION("web interface")
+    REQUIRE(Package::getType("www") == Package::WebInterfaceType);
 }
 
 TEST_CASE("package type to string", M) {
@@ -57,7 +60,10 @@ TEST_CASE("package type to string", M) {
   SECTION("langpack")
     REQUIRE("Language Pack" == Package::displayType(Package::LangPackType));
 
-  SECTION("unknown")
+  SECTION("web interface")
+    REQUIRE("Web Interface" == Package::displayType(Package::WebInterfaceType));
+
+  SECTION("invalid")
     REQUIRE("Unknown" == Package::displayType(static_cast<Package::Type>(-1)));
 }
 
