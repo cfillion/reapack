@@ -101,25 +101,25 @@ Path Source::targetPath() const
   // select the target directory
   switch(type) {
   case Package::ScriptType:
-    path.append("Scripts");
+    path += "Scripts";
     break;
   case Package::EffectType:
-    path.append("Effects");
+    path += "Effects";
     break;
   case Package::DataType:
-    path.append("Data");
+    path += "Data";
     break;
   case Package::ExtensionType:
-    path.append("UserPlugins");
+    path += "UserPlugins";
     break;
   case Package::ThemeType:
-    path.append("ColorThemes");
+    path += "ColorThemes";
     break;
   case Package::LangPackType:
-    path.append("LangPack");
+    path += "LangPack";
     break;
   case Package::WebInterfaceType:
-    path.append("reaper_www_root");
+    path += "reaper_www_root";
     break;
   case Package::UnknownType:
     // The package has an unsupported type, so we make an empty path.
@@ -135,7 +135,7 @@ Path Source::targetPath() const
   case Package::ScriptType:
   case Package::EffectType: {
     const Category *cat = m_version->package()->category();
-    path.append(cat->index()->name());
+    path += cat->index()->name();
 
     // only allow directory traversal up to the index name
     path += Path(cat->name()) + file();
@@ -146,7 +146,7 @@ Path Source::targetPath() const
   case Package::DataType:
   case Package::LangPackType:
   case Package::WebInterfaceType:
-    path.append(file(), false);
+    path.append(file(), false); // no directory traversal
     break;
   case Package::UnknownType:
     break;
