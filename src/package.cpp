@@ -40,7 +40,7 @@ Package::Type Package::getType(const char *type)
     return ThemeType;
   else if(!strcmp(type, "langpack"))
     return LangPackType;
-  else if(!strcmp(type, "www"))
+  else if(!strcmp(type, "webinterface"))
     return WebInterfaceType;
   else
     return UnknownType;

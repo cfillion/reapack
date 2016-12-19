@@ -35,7 +35,7 @@ TEST_CASE("package type from string", M) {
     REQUIRE(Package::getType("langpack") == Package::LangPackType);
 
   SECTION("web interface")
-    REQUIRE(Package::getType("www") == Package::WebInterfaceType);
+    REQUIRE(Package::getType("webinterface") == Package::WebInterfaceType);
 }
 
 TEST_CASE("package type to string", M) {
