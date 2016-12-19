@@ -1,4 +1,4 @@
-@version 1.1rc4
+@version 1.1rc5
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -8,7 +8,7 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  * add support for Language Pack packages [p=1753437]
-  * browser: add Language Packs filtering option
-  Fixed:
-  * win32: fix temporary file removal (was broken since v1.1rc2) [p=1755742]
+  * about: make Ctrl+C copy pkg name or source url
+  * about pkg: double clicking on a file opens it in file explorer
+  * add support for REAPER v5.30 custom Web Interfaces
+  * browser: prompt to enable "Install new packages when sychronizing" when installing everything
