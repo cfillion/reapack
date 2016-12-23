@@ -107,11 +107,11 @@ bool About::onKeyDown(const int key, const int mods)
 
 void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 {
-  if(focus)
-    setFocus(); // this also calls show();
-
-  if(m_delegate && delegate->data() == m_delegate->data())
+  if(m_delegate && delegate->data() == m_delegate->data()) {
+    if(focus)
+      setFocus(); // also calls show()
     return;
+  }
 
   // prevent fast flickering on Windows
   InhibitControl block(handle());
@@ -149,6 +149,11 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 
   m_menu->autoSizeHeader();
   m_list->autoSizeHeader();
+
+  if(focus) {
+    show();
+    m_tabs->setFocus();
+  }
 }
 
 void About::setTitle(const string &what)
