@@ -83,8 +83,8 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     break;
   case WM_GETMINMAXINFO: {
     MINMAXINFO *mmi = (MINMAXINFO *)lParam;
-    mmi->ptMinTrackSize.x = dlg->m_initialSize.x;
-    mmi->ptMinTrackSize.y = dlg->m_initialSize.y;
+    mmi->ptMinTrackSize.x = dlg->m_minimumSize.x;
+    mmi->ptMinTrackSize.y = dlg->m_minimumSize.y;
     break;
   }
   case WM_SIZE:
@@ -134,7 +134,7 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
 }
 
 Dialog::Dialog(const int templateId)
-  : m_template(templateId), m_isVisible(false), m_initialSize(),
+  : m_template(templateId), m_isVisible(false), m_minimumSize(),
     m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
   m_accel.translateAccel = HandleKey;
@@ -392,7 +392,7 @@ void Dialog::onInit()
 {
   RECT rect;
   GetWindowRect(m_handle, &rect);
-  m_initialSize = {rect.right - rect.left, rect.bottom - rect.top};
+  m_minimumSize = {rect.right - rect.left, rect.bottom - rect.top};
 
   center();
 

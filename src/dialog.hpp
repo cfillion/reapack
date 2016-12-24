@@ -106,6 +106,7 @@ public:
   HWND getControl(int idc);
   std::string getText(HWND);
   void setAnchor(HWND, int flags);
+  void setMinimumSize(const POINT &p) { m_minimumSize = p; }
 
   void restore(Serializer::Data &);
   void save(Serializer::Data &) const;
@@ -154,7 +155,7 @@ private:
 
   const int m_template;
   bool m_isVisible;
-  POINT m_initialSize;
+  POINT m_minimumSize;
   WDL_WndSizer m_resizer;
   Modality m_mode;
 

@@ -63,6 +63,7 @@ void About::onInit()
   m_list->onContextMenu([=] (Menu &m, int i) { return m_delegate->fillContextMenu(m, i); });
   m_list->onActivate([=] { m_delegate->itemActivated(); });
 
+  setMinimumSize({560, 200});
   setAnchor(m_tabs->handle(), AnchorRight | AnchorBottom);
   setAnchor(m_desc->handle(), AnchorRight | AnchorBottom);
   setAnchor(m_menu->handle(), AnchorBottom);
