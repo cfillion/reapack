@@ -69,11 +69,9 @@ void About::onInit()
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_REPORT), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_CHANGELOG), AnchorRight | AnchorBottom);
-  setAnchor(getControl(IDC_WEBSITE), AnchorTop | AnchorBottom);
-  setAnchor(getControl(IDC_DONATE), AnchorTop | AnchorBottom);
-  setAnchor(getControl(IDC_SCREENSHOT), AnchorTop | AnchorBottom);
   setAnchor(getControl(IDC_ACTION), AnchorAll);
   setAnchor(getControl(IDOK), AnchorAll);
+  // link buttons are anchored in setMetadata
 }
 
 void About::onCommand(const int id, int)
@@ -206,6 +204,7 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
         SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 
       show(handle);
+      setAnchor(handle, AnchorTop | AnchorBottom);
       rect.left += shift;
       m_links[control] = {};
     }
