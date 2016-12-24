@@ -357,6 +357,7 @@ void Dialog::setAnchor(HWND handle, const int flags)
   const float right = (float)min(1, flags & AnchorRight);
   const float bottom = (float)min(1, flags & AnchorBottom);
 
+  m_resizer.remove_itemhwnd(handle);
   m_resizer.init_itemhwnd(handle, left, top, right, bottom);
 }
 
