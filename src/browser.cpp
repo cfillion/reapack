@@ -131,7 +131,7 @@ void Browser::onInit()
   });
 
   Dialog::onInit();
-  setMinimumSize({600, 200});
+  setMinimumSize({600, 250});
 
   setAnchor(m_filterHandle, AnchorRight);
   setAnchor(getControl(IDC_CLEAR), AnchorLeftRight);
