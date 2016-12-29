@@ -458,7 +458,7 @@ void AboutIndexDelegate::install()
   if(!choice)
     return;
 
-  const Remote &remote = m_reapack->remote(m_index->name());
+  Remote remote = m_reapack->remote(m_index->name());
 
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
@@ -466,6 +466,27 @@ void AboutIndexDelegate::install()
       AUTO_STR("This repository cannot be found in your current configuration."),
       AUTO_STR("ReaPack"), MB_OK);
     return;
+  }
+
+  const InstallOpts &installOpts = m_reapack->config()->install;
+
+  if(choice == INSTALL_ALL && boost::logic::indeterminate(remote.autoInstall())
+      && !installOpts.autoInstall) {
+    const int btn = MessageBox(m_dialog->handle(),
+      AUTO_STR("Do you want ReaPack to install new packages from this repository")
+      AUTO_STR(" when synchronizing in the future?\r\n\r\nThis setting can also be")
+      AUTO_STR(" customized globally or on a per-repository basis in")
+      AUTO_STR(" ReaPack > Manage repositories."),
+      AUTO_STR("Install all packages in this repository"), MB_YESNOCANCEL);
+
+    switch(btn) {
+    case IDYES:
+      remote.setAutoInstall(true);
+      m_reapack->config()->remotes.add(remote);
+      break;
+    case IDCANCEL:
+      return;
+    }
   }
 
   Transaction *tx = m_reapack->setupTransaction();
