@@ -8,10 +8,10 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  about repo: prompt to enable local "Install new packages when sychronizing" override when installing everything
-  config: add ReaTeam/LangPacks to the default repositories
+  * about repo: prompt to enable local "Install new packages when sychronizing" override when installing everything
+  * config: add ReaTeam/LangPacks to the default repositories
   Changed:
-  dialog: allow about and browser windows to be resized smaller than the default size
+  * dialog: allow about and browser windows to be resized smaller than the default size
   Fixed:
-  about: fix for the Escape key not closing the window in some cases on macOS
-  about: fix link button positioning when the window is resized
+  * about: fix for the Escape key not closing the window in some cases on macOS
+  * about: fix link button positioning when the window is resized
