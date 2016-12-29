@@ -1,4 +1,4 @@
-@version 1.1rc5
+@version 1.1rc6
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -8,7 +8,10 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  * about: make Ctrl+C copy pkg name or source url
-  * about pkg: double clicking on a file opens it in file explorer
-  * add support for REAPER v5.30 custom Web Interfaces
-  * browser: prompt to enable "Install new packages when sychronizing" when installing everything
+  about repo: prompt to enable local "Install new packages when sychronizing" override when installing everything
+  config: add ReaTeam/LangPacks to the default repositories
+  Changed:
+  dialog: allow about and browser windows to be resized smaller than the default size
+  Fixed:
+  about: fix for the Escape key not closing the window in some cases on macOS
+  about: fix link button positioning when the window is resized
