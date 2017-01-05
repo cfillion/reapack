@@ -857,15 +857,15 @@ void Browser::aboutPackage(const int index, const bool focus)
 
   if(entry && entry->package) {
     m_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(
-      entry->package, entry->regEntry.version, m_reapack), focus);
+      entry->package, entry->regEntry.version), focus);
   }
 }
 
 void Browser::aboutRemote(const int index, const bool focus)
 {
   if(const Entry *entry = getEntry(index)) {
-    m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(
-      entry->index, m_reapack), focus);
+    m_reapack->about()->setDelegate(
+      make_shared<AboutIndexDelegate>(entry->index), focus);
   }
 }
 

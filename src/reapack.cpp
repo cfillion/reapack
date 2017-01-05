@@ -228,7 +228,7 @@ void ReaPack::aboutSelf()
 {
   fetchIndex(remote("ReaPack"), [=] (const IndexPtr &index) {
     if(index)
-      about()->setDelegate(make_shared<AboutIndexDelegate>(index, this));
+      about()->setDelegate(make_shared<AboutIndexDelegate>(index));
   }, m_mainWindow);
 }
 
@@ -239,7 +239,7 @@ About *ReaPack::about(const bool instantiate)
   else if(!instantiate)
     return nullptr;
 
-  m_about = Dialog::Create<About>(m_instance, m_mainWindow);
+  m_about = Dialog::Create<About>(m_instance, m_mainWindow, this);
 
   m_about->setCloseHandler([=] (INT_PTR) {
     Dialog::Destroy(m_about);

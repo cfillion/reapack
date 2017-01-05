@@ -45,7 +45,8 @@ enum {
   ACTION_COPY_URL, ACTION_LOCATE
 };
 
-About::About() : Dialog(IDD_ABOUT_DIALOG)
+About::About(ReaPack *reapack)
+  : Dialog(IDD_ABOUT_DIALOG), m_reapack(reapack)
 {
 }
 
@@ -269,8 +270,8 @@ void About::updateList()
   m_list->sort();
 }
 
-AboutIndexDelegate::AboutIndexDelegate(const IndexPtr &index, ReaPack *reapack)
-  : m_index(index), m_reapack(reapack)
+AboutIndexDelegate::AboutIndexDelegate(const IndexPtr &index)
+  : m_index(index)
 {
 }
 
@@ -412,12 +413,13 @@ const Package *AboutIndexDelegate::currentPackage() const
 
 void AboutIndexDelegate::findInBrowser()
 {
-  Browser *browser = m_reapack->browsePackages();
+  ReaPack *reapack = m_dialog->reapack();
+  Browser *browser = reapack->browsePackages();
   if(!browser)
     return;
 
   const Package *pkg = currentPackage();
-  const string &name = pkg->displayName(m_reapack->config()->browser.showDescs);
+  const string &name = pkg->displayName(reapack->config()->browser.showDescs);
 
   ostringstream stream;
   stream << '^' << quoted(name) << "$ ^" << quoted(m_index->name()) << '$';
@@ -436,13 +438,15 @@ void AboutIndexDelegate::aboutPackage()
   }
   catch(const reapack_error &) {}
 
-  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, current, m_reapack));
+  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, current));
 }
 
 void AboutIndexDelegate::itemCopy()
 {
+  Config *config = m_dialog->reapack()->config();
+
   if(const Package *pkg = currentPackage())
-    m_dialog->setClipboard(pkg->displayName(m_reapack->config()->browser.showDescs));
+    m_dialog->setClipboard(pkg->displayName(config->browser.showDescs));
 }
 
 void AboutIndexDelegate::install()
@@ -458,7 +462,8 @@ void AboutIndexDelegate::install()
   if(!choice)
     return;
 
-  Remote remote = m_reapack->remote(m_index->name());
+  ReaPack *reapack = m_dialog->reapack();
+  Remote remote = reapack->remote(m_index->name());
 
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
@@ -468,7 +473,7 @@ void AboutIndexDelegate::install()
     return;
   }
 
-  const InstallOpts &installOpts = m_reapack->config()->install;
+  const InstallOpts &installOpts = reapack->config()->install;
 
   if(choice == INSTALL_ALL && boost::logic::indeterminate(remote.autoInstall())
       && !installOpts.autoInstall) {
@@ -482,27 +487,27 @@ void AboutIndexDelegate::install()
     switch(btn) {
     case IDYES:
       remote.setAutoInstall(true);
-      m_reapack->config()->remotes.add(remote);
+      reapack->config()->remotes.add(remote);
       break;
     case IDCANCEL:
       return;
     }
   }
 
-  Transaction *tx = m_reapack->setupTransaction();
+  Transaction *tx = reapack->setupTransaction();
 
   if(!tx)
     return;
 
-  m_reapack->enable(remote);
+  reapack->enable(remote);
 
   tx->synchronize(remote, choice == INSTALL_ALL);
   tx->runTasks();
 }
 
-AboutPackageDelegate::AboutPackageDelegate(const Package *pkg,
-    const VersionName &ver, ReaPack *reapack)
-  : m_package(pkg), m_current(ver), m_reapack(reapack),
+AboutPackageDelegate::AboutPackageDelegate(
+    const Package *pkg, const VersionName &ver)
+  : m_package(pkg), m_current(ver),
     m_index(pkg->category()->index()->shared_from_this())
 {
 }
@@ -608,7 +613,7 @@ void AboutPackageDelegate::onCommand(const int id)
 {
   switch(id) {
   case IDC_ACTION:
-    m_dialog->setDelegate(make_shared<AboutIndexDelegate>(m_index, m_reapack));
+    m_dialog->setDelegate(make_shared<AboutIndexDelegate>(m_index));
     break;
   case ACTION_COPY_URL:
     copySourceUrl();

@@ -420,7 +420,7 @@ void Manager::about(const int index)
   const Remote &remote = getRemote(index);
   m_reapack->fetchIndex(remote, [=] (const IndexPtr &index) {
     if(index)
-      m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(index, m_reapack));
+      m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(index));
   }, handle());
 }
 
