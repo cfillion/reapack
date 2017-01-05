@@ -41,20 +41,12 @@ void Filter::set(const string &input)
 
   for(const char c : input) {
     if(c == '"' && state != SingleQuote) {
-      if(state == DoubleQuote)
-        state = Default;
-      else
-        state = DoubleQuote;
-
+      state = state == Default ? DoubleQuote : Default;
       flags |= Node::QuotedFlag;
       continue;
     }
     else if(c == '\'' && state != DoubleQuote) {
-      if(state == SingleQuote)
-        state = Default;
-      else
-        state = SingleQuote;
-
+      state = state == Default ? SingleQuote : Default;
       flags |= Node::QuotedFlag;
       continue;
     }
@@ -87,9 +79,7 @@ Filter::Group::Group(Type type, int flags, Group *parent)
 
 Filter::Group *Filter::Group::push(string buf, int *flags)
 {
-  size_t size = buf.size();
-
-  if(!size)
+  if(buf.empty())
     return this;
 
   if((*flags & QuotedFlag) == 0) {
@@ -105,17 +95,12 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
         return this;
       }
 
-      NodePtr prev;
-      if(!m_nodes.empty()) {
-        prev = m_nodes.back();
-        m_nodes.pop_back();
-      }
+      NodePtr prev = m_nodes.back();
+      m_nodes.pop_back();
 
       auto newGroup = make_shared<Group>(MatchAny, 0, this);
+      newGroup->m_nodes.push_back(prev);
       m_nodes.push_back(newGroup);
-
-      if(prev)
-        newGroup->m_nodes.push_back(prev);
 
       return newGroup.get();
     }
@@ -126,29 +111,22 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
       return newGroup.get();
     }
     else if(buf == ")") {
-      Group *parent = this;
-
-      while(parent->m_parent) {
-        const Type type = parent->m_type;
-        parent = parent->m_parent;
-
-        if(type == MatchAll)
-          break;
+      for(Group *parent = this; parent->m_parent; parent = parent->m_parent) {
+        if(parent->m_type == MatchAll)
+          return parent->m_parent;
       }
 
-      return parent;
+      return this;
     }
   }
 
-  if(size > 1 && buf[0] == '^') {
+  if(buf.size() > 1 && buf.front() == '^') {
     *flags |= Node::StartAnchorFlag;
-    buf.erase(0, 1);
-    size--;
+    buf.erase(0, 1); // we need to recheck the size() below, for '$'
   }
-  if(size > 1 && buf[size - 1] == '$') {
+  if(buf.size() > 1 && buf.back() == '$') {
     *flags |= Node::EndAnchorFlag;
-    buf.erase(size - 1, 1);
-    size--;
+    buf.pop_back();
   }
 
   Group *group = m_open ? this : m_parent;
@@ -189,12 +167,13 @@ Filter::Token::Token(const string &buf, int flags)
 
 bool Filter::Token::match(const vector<string> &rows) const
 {
+  const bool isNot = test(NotFlag);
   bool match = false;
 
   for(const string &row : rows) {
-    if(matchRow(row))
+    if(matchRow(row) ^ isNot)
       match = true;
-    else if(test(NotFlag))
+    else if(isNot)
       return false;
   }
 
@@ -204,23 +183,21 @@ bool Filter::Token::match(const vector<string> &rows) const
 bool Filter::Token::matchRow(const string &str) const
 {
   const size_t pos = str.find(m_buf);
-  const bool isStart = pos == 0, isEnd = pos + m_buf.size() == str.size();
-  const bool fail = test(NotFlag);
-
-  if(test(StartAnchorFlag) && !isStart)
-    return fail;
-  if(test(EndAnchorFlag) && !isEnd)
-    return fail;
 
   if(pos == string::npos)
-    return fail;
+    return false;
 
+  const bool isStart = pos == 0, isEnd = pos + m_buf.size() == str.size();
+
+  if(test(StartAnchorFlag) && !isStart)
+    return false;
+  if(test(EndAnchorFlag) && !isEnd)
+    return false;
   if(test(QuotedFlag) && !test(PhraseFlag)) {
-    return fail ^ (
+    return
       (isStart || !isalnum(str[pos - 1])) &&
-      (isEnd || !isalnum(str[pos + m_buf.size()]))
-    );
+      (isEnd || !isalnum(str[pos + m_buf.size()]));
   }
 
-  return !fail;
+  return true;
 }
