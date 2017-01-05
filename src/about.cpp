@@ -74,6 +74,16 @@ void About::onInit()
   setAnchor(getControl(IDC_ACTION), AnchorAll);
   setAnchor(getControl(IDOK), AnchorAll);
   // link buttons are anchored in setMetadata
+
+  auto data = m_serializer.read(m_reapack->config()->about.state, 1);
+  restoreState(data);
+}
+
+void About::onClose()
+{
+  Serializer::Data data;
+  saveState(data);
+  m_reapack->config()->about.state = m_serializer.write(data);
 }
 
 void About::onCommand(const int id, int)

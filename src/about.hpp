@@ -20,11 +20,11 @@
 
 #include "dialog.hpp"
 
+#include "version.hpp"
+
 #include <map>
 #include <memory>
 #include <vector>
-
-#include "version.hpp"
 
 class AboutDelegate;
 class Index;
@@ -61,6 +61,7 @@ protected:
   void onInit() override;
   void onCommand(int, int) override;
   bool onKeyDown(int, int) override;
+  void onClose() override;
 
 private:
   void selectLink(int control);
@@ -77,6 +78,7 @@ private:
   ListView *m_list;
 
   DelegatePtr m_delegate;
+  Serializer m_serializer;
 };
 
 class AboutDelegate {
