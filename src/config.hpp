@@ -25,12 +25,12 @@
 
 class Path;
 
-struct AboutOpts {
-  std::string state;
+struct WindowState {
+  std::string about;
+  std::string browser;
 };
 
 struct BrowserOpts {
-  std::string state;
   bool showDescs;
 };
 
@@ -57,10 +57,10 @@ public:
 
   bool isFirstRun() const { return m_isFirstRun; }
 
-  AboutOpts about;
   BrowserOpts browser;
   InstallOpts install;
   NetworkOpts network;
+  WindowState windowState;
 
   RemoteList remotes;
 

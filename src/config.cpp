@@ -65,10 +65,10 @@ Config::Config()
 
 void Config::resetOptions()
 {
-  about = {""};
-  browser = {"", true};
+  browser = {true};
   install = {false, false, true};
   network = {"", true};
+  windowState = {};
 }
 
 void Config::restoreSelfRemote()
@@ -142,15 +142,15 @@ void Config::read(const Path &path)
   install.promptObsolete = getUInt(INSTALL_GRP,
     PROMPTOBSOLETE_KEY, install.promptObsolete) > 0;
 
-  about.state = getString(ABOUT_GRP, STATE_KEY, about.state);
-
   browser.showDescs = getUInt(BROWSER_GRP,
     SHOWDESCS_KEY, browser.showDescs) > 0;
-  browser.state = getString(BROWSER_GRP, STATE_KEY, browser.state);
 
   network.proxy = getString(NETWORK_GRP, PROXY_KEY, network.proxy);
   network.verifyPeer = getUInt(NETWORK_GRP,
     VERIFYPEER_KEY, network.verifyPeer) > 0;
+
+  windowState.about = getString(ABOUT_GRP, STATE_KEY, windowState.about);
+  windowState.browser = getString(BROWSER_GRP, STATE_KEY, windowState.browser);
 
   readRemotes();
   restoreSelfRemote();
@@ -165,13 +165,13 @@ void Config::write()
   setUInt(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
   setUInt(INSTALL_GRP, PROMPTOBSOLETE_KEY, install.promptObsolete);
 
-  setString(ABOUT_GRP, STATE_KEY, about.state);
-
   setUInt(BROWSER_GRP, SHOWDESCS_KEY, browser.showDescs);
-  setString(BROWSER_GRP, STATE_KEY, browser.state);
 
   setString(NETWORK_GRP, PROXY_KEY, network.proxy);
   setUInt(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
+
+  setString(ABOUT_GRP, STATE_KEY, windowState.about);
+  setString(BROWSER_GRP, STATE_KEY, windowState.browser);
 
   writeRemotes();
 }

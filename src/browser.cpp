@@ -146,13 +146,21 @@ void Browser::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_applyBtn, AnchorAll);
 
-  auto data = m_serializer.read(m_reapack->config()->browser.state, 1);
+  auto data = m_serializer.read(m_reapack->config()->windowState.browser, 1);
   restoreState(data);
   m_list->restoreState(data);
   assert(data.empty());
 
   updateDisplayLabel();
   refresh();
+}
+
+void Browser::onClose()
+{
+  Serializer::Data data;
+  saveState(data);
+  m_list->saveState(data);
+  m_reapack->config()->windowState.browser = m_serializer.write(data);
 }
 
 void Browser::onCommand(const int id, const int event)
@@ -274,14 +282,6 @@ bool Browser::onKeyDown(const int key, const int mods)
     return false;
 
   return true;
-}
-
-void Browser::onClose()
-{
-  Serializer::Data data;
-  saveState(data);
-  m_list->saveState(data);
-  m_reapack->config()->browser.state = m_serializer.write(data);
 }
 
 void Browser::onTimer(const int id)
