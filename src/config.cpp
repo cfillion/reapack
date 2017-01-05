@@ -36,6 +36,7 @@ static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
 static const auto_char *PROMPTOBSOLETE_KEY = AUTO_STR("promptobsolete");
 
 static const auto_char *ABOUT_GRP = AUTO_STR("about");
+static const auto_char *MANAGER_GRP = AUTO_STR("manager");
 
 static const auto_char *BROWSER_GRP = AUTO_STR("browser");
 static const auto_char *SHOWDESCS_KEY = AUTO_STR("showdescs");
@@ -151,6 +152,7 @@ void Config::read(const Path &path)
 
   windowState.about = getString(ABOUT_GRP, STATE_KEY, windowState.about);
   windowState.browser = getString(BROWSER_GRP, STATE_KEY, windowState.browser);
+  windowState.manager = getString(MANAGER_GRP, STATE_KEY, windowState.manager);
 
   readRemotes();
   restoreSelfRemote();
@@ -172,6 +174,8 @@ void Config::write()
 
   setString(ABOUT_GRP, STATE_KEY, windowState.about);
   setString(BROWSER_GRP, STATE_KEY, windowState.browser);
+  setString(MANAGER_GRP, STATE_KEY, windowState.manager);
+
 
   writeRemotes();
 }

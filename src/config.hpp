@@ -28,6 +28,7 @@ class Path;
 struct WindowState {
   std::string about;
   std::string browser;
+  std::string manager;
 };
 
 struct BrowserOpts {

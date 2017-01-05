@@ -45,6 +45,7 @@ protected:
   void onInit() override;
   void onCommand(int, int) override;
   bool onKeyDown(int, int) override;
+  void onClose() override;
 
 private:
   struct RemoteMods {
@@ -91,6 +92,8 @@ private:
   boost::optional<bool> m_autoInstall;
   boost::optional<bool> m_bleedingEdge;
   boost::optional<bool> m_promptObsolete;
+
+  Serializer m_serializer;
 };
 
 class NetworkConfig : public Dialog {

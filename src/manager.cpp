@@ -67,9 +67,21 @@ void Manager::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_apply, AnchorAll);
 
+  auto data = m_serializer.read(m_reapack->config()->windowState.manager, 1);
+  restoreState(data);
+  m_list->restoreState(data);
+
   refresh();
 
   m_list->autoSizeHeader();
+}
+
+void Manager::onClose()
+{
+  Serializer::Data data;
+  saveState(data);
+  m_list->saveState(data);
+  m_reapack->config()->windowState.manager = m_serializer.write(data);
 }
 
 void Manager::onCommand(const int id, int)
