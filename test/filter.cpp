@@ -59,18 +59,13 @@ TEST_CASE("word matching", M) {
   REQUIRE(f.match({"hello test world"}));
 }
 
-TEST_CASE("double quote matching", M) {
+TEST_CASE("quote matching", M) {
   Filter f;
-  f.set("\"hello world\"");
 
-  REQUIRE(f.match({"hello world"}));
-  REQUIRE_FALSE(f.match({"helloworld"}));
-  REQUIRE_FALSE(f.match({"hello test world"}));
-}
-
-TEST_CASE("single quote matching", M) {
-  Filter f;
-  f.set("'hello world'");
+  SECTION("double quotes")
+    f.set("\"hello world\"");
+  SECTION("single quotes")
+    f.set("'hello world'");
 
   REQUIRE(f.match({"hello world"}));
   REQUIRE_FALSE(f.match({"helloworld"}));
@@ -165,6 +160,15 @@ TEST_CASE("end of string", M) {
     REQUIRE(f.match({"hello"}));
     REQUIRE_FALSE(f.match({"hello world"}));
   }
+}
+
+TEST_CASE("both anchors", M) {
+  Filter f;
+  f.set("^word$");
+
+  REQUIRE(f.match({"word"}));
+  REQUIRE_FALSE(f.match({"word after"}));
+  REQUIRE_FALSE(f.match({"before word"}));
 }
 
 TEST_CASE("row matching", M) {

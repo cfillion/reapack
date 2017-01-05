@@ -67,6 +67,12 @@ void Filter::set(const string &input)
   group->push(buf, &flags);
 }
 
+bool Filter::match(vector<string> rows) const
+{
+  for_each(rows.begin(), rows.end(), [](string &str) { boost::to_lower(str); });
+  return m_root.match(rows);
+}
+
 Filter::Group::Group(Type type, int flags, Group *parent)
   : Node(flags), m_parent(parent), m_type(type), m_open(true)
 {
@@ -168,9 +174,10 @@ bool Filter::Group::match(const vector<string> &rows) const
   return m_type == MatchAll && !test(NotFlag);
 }
 
-Filter::Token::Token(const std::string &buf, int flags)
+Filter::Token::Token(const string &buf, int flags)
   : Node(flags), m_buf(buf)
 {
+  boost::to_lower(m_buf);
 }
 
 bool Filter::Token::match(const vector<string> &rows) const
@@ -189,14 +196,13 @@ bool Filter::Token::match(const vector<string> &rows) const
 
 bool Filter::Token::matchRow(const string &str) const
 {
-  bool match = true;
+  const size_t pos = str.find(m_buf);
+  const bool fail = test(NotFlag);
 
-  if(test(StartAnchorFlag))
-    match = match && boost::istarts_with(str, m_buf);
-  if(test(EndAnchorFlag))
-    match = match && boost::iends_with(str, m_buf);
+  if(test(StartAnchorFlag) && pos != 0)
+    return fail;
+  if(test(EndAnchorFlag) && pos + m_buf.size() != str.size())
+    return fail;
 
-  match = match && boost::icontains(str, m_buf);
-
-  return match ^ test(NotFlag);
+  return (pos != string::npos) ^ fail;
 }

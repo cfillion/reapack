@@ -29,7 +29,7 @@ public:
   const std::string get() const { return m_input; }
   void set(const std::string &);
 
-  bool match(const std::vector<std::string> &rows) const { return m_root.match(rows); }
+  bool match(std::vector<std::string> rows) const;
 
   Filter &operator=(const std::string &f) { set(f); return *this; }
   bool operator==(const std::string &f) const { return m_input == f; }
