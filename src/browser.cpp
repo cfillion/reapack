@@ -149,7 +149,6 @@ void Browser::onInit()
   auto data = m_serializer.read(m_reapack->config()->windowState.browser, 1);
   restoreState(data);
   m_list->restoreState(data);
-  assert(data.empty());
 
   updateDisplayLabel();
   refresh();
