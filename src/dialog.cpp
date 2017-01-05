@@ -218,18 +218,20 @@ void Dialog::center()
   GetWindowRect(m_parent, &parentRect);
 
 #ifdef _WIN32
-  // limit the centering to the monitor containing most of the parent window
   HMONITOR monitor = MonitorFromWindow(m_parent, MONITOR_DEFAULTTONEAREST);
   MONITORINFO minfo{sizeof(MONITORINFO)};
-
-  if(GetMonitorInfo(monitor, &minfo)) {
-    parentRect.left = max(parentRect.left, minfo.rcWork.left);
-    parentRect.top = max(parentRect.top, minfo.rcWork.top);
-
-    parentRect.right = min(parentRect.right, minfo.rcWork.right);
-    parentRect.bottom = min(parentRect.bottom, minfo.rcWork.bottom);
-  }
+  GetMonitorInfo(monitor, &minfo);
+  RECT &screenRect = minfo.rcWork;
+#else
+  RECT screenRect;
+  SWELL_GetViewPort(&screenRect, &dialogRect, false);
 #endif
+
+  // limit the centering to the monitor containing most of the parent window
+  parentRect.left = max(parentRect.left, screenRect.left);
+  parentRect.top = max(parentRect.top, screenRect.top);
+  parentRect.right = min(parentRect.right, screenRect.right);
+  parentRect.bottom = min(parentRect.bottom, screenRect.bottom);
 
   const int parentWidth = parentRect.right - parentRect.left;
   const int dialogWidth = dialogRect.right - dialogRect.left;
@@ -249,7 +251,7 @@ void Dialog::center()
   top += verticalBias; // according to SWELL, top means bottom.
 #endif
 
-  boundedMove(left, top);
+  move(left, top);
 }
 
 void Dialog::boundedMove(int x, int y)
@@ -279,6 +281,11 @@ void Dialog::boundedMove(int x, int y)
   x = min(max(viewportX, x), viewportWidth - width - abs(viewportX));
   y = min(max(viewportY, y), viewportHeight - height - abs(viewportY));
 
+  move(x, y);
+}
+
+void Dialog::move(const int x, const int y)
+{
   SetWindowPos(m_handle, nullptr, x, y,
     0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 }

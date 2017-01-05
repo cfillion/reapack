@@ -96,6 +96,7 @@ public:
 
   void close(INT_PTR = 0);
   void center();
+  void move(int x, int y);
   void boundedMove(int x, int y);
   bool hasFocus() const;
   void setFocus();
