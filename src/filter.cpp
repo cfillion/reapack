@@ -47,6 +47,7 @@ void Filter::set(const string &input)
         state = DoubleQuote;
 
       flags |= Node::QuotedFlag;
+      continue;
     }
     else if(c == '\'' && state != DoubleQuote) {
       if(state == SingleQuote)
@@ -55,13 +56,19 @@ void Filter::set(const string &input)
         state = SingleQuote;
 
       flags |= Node::QuotedFlag;
+      continue;
     }
-    else if(c == '\x20' && state == Default) {
-      group = group->push(buf, &flags);
-      buf.clear();
+    else if(c == '\x20') {
+      if(state == Default) {
+        group = group->push(buf, &flags);
+        buf.clear();
+        continue;
+      }
+      else
+        flags |= Node::PhraseFlag;
     }
-    else
-      buf += c;
+
+    buf += c;
   }
 
   group->push(buf, &flags);
@@ -197,12 +204,23 @@ bool Filter::Token::match(const vector<string> &rows) const
 bool Filter::Token::matchRow(const string &str) const
 {
   const size_t pos = str.find(m_buf);
+  const bool isStart = pos == 0, isEnd = pos + m_buf.size() == str.size();
   const bool fail = test(NotFlag);
 
-  if(test(StartAnchorFlag) && pos != 0)
+  if(test(StartAnchorFlag) && !isStart)
     return fail;
-  if(test(EndAnchorFlag) && pos + m_buf.size() != str.size())
+  if(test(EndAnchorFlag) && !isEnd)
     return fail;
 
-  return (pos != string::npos) ^ fail;
+  if(pos == string::npos)
+    return fail;
+
+  if(test(QuotedFlag) && !test(PhraseFlag)) {
+    return fail ^ (
+      (isStart || !isalnum(str[pos - 1])) &&
+      (isEnd || !isalnum(str[pos + m_buf.size()]))
+    );
+  }
+
+  return !fail;
 }

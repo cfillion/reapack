@@ -59,7 +59,7 @@ TEST_CASE("word matching", M) {
   REQUIRE(f.match({"hello test world"}));
 }
 
-TEST_CASE("quote matching", M) {
+TEST_CASE("quote phrase matching", M) {
   Filter f;
 
   SECTION("double quotes")
@@ -68,8 +68,24 @@ TEST_CASE("quote matching", M) {
     f.set("'hello world'");
 
   REQUIRE(f.match({"hello world"}));
+  REQUIRE(f.match({"BEFOREhello worldAFTER"}));
   REQUIRE_FALSE(f.match({"helloworld"}));
   REQUIRE_FALSE(f.match({"hello test world"}));
+}
+
+TEST_CASE("quote word matching", M) {
+  Filter f;
+
+  SECTION("double quotes")
+    f.set("\"word\"");
+  SECTION("single quotes")
+    f.set("'word'");
+
+  REQUIRE(f.match({"BEFORE word AFTER"}));
+  REQUIRE(f.match({"_word_"}));
+  REQUIRE_FALSE(f.match({"BEFOREword"}));
+  REQUIRE_FALSE(f.match({"wordAFTER"}));
+  REQUIRE_FALSE(f.match({"BEFOREwordAFTER"}));
 }
 
 TEST_CASE("mixing quotes", M) {
@@ -249,6 +265,11 @@ TEST_CASE("NOT operator", M) {
     f.set("NOT bacon OR hello");
     REQUIRE(f.match({"hello bacon"}));
     REQUIRE(f.match({"hello", "bacon"}));
+  }
+
+  SECTION("quote word matching") {
+    f.set("NOT 'hello'");
+    REQUIRE(f.match({"hellobacon"}));
   }
 
   SECTION("NOT NOT") {

@@ -43,6 +43,7 @@ private:
       EndAnchorFlag   = 1<<1,
       QuotedFlag      = 1<<2,
       NotFlag         = 1<<3,
+      PhraseFlag      = 1<<4,
     };
 
     Node(int flags) : m_flags(flags) {}
