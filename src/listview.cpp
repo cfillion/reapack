@@ -514,7 +514,7 @@ void ListView::restoreState(Serializer::Data &data)
 
     switch(col) {
     case -1: // sort
-      if(left < columnCount())
+      if(left >= 0 && left < columnCount())
         sortByColumn(left, right == 0 ? AscendingOrder : DescendingOrder, true);
       break;
     default: // column
