@@ -271,9 +271,9 @@ void Dialog::boundedMove(int x, int y)
   SWELL_GetViewPort(&viewport, &rect, false);
 
   const int viewportX = viewport.left;
-  const int viewportWidth = viewport.right;
+  const int viewportWidth = viewport.right - viewportX;
   const int viewportY = viewport.top;
-  const int viewportHeight = viewport.bottom;
+  const int viewportHeight = viewport.bottom - viewportY;
 #endif
 
   x = min(max(viewportX, x), viewportWidth - width - abs(viewportX));
