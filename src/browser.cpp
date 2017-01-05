@@ -147,8 +147,8 @@ void Browser::onInit()
   setAnchor(m_applyBtn, AnchorAll);
 
   auto data = m_serializer.read(m_reapack->config()->browser.state, 1);
-  Dialog::restore(data);
-  m_list->restore(data);
+  restoreState(data);
+  m_list->restoreState(data);
   assert(data.empty());
 
   updateDisplayLabel();
@@ -279,8 +279,8 @@ bool Browser::onKeyDown(const int key, const int mods)
 void Browser::onClose()
 {
   Serializer::Data data;
-  Dialog::save(data);
-  m_list->save(data);
+  saveState(data);
+  m_list->saveState(data);
   m_reapack->config()->browser.state = m_serializer.write(data);
 }
 

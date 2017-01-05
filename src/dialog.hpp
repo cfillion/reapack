@@ -108,8 +108,8 @@ public:
   void setAnchor(HWND, int flags);
   void setMinimumSize(const POINT &p) { m_minimumSize = p; }
 
-  void restore(Serializer::Data &);
-  void save(Serializer::Data &) const;
+  void restoreState(Serializer::Data &);
+  void saveState(Serializer::Data &) const;
 
   void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 

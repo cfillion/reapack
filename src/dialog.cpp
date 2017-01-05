@@ -377,7 +377,7 @@ void Dialog::setAnchor(HWND handle, const int flags)
   m_resizer.init_itemhwnd(handle, left, top, right, bottom);
 }
 
-void Dialog::restore(Serializer::Data &data)
+void Dialog::restoreState(Serializer::Data &data)
 {
   if(data.size() < 2)
     return;
@@ -396,7 +396,7 @@ void Dialog::restore(Serializer::Data &data)
   data.erase(data.begin(), it);
 }
 
-void Dialog::save(Serializer::Data &data) const
+void Dialog::saveState(Serializer::Data &data) const
 {
   RECT rect;
   GetWindowRect(m_handle, &rect);

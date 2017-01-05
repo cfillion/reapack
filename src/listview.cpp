@@ -495,7 +495,7 @@ void ListView::resetColumns()
   }
 }
 
-void ListView::restore(Serializer::Data &data)
+void ListView::restoreState(Serializer::Data &data)
 {
   m_customizable = true;
   setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
@@ -537,7 +537,7 @@ void ListView::restore(Serializer::Data &data)
   ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
 }
 
-void ListView::save(Serializer::Data &data) const
+void ListView::saveState(Serializer::Data &data) const
 {
   const Sort sort = m_sort.value_or(Sort());
   vector<int> order(columnCount());

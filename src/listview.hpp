@@ -88,8 +88,8 @@ public:
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setSortCallback(int i, const SortCallback &cb) { m_sortFuncs[i] = cb; }
 
-  void restore(Serializer::Data &);
-  void save(Serializer::Data &) const;
+  void restoreState(Serializer::Data &);
+  void saveState(Serializer::Data &) const;
   void resetColumns();
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
