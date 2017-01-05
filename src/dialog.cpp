@@ -251,7 +251,7 @@ void Dialog::center()
   top += verticalBias; // according to SWELL, top means bottom.
 #endif
 
-  move(left, top);
+  boundedMove(left, top);
 }
 
 void Dialog::boundedMove(int x, int y)
@@ -281,11 +281,6 @@ void Dialog::boundedMove(int x, int y)
   x = min(max(viewportX, x), viewportWidth - width - abs(viewportX));
   y = min(max(viewportY, y), viewportHeight - height - abs(viewportY));
 
-  move(x, y);
-}
-
-void Dialog::move(const int x, const int y)
-{
   SetWindowPos(m_handle, nullptr, x, y,
     0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 }
