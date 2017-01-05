@@ -134,12 +134,13 @@ int ListView::columnWidth(const int index) const
 
 void ListView::sort()
 {
-  if(!m_sort)
-    return;
-
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
     ListView *view = reinterpret_cast<ListView *>(param);
+
+    if(!view->m_sort)
+      return (int)(aRow - bRow);
+
     const int column = view->m_sort->column;
 
     int ret;
@@ -487,7 +488,7 @@ void ListView::resetColumns()
 
   ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
 
-  if(m_sort && m_defaultSort) {
+  if(m_sort) {
     setSortArrow(false);
     m_sort = m_defaultSort;
     setSortArrow(true);
@@ -539,7 +540,7 @@ void ListView::restoreState(Serializer::Data &data)
 
 void ListView::saveState(Serializer::Data &data) const
 {
-  const Sort sort = m_sort.value_or(Sort());
+  const Sort &sort = m_sort.value_or(Sort{});
   vector<int> order(columnCount());
   ListView_GetColumnOrderArray(handle(), columnCount(), &order[0]);
 
