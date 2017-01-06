@@ -1,4 +1,4 @@
-@version 1.1rc6
+@version 1.1rc7
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
@@ -8,10 +8,12 @@
   [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  * about repo: prompt to enable local "Install new packages when sychronizing" override when installing everything
-  * config: add ReaTeam/LangPacks to the default repositories
+  * about: save window position and size [p=1779566]
+  * filter: implement exact word matching [t=185894]
+  * manager: save window position, size and list state
   Changed:
-  * dialog: allow about and browser windows to be resized smaller than the default size
+  * dialog: limit window centering to the nearest monitor [p=1779566]
   Fixed:
-  * about: fix for the Escape key not closing the window in some cases on macOS
-  * about: fix link button positioning when the window is resized
+  * browser: fix crash if saved state is bigger than expected
+  * dialog: fix window positionning with some multi-monitor setups on macOS
+  * listview: fix crash if sort is disabled in saved state
