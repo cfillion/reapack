@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="0d29d215c33d0aee06c311d68459a1c0f54d2244" name="ReaPack">
+<index version="1" commit="2aeeee5b986616e9cc0050b995fa4833049f59fd" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -373,17 +373,33 @@ Fixed:
       </version>
       <version name="1.1rc6" author="cfillion" time="2016-12-29T04:36:25Z">
         <changelog><![CDATA[Added:
-about repo: prompt to enable local "Install new packages when sychronizing" override when installing everything
-config: add ReaTeam/LangPacks to the default repositories
+* about repo: prompt to enable local "Install new packages when sychronizing" override when installing everything
+* config: add ReaTeam/LangPacks to the default repositories
 Changed:
-dialog: allow about and browser windows to be resized smaller than the default size
+* dialog: allow about and browser windows to be resized smaller than the default size
 Fixed:
-about: fix for the Escape key not closing the window in some cases on macOS
-about: fix link button positioning when the window is resized]]></changelog>
+* about: fix for the Escape key not closing the window in some cases on macOS
+* about: fix link button positioning when the window is resized]]></changelog>
         <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc6/reaper_reapack32.dylib</source>
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc6/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc6/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc6/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.1rc7" author="cfillion" time="2017-01-06T13:45:30Z">
+        <changelog><![CDATA[Added:
+* about: save window position and size [p=1779566]
+* filter: implement exact word matching [t=185894]
+* manager: save window position, size and list state
+Changed:
+* dialog: limit window centering to the nearest monitor [p=1779566]
+Fixed:
+* browser: fix crash if saved state is bigger than expected
+* dialog: fix window positionning with some multi-monitor setups on macOS
+* listview: fix crash if sort is disabled in saved state]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc7/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1rc7/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc7/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc7/reaper_reapack64.dll</source>
       </version>
     </reapack>
   </category>
