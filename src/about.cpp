@@ -71,9 +71,11 @@ void About::onInit()
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_REPORT), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_CHANGELOG), AnchorRight | AnchorBottom);
+  setAnchor(getControl(IDC_WEBSITE), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_DONATE), AnchorTop | AnchorBottom);
+  setAnchor(getControl(IDC_SCREENSHOT), AnchorTop | AnchorBottom);
   setAnchor(getControl(IDC_ACTION), AnchorAll);
   setAnchor(getControl(IDOK), AnchorAll);
-  // link buttons are anchored in setMetadata
 
   auto data = m_serializer.read(m_reapack->config()->windowState.about, 1);
   restoreState(data);
