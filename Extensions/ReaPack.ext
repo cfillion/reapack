@@ -1,19 +1,19 @@
-@version 1.1rc7
+@version 1.1
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [win32] reaper_reapack32.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [win64] reaper_reapack64.dll https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [win32]    reaper_reapack32.dll   https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [win64]    reaper_reapack64.dll   https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  Added:
-  * about: save window position and size [p=1779566]
-  * filter: implement exact word matching [t=185894]
-  * manager: save window position, size and list state
-  Changed:
-  * dialog: limit window centering to the nearest monitor [p=1779566]
-  Fixed:
-  * browser: fix crash if saved state is bigger than expected
-  * dialog: fix window positionning with some multi-monitor setups on macOS
-  * listview: fix crash if sort is disabled in saved state
+  +++ Summary of the main changes since v1.0: +++
+  Added support for themes, language packs and web browser interfaces
+  New community repositories: ReaTeam/Themes and ReaTeam/LangPacks
+  Every package can have its own rich text documentation in the new unified About window
+  Get notified of obsolete (removed) packages when synchronizing with option to uninstall them
+  Most windows can be resized and columns can be customized (browser & configuration)
+  Simplified setup: all repositories are enabled by default
+  Added filtering/search options similar to REAPER's syntax
+  Extended support to old macOS version up to 10.7
+  Many bug fixes and other improvements!
