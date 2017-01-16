@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="ea979228165d7d19d540c21d2a07c3b8cfc442e3" name="ReaPack">
+<index version="1" commit="caea524524423bfc925987c9ca0d8fcd96dec6dc" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
+      <metadata>
+        <link rel="donation">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=T3DEWBQJAV7WL&amp;lc=CA&amp;item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&amp;no_note=0&amp;cn=Custom%20message&amp;no_shipping=1&amp;currency_code=CAD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted</link>
+      </metadata>
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
         <changelog><![CDATA[Bug fixes:
 # fix removal of unneeded files
@@ -408,7 +411,7 @@ New community repositories: ReaTeam/Themes and ReaTeam/LangPacks
 Every package can have its own rich text documentation in the new unified About window
 Get notified of obsolete (removed) packages when synchronizing with option to uninstall them
 Most windows can be resized and columns can be customized (browser & configuration)
-Simplified setup: all repositories are enabled by default
+Simplified setup: all default repositories are enabled on first launch
 Added filtering/search options similar to REAPER's syntax
 Extended support to old macOS version up to 10.7
 Many bug fixes and other improvements!]]></changelog>
