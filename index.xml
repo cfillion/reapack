@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="2aeeee5b986616e9cc0050b995fa4833049f59fd" name="ReaPack">
+<index version="1" commit="ea979228165d7d19d540c21d2a07c3b8cfc442e3" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
@@ -401,6 +401,22 @@ Fixed:
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc7/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1rc7/reaper_reapack64.dll</source>
       </version>
+      <version name="1.1" author="cfillion" time="2017-01-16T07:24:40Z">
+        <changelog><![CDATA[+++ Summary of the main changes since v1.0: +++
+Added support for themes, language packs and web browser interfaces
+New community repositories: ReaTeam/Themes and ReaTeam/LangPacks
+Every package can have its own rich text documentation in the new unified About window
+Get notified of obsolete (removed) packages when synchronizing with option to uninstall them
+Most windows can be resized and columns can be customized (browser & configuration)
+Simplified setup: all repositories are enabled by default
+Added filtering/search options similar to REAPER's syntax
+Extended support to old macOS version up to 10.7
+Many bug fixes and other improvements!]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack64.dll</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -410,7 +426,7 @@ Fixed:
 
 {\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack: Package Manager for REAPER\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} built on [[REAPACK_BUILDTIME]]\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2016  Christian Fillion\line
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2017  Christian Fillion\line
 \line
 This program is free software: you can redistribute it and/or modify\line
 it under the terms of the GNU Lesser General Public License as published by\line
