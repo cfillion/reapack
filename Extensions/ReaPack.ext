@@ -1,6 +1,7 @@
 @version 1.1
 @author cfillion
 @description ReaPack: Package manager for REAPER
+@donation https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=T3DEWBQJAV7WL&lc=CA&item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&no_note=0&cn=Custom%20message&no_shipping=1&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
@@ -13,7 +14,7 @@
   Every package can have its own rich text documentation in the new unified About window
   Get notified of obsolete (removed) packages when synchronizing with option to uninstall them
   Most windows can be resized and columns can be customized (browser & configuration)
-  Simplified setup: all repositories are enabled by default
+  Simplified setup: all default repositories are enabled on first launch
   Added filtering/search options similar to REAPER's syntax
   Extended support to old macOS version up to 10.7
   Many bug fixes and other improvements!
