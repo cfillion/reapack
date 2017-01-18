@@ -27,10 +27,7 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-#include <locale>
-#include <sstream>
 
 using namespace std;
 
@@ -410,15 +407,12 @@ void Browser::fillMenu(Menu &menu)
 
 void Browser::updateDisplayLabel()
 {
-  basic_ostringstream<auto_char> btnLabel;
-  btnLabel.imbue(locale("")); // enable number formatting
-  btnLabel << m_list->rowCount() << AUTO_STR('/') << m_entries.size()
-    << AUTO_STR(" package");
+  auto_char btnLabel[32] = {};
+  auto_snprintf(btnLabel, auto_size(btnLabel), AUTO_STR("%d/%zu package%s..."),
+    m_list->rowCount(), m_entries.size(),
+    m_entries.size() == 1 ? AUTO_STR("") : AUTO_STR("s"));
 
-  if(m_entries.size() != 1)
-    btnLabel << AUTO_STR('s');
-
-  SetWindowText(m_displayBtn, btnLabel.str().c_str());
+  SetWindowText(m_displayBtn, btnLabel);
 }
 
 void Browser::displayButton()
