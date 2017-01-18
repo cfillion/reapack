@@ -18,8 +18,8 @@
 #ifndef REAPACK_PATH_HPP
 #define REAPACK_PATH_HPP
 
-#include <string>
 #include <list>
+#include <string>
 
 class UseRootPath;
 
@@ -42,6 +42,7 @@ public:
 
   bool empty() const { return m_parts.empty(); }
   size_t size() const { return m_parts.size(); }
+  bool absolute() const { return m_absolute; }
 
   std::string basename() const;
   Path dirname() const;
@@ -66,6 +67,7 @@ private:
   const std::string &at(size_t) const;
 
   std::list<std::string> m_parts;
+  bool m_absolute;
 };
 
 class UseRootPath {

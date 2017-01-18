@@ -39,18 +39,23 @@ Path Path::REGISTRY = Path::DATA + "registry.db";
 
 Path Path::s_root;
 
-static vector<string> Split(const string &input)
+static vector<string> Split(const string &input, bool *absolute)
 {
   vector<string> list;
 
   size_t last = 0, size = input.size();
 
   while(last < size) {
-    const size_t pos = input.find_first_of("\\/", max((size_t)1, last));
+    const size_t pos = input.find_first_of("\\/", last);
 
     if(pos == string::npos) {
       list.push_back(input.substr(last));
       break;
+    }
+    else if(last + pos == 0) {
+      *absolute = true;
+      last++;
+      continue;
     }
 
     const string part = input.substr(last, pos - last);
@@ -64,17 +69,23 @@ static vector<string> Split(const string &input)
   return list;
 }
 
-Path::Path(const string &path)
+Path::Path(const string &path) : m_absolute(false)
 {
   append(path);
 }
 
-void Path::append(const string &parts, const bool traversal)
+void Path::append(const string &input, const bool traversal)
 {
-  if(parts.empty())
+  if(input.empty())
     return;
 
-  for(const string &part : Split(parts)) {
+  bool absolute = false;
+  const auto &parts = Split(input, &absolute);
+
+  if(m_parts.empty() && absolute)
+    m_absolute = true;
+
+  for(const string &part : parts) {
     if(part == DOTDOT) {
       if(traversal)
         removeLast();
@@ -125,7 +136,7 @@ string Path::join(const char sep) const
   for(auto it = m_parts.begin(); it != m_parts.end(); it++) {
     const string &part = *it;
 
-    if(!path.empty())
+    if(!path.empty() || m_absolute)
       path += sep ? sep : SEPARATOR;
 
     path += part;

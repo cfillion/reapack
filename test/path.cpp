@@ -74,6 +74,16 @@ TEST_CASE("empty components", M) {
   REQUIRE(a.size() == 0);
 }
 
+TEST_CASE("strip trailing/leading slashes", M) {
+  Path a;
+  a.append("a/b/");
+  a.append("/c/d/");
+  a.append(Path("/e/f/"));
+
+  REQUIRE(a.size() == 6);
+  REQUIRE(a.join() == "a/b/c/d/e/f");
+}
+
 TEST_CASE("clear path", M) {
   Path a;
   a.append("test");
@@ -136,10 +146,13 @@ TEST_CASE("split input", M) {
 
 #ifndef _WIN32
 TEST_CASE("absolute path (unix)", M) {
+  CHECK_FALSE(Path("a/b").absolute());
+
   const Path a("/usr/bin/zsh");
 
   REQUIRE(a.size() == 3);
-  REQUIRE(a[0] == "/usr");
+  REQUIRE(a.absolute());
+  REQUIRE(a[0] == "usr");
   REQUIRE(a.join() == "/usr/bin/zsh");
 }
 #endif
