@@ -69,25 +69,6 @@ Path::Path(const string &path)
   append(path);
 }
 
-void Path::prepend(const string &str)
-{
-  if(str.empty())
-    return;
-
-  bool skip = false;
-
-  const vector<string> &parts = Split(str);
-
-  for(const string &part : parts | boost::adaptors::reversed) {
-    if(part == DOTDOT)
-      skip = true;
-    else if(!skip)
-      m_parts.push_front(part);
-    else
-      skip = false;
-  }
-}
-
 void Path::append(const string &parts, const bool traversal)
 {
   if(parts.empty())
@@ -103,11 +84,6 @@ void Path::append(const string &parts, const bool traversal)
   }
 }
 
-void Path::prepend(const Path &o)
-{
-  m_parts.insert(m_parts.begin(), o.m_parts.begin(), o.m_parts.end());
-}
-
 void Path::append(const Path &o)
 {
   m_parts.insert(m_parts.end(), o.m_parts.begin(), o.m_parts.end());
@@ -116,12 +92,6 @@ void Path::append(const Path &o)
 void Path::clear()
 {
   m_parts.clear();
-}
-
-void Path::removeFirst()
-{
-  if(!empty())
-    m_parts.pop_front();
 }
 
 void Path::removeLast()
@@ -206,7 +176,7 @@ Path Path::operator+(const string &part) const
 Path Path::operator+(const Path &o) const
 {
   Path path(*this);
-  path += o;
+  path.append(o);
 
   return path;
 }

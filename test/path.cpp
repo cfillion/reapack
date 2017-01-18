@@ -19,7 +19,7 @@ TEST_CASE("compare paths", M) {
   REQUIRE_FALSE(a != a);
 }
 
-TEST_CASE("prepend and append path components", M) {
+TEST_CASE("append path components", M) {
   Path path;
   REQUIRE(path.empty());
   REQUIRE(path.size() == 0);
@@ -27,14 +27,14 @@ TEST_CASE("prepend and append path components", M) {
   REQUIRE(path.dirname().empty());
   REQUIRE(path.basename().empty());
 
-  path.prepend("world");
+  path.append("hello");
   REQUIRE_FALSE(path.empty());
   REQUIRE(path.size() == 1);
-  REQUIRE(path.join() == "world");
+  REQUIRE(path.join() == "hello");
   REQUIRE(path.dirname().empty());
-  REQUIRE(path.basename() == "world");
+  REQUIRE(path.basename() == "hello");
 
-  path.prepend("hello");
+  path.append("world");
   REQUIRE(path.size() == 2);
 #ifndef _WIN32
   REQUIRE(path.join() == "hello/world");
@@ -70,7 +70,6 @@ TEST_CASE("concatenate paths", M) {
 TEST_CASE("empty components", M) {
   Path a;
   a.append(string());
-  a.prepend(string());
 
   REQUIRE(a.size() == 0);
 }
@@ -117,15 +116,6 @@ TEST_CASE("split input", M) {
     REQUIRE(a[1] == "world");
   }
 
-  SECTION("prepend") {
-    Path a;
-    a.prepend("hello/world");
-
-    REQUIRE(a.size() == 2);
-    REQUIRE(a[0] == "hello");
-    REQUIRE(a[1] == "world");
-  }
-
   SECTION("append") {
     Path a;
     a.append("hello/world");
@@ -153,24 +143,6 @@ TEST_CASE("absolute path (unix)", M) {
   REQUIRE(a.join() == "/usr/bin/zsh");
 }
 #endif
-
-TEST_CASE("remove first component of path", M) {
-  Path a;
-  a.append("a");
-  a.append("b");
-
-  CHECK(a.size() == 2);
-
-  a.removeFirst();
-
-  REQUIRE(a.size() == 1);
-  REQUIRE(a[0] == "b");
-
-  a.removeFirst();
-  REQUIRE(a.empty());
-
-  a.removeFirst(); // no crash
-}
 
 TEST_CASE("remove last component of path", M) {
   Path a;
@@ -228,16 +200,6 @@ TEST_CASE("directory traversal", M) {
     REQUIRE(a == Path("a/b"));
   }
 
-  SECTION("prepend") {
-    Path a;
-    a.prepend("a/../b/c/../d");
-    REQUIRE(a == Path("b/d"));
-
-    Path b;
-    b.prepend("../a");
-    REQUIRE(b == Path("a"));
-  }
-
   SECTION("concatenate") {
     // concatenating a std::string to a path, directory traversal is applied
     const Path a = Path("a/b/c") + "../../../d/e/f";
@@ -249,11 +211,11 @@ TEST_CASE("directory traversal", M) {
   }
 }
 
-TEST_CASE("append and prepend full paths") {
+TEST_CASE("append full paths") {
   Path a;
-  a += Path("c/d");
+  a += Path("a/b");
+  a.append(Path("c/d"));
   a.append(Path("e/f"));
-  a.prepend(Path("a/b"));
 
   REQUIRE(a == Path("a/b/c/d/e/f"));
 }

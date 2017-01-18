@@ -35,11 +35,8 @@ public:
 
   Path(const std::string &path = std::string());
 
-  void prepend(const std::string &part);
   void append(const std::string &part, bool traversal = true);
-  void prepend(const Path &other);
   void append(const Path &other);
-  void removeFirst();
   void removeLast();
   void clear();
 
