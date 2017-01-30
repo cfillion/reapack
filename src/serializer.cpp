@@ -17,6 +17,7 @@
 
 #include "serializer.hpp"
 
+#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 static const unsigned short VERSION = 1;
@@ -51,9 +52,9 @@ auto Serializer::read(const string &input, const int userVersion) -> Data
       int value;
 
       try {
-        value = stoi(field.c_str());
+        value = boost::lexical_cast<int>(field);
       }
-      catch(logic_error &) {
+      catch(const boost::bad_lexical_cast &) {
         return out; // data is invalid! aborting.
       }
 
