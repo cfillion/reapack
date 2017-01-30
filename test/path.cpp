@@ -81,7 +81,11 @@ TEST_CASE("strip trailing/leading slashes", M) {
   a.append(Path("/e/f/"));
 
   REQUIRE(a.size() == 6);
+#ifndef _WIN32
   REQUIRE(a.join() == "a/b/c/d/e/f");
+#else
+  REQUIRE(a.join() == "a\\b\\c\\d\\e\\f");
+#endif
 }
 
 TEST_CASE("clear path", M) {
