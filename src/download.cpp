@@ -73,20 +73,13 @@ size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
   return size;
 }
 
-int Download::UpdateProgress(void *ptr, const double dltotal, const double dlnow,
-    const double ultotal, const double ulnow)
+int Download::UpdateProgress(void *ptr, const double, const double,
+    const double, const double)
 {
   Download *dl = static_cast<Download *>(ptr);
 
   if(dl->isAborted())
     return 1;
-
-  const double total = ultotal + dltotal;
-
-  if(total > 0) {
-    const short progress = (short)((ulnow + dlnow / total) * 100);
-    dl->setProgress(min(progress, (short)100));
-  }
 
   return 0;
 }
@@ -110,14 +103,6 @@ void Download::reset()
   m_state = Idle;
   m_aborted = false;
   m_contents.clear();
-  m_progress = 0;
-}
-
-void Download::setProgress(const short percent)
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  m_progress = percent;
 }
 
 void Download::finish(const State state, const string &contents)
@@ -151,13 +136,6 @@ bool Download::isAborted()
   WDL_MutexLock lock(&m_mutex);
 
   return m_aborted;
-}
-
-short Download::progress()
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  return m_progress;
 }
 
 void Download::start()

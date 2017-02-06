@@ -66,7 +66,6 @@ public:
   State state() const { return m_state; }
   const std::string &contents() { return m_contents; }
   bool isAborted();
-  short progress();
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
@@ -81,7 +80,6 @@ private:
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
-  void setProgress(short);
   void finish(const State state, const std::string &contents);
   void reset();
 
@@ -95,7 +93,6 @@ private:
   State m_state;
   bool m_aborted;
   std::string m_contents;
-  short m_progress;
 
   VoidSignal m_onStart;
   VoidSignal m_onFinish;
