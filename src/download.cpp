@@ -328,11 +328,6 @@ void DownloadQueue::abort()
   m_onAbort();
 }
 
-DownloadNotifier::DownloadNotifier() : m_active(0)
-{
-  assert(!s_instance);
-}
-
 DownloadNotifier *DownloadNotifier::get()
 {
   if(!s_instance)
@@ -362,20 +357,24 @@ void DownloadNotifier::notify(const Notification &notif)
 void DownloadNotifier::tick()
 {
   DownloadNotifier *instance = DownloadNotifier::get();
+  instance->processQueue();
 
-  WDL_MutexLock lock(&instance->m_mutex);
-
-  while(!instance->m_queue.empty()) {
-    const Notification notif = instance->m_queue.front();
-    instance->m_queue.pop();
-
-    notif.first->setState(notif.second);
-    // `this` can be destroyed here
-  }
-
+  // doing this in stop() would cause a use after free of m_mutex in processQueue
   if(!instance->m_active) {
     plugin_register("-timer", (void *)tick);
-    s_instance = nullptr;
+
     delete s_instance;
+    s_instance = nullptr;
+  }
+}
+
+void DownloadNotifier::processQueue()
+{
+  WDL_MutexLock lock(&m_mutex);
+
+  while(!m_queue.empty()) {
+    const Notification &notif = m_queue.front();
+    notif.first->setState(notif.second);
+    m_queue.pop();
   }
 }

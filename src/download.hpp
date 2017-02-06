@@ -156,8 +156,6 @@ class DownloadNotifier {
 public:
   static DownloadNotifier *get();
 
-  DownloadNotifier();
-
   void start();
   void stop();
 
@@ -166,6 +164,10 @@ public:
 private:
   static DownloadNotifier *s_instance;
   static void tick();
+
+  DownloadNotifier() : m_active(0) {}
+  ~DownloadNotifier() = default;
+  void processQueue();
 
   WDL_Mutex m_mutex;
   size_t m_active;
