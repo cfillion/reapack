@@ -20,7 +20,6 @@
 #include "reapack.hpp"
 
 #include <boost/format.hpp>
-#include <curl/curl.h>
 
 #include <reaper_plugin_functions.h>
 
@@ -28,14 +27,11 @@ using boost::format;
 using namespace std;
 
 static const int DOWNLOAD_TIMEOUT = 15;
-static const int CONCURRENT_DOWNLOADS = 3;
-
-Download::Queue Download::s_finished;
-WDL_Mutex Download::s_mutex;
-size_t Download::s_running = 0;
 
 static CURLSH *g_curlShare = nullptr;
 static WDL_Mutex g_curlMutex;
+
+DownloadNotifier *DownloadNotifier::s_instance = nullptr;
 
 static void LockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
 {
@@ -56,6 +52,7 @@ void Download::Init()
 
   curl_share_setopt(g_curlShare, CURLSHOPT_LOCKFUNC, LockCurlMutex);
   curl_share_setopt(g_curlShare, CURLSHOPT_UNLOCKFUNC, UnlockCurlMutex);
+
   curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
   curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 }
@@ -64,114 +61,6 @@ void Download::Cleanup()
 {
   curl_share_cleanup(g_curlShare);
   curl_global_cleanup();
-}
-
-Download::Download(const string &name, const string &url,
-  const NetworkOpts &opts, const int flags)
-  : m_name(name), m_url(url), m_opts(opts),
-    m_flags(flags), m_threadHandle(nullptr)
-{
-  reset();
-}
-
-Download::~Download()
-{
-  wait();
-}
-
-void Download::reset()
-{
-  m_state = Idle;
-  m_aborted = false;
-  m_contents.clear();
-  m_progress = 0;
-}
-
-void Download::wait()
-{
-  if(m_threadHandle) {
-    WaitForSingleObject(m_threadHandle, INFINITE);
-    CloseHandle(m_threadHandle);
-  }
-}
-
-void Download::TimerTick()
-{
-  Download *dl = Download::NextFinished();
-
-  if(dl)
-    dl->finishInMainThread();
-}
-
-void Download::start()
-{
-  if(m_threadHandle)
-    return;
-
-  reset();
-
-  m_state = Running;
-  m_onStart();
-
-  RegisterStart();
-  m_threadHandle = CreateThread(nullptr, 0, Worker, (void *)this, 0, nullptr);
-}
-
-DWORD WINAPI Download::Worker(void *ptr)
-{
-  const auto userAgent = format("ReaPack/%s REAPER/%s")
-    % ReaPack::VERSION % GetAppVersion();
-
-  Download *download = static_cast<Download *>(ptr);
-  const NetworkOpts &opts = download->options();
-
-  string contents;
-
-  CURL *curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, download->url().c_str());
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.str().c_str());
-  curl_easy_setopt(curl, CURLOPT_PROXY, opts.proxy.c_str());
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, opts.verifyPeer);
-
-  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
-  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
-  curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
-
-  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
-  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
-  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
-  curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
-  curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
-
-  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
-  curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
-  curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-
-  curl_slist *headers = nullptr;
-  if(download->has(NoCacheFlag))
-    headers = curl_slist_append(headers, "Cache-Control: no-cache");
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-  char errbuf[CURL_ERROR_SIZE];
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
-
-  const CURLcode res = curl_easy_perform(curl);
-
-  if(download->isAborted())
-    download->finish(Aborted, "aborted by user");
-  else if(res != CURLE_OK) {
-    const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
-    download->finish(Failure, err.str());
-  }
-  else
-    download->finish(Success, contents);
-
-  curl_slist_free_all(headers);
-  curl_easy_cleanup(curl);
-
-  return 0;
 }
 
 size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
@@ -202,39 +91,26 @@ int Download::UpdateProgress(void *ptr, const double dltotal, const double dlnow
   return 0;
 }
 
-void Download::RegisterStart()
+Download::Download(const string &name, const string &url,
+  const NetworkOpts &opts, const int flags)
+  : m_name(name), m_url(url), m_opts(opts), m_flags(flags)
 {
-  WDL_MutexLock lock(&s_mutex);
+  reset();
 
-  if(!s_running)
-    plugin_register("timer", (void*)TimerTick);
-
-  s_running++;
+  DownloadNotifier::get()->start();
 }
 
-void Download::MarkAsFinished(Download *dl)
+Download::~Download()
 {
-  WDL_MutexLock lock(&s_mutex);
-
-  s_finished.push(dl);
+  DownloadNotifier::get()->stop();
 }
 
-Download *Download::NextFinished()
+void Download::reset()
 {
-  WDL_MutexLock lock(&s_mutex);
-
-  if(!s_running)
-    plugin_register("-timer", (void *)TimerTick);
-
-  if(s_finished.empty())
-    return nullptr;
-
-  Download *dl = s_finished.front();
-  s_finished.pop();
-
-  s_running--;
-
-  return dl;
+  m_state = Idle;
+  m_aborted = false;
+  m_contents.clear();
+  m_progress = 0;
 }
 
 void Download::setProgress(const short percent)
@@ -246,32 +122,29 @@ void Download::setProgress(const short percent)
 
 void Download::finish(const State state, const string &contents)
 {
-  // called from the worker thread
+  DownloadNotifier::get()->notify({this, state});
 
   WDL_MutexLock lock(&m_mutex);
-
-  m_state = state;
   m_contents = contents;
-
-  MarkAsFinished(this);
 }
 
-void Download::finishInMainThread()
+void Download::setState(const State state)
 {
-  if(m_threadHandle) {
-    CloseHandle(m_threadHandle);
-    m_threadHandle = nullptr;
+  m_state = state;
+
+  switch(state) {
+  case Idle:
+    break;
+  case Running:
+    m_onStart();
+    break;
+  case Success:
+  case Failure:
+  case Aborted:
+    m_onFinish();
+    m_cleanupHandler();
+    break;
   }
-
-  m_onFinish();
-  m_cleanupHandler();
-}
-
-auto Download::state() -> State
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  return m_state;
 }
 
 const string &Download::contents()
@@ -295,11 +168,125 @@ short Download::progress()
   return m_progress;
 }
 
+void Download::start()
+{
+  DownloadThread *thread = new DownloadThread;
+  thread->push(this);
+  onFinish([thread] { delete thread; });
+}
+
 void Download::abort()
 {
   WDL_MutexLock lock(&m_mutex);
 
   m_aborted = true;
+}
+
+void Download::exec(CURL *curl)
+{
+  DownloadNotifier::get()->notify({this, Running});
+
+  string contents;
+
+  curl_easy_setopt(curl, CURLOPT_URL, m_url.c_str());
+  curl_easy_setopt(curl, CURLOPT_PROXY, m_opts.proxy.c_str());
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
+
+  curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
+  curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
+
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
+
+  curl_slist *headers = nullptr;
+  if(has(Download::NoCacheFlag))
+    headers = curl_slist_append(headers, "Cache-Control: no-cache");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+  char errbuf[CURL_ERROR_SIZE];
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+
+  const CURLcode res = curl_easy_perform(curl);
+
+  if(isAborted())
+    finish(Aborted, "aborted by user");
+  else if(res != CURLE_OK) {
+    const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
+    finish(Failure, err.str());
+  }
+  else
+    finish(Success, contents);
+
+  curl_slist_free_all(headers);
+}
+
+DownloadThread::DownloadThread() : m_exit(false)
+{
+  m_wake = CreateEvent(nullptr, true, false, AUTO_STR("WakeEvent"));
+  m_thread = CreateThread(nullptr, 0, thread, (void *)this, 0, nullptr);
+}
+
+DownloadThread::~DownloadThread()
+{
+  // remove all pending downloads then wake the thread to make it exit
+  m_exit = true;
+  SetEvent(m_wake);
+
+  WaitForSingleObject(m_thread, INFINITE);
+
+  CloseHandle(m_wake);
+  CloseHandle(m_thread);
+}
+
+DWORD WINAPI DownloadThread::thread(void *ptr)
+{
+  DownloadThread *thread = static_cast<DownloadThread *>(ptr);
+  CURL *curl = curl_easy_init();
+
+  const auto userAgent = format("ReaPack/%s REAPER/%s")
+    % ReaPack::VERSION % GetAppVersion();
+
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.str().c_str());
+  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
+  curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
+  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+  curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
+  curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
+  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
+
+  while(!thread->m_exit) {
+    while(Download *dl = thread->nextDownload())
+      dl->exec(curl);
+
+    ResetEvent(thread->m_wake);
+    WaitForSingleObject(thread->m_wake, INFINITE);
+  }
+
+  curl_easy_cleanup(curl);
+
+  return 0;
+}
+
+Download *DownloadThread::nextDownload()
+{
+  WDL_MutexLock lock(&m_mutex);
+
+  if(m_queue.empty())
+    return nullptr;
+
+  Download *dl = m_queue.front();
+  m_queue.pop();
+  return dl;
+}
+
+void DownloadThread::push(Download *dl)
+{
+  WDL_MutexLock lock(&m_mutex);
+  m_queue.push(dl);
+  SetEvent(m_wake);
 }
 
 DownloadQueue::~DownloadQueue()
@@ -314,35 +301,23 @@ DownloadQueue::~DownloadQueue()
 void DownloadQueue::push(Download *dl)
 {
   m_onPush(dl);
-
-  dl->onFinish([=] {
-    m_running.erase(remove(m_running.begin(), m_running.end(), dl));
-
-    start();
-  });
+  m_running.insert(dl);
 
   dl->setCleanupHandler([=] {
     delete dl;
 
+    m_running.erase(dl);
+
     // call m_onDone() only after every onFinish slots ran
-    if(idle())
+    if(m_running.empty())
       m_onDone();
   });
 
-  m_queue.push(dl);
+  auto &thread = m_pool[m_running.size() % m_pool.size()];
+  if(!thread)
+    thread = make_unique<DownloadThread>();
 
-  start();
-}
-
-void DownloadQueue::start()
-{
-  while(m_running.size() < CONCURRENT_DOWNLOADS && !m_queue.empty()) {
-    Download *dl = m_queue.front();
-    m_queue.pop();
-
-    m_running.push_back(dl);
-    dl->start();
-  }
+  thread->push(dl);
 }
 
 void DownloadQueue::abort()
@@ -350,17 +325,57 @@ void DownloadQueue::abort()
   for(Download *dl : m_running)
     dl->abort();
 
-  clear();
-
   m_onAbort();
 }
 
-void DownloadQueue::clear()
+DownloadNotifier::DownloadNotifier() : m_active(0)
 {
-  while(!m_queue.empty()) {
-    Download *download = m_queue.front();
-    delete download;
+  assert(!s_instance);
+}
 
-    m_queue.pop();
+DownloadNotifier *DownloadNotifier::get()
+{
+  if(!s_instance)
+    s_instance = new DownloadNotifier;
+
+  return s_instance;
+}
+
+void DownloadNotifier::start()
+{
+  if(!m_active++)
+    plugin_register("timer", (void *)tick);
+}
+
+void DownloadNotifier::stop()
+{
+  --m_active;
+}
+
+void DownloadNotifier::notify(const Notification &notif)
+{
+  WDL_MutexLock lock(&m_mutex);
+
+  m_queue.push(notif);
+}
+
+void DownloadNotifier::tick()
+{
+  DownloadNotifier *instance = DownloadNotifier::get();
+
+  WDL_MutexLock lock(&instance->m_mutex);
+
+  while(!instance->m_queue.empty()) {
+    const Notification notif = instance->m_queue.front();
+    instance->m_queue.pop();
+
+    notif.first->setState(notif.second);
+    // `this` can be destroyed here
+  }
+
+  if(!instance->m_active) {
+    plugin_register("-timer", (void *)tick);
+    s_instance = nullptr;
+    delete s_instance;
   }
 }
