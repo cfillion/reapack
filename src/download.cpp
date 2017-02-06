@@ -76,12 +76,7 @@ size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
 int Download::UpdateProgress(void *ptr, const double, const double,
     const double, const double)
 {
-  Download *dl = static_cast<Download *>(ptr);
-
-  if(dl->isAborted())
-    return 1;
-
-  return 0;
+  return static_cast<Download *>(ptr)->isAborted();
 }
 
 Download::Download(const string &name, const string &url,
@@ -103,13 +98,6 @@ void Download::reset()
   m_state = Idle;
   m_aborted = false;
   m_contents.clear();
-}
-
-void Download::finish(const State state, const string &contents)
-{
-  m_contents = contents;
-
-  DownloadNotifier::get()->notify({this, state});
 }
 
 void Download::setState(const State state)
@@ -140,6 +128,17 @@ void Download::start()
 
 void Download::exec(CURL *curl)
 {
+  const auto finish = [&](const State state, const string &contents) {
+    m_contents = contents;
+
+    DownloadNotifier::get()->notify({this, state});
+  };
+
+  if(isAborted()) {
+    finish(Aborted, "cancelled");
+    return;
+  }
+
   DownloadNotifier::get()->notify({this, Running});
 
   string contents;

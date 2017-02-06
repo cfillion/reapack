@@ -80,7 +80,6 @@ private:
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
-  void finish(const State state, const std::string &contents);
   void reset();
 
   std::string m_name;
