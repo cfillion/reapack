@@ -131,25 +131,11 @@ void Download::setState(const State state)
   }
 }
 
-bool Download::isAborted()
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  return m_aborted;
-}
-
 void Download::start()
 {
   DownloadThread *thread = new DownloadThread;
   thread->push(this);
   onFinish([thread] { delete thread; });
-}
-
-void Download::abort()
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  m_aborted = true;
 }
 
 void Download::exec(CURL *curl)

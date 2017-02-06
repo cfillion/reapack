@@ -65,14 +65,14 @@ public:
   void setState(State);
   State state() const { return m_state; }
   const std::string &contents() { return m_contents; }
-  bool isAborted();
+  bool isAborted() { return m_aborted; }
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
   void start();
-  void abort();
+  void abort() { m_aborted = true; }
 
   void exec(CURL *);
 
@@ -88,10 +88,8 @@ private:
   NetworkOpts m_opts;
   int m_flags;
 
-  WDL_Mutex m_mutex;
-
   State m_state;
-  bool m_aborted;
+  std::atomic_bool m_aborted;
   std::string m_contents;
 
   VoidSignal m_onStart;
