@@ -122,10 +122,9 @@ void Download::setProgress(const short percent)
 
 void Download::finish(const State state, const string &contents)
 {
-  DownloadNotifier::get()->notify({this, state});
-
-  WDL_MutexLock lock(&m_mutex);
   m_contents = contents;
+
+  DownloadNotifier::get()->notify({this, state});
 }
 
 void Download::setState(const State state)
@@ -145,13 +144,6 @@ void Download::setState(const State state)
     m_cleanupHandler();
     break;
   }
-}
-
-const string &Download::contents()
-{
-  WDL_MutexLock lock(&m_mutex);
-
-  return m_contents;
 }
 
 bool Download::isAborted()

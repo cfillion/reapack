@@ -64,7 +64,7 @@ public:
 
   void setState(State);
   State state() const { return m_state; }
-  const std::string &contents();
+  const std::string &contents() { return m_contents; }
   bool isAborted();
   short progress();
 
