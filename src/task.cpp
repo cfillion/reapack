@@ -73,9 +73,6 @@ bool InstallTask::start()
 
 void InstallTask::saveSource(Download *dl, const Source *src)
 {
-  if(dl->state() == Download::Aborted)
-    return;
-
   const Path &targetPath = src->targetPath();
 
   Path tmpPath(targetPath);
