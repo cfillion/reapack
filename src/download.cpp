@@ -76,28 +76,20 @@ size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
 int Download::UpdateProgress(void *ptr, const double, const double,
     const double, const double)
 {
-  return static_cast<Download *>(ptr)->isAborted();
+  return static_cast<Download *>(ptr)->m_abort;
 }
 
 Download::Download(const string &name, const string &url,
   const NetworkOpts &opts, const int flags)
-  : m_name(name), m_url(url), m_opts(opts), m_flags(flags)
+  : m_name(name), m_url(url), m_opts(opts), m_flags(flags),
+    m_state(Idle), m_abort(false)
 {
-  reset();
-
   DownloadNotifier::get()->start();
 }
 
 Download::~Download()
 {
   DownloadNotifier::get()->stop();
-}
-
-void Download::reset()
-{
-  m_state = Idle;
-  m_aborted = false;
-  m_contents.clear();
 }
 
 void Download::setState(const State state)
@@ -134,7 +126,7 @@ void Download::exec(CURL *curl)
     DownloadNotifier::get()->notify({this, state});
   };
 
-  if(isAborted()) {
+  if(m_abort) {
     finish(Aborted, "cancelled");
     return;
   }
@@ -163,7 +155,7 @@ void Download::exec(CURL *curl)
 
   const CURLcode res = curl_easy_perform(curl);
 
-  if(isAborted())
+  if(m_abort)
     finish(Aborted, "aborted by user");
   else if(res != CURLE_OK) {
     const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
