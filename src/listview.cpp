@@ -256,9 +256,8 @@ vector<int> ListView::selection(const bool sort) const
   int index = -1;
   vector<int> indexes;
 
-  while((index = ListView_GetNextItem(handle(), index, LVNI_SELECTED)) != -1) {
+  while((index = ListView_GetNextItem(handle(), index, LVNI_SELECTED)) != -1)
     indexes.push_back(translateBack(index));
-  }
 
   if(sort)
     std::sort(indexes.begin(), indexes.end());
