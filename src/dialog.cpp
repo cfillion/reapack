@@ -63,11 +63,6 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     // (destruction might be caused by the application exiting,
     // in which case IsWindowVisible would be false but m_isVisible == true)
     dlg->m_isVisible = wParam == 1;
-
-    if(wParam)
-      dlg->onShow();
-    else
-      dlg->onHide();
     break;
   case WM_TIMER:
     dlg->onTimer((int)wParam);
@@ -98,13 +93,8 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     // When this happens, neither lParam nor s_instances will contain
     // a pointer to the Dialog instance, so there is nothing we can do.
     // At least, let's try to not crash.
-    if(!dlg)
-      break;
-
-    if(dlg->isVisible())
-      dlg->onHide();
-
-    dlg->onClose();
+    if(dlg)
+      dlg->onClose();
     break;
   };
 
@@ -414,14 +404,6 @@ void Dialog::onInit()
   center();
 
   m_resizer.init(m_handle);
-}
-
-void Dialog::onShow()
-{
-}
-
-void Dialog::onHide()
-{
 }
 
 void Dialog::onTimer(int)

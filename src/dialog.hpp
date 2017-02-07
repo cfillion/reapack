@@ -138,8 +138,6 @@ protected:
   }
 
   virtual void onInit();
-  virtual void onShow();
-  virtual void onHide();
   virtual void onClose();
   virtual void onTimer(int id);
   virtual void onCommand(int id, int event);
