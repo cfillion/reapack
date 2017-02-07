@@ -263,12 +263,14 @@ TEST_CASE("read source platform", M) {
 
   IndexPtr ri = Index::load("src_platform");
 
-  CHECK(ri->packages().size() == 1);
+  REQUIRE(ri->packages().size() == 1);
 
 #ifdef __APPLE__
   const auto expected = Platform::DarwinPlatform;
 #elif _WIN32
   const auto expected = Platform::WindowsPlatform;
+#elif __linux__
+  const auto expected = Platform::LinuxPlatform;
 #endif
 
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()

@@ -15,41 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_PLATFORM_HPP
-#define REAPACK_PLATFORM_HPP
+#include "richedit.hpp"
 
-class Platform {
-public:
-  enum Enum {
-    UnknownPlatform,
-    GenericPlatform,
+#ifdef SWELL_TARGET_GDK
 
-    WindowsPlatform,
-    Win32Platform,
-    Win64Platform,
+// Starting here and onward is the Linux implementation of RichEdit
+// See also richedit.mm and richedit-win32.cpp
 
-    DarwinPlatform,
-    Darwin32Platform,
-    Darwin64Platform,
+using namespace std;
 
-    LinuxPlatform,
-    Linux64Platform,
-  };
+void RichEdit::Init()
+{
+}
 
-  Platform() : m_value(GenericPlatform) {}
-  Platform(Enum val) : m_value(val) {}
-  Platform(const char *str) : m_value(parse(str)) {}
+RichEdit::RichEdit(HWND handle)
+  : Control(handle)
+{
+}
 
-  Enum value() const { return m_value; }
-  bool test() const;
+RichEdit::~RichEdit()
+{
+}
 
-  operator Enum() const { return m_value; }
-  Platform &operator=(Enum n) { m_value = n; return *this; }
+void RichEdit::onNotify(LPNMHDR, LPARAM)
+{
+}
 
-private:
-  static Enum parse(const char *);
-
-  Enum m_value;
-};
+bool RichEdit::setRichText(const string &)
+{
+  return false;
+}
 
 #endif

@@ -204,7 +204,7 @@ bool Transaction::runTasks()
 
     if(m_promptObsolete(selected)) {
       if(m_taskQueues.empty())
-        m_taskQueues.push({});
+        m_taskQueues.push(TaskQueue());
 
       for(const auto &entry : selected)
         m_taskQueues.back().push(make_shared<UninstallTask>(entry, this));
