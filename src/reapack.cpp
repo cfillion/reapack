@@ -436,15 +436,18 @@ Transaction *ReaPack::setupTransaction()
       &entries, &m_config->install.promptObsolete) == IDOK;
   });
 
-  m_tx->setCleanupHandler([=] {
-    delete m_tx;
-    m_tx = nullptr;
-
-    // refresh only once all onFinish slots were ran
-    refreshBrowser();
-  });
+  m_tx->setCleanupHandler(bind(&ReaPack::teardownTransaction, this));
 
   return m_tx;
+}
+
+void ReaPack::teardownTransaction()
+{
+  delete m_tx;
+  m_tx = nullptr;
+
+  // refresh only once the registry is close
+  refreshBrowser();
 }
 
 void ReaPack::refreshManager()

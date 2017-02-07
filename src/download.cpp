@@ -250,15 +250,15 @@ void DownloadQueue::push(Download *dl)
   m_onPush(dl);
   m_running.insert(dl);
 
-  dl->setCleanupHandler([=] {
-    delete dl;
-
+  dl->onFinish([=] {
     m_running.erase(dl);
 
     // call m_onDone() only after every onFinish slots ran
     if(m_running.empty())
       m_onDone();
   });
+
+  dl->setCleanupHandler([=] { delete dl; });
 
   auto &thread = m_pool[m_running.size() % m_pool.size()];
   if(!thread)

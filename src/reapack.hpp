@@ -91,6 +91,7 @@ private:
   void registerSelf();
   void doFetchIndex(const Remote &remote, DownloadQueue *, HWND, bool stale);
   IndexPtr loadIndex(const Remote &remote, HWND);
+  void teardownTransaction();
 
   std::map<int, ActionCallback> m_actions;
 
