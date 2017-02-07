@@ -46,11 +46,9 @@ static bool validateName(const string &name)
 
 static bool validateUrl(const string &url)
 {
-  using namespace std::regex_constants;
-
   // see http://tools.ietf.org/html/rfc3986#section-2
   static const regex pattern(
-    "(?:[a-z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+", icase);
+    "(?:[a-zA-Z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+");
 
   smatch match;
   regex_match(url, match, pattern);
