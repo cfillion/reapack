@@ -1,4 +1,8 @@
-CXX := c++
+ifeq (@(ARCH),x86_64)
+  CXX := c++
+else
+  CXX := echo 'Unsupported architecture: @(ARCH)' && false
+endif
 
 REAPACK_FILE = reaper_reapack@(SUFFIX).so
 
