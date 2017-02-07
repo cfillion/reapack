@@ -146,6 +146,10 @@ Dialog::~Dialog()
   for(Control *control : m_controls | boost::adaptors::map_values)
     delete control;
 
+  // Unregistering the instance right now before DestroyWindow prevents WM_DESTROY
+  // from calling the default implementation of onClose (because we're in the
+  // destructor – no polymorphism here). Instead, the right onClose is called
+  // directly by close() for modeless dialogs, or by the OS/SWELL for modal dialogs.
   s_instances.erase(m_handle);
 
   DestroyWindow(m_handle);
@@ -194,7 +198,7 @@ void Dialog::close(const INT_PTR result)
     EndDialog(m_handle, result);
     break;
   case Modeless:
-    SendMessage(m_handle, WM_DESTROY, 0, (LPARAM)this);
+    onClose();
     m_closeHandler(result);
     break;
   }
