@@ -27,6 +27,8 @@ using boost::format;
 using namespace std;
 
 static const int DOWNLOAD_TIMEOUT = 15;
+// to set the amount of concurrent downloads, change the size of
+// the m_pool member in DownloadQueue
 
 static CURLSH *g_curlShare = nullptr;
 static WDL_Mutex g_curlMutex;
@@ -63,12 +65,11 @@ void Download::Cleanup()
   curl_global_cleanup();
 }
 
-size_t Download::WriteData(char *ptr, size_t rawsize, size_t nmemb, void *data)
+size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
 {
   const size_t size = rawsize * nmemb;
 
-  string *str = static_cast<string *>(data);
-  str->append(ptr, size);
+  static_cast<string *>(ptr)->append(data, size);
 
   return size;
 }
@@ -232,6 +233,7 @@ Download *DownloadThread::nextDownload()
 void DownloadThread::push(Download *dl)
 {
   WDL_MutexLock lock(&m_mutex);
+
   m_queue.push(dl);
   SetEvent(m_wake);
 }
