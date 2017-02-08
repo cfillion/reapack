@@ -19,6 +19,7 @@
 
 #include "version.hpp"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <locale>
 
 using namespace std;
@@ -35,10 +36,10 @@ void OutputStream::indented(const string &text)
   string line;
 
   while(getline(stream, line, '\n')) {
-    const auto first = line.find_first_not_of('\x20');
+    boost::algorithm::trim(line);
 
-    if(first != string::npos)
-      m_stream << "\x20\x20" << line.substr(first);
+    if(!line.empty())
+      m_stream << "\x20\x20" << line;
 
     m_stream << "\r\n";
   }
