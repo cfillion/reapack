@@ -118,12 +118,12 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
     return;
   }
 
-  m_downloadQueue.push(dl);
-
   dl->onFinish([=] {
     if(saveFile(dl, Index::pathFor(dl->name())))
       cb();
   });
+
+  m_downloadQueue.push(dl);
 }
 
 void Transaction::install(const Version *ver, const bool pin)

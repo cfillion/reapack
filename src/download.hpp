@@ -20,19 +20,21 @@
 
 #include "config.hpp"
 
+#include <array>
+#include <atomic>
 #include <functional>
 #include <queue>
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 #include <boost/signals2.hpp>
 #include <WDL/mutex.h>
 
+#include <curl/curl.h>
 #include <reaper_plugin.h>
 
 class Download {
 public:
-  typedef std::queue<Download *> Queue;
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef std::function<void ()> CleanupHandler;
 
@@ -60,53 +62,54 @@ public:
   const NetworkOpts &options() const { return m_opts; }
   bool has(Flag f) const { return (m_flags & f) != 0; }
 
-  State state();
-  const std::string &contents();
-  bool isAborted();
-  short progress();
+  void setState(State);
+  State state() const { return m_state; }
+  const std::string &contents() { return m_contents; }
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
   void start();
-  void abort();
-  void wait();
+  void abort() { m_abort = true; }
+
+  void exec(CURL *);
 
 private:
-  static WDL_Mutex s_mutex;
-  static Queue s_finished;
-  static size_t s_running;
-  static void RegisterStart();
-  static Download *NextFinished();
-  static void MarkAsFinished(Download *);
-
-  static void TimerTick();
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
-  static DWORD WINAPI Worker(void *ptr);
-
-  void setProgress(short);
-  void finish(const State state, const std::string &contents);
-  void finishInMainThread();
-  void reset();
 
   std::string m_name;
   std::string m_url;
   NetworkOpts m_opts;
   int m_flags;
 
-  WDL_Mutex m_mutex;
-
-  HANDLE m_threadHandle;
   State m_state;
-  bool m_aborted;
+  std::atomic_bool m_abort;
   std::string m_contents;
-  short m_progress;
 
   VoidSignal m_onStart;
   VoidSignal m_onFinish;
   CleanupHandler m_cleanupHandler;
+};
+
+class DownloadThread {
+public:
+  DownloadThread();
+  ~DownloadThread();
+
+  void push(Download *);
+  void clear();
+
+private:
+  static DWORD WINAPI thread(void *);
+  Download *nextDownload();
+
+  HANDLE m_wake;
+  HANDLE m_thread;
+  std::atomic_bool m_exit;
+  WDL_Mutex m_mutex;
+  std::queue<Download *> m_queue;
 };
 
 class DownloadQueue {
@@ -119,24 +122,47 @@ public:
   ~DownloadQueue();
 
   void push(Download *);
-  void start();
   void abort();
 
-  bool idle() const { return m_queue.empty() && m_running.empty(); }
+  bool idle() const { return m_running.empty(); }
 
   void onPush(const DownloadSignal::slot_type &slot) { m_onPush.connect(slot); }
   void onAbort(const VoidSignal::slot_type &slot) { m_onAbort.connect(slot); }
   void onDone(const VoidSignal::slot_type &slot) { m_onDone.connect(slot); }
 
 private:
-  void clear();
-
-  Download::Queue m_queue;
-  std::vector<Download *> m_running;
+  std::array<std::unique_ptr<DownloadThread>, 3> m_pool;
+  std::unordered_set<Download *> m_running;
 
   DownloadSignal m_onPush;
   VoidSignal m_onAbort;
   VoidSignal m_onDone;
+};
+
+// This singleton class receives state change notifications from a
+// worker thread and applies them in the main thread
+class DownloadNotifier {
+  typedef std::pair<Download *, Download::State> Notification;
+
+public:
+  static DownloadNotifier *get();
+
+  void start();
+  void stop();
+
+  void notify(const Notification &);
+
+private:
+  static DownloadNotifier *s_instance;
+  static void tick();
+
+  DownloadNotifier() : m_active(0) {}
+  ~DownloadNotifier() = default;
+  void processQueue();
+
+  WDL_Mutex m_mutex;
+  size_t m_active;
+  std::queue<Notification> m_queue;
 };
 
 #endif
