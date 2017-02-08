@@ -105,7 +105,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   else if(regEntry.pinned || latest->name() < regEntry.version)
     return;
 
-  m_currentQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
+  m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
 }
 
 void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
@@ -129,7 +129,7 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
 void Transaction::install(const Version *ver, const bool pin)
 {
   const auto &oldEntry = m_registry.getEntry(ver->package());
-  m_currentQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
+  m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
 }
 
 void Transaction::registerAll(const Remote &remote)
@@ -145,7 +145,7 @@ void Transaction::registerAll(const Remote &remote)
 
 void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
 {
-  m_currentQueue.push(make_shared<PinTask>(entry, pinned, this));
+  m_nextQueue.push(make_shared<PinTask>(entry, pinned, this));
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -165,7 +165,7 @@ void Transaction::uninstall(const Remote &remote)
 
 void Transaction::uninstall(const Registry::Entry &entry)
 {
-  m_currentQueue.push(make_shared<UninstallTask>(entry, this));
+  m_nextQueue.push(make_shared<UninstallTask>(entry, this));
 }
 
 bool Transaction::saveFile(Download *dl, const Path &path)
@@ -185,9 +185,9 @@ bool Transaction::saveFile(Download *dl, const Path &path)
 
 bool Transaction::runTasks()
 {
-  if(!m_currentQueue.empty()) {
-    m_taskQueues.push(m_currentQueue);
-    TaskQueue().swap(m_currentQueue);
+  if(!m_nextQueue.empty()) {
+    m_taskQueues.push(m_nextQueue);
+    TaskQueue().swap(m_nextQueue);
   }
 
   // do nothing if there are running tasks
@@ -225,7 +225,7 @@ bool Transaction::runTasks()
     m_registry.restore();
     m_taskQueues.pop();
 
-    if(!commitTasks())
+    if(!commitTasks()) // if the tasks didn't finish immediately (downloading)
       return false;
   }
 
@@ -260,7 +260,7 @@ void Transaction::finish()
   }
 
   assert(m_downloadQueue.idle());
-  assert(m_currentQueue.empty());
+  assert(m_nextQueue.empty());
   assert(m_taskQueues.empty());
   assert(m_regQueue.empty());
 

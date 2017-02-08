@@ -102,7 +102,7 @@ private:
   std::unordered_set<Registry::Entry> m_obsolete;
 
   DownloadQueue m_downloadQueue;
-  TaskQueue m_currentQueue;
+  TaskQueue m_nextQueue;
   std::queue<TaskQueue> m_taskQueues;
   std::queue<TaskPtr> m_runningTasks;
   std::queue<HostTicket> m_regQueue;
