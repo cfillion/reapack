@@ -27,6 +27,8 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
+#include <boost/algorithm/string/trim.hpp>
+
 using namespace std;
 
 static const auto_char *TITLE = AUTO_STR("ReaPack: Import a repository");
@@ -81,7 +83,8 @@ void Import::fetch()
   if(m_download)
    return;
 
-  const string &url = getText(m_url);
+  string url = getText(m_url);
+  boost::algorithm::trim(url);
 
   if(url.empty()) {
     close();
