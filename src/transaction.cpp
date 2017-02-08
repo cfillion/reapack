@@ -190,9 +190,12 @@ bool Transaction::runTasks()
     TaskQueue().swap(m_nextQueue);
   }
 
-  // do nothing if there are running tasks
   if(!commitTasks())
-    return false;
+    return false; // we're downloading indexes for synchronization
+  else if(m_isCancelled) {
+    finish();
+    return true;
+  }
 
   if(m_config->install.promptObsolete && !m_obsolete.empty()) {
     vector<Registry::Entry> selected;
@@ -229,7 +232,12 @@ bool Transaction::runTasks()
       return false;
   }
 
+  // we're done!
+  m_registry.commit();
+  registerQueued();
+
   finish();
+
   return true;
 }
 
@@ -254,16 +262,6 @@ bool Transaction::commitTasks()
 
 void Transaction::finish()
 {
-  if(!m_isCancelled) {
-    m_registry.commit();
-    registerQueued();
-  }
-
-  assert(m_downloadQueue.idle());
-  assert(m_nextQueue.empty());
-  assert(m_taskQueues.empty());
-  assert(m_regQueue.empty());
-
   m_onFinish();
   m_cleanupHandler();
 }
