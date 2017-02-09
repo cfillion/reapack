@@ -27,13 +27,22 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
+#include <filebrowse.h>
+
+static const char *ARCHIVE_FILTER =
+  "ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0";
+static const char *ARCHIVE_EXT = "ReaPackArchive";
+
 using namespace std;
 
-enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-       ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-       ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
-       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
-       ACTION_NETCONFIG, ACTION_RESETCONFIG };
+enum {
+  ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
+  ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
+  ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
+  ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
+  ACTION_NETCONFIG, ACTION_RESETCONFIG, ACTION_IMPORT_REPO,
+  ACTION_IMPORT_ARCHIVE, ACTION_EXPORT_ARCHIVE
+};
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -88,7 +97,7 @@ void Manager::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_IMPORT:
-    import();
+    importExport();
     break;
   case IDC_BROWSE:
     launchBrowser();
@@ -119,6 +128,15 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_UNINSTALL:
     uninstall();
+    break;
+  case ACTION_IMPORT_REPO:
+    importRepo();
+    break;
+  case ACTION_IMPORT_ARCHIVE:
+    importArchive();
+    break;
+  case ACTION_EXPORT_ARCHIVE:
+    exportArchive();
     break;
   case ACTION_AUTOINSTALL:
     toggle(m_autoInstall, m_config->install.autoInstall);
@@ -446,7 +464,18 @@ void Manager::copyUrl()
   setClipboard(values);
 }
 
-bool Manager::import()
+void Manager::importExport()
+{
+  Menu menu;
+  menu.addAction(AUTO_STR("Import a &repository..."), ACTION_IMPORT_REPO);
+  menu.addSeparator();
+  menu.addAction(AUTO_STR("Import offline archive..."), ACTION_IMPORT_ARCHIVE);
+  menu.addAction(AUTO_STR("&Export offline archive..."), ACTION_EXPORT_ARCHIVE);
+
+  menu.show(getControl(IDC_IMPORT), handle());
+}
+
+bool Manager::importRepo()
 {
   if(m_importing) // avoid opening the import dialog twice on windows
     return true;
@@ -456,6 +485,39 @@ bool Manager::import()
   m_importing = false;
 
   return ret != 0;
+}
+
+void Manager::importArchive()
+{
+  const char *title = "Import offline archive";
+
+  char *path = WDL_ChooseFileForOpen(handle(), title,
+    Path::prefixRoot(Path::DATA).join().c_str(),
+    nullptr, ARCHIVE_FILTER, ARCHIVE_EXT, true, false);
+
+  if(!path)
+    return;
+
+  auto_char msg[255] = {};
+  auto_snprintf(msg, auto_size(msg), "%s (%zu)\n", path, string(path).size());
+  MessageBox(handle(), msg, AUTO_STR("Import"), MB_OK);
+}
+
+void Manager::exportArchive()
+{
+  const char *title = "Export offline archive";
+
+  char path[4096] = {};
+  const bool ok = WDL_ChooseFileForSave(handle(), title,
+      Path::prefixRoot(Path::DATA).join().c_str(),
+      nullptr, ARCHIVE_FILTER, ARCHIVE_EXT, true, path, sizeof(path));
+
+  if(!ok)
+    return;
+
+  auto_char msg[255] = {};
+  auto_snprintf(msg, auto_size(msg), "%s (%zu)\n", path, string(path).size());
+  MessageBox(handle(), msg, AUTO_STR("Export"), MB_OK);
 }
 
 void Manager::launchBrowser()

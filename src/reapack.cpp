@@ -199,7 +199,7 @@ void ReaPack::importRemote()
 
   manageRemotes();
 
-  if(!m_manager->import() && autoClose)
+  if(!m_manager->importRepo() && autoClose)
     m_manager->close();
 }
 
