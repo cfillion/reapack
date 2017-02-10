@@ -20,6 +20,7 @@
 #include "about.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
+#include "filedialog.hpp"
 #include "import.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
@@ -27,11 +28,9 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
-#include <filebrowse.h>
-
-static const char *ARCHIVE_FILTER =
-  "ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0";
-static const char *ARCHIVE_EXT = "ReaPackArchive";
+static const auto_char *ARCHIVE_FILTER =
+  AUTO_STR("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
+static const auto_char *ARCHIVE_EXT = AUTO_STR("ReaPackArchive");
 
 using namespace std;
 
@@ -489,34 +488,33 @@ bool Manager::importRepo()
 
 void Manager::importArchive()
 {
-  const char *title = "Import offline archive";
+  const auto_char *title = AUTO_STR("Import offline archive");
 
-  char *path = WDL_ChooseFileForOpen(handle(), title,
-    Path::prefixRoot(Path::DATA).join().c_str(),
-    nullptr, ARCHIVE_FILTER, ARCHIVE_EXT, true, false);
+  const auto_string &path = FileDialog::getOpenFileName(handle(), instance(),
+    title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
 
-  if(!path)
+  if(path.empty())
     return;
 
   auto_char msg[255] = {};
-  auto_snprintf(msg, auto_size(msg), "%s (%zu)\n", path, string(path).size());
+  auto_snprintf(msg, auto_size(msg), AUTO_STR("%s (%zu)\n"),
+    path.c_str(), path.size());
   MessageBox(handle(), msg, AUTO_STR("Import"), MB_OK);
 }
 
 void Manager::exportArchive()
 {
-  const char *title = "Export offline archive";
+  const auto_char *title = AUTO_STR("Export offline archive");
 
-  char path[4096] = {};
-  const bool ok = WDL_ChooseFileForSave(handle(), title,
-      Path::prefixRoot(Path::DATA).join().c_str(),
-      nullptr, ARCHIVE_FILTER, ARCHIVE_EXT, true, path, sizeof(path));
+  const auto_string &path = FileDialog::getSaveFileName(handle(), instance(),
+    title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
 
-  if(!ok)
+  if(path.empty())
     return;
 
   auto_char msg[255] = {};
-  auto_snprintf(msg, auto_size(msg), "%s (%zu)\n", path, string(path).size());
+  auto_snprintf(msg, auto_size(msg), AUTO_STR("%s (%zu)\n"),
+    path.c_str(), path.size());
   MessageBox(handle(), msg, AUTO_STR("Export"), MB_OK);
 }
 

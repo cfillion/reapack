@@ -1,5 +1,5 @@
 WDL := vendor/WDL/WDL
-WDLSOURCE := $(WDL)/wingui/wndsize.cpp $(WDL)/filebrowse.cpp
+WDLSOURCE := $(WDL)/wingui/wndsize.cpp
 
 TINYXML := $(WDL)/tinyxml
 WDLSOURCE += $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp
