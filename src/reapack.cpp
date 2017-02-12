@@ -327,7 +327,7 @@ void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
     return;
 
   const auto warn = [=] (const string &desc, const auto_char *title) {
-    auto_char msg[512] = {};
+    auto_char msg[512];
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("ReaPack could not download %s's index.\n\n")
 
@@ -369,7 +369,7 @@ IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
 
-    auto_char msg[512] = {};
+    auto_char msg[512];
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("ReaPack could not read %s's index.\n\n")
 
@@ -400,7 +400,7 @@ Transaction *ReaPack::setupTransaction()
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
 
-    auto_char msg[512] = {};
+    auto_char msg[512];
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("The following error occurred while creating a transaction:\n\n%s"),
       desc.c_str()
@@ -480,7 +480,7 @@ void ReaPack::registerSelf()
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
 
-    auto_char msg[255] = {};
+    auto_char msg[255];
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("ReaPack could not register itself! Please report this issue.\n\n")
       AUTO_STR("Error description: %s"), desc.c_str());

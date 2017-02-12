@@ -90,7 +90,7 @@ void Database::setVersion(const Version &version)
 {
   int32_t value = version.minor | (int32_t)version.major << 16;
 
-  char sql[255] = {};
+  char sql[255];
   sprintf(sql, "PRAGMA user_version = %" PRId32, value);
   exec(sql);
 }

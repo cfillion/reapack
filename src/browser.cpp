@@ -326,7 +326,7 @@ void Browser::fillMenu(Menu &menu)
 
   if(entry->test(InstalledFlag)) {
     if(entry->test(OutOfDateFlag)) {
-      auto_char installLabel[32] = {};
+      auto_char installLabel[32];
       auto_snprintf(installLabel, auto_size(installLabel),
         AUTO_STR("U&pdate to v%s"),
         make_autostring(entry->latest->name().toString()).c_str());
@@ -336,7 +336,7 @@ void Browser::fillMenu(Menu &menu)
         menu.check(actionIndex);
     }
 
-    auto_char reinstallLabel[32] = {};
+    auto_char reinstallLabel[32];
     auto_snprintf(reinstallLabel, auto_size(reinstallLabel),
       AUTO_STR("&Reinstall v%s"),
       make_autostring(entry->regEntry.version.toString()).c_str());
@@ -348,7 +348,7 @@ void Browser::fillMenu(Menu &menu)
       menu.check(actionIndex);
   }
   else {
-    auto_char installLabel[32] = {};
+    auto_char installLabel[32];
     auto_snprintf(installLabel, auto_size(installLabel),
       AUTO_STR("&Install v%s"),
       make_autostring(entry->latest->name().toString()).c_str());
@@ -398,7 +398,7 @@ void Browser::fillMenu(Menu &menu)
   menu.setEnabled(!entry->test(ObsoleteFlag),
     menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG));
 
-  auto_char aboutLabel[35] = {};
+  auto_char aboutLabel[35];
   const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
@@ -407,7 +407,7 @@ void Browser::fillMenu(Menu &menu)
 
 void Browser::updateDisplayLabel()
 {
-  auto_char btnLabel[32] = {};
+  auto_char btnLabel[32];
   auto_snprintf(btnLabel, auto_size(btnLabel), AUTO_STR("%d/%zu package%s..."),
     m_list->rowCount(), m_entries.size(),
     m_entries.size() == 1 ? AUTO_STR("") : AUTO_STR("s"));
@@ -601,7 +601,7 @@ void Browser::populate(const vector<IndexPtr> &indexes)
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
-    auto_char msg[255] = {};
+    auto_char msg[255];
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("ReaPack could not read from the local package registry.\r\n")
       AUTO_STR("Retry later once all installation task are completed.\r\n")
@@ -1043,7 +1043,7 @@ bool Browser::confirm() const
 
   const size_t count = m_actions.size();
 
-  auto_char msg[255] = {};
+  auto_char msg[255];
   auto_snprintf(msg, auto_size(msg),
     AUTO_STR("Confirm execution of %zu action%s?\n"),
     count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));

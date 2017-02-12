@@ -204,7 +204,7 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   menu.addSeparator();
 
-  auto_char aboutLabel[35] = {};
+  auto_char aboutLabel[35];
   const auto_string &name = make_autostring(remote.name());
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About %s..."), name.c_str());
@@ -514,7 +514,7 @@ bool Manager::confirm() const
 
   const size_t uninstallSize = m_uninstall.size();
 
-  auto_char msg[255] = {};
+  auto_char msg[255];
   auto_snprintf(msg, auto_size(msg), AUTO_STR("Uninstall %zu %s?\n")
     AUTO_STR("Every file they contain will be removed from your computer."),
     uninstallSize,

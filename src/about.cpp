@@ -170,7 +170,7 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 
 void About::setTitle(const string &what)
 {
-  auto_char title[255] = {};
+  auto_char title[255];
   auto_snprintf(title, auto_size(title),
     AUTO_STR("About %s"), make_autostring(what).c_str());
   SetWindowText(handle(), title);
@@ -335,7 +335,7 @@ void AboutIndexDelegate::initInstalledFiles()
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
-    auto_char msg[255] = {};
+    auto_char msg[255];
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("The file list is currently unavailable.\x20")
       AUTO_STR("Retry later when all installation task are completed.\r\n")

@@ -143,6 +143,8 @@ void Import::read()
 
 bool Import::import(const Remote &remote)
 {
+  auto_char msg[1024];
+
   if(const Remote &existing = m_reapack->remote(remote.name())) {
     if(existing.isProtected()) {
       MessageBox(handle(),
@@ -152,7 +154,6 @@ bool Import::import(const Remote &remote)
       return true;
     }
     else if(existing.url() != remote.url()) {
-      auto_char msg[1024] = {};
       auto_snprintf(msg, auto_size(msg),
         AUTO_STR("%s is already configured with a different URL.\r\n")
         AUTO_STR("Do you want to overwrite it?"),
@@ -164,7 +165,6 @@ bool Import::import(const Remote &remote)
         return false;
     }
     else if(existing.isEnabled()) {
-      auto_char msg[1024] = {};
       auto_snprintf(msg, auto_size(msg),
         AUTO_STR("%s is already configured.\r\nNothing to do!"),
         make_autostring(remote.name()).c_str());
@@ -183,7 +183,6 @@ bool Import::import(const Remote &remote)
 
       m_reapack->config()->write();
 
-      auto_char msg[1024] = {};
       auto_snprintf(msg, auto_size(msg), AUTO_STR("%s has been enabled."),
         make_autostring(remote.name()).c_str());
       MessageBox(handle(), msg, TITLE, MB_OK);
@@ -198,7 +197,6 @@ bool Import::import(const Remote &remote)
 
   FS::write(Index::pathFor(remote.name()), m_download->contents());
 
-  auto_char msg[1024] = {};
   auto_snprintf(msg, auto_size(msg),
     AUTO_STR("%s has been successfully imported into your repository list."),
     make_autostring(remote.name()).c_str());

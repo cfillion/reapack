@@ -80,7 +80,7 @@ void Progress::addDownload(Download *dl)
 
 void Progress::updateProgress()
 {
-  auto_char label[1024] = {};
+  auto_char label[1024];
   auto_snprintf(label, auto_size(label), AUTO_STR("Downloading %d of %d: %s"),
     min(m_done + 1, m_total), m_total, m_currentName.c_str());
 
@@ -89,7 +89,7 @@ void Progress::updateProgress()
   const double pos = (double)(min(m_done+1, m_total)) / max(2, m_total);
   const int percent = (int)(pos * 100);
 
-  auto_char title[255] = {};
+  auto_char title[255];
   auto_snprintf(title, auto_size(title),
     AUTO_STR("ReaPack: Download in progress (%d%%)"), percent);
 

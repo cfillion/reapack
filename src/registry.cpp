@@ -299,7 +299,7 @@ void Registry::forget(const Entry &entry)
 
 void Registry::savepoint()
 {
-  char sql[64] = {};
+  char sql[64];
   sprintf(sql, "SAVEPOINT sp%zu", m_savePoint++);
 
   m_db.exec(sql);
@@ -307,7 +307,7 @@ void Registry::savepoint()
 
 void Registry::restore()
 {
-  char sql[64] = {};
+  char sql[64];
   sprintf(sql, "ROLLBACK TO SAVEPOINT sp%zu", --m_savePoint);
 
   m_db.exec(sql);
@@ -315,7 +315,7 @@ void Registry::restore()
 
 void Registry::release()
 {
-  char sql[64] = {};
+  char sql[64];
   sprintf(sql, "RELEASE SAVEPOINT sp%zu", --m_savePoint);
 
   m_db.exec(sql);

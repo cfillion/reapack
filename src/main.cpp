@@ -54,7 +54,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
     *func.ptr = getFunc(func.name);
 
     if(func.required && *func.ptr == nullptr) {
-      auto_char msg[1024] = {};
+      auto_char msg[1024];
       auto_snprintf(msg, auto_size(msg),
         AUTO_STR("ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n")
         AUTO_STR("(Unable to import the following API function: %s)"),
@@ -99,7 +99,7 @@ static void menuHook(const char *name, HMENU handle, int f)
 
   menu.addSeparator();
 
-  auto_char aboutLabel[32] = {};
+  auto_char aboutLabel[32];
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
     AUTO_STR("&About ReaPack v%s"), make_autocstring(ReaPack::VERSION));
   menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
@@ -126,7 +126,7 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   if(current == expected)
     return true;
 
-  auto_char msg[4096] = {};
+  auto_char msg[4096];
   auto_snprintf(msg, auto_size(msg),
     AUTO_STR("ReaPack was not loaded from the standard extension path")
     AUTO_STR(" or its filename was altered.\n")
