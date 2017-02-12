@@ -26,10 +26,32 @@
 
 #include <fstream>
 
-#include <WDL/zlib/zip.h>
-#include <WDL/zlib/unzip.h>
+#include <zlib/zip.h>
+#include <zlib/unzip.h>
+#include <zlib/ioapi.h>
 
 using namespace std;
+
+#ifdef _WIN32
+static void *wide_fopen(voidpf opaque, const void *filename, int mode)
+{
+  const wchar_t *fopen_mode = nullptr;
+
+  if((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_READ)
+    fopen_mode = L"rb";
+  else if(mode & ZLIB_FILEFUNC_MODE_EXISTING)
+    fopen_mode = L"r+b";
+  else if(mode & ZLIB_FILEFUNC_MODE_CREATE)
+    fopen_mode = L"wb";
+
+  FILE *file = nullptr;
+
+  if(filename && fopen_mode)
+    _wfopen_s(&file, static_cast<const wchar_t *>(filename), fopen_mode);
+
+  return file;
+}
+#endif
 
 size_t Archive::write(const auto_string &path, ReaPack *reapack)
 {
@@ -52,8 +74,14 @@ size_t Archive::write(const auto_string &path, ReaPack *reapack)
 
 ArchiveWriter::ArchiveWriter(const auto_string &path)
 {
-  m_zip = zipOpen(reinterpret_cast<const char *>(path.c_str()),
-    APPEND_STATUS_CREATE);
+  zlib_filefunc64_def filefunc{};
+  fill_fopen64_filefunc(&filefunc);
+#ifdef _WIN32
+  filefunc.zopen64_file = wide_fopen;
+#endif
+
+  m_zip = zipOpen2_64(reinterpret_cast<const char *>(path.c_str()),
+    APPEND_STATUS_CREATE, nullptr, &filefunc);
 
   if(!m_zip)
     throw reapack_error(FS::lastError().c_str());
