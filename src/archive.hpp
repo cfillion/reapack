@@ -32,12 +32,11 @@ namespace Archive {
 class ArchiveWriter {
 public:
   ArchiveWriter(const auto_string &path);
-  void addFile(const Path &fn);
+  int addFile(const Path &fn);
+  int addFile(const Path &fn, std::istream &);
   ~ArchiveWriter();
 
 private:
-  static std::string errorMessage(int);
-
   zipFile m_zip;
 };
 

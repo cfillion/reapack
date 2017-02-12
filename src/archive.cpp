@@ -20,11 +20,13 @@
 #include "config.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
+#include "index.hpp"
 #include "path.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
 
 #include <fstream>
+#include <sstream>
 
 #include <zlib/zip.h>
 #include <zlib/unzip.h>
@@ -59,17 +61,32 @@ size_t Archive::write(const auto_string &path, ReaPack *reapack)
 {
   size_t count = 0;
 
-  Registry reg(Path::prefixRoot(Path::REGISTRY));
   ArchiveWriter writer(path);
+  writer.addFile(Path::REGISTRY);
+
+  stringstream remotes;
+  Registry reg(Path::prefixRoot(Path::REGISTRY));
 
   for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
+    bool hasPackages = false;
+
     for(const Registry::Entry &entry : reg.getEntries(remote.name())) {
+      hasPackages = true;
       ++count;
 
-      for(const Registry::File &file : reg.getFiles(entry))
-        writer.addFile(file.path);
+      for(const Registry::File &file : reg.getFiles(entry)) {
+        if(writer.addFile(file.path) != ZIP_OK)
+          ; // TODO: report failure
+      }
+    }
+
+    if(hasPackages) {
+      remotes << remote.toString() << "\n";
+      writer.addFile(Index::pathFor(remote.name()));
     }
   }
+
+  writer.addFile(Path("ReaPack/remotes"), remotes);
 
   return count;
 }
@@ -94,17 +111,24 @@ ArchiveWriter::~ArchiveWriter()
   zipClose(m_zip, nullptr);
 }
 
-void ArchiveWriter::addFile(const Path &path)
+int ArchiveWriter::addFile(const Path &path)
 {
   ifstream stream(make_autostring(Path::prefixRoot(path).join()), ifstream::binary);
-  if(!stream)
-    throw reapack_error(FS::lastError().c_str());
+
+  if(stream)
+    return addFile(path, stream);
+  else
+    return Z_ERRNO;
+}
+
+int ArchiveWriter::addFile(const Path &path, istream &stream)
+{
 
   const int status = zipOpenNewFileInZip(m_zip, path.join('/').c_str(), nullptr,
     nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 
   if(status != ZIP_OK)
-    throw reapack_error(errorMessage(status).c_str());
+    return status;
 
   string buffer(BUFFER_SIZE, 0);
 
@@ -116,23 +140,5 @@ void ArchiveWriter::addFile(const Path &path)
   while(const int len = readChunk())
     zipWriteInFileInZip(m_zip, &buffer[0], len);
 
-  zipCloseFileInZip(m_zip);
-}
-
-string ArchiveWriter::errorMessage(const int code)
-{
-  switch(code) {
-  case ZIP_OK:
-    return "No error";
-  case ZIP_ERRNO:
-    return FS::lastError();
-  case ZIP_PARAMERROR:
-    return "Invalid parameter";
-  case ZIP_BADZIPFILE:
-    return "Bad zip file";
-  case ZIP_INTERNALERROR:
-    return "Internal Zip Error";
-  default:
-    return "Unknown error";
-  }
+  return zipCloseFileInZip(m_zip);
 }
