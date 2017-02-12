@@ -32,6 +32,8 @@
 
 using namespace std;
 
+static const size_t BUFFER_SIZE = 4096;
+
 #ifdef _WIN32
 static void *wide_fopen(voidpf opaque, const void *filename, int mode)
 {
@@ -104,7 +106,7 @@ void ArchiveWriter::addFile(const Path &path)
   if(status != ZIP_OK)
     throw reapack_error(errorMessage(status).c_str());
 
-  string buffer(1024, 0);
+  string buffer(BUFFER_SIZE, 0);
 
   const auto readChunk = [&] {
     stream.read(&buffer[0], buffer.size());
