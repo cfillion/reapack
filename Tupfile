@@ -5,12 +5,17 @@ TINYXML := $(WDL)/tinyxml
 WDLSOURCE += $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp
 WDLSOURCE += $(TINYXML)/tinyxmlparser.cpp $(TINYXML)/tinyxmlerror.cpp
 
+ZLIB := $(WDL)/zlib
+WDLSOURCE += $(ZLIB)/zip.c $(ZLIB)/unzip.c $(ZLIB)/inflate.c $(ZLIB)/deflate.c
+WDLSOURCE += $(ZLIB)/zutil.c $(ZLIB)/crc32.c $(ZLIB)/adler32.c $(ZLIB)/ioapi.c
+WDLSOURCE += $(ZLIB)/trees.c $(ZLIB)/inftrees.c $(ZLIB)/inffast.c
+
 include @(TUP_PLATFORM).tup
 
-: foreach src/*.cpp | $(BUILDDEPS) |> !build |> build/%B.o
+: foreach src/*.cpp | $(BUILDDEPS) |> !build $(SRCFLAGS) |> build/%B.o
 : foreach $(WDLSOURCE) |> !build $(WDLFLAGS) |> build/wdl_%B.o
 : build/*.o | $(LINKDEPS) |> !link $(SOFLAGS) |> $(SOTARGET)
 
-: foreach test/*.cpp |> !build -Isrc |> build/test/%B.o
-: foreach test/helper/*.cpp |> !build -Isrc |> build/test/helper_%B.o
+: foreach test/*.cpp |> !build -Isrc $(SRCFLAGS) |> build/test/%B.o
+: foreach test/helper/*.cpp |> !build -Isrc $(SRCFLAGS) |> build/test/helper_%B.o
 : build/*.o build/test/*.o | $(LINKDEPS) |> !link $(TSFLAGS) |> $(TSTARGET)

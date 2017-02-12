@@ -18,8 +18,10 @@
 #include "manager.hpp"
 
 #include "about.hpp"
+#include "archive.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
+#include "errors.hpp"
 #include "filedialog.hpp"
 #include "import.hpp"
 #include "menu.hpp"
@@ -512,10 +514,24 @@ void Manager::exportArchive()
   if(path.empty())
     return;
 
-  auto_char msg[255] = {};
-  auto_snprintf(msg, auto_size(msg), AUTO_STR("%s (%zu)\n"),
-    path.c_str(), path.size());
-  MessageBox(handle(), msg, AUTO_STR("Export"), MB_OK);
+  auto_char msg[512] = {};
+
+  try {
+    const size_t count = Archive::write(path, m_reapack);
+
+    auto_snprintf(msg, auto_size(msg),
+      AUTO_STR("Done! %zu packages were exported in the archive."), count);
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_snprintf(msg, auto_size(msg),
+      AUTO_STR("ReaPack could not write into %s (%s)."),
+      path.c_str(), desc.c_str()
+    );
+  }
+
+  MessageBox(handle(), msg, title, MB_OK);
 }
 
 void Manager::launchBrowser()

@@ -1,4 +1,4 @@
-CXX := c++
+CXX := clang
 
 REAPACK_FILE = reaper_reapack@(SUFFIX).dylib
 
@@ -6,20 +6,21 @@ CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -Wno-unused-function -Wno-unused-private-field -Wno-missing-braces
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
-CXXFLAGS += -pipe -fPIC -O2 -std=c++14
+CXXFLAGS += -pipe -fPIC -O2
+CXXFLAGS += -arch @(ARCH) -mmacosx-version-min=10.7
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DSWELL_APP_PREFIX=SWELL_REAPACK
 CXXFLAGS += -DREAPACK_FILE=\"$(REAPACK_FILE)\"
-CXXFLAGS += -arch @(ARCH) -mmacosx-version-min=10.7 -stdlib=libc++
 
-WDLFLAGS := -std=c++98 -w
+SRCFLAGS := -std=c++14 -stdlib=libc++
+WDLFLAGS := -w
 
 SWELL := $(WDL)/swell
 WDLSOURCE += $(SWELL)/swell.cpp $(SWELL)/swell-ini.cpp $(SWELL)/swell-miscdlg.mm
 WDLSOURCE += $(SWELL)/swell-gdi.mm $(SWELL)/swell-kb.mm $(SWELL)/swell-menu.mm
 WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
 
-LDFLAGS := -framework Cocoa -framework Carbon -lcurl -lsqlite3
+LDFLAGS := -framework Cocoa -framework Carbon -lcurl -lsqlite3 -lc++
 
 SOFLAGS := -dynamiclib
 SOTARGET := bin/$(REAPACK_FILE)
@@ -33,4 +34,4 @@ BUILDDEPS := src/resource.rc_mac_menu src/resource.rc_mac_dlg
 : src/resource.rc |> php $(SWELL)/mac_resgen.php %f |> $(BUILDDEPS)
 
 # build Objective-C files
-: foreach src/*.mm | $(BUILDDEPS) |> !build |> build/%B_mm.o
+: foreach src/*.mm | $(BUILDDEPS) |> !build $(SRCFLAGS) |> build/%B_mm.o
