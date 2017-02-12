@@ -100,7 +100,7 @@ void ArchiveWriter::addFile(const Path &path)
   if(!stream)
     throw reapack_error(FS::lastError().c_str());
 
-  const int status = zipOpenNewFileInZip(m_zip, path.join().c_str(), nullptr,
+  const int status = zipOpenNewFileInZip(m_zip, path.join('/').c_str(), nullptr,
     nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 
   if(status != ZIP_OK)
