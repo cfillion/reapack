@@ -19,7 +19,6 @@
 #define REAPACK_PACKAGE_HPP
 
 #include "metadata.hpp"
-#include "path.hpp"
 #include "version.hpp"
 
 class Category;

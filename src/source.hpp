@@ -19,10 +19,10 @@
 #define REAPACK_SOURCE_HPP
 
 #include "package.hpp"
+#include "path.hpp"
 #include "platform.hpp"
 
 class Package;
-class Path;
 class Version;
 
 class Source {
