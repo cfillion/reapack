@@ -20,7 +20,6 @@
 #include "reapack.hpp"
 
 #include <boost/format.hpp>
-#include <curl/curl.h>
 
 #include <reaper_plugin_functions.h>
 
@@ -44,7 +43,7 @@ static void UnlockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
   g_curlMutex.Leave();
 }
 
-void Download::GlobalInit()
+void DownloadContext::GlobalInit()
 {
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -58,36 +57,34 @@ void Download::GlobalInit()
   curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 }
 
-void Download::GlobalCleanup()
+void DownloadContext::GlobalCleanup()
 {
   curl_share_cleanup(g_curlShare);
   curl_global_cleanup();
 }
 
-void *Download::ContextInit()
+DownloadContext::DownloadContext()
 {
-  CURL *curl = curl_easy_init();
+  m_curl = curl_easy_init();
 
   const auto userAgent = format("ReaPack/%s REAPER/%s")
     % ReaPack::VERSION % GetAppVersion();
 
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.str().c_str());
-  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
-  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
-  curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
-  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
-  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
-  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
-  curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
-  curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
-  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
-
-  return curl;
+  curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent.str().c_str());
+  curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+  curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
+  curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);
+  curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, true);
+  curl_easy_setopt(m_curl, CURLOPT_MAXREDIRS, 5);
+  curl_easy_setopt(m_curl, CURLOPT_ACCEPT_ENCODING, "");
+  curl_easy_setopt(m_curl, CURLOPT_FAILONERROR, true);
+  curl_easy_setopt(m_curl, CURLOPT_SHARE, g_curlShare);
+  curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, false);
 }
 
-void Download::ContextCleanup(void *ctx)
+DownloadContext::~DownloadContext()
 {
-  curl_easy_cleanup(static_cast<CURL *>(ctx));
+  curl_easy_cleanup(m_curl);
 }
 
 size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
@@ -123,7 +120,7 @@ void Download::start()
   onFinish([thread] { delete thread; });
 }
 
-void Download::run(CURL *curl)
+void Download::run(DownloadContext *ctx)
 {
   const auto finish = [&](const State state, const string &contents) {
     m_contents = contents;
@@ -140,25 +137,25 @@ void Download::run(CURL *curl)
 
   string contents;
 
-  curl_easy_setopt(curl, CURLOPT_URL, m_url.c_str());
-  curl_easy_setopt(curl, CURLOPT_PROXY, m_opts.proxy.c_str());
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_URL, m_url.c_str());
+  curl_easy_setopt(ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
+  curl_easy_setopt(ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 
-  curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
-  curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_PROGRESSDATA, this);
 
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contents);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEFUNCTION, WriteData);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEDATA, &contents);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_HTTPHEADER, headers);
 
   char errbuf[CURL_ERROR_SIZE] = "No details";
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
 
-  const CURLcode res = curl_easy_perform(curl);
+  const CURLcode res = curl_easy_perform(ctx->m_curl);
 
   if(m_abort)
     finish(Aborted, "aborted by user");

@@ -23,16 +23,23 @@
 
 #include <string>
 
+#include <curl/curl.h>
+
+struct DownloadContext {
+  static void GlobalInit();
+  static void GlobalCleanup();
+
+  DownloadContext();
+  ~DownloadContext();
+
+  CURL *m_curl;
+};
+
 class Download : public ThreadTask {
 public:
   enum Flag {
     NoCacheFlag = 1<<0,
   };
-
-  static void GlobalInit();
-  static void GlobalCleanup();
-  static void *ContextInit();
-  static void ContextCleanup(void *);
 
   Download(const std::string &name, const std::string &url,
     const NetworkOpts &, int flags = 0);
@@ -45,7 +52,7 @@ public:
   const std::string &contents() { return m_contents; }
 
   void start();
-  void run(void *) override;
+  void run(DownloadContext *) override;
 
 private:
   static size_t WriteData(char *, size_t, size_t, void *);

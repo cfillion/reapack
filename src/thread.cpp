@@ -77,17 +77,15 @@ DWORD WINAPI WorkerThread::run(void *ptr)
 {
   WorkerThread *thread = static_cast<WorkerThread *>(ptr);
 
-  void *context = Download::ContextInit();
+  DownloadContext context;
 
   while(!thread->m_exit) {
     while(ThreadTask *task = thread->nextTask())
-      task->run(context);
+      task->run(&context);
 
     ResetEvent(thread->m_wake);
     WaitForSingleObject(thread->m_wake, INFINITE);
   }
-
-  Download::ContextCleanup(context);
 
   return 0;
 }

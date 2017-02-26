@@ -81,7 +81,7 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(resourcePath());
 
-  Download::GlobalInit();
+  DownloadContext::GlobalInit();
   RichEdit::Init();
 
   FS::mkdir(Path::CACHE);
@@ -106,7 +106,7 @@ ReaPack::~ReaPack()
   m_config->write();
   delete m_config;
 
-  Download::GlobalCleanup();
+  DownloadContext::GlobalCleanup();
 
   delete m_useRootPath;
 }

@@ -33,6 +33,8 @@
 #include <swell-types.h>
 #endif
 
+struct DownloadContext;
+
 class ThreadTask {
 public:
   enum State {
@@ -50,7 +52,7 @@ public:
   virtual ~ThreadTask();
 
   virtual std::string summary() const = 0;
-  virtual void run(void *) = 0;
+  virtual void run(DownloadContext *) = 0;
 
   void setState(State);
   State state() const { return m_state; }
