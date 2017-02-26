@@ -137,51 +137,71 @@ void Registry::migrate()
 
 auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 {
-  savepoint();
-
-  bool hasConflicts = false;
-
   const Package *pkg = ver->package();
   const Category *cat = pkg->category();
   const Index *ri = cat->index();
 
-  m_clearFiles->bind(1, ri->name());
-  m_clearFiles->bind(2, cat->name());
-  m_clearFiles->bind(3, pkg->name());
+  Entry entry{};
+  entry.remote = ri->name();
+  entry.category = cat->name();
+  entry.package = pkg->name();
+  entry.description = pkg->description();
+  entry.type = pkg->type();
+  entry.version = ver->name();
+  entry.author = ver->author();
+
+  vector<File> files;
+  for(const Source *src : ver->sources())
+    files.push_back({src->targetPath(), src->sections(), src->typeOverride()});
+
+  if((entry.id = push(entry, files, conflicts)))
+    return entry;
+  else
+    return {};
+}
+
+auto Registry::push(const Entry &entry, const vector<File> &files,
+  vector<Path> *conflicts) -> Entry::id_t
+{
+  savepoint();
+
+  bool hasConflicts = false;
+
+  m_clearFiles->bind(1, entry.remote);
+  m_clearFiles->bind(2, entry.category);
+  m_clearFiles->bind(3, entry.package);
   m_clearFiles->exec();
 
-  auto entryId = getEntry(ver->package()).id;
+  Entry::id_t entryId;
 
   // register or update package and version
-  if(entryId) {
-    m_updateEntry->bind(1, pkg->description());
-    m_updateEntry->bind(2, pkg->type());
-    m_updateEntry->bind(3, ver->name().toString());
-    m_updateEntry->bind(4, ver->author());
+  if((entryId = findEntry(entry))) {
+    m_updateEntry->bind(1, entry.description);
+    m_updateEntry->bind(2, entry.type);
+    m_updateEntry->bind(3, entry.version.toString());
+    m_updateEntry->bind(4, entry.author);
     m_updateEntry->bind(5, entryId);
     m_updateEntry->exec();
   }
   else {
-    m_insertEntry->bind(1, ri->name());
-    m_insertEntry->bind(2, cat->name());
-    m_insertEntry->bind(3, pkg->name());
-    m_insertEntry->bind(4, pkg->description());
-    m_insertEntry->bind(5, pkg->type());
-    m_insertEntry->bind(6, ver->name().toString());
-    m_insertEntry->bind(7, ver->author());
+    m_insertEntry->bind(1, entry.remote);
+    m_insertEntry->bind(2, entry.category);
+    m_insertEntry->bind(3, entry.package);
+    m_insertEntry->bind(4, entry.description);
+    m_insertEntry->bind(5, entry.type);
+    m_insertEntry->bind(6, entry.version.toString());
+    m_insertEntry->bind(7, entry.author);
     m_insertEntry->exec();
 
     entryId = m_db.lastInsertId();
   }
 
   // register files
-  for(const Source *src : ver->sources()) {
-    const Path &path = src->targetPath();
-
+  for(const File &file : files) {
     m_insertFile->bind(1, entryId);
-    m_insertFile->bind(2, path.join('/'));
-    m_insertFile->bind(3, src->sections());
-    m_insertFile->bind(4, src->typeOverride());
+    m_insertFile->bind(2, file.path.join('/'));
+    m_insertFile->bind(3, file.sections);
+    m_insertFile->bind(4, file.type);
 
     try {
       m_insertFile->exec();
@@ -189,7 +209,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     catch(const reapack_error &) {
       if(conflicts && m_db.errorCode() == SQLITE_CONSTRAINT) {
         hasConflicts = true;
-        conflicts->push_back(path);
+        conflicts->push_back(file.path);
       }
       else {
         restore();
@@ -200,12 +220,11 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 
   if(hasConflicts) {
     restore();
-    return {};
+    return 0;
   }
   else {
     release();
-    return {entryId, ri->name(), cat->name(),
-      pkg->name(), pkg->description(), pkg->type(), ver->name(), ver->author()};
+    return entryId;
   }
 }
 
@@ -218,14 +237,14 @@ void Registry::setPinned(const Entry &entry, const bool pinned)
 
 auto Registry::getEntry(const Package *pkg) const -> Entry
 {
-  Entry entry{};
-
   const Category *cat = pkg->category();
   const Index *ri = cat->index();
 
-  m_findEntry->bind(1, ri->name());
-  m_findEntry->bind(2, cat->name());
-  m_findEntry->bind(3, pkg->name());
+  Entry entry{0, ri->name(), cat->name(), pkg->name()};
+
+  m_findEntry->bind(1, entry.remote);
+  m_findEntry->bind(2, entry.category);
+  m_findEntry->bind(3, entry.package);
 
   m_findEntry->exec([&] {
     fillEntry(m_findEntry, &entry);
@@ -233,6 +252,22 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   });
 
   return entry;
+}
+
+auto Registry::findEntry(const Entry &entry) const -> Entry::id_t
+{
+  Entry::id_t id = 0;
+
+  m_findEntry->bind(1, entry.remote);
+  m_findEntry->bind(2, entry.category);
+  m_findEntry->bind(3, entry.package);
+
+  m_findEntry->exec([&] {
+    id = m_findEntry->intColumn(0);
+    return false;
+  });
+
+  return id;
 }
 
 auto Registry::getEntries(const string &remoteName) const -> vector<Entry>

@@ -464,17 +464,20 @@ void ReaPack::refreshBrowser()
 
 void ReaPack::registerSelf()
 {
-  // hard-coding galore!
-  Index ri("ReaPack");
-  Category cat("Extensions", &ri);
-  Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
-  Version ver(VERSION, &pkg);
-  ver.setAuthor("cfillion");
-  ver.addSource(new Source(REAPACK_FILE, "dummy url", &ver));
+  Registry::Entry entry{};
+  entry.remote = "ReaPack";
+  entry.category = "Extensions";
+  entry.package = "ReaPack.ext";
+  entry.type = Package::ExtensionType;
+  entry.version = VersionName(VERSION);
+  entry.author = "cfillion";
+
+  Registry::File file{};
+  file.path = Path("UserPlugins/" REAPACK_FILE);
 
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
-    reg.push(&ver);
+    reg.push(entry, {file});
     reg.commit();
   }
   catch(const reapack_error &e) {

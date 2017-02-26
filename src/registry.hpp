@@ -29,7 +29,8 @@
 class Registry {
 public:
   struct Entry {
-    int64_t id;
+    typedef int64_t id_t;
+    id_t id;
     std::string remote;
     std::string category;
     std::string package;
@@ -58,6 +59,8 @@ public:
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
+  Entry::id_t push(const Entry &, const std::vector<File> &,
+    std::vector<Path> *conflicts = nullptr);
   void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);
   void savepoint();
@@ -69,6 +72,7 @@ private:
   void migrate();
   void convertImplicitSections();
   void fillEntry(const Statement *, Entry *) const;
+  Entry::id_t findEntry(const Entry &) const;
 
   Database m_db;
   Statement *m_insertEntry;
