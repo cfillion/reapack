@@ -30,6 +30,7 @@
 #include <set>
 #include <unordered_set>
 
+class ArchiveReader;
 class Config;
 class Path;
 class Remote;

@@ -498,10 +498,20 @@ void Manager::importArchive()
   if(path.empty())
     return;
 
-  auto_char msg[255] = {};
-  auto_snprintf(msg, auto_size(msg), AUTO_STR("%s (%zu)\n"),
-    path.c_str(), path.size());
-  MessageBox(handle(), msg, AUTO_STR("Import"), MB_OK);
+  try {
+    Archive::import(path, m_reapack);
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512];
+    auto_snprintf(msg, auto_size(msg),
+      AUTO_STR("An error occured while reading %s.\r\n\r\n%s."),
+      path.c_str(), desc.c_str()
+    );
+
+    MessageBox(handle(), msg, title, MB_OK);
+  }
 }
 
 void Manager::exportArchive()
@@ -514,10 +524,10 @@ void Manager::exportArchive()
   if(path.empty())
     return;
 
-  auto_char msg[512] = {};
+  auto_char msg[512];
 
   try {
-    const size_t count = Archive::write(path, m_reapack);
+    const size_t count = Archive::create(path, m_reapack);
 
     auto_snprintf(msg, auto_size(msg),
       AUTO_STR("Done! %zu packages were exported in the archive."), count);

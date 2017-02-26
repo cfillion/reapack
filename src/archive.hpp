@@ -26,15 +26,27 @@ class Path;
 class ReaPack;
 
 namespace Archive {
-  size_t write(const auto_string &path, ReaPack *);
+  void import(const auto_string &path, ReaPack *);
+  size_t create(const auto_string &path, ReaPack *);
+};
+
+class ArchiveReader {
+public:
+  ArchiveReader(const auto_string &path);
+  ~ArchiveReader();
+  int extractFile(const Path &);
+  int extractFile(const Path &, std::ostream &);
+
+private:
+  zipFile m_zip;
 };
 
 class ArchiveWriter {
 public:
   ArchiveWriter(const auto_string &path);
+  ~ArchiveWriter();
   int addFile(const Path &fn);
   int addFile(const Path &fn, std::istream &);
-  ~ArchiveWriter();
 
 private:
   zipFile m_zip;

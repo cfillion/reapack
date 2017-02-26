@@ -23,9 +23,11 @@
 #include "index.hpp"
 #include "path.hpp"
 #include "reapack.hpp"
-#include "registry.hpp"
+#include "transaction.hpp"
 
+#include <boost/format.hpp>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 
 #include <zlib/zip.h>
@@ -33,7 +35,9 @@
 #include <zlib/ioapi.h>
 
 using namespace std;
+using namespace boost;
 
+static const Path ARCHIVE_TOC = Path("toc");
 static const size_t BUFFER_SIZE = 4096;
 
 #ifdef _WIN32
@@ -57,43 +61,175 @@ static void *wide_fopen(voidpf opaque, const void *filename, int mode)
 }
 #endif
 
-size_t Archive::write(const auto_string &path, ReaPack *reapack)
+void Archive::import(const auto_string &path, ReaPack *reapack)
 {
-  size_t count = 0;
+  auto reader = make_shared<ArchiveReader>(path);
 
-  ArchiveWriter writer(path);
-  writer.addFile(Path::REGISTRY);
+  stringstream toc;
+  if(const int err = reader->extractFile(ARCHIVE_TOC, toc))
+    throw reapack_error(format("Cannot locate the table of contents (%d)") % err);
 
-  stringstream remotes;
-  Registry reg(Path::prefixRoot(Path::REGISTRY));
+  Transaction *tx = reapack->setupTransaction();
+  if(!tx)
+    return;
 
-  for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
-    bool hasPackages = false;
+  IndexPtr lastIndex;
 
-    for(const Registry::Entry &entry : reg.getEntries(remote.name())) {
-      hasPackages = true;
-      ++count;
+  const map<char, std::function<void (const string &)> > funcs = {
+    {'R', [&](const string &data) {
+      lastIndex = nullptr; // clear the previous repository
+      const Remote &remote = Remote::fromString(data);
 
-      for(const Registry::File &file : reg.getFiles(entry)) {
-        if(writer.addFile(file.path) != ZIP_OK)
-          ; // TODO: report failure
+      if(const int err = reader->extractFile(Index::pathFor(remote.name()))) {
+        throw reapack_error(format("Failed to extract index of %s (%d)")
+          % remote.name() % err);
       }
-    }
 
-    if(hasPackages) {
-      remotes << remote.toString() << "\n";
-      writer.addFile(Index::pathFor(remote.name()));
+      reapack->config()->remotes.add(remote);
+      lastIndex = Index::load(remote.name());
+    }},
+    {'P', [&](const string &data) {
+      // don't report an error if the index isn't loaded assuming we already
+      // did when failing to import the repository above
+      if(!lastIndex)
+        return;
+
+      string categoryName, packageName, versionName;
+      bool pinned;
+
+      istringstream stream(data);
+      stream
+        >> quoted(categoryName) >> quoted(packageName) >> quoted(versionName)
+        >> pinned;
+
+      const Package *pkg = lastIndex->find(categoryName, packageName);
+      const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
+
+      if(!ver) {
+        throw reapack_error(format("%s/%s/%s v%s cannot be found or is"
+          " incompatible with your operating system.")
+          % lastIndex->name() % categoryName % packageName % versionName);
+      }
+
+      tx->install(ver, pinned, reader);
+    }},
+  };
+
+  // starting import, do not abort process at this point
+  string line;
+  while(getline(toc, line)) {
+    try {
+      if(line.size() > 5) // 5 is the length of the line type prefix
+        funcs.at(line[0])(line.substr(5));
+    }
+    catch(const reapack_error &e) {
+      tx->receipt()->addError({e.what(), path});
     }
   }
 
-  writer.addFile(Path("ReaPack/remotes"), remotes);
+  reapack->config()->write();
+  tx->runTasks();
+}
+
+size_t Archive::create(const auto_string &path, ReaPack *reapack)
+{
+  size_t count = 0;
+
+  stringstream toc;
+  Registry reg(Path::prefixRoot(Path::REGISTRY));
+
+  ArchiveWriter writer(path);
+
+  for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
+    bool addedRemote = false;
+
+    for(const Registry::Entry &entry : reg.getEntries(remote.name())) {
+      ++count;
+
+      if(!addedRemote) {
+        toc << "REPO " << remote.toString() << '\n';
+        if(writer.addFile(Index::pathFor(remote.name())))
+          continue; // TODO: report error
+        addedRemote = true;
+      }
+
+      toc << "PACK "
+        << quoted(entry.category) << '\x20'
+        << quoted(entry.package) << '\x20'
+        << quoted(entry.version.toString()) << '\x20'
+        << entry.pinned << '\n'
+      ;
+
+      for(const Registry::File &file : reg.getFiles(entry)) {
+        if(writer.addFile(file.path))
+          break; // TODO: report error
+      }
+    }
+  }
+
+  writer.addFile(ARCHIVE_TOC, toc);
 
   return count;
 }
 
+ArchiveReader::ArchiveReader(const auto_string &path)
+{
+  zlib_filefunc64_def filefunc;
+  fill_fopen64_filefunc(&filefunc);
+#ifdef _WIN32
+  filefunc.zopen64_file = wide_fopen;
+#endif
+
+  m_zip = unzOpen2_64(reinterpret_cast<const char *>(path.c_str()), &filefunc);
+
+  if(!m_zip)
+    throw reapack_error(FS::lastError().c_str());
+}
+
+ArchiveReader::~ArchiveReader()
+{
+  unzClose(m_zip);
+}
+
+int ArchiveReader::extractFile(const Path &path)
+{
+  ofstream stream(make_autostring(Path::prefixRoot(path).join()), ios_base::binary);
+
+  if(stream)
+    return extractFile(path, stream);
+  else
+    throw reapack_error(FS::lastError().c_str());
+}
+
+int ArchiveReader::extractFile(const Path &path, ostream &stream)
+{
+  int status = unzLocateFile(m_zip, path.join('/').c_str(), false);
+  if(status != UNZ_OK)
+    return status;
+
+  status = unzOpenCurrentFile(m_zip);
+  if(status != UNZ_OK)
+    return status;
+
+  string buffer(BUFFER_SIZE, 0);
+
+  const auto readChunk = [&] {
+    return unzReadCurrentFile(m_zip, &buffer[0], (int)buffer.size());
+  };
+
+  while(const int len = readChunk()) {
+    if(len < 0)
+      return len; // read error
+
+    stream.write(&buffer[0], len);
+  }
+
+  return unzCloseCurrentFile(m_zip);
+}
+
 ArchiveWriter::ArchiveWriter(const auto_string &path)
 {
-  zlib_filefunc64_def filefunc{};
+  zlib_filefunc64_def filefunc;
   fill_fopen64_filefunc(&filefunc);
 #ifdef _WIN32
   filefunc.zopen64_file = wide_fopen;
@@ -113,12 +249,12 @@ ArchiveWriter::~ArchiveWriter()
 
 int ArchiveWriter::addFile(const Path &path)
 {
-  ifstream stream(make_autostring(Path::prefixRoot(path).join()), ifstream::binary);
+  ifstream stream(make_autostring(Path::prefixRoot(path).join()), ios_base::binary);
 
   if(stream)
     return addFile(path, stream);
   else
-    return Z_ERRNO;
+    throw reapack_error(FS::lastError().c_str());
 }
 
 int ArchiveWriter::addFile(const Path &path, istream &stream)
@@ -137,8 +273,12 @@ int ArchiveWriter::addFile(const Path &path, istream &stream)
     return (int)stream.gcount();
   };
 
-  while(const int len = readChunk())
+  while(const int len = readChunk()) {
+    if(len < 0)
+      return len; // write error
+
     zipWriteInFileInZip(m_zip, &buffer[0], len);
+  }
 
   return zipCloseFileInZip(m_zip);
 }

@@ -17,8 +17,8 @@
 
 #include "transaction.hpp"
 
+#include "archive.hpp"
 #include "config.hpp"
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
