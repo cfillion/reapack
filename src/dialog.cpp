@@ -18,6 +18,7 @@
 #include "dialog.hpp"
 
 #include "control.hpp"
+#include "encoding.hpp"
 
 #include <algorithm>
 #include <boost/range/adaptor/map.hpp>

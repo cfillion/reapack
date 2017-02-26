@@ -18,7 +18,6 @@
 #ifndef REAPACK_DIALOG_HPP
 #define REAPACK_DIALOG_HPP
 
-#include "encoding.hpp"
 #include "serializer.hpp"
 
 #include <functional>
