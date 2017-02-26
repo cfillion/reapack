@@ -39,7 +39,7 @@ public:
     std::string author;
     bool pinned;
 
-    operator bool() const { return id != 0; }
+    operator bool() const { return id > 0; }
     bool operator==(const Entry &o) const { return id == o.id; }
   };
 

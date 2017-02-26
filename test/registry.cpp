@@ -155,7 +155,8 @@ TEST_CASE("file conflicts", M) {
   CHECK(reg.getEntry(&pkg).id == 0); // still uninstalled
 
   vector<Path> conflicts;
-  reg.push(&ver, &conflicts);
+  const auto &pushResult = reg.push(&ver, &conflicts);
+  CHECK(pushResult.id == 0);
 
   REQUIRE(conflicts.size() == 1);
   REQUIRE(conflicts[0] == src1->targetPath());
