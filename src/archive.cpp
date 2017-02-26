@@ -98,6 +98,9 @@ void Archive::import(const auto_string &path, ReaPack *reapack)
       case 'P':
         state.importPackage(data);
         break;
+      default:
+        throw reapack_error(format("Unknown token '%s' (skipping)")
+          % line.substr(0, 4));
       }
     }
     catch(const reapack_error &e) {
