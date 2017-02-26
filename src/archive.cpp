@@ -61,74 +61,93 @@ static void *wide_fopen(voidpf opaque, const void *filename, int mode)
 }
 #endif
 
+struct ImportArchive {
+  void importRemote(const string &);
+  void importPackage(const string &);
+
+  std::shared_ptr<ArchiveReader> m_reader;
+  RemoteList *m_remotes;
+  Transaction *m_tx;
+  IndexPtr m_lastIndex;
+};
+
 void Archive::import(const auto_string &path, ReaPack *reapack)
 {
-  auto reader = make_shared<ArchiveReader>(path);
+  ImportArchive state{make_shared<ArchiveReader>(path), &reapack->config()->remotes};
 
   stringstream toc;
-  if(const int err = reader->extractFile(ARCHIVE_TOC, toc))
+  if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
     throw reapack_error(format("Cannot locate the table of contents (%d)") % err);
 
-  Transaction *tx = reapack->setupTransaction();
-  if(!tx)
+  // starting import, do not abort process (eg. by throwing) at this point
+  if(!(state.m_tx = reapack->setupTransaction()))
     return;
 
-  IndexPtr lastIndex;
-
-  const map<char, std::function<void (const string &)> > funcs = {
-    {'R', [&](const string &data) {
-      lastIndex = nullptr; // clear the previous repository
-      const Remote &remote = Remote::fromString(data);
-
-      if(const int err = reader->extractFile(Index::pathFor(remote.name()))) {
-        throw reapack_error(format("Failed to extract index of %s (%d)")
-          % remote.name() % err);
-      }
-
-      reapack->config()->remotes.add(remote);
-      lastIndex = Index::load(remote.name());
-    }},
-    {'P', [&](const string &data) {
-      // don't report an error if the index isn't loaded assuming we already
-      // did when failing to import the repository above
-      if(!lastIndex)
-        return;
-
-      string categoryName, packageName, versionName;
-      bool pinned;
-
-      istringstream stream(data);
-      stream
-        >> quoted(categoryName) >> quoted(packageName) >> quoted(versionName)
-        >> pinned;
-
-      const Package *pkg = lastIndex->find(categoryName, packageName);
-      const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
-
-      if(!ver) {
-        throw reapack_error(format("%s/%s/%s v%s cannot be found or is"
-          " incompatible with your operating system.")
-          % lastIndex->name() % categoryName % packageName % versionName);
-      }
-
-      tx->install(ver, pinned, reader);
-    }},
-  };
-
-  // starting import, do not abort process at this point
   string line;
   while(getline(toc, line)) {
+    if(line.size() <= 5) // 5 is the length of the line type prefix
+      continue;
+
+    const string &data = line.substr(5);
+
     try {
-      if(line.size() > 5) // 5 is the length of the line type prefix
-        funcs.at(line[0])(line.substr(5));
+      switch(line[0]) {
+      case 'R':
+        state.importRemote(data);
+        break;
+      case 'P':
+        state.importPackage(data);
+        break;
+      }
     }
     catch(const reapack_error &e) {
-      tx->receipt()->addError({e.what(), path});
+      state.m_tx->receipt()->addError({e.what(), path});
     }
   }
 
   reapack->config()->write();
-  tx->runTasks();
+  state.m_tx->runTasks();
+}
+
+void ImportArchive::importRemote(const string &data)
+{
+  m_lastIndex = nullptr; // clear the previous repository
+  const Remote &remote = Remote::fromString(data);
+
+  if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
+    throw reapack_error(format("Failed to extract index of %s (%d)")
+      % remote.name() % err);
+  }
+
+  m_remotes->add(remote);
+  m_lastIndex = Index::load(remote.name());
+}
+
+void ImportArchive::importPackage(const string &data)
+{
+  // don't report an error if the index isn't loaded assuming we already
+  // did when failing to import the repository above
+  if(!m_lastIndex)
+    return;
+
+  string categoryName, packageName, versionName;
+  bool pinned;
+
+  istringstream stream(data);
+  stream
+    >> quoted(categoryName) >> quoted(packageName) >> quoted(versionName)
+    >> pinned;
+
+  const Package *pkg = m_lastIndex->find(categoryName, packageName);
+  const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
+
+  if(!ver) {
+    throw reapack_error(format("%s/%s/%s v%s cannot be found or is"
+      " incompatible with your operating system.")
+      % m_lastIndex->name() % categoryName % packageName % versionName);
+  }
+
+  m_tx->install(ver, pinned, m_reader);
 }
 
 size_t Archive::create(const auto_string &path, ReaPack *reapack)
