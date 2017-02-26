@@ -18,6 +18,7 @@
 #include "about.hpp"
 
 #include "browser.hpp"
+#include "config.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"

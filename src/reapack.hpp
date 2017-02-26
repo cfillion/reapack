@@ -31,11 +31,11 @@
 class About;
 class Browser;
 class Config;
-class DownloadQueue;
 class Index;
 class Manager;
 class Progress;
 class Remote;
+class ThreadPool;
 class Transaction;
 
 typedef std::shared_ptr<const Index> IndexPtr;
@@ -89,7 +89,7 @@ public:
 
 private:
   void registerSelf();
-  void doFetchIndex(const Remote &remote, DownloadQueue *, HWND, bool stale);
+  void doFetchIndex(const Remote &remote, ThreadPool *, HWND, bool stale);
   IndexPtr loadIndex(const Remote &remote, HWND);
   void teardownTransaction();
 

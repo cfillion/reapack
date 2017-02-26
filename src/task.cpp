@@ -18,6 +18,7 @@
 #include "task.hpp"
 
 #include "config.hpp"
+#include "download.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
@@ -65,7 +66,7 @@ bool InstallTask::start()
     Download *dl = new Download(src->fullName(), src->url(), opts);
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
 
-    tx()->downloadQueue()->push(dl);
+    tx()->threadPool()->push(dl);
   }
 
   return true;

@@ -17,17 +17,17 @@
 
 #include "progress.hpp"
 
-#include "download.hpp"
+#include "thread.hpp"
 #include "resource.hpp"
 
 using namespace std;
 
-Progress::Progress(DownloadQueue *queue)
+Progress::Progress(ThreadPool *pool)
   : Dialog(IDD_PROGRESS_DIALOG),
-    m_queue(queue), m_label(nullptr), m_progress(nullptr),
+    m_pool(pool), m_label(nullptr), m_progress(nullptr),
     m_done(0), m_total(0)
 {
-  m_queue->onPush(bind(&Progress::addDownload, this, placeholders::_1));
+  m_pool->onPush(bind(&Progress::addTask, this, placeholders::_1));
 }
 
 void Progress::onInit()
@@ -44,7 +44,7 @@ void Progress::onCommand(const int id, int)
 {
   switch(id) {
   case IDCANCEL:
-    m_queue->abort();
+    m_pool->abort();
 
     // don't wait until the current downloads are finished
     // before getting out of the user way
@@ -59,7 +59,7 @@ void Progress::onTimer(const int id)
   stopTimer(id);
 }
 
-void Progress::addDownload(Download *dl)
+void Progress::addTask(ThreadTask *task)
 {
   m_total++;
   updateProgress();
@@ -67,12 +67,12 @@ void Progress::addDownload(Download *dl)
   if(!isVisible())
     startTimer(100);
 
-  dl->onStart([=] {
-    m_currentName = make_autostring(dl->name());
+  task->onStart([=] {
+    m_current = make_autostring(task->summary());
     updateProgress();
   });
 
-  dl->onFinish([=] {
+  task->onFinish([=] {
     m_done++;
     updateProgress();
   });
@@ -80,9 +80,12 @@ void Progress::addDownload(Download *dl)
 
 void Progress::updateProgress()
 {
+  auto_char position[32];
+  auto_snprintf(position, auto_size(position), AUTO_STR("%d of %d"),
+    min(m_done + 1, m_total), m_total);
+
   auto_char label[1024];
-  auto_snprintf(label, auto_size(label), AUTO_STR("Downloading %d of %d: %s"),
-    min(m_done + 1, m_total), m_total, m_currentName.c_str());
+  auto_snprintf(label, auto_size(label), m_current.c_str(), position);
 
   SetWindowText(m_label, label);
 
@@ -91,7 +94,7 @@ void Progress::updateProgress()
 
   auto_char title[255];
   auto_snprintf(title, auto_size(title),
-    AUTO_STR("ReaPack: Download in progress (%d%%)"), percent);
+    AUTO_STR("ReaPack: Operation in progress (%d%%)"), percent);
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
   SetWindowText(handle(), title);

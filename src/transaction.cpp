@@ -19,6 +19,7 @@
 
 #include "archive.hpp"
 #include "config.hpp"
+#include "download.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
@@ -36,13 +37,13 @@ Transaction::Transaction(Config *config)
   // don't keep pre-install pushes (for conflict checks); released in runTasks
   m_registry.savepoint();
 
-  m_downloadQueue.onAbort([=] {
+  m_threadPool.onAbort([=] {
     m_isCancelled = true;
     queue<HostTicket>().swap(m_regQueue);
   });
 
   // run tasks after fetching indexes
-  m_downloadQueue.onDone(bind(&Transaction::runTasks, this));
+  m_threadPool.onDone(bind(&Transaction::runTasks, this));
 }
 
 void Transaction::synchronize(const Remote &remote,
@@ -119,11 +120,11 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   }
 
   dl->onFinish([=] {
-    if(saveFile(dl, Index::pathFor(dl->name())))
+    if(saveFile(dl, Index::pathFor(remote.name())))
       cb();
   });
 
-  m_downloadQueue.push(dl);
+  m_threadPool.push(dl);
 }
 
 void Transaction::install(const Version *ver, const bool pin)
@@ -244,7 +245,7 @@ bool Transaction::runTasks()
 bool Transaction::commitTasks()
 {
   // wait until all running tasks are ready
-  if(!m_downloadQueue.idle())
+  if(!m_threadPool.idle())
     return false;
 
   // finish current tasks

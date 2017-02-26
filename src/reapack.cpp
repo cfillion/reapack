@@ -20,6 +20,7 @@
 #include "about.hpp"
 #include "browser.hpp"
 #include "config.hpp"
+#include "download.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
@@ -80,7 +81,7 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(resourcePath());
 
-  Download::Init();
+  Download::GlobalInit();
   RichEdit::Init();
 
   FS::mkdir(Path::CACHE);
@@ -105,7 +106,7 @@ ReaPack::~ReaPack()
   m_config->write();
   delete m_config;
 
-  Download::Cleanup();
+  Download::GlobalCleanup();
 
   delete m_useRootPath;
 }
@@ -287,12 +288,12 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
   // (in `parent`) to the progress dialog prevents it from being shown at all
   // while still taking the focus away from the manager dialog.
 
-  DownloadQueue *queue = new DownloadQueue;
-  Dialog *progress = Dialog::Create<Progress>(m_instance, m_mainWindow, queue);
+  ThreadPool *pool = new ThreadPool;
+  Dialog *progress = Dialog::Create<Progress>(m_instance, m_mainWindow, pool);
 
   auto load = [=] {
     Dialog::Destroy(progress);
-    delete queue;
+    delete pool;
 
     vector<IndexPtr> indexes;
 
@@ -309,16 +310,16 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
     callback(indexes);
   };
 
-  queue->onDone(load);
+  pool->onDone(load);
 
   for(const Remote &remote : remotes)
-    doFetchIndex(remote, queue, parent, stale);
+    doFetchIndex(remote, pool, parent, stale);
 
-  if(queue->idle())
+  if(pool->idle())
     load();
 }
 
-void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
+void ReaPack::doFetchIndex(const Remote &remote, ThreadPool *pool,
   HWND parent, const bool stale)
 {
   Download *dl = Index::fetch(remote, stale, m_config->network);
@@ -358,7 +359,7 @@ void ReaPack::doFetchIndex(const Remote &remote, DownloadQueue *queue,
     }
   });
 
-  queue->push(dl);
+  pool->push(dl);
 }
 
 IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
@@ -411,8 +412,7 @@ Transaction *ReaPack::setupTransaction()
   }
 
   assert(!m_progress);
-  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow,
-    m_tx->downloadQueue());
+  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow, m_tx->threadPool());
 
   m_tx->onFinish([=] {
     Dialog::Destroy(m_progress);
