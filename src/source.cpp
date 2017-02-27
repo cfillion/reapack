@@ -83,16 +83,6 @@ void Source::setSections(int sections)
   m_sections = sections;
 }
 
-string Source::fullName() const
-{
-  if(!m_version)
-    return Path(file()).basename();
-  else if(m_file.empty())
-    return m_version->fullName();
-
-  return m_version->fullName() + " (" + Path(m_file).basename() + ")";
-}
-
 Path Source::targetPath() const
 {
   Path path;

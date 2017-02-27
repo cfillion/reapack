@@ -127,22 +127,6 @@ TEST_CASE("empty source url", M) {
   }
 }
 
-TEST_CASE("source full name", M) {
-  MAKE_VERSION;
-
-  SECTION("with file name") {
-    const Source source("path/to/file", "b", &ver);
-
-    REQUIRE(source.fullName() == ver.fullName() + " (file)");
-  }
-
-  SECTION("without file name") {
-    const Source source({}, "b", &ver);
-
-    REQUIRE(source.fullName() == ver.fullName());
-  }
-}
-
 TEST_CASE("source target path", M) {
   MAKE_VERSION;
 

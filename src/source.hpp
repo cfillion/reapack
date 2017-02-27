@@ -39,10 +39,10 @@ public:
   static Section detectSection(const std::string &category);
 
   Source(const std::string &file, const std::string &url, const Version *);
+  const Version *version() const { return m_version; }
 
   void setPlatform(Platform p) { m_platform = p; }
   Platform platform() const { return m_platform; }
-
   void setTypeOverride(Package::Type t) { m_type = t; }
   Package::Type typeOverride() const { return m_type; }
   Package::Type type() const;
@@ -51,9 +51,6 @@ public:
   void setSections(int);
   int sections() const { return m_sections; }
 
-  const Version *version() const { return m_version; }
-
-  std::string fullName() const;
   Path targetPath() const;
 
 private:
