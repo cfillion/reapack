@@ -188,7 +188,7 @@ void Dialog::setVisible(const bool visible, HWND handle)
 
 bool Dialog::isVisible() const
 {
-  return IsWindowVisible(m_handle);
+  return IsWindowVisible(m_handle) != 0;
 }
 
 void Dialog::close(const INT_PTR result)
