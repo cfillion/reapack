@@ -104,7 +104,7 @@ void Archive::import(const auto_string &path, ReaPack *reapack)
       }
     }
     catch(const reapack_error &e) {
-      state.m_tx->receipt()->addError({e.what(), path});
+      state.m_tx->receipt()->addError({e.what(), from_autostring(path)});
     }
   }
 
