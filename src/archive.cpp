@@ -270,10 +270,15 @@ void FileExtractor::run(DownloadContext *)
     return;
   }
 
-  if(!m_reader->extractFile(m_path.target(), stream))
-    finish(Success);
+  const int error = m_reader->extractFile(m_path.target(), stream);
+  stream.close();
+
+  if(error) {
+    const format &msg = format("Failed to extract file (%d)") % error;
+    finish(Failure, {msg.str(), m_path.target().join()});
+  }
   else
-    finish(Failure, {"Failed to extract file", m_path.target().join()});
+    finish(Success);
 }
 
 ArchiveWriter::ArchiveWriter(const auto_string &path)
