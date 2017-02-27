@@ -148,8 +148,8 @@ void InstallTask::rollback()
   for(const PathGroup &paths : m_newFiles)
     FS::removeRecursive(paths.temp);
 
-  for(Download *dl : m_waiting)
-    dl->abort();
+  for(ThreadTask *job : m_waiting)
+    job->abort();
 
   m_fail = true;
 }

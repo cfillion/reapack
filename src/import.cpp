@@ -106,7 +106,7 @@ void Import::fetch()
     setWaiting(false);
 
     if(state != ThreadTask::Success) {
-      const string msg = "Download failed: " + dl->errorString();
+      const string msg = "Download failed: " + dl->error().message;
       MessageBox(handle(), make_autostring(msg).c_str(), TITLE, MB_OK);
       SetFocus(m_url);
       return;

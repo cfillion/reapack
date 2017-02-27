@@ -28,6 +28,7 @@
 class Download;
 class Index;
 class Source;
+class ThreadTask;
 class Transaction;
 class Version;
 
@@ -70,7 +71,7 @@ private:
   Registry::Entry m_oldEntry;
   bool m_fail;
   IndexPtr m_index; // keep in memory
-  std::unordered_set<Download *> m_waiting;
+  std::unordered_set<ThreadTask *> m_waiting;
   std::vector<Registry::File> m_oldFiles;
   std::vector<PathGroup> m_newFiles;
 };

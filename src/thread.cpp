@@ -55,9 +55,9 @@ void ThreadTask::setState(const State state)
   }
 }
 
-void ThreadTask::finish(const State state, const string &error)
+void ThreadTask::finish(const State state, const ErrorInfo &error)
 {
-  m_errorString = error;
+  m_error = error;
 
   ThreadNotifier::get()->notify({this, state});
 };

@@ -133,11 +133,11 @@ void Report::printErrors()
 
   const auto start = m_stream.tellp();
 
-  for(const Receipt::Error &err : m_receipt.errors()) {
+  for(const ErrorInfo &err : m_receipt.errors()) {
     if(m_stream.tellp() != start)
       m_stream << "\r\n";
 
-    m_stream << err.title << ":\r\n";
+    m_stream << err.context << ":\r\n";
     m_stream.indented(err.message);
   }
 }

@@ -123,7 +123,7 @@ void Download::start()
 void Download::run(DownloadContext *ctx)
 {
   if(aborted()) {
-    finish(Aborted, "cancelled");
+    finish(Aborted, {"cancelled", m_url});
     return;
   }
 
@@ -150,10 +150,10 @@ void Download::run(DownloadContext *ctx)
   const CURLcode res = curl_easy_perform(ctx->m_curl);
 
   if(aborted())
-    finish(Aborted, "aborted");
+    finish(Aborted, {"aborted", m_url});
   else if(res != CURLE_OK) {
     const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
-    finish(Failure, err.str());
+    finish(Failure, {err.str(), m_url});
   }
   else
     finish(Success);

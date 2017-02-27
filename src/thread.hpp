@@ -18,6 +18,8 @@
 #ifndef REAPACK_THREAD_HPP
 #define REAPACK_THREAD_HPP
 
+#include "errors.hpp"
+
 #include <array>
 #include <atomic>
 #include <functional>
@@ -56,7 +58,7 @@ public:
 
   void setState(State);
   State state() const { return m_state; }
-  const std::string &errorString() { return m_errorString; }
+  const ErrorInfo &error() { return m_error; }
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
@@ -66,11 +68,11 @@ public:
   void abort() { m_abort = true; }
 
 protected:
-  void finish(State, const std::string &errorString = {});
+  void finish(State, const ErrorInfo & = {});
 
 private:
   State m_state;
-  std::string m_errorString;
+  ErrorInfo m_error;
   std::atomic_bool m_abort;
 
   VoidSignal m_onStart;

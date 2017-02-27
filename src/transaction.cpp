@@ -37,7 +37,14 @@ Transaction::Transaction(Config *config)
   // don't keep pre-install pushes (for conflict checks); released in runTasks
   m_registry.savepoint();
 
-  m_threadPool.onAbort([=] {
+  m_threadPool.onPush([this] (ThreadTask *task) {
+    task->onFinish([=] {
+      if(task->state() == ThreadTask::Failure)
+        m_receipt.addError(task->error());
+    });
+  });
+
+  m_threadPool.onAbort([this] {
     m_isCancelled = true;
     queue<HostTicket>().swap(m_regQueue);
   });
@@ -171,17 +178,11 @@ void Transaction::uninstall(const Registry::Entry &entry)
 
 bool Transaction::saveFile(Download *dl, const Path &path)
 {
-  switch(dl->state()) {
-  case ThreadTask::Success:
+  if(dl->state() == ThreadTask::Success) {
     if(FS::write(path, dl->contents()))
       return true;
     else
       m_receipt.addError({FS::lastError(), path.join()});
-    break;
-  case ThreadTask::Failure:
-    m_receipt.addError({dl->errorString(), dl->url()});
-  default:
-    return false;
   }
 
   return false;

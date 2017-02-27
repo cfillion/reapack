@@ -23,6 +23,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "errors.hpp"
 #include "registry.hpp"
 
 class Index;
@@ -40,11 +41,6 @@ struct InstallTicket {
 
 class Receipt {
 public:
-  struct Error {
-    std::string message;
-    std::string title;
-  };
-
   Receipt();
 
   bool empty() const;
@@ -60,8 +56,8 @@ public:
   void addRemovals(const std::set<Path> &);
   const std::set<Path> &removals() const { return m_removals; }
 
-  void addError(const Error &err) { m_errors.push_back(err); }
-  const std::vector<Error> &errors() const { return m_errors; }
+  void addError(const ErrorInfo &err) { m_errors.push_back(err); }
+  const std::vector<ErrorInfo> &errors() const { return m_errors; }
   bool hasErrors() const { return !m_errors.empty(); }
 
 private:
@@ -71,7 +67,7 @@ private:
   std::vector<InstallTicket> m_installs;
   std::vector<InstallTicket> m_updates;
   std::set<Path> m_removals;
-  std::vector<Error> m_errors;
+  std::vector<ErrorInfo> m_errors;
 
   std::unordered_set<IndexPtr> m_indexes; // keep them alive!
 };
