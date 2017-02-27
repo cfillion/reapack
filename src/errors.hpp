@@ -27,4 +27,9 @@ public:
   reapack_error(const boost::format &f) : std::runtime_error(f.str()) {}
 };
 
+struct ErrorInfo {
+  std::string message;
+  std::string context;
+};
+
 #endif

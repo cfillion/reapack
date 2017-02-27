@@ -93,11 +93,12 @@ void Import::fetch()
 
   setWaiting(true);
 
-  Download *dl = m_download = new Download({}, url, m_reapack->config()->network);
+  const auto &opts = m_reapack->config()->network;
+  MemoryDownload *dl = m_download = new MemoryDownload(url, opts);
 
   dl->onFinish([=] {
-    const Download::State state = dl->state();
-    if(state == Download::Aborted) {
+    const ThreadTask::State state = dl->state();
+    if(state == ThreadTask::Aborted) {
       // at this point `this` is deleted, so there is nothing else
       // we can do without crashing
       return; 
@@ -105,8 +106,8 @@ void Import::fetch()
 
     setWaiting(false);
 
-    if(state != Download::Success) {
-      const string msg = "Download failed: " + dl->contents();
+    if(state != ThreadTask::Success) {
+      const string msg = "Download failed: " + dl->error().message;
       MessageBox(handle(), make_autostring(msg).c_str(), TITLE, MB_OK);
       SetFocus(m_url);
       return;
@@ -117,7 +118,7 @@ void Import::fetch()
 
   dl->setCleanupHandler([=] {
     // if we are still alive
-    if(dl->state() != Download::Aborted)
+    if(dl->state() != ThreadTask::Aborted)
       m_download = nullptr;
 
     delete dl;

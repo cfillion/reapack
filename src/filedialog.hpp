@@ -15,42 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_IMPORT_HPP
-#define REAPACK_IMPORT_HPP
-
-#include "dialog.hpp"
+#ifndef REAPACK_FILEBROWSE_HPP
+#define REAPACK_FILEBROWSE_HPP
 
 #include "encoding.hpp"
 
-#include <string>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <swell-types.h>
+#endif
 
-class MemoryDownload;
-class ReaPack;
-class Remote;
+class Path;
 
-class Import : public Dialog
-{
-public:
-  Import(ReaPack *);
-
-protected:
-  void onInit() override;
-  void onCommand(int, int) override;
-  void onTimer(int) override;
-
-private:
-  void fetch();
-  void read();
-  bool import(const Remote &);
-  void setWaiting(bool);
-
-  ReaPack *m_reapack;
-  MemoryDownload *m_download;
-  short m_fakePos;
-
-  HWND m_url;
-  HWND m_progress;
-  HWND m_ok;
+namespace FileDialog {
+  auto_string getOpenFileName(HWND, HINSTANCE, const auto_char *title,
+    const Path &directory, const auto_char *filters, const auto_char *defext);
+  auto_string getSaveFileName(HWND, HINSTANCE, const auto_char *title,
+    const Path &directory, const auto_char *filters, const auto_char *defext);
 };
 
 #endif

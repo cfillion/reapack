@@ -39,7 +39,7 @@ public:
   Manager(ReaPack *);
 
   void refresh();
-  bool import();
+  bool importRepo();
 
 protected:
   void onInit() override;
@@ -71,8 +71,11 @@ private:
   void about(int index);
   void copyUrl();
   void launchBrowser();
+  void importExport();
   void options();
   void setupNetwork();
+  void importArchive();
+  void exportArchive();
 
   void setChange(int);
   bool confirm() const;

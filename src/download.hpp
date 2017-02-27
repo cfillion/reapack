@@ -19,150 +19,81 @@
 #define REAPACK_DOWNLOAD_HPP
 
 #include "config.hpp"
+#include "path.hpp"
+#include "thread.hpp"
 
-#include <array>
-#include <atomic>
-#include <functional>
-#include <queue>
-#include <string>
-#include <unordered_set>
-
-#include <boost/signals2.hpp>
-#include <WDL/mutex.h>
+#include <fstream>
+#include <sstream>
 
 #include <curl/curl.h>
-#include <reaper_plugin.h>
 
-class Download {
+struct DownloadContext {
+  static void GlobalInit();
+  static void GlobalCleanup();
+
+  DownloadContext();
+  ~DownloadContext();
+
+  CURL *m_curl;
+};
+
+class Download : public ThreadTask {
 public:
-  typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef std::function<void ()> CleanupHandler;
-
-  enum State {
-    Idle,
-    Running,
-    Success,
-    Failure,
-    Aborted,
-  };
-
   enum Flag {
     NoCacheFlag = 1<<0,
   };
 
-  static void Init();
-  static void Cleanup();
+  Download(const std::string &url, const NetworkOpts &, int flags = 0);
 
-  Download(const std::string &name, const std::string &url,
-    const NetworkOpts &, int flags = 0);
-  ~Download();
-
-  const std::string &name() const { return m_name; }
+  void setName(const std::string &);
   const std::string &url() const { return m_url; }
-  const NetworkOpts &options() const { return m_opts; }
-  bool has(Flag f) const { return (m_flags & f) != 0; }
-
-  void setState(State);
-  State state() const { return m_state; }
-  const std::string &contents() { return m_contents; }
-
-  void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
-  void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
-  void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
-
   void start();
-  void abort() { m_abort = true; }
 
-  void exec(CURL *);
+  bool concurrent() const override { return true; }
+  void run(DownloadContext *) override;
 
 private:
+  virtual std::ostream *openStream() = 0;
+  virtual void closeStream() {}
+
+private:
+  bool has(Flag f) const { return (m_flags & f) != 0; }
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
-  std::string m_name;
   std::string m_url;
   NetworkOpts m_opts;
   int m_flags;
-
-  State m_state;
-  std::atomic_bool m_abort;
-  std::string m_contents;
-
-  VoidSignal m_onStart;
-  VoidSignal m_onFinish;
-  CleanupHandler m_cleanupHandler;
 };
 
-class DownloadThread {
+class MemoryDownload : public Download {
 public:
-  DownloadThread();
-  ~DownloadThread();
+  MemoryDownload(const std::string &url, const NetworkOpts &, int flags = 0);
 
-  void push(Download *);
-  void clear();
+  std::string contents() const { return m_stream.str(); }
+
+protected:
+  std::ostream *openStream() override { return &m_stream; }
 
 private:
-  static DWORD WINAPI thread(void *);
-  Download *nextDownload();
-
-  HANDLE m_wake;
-  HANDLE m_thread;
-  std::atomic_bool m_exit;
-  WDL_Mutex m_mutex;
-  std::queue<Download *> m_queue;
+  std::stringstream m_stream;
 };
 
-class DownloadQueue {
+class FileDownload : public Download {
 public:
-  typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef boost::signals2::signal<void (Download *)> DownloadSignal;
+  FileDownload(const Path &target, const std::string &url,
+    const NetworkOpts &, int flags = 0);
 
-  DownloadQueue() {}
-  DownloadQueue(const DownloadQueue &) = delete;
-  ~DownloadQueue();
+  const TempPath &path() const { return m_path; }
+  bool save();
 
-  void push(Download *);
-  void abort();
-
-  bool idle() const { return m_running.empty(); }
-
-  void onPush(const DownloadSignal::slot_type &slot) { m_onPush.connect(slot); }
-  void onAbort(const VoidSignal::slot_type &slot) { m_onAbort.connect(slot); }
-  void onDone(const VoidSignal::slot_type &slot) { m_onDone.connect(slot); }
+protected:
+  std::ostream *openStream() override;
+  void closeStream() override;
 
 private:
-  std::array<std::unique_ptr<DownloadThread>, 3> m_pool;
-  std::unordered_set<Download *> m_running;
-
-  DownloadSignal m_onPush;
-  VoidSignal m_onAbort;
-  VoidSignal m_onDone;
-};
-
-// This singleton class receives state change notifications from a
-// worker thread and applies them in the main thread
-class DownloadNotifier {
-  typedef std::pair<Download *, Download::State> Notification;
-
-public:
-  static DownloadNotifier *get();
-
-  void start();
-  void stop();
-
-  void notify(const Notification &);
-
-private:
-  static DownloadNotifier *s_instance;
-  static void tick();
-
-  DownloadNotifier() : m_active(0) {}
-  ~DownloadNotifier() = default;
-  void processQueue();
-
-  WDL_Mutex m_mutex;
-  size_t m_active;
-  std::queue<Notification> m_queue;
+  TempPath m_path;
+  std::ofstream m_stream;
 };
 
 #endif

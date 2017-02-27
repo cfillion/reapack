@@ -22,12 +22,12 @@
 
 #include "encoding.hpp"
 
-class Download;
-class DownloadQueue;
+class ThreadPool;
+class ThreadTask;
 
 class Progress : public Dialog {
 public:
-  Progress(DownloadQueue *);
+  Progress(ThreadPool *);
 
 protected:
   void onInit() override;
@@ -35,11 +35,11 @@ protected:
   void onTimer(int) override;
 
 private:
-  void addDownload(Download *);
+  void addTask(ThreadTask *);
   void updateProgress();
 
-  DownloadQueue *m_queue;
-  auto_string m_currentName;
+  ThreadPool *m_pool;
+  auto_string m_current;
 
   HWND m_label;
   HWND m_progress;

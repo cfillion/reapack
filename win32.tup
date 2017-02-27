@@ -25,7 +25,7 @@ SQLFLAGS += /DSQLITE_OMIT_COMPILEOPTION_DIAGS /DSQLITE_OMIT_CAST
 SQLFLAGS += /DSQLITE_OMIT_CHECK /DSQLITE_OMIT_DECLTYPE /DSQLITE_OMIT_DEPRECATED
 
 LD := $(WRAP) link
-LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib
+LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib Comdlg32.lib
 LDFLAGS += vendor/libcurl@(SUFFIX)/lib/libcurl_a.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
 LDFLAGS += $(TUP_VARIANTDIR)/build/vendor/sqlite3.o

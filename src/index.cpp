@@ -82,7 +82,7 @@ IndexPtr Index::load(const string &name, const char *data)
   return IndexPtr(ri);
 }
 
-Download *Index::fetch(const Remote &remote,
+FileDownload *Index::fetch(const Remote &remote,
   const bool stale, const NetworkOpts &opts)
 {
   time_t mtime = 0, now = time(nullptr);
@@ -94,7 +94,10 @@ Download *Index::fetch(const Remote &remote,
       return nullptr;
   }
 
-  return new Download(remote.name(), remote.url(), opts, Download::NoCacheFlag);
+  const Path &path = pathFor(remote.name());
+  auto fd = new FileDownload(path, remote.url(), opts, Download::NoCacheFlag);
+  fd->setName(remote.name());
+  return fd;
 }
 
 Index::Index(const string &name)

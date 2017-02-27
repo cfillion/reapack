@@ -17,8 +17,9 @@
 
 #include "transaction.hpp"
 
+#include "archive.hpp"
 #include "config.hpp"
-#include "encoding.hpp"
+#include "download.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
@@ -36,13 +37,20 @@ Transaction::Transaction(Config *config)
   // don't keep pre-install pushes (for conflict checks); released in runTasks
   m_registry.savepoint();
 
-  m_downloadQueue.onAbort([=] {
+  m_threadPool.onPush([this] (ThreadTask *task) {
+    task->onFinish([=] {
+      if(task->state() == ThreadTask::Failure)
+        m_receipt.addError(task->error());
+    });
+  });
+
+  m_threadPool.onAbort([this] {
     m_isCancelled = true;
     queue<HostTicket>().swap(m_regQueue);
   });
 
   // run tasks after fetching indexes
-  m_downloadQueue.onDone(bind(&Transaction::runTasks, this));
+  m_threadPool.onDone(bind(&Transaction::runTasks, this));
 }
 
 void Transaction::synchronize(const Remote &remote,
@@ -105,12 +113,12 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   else if(regEntry.pinned || latest->name() < regEntry.version)
     return;
 
-  m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
+  m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, nullptr, this));
 }
 
 void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
 {
-  Download *dl = Index::fetch(remote, true, m_config->network);
+  FileDownload *dl = Index::fetch(remote, true, m_config->network);
 
   if(!dl) {
     // the index was last downloaded less than a few seconds ago
@@ -119,17 +127,20 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   }
 
   dl->onFinish([=] {
-    if(saveFile(dl, Index::pathFor(dl->name())))
+    if(!dl->save())
+      m_receipt.addError({FS::lastError(), dl->path().target().join()});
+    else if(dl->state() == ThreadTask::Success)
       cb();
   });
 
-  m_downloadQueue.push(dl);
+  m_threadPool.push(dl);
 }
 
-void Transaction::install(const Version *ver, const bool pin)
+void Transaction::install(const Version *ver,
+  const bool pin, const ArchiveReaderPtr &reader)
 {
   const auto &oldEntry = m_registry.getEntry(ver->package());
-  m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
+  m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
 }
 
 void Transaction::registerAll(const Remote &remote)
@@ -166,21 +177,6 @@ void Transaction::uninstall(const Remote &remote)
 void Transaction::uninstall(const Registry::Entry &entry)
 {
   m_nextQueue.push(make_shared<UninstallTask>(entry, this));
-}
-
-bool Transaction::saveFile(Download *dl, const Path &path)
-{
-  if(dl->state() != Download::Success) {
-    m_receipt.addError({dl->contents(), dl->url()});
-    return false;
-  }
-
-  if(!FS::write(path, dl->contents())) {
-    m_receipt.addError({FS::lastError(), path.join()});
-    return false;
-  }
-
-  return true;
 }
 
 bool Transaction::runTasks()
@@ -244,7 +240,7 @@ bool Transaction::runTasks()
 bool Transaction::commitTasks()
 {
   // wait until all running tasks are ready
-  if(!m_downloadQueue.idle())
+  if(!m_threadPool.idle())
     return false;
 
   // finish current tasks

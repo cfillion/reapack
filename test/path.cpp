@@ -236,3 +236,10 @@ TEST_CASE("append full paths") {
 
   REQUIRE(a == Path("a/b/c/d/e/f"));
 }
+
+TEST_CASE("temporary path") {
+  TempPath a(Path("hello/world"));
+
+  REQUIRE(a.target() == Path("hello/world"));
+  REQUIRE(a.temp() == Path("hello/world.part"));
+}

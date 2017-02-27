@@ -18,10 +18,10 @@
 #ifndef REAPACK_TRANSACTION_HPP
 #define REAPACK_TRANSACTION_HPP
 
-#include "download.hpp"
 #include "receipt.hpp"
 #include "registry.hpp"
 #include "task.hpp"
+#include "thread.hpp"
 
 #include <boost/optional.hpp>
 #include <boost/signals2.hpp>
@@ -30,6 +30,7 @@
 #include <set>
 #include <unordered_set>
 
+class ArchiveReader;
 class Config;
 class Path;
 class Remote;
@@ -53,7 +54,7 @@ public:
 
   void synchronize(const Remote &,
     boost::optional<bool> forceAutoInstall = boost::none);
-  void install(const Version *, bool pin = false);
+  void install(const Version *, bool pin = false, const ArchiveReaderPtr & = nullptr);
   void setPinned(const Registry::Entry &, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
@@ -65,11 +66,10 @@ public:
   Receipt *receipt() { return &m_receipt; }
   Registry *registry() { return &m_registry; }
   const Config *config() { return m_config; }
-  DownloadQueue *downloadQueue() { return &m_downloadQueue; }
+  ThreadPool *threadPool() { return &m_threadPool; }
 
   void registerAll(bool add, const Registry::Entry &);
   void registerFile(const HostTicket &t) { m_regQueue.push(t); }
-  bool saveFile(Download *, const Path &);
 
 private:
   class CompareTask {
@@ -101,7 +101,7 @@ private:
   std::unordered_set<std::string> m_inhibited;
   std::unordered_set<Registry::Entry> m_obsolete;
 
-  DownloadQueue m_downloadQueue;
+  ThreadPool m_threadPool;
   TaskQueue m_nextQueue;
   std::queue<TaskQueue> m_taskQueues;
   std::queue<TaskPtr> m_runningTasks;

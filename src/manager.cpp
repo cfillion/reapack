@@ -18,22 +18,33 @@
 #include "manager.hpp"
 
 #include "about.hpp"
+#include "archive.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
+#include "errors.hpp"
+#include "filedialog.hpp"
 #include "import.hpp"
 #include "menu.hpp"
+#include "progress.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
 
+static const auto_char *ARCHIVE_FILTER =
+  AUTO_STR("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
+static const auto_char *ARCHIVE_EXT = AUTO_STR("ReaPackArchive");
+
 using namespace std;
 
-enum { ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-       ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-       ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
-       ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
-       ACTION_NETCONFIG, ACTION_RESETCONFIG };
+enum {
+  ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
+  ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
+  ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
+  ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
+  ACTION_NETCONFIG, ACTION_RESETCONFIG, ACTION_IMPORT_REPO,
+  ACTION_IMPORT_ARCHIVE, ACTION_EXPORT_ARCHIVE
+};
 
 Manager::Manager(ReaPack *reapack)
   : Dialog(IDD_CONFIG_DIALOG),
@@ -88,7 +99,7 @@ void Manager::onCommand(const int id, int)
 {
   switch(id) {
   case IDC_IMPORT:
-    import();
+    importExport();
     break;
   case IDC_BROWSE:
     launchBrowser();
@@ -119,6 +130,15 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_UNINSTALL:
     uninstall();
+    break;
+  case ACTION_IMPORT_REPO:
+    importRepo();
+    break;
+  case ACTION_IMPORT_ARCHIVE:
+    importArchive();
+    break;
+  case ACTION_EXPORT_ARCHIVE:
+    exportArchive();
     break;
   case ACTION_AUTOINSTALL:
     toggle(m_autoInstall, m_config->install.autoInstall);
@@ -446,7 +466,18 @@ void Manager::copyUrl()
   setClipboard(values);
 }
 
-bool Manager::import()
+void Manager::importExport()
+{
+  Menu menu;
+  menu.addAction(AUTO_STR("Import a &repository..."), ACTION_IMPORT_REPO);
+  menu.addSeparator();
+  menu.addAction(AUTO_STR("Import offline archive..."), ACTION_IMPORT_ARCHIVE);
+  menu.addAction(AUTO_STR("&Export offline archive..."), ACTION_EXPORT_ARCHIVE);
+
+  menu.show(getControl(IDC_IMPORT), handle());
+}
+
+bool Manager::importRepo()
 {
   if(m_importing) // avoid opening the import dialog twice on windows
     return true;
@@ -456,6 +487,81 @@ bool Manager::import()
   m_importing = false;
 
   return ret != 0;
+}
+
+void Manager::importArchive()
+{
+  const auto_char *title = AUTO_STR("Import offline archive");
+
+  const auto_string &path = FileDialog::getOpenFileName(handle(), instance(),
+    title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
+
+  if(path.empty())
+    return;
+
+  try {
+    Archive::import(path, m_reapack);
+  }
+  catch(const reapack_error &e) {
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512];
+    auto_snprintf(msg, auto_size(msg),
+      AUTO_STR("An error occured while reading %s.\r\n\r\n%s."),
+      path.c_str(), desc.c_str()
+    );
+
+    MessageBox(handle(), msg, title, MB_OK);
+  }
+}
+
+void Manager::exportArchive()
+{
+  const auto_char *title = AUTO_STR("Export offline archive");
+
+  const auto_string &path = FileDialog::getSaveFileName(handle(), instance(),
+    title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
+
+  if(path.empty())
+    return;
+
+  ThreadPool *pool = new ThreadPool;
+  Dialog *progress = Dialog::Create<Progress>(instance(), parent(), pool);
+
+  try {
+    const size_t count = Archive::create(path, pool, m_reapack);
+
+    const auto finish = [=] {
+      Dialog::Destroy(progress);
+
+      auto_char msg[255];
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("Done! %zu package%s were exported in the archive."),
+        count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
+      MessageBox(handle(), msg, title, MB_OK);
+
+      delete pool;
+    };
+
+    pool->onDone(finish);
+
+    if(pool->idle())
+      finish();
+  }
+  catch(const reapack_error &e) {
+    Dialog::Destroy(progress);
+    delete pool;
+
+    const auto_string &desc = make_autostring(e.what());
+
+    auto_char msg[512];
+    auto_snprintf(msg, auto_size(msg),
+      AUTO_STR("An error occured while writing into %s.\r\n\r\n%s."),
+      path.c_str(), desc.c_str()
+    );
+    MessageBox(handle(), msg, title, MB_OK);
+  }
+
 }
 
 void Manager::launchBrowser()
