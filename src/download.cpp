@@ -122,20 +122,12 @@ void Download::start()
 
 void Download::run(DownloadContext *ctx)
 {
-  const auto finish = [&](const State state, const string &contents) {
-    m_contents = contents;
-
-    ThreadNotifier::get()->notify({this, state});
-  };
-
   if(aborted()) {
     finish(Aborted, "cancelled");
     return;
   }
 
   ThreadNotifier::get()->notify({this, Running});
-
-  string contents;
 
   curl_easy_setopt(ctx->m_curl, CURLOPT_URL, m_url.c_str());
   curl_easy_setopt(ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
@@ -145,7 +137,7 @@ void Download::run(DownloadContext *ctx)
   curl_easy_setopt(ctx->m_curl, CURLOPT_PROGRESSDATA, this);
 
   curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEDATA, &contents);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEDATA, &m_contents);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
@@ -164,7 +156,7 @@ void Download::run(DownloadContext *ctx)
     finish(Failure, err.str());
   }
   else
-    finish(Success, contents);
+    finish(Success);
 
   curl_slist_free_all(headers);
 }

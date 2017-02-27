@@ -55,6 +55,13 @@ void ThreadTask::setState(const State state)
   }
 }
 
+void ThreadTask::finish(const State state, const string &error)
+{
+  m_errorString = error;
+
+  ThreadNotifier::get()->notify({this, state});
+};
+
 WorkerThread::WorkerThread() : m_exit(false)
 {
   m_wake = CreateEvent(nullptr, true, false, AUTO_STR("WakeEvent"));

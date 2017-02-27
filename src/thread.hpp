@@ -56,6 +56,7 @@ public:
 
   void setState(State);
   State state() const { return m_state; }
+  const std::string &errorString() { return m_errorString; }
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
@@ -64,8 +65,12 @@ public:
   bool aborted() const { return m_abort; }
   void abort() { m_abort = true; }
 
+protected:
+  void finish(State, const std::string &errorString = {});
+
 private:
   State m_state;
+  std::string m_errorString;
   std::atomic_bool m_abort;
 
   VoidSignal m_onStart;

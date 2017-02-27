@@ -172,7 +172,7 @@ void Transaction::uninstall(const Registry::Entry &entry)
 bool Transaction::saveFile(Download *dl, const Path &path)
 {
   if(dl->state() != Download::Success) {
-    m_receipt.addError({dl->contents(), dl->url()});
+    m_receipt.addError({dl->errorString(), dl->url()});
     return false;
   }
 
