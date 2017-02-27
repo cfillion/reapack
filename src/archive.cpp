@@ -34,14 +34,14 @@
 #include <zlib/unzip.h>
 #include <zlib/ioapi.h>
 
-using namespace std;
 using namespace boost;
+using namespace std;
 
 static const Path ARCHIVE_TOC = Path("toc");
 static const size_t BUFFER_SIZE = 4096;
 
 #ifdef _WIN32
-static void *wide_fopen(voidpf opaque, const void *filename, int mode)
+static void *wide_fopen(voidpf, const void *filename, int mode)
 {
   const wchar_t *fopen_mode = nullptr;
 
@@ -227,7 +227,7 @@ int ArchiveReader::extractFile(const Path &path)
     throw reapack_error(format("%s: %s") % path.join() % FS::lastError());
 }
 
-int ArchiveReader::extractFile(const Path &path, ostream &stream)
+int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
 {
   int status = unzLocateFile(m_zip, path.join('/').c_str(), false);
   if(status != UNZ_OK)
@@ -307,17 +307,16 @@ ArchiveWriter::~ArchiveWriter()
 
 int ArchiveWriter::addFile(const Path &path)
 {
-  ifstream stream(make_autostring(Path::prefixRoot(path).join()), ios_base::binary);
+  ifstream stream;
 
-  if(stream)
+  if(FS::open(stream, path))
     return addFile(path, stream);
   else
-    throw reapack_error(FS::lastError().c_str());
+    throw reapack_error(format("%s: %s") % path.join() % FS::lastError());
 }
 
-int ArchiveWriter::addFile(const Path &path, istream &stream)
+int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
 {
-
   const int status = zipOpenNewFileInZip(m_zip, path.join('/').c_str(), nullptr,
     nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 

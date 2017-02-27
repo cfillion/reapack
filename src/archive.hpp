@@ -36,7 +36,7 @@ public:
   ArchiveReader(const auto_string &path);
   ~ArchiveReader();
   int extractFile(const Path &);
-  int extractFile(const Path &, std::ostream &);
+  int extractFile(const Path &, std::ostream &) noexcept;
 
 private:
   zipFile m_zip;
@@ -47,7 +47,7 @@ public:
   ArchiveWriter(const auto_string &path);
   ~ArchiveWriter();
   int addFile(const Path &fn);
-  int addFile(const Path &fn, std::istream &);
+  int addFile(const Path &fn, std::istream &) noexcept;
 
 private:
   zipFile m_zip;

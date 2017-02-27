@@ -46,6 +46,13 @@ FILE *FS::open(const Path &path)
 #endif
 }
 
+bool FS::open(ifstream &stream, const Path &path)
+{
+  const Path &fullPath = Path::prefixRoot(path);
+  stream.open(make_autostring(fullPath.join()), ios_base::binary);
+  return stream.good();
+}
+
 bool FS::open(ofstream &stream, const Path &path)
 {
   mkdir(path.dirname());
