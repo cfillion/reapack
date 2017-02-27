@@ -61,8 +61,10 @@ public:
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
 
+  bool aborted() const { return m_abort; }
   void abort() { m_abort = true; }
 
+private:
   State m_state;
   std::atomic_bool m_abort;
 

@@ -150,7 +150,7 @@ void ImportArchive::importPackage(const string &data)
       % m_lastIndex->name() % categoryName % packageName % versionName);
   }
 
-  m_tx->install(ver, pinned, m_reader);
+  // m_tx->install(ver, pinned, m_reader);
 }
 
 size_t Archive::create(const auto_string &path, ReaPack *reapack)

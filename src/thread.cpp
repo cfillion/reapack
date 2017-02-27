@@ -63,7 +63,6 @@ WorkerThread::WorkerThread() : m_exit(false)
 
 WorkerThread::~WorkerThread()
 {
-  // remove all pending tasks then wake the thread to make it exit
   m_exit = true;
   SetEvent(m_wake);
 

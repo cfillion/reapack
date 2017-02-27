@@ -99,7 +99,7 @@ size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
 int Download::UpdateProgress(void *ptr, const double, const double,
     const double, const double)
 {
-  return static_cast<Download *>(ptr)->m_abort;
+  return static_cast<Download *>(ptr)->aborted();
 }
 
 Download::Download(const string &name, const string &url,
@@ -128,7 +128,7 @@ void Download::run(DownloadContext *ctx)
     ThreadNotifier::get()->notify({this, state});
   };
 
-  if(m_abort) {
+  if(aborted()) {
     finish(Aborted, "cancelled");
     return;
   }
@@ -157,7 +157,7 @@ void Download::run(DownloadContext *ctx)
 
   const CURLcode res = curl_easy_perform(ctx->m_curl);
 
-  if(m_abort)
+  if(aborted())
     finish(Aborted, "aborted by user");
   else if(res != CURLE_OK) {
     const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
