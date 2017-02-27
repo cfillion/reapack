@@ -22,6 +22,7 @@
 #include "registry.hpp"
 
 #include <set>
+#include <unordered_set>
 #include <vector>
 
 class Download;
@@ -69,6 +70,7 @@ private:
   Registry::Entry m_oldEntry;
   bool m_fail;
   IndexPtr m_index; // keep in memory
+  std::unordered_set<Download *> m_waiting;
   std::vector<Registry::File> m_oldFiles;
   std::vector<PathGroup> m_newFiles;
 };

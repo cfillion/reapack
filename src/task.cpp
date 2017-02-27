@@ -66,6 +66,7 @@ bool InstallTask::start()
     Download *dl = new Download(src->fullName(), src->url(), opts);
     dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
 
+    m_waiting.insert(dl);
     tx()->threadPool()->push(dl);
   }
 
@@ -74,12 +75,9 @@ bool InstallTask::start()
 
 void InstallTask::saveSource(Download *dl, const Source *src)
 {
+  m_waiting.erase(dl);
+
   const Path &targetPath = src->targetPath();
-
-  Path tmpPath(targetPath);
-  tmpPath[tmpPath.size() - 1] += ".new";
-
-  m_newFiles.push_back({targetPath, tmpPath});
 
   const auto old = find_if(m_oldFiles.begin(), m_oldFiles.end(),
     [&](const Registry::File &f) { return f.path == targetPath; });
@@ -87,10 +85,13 @@ void InstallTask::saveSource(Download *dl, const Source *src)
   if(old != m_oldFiles.end())
     m_oldFiles.erase(old);
 
-  if(!tx()->saveFile(dl, tmpPath)) {
+  Path tmpPath(targetPath);
+  tmpPath[tmpPath.size() - 1] += ".new";
+
+  if(tx()->saveFile(dl, tmpPath))
+    m_newFiles.push_back({targetPath, tmpPath});
+  else
     rollback();
-    return;
-  }
 }
 
 void InstallTask::commit()
@@ -146,6 +147,9 @@ void InstallTask::rollback()
 {
   for(const PathGroup &paths : m_newFiles)
     FS::removeRecursive(paths.temp);
+
+  for(Download *dl : m_waiting)
+    dl->abort();
 
   m_fail = true;
 }
