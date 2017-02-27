@@ -86,13 +86,10 @@ public:
   void setEnabled(bool enable) { setEnabled(enable, m_handle); }
   void setEnabled(bool, HWND);
 
-  bool isVisible() const { return m_isVisible; }
-  void show() { show(m_handle); }
-  void show(HWND handle) { setVisible(true, handle); }
-  void hide() { hide(m_handle); }
-  void hide(HWND handle) { setVisible(false, handle); }
-  void setVisible(bool visible) { setVisible(visible, m_handle); }
-  void setVisible(bool, HWND);
+  bool isVisible() const;
+  void show(HWND handle = nullptr) { setVisible(true, handle); }
+  void hide(HWND handle = nullptr) { setVisible(false, handle); }
+  void setVisible(bool, HWND = nullptr);
 
   void close(INT_PTR = 0);
   void center();
@@ -152,7 +149,6 @@ private:
   static std::map<HWND, Dialog *> s_instances;
 
   const int m_template;
-  bool m_isVisible;
   POINT m_minimumSize;
   WDL_WndSizer m_resizer;
   Modality m_mode;

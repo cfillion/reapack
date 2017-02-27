@@ -1,0 +1,34 @@
+ifeq (@(ARCH),x86_64)
+  CXX := gcc
+else
+  CXX := echo 'Unsupported architecture: @(ARCH)' && false
+endif
+
+REAPACK_FILE = reaper_reapack@(SUFFIX).so
+
+CXXFLAGS := -Wall -Wextra -Werror
+CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
+CXXFLAGS += -Wno-unused-function -Wno-missing-braces
+CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
+CXXFLAGS += -pipe -fPIC -O2 -std=c++14
+CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
+CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DSWELL_PROVIDED_BY_APP -DSWELL_TARGET_GDK
+CXXFLAGS += -DREAPACK_FILE=\"$(REAPACK_FILE)\"
+
+WDLFLAGS := -std=c++98 -w
+
+SWELL := $(WDL)/swell
+WDLSOURCE += $(SWELL)/swell-modstub-generic.cpp
+
+LDFLAGS := -lstdc++ -lpthread -ldl -lcurl -lsqlite3
+
+SOFLAGS := -shared
+SOTARGET := bin/$(REAPACK_FILE)
+
+TSTARGET := bin/test
+
+!build = |> $(CXX) $(CXXFLAGS) -c %f -o %o |>
+!link = |> $(CXX) $(CXXFLAGS) %f $(LDFLAGS) -o %o |>
+
+BUILDDEPS := src/resource.rc_mac_menu src/resource.rc_mac_dlg
+: src/resource.rc |> php $(SWELL)/mac_resgen.php %f |> $(BUILDDEPS)

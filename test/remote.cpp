@@ -123,6 +123,9 @@ TEST_CASE("valide remote urls", M) {
 
   SECTION("escape sequence")
     remote.setUrl("https://google.com/?q=hello%20world");
+
+  SECTION("libstdc++ bug #71500") // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71500
+    remote.setUrl("https://google.com/RRR");
 }
 
 TEST_CASE("null remote", M) {

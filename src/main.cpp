@@ -185,7 +185,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   return 1;
 }
 
-#ifdef __APPLE__
+#ifndef _WIN32
 #include "resource.hpp"
 
 #include <swell/swell-dlggen.h>

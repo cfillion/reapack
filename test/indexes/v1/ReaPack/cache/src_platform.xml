@@ -4,6 +4,7 @@
       <version name="1.0">
         <source platform="windows" type="effect">https://google.com/</source>
         <source platform="darwin" type="effect">https://google.com/</source>
+        <source platform="linux" type="effect">https://google.com/</source>
       </version>
     </reapack>
   </category>

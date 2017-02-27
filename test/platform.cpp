@@ -30,14 +30,20 @@ TEST_CASE("platform from string", M) {
   SECTION("windows 64-bit")
     REQUIRE(Platform("win64") == Platform::Win64Platform);
 
-  SECTION("generic os x")
+  SECTION("generic macos")
     REQUIRE(Platform("darwin") == Platform::DarwinPlatform);
 
-  SECTION("os x 32-bit")
+  SECTION("macos 32-bit")
     REQUIRE(Platform("darwin32") == Platform::Darwin32Platform);
 
-  SECTION("os x 64-bit")
+  SECTION("macos 64-bit")
     REQUIRE(Platform("darwin64") == Platform::Darwin64Platform);
+
+  SECTION("generic linux")
+    REQUIRE(Platform("linux") == Platform::LinuxPlatform);
+
+  SECTION("linux 64-bit")
+    REQUIRE(Platform("linux64") == Platform::Linux64Platform);
 }
 
 TEST_CASE("test platform", M) {
@@ -45,6 +51,8 @@ TEST_CASE("test platform", M) {
     {Platform::GenericPlatform, true},
 
 #ifdef __APPLE__
+    {Platform::LinuxPlatform, false},
+    {Platform::Linux64Platform, false},
     {Platform::WindowsPlatform, false},
     {Platform::Win32Platform, false},
     {Platform::Win64Platform, false},
@@ -58,10 +66,23 @@ TEST_CASE("test platform", M) {
     {Platform::Darwin64Platform, false},
 #endif
 
+#elif __linux__
+    {Platform::DarwinPlatform, false},
+    {Platform::Darwin32Platform, false},
+    {Platform::Darwin64Platform, false},
+    {Platform::WindowsPlatform, false},
+    {Platform::Win32Platform, false},
+    {Platform::Win64Platform, false},
+
+    {Platform::LinuxPlatform, true},
+    {Platform::Linux64Platform, true},
+
 #elif _WIN32
     {Platform::DarwinPlatform, false},
     {Platform::Darwin32Platform, false},
     {Platform::Darwin64Platform, false},
+    {Platform::LinuxPlatform, false},
+    {Platform::Linux64Platform, false},
 
     {Platform::WindowsPlatform, true},
 #ifdef _WIN64
@@ -71,6 +92,9 @@ TEST_CASE("test platform", M) {
     {Platform::Win32Platform, true},
     {Platform::Win64Platform, false},
 #endif
+
+#else
+#error Untested platform
 #endif
   };
 

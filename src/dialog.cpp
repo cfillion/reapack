@@ -57,13 +57,6 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 
     dlg->onInit();
     break;
-  case WM_SHOWWINDOW:
-    // this makes possible to call onHide when destroying the window
-    // but only if was visible before the destruction request
-    // (destruction might be caused by the application exiting,
-    // in which case IsWindowVisible would be false but m_isVisible == true)
-    dlg->m_isVisible = wParam == 1;
-    break;
   case WM_TIMER:
     dlg->onTimer((int)wParam);
     break;
@@ -124,8 +117,7 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
 }
 
 Dialog::Dialog(const int templateId)
-  : m_template(templateId), m_isVisible(false), m_minimumSize(),
-    m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
+  : m_template(templateId), m_instance(nullptr), m_parent(nullptr), m_handle(nullptr)
 {
   m_accel.translateAccel = HandleKey;
   m_accel.isLocal = true;
@@ -188,7 +180,15 @@ void Dialog::DestroyAll()
 
 void Dialog::setVisible(const bool visible, HWND handle)
 {
+  if(!handle)
+    handle = m_handle;
+
   ShowWindow(handle, visible ? SW_SHOW : SW_HIDE);
+}
+
+bool Dialog::isVisible() const
+{
+  return IsWindowVisible(m_handle);
 }
 
 void Dialog::close(const INT_PTR result)
