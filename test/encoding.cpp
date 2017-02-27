@@ -27,6 +27,6 @@ TEST_CASE("string to wstring to string", M) {
 }
 
 TEST_CASE("auto_size", M) {
-  auto_char test[42];
+  auto_char test[42] = {};
   REQUIRE(auto_size(test) == 42);
 }
