@@ -343,18 +343,11 @@ void ReaPack::doFetchIndex(const Remote &remote, ThreadPool *pool,
   };
 
   dl->onFinish([=] {
-    switch(dl->state()) {
-    case ThreadTask::Success:
-      if(!FS::rename(dl->path()))
-        warn(FS::lastError(), AUTO_STR("Write Failed"));
-      break;
-    case ThreadTask::Failure:
-      if(stale || !FS::exists(dl->path().target()))
-        warn(dl->error().message, AUTO_STR("Download Failed"));
-      break;
-    default:
-      break;
-    }
+    if(!dl->save())
+      warn(FS::lastError(), AUTO_STR("Write Failed"));
+    else if(dl->state() == ThreadTask::Failure &&
+        (stale || !FS::exists(dl->path().target())))
+      warn(dl->error().message, AUTO_STR("Download Failed"));
   });
 
   pool->push(dl);

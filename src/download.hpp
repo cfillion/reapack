@@ -85,6 +85,7 @@ public:
     const NetworkOpts &, int flags = 0);
 
   const TempPath &path() const { return m_path; }
+  bool save();
 
 protected:
   std::ostream *openStream() override;

@@ -127,13 +127,10 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   }
 
   dl->onFinish([=] {
-    if(dl->state() != ThreadTask::Success)
-      return;
-
-    if(FS::rename(dl->path()))
-      cb();
-    else
+    if(!dl->save())
       m_receipt.addError({FS::lastError(), dl->path().target().join()});
+    else if(dl->state() == ThreadTask::Success)
+      cb();
   });
 
   m_threadPool.push(dl);

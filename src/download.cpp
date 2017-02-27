@@ -179,6 +179,14 @@ FileDownload::FileDownload(const Path &target, const string &url,
   setName(target.join());
 }
 
+bool FileDownload::save()
+{
+  if(state() == Success)
+    return FS::rename(m_path);
+  else
+    return FS::remove(m_path.temp());
+}
+
 ostream *FileDownload::openStream()
 {
   if(FS::open(m_stream, m_path.temp()))
