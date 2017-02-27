@@ -115,12 +115,16 @@ void Archive::import(const auto_string &path, ReaPack *reapack)
 void ImportArchive::importRemote(const string &data)
 {
   m_lastIndex = nullptr; // clear the previous repository
-  const Remote &remote = Remote::fromString(data);
+  Remote remote = Remote::fromString(data);
 
   if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
     throw reapack_error(format("Failed to extract index of %s (%d)")
       % remote.name() % err);
   }
+
+  const Remote &original = m_remotes->get(remote.name());
+  if(original.isProtected())
+    remote.setUrl(original.url());
 
   m_remotes->add(remote);
   m_lastIndex = Index::load(remote.name());
