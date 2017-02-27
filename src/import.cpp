@@ -93,7 +93,8 @@ void Import::fetch()
 
   setWaiting(true);
 
-  Download *dl = m_download = new Download({}, url, m_reapack->config()->network);
+  const auto &opts = m_reapack->config()->network;
+  MemoryDownload *dl = m_download = new MemoryDownload({}, url, opts);
 
   dl->onFinish([=] {
     const ThreadTask::State state = dl->state();

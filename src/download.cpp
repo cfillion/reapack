@@ -17,6 +17,7 @@
 
 #include "download.hpp"
 
+#include "filesystem.hpp"
 #include "reapack.hpp"
 
 #include <boost/format.hpp>
@@ -91,7 +92,7 @@ size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
 {
   const size_t size = rawsize * nmemb;
 
-  static_cast<string *>(ptr)->append(data, size);
+  static_cast<ostream *>(ptr)->write(data, size);
 
   return size;
 }
@@ -102,15 +103,9 @@ int Download::UpdateProgress(void *ptr, const double, const double,
   return static_cast<Download *>(ptr)->aborted();
 }
 
-Download::Download(const string &name, const string &url,
-  const NetworkOpts &opts, const int flags)
-  : m_name(name), m_url(url), m_opts(opts), m_flags(flags)
+Download::Download(const string &url, const NetworkOpts &opts, const int flags)
+  : m_url(url), m_opts(opts), m_flags(flags)
 {
-}
-
-string Download::summary() const
-{
-  return "Downloading %s: " + m_name;
 }
 
 void Download::start()
@@ -129,6 +124,10 @@ void Download::run(DownloadContext *ctx)
 
   ThreadNotifier::get()->notify({this, Running});
 
+  ostream *stream = openStream();
+  if(!stream)
+    return;
+
   curl_easy_setopt(ctx->m_curl, CURLOPT_URL, m_url.c_str());
   curl_easy_setopt(ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
   curl_easy_setopt(ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
@@ -137,7 +136,7 @@ void Download::run(DownloadContext *ctx)
   curl_easy_setopt(ctx->m_curl, CURLOPT_PROGRESSDATA, this);
 
   curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEDATA, &m_contents);
+  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEDATA, stream);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
@@ -148,6 +147,7 @@ void Download::run(DownloadContext *ctx)
   curl_easy_setopt(ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
 
   const CURLcode res = curl_easy_perform(ctx->m_curl);
+  closeStream();
 
   if(aborted())
     finish(Aborted, {"aborted", m_url});
@@ -159,4 +159,40 @@ void Download::run(DownloadContext *ctx)
     finish(Success);
 
   curl_slist_free_all(headers);
+}
+
+MemoryDownload::MemoryDownload(const string &name, const string &url,
+    const NetworkOpts &opts, int flags)
+  : Download(url, opts, flags), m_name(name)
+{
+}
+
+string MemoryDownload::summary() const
+{
+  return "Downloading %s: " + m_name;
+}
+
+FileDownload::FileDownload(const Path &target, const string &url,
+    const NetworkOpts &opts, int flags)
+  : Download(url, opts, flags), m_path(target)
+{
+}
+
+string FileDownload::summary() const
+{
+  return "Downloading %s: " + m_path.target().join();
+}
+
+ostream *FileDownload::openStream()
+{
+  if(FS::open(m_stream, m_path.temp()))
+    return &m_stream;
+
+  finish(Failure, {FS::lastError(), m_path.temp().join()});
+  return nullptr;
+}
+
+void FileDownload::closeStream()
+{
+  m_stream.close();
 }

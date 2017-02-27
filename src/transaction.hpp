@@ -70,7 +70,6 @@ public:
 
   void registerAll(bool add, const Registry::Entry &);
   void registerFile(const HostTicket &t) { m_regQueue.push(t); }
-  bool saveFile(Download *, const Path &);
 
 private:
   class CompareTask {

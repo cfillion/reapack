@@ -322,7 +322,7 @@ void ReaPack::fetchIndexes(const vector<Remote> &remotes,
 void ReaPack::doFetchIndex(const Remote &remote, ThreadPool *pool,
   HWND parent, const bool stale)
 {
-  Download *dl = Index::fetch(remote, stale, m_config->network);
+  FileDownload *dl = Index::fetch(remote, stale, m_config->network);
 
   if(!dl)
     return;
@@ -343,16 +343,14 @@ void ReaPack::doFetchIndex(const Remote &remote, ThreadPool *pool,
   };
 
   dl->onFinish([=] {
-    const Path &path = Index::pathFor(remote.name());
-
     switch(dl->state()) {
     case ThreadTask::Success:
-      if(!FS::write(path, dl->contents()))
+      if(!FS::rename(dl->path()))
         warn(FS::lastError(), AUTO_STR("Write Failed"));
       break;
     case ThreadTask::Failure:
-      if(stale || !FS::exists(path))
-        warn(dl->contents(), AUTO_STR("Download Failed"));
+      if(stale || !FS::exists(dl->path().target()))
+        warn(dl->error().message, AUTO_STR("Download Failed"));
       break;
     default:
       break;

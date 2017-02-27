@@ -25,7 +25,6 @@
 #include <unordered_set>
 #include <vector>
 
-class Download;
 class Index;
 class Source;
 class ThreadTask;
@@ -62,18 +61,16 @@ public:
   void rollback() override;
 
 private:
-  struct PathGroup { Path target; Path temp; };
-
-  void saveSource(Download *, const Source *);
+  void push(ThreadTask *, const TempPath &);
 
   const Version *m_version;
   bool m_pin;
   Registry::Entry m_oldEntry;
   bool m_fail;
   IndexPtr m_index; // keep in memory
-  std::unordered_set<ThreadTask *> m_waiting;
   std::vector<Registry::File> m_oldFiles;
-  std::vector<PathGroup> m_newFiles;
+  std::vector<TempPath> m_newFiles;
+  std::unordered_set<ThreadTask *> m_waiting;
 };
 
 class UninstallTask : public Task {

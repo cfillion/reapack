@@ -46,20 +46,34 @@ FILE *FS::open(const Path &path)
 #endif
 }
 
-bool FS::write(const Path &path, const string &contents)
+bool FS::open(ofstream &stream, const Path &path)
 {
   mkdir(path.dirname());
 
   const Path &fullPath = Path::prefixRoot(path);
-  ofstream file(make_autostring(fullPath.join()), ios_base::binary);
+  stream.open(make_autostring(fullPath.join()), ios_base::binary);
+  return stream.good();
+}
 
-  if(!file)
+bool FS::write(const Path &path, const string &contents)
+{
+  ofstream file;
+  if(!open(file, path))
     return false;
 
   file << contents;
   file.close();
 
   return true;
+}
+
+bool FS::rename(const TempPath &path)
+{
+#ifdef _WIN32
+  remove(path.target());
+#endif
+
+  return rename(path.temp(), path.target());
 }
 
 bool FS::rename(const Path &from, const Path &to)

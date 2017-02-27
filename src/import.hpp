@@ -24,7 +24,7 @@
 
 #include <string>
 
-class Download;
+class MemoryDownload;
 class ReaPack;
 class Remote;
 
@@ -45,7 +45,7 @@ private:
   void setWaiting(bool);
 
   ReaPack *m_reapack;
-  Download *m_download;
+  MemoryDownload *m_download;
   short m_fakePos;
 
   HWND m_url;

@@ -21,10 +21,13 @@
 #include <string>
 
 class Path;
+class TempPath;
 
 namespace FS {
   FILE *open(const Path &);
+  bool open(std::ofstream &, const Path &);
   bool write(const Path &, const std::string &);
+  bool rename(const TempPath &);
   bool rename(const Path &, const Path &);
   bool remove(const Path &);
   bool removeRecursive(const Path &);

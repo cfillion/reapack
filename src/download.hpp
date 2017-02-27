@@ -19,9 +19,11 @@
 #define REAPACK_DOWNLOAD_HPP
 
 #include "config.hpp"
+#include "path.hpp"
 #include "thread.hpp"
 
-#include <string>
+#include <fstream>
+#include <sstream>
 
 #include <curl/curl.h>
 
@@ -41,28 +43,59 @@ public:
     NoCacheFlag = 1<<0,
   };
 
-  Download(const std::string &name, const std::string &url,
-    const NetworkOpts &, int flags = 0);
-
-  std::string summary() const override;
+  Download(const std::string &url, const NetworkOpts &, int flags = 0);
   const std::string &url() const { return m_url; }
-  const NetworkOpts &options() const { return m_opts; }
-  bool has(Flag f) const { return (m_flags & f) != 0; }
-
-  const std::string &contents() { return m_contents; }
 
   void start();
   void run(DownloadContext *) override;
 
 private:
+  virtual std::ostream *openStream() = 0;
+  virtual void closeStream() {}
+
+private:
+  bool has(Flag f) const { return (m_flags & f) != 0; }
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
-  std::string m_name;
   std::string m_url;
   NetworkOpts m_opts;
   int m_flags;
-  std::string m_contents;
+};
+
+class MemoryDownload : public Download {
+public:
+  MemoryDownload(const std::string &name, const std::string &url,
+    const NetworkOpts &, int flags = 0);
+
+  std::string contents() const { return m_stream.str(); }
+
+protected:
+  std::ostream *openStream() override { return &m_stream; }
+
+private:
+  std::string summary() const override;
+
+  std::string m_name;
+  std::stringstream m_stream;
+};
+
+class FileDownload : public Download {
+public:
+  FileDownload(const Path &target, const std::string &url,
+    const NetworkOpts &, int flags = 0);
+
+  const TempPath &path() const { return m_path; }
+
+protected:
+  std::ostream *openStream() override;
+  void closeStream() override;
+
+private:
+  std::string summary() const override;
+
+  TempPath m_path;
+  std::ofstream m_stream;
 };
 
 #endif

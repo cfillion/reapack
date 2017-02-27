@@ -62,36 +62,38 @@ bool InstallTask::start()
   }
 
   for(const Source *src : m_version->sources()) {
-    const NetworkOpts &opts = tx()->config()->network;
-    Download *dl = new Download(src->fullName(), src->url(), opts);
-    dl->onFinish(bind(&InstallTask::saveSource, this, dl, src));
+    const Path &targetPath = src->targetPath();
 
-    m_waiting.insert(dl);
-    tx()->threadPool()->push(dl);
+    const auto old = find_if(m_oldFiles.begin(), m_oldFiles.end(),
+      [&](const Registry::File &f) { return f.path == targetPath; });
+
+    if(old != m_oldFiles.end())
+      m_oldFiles.erase(old);
+
+    // if(m_reader) {
+    // }
+    // else {
+      const NetworkOpts &opts = tx()->config()->network;
+      FileDownload *dl = new FileDownload(targetPath, src->url(), opts);
+      push(dl, dl->path());
+    // }
   }
 
   return true;
 }
 
-void InstallTask::saveSource(Download *dl, const Source *src)
+void InstallTask::push(ThreadTask *job, const TempPath &path)
 {
-  m_waiting.erase(dl);
+  job->onStart([=] { m_newFiles.push_back(path); });
+  job->onFinish([=] {
+    m_waiting.erase(job);
 
-  const Path &targetPath = src->targetPath();
+    if(job->state() != ThreadTask::Success)
+      rollback();
+  });
 
-  const auto old = find_if(m_oldFiles.begin(), m_oldFiles.end(),
-    [&](const Registry::File &f) { return f.path == targetPath; });
-
-  if(old != m_oldFiles.end())
-    m_oldFiles.erase(old);
-
-  Path tmpPath(targetPath);
-  tmpPath[tmpPath.size() - 1] += ".new";
-
-  if(tx()->saveFile(dl, tmpPath))
-    m_newFiles.push_back({targetPath, tmpPath});
-  else
-    rollback();
+  m_waiting.insert(job);
+  tx()->threadPool()->push(job);
 }
 
 void InstallTask::commit()
@@ -99,15 +101,10 @@ void InstallTask::commit()
   if(m_fail)
     return;
 
-  for(const PathGroup &paths : m_newFiles) {
-#ifdef _WIN32
-    // TODO: rename to .old
-    FS::remove(paths.target);
-#endif
-
-    if(!FS::rename(paths.temp, paths.target)) {
+  for(const TempPath &paths : m_newFiles) {
+    if(!FS::rename(paths)) {
       tx()->receipt()->addError({"Cannot rename to target: " + FS::lastError(),
-        paths.target.join()});
+        paths.target().join()});
 
       // it's a bit late to rollback here as some files might already have been
       // overwritten. at least we can delete the temporary files
@@ -145,8 +142,8 @@ void InstallTask::commit()
 
 void InstallTask::rollback()
 {
-  for(const PathGroup &paths : m_newFiles)
-    FS::removeRecursive(paths.temp);
+  for(const TempPath &paths : m_newFiles)
+    FS::removeRecursive(paths.temp());
 
   for(ThreadTask *job : m_waiting)
     job->abort();

@@ -118,7 +118,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
 
 void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
 {
-  Download *dl = Index::fetch(remote, true, m_config->network);
+  FileDownload *dl = Index::fetch(remote, true, m_config->network);
 
   if(!dl) {
     // the index was last downloaded less than a few seconds ago
@@ -127,8 +127,13 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   }
 
   dl->onFinish([=] {
-    if(saveFile(dl, Index::pathFor(remote.name())))
+    if(dl->state() != ThreadTask::Success)
+      return;
+
+    if(FS::rename(dl->path()))
       cb();
+    else
+      m_receipt.addError({FS::lastError(), dl->path().target().join()});
   });
 
   m_threadPool.push(dl);
@@ -174,18 +179,6 @@ void Transaction::uninstall(const Remote &remote)
 void Transaction::uninstall(const Registry::Entry &entry)
 {
   m_nextQueue.push(make_shared<UninstallTask>(entry, this));
-}
-
-bool Transaction::saveFile(Download *dl, const Path &path)
-{
-  if(dl->state() == ThreadTask::Success) {
-    if(FS::write(path, dl->contents()))
-      return true;
-    else
-      m_receipt.addError({FS::lastError(), path.join()});
-  }
-
-  return false;
 }
 
 bool Transaction::runTasks()
