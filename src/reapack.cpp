@@ -346,11 +346,11 @@ void ReaPack::doFetchIndex(const Remote &remote, ThreadPool *pool,
     const Path &path = Index::pathFor(remote.name());
 
     switch(dl->state()) {
-    case Download::Success:
+    case ThreadTask::Success:
       if(!FS::write(path, dl->contents()))
         warn(FS::lastError(), AUTO_STR("Write Failed"));
       break;
-    case Download::Failure:
+    case ThreadTask::Failure:
       if(stale || !FS::exists(path))
         warn(dl->contents(), AUTO_STR("Download Failed"));
       break;
