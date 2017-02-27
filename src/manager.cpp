@@ -25,6 +25,7 @@
 #include "filedialog.hpp"
 #include "import.hpp"
 #include "menu.hpp"
+#include "progress.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
 #include "resource.hpp"
@@ -524,24 +525,43 @@ void Manager::exportArchive()
   if(path.empty())
     return;
 
-  auto_char msg[512];
+  ThreadPool *pool = new ThreadPool;
+  Dialog *progress = Dialog::Create<Progress>(instance(), parent(), pool);
 
   try {
-    const size_t count = Archive::create(path, m_reapack);
+    const size_t count = Archive::create(path, pool, m_reapack);
 
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("Done! %zu packages were exported in the archive."), count);
+    const auto finish = [=] {
+      Dialog::Destroy(progress);
+
+      auto_char msg[255];
+      auto_snprintf(msg, auto_size(msg),
+        AUTO_STR("Done! %zu package%s were exported in the archive."),
+        count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
+      MessageBox(handle(), msg, title, MB_OK);
+
+      delete pool;
+    };
+
+    pool->onDone(finish);
+
+    if(pool->idle())
+      finish();
   }
   catch(const reapack_error &e) {
+    Dialog::Destroy(progress);
+    delete pool;
+
     const auto_string &desc = make_autostring(e.what());
 
+    auto_char msg[512];
     auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not write into %s (%s)."),
+      AUTO_STR("An error occured while writing into %s.\r\n\r\n%s."),
       path.c_str(), desc.c_str()
     );
+    MessageBox(handle(), msg, title, MB_OK);
   }
 
-  MessageBox(handle(), msg, title, MB_OK);
 }
 
 void Manager::launchBrowser()

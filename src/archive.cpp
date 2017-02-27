@@ -157,47 +157,6 @@ void ImportArchive::importPackage(const string &data)
   m_tx->install(ver, pinned, m_reader);
 }
 
-size_t Archive::create(const auto_string &path, ReaPack *reapack)
-{
-  size_t count = 0;
-
-  stringstream toc;
-  Registry reg(Path::prefixRoot(Path::REGISTRY));
-
-  ArchiveWriter writer(path);
-
-  for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
-    bool addedRemote = false;
-
-    for(const Registry::Entry &entry : reg.getEntries(remote.name())) {
-      ++count;
-
-      if(!addedRemote) {
-        toc << "REPO " << remote.toString() << '\n';
-        if(writer.addFile(Index::pathFor(remote.name())))
-          continue; // TODO: report error
-        addedRemote = true;
-      }
-
-      toc << "PACK "
-        << quoted(entry.category) << '\x20'
-        << quoted(entry.package) << '\x20'
-        << quoted(entry.version.toString()) << '\x20'
-        << entry.pinned << '\n'
-      ;
-
-      for(const Registry::File &file : reg.getFiles(entry)) {
-        if(writer.addFile(file.path))
-          break; // TODO: report error
-      }
-    }
-  }
-
-  writer.addFile(ARCHIVE_TOC, toc);
-
-  return count;
-}
-
 ArchiveReader::ArchiveReader(const auto_string &path)
 {
   zlib_filefunc64_def filefunc;
@@ -285,6 +244,49 @@ void FileExtractor::run(DownloadContext *)
     finish(Success);
 }
 
+size_t Archive::create(const auto_string &path, ThreadPool *pool, ReaPack *reapack)
+{
+  size_t count = 0;
+  vector<ThreadTask *> jobs;
+
+  stringstream toc;
+  Registry reg(Path::prefixRoot(Path::REGISTRY));
+
+  ArchiveWriterPtr writer = make_shared<ArchiveWriter>(path);
+
+  for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
+    bool addedRemote = false;
+
+    for(const Registry::Entry &entry : reg.getEntries(remote.name())) {
+      ++count;
+
+      if(!addedRemote) {
+        toc << "REPO " << remote.toString() << '\n';
+        jobs.push_back(new FileCompressor(Index::pathFor(remote.name()), writer));
+        addedRemote = true;
+      }
+
+      toc << "PACK "
+        << quoted(entry.category) << '\x20'
+        << quoted(entry.package) << '\x20'
+        << quoted(entry.version.toString()) << '\x20'
+        << entry.pinned << '\n'
+      ;
+
+      for(const Registry::File &file : reg.getFiles(entry))
+        jobs.push_back(new FileCompressor(file.path, writer));
+    }
+  }
+
+  writer->addFile(ARCHIVE_TOC, toc);
+
+  // start after we've written the table of contents in the main thread
+  for(ThreadTask *job : jobs)
+    pool->push(job);
+
+  return count;
+}
+
 ArchiveWriter::ArchiveWriter(const auto_string &path)
 {
   zlib_filefunc64_def filefunc;
@@ -338,4 +340,36 @@ int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
   }
 
   return zipCloseFileInZip(m_zip);
+}
+
+FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &writer)
+  : m_path(target), m_writer(writer)
+{
+  setSummary("Compressing %s: " + target.join());
+}
+
+void FileCompressor::run(DownloadContext *)
+{
+  if(aborted()) {
+    finish(Aborted, {"cancelled", m_path.join()});
+    return;
+  }
+
+  ThreadNotifier::get()->notify({this, Running});
+
+  ifstream stream;
+  if(!FS::open(stream, m_path)) {
+    finish(Failure, {FS::lastError(), m_path.join()});
+    return;
+  }
+
+  const int error = m_writer->addFile(m_path, stream);
+  stream.close();
+
+  if(error) {
+    const format &msg = format("Failed to compress file (%d)") % error;
+    finish(Failure, {msg.str(), m_path.join()});
+  }
+  else
+    finish(Success);
 }

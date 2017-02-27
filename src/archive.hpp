@@ -23,12 +23,13 @@
 #include "thread.hpp"
 
 class ReaPack;
+class ThreadPool;
 
 typedef void *zipFile;
 
 namespace Archive {
   void import(const auto_string &path, ReaPack *);
-  size_t create(const auto_string &path, ReaPack *);
+  size_t create(const auto_string &path, ThreadPool *pool, ReaPack *);
 };
 
 class ArchiveReader {
@@ -42,6 +43,8 @@ private:
   zipFile m_zip;
 };
 
+typedef std::shared_ptr<ArchiveReader> ArchiveReaderPtr;
+
 class ArchiveWriter {
 public:
   ArchiveWriter(const auto_string &path);
@@ -53,7 +56,7 @@ private:
   zipFile m_zip;
 };
 
-typedef std::shared_ptr<ArchiveReader> ArchiveReaderPtr;
+typedef std::shared_ptr<ArchiveWriter> ArchiveWriterPtr;
 
 class FileExtractor : public ThreadTask {
 public:
@@ -66,6 +69,18 @@ public:
 private:
   TempPath m_path;
   ArchiveReaderPtr m_reader;
+};
+
+class FileCompressor : public ThreadTask {
+public:
+  FileCompressor(const Path &target, const ArchiveWriterPtr &);
+
+  bool concurrent() const override { return false; }
+  void run(DownloadContext *) override;
+
+private:
+  Path m_path;
+  ArchiveWriterPtr m_writer;
 };
 
 #endif
