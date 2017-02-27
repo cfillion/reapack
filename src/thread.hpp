@@ -52,10 +52,9 @@ public:
 
   ThreadTask();
   virtual ~ThreadTask();
-
-  virtual std::string summary() const = 0;
   virtual void run(DownloadContext *) = 0;
 
+  const std::string &summary() const { return m_summary; }
   void setState(State);
   State state() const { return m_state; }
   const ErrorInfo &error() { return m_error; }
@@ -68,9 +67,11 @@ public:
   void abort() { m_abort = true; }
 
 protected:
+  void setSummary(const std::string &s) { m_summary = s; }
   void finish(State, const ErrorInfo & = {});
 
 private:
+  std::string m_summary;
   State m_state;
   ErrorInfo m_error;
   std::atomic_bool m_abort;

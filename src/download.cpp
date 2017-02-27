@@ -108,6 +108,11 @@ Download::Download(const string &url, const NetworkOpts &opts, const int flags)
 {
 }
 
+void Download::setName(const string &name)
+{
+  setSummary("Downloading %s: " + name);
+}
+
 void Download::start()
 {
   WorkerThread *thread = new WorkerThread;
@@ -161,26 +166,17 @@ void Download::run(DownloadContext *ctx)
   curl_slist_free_all(headers);
 }
 
-MemoryDownload::MemoryDownload(const string &name, const string &url,
-    const NetworkOpts &opts, int flags)
-  : Download(url, opts, flags), m_name(name)
+MemoryDownload::MemoryDownload(const string &url, const NetworkOpts &opts, int flags)
+  : Download(url, opts, flags)
 {
-}
-
-string MemoryDownload::summary() const
-{
-  return "Downloading %s: " + m_name;
+  setName(url);
 }
 
 FileDownload::FileDownload(const Path &target, const string &url,
     const NetworkOpts &opts, int flags)
   : Download(url, opts, flags), m_path(target)
 {
-}
-
-string FileDownload::summary() const
-{
-  return "Downloading %s: " + m_path.target().join();
+  setName(target.join());
 }
 
 ostream *FileDownload::openStream()

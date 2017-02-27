@@ -94,7 +94,7 @@ void Import::fetch()
   setWaiting(true);
 
   const auto &opts = m_reapack->config()->network;
-  MemoryDownload *dl = m_download = new MemoryDownload({}, url, opts);
+  MemoryDownload *dl = m_download = new MemoryDownload(url, opts);
 
   dl->onFinish([=] {
     const ThreadTask::State state = dl->state();

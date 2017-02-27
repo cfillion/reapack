@@ -47,6 +47,7 @@ public:
   const std::string &url() const { return m_url; }
 
   void start();
+  void setName(const std::string &);
   void run(DownloadContext *) override;
 
 private:
@@ -65,8 +66,7 @@ private:
 
 class MemoryDownload : public Download {
 public:
-  MemoryDownload(const std::string &name, const std::string &url,
-    const NetworkOpts &, int flags = 0);
+  MemoryDownload(const std::string &url, const NetworkOpts &, int flags = 0);
 
   std::string contents() const { return m_stream.str(); }
 
@@ -74,9 +74,6 @@ protected:
   std::ostream *openStream() override { return &m_stream; }
 
 private:
-  std::string summary() const override;
-
-  std::string m_name;
   std::stringstream m_stream;
 };
 
@@ -92,8 +89,6 @@ protected:
   void closeStream() override;
 
 private:
-  std::string summary() const override;
-
   TempPath m_path;
   std::ofstream m_stream;
 };

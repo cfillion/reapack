@@ -95,7 +95,9 @@ FileDownload *Index::fetch(const Remote &remote,
   }
 
   const Path &path = pathFor(remote.name());
-  return new FileDownload(path, remote.url(), opts, Download::NoCacheFlag);
+  auto fd = new FileDownload(path, remote.url(), opts, Download::NoCacheFlag);
+  fd->setName(remote.name());
+  return fd;
 }
 
 Index::Index(const string &name)
