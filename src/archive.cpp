@@ -65,7 +65,7 @@ struct ImportArchive {
   void importRemote(const string &);
   void importPackage(const string &);
 
-  std::shared_ptr<ArchiveReader> m_reader;
+  ArchiveReaderPtr m_reader;
   RemoteList *m_remotes;
   Transaction *m_tx;
   IndexPtr m_lastIndex;
@@ -150,7 +150,7 @@ void ImportArchive::importPackage(const string &data)
       % m_lastIndex->name() % categoryName % packageName % versionName);
   }
 
-  // m_tx->install(ver, pinned, m_reader);
+  m_tx->install(ver, pinned, m_reader);
 }
 
 size_t Archive::create(const auto_string &path, ReaPack *reapack)
@@ -247,6 +247,33 @@ int ArchiveReader::extractFile(const Path &path, ostream &stream)
   }
 
   return unzCloseCurrentFile(m_zip);
+}
+
+FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
+  : m_path(target), m_reader(reader)
+{
+  setSummary("Extracting %s: " + target.join());
+}
+
+void FileExtractor::run(DownloadContext *)
+{
+  if(aborted()) {
+    finish(Aborted, {"cancelled", m_path.target().join()});
+    return;
+  }
+
+  ThreadNotifier::get()->notify({this, Running});
+
+  ofstream stream;
+  if(!FS::open(stream, m_path.temp())) {
+    finish(Failure, {FS::lastError(), m_path.temp().join()});
+    return;
+  }
+
+  if(!m_reader->extractFile(m_path.target(), stream))
+    finish(Success);
+  else
+    finish(Failure, {"Failed to extract file", m_path.target().join()});
 }
 
 ArchiveWriter::ArchiveWriter(const auto_string &path)

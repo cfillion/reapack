@@ -19,11 +19,12 @@
 #define REAPACK_ARCHIVE_HPP
 
 #include "encoding.hpp"
+#include "path.hpp"
+#include "thread.hpp"
+
+class ReaPack;
 
 typedef void *zipFile;
-
-class Path;
-class ReaPack;
 
 namespace Archive {
   void import(const auto_string &path, ReaPack *);
@@ -50,6 +51,21 @@ public:
 
 private:
   zipFile m_zip;
+};
+
+typedef std::shared_ptr<ArchiveReader> ArchiveReaderPtr;
+
+class FileExtractor : public ThreadTask {
+public:
+  FileExtractor(const Path &target, const ArchiveReaderPtr &);
+  const TempPath &path() const { return m_path; }
+
+  bool concurrent() const override { return false; }
+  void run(DownloadContext *) override;
+
+private:
+  TempPath m_path;
+  ArchiveReaderPtr m_reader;
 };
 
 #endif

@@ -140,7 +140,8 @@ void ThreadPool::push(ThreadTask *task)
 
   task->setCleanupHandler([=] { delete task; });
 
-  auto &thread = m_pool[m_running.size() % m_pool.size()];
+  const size_t nextThread = m_running.size() % m_pool.size();
+  auto &thread = task->concurrent() ? m_pool[nextThread] : m_pool.front();
   if(!thread)
     thread = make_unique<WorkerThread>();
 

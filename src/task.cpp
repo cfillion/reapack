@@ -17,6 +17,7 @@
 
 #include "task.hpp"
 
+#include "archive.hpp"
 #include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
@@ -31,9 +32,9 @@ Task::Task(Transaction *tx) : m_tx(tx)
 }
 
 InstallTask::InstallTask(const Version *ver, const bool pin,
-    const Registry::Entry &re, Transaction *tx)
-  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(move(re)), m_fail(false),
-    m_index(ver->package()->category()->index()->shared_from_this())
+    const Registry::Entry &re, const ArchiveReaderPtr &reader, Transaction *tx)
+  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(move(re)), m_reader(reader),
+    m_fail(false), m_index(ver->package()->category()->index()->shared_from_this())
 {
 }
 
@@ -70,13 +71,15 @@ bool InstallTask::start()
     if(old != m_oldFiles.end())
       m_oldFiles.erase(old);
 
-    // if(m_reader) {
-    // }
-    // else {
+    if(m_reader) {
+      FileExtractor *ex = new FileExtractor(targetPath, m_reader);
+      push(ex, ex->path());
+    }
+    else {
       const NetworkOpts &opts = tx()->config()->network;
       FileDownload *dl = new FileDownload(targetPath, src->url(), opts);
       push(dl, dl->path());
-    // }
+    }
   }
 
   return true;

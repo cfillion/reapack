@@ -44,10 +44,12 @@ public:
   };
 
   Download(const std::string &url, const NetworkOpts &, int flags = 0);
-  const std::string &url() const { return m_url; }
 
-  void start();
   void setName(const std::string &);
+  const std::string &url() const { return m_url; }
+  void start();
+
+  bool concurrent() const override { return true; }
   void run(DownloadContext *) override;
 
 private:

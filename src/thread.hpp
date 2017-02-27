@@ -52,6 +52,8 @@ public:
 
   ThreadTask();
   virtual ~ThreadTask();
+
+  virtual bool concurrent() const = 0;
   virtual void run(DownloadContext *) = 0;
 
   const std::string &summary() const { return m_summary; }

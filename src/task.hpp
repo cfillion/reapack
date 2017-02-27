@@ -25,12 +25,14 @@
 #include <unordered_set>
 #include <vector>
 
+class ArchiveReader;
 class Index;
 class Source;
 class ThreadTask;
 class Transaction;
 class Version;
 
+typedef std::shared_ptr<ArchiveReader> ArchiveReaderPtr;
 typedef std::shared_ptr<const Index> IndexPtr;
 
 class Task {
@@ -54,7 +56,8 @@ private:
 
 class InstallTask : public Task {
 public:
-  InstallTask(const Version *ver, bool pin, const Registry::Entry &, Transaction *);
+  InstallTask(const Version *ver, bool pin, const Registry::Entry &,
+    const ArchiveReaderPtr &, Transaction *);
 
   bool start() override;
   void commit() override;
@@ -66,6 +69,8 @@ private:
   const Version *m_version;
   bool m_pin;
   Registry::Entry m_oldEntry;
+  ArchiveReaderPtr m_reader;
+
   bool m_fail;
   IndexPtr m_index; // keep in memory
   std::vector<Registry::File> m_oldFiles;

@@ -54,7 +54,7 @@ public:
 
   void synchronize(const Remote &,
     boost::optional<bool> forceAutoInstall = boost::none);
-  void install(const Version *, bool pin = false);
+  void install(const Version *, bool pin = false, const ArchiveReaderPtr & = nullptr);
   void setPinned(const Registry::Entry &, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);

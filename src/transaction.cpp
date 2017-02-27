@@ -113,7 +113,7 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   else if(regEntry.pinned || latest->name() < regEntry.version)
     return;
 
-  m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, this));
+  m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, nullptr, this));
 }
 
 void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
@@ -139,10 +139,11 @@ void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
   m_threadPool.push(dl);
 }
 
-void Transaction::install(const Version *ver, const bool pin)
+void Transaction::install(const Version *ver,
+  const bool pin, const ArchiveReaderPtr &reader)
 {
   const auto &oldEntry = m_registry.getEntry(ver->package());
-  m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, this));
+  m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
 }
 
 void Transaction::registerAll(const Remote &remote)
