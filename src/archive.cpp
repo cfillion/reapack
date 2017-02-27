@@ -123,8 +123,10 @@ void ImportArchive::importRemote(const string &data)
   }
 
   const Remote &original = m_remotes->get(remote.name());
-  if(original.isProtected())
+  if(original.isProtected()) {
     remote.setUrl(original.url());
+    remote.protect();
+  }
 
   m_remotes->add(remote);
   m_lastIndex = Index::load(remote.name());
