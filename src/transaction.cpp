@@ -171,17 +171,20 @@ void Transaction::uninstall(const Registry::Entry &entry)
 
 bool Transaction::saveFile(Download *dl, const Path &path)
 {
-  if(dl->state() != Download::Success) {
+  switch(dl->state()) {
+  case ThreadTask::Success:
+    if(FS::write(path, dl->contents()))
+      return true;
+    else
+      m_receipt.addError({FS::lastError(), path.join()});
+    break;
+  case ThreadTask::Failure:
     m_receipt.addError({dl->errorString(), dl->url()});
+  default:
     return false;
   }
 
-  if(!FS::write(path, dl->contents())) {
-    m_receipt.addError({FS::lastError(), path.join()});
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 bool Transaction::runTasks()

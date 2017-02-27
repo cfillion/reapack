@@ -150,7 +150,7 @@ void Download::run(DownloadContext *ctx)
   const CURLcode res = curl_easy_perform(ctx->m_curl);
 
   if(aborted())
-    finish(Aborted, "aborted by user");
+    finish(Aborted, "aborted");
   else if(res != CURLE_OK) {
     const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
     finish(Failure, err.str());
