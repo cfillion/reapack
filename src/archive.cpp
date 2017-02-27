@@ -215,12 +215,12 @@ ArchiveReader::~ArchiveReader()
 
 int ArchiveReader::extractFile(const Path &path)
 {
-  ofstream stream(make_autostring(Path::prefixRoot(path).join()), ios_base::binary);
+  ofstream stream;
 
-  if(stream)
+  if(FS::open(stream, path))
     return extractFile(path, stream);
   else
-    throw reapack_error(FS::lastError().c_str());
+    throw reapack_error(format("%s: %s") % path.join() % FS::lastError());
 }
 
 int ArchiveReader::extractFile(const Path &path, ostream &stream)
