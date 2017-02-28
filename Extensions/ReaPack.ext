@@ -1,4 +1,4 @@
-@version 1.1
+@version 1.2beta1
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @donation https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=T3DEWBQJAV7WL&lc=CA&item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&no_note=0&cn=Custom%20message&no_shipping=1&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
@@ -7,14 +7,24 @@
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32]    reaper_reapack32.dll   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64]    reaper_reapack64.dll   https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  +++ Summary of the main changes since v1.0: +++
-  Added support for themes, language packs and web browser interfaces
-  New community repositories: ReaTeam/Themes and ReaTeam/LangPacks
-  Every package can have its own rich text documentation in the new unified About window
-  Get notified of obsolete (removed) packages when synchronizing with option to uninstall them
-  Most windows can be resized and columns can be customized (browser & configuration)
-  Simplified setup: all default repositories are enabled on first launch
-  Added filtering/search options similar to REAPER's syntax
-  Extended support to old macOS version up to 10.7
-  Many bug fixes and other improvements!
+  Added:
+  * archive: implement import/export of the current package set for offline use
+  * linux: initial port (64-bit only)
+  Changed:
+  * browser: add ellipsis on the pkg count button to hint at its menu (#18)
+  * download: redesign thread scheduling logic
+  * download: reuse HTTP connections when possible
+  * download: write data directly to disk when applicable
+  * import: trim leading and trailing whitespace from user input [p=1799229]
+  * manager: remove extra ellipsis on the Browse packages button
+  * ostream: trim trailing whitespace from changelog lines
+  Fixed:
+  * download: don't report garbage as error in some edge cases
+  * path: avoid repeated slashes when concatenating path segments
+  * serializer: fix crash when reading empty window settings on macOS 10.8 [p=1794205]
+  * task: abort download of subsequent files after a single failure
+  * task: fix cancelled downloads being considered as sucessful installation
+  * transaction: do not start the next batch of tasks when cancelled
+  * transaction: don't propose to uninstall obsolete packages from protected repos
