@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="caea524524423bfc925987c9ca0d8fcd96dec6dc" name="ReaPack">
+<index version="1" commit="edbb3775e7f324ec0aa2e9e47e5af5299372c499" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -419,6 +419,32 @@ Many bug fixes and other improvements!]]></changelog>
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.1/reaper_reapack64.dll</source>
+      </version>
+      <version name="1.2beta1" author="cfillion" time="2017-02-28T00:08:03Z">
+        <changelog><![CDATA[Added:
+* archive: implement import/export of the current package set for offline use
+* linux: initial port (64-bit only)
+Changed:
+* browser: add ellipsis on the pkg count button to hint at its menu (#18)
+* download: redesign thread scheduling logic
+* download: reuse HTTP connections when possible
+* download: write data directly to disk when applicable
+* import: trim leading and trailing whitespace from user input [p=1799229]
+* manager: remove extra ellipsis on the Browse packages button
+* ostream: trim trailing whitespace from changelog lines
+Fixed:
+* download: don't report garbage as error in some edge cases
+* path: avoid repeated slashes when concatenating path segments
+* serializer: fix crash when reading empty window settings on macOS 10.8 [p=1794205]
+* task: abort download of subsequent files after a single failure
+* task: fix cancelled downloads being considered as sucessful installation
+* transaction: do not start the next batch of tasks when cancelled
+* transaction: don't propose to uninstall obsolete packages from protected repos]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack64.dll</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack64.so</source>
       </version>
     </reapack>
   </category>
