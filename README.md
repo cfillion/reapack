@@ -11,7 +11,7 @@ https://github.com/cfillion/reapack/wiki
 Download these files into the `vendor` directory:
 
 1. reaper_plugin.h from
-  [Jeff0S/sws](https://github.com/Jeff0S/sws/raw/master/reaper/reaper_plugin.h)
+  [reaper-oss/sws](https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h)
 2. catch.hpp from
   [philsquared/Catch](https://github.com/philsquared/Catch/raw/master/single_include/catch.hpp)
 3. [WDL](http://www.cockos.com/wdl/) from Cockos:
@@ -40,7 +40,7 @@ vendor
 
 1. Install boost development files and tup
 2. Run `rake` from this directory
-3. Copy or link `x64/bin/reaper_reapack64.dylib` to `~/.REAPER/UserPlugins`
+3. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
 4. Apply this patch to your build of SWELL: [lv-getnextitem-istart](https://github.com/cfillion/WDL/commit/64c16e60884479faba68e8a22e4644806b1244d0.patch)
 
 ### macOS
