@@ -193,19 +193,7 @@ bool Transaction::runTasks()
     return true;
   }
 
-  if(m_config->install.promptObsolete && !m_obsolete.empty()) {
-    vector<Registry::Entry> selected;
-    selected.insert(selected.end(), m_obsolete.begin(), m_obsolete.end());
-    m_obsolete.clear();
-
-    if(m_promptObsolete(selected)) {
-      if(m_taskQueues.empty())
-        m_taskQueues.push(TaskQueue());
-
-      for(const auto &entry : selected)
-        m_taskQueues.back().push(make_shared<UninstallTask>(entry, this));
-    }
-  }
+  promptObsolete();
 
   while(!m_taskQueues.empty()) {
     m_registry.savepoint();
@@ -330,7 +318,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
     const int section = *it++;
     const bool isLastSection = it == sections.end();
 
-    int id = AddRemoveReaScript(reg.add, section, fullPath.c_str(),
+    const int id = AddRemoveReaScript(reg.add, section, fullPath.c_str(),
       isLastCall && isLastSection);
 
     if(!id && enableError) {
@@ -355,4 +343,23 @@ void Transaction::inhibit(const Remote &remote)
     m_syncedRemotes.erase(it);
 
   m_inhibited.insert(remote.name());
+}
+
+void Transaction::promptObsolete()
+{
+  if(!m_config->install.promptObsolete || m_obsolete.empty())
+    return;
+
+  vector<Registry::Entry> selected;
+  selected.insert(selected.end(), m_obsolete.begin(), m_obsolete.end());
+  m_obsolete.clear();
+
+  if(!m_promptObsolete(selected) || selected.empty())
+    return;
+
+  if(m_taskQueues.empty())
+    m_taskQueues.push(TaskQueue());
+
+  for(const auto &entry : selected)
+    m_taskQueues.back().push(make_shared<UninstallTask>(entry, this));
 }

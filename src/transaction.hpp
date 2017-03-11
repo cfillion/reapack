@@ -89,6 +89,7 @@ private:
   void registerQueued();
   void registerScript(const HostTicket &, bool isLast);
   void inhibit(const Remote &);
+  void promptObsolete();
   bool commitTasks();
   void finish();
 
