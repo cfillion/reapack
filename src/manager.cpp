@@ -66,7 +66,7 @@ void Manager::onInit()
     {AUTO_STR("State"), 60},
   });
 
-  m_list->onActivate([=] { about(m_list->currentIndex()); });
+  m_list->onActivate([=] { m_reapack->about(getRemote(m_list->currentIndex())); });
   m_list->onContextMenu(bind(&Manager::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
 
@@ -185,7 +185,7 @@ void Manager::onCommand(const int id, int)
   default:
     const int action = id >> 8;
     if(action == ACTION_ABOUT)
-      about(id & 0xff);
+      m_reapack->about(getRemote(id & 0xff));
     break;
   }
 }
@@ -404,8 +404,8 @@ void Manager::refreshIndex()
   for(size_t i = 0; i < selection.size(); i++)
     remotes[i] = getRemote(selection[i]);
 
-  m_reapack->fetchIndexes(remotes,
-    bind(&ReaPack::refreshBrowser, m_reapack), handle(), true);
+  if(Transaction *tx = m_reapack->setupTransaction())
+    tx->fetchIndexes(remotes, true);
 }
 
 void Manager::uninstall()
@@ -445,15 +445,6 @@ void Manager::setChange(const int increment)
     enable(m_apply);
   else
     disable(m_apply);
-}
-
-void Manager::about(const int index)
-{
-  const Remote &remote = getRemote(index);
-  m_reapack->fetchIndex(remote, [=] (const IndexPtr &index) {
-    if(index)
-      m_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(index));
-  }, handle());
 }
 
 void Manager::copyUrl()

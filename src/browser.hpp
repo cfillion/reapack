@@ -142,7 +142,6 @@ private:
 
   ReaPack *m_reapack;
   bool m_loading;
-  bool m_loaded;
   int m_currentIndex;
 
   Filter m_filter;

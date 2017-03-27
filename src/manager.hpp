@@ -68,7 +68,6 @@ private:
   void uninstall();
   void toggle(boost::optional<bool> &, bool current);
   void refreshIndex();
-  void about(int index);
   void copyUrl();
   void launchBrowser();
   void importExport();

@@ -31,20 +31,14 @@
 class About;
 class Browser;
 class Config;
-class Index;
 class Manager;
 class Progress;
 class Remote;
-class ThreadPool;
 class Transaction;
-
-typedef std::shared_ptr<const Index> IndexPtr;
 
 class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
-  typedef std::function<void (const IndexPtr &)> IndexCallback;
-  typedef std::function<void (const std::vector<IndexPtr> &)> IndexesCallback;
 
   static const char *VERSION;
   static const char *BUILDTIME;
@@ -72,6 +66,7 @@ public:
   void importRemote();
   void manageRemotes();
   void aboutSelf();
+  void about(const Remote &);
   About *about(bool instantiate = true);
   Browser *browsePackages();
   void refreshManager();
@@ -79,18 +74,11 @@ public:
 
   Remote remote(const std::string &name) const;
 
-  void fetchIndex(const Remote &remote, const IndexCallback &,
-    HWND parent, bool stale = false);
-  void fetchIndexes(const std::vector<Remote> &,
-    const IndexesCallback &, HWND parent, bool stale = false);
-
   Transaction *setupTransaction();
   Config *config() const { return m_config; }
 
 private:
   void registerSelf();
-  void doFetchIndex(const Remote &remote, ThreadPool *, HWND, bool stale);
-  IndexPtr loadIndex(const Remote &remote, HWND);
   void teardownTransaction();
 
   std::map<int, ActionCallback> m_actions;

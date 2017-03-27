@@ -52,6 +52,8 @@ public:
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
   void setObsoleteHandler(const ObsoleteHandler &cb) { m_promptObsolete = cb; }
 
+  void fetchIndexes(const std::vector<Remote> &, bool stale = false);
+  std::vector<IndexPtr> getIndexes(const std::vector<Remote> &) const;
   void synchronize(const Remote &,
     boost::optional<bool> forceAutoInstall = boost::none);
   void install(const Version *, bool pin = false, const ArchiveReaderPtr & = nullptr);
@@ -83,7 +85,9 @@ private:
   typedef std::priority_queue<TaskPtr,
     std::vector<TaskPtr>, CompareTask> TaskQueue;
 
-  void fetchIndex(const Remote &, const std::function<void ()> &);
+  void fetchIndex(const Remote &, bool stale,
+    const std::function<void (const IndexPtr &)> & = {});
+  IndexPtr loadIndex(const Remote &);
   void synchronize(const Package *, const InstallOpts &);
   bool allFilesExists(const std::set<Path> &) const;
   void registerQueued();
@@ -99,6 +103,7 @@ private:
   Receipt m_receipt;
 
   std::unordered_set<std::string> m_syncedRemotes;
+  std::map<std::string, IndexPtr> m_indexes;
   std::unordered_set<std::string> m_inhibited;
   std::unordered_set<Registry::Entry> m_obsolete;
 

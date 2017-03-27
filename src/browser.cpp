@@ -53,7 +53,7 @@ enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser(ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
-    m_loading(false), m_loaded(false), m_currentIndex(-1)
+    m_loading(false), m_currentIndex(-1)
 {
 }
 
@@ -525,41 +525,32 @@ void Browser::updateAbout()
 
 void Browser::refresh(const bool stale)
 {
+  // Do nothing when called again when (or while) the index downloading
+  // transaction finishes. populate() handles the next step of the loading process.
   if(m_loading)
     return;
 
   const vector<Remote> &remotes = m_reapack->config()->remotes.getEnabled();
 
-  if(!m_loaded && remotes.empty()) {
-    m_loaded = true;
-    show();
+  if(remotes.empty()) {
+    if(!isVisible() || stale) {
+      show();
 
-    MessageBox(handle(), AUTO_STR("No repository enabled!\r\n")
-      AUTO_STR("Enable or import repositories from ")
-      AUTO_STR("Extensions > ReaPack > Manage repositories."),
-      AUTO_STR("Browse packages"), MB_OK);
+      MessageBox(handle(), AUTO_STR("No repository enabled!\r\n")
+        AUTO_STR("Enable or import repositories from ")
+        AUTO_STR("Extensions > ReaPack > Manage repositories."),
+        AUTO_STR("Browse packages"), MB_OK);
+    }
 
     return;
   }
 
-  m_loading = true;
-
-  m_reapack->fetchIndexes(remotes, [=] (const vector<IndexPtr> &indexes) {
-    // if the user wanted to close the window while we were downloading stuff
-    if(m_loaded && !isVisible()) {
-      close();
-      return;
-    }
-
-    m_loading = false;
-
-    populate(indexes);
-
-    if(!m_loaded) {
-      m_loaded = true;
-      show();
-    }
-  }, handle(), stale);
+  if(Transaction *tx = m_reapack->setupTransaction()) {
+    m_loading = true;
+    tx->fetchIndexes(remotes, stale);
+    tx->onFinish([=] { populate(tx->getIndexes(remotes)); });
+    tx->runTasks();
+  }
 }
 
 void Browser::setFilter(const string &newFilter)
@@ -571,6 +562,8 @@ void Browser::setFilter(const string &newFilter)
 
 void Browser::populate(const vector<IndexPtr> &indexes)
 {
+  m_loading = false;
+
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
@@ -609,6 +602,9 @@ void Browser::populate(const vector<IndexPtr> &indexes)
       desc.c_str());
     MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
   }
+
+  if(!isVisible())
+    show();
 }
 
 void Browser::transferActions()

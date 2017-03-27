@@ -30,6 +30,8 @@
 
 using namespace std;
 
+static const time_t STALE_THRESHOLD = 7 * 24 * 3600;
+
 Transaction::Transaction(Config *config)
   : m_isCancelled(false), m_config(config),
     m_registry(Path::prefixRoot(Path::REGISTRY))
@@ -68,18 +70,7 @@ void Transaction::synchronize(const Remote &remote,
   else if(!boost::logic::indeterminate(remote.autoInstall()))
     opts.autoInstall = remote.autoInstall();
 
-  fetchIndex(remote, [=] {
-    IndexPtr ri;
-
-    try {
-      ri = Index::load(remote.name());
-    }
-    catch(const reapack_error &e) {
-      // index file is invalid (load error)
-      m_receipt.addError({e.what(), remote.name()});
-      return;
-    }
-
+  fetchIndex(remote, true, [=] (const IndexPtr &ri) {
     for(const Package *pkg : ri->packages())
       synchronize(pkg, opts);
 
@@ -116,24 +107,74 @@ void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
   m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, nullptr, this));
 }
 
-void Transaction::fetchIndex(const Remote &remote, const function<void()> &cb)
+void Transaction::fetchIndexes(const vector<Remote> &remotes, const bool stale)
 {
-  FileDownload *dl = Index::fetch(remote, true, m_config->network);
+  for(const Remote &remote : remotes)
+    fetchIndex(remote, stale);
+}
 
-  if(!dl) {
-    // the index was last downloaded less than a few seconds ago
-    cb();
+vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
+{
+  vector<IndexPtr> indexes;
+
+  for(const Remote &remote : remotes) {
+    const auto it = m_indexes.find(remote.name());
+    if(it != m_indexes.end())
+      indexes.push_back(it->second);
+  }
+
+  return indexes;
+}
+
+void Transaction::fetchIndex(const Remote &remote, const bool stale,
+  const function<void (const IndexPtr &)> &cb)
+{
+  const auto load = [=] {
+    const IndexPtr ri = loadIndex(remote);
+    if(cb && ri)
+      cb(ri);
+  };
+
+  const Path &path = Index::pathFor(remote.name());
+  time_t mtime = 0, now = time(nullptr);
+  FS::mtime(path, &mtime);
+
+  if(!stale && mtime > now - STALE_THRESHOLD) {
+    load();
     return;
   }
+
+  auto dl = new FileDownload(path, remote.url(),
+    m_config->network, Download::NoCacheFlag);
+  dl->setName(remote.name());
 
   dl->onFinish([=] {
     if(!dl->save())
       m_receipt.addError({FS::lastError(), dl->path().target().join()});
-    else if(dl->state() == ThreadTask::Success)
-      cb();
+
+    if(FS::exists(path))
+      load(); // try to load anyway, even on failure
   });
 
   m_threadPool.push(dl);
+}
+
+IndexPtr Transaction::loadIndex(const Remote &remote)
+{
+  const auto it = m_indexes.find(remote.name());
+  if(it != m_indexes.end())
+    return it->second;
+
+  try {
+    const IndexPtr &ri = Index::load(remote.name());
+    m_indexes[remote.name()] = ri;
+    return ri;
+  }
+  catch(const reapack_error &e) {
+    m_receipt.addError({
+      "Couldn't load repository index: " + string(e.what()), remote.name()});
+    return nullptr;
+  }
 }
 
 void Transaction::install(const Version *ver,

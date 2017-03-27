@@ -29,7 +29,6 @@
 #include "source.hpp"
 
 class Index;
-class FileDownload;
 class Path;
 class Remote;
 class TiXmlElement;
@@ -41,7 +40,6 @@ class Index : public std::enable_shared_from_this<const Index> {
 public:
   static Path pathFor(const std::string &name);
   static IndexPtr load(const std::string &name, const char *data = nullptr);
-  static FileDownload *fetch(const Remote &, bool stale, const NetworkOpts &);
 
   Index(const std::string &name);
   ~Index();

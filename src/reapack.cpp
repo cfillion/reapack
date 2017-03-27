@@ -225,12 +225,26 @@ Remote ReaPack::remote(const string &name) const
   return m_config->remotes.get(name);
 }
 
+void ReaPack::about(const Remote &repo)
+{
+  Transaction *tx = setupTransaction();
+  if(!tx)
+    return;
+
+  const vector<Remote> repos = {repo};
+
+  tx->fetchIndexes(repos);
+  tx->onFinish([=] {
+    const auto &indexes = tx->getIndexes(repos);
+    if(!indexes.empty())
+      about()->setDelegate(make_shared<AboutIndexDelegate>(indexes.front()));
+  });
+  tx->runTasks();
+}
+
 void ReaPack::aboutSelf()
 {
-  fetchIndex(remote("ReaPack"), [=] (const IndexPtr &index) {
-    if(index)
-      about()->setDelegate(make_shared<AboutIndexDelegate>(index));
-  }, m_mainWindow);
+  about(remote("ReaPack"));
 }
 
 About *ReaPack::about(const bool instantiate)
@@ -273,111 +287,6 @@ Browser *ReaPack::browsePackages()
   return m_browser;
 }
 
-void ReaPack::fetchIndex(const Remote &remote,
-  const IndexCallback &callback, HWND parent, const bool stale)
-{
-  fetchIndexes({remote}, [=] (const vector<IndexPtr> &indexes) {
-    callback(indexes.empty() ? nullptr : indexes.front());
-  }, parent, stale);
-}
-
-void ReaPack::fetchIndexes(const vector<Remote> &remotes,
-  const IndexesCallback &callback, HWND parent, const bool stale)
-{
-  // I don't know why, but at least on OSX giving the manager window handle
-  // (in `parent`) to the progress dialog prevents it from being shown at all
-  // while still taking the focus away from the manager dialog.
-
-  ThreadPool *pool = new ThreadPool;
-  Dialog *progress = Dialog::Create<Progress>(m_instance, m_mainWindow, pool);
-
-  auto load = [=] {
-    Dialog::Destroy(progress);
-    delete pool;
-
-    vector<IndexPtr> indexes;
-
-    for(const Remote &remote : remotes) {
-      if(!FS::exists(Index::pathFor(remote.name())))
-        continue;
-
-      IndexPtr index = loadIndex(remote, parent);
-
-      if(index)
-        indexes.push_back(index);
-    }
-
-    callback(indexes);
-  };
-
-  pool->onDone(load);
-
-  for(const Remote &remote : remotes)
-    doFetchIndex(remote, pool, parent, stale);
-
-  if(pool->idle())
-    load();
-}
-
-void ReaPack::doFetchIndex(const Remote &remote, ThreadPool *pool,
-  HWND parent, const bool stale)
-{
-  FileDownload *dl = Index::fetch(remote, stale, m_config->network);
-
-  if(!dl)
-    return;
-
-  const auto warn = [=] (const string &desc, const auto_char *title) {
-    auto_char msg[512];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not download %s's index.\n\n")
-
-      AUTO_STR("Try again later. ")
-      AUTO_STR("If the problem persist, contact the maintainer of this repository.\n\n")
-
-      AUTO_STR("[Error description: %s]"),
-      make_autostring(remote.name()).c_str(), make_autostring(desc).c_str()
-    );
-
-    MessageBox(parent, msg, title, MB_OK);
-  };
-
-  dl->onFinish([=] {
-    if(!dl->save())
-      warn(FS::lastError(), AUTO_STR("Write Failed"));
-    else if(dl->state() == ThreadTask::Failure &&
-        (stale || !FS::exists(dl->path().target())))
-      warn(dl->error().message, AUTO_STR("Download Failed"));
-  });
-
-  pool->push(dl);
-}
-
-IndexPtr ReaPack::loadIndex(const Remote &remote, HWND parent)
-{
-  try {
-    return Index::load(remote.name());
-  }
-  catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-
-    auto_char msg[512];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not read %s's index.\n\n")
-
-      AUTO_STR("Synchronize your packages and try again later.\n")
-      AUTO_STR("If the problem persist, contact the maintainer of this repository.\n\n")
-
-      AUTO_STR("[Error description: %s]"),
-      make_autostring(remote.name()).c_str(), desc.c_str()
-    );
-
-    MessageBox(parent, msg, AUTO_STR("ReaPack"), MB_OK);
-  }
-
-  return nullptr;
-}
-
 Transaction *ReaPack::setupTransaction()
 {
   if(m_progress && m_progress->isVisible())
@@ -409,13 +318,14 @@ Transaction *ReaPack::setupTransaction()
     Dialog::Destroy(m_progress);
     m_progress = nullptr;
 
-    if(m_tx->isCancelled() || m_tx->receipt()->empty())
-      return;
+    if(!m_tx->isCancelled() && !m_tx->receipt()->empty()) {
+      LockDialog managerLock(m_manager);
+      LockDialog browserLock(m_browser);
 
-    LockDialog managerLock(m_manager);
-    LockDialog browserLock(m_browser);
+      Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
+    }
 
-    Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
+    refreshBrowser();
   });
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
@@ -436,9 +346,6 @@ void ReaPack::teardownTransaction()
 {
   delete m_tx;
   m_tx = nullptr;
-
-  // refresh only once the registry is close
-  refreshBrowser();
 }
 
 void ReaPack::refreshManager()

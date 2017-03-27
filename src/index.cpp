@@ -17,7 +17,6 @@
 
 #include "index.hpp"
 
-#include "download.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
@@ -80,24 +79,6 @@ IndexPtr Index::load(const string &name, const char *data)
 
   ptr.release();
   return IndexPtr(ri);
-}
-
-FileDownload *Index::fetch(const Remote &remote,
-  const bool stale, const NetworkOpts &opts)
-{
-  time_t mtime = 0, now = time(nullptr);
-
-  if(FS::mtime(pathFor(remote.name()), &mtime)) {
-    const time_t threshold = stale ? 0 : (7 * 24 * 3600);
-
-    if(mtime > now - threshold)
-      return nullptr;
-  }
-
-  const Path &path = pathFor(remote.name());
-  auto fd = new FileDownload(path, remote.url(), opts, Download::NoCacheFlag);
-  fd->setName(remote.name());
-  return fd;
 }
 
 Index::Index(const string &name)
