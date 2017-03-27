@@ -148,7 +148,7 @@ void Download::run(DownloadContext *ctx)
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
   curl_easy_setopt(ctx->m_curl, CURLOPT_HTTPHEADER, headers);
 
-  char errbuf[CURL_ERROR_SIZE] = "No details";
+  char errbuf[CURL_ERROR_SIZE] = "No error message";
   curl_easy_setopt(ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
 
   const CURLcode res = curl_easy_perform(ctx->m_curl);
