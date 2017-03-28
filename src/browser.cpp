@@ -53,7 +53,7 @@ enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser(ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
-    m_loading(Idle), m_currentIndex(-1)
+    m_loadState(Init), m_currentIndex(-1)
 {
 }
 
@@ -238,7 +238,7 @@ void Browser::onCommand(const int id, const int event)
     else
       break;
   case IDCANCEL:
-    if(m_loading)
+    if(m_loadState >= Loading)
       hide();
     else
       close();
@@ -526,12 +526,12 @@ void Browser::refresh(const bool stale)
 {
   // Do nothing when called again when (or while) the index downloading
   // transaction finishes. populate() handles the next step of the loading process.
-  switch(m_loading) {
+  switch(m_loadState) {
   case Done:
-    m_loading = Idle;
+    m_loadState = Loaded;
   case Loading:
     return;
-  case Idle:
+  default:
     break;
   }
 
@@ -552,12 +552,17 @@ void Browser::refresh(const bool stale)
   }
 
   if(Transaction *tx = m_reapack->setupTransaction()) {
-    m_loading = Loading;
+    const bool firstLoad = m_loadState == Init;
+    m_loadState = Loading;
 
     tx->fetchIndexes(remotes, stale);
     tx->onFinish([=] {
-      m_loading = Done;
-      populate(tx->getIndexes(remotes));
+      m_loadState = Done;
+
+      if(firstLoad || isVisible())
+        populate(tx->getIndexes(remotes));
+      else
+        close();
     });
 
     tx->runTasks();

@@ -102,7 +102,8 @@ private:
   };
 
   enum LoadState {
-    Idle,
+    Init,
+    Loaded,
     Loading,
     Done,
   };
@@ -147,7 +148,7 @@ private:
   void aboutPackage(int index, bool focus = true);
 
   ReaPack *m_reapack;
-  LoadState m_loading;
+  LoadState m_loadState;
   int m_currentIndex;
 
   Filter m_filter;
