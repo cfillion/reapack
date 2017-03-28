@@ -542,6 +542,7 @@ void Browser::refresh(const bool stale)
         AUTO_STR("Browse packages"), MB_OK);
     }
 
+    populate({});
     return;
   }
 
