@@ -90,6 +90,7 @@ private:
   Manager *m_manager;
   About *m_about;
 
+  bool m_inhibitBrowser;
   REAPER_PLUGIN_HINSTANCE m_instance;
   HWND m_mainWindow;
   UseRootPath *m_useRootPath;

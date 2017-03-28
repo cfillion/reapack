@@ -76,7 +76,7 @@ std::string ReaPack::resourcePath()
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(), importAction(), configAction(),
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
-    m_about(nullptr), m_instance(instance)
+    m_about(nullptr), m_inhibitBrowser(false), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(resourcePath());
@@ -325,7 +325,6 @@ Transaction *ReaPack::setupTransaction()
       Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
     }
 
-    refreshBrowser();
   });
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
@@ -346,6 +345,10 @@ void ReaPack::teardownTransaction()
 {
   delete m_tx;
   m_tx = nullptr;
+
+  // Update the browser only after the transaction is deleted because
+  // it must be able to start a new one to load the indexes
+  refreshBrowser();
 }
 
 void ReaPack::refreshManager()
@@ -356,8 +359,17 @@ void ReaPack::refreshManager()
 
 void ReaPack::refreshBrowser()
 {
-  if(m_browser)
+  if(!m_browser)
+    return;
+
+  if(m_inhibitBrowser)
+    m_inhibitBrowser = false;
+  else {
+    // set prenvively in case the transaction finishes immediately (eg. nothing to dl)
+    m_inhibitBrowser = true;
     m_browser->refresh();
+    m_inhibitBrowser = m_tx != nullptr;
+  }
 }
 
 void ReaPack::registerSelf()
