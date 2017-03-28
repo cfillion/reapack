@@ -76,7 +76,7 @@ std::string ReaPack::resourcePath()
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(), importAction(), configAction(),
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
-    m_about(nullptr), m_inhibitBrowser(false), m_instance(instance)
+    m_about(nullptr), m_instance(instance)
 {
   m_mainWindow = GetMainHwnd();
   m_useRootPath = new UseRootPath(resourcePath());
@@ -279,6 +279,7 @@ Browser *ReaPack::browsePackages()
   }
 
   m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, this);
+  m_browser->refresh();
   m_browser->setCloseHandler([=] (INT_PTR) {
     Dialog::Destroy(m_browser);
     m_browser = nullptr;
@@ -359,17 +360,8 @@ void ReaPack::refreshManager()
 
 void ReaPack::refreshBrowser()
 {
-  if(!m_browser)
-    return;
-
-  if(m_inhibitBrowser)
-    m_inhibitBrowser = false;
-  else {
-    // set prenvively in case the transaction finishes immediately (eg. nothing to dl)
-    m_inhibitBrowser = true;
+  if(m_browser)
     m_browser->refresh();
-    m_inhibitBrowser = m_tx != nullptr;
-  }
 }
 
 void ReaPack::registerSelf()

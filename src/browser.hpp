@@ -101,6 +101,12 @@ private:
     UninstalledView,
   };
 
+  enum LoadState {
+    Idle,
+    Loading,
+    Done,
+  };
+
   Entry makeEntry(const Package *, const Registry::Entry &, const IndexPtr &) const;
 
   void onSelection();
@@ -141,7 +147,7 @@ private:
   void aboutPackage(int index, bool focus = true);
 
   ReaPack *m_reapack;
-  bool m_loading;
+  LoadState m_loading;
   int m_currentIndex;
 
   Filter m_filter;

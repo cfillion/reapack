@@ -53,7 +53,7 @@ enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser(ReaPack *reapack)
   : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
-    m_loading(false), m_currentIndex(-1)
+    m_loading(Idle), m_currentIndex(-1)
 {
 }
 
@@ -148,7 +148,6 @@ void Browser::onInit()
   m_list->restoreState(data);
 
   updateDisplayLabel();
-  refresh();
 }
 
 void Browser::onClose()
@@ -527,8 +526,14 @@ void Browser::refresh(const bool stale)
 {
   // Do nothing when called again when (or while) the index downloading
   // transaction finishes. populate() handles the next step of the loading process.
-  if(m_loading)
+  switch(m_loading) {
+  case Done:
+    m_loading = Idle;
+  case Loading:
     return;
+  case Idle:
+    break;
+  }
 
   const vector<Remote> &remotes = m_reapack->config()->remotes.getEnabled();
 
@@ -547,9 +552,14 @@ void Browser::refresh(const bool stale)
   }
 
   if(Transaction *tx = m_reapack->setupTransaction()) {
-    m_loading = true;
+    m_loading = Loading;
+
     tx->fetchIndexes(remotes, stale);
-    tx->onFinish([=] { populate(tx->getIndexes(remotes)); });
+    tx->onFinish([=] {
+      m_loading = Done;
+      populate(tx->getIndexes(remotes));
+    });
+
     tx->runTasks();
   }
 }
@@ -563,8 +573,6 @@ void Browser::setFilter(const string &newFilter)
 
 void Browser::populate(const vector<IndexPtr> &indexes)
 {
-  m_loading = false;
-
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));
 
