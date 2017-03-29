@@ -31,6 +31,8 @@
 #include "resource.hpp"
 #include "transaction.hpp"
 
+#include <boost/algorithm/string/join.hpp>
+
 static const auto_char *ARCHIVE_FILTER =
   AUTO_STR("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
 static const auto_char *ARCHIVE_EXT = AUTO_STR("ReaPackArchive");
@@ -520,15 +522,27 @@ void Manager::exportArchive()
   Dialog *progress = Dialog::Create<Progress>(instance(), parent(), pool);
 
   try {
-    const size_t count = Archive::create(path, pool, m_reapack);
+    vector<string> errors;
+    const size_t count = Archive::create(path, &errors, pool, m_reapack);
 
     const auto finish = [=] {
       Dialog::Destroy(progress);
 
-      auto_char msg[255];
+      auto_char error[1024];
+      if(errors.empty())
+        error[0] = 0;
+      else {
+        auto_snprintf(error, auto_size(error),
+          AUTO_STR("\r\n\r\n%zu file%s could not be archived. ")
+          AUTO_STR("Synchronize packages to repair any missing file.\r\n\r\n%s"),
+          errors.size(), errors.size() == 1 ? AUTO_STR("") : AUTO_STR("s"),
+          make_autostring(boost::algorithm::join(errors, "\r\n")).c_str());
+      }
+
+      auto_char msg[2048];
       auto_snprintf(msg, auto_size(msg),
-        AUTO_STR("Done! %zu package%s were exported in the archive."),
-        count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
+        AUTO_STR("Done! %zu package%s were exported in the archive.%s"),
+        count, count == 1 ? AUTO_STR("") : AUTO_STR("s"), error);
       MessageBox(handle(), msg, title, MB_OK);
 
       delete pool;
@@ -552,7 +566,6 @@ void Manager::exportArchive()
     );
     MessageBox(handle(), msg, title, MB_OK);
   }
-
 }
 
 void Manager::launchBrowser()

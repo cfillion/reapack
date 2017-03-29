@@ -29,7 +29,8 @@ typedef void *zipFile;
 
 namespace Archive {
   void import(const auto_string &path, ReaPack *);
-  size_t create(const auto_string &path, ThreadPool *pool, ReaPack *);
+  size_t create(const auto_string &path,
+    std::vector<std::string> *errors, ThreadPool *pool, ReaPack *);
 };
 
 class ArchiveReader {

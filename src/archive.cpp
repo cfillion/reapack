@@ -246,7 +246,8 @@ void FileExtractor::run(DownloadContext *)
     finish(Success);
 }
 
-size_t Archive::create(const auto_string &path, ThreadPool *pool, ReaPack *reapack)
+size_t Archive::create(const auto_string &path, vector<string> *errors,
+  ThreadPool *pool, ReaPack *reapack)
 {
   size_t count = 0;
   vector<ThreadTask *> jobs;
@@ -256,6 +257,15 @@ size_t Archive::create(const auto_string &path, ThreadPool *pool, ReaPack *reapa
 
   ArchiveWriterPtr writer = make_shared<ArchiveWriter>(path);
 
+  const auto compress = [&] (const Path &path) {
+    if(FS::exists(path))
+      jobs.push_back(new FileCompressor(path, writer));
+    else {
+      const auto fmt = format("%s (%s)") % path.join() % FS::lastError();
+      errors->push_back(fmt.str());
+    }
+  };
+
   for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
     bool addedRemote = false;
 
@@ -264,7 +274,7 @@ size_t Archive::create(const auto_string &path, ThreadPool *pool, ReaPack *reapa
 
       if(!addedRemote) {
         toc << "REPO " << remote.toString() << '\n';
-        jobs.push_back(new FileCompressor(Index::pathFor(remote.name()), writer));
+        compress(Index::pathFor(remote.name()));
         addedRemote = true;
       }
 
@@ -276,13 +286,15 @@ size_t Archive::create(const auto_string &path, ThreadPool *pool, ReaPack *reapa
       ;
 
       for(const Registry::File &file : reg.getFiles(entry))
-        jobs.push_back(new FileCompressor(file.path, writer));
+        compress(file.path);
     }
   }
 
   writer->addFile(ARCHIVE_TOC, toc);
 
-  // start after we've written the table of contents in the main thread
+  // Start after we've written the table of contents in the main thread
+  // because we cannot safely write into the zip from more than one
+  // thread at the same time.
   for(ThreadTask *job : jobs)
     pool->push(job);
 
