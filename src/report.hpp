@@ -34,7 +34,7 @@ public:
 protected:
   void onInit() override;
 
-  virtual void fillReport();
+  void fillReport();
 
   void printHeader(const char *);
 

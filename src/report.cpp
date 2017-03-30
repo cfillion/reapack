@@ -38,9 +38,6 @@ void Report::onInit()
 
   fillReport();
 
-  const auto_string &str = make_autostring(m_stream.str());
-  SetDlgItemText(handle(), IDC_REPORT, str.c_str());
-
   SetFocus(getControl(IDOK));
 }
 
@@ -93,6 +90,14 @@ void Report::fillReport()
 
   if(removals)
     printRemovals();
+
+  if(installs + updates + removals == 0) {
+    SetDlgItemText(handle(), IDC_LABEL,
+      AUTO_STR("Oops! The following error(s) occured:"));
+  }
+
+  const auto_string &str = make_autostring(m_stream.str());
+  SetDlgItemText(handle(), IDC_REPORT, str.c_str());
 }
 
 void Report::printInstalls()
