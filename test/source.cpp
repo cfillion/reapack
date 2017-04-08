@@ -58,6 +58,7 @@ TEST_CASE("parse file section", M) {
   REQUIRE(0 == Source::getSection("hello"));
   REQUIRE(Source::MainSection == Source::getSection("main"));
   REQUIRE(Source::MIDIEditorSection == Source::getSection("midi_editor"));
+  REQUIRE(Source::MIDIInlineEditorSection == Source::getSection("midi_inline_editor"));
 }
 
 TEST_CASE("explicit source section", M) {
@@ -104,6 +105,16 @@ TEST_CASE("implicit source section") {
     source.setSections(Source::ImplicitSection);
     REQUIRE(source.sections() == Source::MIDIEditorSection);
   }
+
+  SECTION("midi inline editor") {
+    Category cat("MIDI Inline Editor", &ri);
+    Package pack(Package::ScriptType, "package name", &cat);
+    Version ver("1.0", &pack);
+
+    Source source("filename", "url", &ver);
+    source.setSections(Source::ImplicitSection);
+    REQUIRE(source.sections() == Source::MIDIInlineEditorSection);
+  }
 }
 
 TEST_CASE("implicit section detection", M) {
@@ -113,6 +124,9 @@ TEST_CASE("implicit section detection", M) {
 
   REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor"));
   REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor/Hello"));
+
+  REQUIRE(Source::MIDIInlineEditorSection ==
+    Source::detectSection("midi inline editor"));
 }
 
 TEST_CASE("empty source url", M) {

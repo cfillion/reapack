@@ -566,6 +566,7 @@ void AboutPackageDelegate::updateList(const int index)
   static const map<Source::Section, string> sectionMap{
     {Source::MainSection, "Main"},
     {Source::MIDIEditorSection, "MIDI Editor"},
+    {Source::MIDIInlineEditorSection, "MIDI Inline Editor"},
   };
 
   if(index < 0)
