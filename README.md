@@ -49,8 +49,8 @@ vendor
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Apply these patches to WDL:
-  - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
-  - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
+    - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
+    - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
 4. Run `rake` from this directory
 5. Copy or link `x64/bin/reaper_reapack64.dylib` or `x86/bin/reaper_reapack32.dylib`
    to REAPER's extension directory
@@ -71,18 +71,18 @@ vendor
 4. Download the latest [curl](http://curl.haxx.se/download.html) source
   code and extract it as `vendor/curl`:
 
-  ```
-  reapack> tree vendor
-  vendor
-  ├── curl/
-  │   ├── builds/
-  │   │   └── ...
-  │   ├── winbuild/
-  │   │   ├── Makefile.vc
-  │   │   └── ...
-  │   └── ...
-  └── ...
-  ```
+    ```
+    reapack> tree vendor
+    vendor
+    ├── curl/
+    │   ├── builds/
+    │   │   └── ...
+    │   ├── winbuild/
+    │   │   ├── Makefile.vc
+    │   │   └── ...
+    │   └── ...
+    └── ...
+    ```
 5. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
 6. Run `build_deps.bat` and `rake` from this directory using
