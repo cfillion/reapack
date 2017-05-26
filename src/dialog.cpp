@@ -367,8 +367,27 @@ void Dialog::setAnchor(HWND handle, const int flags)
   const float right = (float)min(1, flags & AnchorRight);
   const float bottom = (float)min(1, flags & AnchorBottom);
 
-  m_resizer.remove_itemhwnd(handle);
   m_resizer.init_itemhwnd(handle, left, top, right, bottom);
+}
+
+void Dialog::setAnchorPos(HWND handle,
+  const LONG *left, const LONG *top, const LONG *right, const LONG *bottom)
+{
+  auto *item = m_resizer.get_itembywnd(handle);
+
+  if(!item)
+    return;
+
+  RECT *rect = &item->orig;
+
+  if(left)
+    rect->left = *left;
+  if(top)
+    rect->top = *top;
+  if(right)
+    rect->right = *right;
+  if(bottom)
+    rect->bottom = *bottom;
 }
 
 void Dialog::restoreState(Serializer::Data &data)

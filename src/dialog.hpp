@@ -103,6 +103,8 @@ public:
   HWND getControl(int idc);
   std::string getText(HWND);
   void setAnchor(HWND, int flags);
+  void setAnchorPos(HWND, const LONG *left = nullptr, const LONG *top = nullptr,
+    const LONG *right = nullptr, const LONG *bottom = nullptr);
   void setMinimumSize(const POINT &p) { m_minimumSize = p; }
 
   void restoreState(Serializer::Data &);

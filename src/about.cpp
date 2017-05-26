@@ -214,18 +214,19 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
 
     if(!m_links.count(control)) {
       HWND handle = getControl(control);
-
-      SetWindowPos(handle, nullptr, rect.left, rect.top, 0, 0,
-        SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
-
+      setAnchorPos(handle, &rect.left, nullptr, &rect.right);
       show(handle);
-      setAnchor(handle, AnchorTop | AnchorBottom);
+
       rect.left += shift;
+      rect.right += shift;
+
       m_links[control] = {};
     }
 
     m_links[control].push_back(&pair.second);
   }
+
+  onResize(); // update the position of link buttons
 }
 
 void About::setAction(const string &label)
