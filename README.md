@@ -49,7 +49,6 @@ vendor
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Apply these patches to WDL:
-  - [no-minmax-fix](https://github.com/cfillion/WDL/commit/7bae0e33ac9ae7550f1c8c29ac00900f366bd3f7.patch)
   - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
   - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
 4. Run `rake` from this directory
