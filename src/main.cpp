@@ -140,6 +140,23 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   return false;
 }
 
+static void setupActions()
+{
+  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
+    &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
+
+  reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
+    &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
+
+  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
+    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
+
+  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
+    &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
+
+  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
+}
+
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
@@ -163,19 +180,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 
   reapack = new ReaPack(instance);
 
-  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
-    &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
-
-  reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
-    &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
-
-  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
-    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
-
-  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
-    &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
-
-  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
+  setupActions();
 
   plugin_register("hookcommand", (void *)commandHook);
   plugin_register("hookcustommenu", (void *)menuHook);
