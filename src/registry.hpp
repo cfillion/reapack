@@ -29,7 +29,9 @@
 class Registry {
 public:
   struct Entry {
-    int64_t id;
+    typedef int64_t id_t;
+
+    id_t id;
     std::string remote;
     std::string category;
     std::string package;
@@ -57,7 +59,7 @@ public:
   std::vector<Entry> getEntries(const std::string &) const;
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
-  int64_t getOwner(const Path &) const;
+  Entry::id_t getOwner(const Path &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);
@@ -94,7 +96,7 @@ namespace std
   {
     std::size_t operator()(const Registry::Entry &e) const
     {
-      return std::hash<int64_t>()(e.id);
+      return std::hash<Registry::Entry::id_t>()(e.id);
     }
   };
 }

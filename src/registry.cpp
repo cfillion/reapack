@@ -295,13 +295,13 @@ auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
   return mainFiles;
 }
 
-int64_t Registry::getOwner(const Path &path) const
+auto Registry::getOwner(const Path &path) const -> Entry::id_t
 {
   Entry entry{};
 
   m_getOwner->bind(1, path.join('/'));
 
-  int64_t id = 0;
+  Entry::id_t id = 0;
 
   m_getOwner->exec([&] {
     id = m_getOwner->intColumn(0);
