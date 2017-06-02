@@ -59,7 +59,7 @@ void APIDef::unregister(const char *key, void *ptr)
 #define DEFARGS(r, macro, i, arg) \
   BOOST_PP_IF(i, ",", BOOST_PP_EMPTY()) BOOST_PP_STRINGIZE(macro(arg))
 
-#define DEFAPI(type, name, args, help, ...) \
+#define DEFINE_API(type, name, args, help, ...) \
   namespace name { \
     static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(ARGS, _, args)) __VA_ARGS__ \
     void *reascriptImpl(void **argv, int argc) { \
@@ -77,7 +77,7 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIdef_" API_PREFIX #name, (void *)name::definition, \
   }
 
-DEFAPI(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
+DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
     ((int*, resultOut))((char*, errorOut))((int, errorOut_sz)),
   "Compare version numbers. Returns 0 if both versions are equal,"
   " a positive value if ver1 is higher than ver2"
@@ -91,6 +91,10 @@ DEFAPI(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
     return true;
   }
 
-  snprintf(errorOut, errorOut_sz, "%s", error.c_str());
+  if(errorOut)
+    snprintf(errorOut, errorOut_sz, "%s", error.c_str());
+
+  *resultOut = 0;
+
   return false;
 });
