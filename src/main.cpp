@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "api.hpp"
 #include "errors.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
@@ -157,6 +158,11 @@ static void setupActions()
   reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
 }
 
+static void setupAPI()
+{
+  reapack->setupAPI(&API::CompareVersions);
+}
+
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
@@ -181,6 +187,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   reapack = new ReaPack(instance);
 
   setupActions();
+  setupAPI();
 
   plugin_register("hookcommand", (void *)commandHook);
   plugin_register("hookcustommenu", (void *)menuHook);

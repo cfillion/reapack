@@ -38,7 +38,7 @@ public:
   VersionName(const VersionName &);
 
   void parse(const std::string &);
-  bool tryParse(const std::string &);
+  bool tryParse(const std::string &, std::string *errorOut = nullptr);
 
   size_t size() const { return m_segments.size(); }
   bool isStable() const { return m_stable; }
