@@ -239,9 +239,7 @@ const Path &Path::operator+=(const Path &o)
 const string &Path::at(const size_t index) const
 {
   auto it = m_parts.begin();
-
-  for(size_t i = 0; i < index; i++)
-    it++;
+  advance(it, index);
 
   return *it;
 }
