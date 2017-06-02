@@ -154,6 +154,45 @@ DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
   return a.compare(b);
 });
 
+DEFINE_API(void, FreeEntry, ((PackageEntry*, entry)), R"(
+  Free resources allocated for the given package entry.
+)", {
+  if(s_entries.count(entry)) {
+    s_entries.erase(entry);
+    delete entry;
+  }
+});
+
+DEFINE_API(void, GetEntryInfo, ((PackageEntry*, entry))
+  ((char*, repoOut))((int, repoOut_sz))((char*, catOut))((int, catOut_sz))
+  ((char*, pkgOut))((int, pkgOut_sz))((char*, descOut))((int, descOut_sz))
+  ((int*, typeOut))((char*, verOut))((int, verOut_sz))
+  ((char*, authorOut))((int, authorOut_sz))((bool*, pinnedOut)), R"(
+  Get the repository name, category, package name, package description, package type, the currently installed version, author name and pinned status of the given package entry.
+
+  type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface
+)", {
+  if(!s_entries.count(entry))
+    return;
+
+  if(repoOut)
+    snprintf(repoOut, repoOut_sz, "%s", entry->remote.c_str());
+  if(catOut)
+    snprintf(catOut, catOut_sz, "%s", entry->category.c_str());
+  if(pkgOut)
+    snprintf(pkgOut, pkgOut_sz, "%s", entry->package.c_str());
+  if(descOut)
+    snprintf(descOut, descOut_sz, "%s", entry->description.c_str());
+  if(typeOut)
+    *typeOut = (int)entry->type;
+  if(verOut)
+    snprintf(verOut, verOut_sz, "%s", entry->version.toString().c_str());
+  if(authorOut)
+    snprintf(authorOut, authorOut_sz, "%s", entry->author.c_str());
+  if(pinnedOut)
+    *pinnedOut = entry->pinned;
+});
+
 DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)), R"(
   Returns the package entry owning the given file.
   Delete the returned object from memory after use with <a href="#ReaPack_FreeEntry">ReaPack_FreeEntry</a>.
@@ -185,14 +224,5 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
       snprintf(errorOut, errorOut_sz, "%s", e.what());
 
     return nullptr;
-  }
-});
-
-DEFINE_API(void, FreeEntry, ((PackageEntry*, entry)), R"(
-  Free resources allocated for the given package entry.
-)", {
-  if(s_entries.count(entry)) {
-    s_entries.erase(entry);
-    delete entry;
   }
 });
