@@ -90,10 +90,8 @@ private:
   size_t m_savePoint;
 };
 
-namespace std
-{
-  template<> struct hash<Registry::Entry>
-  {
+namespace std {
+  template<> struct hash<Registry::Entry> {
     std::size_t operator()(const Registry::Entry &e) const
     {
       return std::hash<Registry::Entry::id_t>()(e.id);
