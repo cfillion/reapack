@@ -21,16 +21,20 @@
 
 #include <reaper_plugin_functions.h>
 
+#include "about.hpp"
 #include "errors.hpp"
+#include "index.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
 #include "remote.hpp"
-#include "version.hpp"
+#include "transaction.hpp"
 
 using namespace API;
 using namespace std;
 
 ReaPack *API::reapack = nullptr;
+
+static set<Registry::Entry *> s_entries;
 
 #define API_PREFIX "ReaPack_"
 
@@ -80,15 +84,45 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIdef_" API_PREFIX #name, (void *)name::definition, \
   }
 
-DEFINE_API(bool, AboutPackage, ((int, id)),
-  "Show the about dialog of the given package. Returns true on success.",
-{
-  return false;
+DEFINE_API(bool, AboutInstalledPackage, ((Registry::Entry*, entry)), R"(
+  Show the about dialog of the given package entry.
+  The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
+)", {
+  if(!s_entries.count(entry))
+    return false;
+
+  // the one given by the user may be deleted while we download the idnex
+  const Registry::Entry entryCopy = *entry;
+
+  const Remote &repo = reapack->remote(entry->remote);
+  if(!repo)
+    return false;
+
+  Transaction *tx = reapack->setupTransaction();
+  if(!tx)
+    return false;
+
+  const vector<Remote> repos = {repo};
+
+  tx->fetchIndexes(repos);
+  tx->onFinish([=] {
+    const auto &indexes = tx->getIndexes(repos);
+    if(indexes.empty())
+      return;
+
+    const Package *pkg = indexes.front()->find(entryCopy.category, entryCopy.package);
+    if(pkg)
+      reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
+  });
+  tx->runTasks();
+
+  return true;
 });
 
-DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
-  "Show the about dialog of the given repository. Returns true on success.",
-{
+DEFINE_API(bool, AboutRepository, ((const char*, repoName)), R"(
+  Show the about dialog of the given repository.
+  The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
+)", {
   if(const Remote &repo = reapack->remote(repoName)) {
     reapack->about(repo);
     return true;
@@ -98,11 +132,9 @@ DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
 });
 
 DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
-    ((int*, resultOut))((char*, errorOut))((int, errorOut_sz)),
-  "Returns 0 if both versions are equal,"
-  " a positive value if ver1 is higher than ver2"
-  " and a negative value otherwise.",
-{
+    ((int*, resultOut))((char*, errorOut))((int, errorOut_sz)), R"(
+  Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.
+)", {
   VersionName a, b;
   string error;
 
@@ -119,9 +151,10 @@ DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
   return false;
 });
 
-DEFINE_API(int, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)),
-  "Returns ID of the package owning the given file or 0 on error.",
-{
+DEFINE_API(Registry::Entry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)), R"(
+  Returns the package entry owning the given file.
+  Delete the returned object from memory after use with <a href="#ReaPack_FreeEntry">ReaPack_FreeEntry</a>.
+)", {
   Path path(fn);
 
   const Path &rp = ReaPack::resourcePath();
@@ -131,18 +164,35 @@ DEFINE_API(int, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_
 
   try {
     const Registry reg(Path::prefixRoot(Path::REGISTRY));
-    const int owner = (int)reg.getOwner(path);
+    const auto &owner = reg.getOwner(path);
 
-    if(!owner && errorOut)
-      snprintf(errorOut, errorOut_sz, "file is not owned by any package");
+    if(owner) {
+      auto entry = new Registry::Entry(owner);
+      s_entries.insert(entry);
+      return entry;
+    }
+    else if(errorOut)
+      snprintf(errorOut, errorOut_sz, "the file is not owned by any package entry");
 
-    return owner;
+    return nullptr;
   }
   catch(const reapack_error &e)
   {
     if(errorOut)
       snprintf(errorOut, errorOut_sz, "%s", e.what());
 
-    return 0;
+    return nullptr;
   }
+});
+
+DEFINE_API(bool, FreeEntry, ((Registry::Entry*, entry)), R"(
+  Free resources allocated for the given package entry.
+)", {
+  if(s_entries.count(entry)) {
+    s_entries.erase(entry);
+    delete entry;
+    return true;
+  }
+
+  return false;
 });

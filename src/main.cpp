@@ -160,9 +160,10 @@ static void setupActions()
 
 static void setupAPI()
 {
-  reapack->setupAPI(&API::AboutPackage);
+  reapack->setupAPI(&API::AboutInstalledPackage);
   reapack->setupAPI(&API::AboutRepository);
   reapack->setupAPI(&API::CompareVersions);
+  reapack->setupAPI(&API::FreeEntry);
   reapack->setupAPI(&API::GetOwner);
 }
 

@@ -210,8 +210,8 @@ TEST_CASE("get file owner", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE(reg.getOwner({}) == 0);
+  REQUIRE_FALSE(reg.getOwner({}));
 
   const Registry::Entry &entry = reg.push(&ver);
-  REQUIRE(reg.getOwner(src->targetPath()) == entry.id);
+  REQUIRE(reg.getOwner(src->targetPath()) == entry);
 }

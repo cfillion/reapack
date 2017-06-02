@@ -58,7 +58,8 @@ Registry::Registry(const Path &path)
 
   // file queries
   m_getOwner = m_db.prepare(
-    "SELECT entry FROM files WHERE path = ? LIMIT 1"
+    "SELECT e.id, remote, category, package, desc, e.type, version, author, pinned "
+    "FROM entries e JOIN files f ON f.entry = e.id WHERE f.path = ? LIMIT 1"
   );
   m_getFiles = m_db.prepare(
     "SELECT path, main, type FROM files WHERE entry = ? ORDER BY path"
@@ -295,20 +296,18 @@ auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
   return mainFiles;
 }
 
-auto Registry::getOwner(const Path &path) const -> Entry::id_t
+auto Registry::getOwner(const Path &path) const -> Entry
 {
   Entry entry{};
 
   m_getOwner->bind(1, path.join('/'));
 
-  Entry::id_t id = 0;
-
   m_getOwner->exec([&] {
-    id = m_getOwner->intColumn(0);
+    fillEntry(m_getOwner, &entry);
     return false;
   });
 
-  return id;
+  return entry;
 }
 
 void Registry::forget(const Entry &entry)

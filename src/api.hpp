@@ -46,9 +46,10 @@ private:
 namespace API {
   extern ReaPack *reapack;
 
-  extern APIFunc AboutPackage;
+  extern APIFunc AboutInstalledPackage;
   extern APIFunc AboutRepository;
   extern APIFunc CompareVersions;
+  extern APIFunc FreeEntry;
   extern APIFunc GetOwner;
 };
 
