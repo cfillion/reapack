@@ -37,7 +37,11 @@ using namespace std;
 
 ReaPack *API::reapack = nullptr;
 
-typedef Registry::Entry PackageEntry;
+struct PackageEntry {
+  Registry::Entry regEntry;
+  vector<Registry::File> files;
+};
+
 static set<PackageEntry *> s_entries;
 
 APIDef::APIDef(const APIFunc *func)
@@ -99,9 +103,9 @@ DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)), R"(
     return false;
 
   // the one given by the user may be deleted while we download the idnex
-  const PackageEntry entryCopy = *entry;
+  const Registry::Entry entryCopy = entry->regEntry;
 
-  const Remote &repo = reapack->remote(entry->remote);
+  const Remote &repo = reapack->remote(entryCopy.remote);
   if(!repo)
     return false;
 
@@ -154,6 +158,29 @@ DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
   return a.compare(b);
 });
 
+DEFINE_API(bool, EnumOwnedFiles, ((PackageEntry*, entry))((int, index))
+  ((char*, pathOut))((int, pathOut_sz))((int*, sectionsOut))((int*, typeOut)), R"(
+  Enumerate the files owned by the given package. Returns false when there is no more data.
+
+  sections: 0=not in action list, &1=main, &2=midi editor, &4=midi inline editor
+  type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.
+)", {
+  const size_t i = index;
+
+  if(!s_entries.count(entry) || i >= entry->files.size())
+    return false;
+
+  const Registry::File &file = entry->files[i];
+  if(pathOut)
+    snprintf(pathOut, pathOut_sz, "%s", Path::prefixRoot(file.path).join().c_str());
+  if(sectionsOut)
+    *sectionsOut = file.sections;
+  if(typeOut)
+    *typeOut = (int)file.type;
+
+  return entry->files.size() > i + 1;
+});
+
 DEFINE_API(bool, FreeEntry, ((PackageEntry*, entry)), R"(
   Free resources allocated for the given package entry.
 )", {
@@ -169,30 +196,35 @@ DEFINE_API(bool, GetEntryInfo, ((PackageEntry*, entry))
   ((char*, repoOut))((int, repoOut_sz))((char*, catOut))((int, catOut_sz))
   ((char*, pkgOut))((int, pkgOut_sz))((char*, descOut))((int, descOut_sz))
   ((int*, typeOut))((char*, verOut))((int, verOut_sz))
-  ((char*, authorOut))((int, authorOut_sz))((bool*, pinnedOut)), R"(
-  Get the repository name, category, package name, package description, package type, the currently installed version, author name and pinned status of the given package entry.
+  ((char*, authorOut))((int, authorOut_sz))
+  ((bool*, pinnedOut))((int*, fileCountOut)), R"(
+  Get the repository name, category, package name, package description, package type, the currently installed version, author name, pinned status and how many files are owned by the given package entry.
 
   type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface
 )", {
   if(!s_entries.count(entry))
     return false;
 
+  const Registry::Entry &regEntry = entry->regEntry;
+
   if(repoOut)
-    snprintf(repoOut, repoOut_sz, "%s", entry->remote.c_str());
+    snprintf(repoOut, repoOut_sz, "%s", regEntry.remote.c_str());
   if(catOut)
-    snprintf(catOut, catOut_sz, "%s", entry->category.c_str());
+    snprintf(catOut, catOut_sz, "%s", regEntry.category.c_str());
   if(pkgOut)
-    snprintf(pkgOut, pkgOut_sz, "%s", entry->package.c_str());
+    snprintf(pkgOut, pkgOut_sz, "%s", regEntry.package.c_str());
   if(descOut)
-    snprintf(descOut, descOut_sz, "%s", entry->description.c_str());
+    snprintf(descOut, descOut_sz, "%s", regEntry.description.c_str());
   if(typeOut)
-    *typeOut = (int)entry->type;
+    *typeOut = (int)regEntry.type;
   if(verOut)
-    snprintf(verOut, verOut_sz, "%s", entry->version.toString().c_str());
+    snprintf(verOut, verOut_sz, "%s", regEntry.version.toString().c_str());
   if(authorOut)
-    snprintf(authorOut, authorOut_sz, "%s", entry->author.c_str());
+    snprintf(authorOut, authorOut_sz, "%s", regEntry.author.c_str());
   if(pinnedOut)
-    *pinnedOut = entry->pinned;
+    *pinnedOut = regEntry.pinned;
+  if(fileCountOut)
+    *fileCountOut = (int)entry->files.size();
 
   return true;
 });
@@ -213,7 +245,7 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
     const auto &owner = reg.getOwner(path);
 
     if(owner) {
-      auto entry = new PackageEntry(owner);
+      auto entry = new PackageEntry{owner, reg.getFiles(owner)};
       s_entries.insert(entry);
       return entry;
     }
