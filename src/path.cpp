@@ -105,6 +105,25 @@ void Path::clear()
   m_parts.clear();
 }
 
+void Path::remove(const size_t pos, size_t count)
+{
+  if(pos > size())
+    return;
+  else if(pos + count > size())
+    count = size() - pos;
+
+  auto begin = m_parts.begin();
+  advance(begin, pos);
+
+  auto end = begin;
+  advance(end, count);
+
+  m_parts.erase(begin, end);
+
+  if(!pos && m_absolute)
+    m_absolute = false;
+}
+
 void Path::removeLast()
 {
   if(!empty())
@@ -159,6 +178,19 @@ string Path::last() const
     return {};
 
   return m_parts.back();
+}
+
+bool Path::startsWith(const Path &o) const
+{
+  if(size() < o.size() || absolute() != o.absolute())
+    return false;
+
+  for(size_t i = 0; i < o.size(); i++) {
+    if(o[i] != at(i))
+      return false;
+  }
+
+  return true;
 }
 
 bool Path::operator==(const Path &o) const

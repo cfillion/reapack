@@ -122,9 +122,16 @@ DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
 DEFINE_API(int, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)),
   "Returns ID of the package owning the given file or 0 on error.",
 {
+  Path path(fn);
+
+  const Path &rp = ReaPack::resourcePath();
+
+  if(path.startsWith(rp))
+    path.remove(0, rp.size());
+
   try {
     const Registry reg(Path::prefixRoot(Path::REGISTRY));
-    const int owner = (int)reg.getOwner(Path(fn));
+    const int owner = (int)reg.getOwner(path);
 
     if(!owner && errorOut)
       snprintf(errorOut, errorOut_sz, "file is not owned by any package");
