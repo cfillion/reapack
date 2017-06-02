@@ -17,6 +17,7 @@
 
 #include "api.hpp"
 
+#include <boost/mpl/aux_/preprocessor/token_equal.hpp>
 #include <boost/preprocessor.hpp>
 
 #include <reaper_plugin_functions.h>
@@ -60,6 +61,9 @@ void APIDef::unregister(const char *key, void *ptr)
   plugin_register(buf, ptr);
 }
 
+#define BOOST_MPL_PP_TOKEN_EQUAL_void(x) x
+#define IS_VOID(type) BOOST_MPL_PP_TOKEN_EQUAL(type, void)
+
 #define ARG_TYPE(arg) BOOST_PP_TUPLE_ELEM(2, 0, arg)
 #define ARG_NAME(arg) BOOST_PP_TUPLE_ELEM(2, 1, arg)
 
@@ -71,8 +75,10 @@ void APIDef::unregister(const char *key, void *ptr)
 #define DEFINE_API(type, name, args, help, ...) \
   namespace API_##name { \
     static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(ARGS, _, args)) __VA_ARGS__ \
-    void *reascriptImpl(void **argv, int argc) { \
-      return (void *)(intptr_t)cImpl(BOOST_PP_SEQ_FOR_EACH_I(PARAMS, _, args)); \
+    static void *reascriptImpl(void **argv, int argc) { \
+      BOOST_PP_EXPR_IF(BOOST_PP_NOT(IS_VOID(type)), return (void *)(intptr_t)) \
+      cImpl(BOOST_PP_SEQ_FOR_EACH_I(PARAMS, _, args)); \
+      BOOST_PP_EXPR_IF(IS_VOID(type), return nullptr;) \
     } \
     static const char *definition = #type "\0" \
       BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, ARG_TYPE, args) "\0" \
@@ -120,7 +126,7 @@ DEFINE_API(bool, AboutInstalledPackage, ((Registry::Entry*, entry)), R"(
 });
 
 DEFINE_API(bool, AboutRepository, ((const char*, repoName)), R"(
-  Show the about dialog of the given repository.
+  Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
   The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
 )", {
   if(const Remote &repo = reapack->remote(repoName)) {
@@ -185,13 +191,11 @@ DEFINE_API(Registry::Entry*, GetOwner, ((const char*, fn))((char*, errorOut))((i
   }
 });
 
-DEFINE_API(bool, FreeEntry, ((Registry::Entry*, entry)), R"(
+DEFINE_API(void, FreeEntry, ((Registry::Entry*, entry)), R"(
   Free resources allocated for the given package entry.
 )", {
-  if(!s_entries.count(entry))
-    return false;
-
-  s_entries.erase(entry);
-  delete entry;
-  return true;
+  if(s_entries.count(entry)) {
+    s_entries.erase(entry);
+    delete entry;
+  }
 });
