@@ -37,7 +37,8 @@ using namespace std;
 
 ReaPack *API::reapack = nullptr;
 
-static set<Registry::Entry *> s_entries;
+typedef Registry::Entry PackageEntry;
+static set<PackageEntry *> s_entries;
 
 APIDef::APIDef(const APIFunc *func)
   : m_func(func)
@@ -90,7 +91,7 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIdef_" API_PREFIX #name, (void *)API_##name::definition, \
   }
 
-DEFINE_API(bool, AboutInstalledPackage, ((Registry::Entry*, entry)), R"(
+DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)), R"(
   Show the about dialog of the given package entry.
   The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
 )", {
@@ -98,7 +99,7 @@ DEFINE_API(bool, AboutInstalledPackage, ((Registry::Entry*, entry)), R"(
     return false;
 
   // the one given by the user may be deleted while we download the idnex
-  const Registry::Entry entryCopy = *entry;
+  const PackageEntry entryCopy = *entry;
 
   const Remote &repo = reapack->remote(entry->remote);
   if(!repo)
@@ -137,27 +138,23 @@ DEFINE_API(bool, AboutRepository, ((const char*, repoName)), R"(
   return false;
 });
 
-DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
-    ((int*, resultOut))((char*, errorOut))((int, errorOut_sz)), R"(
+DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
+    ((char*, errorOut))((int, errorOut_sz)), R"(
   Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.
 )", {
   VersionName a, b;
   string error;
 
-  if(a.tryParse(ver1, &error) && b.tryParse(ver2, &error)) {
-    *resultOut = a.compare(b);
-    return true;
-  }
+  b.tryParse(ver2, &error);
+  a.tryParse(ver1, &error);
 
   if(errorOut)
     snprintf(errorOut, errorOut_sz, "%s", error.c_str());
 
-  *resultOut = 0;
-
-  return false;
+  return a.compare(b);
 });
 
-DEFINE_API(Registry::Entry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)), R"(
+DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)), R"(
   Returns the package entry owning the given file.
   Delete the returned object from memory after use with <a href="#ReaPack_FreeEntry">ReaPack_FreeEntry</a>.
 )", {
@@ -173,7 +170,7 @@ DEFINE_API(Registry::Entry*, GetOwner, ((const char*, fn))((char*, errorOut))((i
     const auto &owner = reg.getOwner(path);
 
     if(owner) {
-      auto entry = new Registry::Entry(owner);
+      auto entry = new PackageEntry(owner);
       s_entries.insert(entry);
       return entry;
     }
@@ -191,7 +188,7 @@ DEFINE_API(Registry::Entry*, GetOwner, ((const char*, fn))((char*, errorOut))((i
   }
 });
 
-DEFINE_API(void, FreeEntry, ((Registry::Entry*, entry)), R"(
+DEFINE_API(void, FreeEntry, ((PackageEntry*, entry)), R"(
   Free resources allocated for the given package entry.
 )", {
   if(s_entries.count(entry)) {
