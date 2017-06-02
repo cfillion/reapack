@@ -29,14 +29,14 @@
 #include "remote.hpp"
 #include "transaction.hpp"
 
+#define API_PREFIX "ReaPack_"
+
 using namespace API;
 using namespace std;
 
 ReaPack *API::reapack = nullptr;
 
 static set<Registry::Entry *> s_entries;
-
-#define API_PREFIX "ReaPack_"
 
 APIDef::APIDef(const APIFunc *func)
   : m_func(func)
@@ -66,10 +66,10 @@ void APIDef::unregister(const char *key, void *ptr)
 #define ARGS(r, data, i, arg) BOOST_PP_COMMA_IF(i) ARG_TYPE(arg) ARG_NAME(arg)
 #define PARAMS(r, data, i, arg) BOOST_PP_COMMA_IF(i) (ARG_TYPE(arg))(intptr_t)argv[i]
 #define DEFARGS(r, macro, i, arg) \
-  BOOST_PP_IF(i, ",", BOOST_PP_EMPTY()) BOOST_PP_STRINGIZE(macro(arg))
+  BOOST_PP_EXPR_IF(i, ",") BOOST_PP_STRINGIZE(macro(arg))
 
 #define DEFINE_API(type, name, args, help, ...) \
-  namespace name { \
+  namespace API_##name { \
     static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(ARGS, _, args)) __VA_ARGS__ \
     void *reascriptImpl(void **argv, int argc) { \
       return (void *)(intptr_t)cImpl(BOOST_PP_SEQ_FOR_EACH_I(PARAMS, _, args)); \
@@ -79,9 +79,9 @@ void APIDef::unregister(const char *key, void *ptr)
       BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, ARG_NAME, args) "\0" help; \
   }; \
   APIFunc API::name = {\
-    "API_" API_PREFIX #name, (void *)&name::cImpl, \
-    "APIvararg_" API_PREFIX #name, (void *)&name::reascriptImpl, \
-    "APIdef_" API_PREFIX #name, (void *)name::definition, \
+    "API_" API_PREFIX #name, (void *)&API_##name::cImpl, \
+    "APIvararg_" API_PREFIX #name, (void *)&API_##name::reascriptImpl, \
+    "APIdef_" API_PREFIX #name, (void *)API_##name::definition, \
   }
 
 DEFINE_API(bool, AboutInstalledPackage, ((Registry::Entry*, entry)), R"(
@@ -188,11 +188,10 @@ DEFINE_API(Registry::Entry*, GetOwner, ((const char*, fn))((char*, errorOut))((i
 DEFINE_API(bool, FreeEntry, ((Registry::Entry*, entry)), R"(
   Free resources allocated for the given package entry.
 )", {
-  if(s_entries.count(entry)) {
-    s_entries.erase(entry);
-    delete entry;
-    return true;
-  }
+  if(!s_entries.count(entry))
+    return false;
 
-  return false;
+  s_entries.erase(entry);
+  delete entry;
+  return true;
 });

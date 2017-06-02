@@ -42,7 +42,6 @@ private:
   const APIFunc *m_func;
 };
 
-
 namespace API {
   extern ReaPack *reapack;
 
