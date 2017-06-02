@@ -57,6 +57,7 @@ public:
   std::vector<Entry> getEntries(const std::string &) const;
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
+  int64_t getOwner(const Path &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);
@@ -78,6 +79,7 @@ private:
   Statement *m_allEntries;
   Statement *m_forgetEntry;
 
+  Statement *m_getOwner;
   Statement *m_getFiles;
   Statement *m_insertFile;
   Statement *m_clearFiles;

@@ -160,8 +160,10 @@ static void setupActions()
 
 static void setupAPI()
 {
+  reapack->setupAPI(&API::AboutPackage);
   reapack->setupAPI(&API::AboutRepository);
   reapack->setupAPI(&API::CompareVersions);
+  reapack->setupAPI(&API::GetOwner);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(

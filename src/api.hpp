@@ -42,11 +42,14 @@ private:
   const APIFunc *m_func;
 };
 
+
 namespace API {
+  extern ReaPack *reapack;
+
+  extern APIFunc AboutPackage;
   extern APIFunc AboutRepository;
   extern APIFunc CompareVersions;
-
-  extern ReaPack *reapack;
+  extern APIFunc GetOwner;
 };
 
 #endif

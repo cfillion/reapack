@@ -19,7 +19,6 @@
 #define REAPACK_REAPACK_HPP
 
 #include "path.hpp"
-#include "registry.hpp"
 
 #include <functional>
 #include <map>

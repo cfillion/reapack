@@ -168,7 +168,7 @@ TEST_CASE("get main files", M) {
   MAKE_PACKAGE
 
   Registry reg;
-  REQUIRE((reg.getMainFiles({})).empty());
+  REQUIRE(reg.getMainFiles({}).empty());
 
   Source *main1 = new Source({}, "url", &ver);
   main1->setSections(Source::MIDIEditorSection);
@@ -204,4 +204,14 @@ TEST_CASE("pin registry entry", M) {
 
   reg.setPinned(entry, false);
   REQUIRE_FALSE(reg.getEntry(&pkg).pinned);
+}
+
+TEST_CASE("get file owner", M) {
+  MAKE_PACKAGE
+
+  Registry reg;
+  REQUIRE(reg.getOwner({}) == 0);
+
+  const Registry::Entry &entry = reg.push(&ver);
+  REQUIRE(reg.getOwner(src->targetPath()) == entry.id);
 }

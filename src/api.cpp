@@ -21,7 +21,9 @@
 
 #include <reaper_plugin_functions.h>
 
+#include "errors.hpp"
 #include "reapack.hpp"
+#include "registry.hpp"
 #include "remote.hpp"
 #include "version.hpp"
 
@@ -66,9 +68,7 @@ void APIDef::unregister(const char *key, void *ptr)
   namespace name { \
     static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(ARGS, _, args)) __VA_ARGS__ \
     void *reascriptImpl(void **argv, int argc) { \
-      if(argc == BOOST_PP_SEQ_SIZE(args)) \
-        return (void *)(intptr_t)cImpl(BOOST_PP_SEQ_FOR_EACH_I(PARAMS, _, args)); \
-      return nullptr; \
+      return (void *)(intptr_t)cImpl(BOOST_PP_SEQ_FOR_EACH_I(PARAMS, _, args)); \
     } \
     static const char *definition = #type "\0" \
       BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, ARG_TYPE, args) "\0" \
@@ -79,6 +79,12 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIvararg_" API_PREFIX #name, (void *)&name::reascriptImpl, \
     "APIdef_" API_PREFIX #name, (void *)name::definition, \
   }
+
+DEFINE_API(bool, AboutPackage, ((int, id)),
+  "Show the about dialog of the given package. Returns true on success.",
+{
+  return false;
+});
 
 DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
   "Show the about dialog of the given repository. Returns true on success.",
@@ -93,7 +99,7 @@ DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
 
 DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
     ((int*, resultOut))((char*, errorOut))((int, errorOut_sz)),
-  "Compare version numbers. Returns 0 if both versions are equal,"
+  "Returns 0 if both versions are equal,"
   " a positive value if ver1 is higher than ver2"
   " and a negative value otherwise.",
 {
@@ -111,4 +117,25 @@ DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
   *resultOut = 0;
 
   return false;
+});
+
+DEFINE_API(int, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)),
+  "Returns ID of the package owning the given file or 0 on error.",
+{
+  try {
+    const Registry reg(Path::prefixRoot(Path::REGISTRY));
+    const int owner = (int)reg.getOwner(Path(fn));
+
+    if(!owner && errorOut)
+      snprintf(errorOut, errorOut_sz, "file is not owned by any package");
+
+    return owner;
+  }
+  catch(const reapack_error &e)
+  {
+    if(errorOut)
+      snprintf(errorOut, errorOut_sz, "%s", e.what());
+
+    return 0;
+  }
 });
