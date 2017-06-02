@@ -18,6 +18,8 @@
 #ifndef REAPACK_API_HPP
 #define REAPACK_API_HPP
 
+class ReaPack;
+
 struct APIFunc {
   const char *cKey;
   void *cImpl;
@@ -41,7 +43,10 @@ private:
 };
 
 namespace API {
+  extern APIFunc AboutRepository;
   extern APIFunc CompareVersions;
+
+  extern ReaPack *reapack;
 };
 
 #endif

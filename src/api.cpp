@@ -18,14 +18,17 @@
 #include "api.hpp"
 
 #include <boost/preprocessor.hpp>
-#include <cstdint>
-#include <cstdio>
 
 #include <reaper_plugin_functions.h>
 
+#include "reapack.hpp"
+#include "remote.hpp"
 #include "version.hpp"
 
+using namespace API;
 using namespace std;
+
+ReaPack *API::reapack = nullptr;
 
 #define API_PREFIX "ReaPack_"
 
@@ -76,6 +79,17 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIvararg_" API_PREFIX #name, (void *)&name::reascriptImpl, \
     "APIdef_" API_PREFIX #name, (void *)name::definition, \
   }
+
+DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
+  "Show the about dialog of the given repository. Returns true on success.",
+{
+  if(const Remote &repo = reapack->remote(repoName)) {
+    reapack->about(repo);
+    return true;
+  }
+
+  return false;
+});
 
 DEFINE_API(bool, CompareVersions, ((const char*, ver1))((const char*, ver2))
     ((int*, resultOut))((char*, errorOut))((int, errorOut_sz)),

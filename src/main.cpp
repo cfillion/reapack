@@ -160,6 +160,7 @@ static void setupActions()
 
 static void setupAPI()
 {
+  reapack->setupAPI(&API::AboutRepository);
   reapack->setupAPI(&API::CompareVersions);
 }
 
@@ -184,7 +185,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(!checkLocation(instance))
     return 0;
 
-  reapack = new ReaPack(instance);
+  reapack = API::reapack = new ReaPack(instance);
 
   setupActions();
   setupAPI();
