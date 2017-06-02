@@ -154,16 +154,18 @@ DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
   return a.compare(b);
 });
 
-DEFINE_API(void, FreeEntry, ((PackageEntry*, entry)), R"(
+DEFINE_API(bool, FreeEntry, ((PackageEntry*, entry)), R"(
   Free resources allocated for the given package entry.
 )", {
-  if(s_entries.count(entry)) {
-    s_entries.erase(entry);
-    delete entry;
-  }
+  if(!s_entries.count(entry))
+    return false;
+
+  s_entries.erase(entry);
+  delete entry;
+  return true;
 });
 
-DEFINE_API(void, GetEntryInfo, ((PackageEntry*, entry))
+DEFINE_API(bool, GetEntryInfo, ((PackageEntry*, entry))
   ((char*, repoOut))((int, repoOut_sz))((char*, catOut))((int, catOut_sz))
   ((char*, pkgOut))((int, pkgOut_sz))((char*, descOut))((int, descOut_sz))
   ((int*, typeOut))((char*, verOut))((int, verOut_sz))
@@ -173,7 +175,7 @@ DEFINE_API(void, GetEntryInfo, ((PackageEntry*, entry))
   type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface
 )", {
   if(!s_entries.count(entry))
-    return;
+    return false;
 
   if(repoOut)
     snprintf(repoOut, repoOut_sz, "%s", entry->remote.c_str());
@@ -191,6 +193,8 @@ DEFINE_API(void, GetEntryInfo, ((PackageEntry*, entry))
     snprintf(authorOut, authorOut_sz, "%s", entry->author.c_str());
   if(pinnedOut)
     *pinnedOut = entry->pinned;
+
+  return true;
 });
 
 DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)), R"(
