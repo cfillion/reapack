@@ -19,7 +19,6 @@
 #define REAPACK_REAPACK_HPP
 
 #include "path.hpp"
-#include "registry.hpp"
 
 #include <functional>
 #include <map>
@@ -29,12 +28,14 @@
 #include <reaper_plugin.h>
 
 class About;
+class APIDef;
 class Browser;
 class Config;
 class Manager;
 class Progress;
 class Remote;
 class Transaction;
+struct APIFunc;
 
 class ReaPack {
 public:
@@ -57,6 +58,8 @@ public:
   int setupAction(const char *name, const char *desc,
     gaccel_register_t *action, const ActionCallback &);
   bool execActions(int id, int);
+
+  void setupAPI(const APIFunc *func);
 
   void synchronizeAll();
   void setRemoteEnabled(bool enable, const Remote &);
@@ -82,6 +85,7 @@ private:
   void teardownTransaction();
 
   std::map<int, ActionCallback> m_actions;
+  std::vector<std::unique_ptr<APIDef> > m_api;
 
   Config *m_config;
   Transaction *m_tx;

@@ -18,6 +18,7 @@
 #include "reapack.hpp"
 
 #include "about.hpp"
+#include "api.hpp"
 #include "browser.hpp"
 #include "config.hpp"
 #include "download.hpp"
@@ -140,6 +141,11 @@ bool ReaPack::execActions(const int id, const int)
   m_actions.at(id)();
 
   return true;
+}
+
+void ReaPack::setupAPI(const APIFunc *func)
+{
+  m_api.push_back(std::make_unique<APIDef>(func));
 }
 
 void ReaPack::synchronizeAll()

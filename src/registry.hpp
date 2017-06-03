@@ -29,7 +29,9 @@
 class Registry {
 public:
   struct Entry {
-    int64_t id;
+    typedef int64_t id_t;
+
+    id_t id;
     std::string remote;
     std::string category;
     std::string package;
@@ -54,6 +56,7 @@ public:
   Registry(const Path &path = {});
 
   Entry getEntry(const Package *) const;
+  Entry getOwner(const Path &) const;
   std::vector<Entry> getEntries(const std::string &) const;
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
@@ -77,6 +80,7 @@ private:
   Statement *m_findEntry;
   Statement *m_allEntries;
   Statement *m_forgetEntry;
+  Statement *m_getOwner;
 
   Statement *m_getFiles;
   Statement *m_insertFile;
@@ -86,13 +90,11 @@ private:
   size_t m_savePoint;
 };
 
-namespace std
-{
-  template<> struct hash<Registry::Entry>
-  {
+namespace std {
+  template<> struct hash<Registry::Entry> {
     std::size_t operator()(const Registry::Entry &e) const
     {
-      return std::hash<int64_t>()(e.id);
+      return std::hash<Registry::Entry::id_t>()(e.id);
     }
   };
 }

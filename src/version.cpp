@@ -126,13 +126,16 @@ void VersionName::parse(const string &str)
   m_stable = letters < 1;
 }
 
-bool VersionName::tryParse(const string &str)
+bool VersionName::tryParse(const string &str, string *errorOut)
 {
   try {
     parse(str);
     return true;
   }
-  catch(const reapack_error &) {
+  catch(const reapack_error &err) {
+    if(errorOut)
+      *errorOut = err.what();
+
     return false;
   }
 }

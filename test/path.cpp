@@ -228,7 +228,7 @@ TEST_CASE("directory traversal", M) {
   }
 }
 
-TEST_CASE("append full paths") {
+TEST_CASE("append full paths", M) {
   Path a;
   a += Path("a/b");
   a.append(Path("c/d"));
@@ -237,9 +237,43 @@ TEST_CASE("append full paths") {
   REQUIRE(a == Path("a/b/c/d/e/f"));
 }
 
-TEST_CASE("temporary path") {
+TEST_CASE("temporary path", M) {
   TempPath a(Path("hello/world"));
 
   REQUIRE(a.target() == Path("hello/world"));
   REQUIRE(a.temp() == Path("hello/world.part"));
+}
+
+TEST_CASE("path starts with", M) {
+  const Path ref("a/b");
+
+  REQUIRE(ref.startsWith(ref));
+  REQUIRE(Path("a/b/c").startsWith(ref));
+  REQUIRE_FALSE(Path("/a/b/c").startsWith(ref));
+  REQUIRE_FALSE(Path("0/a/b/c").startsWith(ref));
+  REQUIRE_FALSE(Path("a").startsWith(ref));
+}
+
+TEST_CASE("remove path segments", M) {
+  Path path("/a/b/c/d/e");
+
+  SECTION("remove from start") {
+    path.remove(0, 1);
+    REQUIRE(path == Path("b/c/d/e"));
+    REQUIRE_FALSE(path.absolute());
+  }
+
+  SECTION("remove from middle") {
+    path.remove(1, 2);
+    REQUIRE(path == Path("/a/d/e"));
+#ifndef _WIN32
+    REQUIRE(path.absolute());
+#endif
+  }
+
+  SECTION("remove past the end") {
+    path.remove(4, 2);
+    path.remove(18, 1);
+    REQUIRE(path == Path("/a/b/c/d"));
+  }
 }

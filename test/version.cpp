@@ -90,8 +90,12 @@ TEST_CASE("parse version failsafe", M) {
   SECTION("invalid") {
     REQUIRE_FALSE(ver.tryParse("hello"));
 
+    string error;
+    REQUIRE_FALSE(ver.tryParse("world", &error));
+
     REQUIRE(ver.toString().empty());
     REQUIRE(ver.size() == 0);
+    REQUIRE(error == "invalid version name 'world'");
   }
 }
 

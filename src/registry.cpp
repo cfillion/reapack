@@ -57,6 +57,10 @@ Registry::Registry(const Path &path)
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
 
   // file queries
+  m_getOwner = m_db.prepare(
+    "SELECT e.id, remote, category, package, desc, e.type, version, author, pinned "
+    "FROM entries e JOIN files f ON f.entry = e.id WHERE f.path = ? LIMIT 1"
+  );
   m_getFiles = m_db.prepare(
     "SELECT path, main, type FROM files WHERE entry = ? ORDER BY path"
   );
@@ -260,9 +264,13 @@ auto Registry::getFiles(const Entry &entry) const -> vector<File>
 
   m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
-    File file{m_getFiles->stringColumn(0)};
-    file.sections = static_cast<int>(m_getFiles->intColumn(1));
-    file.type = static_cast<Package::Type>(m_getFiles->intColumn(2));
+    int col = 0;
+
+    File file{
+      m_getFiles->stringColumn(col++),
+      static_cast<int>(m_getFiles->intColumn(col++)),
+      static_cast<Package::Type>(m_getFiles->intColumn(col++)),
+    };
 
     if(!file.type) // < v1.0rc2
       file.type = entry.type;
@@ -286,6 +294,20 @@ auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
     back_inserter(mainFiles), [&](const File &f) { return f.sections; });
 
   return mainFiles;
+}
+
+auto Registry::getOwner(const Path &path) const -> Entry
+{
+  Entry entry{};
+
+  m_getOwner->bind(1, path.join('/'));
+
+  m_getOwner->exec([&] {
+    fillEntry(m_getOwner, &entry);
+    return false;
+  });
+
+  return entry;
 }
 
 void Registry::forget(const Entry &entry)

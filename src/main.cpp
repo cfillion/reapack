@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "api.hpp"
 #include "errors.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
@@ -140,6 +141,34 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   return false;
 }
 
+static void setupActions()
+{
+  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
+    &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
+
+  reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
+    &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
+
+  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
+    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
+
+  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
+    &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
+
+  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
+}
+
+static void setupAPI()
+{
+  reapack->setupAPI(&API::AboutInstalledPackage);
+  reapack->setupAPI(&API::AboutRepository);
+  reapack->setupAPI(&API::CompareVersions);
+  reapack->setupAPI(&API::EnumOwnedFiles);
+  reapack->setupAPI(&API::FreeEntry);
+  reapack->setupAPI(&API::GetEntryInfo);
+  reapack->setupAPI(&API::GetOwner);
+}
+
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
@@ -161,21 +190,10 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(!checkLocation(instance))
     return 0;
 
-  reapack = new ReaPack(instance);
+  reapack = API::reapack = new ReaPack(instance);
 
-  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
-    &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
-
-  reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
-    &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
-
-  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
-    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
-
-  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
-    &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
-
-  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
+  setupActions();
+  setupAPI();
 
   plugin_register("hookcommand", (void *)commandHook);
   plugin_register("hookcustommenu", (void *)menuHook);

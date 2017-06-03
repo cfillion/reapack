@@ -37,6 +37,7 @@ public:
 
   void append(const std::string &part, bool traversal = true);
   void append(const Path &other);
+  void remove(size_t pos, size_t count);
   void removeLast();
   void clear();
 
@@ -49,6 +50,7 @@ public:
   std::string join(const char sep = 0) const;
   std::string first() const;
   std::string last() const;
+  bool startsWith(const Path &) const;
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;
