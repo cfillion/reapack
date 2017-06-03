@@ -244,7 +244,7 @@ void About::selectLink(const int ctrl)
   m_tabs->setFocus();
 
   if(count == 1) {
-    openLink(links.front());
+    openURL(links.front()->url);
     return;
   }
 
@@ -258,13 +258,7 @@ void About::selectLink(const int ctrl)
   const int choice = menu.show(getControl(ctrl), handle());
 
   if(choice >> 8 == ctrl)
-    openLink(links[choice & 0xff]);
-}
-
-void About::openLink(const Link *link)
-{
-  const auto_string &url = make_autostring(link->url);
-  ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
+    openURL(links[choice & 0xff]->url);
 }
 
 void About::updateList()

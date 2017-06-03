@@ -50,6 +50,7 @@ private:
 
   HWND m_url;
   HWND m_progress;
+  HWND m_discover;
   HWND m_ok;
 };
 

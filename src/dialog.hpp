@@ -100,6 +100,7 @@ public:
   void stopTimer(int id);
   void setClipboard(const std::string &);
   void setClipboard(const std::vector<std::string> &);
+  static void openURL(const std::string &url);
   HWND getControl(int idc);
   std::string getText(HWND);
   void setAnchor(HWND, int flags);

@@ -344,6 +344,12 @@ void Dialog::setClipboard(const vector<string> &values)
     setClipboard(boost::algorithm::join(values, "\n"));
 }
 
+void Dialog::openURL(const string &utf8)
+{
+  const auto_string &url = make_autostring(utf8);
+  ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
+}
+
 HWND Dialog::getControl(const int idc)
 {
   return GetDlgItem(m_handle, idc);

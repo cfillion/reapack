@@ -70,5 +70,6 @@
 #define IDC_SCREENSHOT 231
 #define IDC_ENABLE     232
 #define IDC_CHANGELOG  233
+#define IDC_DISCOVER   234
 
 #endif

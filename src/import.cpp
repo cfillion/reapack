@@ -32,6 +32,7 @@
 using namespace std;
 
 static const auto_char *TITLE = AUTO_STR("ReaPack: Import a repository");
+static const string DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import(ReaPack *reapack)
   : Dialog(IDD_IMPORT_DIALOG), m_reapack(reapack), m_download(nullptr)
@@ -46,9 +47,8 @@ void Import::onInit()
 
   m_url = getControl(IDC_URL);
   m_progress = getControl(IDC_PROGRESS);
+  m_discover = getControl(IDC_DISCOVER);
   m_ok = getControl(IDOK);
-
-  hide(m_progress);
 
 #ifdef PBM_SETMARQUEE
   SendMessage(m_progress, PBM_SETMARQUEE, 1, 0);
@@ -60,6 +60,9 @@ void Import::onCommand(const int id, int)
   switch(id) {
   case IDOK:
     fetch();
+    break;
+  case IDC_DISCOVER:
+    openURL(DISCOVER_URL);
     break;
   case IDCANCEL:
     if(m_download)
@@ -212,6 +215,7 @@ bool Import::import(const Remote &remote)
 void Import::setWaiting(const bool wait)
 {
   setVisible(wait, m_progress);
+  setVisible(!wait, m_discover);
   setEnabled(!wait, m_url);
 
 #ifndef PBM_SETMARQUEE
