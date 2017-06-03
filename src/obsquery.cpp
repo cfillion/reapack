@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "query.hpp"
+#include "obsquery.hpp"
 
 #include "encoding.hpp"
 #include "listview.hpp"
@@ -30,7 +30,7 @@ using namespace std;
 enum { ACTION_SELECT_ALL = 300, ACTION_UNSELECT_ALL };
 
 ObsoleteQuery::ObsoleteQuery(vector<Registry::Entry> *entries, bool *enable)
-  : Dialog(IDD_QUERY_DIALOG), m_entries(entries), m_enable(enable)
+  : Dialog(IDD_OBSQUERY_DIALOG), m_entries(entries), m_enable(enable)
 {
 }
 

@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_QUERY_HPP
-#define REAPACK_QUERY_HPP
+#ifndef REAPACK_OBSOLETE_QUERY_HPP
+#define REAPACK_OBSOLETE_QUERY_HPP
 
 #include "dialog.hpp"
 
