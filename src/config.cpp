@@ -193,9 +193,9 @@ void Config::readRemotes()
 
 void Config::writeRemotes()
 {
-  unsigned int i = 0;
   m_remotesIniSize = max((unsigned int)remotes.size(), m_remotesIniSize);
 
+  unsigned int i = 0;
   for(auto it = remotes.begin(); it != remotes.end(); it++, i++)
     setString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i), it->toString());
 

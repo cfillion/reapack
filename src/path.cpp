@@ -152,9 +152,7 @@ string Path::join(const char sep) const
 {
   string path;
 
-  for(auto it = m_parts.begin(); it != m_parts.end(); it++) {
-    const string &part = *it;
-
+  for(const string &part : m_parts) {
     if(!path.empty() || m_absolute)
       path += sep ? sep : SEPARATOR;
 

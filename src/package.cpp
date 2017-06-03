@@ -114,9 +114,7 @@ bool Package::addVersion(const Version *ver)
 const Version *Package::version(const size_t index) const
 {
   auto it = m_versions.begin();
-
-  for(size_t i = 0; i < index; i++)
-    it++;
+  advance(it, index);
 
   return *it;
 }
