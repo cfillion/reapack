@@ -470,13 +470,13 @@ void Manager::importExport()
   menu.show(getControl(IDC_IMPORT), handle());
 }
 
-bool Manager::importRepo(const string &url)
+bool Manager::importRepo()
 {
   if(m_importing) // avoid opening the import dialog twice on windows
     return true;
 
   m_importing = true;
-  const auto ret = Dialog::Show<Import>(instance(), handle(), url, m_reapack);
+  const auto ret = Dialog::Show<Import>(instance(), handle(), m_reapack);
   m_importing = false;
 
   return ret != 0;

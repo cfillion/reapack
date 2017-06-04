@@ -39,7 +39,7 @@ public:
   Manager(ReaPack *);
 
   void refresh();
-  bool importRepo(const std::string &url = {});
+  bool importRepo();
 
 protected:
   void onInit() override;

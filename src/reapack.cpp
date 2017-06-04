@@ -200,13 +200,13 @@ void ReaPack::uninstall(const Remote &remote)
   });
 }
 
-void ReaPack::importRemote(const string &url)
+void ReaPack::importRemote()
 {
   const bool autoClose = m_manager == nullptr;
 
   manageRemotes();
 
-  if(!m_manager->importRepo(url) && autoClose)
+  if(!m_manager->importRepo() && autoClose)
     m_manager->close();
 }
 

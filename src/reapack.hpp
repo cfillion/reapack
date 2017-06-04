@@ -66,7 +66,7 @@ public:
   void enable(const Remote &r) { setRemoteEnabled(true, r); }
   void uninstall(const Remote &);
 
-  void importRemote(const std::string &url = {});
+  void importRemote();
   void manageRemotes();
   void aboutSelf();
   void about(const Remote &);
