@@ -295,3 +295,40 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
     return nullptr;
   }
 });
+
+DEFINE_API(bool, SetRepository, ((const char*, name))((const char*, url))
+  ((bool, enabled))((int, autoInstall))((bool, commit))
+  ((char*, errorOut))((int, errorOut_sz)), R"(
+  Add the given repository name and URL to the list. Set commit to true on the last call to this function.
+
+  autoInstall: default is 2 (use global setting).
+)", {
+  try {
+    if(reapack->remote(name).isProtected()) {
+      if(errorOut)
+        snprintf(errorOut, errorOut_sz, "this repository is protected");
+      return false;
+    }
+
+    Remote remote(name, url, enabled, boost::lexical_cast<tribool>(autoInstall));
+    reapack->config()->remotes.add(remote);
+  }
+  catch(const reapack_error &e) {
+    if(errorOut)
+      snprintf(errorOut, errorOut_sz, "%s", e.what());
+    return false;
+  }
+  catch(const boost::bad_lexical_cast &) {
+    if(errorOut)
+      snprintf(errorOut, errorOut_sz, "invalid value for autoInstall");
+    return false;
+  }
+
+  if(commit) {
+    reapack->refreshManager();
+    reapack->refreshBrowser();
+    reapack->config()->write();
+  }
+
+  return true;
+});

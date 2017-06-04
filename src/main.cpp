@@ -168,6 +168,7 @@ static void setupAPI()
   reapack->setupAPI(&API::FreeEntry);
   reapack->setupAPI(&API::GetEntryInfo);
   reapack->setupAPI(&API::GetOwner);
+  reapack->setupAPI(&API::SetRepository);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
