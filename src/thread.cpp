@@ -86,8 +86,12 @@ DWORD WINAPI WorkerThread::run(void *ptr)
   DownloadContext context;
 
   while(!thread->m_exit) {
-    while(ThreadTask *task = thread->nextTask())
-      task->run(&context);
+    while(ThreadTask *task = thread->nextTask()) {
+      if(auto dl = dynamic_cast<Download *>(task))
+        dl->setContext(&context);
+
+      task->run();
+    }
 
     ResetEvent(thread->m_wake);
     WaitForSingleObject(thread->m_wake, INFINITE);

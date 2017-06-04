@@ -47,12 +47,13 @@ public:
 
   void setName(const std::string &);
   const std::string &url() const { return m_url; }
+  void setContext(DownloadContext *ctx) { m_ctx = ctx; }
   void start();
 
   bool concurrent() const override { return true; }
-  void run(DownloadContext *) override;
+  void run() override;
 
-private:
+protected:
   virtual std::ostream *openStream() = 0;
   virtual void closeStream() {}
 
@@ -64,6 +65,7 @@ private:
   std::string m_url;
   NetworkOpts m_opts;
   int m_flags;
+  DownloadContext *m_ctx;
 };
 
 class MemoryDownload : public Download {

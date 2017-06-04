@@ -104,7 +104,7 @@ int Download::UpdateProgress(void *ptr, const double, const double,
 }
 
 Download::Download(const string &url, const NetworkOpts &opts, const int flags)
-  : m_url(url), m_opts(opts), m_flags(flags)
+  : m_url(url), m_opts(opts), m_flags(flags), m_ctx(nullptr)
 {
 }
 
@@ -120,7 +120,7 @@ void Download::start()
   onFinish([thread] { delete thread; });
 }
 
-void Download::run(DownloadContext *ctx)
+void Download::run()
 {
   if(aborted()) {
     finish(Aborted, {"cancelled", m_url});
@@ -133,25 +133,25 @@ void Download::run(DownloadContext *ctx)
   if(!stream)
     return;
 
-  curl_easy_setopt(ctx->m_curl, CURLOPT_URL, m_url.c_str());
-  curl_easy_setopt(ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
-  curl_easy_setopt(ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 
-  curl_easy_setopt(ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
-  curl_easy_setopt(ctx->m_curl, CURLOPT_PROGRESSDATA, this);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSDATA, this);
 
-  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(ctx->m_curl, CURLOPT_WRITEDATA, stream);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_WRITEFUNCTION, WriteData);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_WRITEDATA, stream);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
-  curl_easy_setopt(ctx->m_curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_HTTPHEADER, headers);
 
   char errbuf[CURL_ERROR_SIZE] = "No error message";
-  curl_easy_setopt(ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
 
-  const CURLcode res = curl_easy_perform(ctx->m_curl);
+  const CURLcode res = curl_easy_perform(m_ctx->m_curl);
   closeStream();
 
   if(aborted())

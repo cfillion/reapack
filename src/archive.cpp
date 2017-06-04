@@ -220,7 +220,7 @@ FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
   setSummary("Extracting %s: " + target.join());
 }
 
-void FileExtractor::run(DownloadContext *)
+void FileExtractor::run()
 {
   if(aborted()) {
     finish(Aborted, {"cancelled", m_path.target().join()});
@@ -362,7 +362,7 @@ FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &write
   setSummary("Compressing %s: " + target.join());
 }
 
-void FileCompressor::run(DownloadContext *)
+void FileCompressor::run()
 {
   if(aborted()) {
     finish(Aborted, {"cancelled", m_path.join()});
