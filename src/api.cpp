@@ -98,10 +98,10 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIdef_" API_PREFIX #name, (void *)API_##name::definition, \
   }
 
-DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)), R"(
-  Show the about dialog of the given package entry.
-  The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
-)", {
+DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)),
+R"(Show the about dialog of the given package entry.
+The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",
+{
   if(!s_entries.count(entry))
     return false;
 
@@ -133,10 +133,10 @@ DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)), R"(
   return true;
 });
 
-DEFINE_API(bool, AboutRepository, ((const char*, repoName)), R"(
-  Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
-  The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
-)", {
+DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
+R"(Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
+The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",
+{
   if(const Remote &repo = reapack->remote(repoName)) {
     reapack->about(repo);
     return true;
@@ -146,9 +146,9 @@ DEFINE_API(bool, AboutRepository, ((const char*, repoName)), R"(
 });
 
 DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
-    ((char*, errorOut))((int, errorOut_sz)), R"(
-  Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.
-)", {
+    ((char*, errorOut))((int, errorOut_sz)),
+R"(Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.)",
+{
   VersionName a, b;
   string error;
 
@@ -162,12 +162,12 @@ DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
 });
 
 DEFINE_API(bool, EnumOwnedFiles, ((PackageEntry*, entry))((int, index))
-  ((char*, pathOut))((int, pathOut_sz))((int*, sectionsOut))((int*, typeOut)), R"(
-  Enumerate the files owned by the given package. Returns false when there is no more data.
+  ((char*, pathOut))((int, pathOut_sz))((int*, sectionsOut))((int*, typeOut)),
+R"(Enumerate the files owned by the given package. Returns false when there is no more data.
 
-  sections: 0=not in action list, &1=main, &2=midi editor, &4=midi inline editor
-  type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.
-)", {
+sections: 0=not in action list, &1=main, &2=midi editor, &4=midi inline editor
+type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.)",
+{
   const size_t i = index;
 
   if(!s_entries.count(entry) || i >= entry->files.size())
@@ -185,9 +185,9 @@ DEFINE_API(bool, EnumOwnedFiles, ((PackageEntry*, entry))((int, index))
 });
 
 DEFINE_API(bool, EnumRepositories, ((int, index))
-  ((char*, nameOut))((int, nameOut_sz)), R"(
-  Enumerate the repository list. Returns false once the end of the list is reached.
-)", {
+  ((char*, nameOut))((int, nameOut_sz)),
+R"(Enumerate the repository list. Returns false once the end of the list is reached.)",
+{
   const size_t i = index;
   const RemoteList &list = reapack->config()->remotes;
 
@@ -205,9 +205,9 @@ DEFINE_API(bool, EnumRepositories, ((int, index))
   return list.size() > i + 1;
 });
 
-DEFINE_API(bool, FreeEntry, ((PackageEntry*, entry)), R"(
-  Free resources allocated for the given package entry.
-)", {
+DEFINE_API(bool, FreeEntry, ((PackageEntry*, entry)),
+R"(Free resources allocated for the given package entry.)",
+{
   if(!s_entries.count(entry))
     return false;
 
@@ -221,11 +221,11 @@ DEFINE_API(bool, GetEntryInfo, ((PackageEntry*, entry))
   ((char*, pkgOut))((int, pkgOut_sz))((char*, descOut))((int, descOut_sz))
   ((int*, typeOut))((char*, verOut))((int, verOut_sz))
   ((char*, authorOut))((int, authorOut_sz))
-  ((bool*, pinnedOut))((int*, fileCountOut)), R"(
-  Get the repository name, category, package name, package description, package type, the currently installed version, author name, pinned status and how many files are owned by the given package entry.
+  ((bool*, pinnedOut))((int*, fileCountOut)),
+R"(Get the repository name, category, package name, package description, package type, the currently installed version, author name, pinned status and how many files are owned by the given package entry.
 
-  type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface
-)", {
+type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface)",
+{
   if(!s_entries.count(entry))
     return false;
 
@@ -253,10 +253,10 @@ DEFINE_API(bool, GetEntryInfo, ((PackageEntry*, entry))
   return true;
 });
 
-DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)), R"(
-  Returns the package entry owning the given file.
-  Delete the returned object from memory after use with <a href="#ReaPack_FreeEntry">ReaPack_FreeEntry</a>.
-)", {
+DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int, errorOut_sz)),
+R"(Returns the package entry owning the given file.
+Delete the returned object from memory after use with <a href="#ReaPack_FreeEntry">ReaPack_FreeEntry</a>.)",
+{
   Path path(fn);
 
   const Path &rp = ReaPack::resourcePath();
@@ -289,11 +289,11 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
 
 DEFINE_API(bool, GetRepositoryInfo, ((const char*, name))
   ((char*, urlOut))((int, urlOut_sz))
-  ((bool*, enabledOut))((int*, autoInstallOut)), R"(
-  Get the infos of the given repository.
+  ((bool*, enabledOut))((int*, autoInstallOut)),
+R"(Get the infos of the given repository.
 
-  autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting
-)", {
+autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
+{
   const Remote &remote = reapack->remote(name);
 
   if(!remote)
@@ -311,11 +311,11 @@ DEFINE_API(bool, GetRepositoryInfo, ((const char*, name))
 
 DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
   ((bool, enabled))((int, autoInstall))((bool, commit))
-  ((char*, errorOut))((int, errorOut_sz)), R"(
-  Add or modify a repository. Set commit to true for the last call to save the new list and update the GUI.
+  ((char*, errorOut))((int, errorOut_sz)),
+R"(Add or modify a repository. Set commit to true for the last call to save the new list and update the GUI.
 
-  autoInstall: default is 2 (obey user setting).
-)", {
+autoInstall: default is 2 (obey user setting).)",
+{
   try {
     if(reapack->remote(name).isProtected()) {
       if(errorOut)
