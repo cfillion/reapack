@@ -61,11 +61,11 @@ vendor
   [tup](http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip)
   (explicit-variant branch, see [this
   thread](https://groups.google.com/d/topic/tup-users/UNUSE15PQdA/discussion))
-  and [Visual Studio 2015, with Visual C++](https://www.visualstudio.com/products/visual-studio-community-vs)
+  and [Visual Studio 2017, with C++ support](https://www.visualstudio.com/vs/community/)
 2. Prevent Microsoft's C++ compiler from saving telemetry outside of the build directory:
    [instructions here](https://msdn.microsoft.com/en-us/library/ee225238.aspx#Anchor_5)
    or set the `OptIn` registry key to `0` in
-   `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\14.0\SQM`
+   `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\15.0\SQM`
 3. Download the latest [boost](http://www.boost.org/) and copy the
   `boost` subdirectory into `<reapack>\vendor`
 4. Download the latest [curl](http://curl.haxx.se/download.html) source
@@ -86,6 +86,6 @@ vendor
 5. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
 6. Run `build_deps.bat` and `rake` from this directory using
-  "Developer Command Prompt for VS2015"
+  "Developer Command Prompt for VS 2017"
 7. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
    to your REAPER plugin folder

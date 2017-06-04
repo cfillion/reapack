@@ -2,8 +2,10 @@
 setlocal
 
 set self=%~dp0
-set vendor=%self%\vendor
+set vendor=%self%vendor
 set curl=%vendor%\curl
+
+call :AssertExists "%curl%\winbuild\Makefile.vc" || goto :eof
 
 if "%1%"=="curl32" (
   cd "%curl%\winbuild"
@@ -22,3 +24,9 @@ if "%1%"=="curl64" (
 
 call %self%\wrapper i386 cmd /c %self%\build_deps curl32
 call %self%\wrapper x86_64 cmd /c %self%\build_deps curl64
+
+:AssertExists
+if not exist "%~1" (
+  echo [build_deps] %~1: No such file or directory
+  exit /b 1
+)
