@@ -287,7 +287,7 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
   }
 });
 
-DEFINE_API(bool, GetRepository, ((const char*, name))
+DEFINE_API(bool, GetRepositoryInfo, ((const char*, name))
   ((char*, urlOut))((int, urlOut_sz))
   ((bool*, enabledOut))((int*, autoInstallOut)), R"(
   Get the infos of the given repository.
@@ -309,7 +309,7 @@ DEFINE_API(bool, GetRepository, ((const char*, name))
   return true;
 });
 
-DEFINE_API(bool, SetRepository, ((const char*, name))((const char*, url))
+DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
   ((bool, enabled))((int, autoInstall))((bool, commit))
   ((char*, errorOut))((int, errorOut_sz)), R"(
   Add or modify a repository. Set commit to true for the last call to save the new list and update the GUI.
