@@ -291,9 +291,9 @@ autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
 DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
   ((bool, enable))((int, autoInstall))((bool, commit))
   ((char*, errorOut))((int, errorOut_sz)),
-R"(Add or modify a repository. Set url to nullptr (empty string in Lua) to keep the existing URL. Set commit to true for the last call to save the new list and update the GUI.
+R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to keep the existing URL. Set commit to true for the last call to process the new list and update the GUI.
 
-autoInstall: default is 2 (obey user setting).)",
+autoInstall: usually set to 2 (obey user setting).)",
 {
   try {
     const Remote &existing = reapack->remote(name);
@@ -316,7 +316,6 @@ autoInstall: default is 2 (obey user setting).)",
         return false;
 
       reapack->setRemoteEnabled(enable, existing);
-      tx->runTasks();
     }
 
     reapack->config()->remotes.add(remote);
@@ -336,6 +335,9 @@ autoInstall: default is 2 (obey user setting).)",
     reapack->refreshManager();
     reapack->refreshBrowser();
     reapack->config()->write();
+
+    if(reapack->hasTransaction())
+      reapack->setupTransaction()->runTasks();
   }
 
   return true;
