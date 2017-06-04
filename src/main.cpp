@@ -162,11 +162,14 @@ static void setupAPI()
 {
   reapack->setupAPI(&API::AboutInstalledPackage);
   reapack->setupAPI(&API::AboutRepository);
+  reapack->setupAPI(&API::AddSetRepository);
   reapack->setupAPI(&API::CompareVersions);
   reapack->setupAPI(&API::EnumOwnedFiles);
+  reapack->setupAPI(&API::EnumRepositories);
   reapack->setupAPI(&API::FreeEntry);
   reapack->setupAPI(&API::GetEntryInfo);
   reapack->setupAPI(&API::GetOwner);
+  reapack->setupAPI(&API::GetRepositoryInfo);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(

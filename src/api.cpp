@@ -17,12 +17,15 @@
 
 #include "api.hpp"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/logic/tribool_io.hpp> // required to get correct tribool casts
 #include <boost/mpl/aux_/preprocessor/token_equal.hpp>
 #include <boost/preprocessor.hpp>
 
 #include <reaper_plugin_functions.h>
 
 #include "about.hpp"
+#include "config.hpp"
 #include "errors.hpp"
 #include "index.hpp"
 #include "reapack.hpp"
@@ -181,6 +184,27 @@ DEFINE_API(bool, EnumOwnedFiles, ((PackageEntry*, entry))((int, index))
   return entry->files.size() > i + 1;
 });
 
+DEFINE_API(bool, EnumRepositories, ((int, index))
+  ((char*, nameOut))((int, nameOut_sz)), R"(
+  Enumerate the repository list. Returns false once the end of the list is reached.
+)", {
+  const size_t i = index;
+  const RemoteList &list = reapack->config()->remotes;
+
+  if(i >= list.size())
+    return false;
+
+  auto it = list.begin();
+  advance(it, i);
+
+  const Remote &remote = *it;
+
+  if(nameOut)
+    snprintf(nameOut, nameOut_sz, "%s", remote.name().c_str());
+
+  return list.size() > i + 1;
+});
+
 DEFINE_API(bool, FreeEntry, ((PackageEntry*, entry)), R"(
   Free resources allocated for the given package entry.
 )", {
@@ -261,4 +285,63 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
 
     return nullptr;
   }
+});
+
+DEFINE_API(bool, GetRepositoryInfo, ((const char*, name))
+  ((char*, urlOut))((int, urlOut_sz))
+  ((bool*, enabledOut))((int*, autoInstallOut)), R"(
+  Get the infos of the given repository.
+
+  autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting
+)", {
+  const Remote &remote = reapack->remote(name);
+
+  if(!remote)
+    return false;
+
+  if(urlOut)
+    snprintf(urlOut, urlOut_sz, "%s", remote.url().c_str());
+  if(enabledOut)
+    *enabledOut = remote.isEnabled();
+  if(autoInstallOut)
+    *autoInstallOut = boost::lexical_cast<int>(remote.autoInstall());
+
+  return true;
+});
+
+DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
+  ((bool, enabled))((int, autoInstall))((bool, commit))
+  ((char*, errorOut))((int, errorOut_sz)), R"(
+  Add or modify a repository. Set commit to true for the last call to save the new list and update the GUI.
+
+  autoInstall: default is 2 (obey user setting).
+)", {
+  try {
+    if(reapack->remote(name).isProtected()) {
+      if(errorOut)
+        snprintf(errorOut, errorOut_sz, "this repository is protected");
+      return false;
+    }
+
+    Remote remote(name, url, enabled, boost::lexical_cast<tribool>(autoInstall));
+    reapack->config()->remotes.add(remote);
+  }
+  catch(const reapack_error &e) {
+    if(errorOut)
+      snprintf(errorOut, errorOut_sz, "%s", e.what());
+    return false;
+  }
+  catch(const boost::bad_lexical_cast &) {
+    if(errorOut)
+      snprintf(errorOut, errorOut_sz, "invalid value for autoInstall");
+    return false;
+  }
+
+  if(commit) {
+    reapack->refreshManager();
+    reapack->refreshBrowser();
+    reapack->config()->write();
+  }
+
+  return true;
 });
