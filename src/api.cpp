@@ -184,27 +184,6 @@ type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.)",
   return entry->files.size() > i + 1;
 });
 
-DEFINE_API(bool, EnumRepositories, ((int, index))
-  ((char*, nameOut))((int, nameOut_sz)),
-R"(Enumerate the repository list. Returns false once the end of the list is reached.)",
-{
-  const size_t i = index;
-  const RemoteList &list = reapack->config()->remotes;
-
-  if(i >= list.size())
-    return false;
-
-  auto it = list.begin();
-  advance(it, i);
-
-  const Remote &remote = *it;
-
-  if(nameOut)
-    snprintf(nameOut, nameOut_sz, "%s", remote.name().c_str());
-
-  return list.size() > i + 1;
-});
-
 DEFINE_API(bool, FreeEntry, ((PackageEntry*, entry)),
 R"(Free resources allocated for the given package entry.)",
 {

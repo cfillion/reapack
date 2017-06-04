@@ -50,7 +50,6 @@ namespace API {
   extern APIFunc AddSetRepository;
   extern APIFunc CompareVersions;
   extern APIFunc EnumOwnedFiles;
-  extern APIFunc EnumRepositories;
   extern APIFunc FreeEntry;
   extern APIFunc GetEntryInfo;
   extern APIFunc GetOwner;

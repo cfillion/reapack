@@ -165,7 +165,6 @@ static void setupAPI()
   reapack->setupAPI(&API::AddSetRepository);
   reapack->setupAPI(&API::CompareVersions);
   reapack->setupAPI(&API::EnumOwnedFiles);
-  reapack->setupAPI(&API::EnumRepositories);
   reapack->setupAPI(&API::FreeEntry);
   reapack->setupAPI(&API::GetEntryInfo);
   reapack->setupAPI(&API::GetOwner);
