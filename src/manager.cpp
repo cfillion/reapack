@@ -58,7 +58,10 @@ Manager::Manager(ReaPack *reapack)
 void Manager::onInit()
 {
   Dialog::onInit();
-  setMinimumSize({629, 210});
+
+  auto msize = minimumSize();
+  msize.y = 210;
+  setMinimumSize(msize);
 
   m_apply = getControl(IDAPPLY);
   disable(m_apply);
