@@ -289,20 +289,36 @@ autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
 });
 
 DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
-  ((bool, enabled))((int, autoInstall))((bool, commit))
+  ((bool, enable))((int, autoInstall))((bool, commit))
   ((char*, errorOut))((int, errorOut_sz)),
-R"(Add or modify a repository. Set commit to true for the last call to save the new list and update the GUI.
+R"(Add or modify a repository. Set url to nullptr (empty string in Lua) to keep the existing URL. Set commit to true for the last call to save the new list and update the GUI.
 
 autoInstall: default is 2 (obey user setting).)",
 {
   try {
-    if(reapack->remote(name).isProtected()) {
+    const Remote &existing = reapack->remote(name);
+
+    if(!url || strlen(url) == 0)
+      url = existing.url().c_str();
+
+    if(existing.isProtected() && url != existing.url()) {
       if(errorOut)
-        snprintf(errorOut, errorOut_sz, "this repository is protected");
+        snprintf(errorOut, errorOut_sz, "cannot change URL of a protected repository");
       return false;
     }
 
-    Remote remote(name, url, enabled, boost::lexical_cast<tribool>(autoInstall));
+    Remote remote(name, url, enable, boost::lexical_cast<tribool>(autoInstall));
+
+    if(existing && enable != existing.isEnabled()) {
+      Transaction *tx = reapack->setupTransaction();
+
+      if(!tx)
+        return false;
+
+      reapack->setRemoteEnabled(enable, existing);
+      tx->runTasks();
+    }
+
     reapack->config()->remotes.add(remote);
   }
   catch(const reapack_error &e) {
