@@ -168,6 +168,7 @@ static void setupAPI()
   reapack->setupAPI(&API::FreeEntry);
   reapack->setupAPI(&API::GetEntryInfo);
   reapack->setupAPI(&API::GetOwner);
+  reapack->setupAPI(&API::GetRepository);
   reapack->setupAPI(&API::SetRepository);
 }
 

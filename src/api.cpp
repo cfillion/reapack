@@ -185,11 +185,8 @@ DEFINE_API(bool, EnumOwnedFiles, ((PackageEntry*, entry))((int, index))
 });
 
 DEFINE_API(bool, EnumRepositories, ((int, index))
-  ((char*, nameOut))((int, nameOut_sz))((char*, urlOut))((int, urlOut_sz))
-  ((bool*, enabledOut))((int*, autoInstallOut)), R"(
+  ((char*, nameOut))((int, nameOut_sz)), R"(
   Enumerate the repository list. Returns false once the end of the list is reached.
-
-  autoInstall: 0=manual, 1=when sychronizing, 2=use global setting
 )", {
   const size_t i = index;
   const RemoteList &list = reapack->config()->remotes;
@@ -204,12 +201,6 @@ DEFINE_API(bool, EnumRepositories, ((int, index))
 
   if(nameOut)
     snprintf(nameOut, nameOut_sz, "%s", remote.name().c_str());
-  if(urlOut)
-    snprintf(urlOut, urlOut_sz, "%s", remote.url().c_str());
-  if(enabledOut)
-    *enabledOut = remote.isEnabled();
-  if(autoInstallOut)
-    *autoInstallOut = boost::lexical_cast<int>(remote.autoInstall());
 
   return list.size() > i + 1;
 });
@@ -296,12 +287,34 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
   }
 });
 
+DEFINE_API(bool, GetRepository, ((const char*, name))
+  ((char*, urlOut))((int, urlOut_sz))
+  ((bool*, enabledOut))((int*, autoInstallOut)), R"(
+  Get the infos of the given repository.
+
+  autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting
+)", {
+  const Remote &remote = reapack->remote(name);
+
+  if(!remote)
+    return false;
+
+  if(urlOut)
+    snprintf(urlOut, urlOut_sz, "%s", remote.url().c_str());
+  if(enabledOut)
+    *enabledOut = remote.isEnabled();
+  if(autoInstallOut)
+    *autoInstallOut = boost::lexical_cast<int>(remote.autoInstall());
+
+  return true;
+});
+
 DEFINE_API(bool, SetRepository, ((const char*, name))((const char*, url))
   ((bool, enabled))((int, autoInstall))((bool, commit))
   ((char*, errorOut))((int, errorOut_sz)), R"(
-  Add the given repository name and URL to the list. Set commit to true on the last call to this function.
+  Add or modify a repository. Set commit to true for the last call to save the new list and update the GUI.
 
-  autoInstall: default is 2 (use global setting).
+  autoInstall: default is 2 (obey user setting).
 )", {
   try {
     if(reapack->remote(name).isProtected()) {
