@@ -342,12 +342,14 @@ autoInstall: usually set to 2 (obey user setting).)",
   }
 
   if(commit) {
-    reapack->refreshManager();
-    reapack->refreshBrowser();
-    reapack->config()->write();
-
     if(reapack->hasTransaction())
       reapack->setupTransaction()->runTasks();
+    else {
+      reapack->refreshManager();
+      reapack->refreshBrowser();
+    }
+
+    reapack->config()->write();
   }
 
   return true;
