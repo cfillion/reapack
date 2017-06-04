@@ -120,18 +120,13 @@ void Download::start()
   onFinish([thread] { delete thread; });
 }
 
-void Download::run()
+bool Download::run()
 {
-  if(aborted()) {
-    finish(Aborted, {"cancelled", m_url});
-    return;
-  }
-
   ThreadNotifier::get()->notify({this, Running});
 
   ostream *stream = openStream();
   if(!stream)
-    return;
+    return false;
 
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.c_str());
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
@@ -152,18 +147,16 @@ void Download::run()
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
 
   const CURLcode res = curl_easy_perform(m_ctx->m_curl);
+  curl_slist_free_all(headers);
   closeStream();
 
-  if(aborted())
-    finish(Aborted, {"aborted", m_url});
-  else if(res != CURLE_OK) {
+  if(res != CURLE_OK) {
     const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
-    finish(Failure, {err.str(), m_url});
+    setError({err.str(), m_url});
+    return false;
   }
-  else
-    finish(Success);
 
-  curl_slist_free_all(headers);
+  return true;
 }
 
 MemoryDownload::MemoryDownload(const string &url, const NetworkOpts &opts, int flags)
@@ -191,9 +184,10 @@ ostream *FileDownload::openStream()
 {
   if(FS::open(m_stream, m_path.temp()))
     return &m_stream;
-
-  finish(Failure, {FS::lastError(), m_path.temp().join()});
-  return nullptr;
+  else {
+    setError({FS::lastError(), m_path.temp().join()});
+    return nullptr;
+  }
 }
 
 void FileDownload::closeStream()

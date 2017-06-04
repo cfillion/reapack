@@ -51,7 +51,7 @@ public:
   void start();
 
   bool concurrent() const override { return true; }
-  void run() override;
+  bool run() override;
 
 protected:
   virtual std::ostream *openStream() = 0;

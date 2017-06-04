@@ -220,19 +220,14 @@ FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
   setSummary("Extracting %s: " + target.join());
 }
 
-void FileExtractor::run()
+bool FileExtractor::run()
 {
-  if(aborted()) {
-    finish(Aborted, {"cancelled", m_path.target().join()});
-    return;
-  }
-
   ThreadNotifier::get()->notify({this, Running});
 
   ofstream stream;
   if(!FS::open(stream, m_path.temp())) {
-    finish(Failure, {FS::lastError(), m_path.temp().join()});
-    return;
+    setError({FS::lastError(), m_path.temp().join()});
+    return false;
   }
 
   const int error = m_reader->extractFile(m_path.target(), stream);
@@ -240,10 +235,11 @@ void FileExtractor::run()
 
   if(error) {
     const format &msg = format("Failed to extract file (%d)") % error;
-    finish(Failure, {msg.str(), m_path.target().join()});
+    setError({msg.str(), m_path.target().join()});
+    return false;
   }
-  else
-    finish(Success);
+
+  return true;
 }
 
 size_t Archive::create(const auto_string &path, vector<string> *errors,
@@ -362,19 +358,14 @@ FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &write
   setSummary("Compressing %s: " + target.join());
 }
 
-void FileCompressor::run()
+bool FileCompressor::run()
 {
-  if(aborted()) {
-    finish(Aborted, {"cancelled", m_path.join()});
-    return;
-  }
-
   ThreadNotifier::get()->notify({this, Running});
 
   ifstream stream;
   if(!FS::open(stream, m_path)) {
-    finish(Failure, {FS::lastError(), m_path.join()});
-    return;
+    setError({FS::lastError(), m_path.join()});
+    return false;
   }
 
   const int error = m_writer->addFile(m_path, stream);
@@ -382,8 +373,9 @@ void FileCompressor::run()
 
   if(error) {
     const format &msg = format("Failed to compress file (%d)") % error;
-    finish(Failure, {msg.str(), m_path.join()});
+    setError({msg.str(), m_path.join()});
+    return false;
   }
-  else
-    finish(Success);
+
+  return true;
 }

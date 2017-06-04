@@ -38,7 +38,9 @@ ThreadTask::~ThreadTask()
 
 void ThreadTask::setState(const State state)
 {
-  m_state = state;
+  // The task may have been aborted while the task was running or just before
+  // the finish notification got received in the main thread.
+  m_state = aborted() ? Aborted : state;
 
   switch(state) {
   case Idle:
@@ -55,9 +57,12 @@ void ThreadTask::setState(const State state)
   }
 }
 
-void ThreadTask::finish(const State state, const ErrorInfo &error)
+void ThreadTask::exec()
 {
-  m_error = error;
+  State state = Aborted;
+
+  if(!aborted())
+    state = run() ? Success : Failure;
 
   ThreadNotifier::get()->notify({this, state});
 };
@@ -90,7 +95,7 @@ DWORD WINAPI WorkerThread::run(void *ptr)
       if(auto dl = dynamic_cast<Download *>(task))
         dl->setContext(&context);
 
-      task->run();
+      task->exec();
     }
 
     ResetEvent(thread->m_wake);

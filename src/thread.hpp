@@ -52,11 +52,13 @@ public:
   virtual ~ThreadTask();
 
   virtual bool concurrent() const = 0;
-  virtual void run() = 0;
+  virtual bool run() = 0;
 
+  void exec();
   const std::string &summary() const { return m_summary; }
   void setState(State);
   State state() const { return m_state; }
+  void setError(const ErrorInfo &err) { m_error = err; }
   const ErrorInfo &error() { return m_error; }
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
@@ -68,7 +70,6 @@ public:
 
 protected:
   void setSummary(const std::string &s) { m_summary = s; }
-  void finish(State, const ErrorInfo & = {});
 
 private:
   std::string m_summary;

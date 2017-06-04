@@ -65,7 +65,7 @@ public:
   const TempPath &path() const { return m_path; }
 
   bool concurrent() const override { return false; }
-  void run() override;
+  bool run() override;
 
 private:
   TempPath m_path;
@@ -77,7 +77,7 @@ public:
   FileCompressor(const Path &target, const ArchiveWriterPtr &);
 
   bool concurrent() const override { return false; }
-  void run() override;
+  bool run() override;
 
 private:
   Path m_path;
