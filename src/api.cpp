@@ -289,7 +289,7 @@ Delete the returned object from memory after use with <a href="#ReaPack_FreeEntr
 
 DEFINE_API(bool, GetRepositoryInfo, ((const char*, name))
   ((char*, urlOut))((int, urlOut_sz))
-  ((bool*, enabledOut))((int*, autoInstallOut)),
+  ((bool*, enabledOut))((int*, autoInstallOut))((bool*, protectedOut)),
 R"(Get the infos of the given repository.
 
 autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
@@ -305,6 +305,8 @@ autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
     *enabledOut = remote.isEnabled();
   if(autoInstallOut)
     *autoInstallOut = boost::lexical_cast<int>(remote.autoInstall());
+  if(protectedOut)
+    *protectedOut = remote.isProtected();
 
   return true;
 });
