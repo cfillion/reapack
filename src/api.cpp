@@ -70,27 +70,37 @@ void APIDef::unregister(const char *key, void *ptr)
 }
 
 #define BOOST_MPL_PP_TOKEN_EQUAL_void(x) x
+#define BOOST_MPL_PP_TOKEN_EQUAL_bool(x) x
+#define BOOST_MPL_PP_TOKEN_EQUAL_int(x) x
 #define IS_VOID(type) BOOST_MPL_PP_TOKEN_EQUAL(type, void)
+#define IS_BOOL(type) BOOST_MPL_PP_TOKEN_EQUAL(type, bool)
+#define IS_INT(type)  BOOST_MPL_PP_TOKEN_EQUAL(type, int)
 
 #define ARG_TYPE(arg) BOOST_PP_TUPLE_ELEM(2, 0, arg)
 #define ARG_NAME(arg) BOOST_PP_TUPLE_ELEM(2, 1, arg)
 
-#define ARGS(r, data, i, arg) BOOST_PP_COMMA_IF(i) ARG_TYPE(arg) ARG_NAME(arg)
-#define PARAMS(r, data, i, arg) BOOST_PP_COMMA_IF(i) (ARG_TYPE(arg))(intptr_t)argv[i]
-#define DEFARGS(r, macro, i, arg) \
+// produce an appropriate conversion from void* to any type
+#define VOIDP_TO(type, val) \
+  BOOST_PP_IF(IS_BOOL(type), val != 0, \
+    (type) BOOST_PP_EXPR_IF(IS_INT(type), (intptr_t)) val)
+
+#define DEFARGS(r, data, i, arg) BOOST_PP_COMMA_IF(i) ARG_TYPE(arg) ARG_NAME(arg)
+#define CALLARGS(r, data, i, arg) \
+  BOOST_PP_COMMA_IF(i) VOIDP_TO(ARG_TYPE(arg), argv[i])
+#define DOCARGS(r, macro, i, arg) \
   BOOST_PP_EXPR_IF(i, ",") BOOST_PP_STRINGIZE(macro(arg))
 
 #define DEFINE_API(type, name, args, help, ...) \
   namespace API_##name { \
-    static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(ARGS, _, args)) __VA_ARGS__ \
+    static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, _, args)) __VA_ARGS__ \
     static void *reascriptImpl(void **argv, int argc) { \
       BOOST_PP_EXPR_IF(BOOST_PP_NOT(IS_VOID(type)), return (void *)(intptr_t)) \
-      cImpl(BOOST_PP_SEQ_FOR_EACH_I(PARAMS, _, args)); \
+      cImpl(BOOST_PP_SEQ_FOR_EACH_I(CALLARGS, _, args)); \
       BOOST_PP_EXPR_IF(IS_VOID(type), return nullptr;) \
     } \
     static const char *definition = #type "\0" \
-      BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, ARG_TYPE, args) "\0" \
-      BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, ARG_NAME, args) "\0" help; \
+      BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_TYPE, args) "\0" \
+      BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_NAME, args) "\0" help; \
   }; \
   APIFunc API::name = {\
     "API_" API_PREFIX #name, (void *)&API_##name::cImpl, \
