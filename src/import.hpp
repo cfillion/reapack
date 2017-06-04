@@ -31,7 +31,7 @@ class Remote;
 class Import : public Dialog
 {
 public:
-  Import(ReaPack *);
+  Import(const std::string &initialUrl, ReaPack *);
 
 protected:
   void onInit() override;
@@ -44,6 +44,7 @@ private:
   bool import(const Remote &);
   void setWaiting(bool);
 
+  std::string m_initialUrl;
   ReaPack *m_reapack;
   MemoryDownload *m_download;
   short m_fakePos;

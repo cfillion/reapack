@@ -150,7 +150,7 @@ static void setupActions()
     &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
 
   reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
-    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
+    &reapack->importAction, bind(&ReaPack::importRemote, reapack, ""));
 
   reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
     &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
@@ -168,6 +168,7 @@ static void setupAPI()
   reapack->setupAPI(&API::FreeEntry);
   reapack->setupAPI(&API::GetEntryInfo);
   reapack->setupAPI(&API::GetOwner);
+  reapack->setupAPI(&API::ImportRepository);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(

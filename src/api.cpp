@@ -295,3 +295,9 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
     return nullptr;
   }
 });
+
+DEFINE_API(void, ImportRepository, ((const char*, url)), R"(
+  Opens the "Import a repository" dialog with the input box pre-filled with given url.
+)", {
+  reapack->importRemote(url);
+});

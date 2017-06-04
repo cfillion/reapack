@@ -53,6 +53,7 @@ namespace API {
   extern APIFunc FreeEntry;
   extern APIFunc GetEntryInfo;
   extern APIFunc GetOwner;
+  extern APIFunc ImportRepository;
 };
 
 #endif
