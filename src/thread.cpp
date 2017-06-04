@@ -57,6 +57,13 @@ void ThreadTask::setState(const State state)
   }
 }
 
+void ThreadTask::start()
+{
+  WorkerThread *thread = new WorkerThread;
+  thread->push(this);
+  onFinish([thread] { delete thread; });
+}
+
 void ThreadTask::exec()
 {
   State state = Aborted;

@@ -52,9 +52,9 @@ public:
   virtual ~ThreadTask();
 
   virtual bool concurrent() const = 0;
-  virtual bool run() = 0;
 
-  void exec();
+  void start(); // start a new thread
+  void exec();  // runs in the current thread
   const std::string &summary() const { return m_summary; }
   void setState(State);
   State state() const { return m_state; }
@@ -69,6 +69,8 @@ public:
   void abort() { m_abort = true; }
 
 protected:
+  virtual bool run() = 0;
+
   void setSummary(const std::string &s) { m_summary = s; }
 
 private:

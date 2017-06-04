@@ -113,13 +113,6 @@ void Download::setName(const string &name)
   setSummary("Downloading %s: " + name);
 }
 
-void Download::start()
-{
-  WorkerThread *thread = new WorkerThread;
-  thread->push(this);
-  onFinish([thread] { delete thread; });
-}
-
 bool Download::run()
 {
   ThreadNotifier::get()->notify({this, Running});

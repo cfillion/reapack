@@ -48,7 +48,6 @@ public:
   void setName(const std::string &);
   const std::string &url() const { return m_url; }
   void setContext(DownloadContext *ctx) { m_ctx = ctx; }
-  void start();
 
   bool concurrent() const override { return true; }
   bool run() override;
