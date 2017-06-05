@@ -31,7 +31,7 @@
 
 using namespace std;
 
-static const auto_char *TITLE = AUTO_STR("ReaPack: Import a repository");
+static const auto_char *TITLE = AUTO_STR("ReaPack: Import repositories");
 static const string DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import(ReaPack *reapack)

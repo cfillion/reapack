@@ -466,7 +466,7 @@ void Manager::copyUrl()
 void Manager::importExport()
 {
   Menu menu;
-  menu.addAction(AUTO_STR("Import a &repository..."), ACTION_IMPORT_REPO);
+  menu.addAction(AUTO_STR("Import &repositories..."), ACTION_IMPORT_REPO);
   menu.addSeparator();
   menu.addAction(AUTO_STR("Import offline archive..."), ACTION_IMPORT_ARCHIVE);
   menu.addAction(AUTO_STR("&Export offline archive..."), ACTION_EXPORT_ARCHIVE);
