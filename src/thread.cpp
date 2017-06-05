@@ -68,8 +68,10 @@ void ThreadTask::exec()
 {
   State state = Aborted;
 
-  if(!aborted())
+  if(!aborted()) {
+    ThreadNotifier::get()->notify({this, Running});
     state = run() ? Success : Failure;
+  }
 
   ThreadNotifier::get()->notify({this, state});
 };
