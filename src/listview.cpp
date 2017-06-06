@@ -81,17 +81,19 @@ int ListView::addRow(const Row &content)
   ListView_InsertItem(handle(), &item);
 
   m_rows.resize(item.iItem + 1); // make room for the new row
-  replaceRow(item.iItem, content);
+  replaceRow(item.iItem, content, false);
 
   return item.iItem;
 }
 
-void ListView::replaceRow(int index, const Row &content)
+void ListView::replaceRow(int index, const Row &content, const bool isUserIndex)
 {
   assert(content.size() == m_cols.size());
 
   m_rows[index] = content;
-  index = translate(index);
+
+  if(isUserIndex)
+    index = translate(index);
 
   for(int i = 0; i < columnCount(); i++) {
     auto_char *text = const_cast<auto_char *>(content[i].c_str());

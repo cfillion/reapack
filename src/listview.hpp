@@ -58,7 +58,7 @@ public:
 
   int addRow(const Row &);
   const Row &row(int index) const { return m_rows[index]; }
-  void replaceRow(int index, const Row &);
+  void replaceRow(int index, const Row &, bool userIndex = true);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
   bool empty() const { return rowCount() < 1; }
