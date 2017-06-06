@@ -228,8 +228,9 @@ void Import::processQueue()
 bool Import::import(const ImportData &data)
 {
   if(!data.remote.isEnabled()) {
-    if(m_reapack->setupTransaction()) {
+    if(Transaction *tx = m_reapack->setupTransaction()) {
       m_reapack->enable(data.remote);
+      tx->synchronize(data.remote);
       return true;
     }
     else
