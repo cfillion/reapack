@@ -94,7 +94,10 @@ ThreadPool *Import::setupPool()
     m_pool->onDone([=] {
       setWaiting(false);
 
-      if(m_state == OK)
+      if(m_queue.empty())
+        m_state = Close;
+
+      if(!m_state)
         processQueue();
 
       queue<ImportData> clear;
