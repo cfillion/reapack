@@ -55,6 +55,9 @@ int TabBar::currentIndex() const
 
 void TabBar::setCurrentIndex(const int index)
 {
+  if(index < 0 && index >= count())
+    return;
+
   TabCtrl_SetCurSel(handle(), index);
   switchPage();
 }

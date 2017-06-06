@@ -108,9 +108,11 @@ void APIDef::unregister(const char *key, void *ptr)
     "APIdef_" API_PREFIX #name, (void *)API_##name::definition, \
   }
 
-DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)),
+DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry))((int, tab)),
 R"(Show the about dialog of the given package entry.
-The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",
+The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
+
+tab: 0=about (if available), 1=history, 2=contents)",
 {
   if(!s_entries.count(entry))
     return false;
@@ -135,20 +137,26 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
       return;
 
     const Package *pkg = indexes.front()->find(entryCopy.category, entryCopy.package);
-    if(pkg)
-      reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
+    if(!pkg)
+      return;
+
+    About *about = reapack->about();
+    about->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
+    about->setTab(tab);
   });
   tx->runTasks();
 
   return true;
 });
 
-DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
+DEFINE_API(bool, AboutRepository, ((const char*, repoName))((int, tab)),
 R"(Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
-The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",
+The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.
+
+tab: 0=about (if available), 1=packages, 2=installed files)",
 {
   if(const Remote &repo = reapack->remote(repoName)) {
-    reapack->about(repo);
+    reapack->about(repo, tab);
     return true;
   }
 

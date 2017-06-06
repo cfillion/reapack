@@ -236,6 +236,15 @@ void About::setAction(const string &label)
   show(btn);
 }
 
+void About::setTab(const int tab)
+{
+  // FIXME: Remove hard-codded maximum tab count
+  const int firstTab = 3 - m_tabs->count();
+  assert(firstTab >= 0);
+  if(tab >= firstTab)
+    m_tabs->setCurrentIndex(tab - firstTab);
+}
+
 void About::selectLink(const int ctrl)
 {
   const auto &links = m_links[ctrl];

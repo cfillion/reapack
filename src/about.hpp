@@ -50,6 +50,7 @@ public:
   void setTitle(const std::string &);
   void setMetadata(const Metadata *, bool substitution = false);
   void setAction(const std::string &);
+  void setTab(int tab);
 
   ReaPack *reapack() const { return  m_reapack; }
   TabBar *tabs() const { return m_tabs; }
