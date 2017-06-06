@@ -75,7 +75,9 @@ FONT DIALOG_FONT
 BEGIN
   LTEXT "Type or paste one or more repository index URLs (one per line):",
     IDC_LABEL, 5, 5, 280, 10
+#ifdef __APPLE__
   GROUPBOX "", IDC_GROUPBOX, 3, 9, 284, 51
+#endif
   EDITTEXT IDC_URL, 5, 18, 278, 40, WS_VSCROLL | ES_MULTILINE
   CONTROL "", IDC_PROGRESS, PROGRESS_CLASS, PBS_MARQUEE | NOT WS_VISIBLE, 10, 68, 150, 5
   PUSHBUTTON "&Discover repositories...", IDC_DISCOVER, 5, 64, 90, 14
