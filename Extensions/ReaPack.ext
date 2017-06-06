@@ -1,4 +1,4 @@
-@version 1.2beta1
+@version 1.2beta2
 @author cfillion
 @description ReaPack: Package manager for REAPER
 @donation https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=T3DEWBQJAV7WL&lc=CA&item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&no_note=0&cn=Custom%20message&no_shipping=1&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
@@ -10,21 +10,37 @@
   [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  * archive: implement import/export of the current package set for offline use
-  * linux: initial port (64-bit only)
-  Changed:
-  * browser: add ellipsis on the pkg count button to hint at its menu (#18)
-  * download: redesign thread scheduling logic
-  * download: reuse HTTP connections when possible
-  * download: write data directly to disk when applicable
-  * import: trim leading and trailing whitespace from user input [p=1799229]
-  * manager: remove extra ellipsis on the Browse packages button
-  * ostream: trim trailing whitespace from changelog lines
+  * add support for project templates, track templates and midi note names [p=1823893]
+  * add support for the MIDI Inline Editor section [p=1829130]
+  * api: create AboutInstalledPackage
+  * api: create AboutRepository
+  * api: create AddSetRepository
+  * api: create BrowsePackages
+  * api: create CompareVersions
+  * api: create EnumOwnedFiles
+  * api: create FreeEntry
+  * api: create GetEntryInfo
+  * api: create GetOwner
+  * api: create GetRepositoryInfo
+  * browser: add Web Interfaces, Project & Track Templates and MIDI Note Names to the menu
+  * config: add a setting to control the refresh rate of cached indexes
+  * import: add a "Discover repositories..." button opening https://reapack.com/repos
+  * import: allow multiline input, support importing many repos at once
   Fixed:
-  * download: don't report garbage as error in some edge cases
-  * path: avoid repeated slashes when concatenating path segments
-  * serializer: fix crash when reading empty window settings on macOS 10.8 [p=1794205]
-  * task: abort download of subsequent files after a single failure
-  * task: fix cancelled downloads being considered as sucessful installation
-  * transaction: do not start the next batch of tasks when cancelled
-  * transaction: don't propose to uninstall obsolete packages from protected repos
+  * about: fix positionning of link buttons on resize
+  * download: fix a possible crash when a finished download is cancelled
+  * fix a possible race condition when downloading indexes
+  * manager: don't synchronize uninstalled/disabled repos when enabling auto-install mode
+  * report every repository loading error together in the same popup
+  Changed:
+  * archive: list missing files on export if any
+  * browser: always show "no repo enabled" message when manually triggering a browser refresh
+  * browser: reload whenever a repo index is downloaded
+  * import: preserve auto-install setting when overwriting an existing repository
+  * import: synchronize newly imported repo when autoinstall is enabled
+  * listview: optimize insertion of items when view is sorted
+  * manager: make the window bigger by default
+  * report: don't show "All Done" message when there are only errors
+  * transaction: load cached index if possible after a download failure
+  * win32: update boost, curl and sqlite to latest
+  * win32: update to Visual Studio 2017's C++ compiler and runtime libraries
