@@ -115,8 +115,6 @@ void Download::setName(const string &name)
 
 bool Download::run()
 {
-  ThreadNotifier::get()->notify({this, Running});
-
   ostream *stream = openStream();
   if(!stream)
     return false;

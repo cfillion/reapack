@@ -466,7 +466,7 @@ void Manager::copyUrl()
 void Manager::importExport()
 {
   Menu menu;
-  menu.addAction(AUTO_STR("Import a &repository..."), ACTION_IMPORT_REPO);
+  menu.addAction(AUTO_STR("Import &repositories..."), ACTION_IMPORT_REPO);
   menu.addSeparator();
   menu.addAction(AUTO_STR("Import offline archive..."), ACTION_IMPORT_ARCHIVE);
   menu.addAction(AUTO_STR("&Export offline archive..."), ACTION_EXPORT_ARCHIVE);
@@ -692,8 +692,8 @@ bool Manager::apply()
   if(syncAll)
     m_reapack->synchronizeAll();
 
+  tx->onFinish(bind(&Config::write, m_config));
   tx->runTasks();
-  m_config->write();
   reset();
 
   return true;

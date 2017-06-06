@@ -20,13 +20,14 @@
 
 #include "dialog.hpp"
 
-#include "encoding.hpp"
+#include "remote.hpp"
 
+#include <queue>
 #include <string>
 
 class MemoryDownload;
 class ReaPack;
-class Remote;
+class ThreadPool;
 
 class Import : public Dialog
 {
@@ -39,19 +40,30 @@ protected:
   void onTimer(int) override;
 
 private:
+  enum State {
+    OK,
+    Aborted,
+    Close,
+  };
+
+  struct ImportData { Remote remote; std::string contents; };
+
+  ThreadPool *setupPool();
   void fetch();
-  void read();
-  bool import(const Remote &);
+  bool read(MemoryDownload *);
+  void processQueue();
+  bool import(const ImportData &);
   void setWaiting(bool);
 
   ReaPack *m_reapack;
-  MemoryDownload *m_download;
+  ThreadPool *m_pool;
+  State m_state;
+  std::queue<ImportData> m_queue;
   short m_fakePos;
 
   HWND m_url;
   HWND m_progress;
   HWND m_discover;
-  HWND m_ok;
 };
 
 #endif

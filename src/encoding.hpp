@@ -47,9 +47,9 @@ typedef std::string auto_string;
 #define AUTO_STR(text) text
 #define to_autostring std::to_string
 #define auto_snprintf snprintf
-#define make_autostring(string) string
+#define make_autostring(string) (string)
 #define make_autocstring(cstr) cstr
-#define from_autostring(string) string
+#define from_autostring(string) (string)
 
 #endif
 

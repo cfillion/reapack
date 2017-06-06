@@ -222,8 +222,6 @@ FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
 
 bool FileExtractor::run()
 {
-  ThreadNotifier::get()->notify({this, Running});
-
   ofstream stream;
   if(!FS::open(stream, m_path.temp())) {
     setError({FS::lastError(), m_path.temp().join()});
@@ -360,8 +358,6 @@ FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &write
 
 bool FileCompressor::run()
 {
-  ThreadNotifier::get()->notify({this, Running});
-
   ifstream stream;
   if(!FS::open(stream, m_path)) {
     setError({FS::lastError(), m_path.join()});

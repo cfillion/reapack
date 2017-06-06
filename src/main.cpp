@@ -92,7 +92,7 @@ static void menuHook(const char *name, HMENU handle, int f)
   menu.addAction(AUTO_STR("&Browse packages..."),
     NamedCommandLookup("_REAPACK_BROWSE"));
 
-  menu.addAction(AUTO_STR("&Import a repository..."),
+  menu.addAction(AUTO_STR("&Import repositories..."),
     NamedCommandLookup("_REAPACK_IMPORT"));
 
   menu.addAction(AUTO_STR("&Manage repositories..."),
@@ -149,7 +149,7 @@ static void setupActions()
   reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
     &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
 
-  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import a repository...",
+  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import repositories...",
     &reapack->importAction, bind(&ReaPack::importRemote, reapack));
 
   reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",

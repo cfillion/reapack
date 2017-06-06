@@ -327,8 +327,8 @@ autoInstall: usually set to 2 (obey user setting).)",
 
       reapack->setRemoteEnabled(enable, existing);
     }
-
-    reapack->config()->remotes.add(remote);
+    else
+      reapack->config()->remotes.add(remote);
   }
   catch(const reapack_error &e) {
     if(errorOut)
@@ -341,16 +341,8 @@ autoInstall: usually set to 2 (obey user setting).)",
     return false;
   }
 
-  if(commit) {
-    if(reapack->hasTransaction())
-      reapack->setupTransaction()->runTasks();
-    else {
-      reapack->refreshManager();
-      reapack->refreshBrowser();
-    }
-
-    reapack->config()->write();
-  }
+  if(commit)
+    reapack->commitConfig();
 
   return true;
 });
