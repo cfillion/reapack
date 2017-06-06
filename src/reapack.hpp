@@ -77,8 +77,8 @@ public:
 
   Remote remote(const std::string &name) const;
 
-  bool hasTransaction() const { return m_tx != nullptr; }
   Transaction *setupTransaction();
+  void commit();
   Config *config() const { return m_config; }
 
 private:

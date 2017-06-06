@@ -92,11 +92,11 @@ static void menuHook(const char *name, HMENU handle, int f)
   menu.addAction(AUTO_STR("&Browse packages..."),
     NamedCommandLookup("_REAPACK_BROWSE"));
 
-  menu.addAction(AUTO_STR("&Manage repositories..."),
-    NamedCommandLookup("_REAPACK_MANAGE"));
-
   menu.addAction(AUTO_STR("&Import repositories..."),
     NamedCommandLookup("_REAPACK_IMPORT"));
+
+  menu.addAction(AUTO_STR("&Manage repositories..."),
+    NamedCommandLookup("_REAPACK_MANAGE"));
 
   menu.addSeparator();
 

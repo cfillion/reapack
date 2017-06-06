@@ -182,7 +182,6 @@ void ReaPack::setRemoteEnabled(const bool enable, const Remote &remote)
       return;
 
     m_config->remotes.add(copy);
-    refreshManager();
   });
 }
 
@@ -331,7 +330,6 @@ Transaction *ReaPack::setupTransaction()
 
       Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
     }
-
   });
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
@@ -356,6 +354,19 @@ void ReaPack::teardownTransaction()
   // Update the browser only after the transaction is deleted because
   // it must be able to start a new one to load the indexes
   refreshBrowser();
+  refreshManager();
+}
+
+void ReaPack::commit()
+{
+  if(m_tx)
+    m_tx->runTasks();
+  else {
+    refreshBrowser();
+    refreshManager();
+  }
+
+  m_config->write();
 }
 
 void ReaPack::refreshManager()
