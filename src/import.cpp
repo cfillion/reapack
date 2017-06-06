@@ -48,7 +48,6 @@ void Import::onInit()
   m_url = getControl(IDC_URL);
   m_progress = getControl(IDC_PROGRESS);
   m_discover = getControl(IDC_DISCOVER);
-  m_ok = getControl(IDOK);
 
 #ifdef PBM_SETMARQUEE
   SendMessage(m_progress, PBM_SETMARQUEE, 1, 0);
@@ -66,6 +65,8 @@ void Import::onCommand(const int id, int)
     break;
   case IDCANCEL:
     if(m_pool) {
+      disable(getControl(IDOK));
+      disable(getControl(IDCANCEL));
       m_pool->abort();
       m_state = Close;
     }
