@@ -238,7 +238,7 @@ void About::setAction(const string &label)
 
 void About::setTab(const int tab)
 {
-  // FIXME: Remove hard-codded maximum tab count
+  // FIXME: Remove hard-coded maximum tab count
   const int firstTab = 3 - m_tabs->count();
   assert(firstTab >= 0);
   if(tab >= firstTab)
