@@ -61,7 +61,7 @@ void ObsoleteQuery::onInit()
 
   m_list->autoSizeHeader();
 
-  SendMessage(m_enableCtrl, BM_SETCHECK, BST_CHECKED, 0);
+  setChecked(true, m_enableCtrl);
 
   disable(m_okBtn);
 }
@@ -73,7 +73,7 @@ void ObsoleteQuery::onCommand(const int id, int event)
     prepare();
     break;
   case IDC_ENABLE:
-    *m_enable = SendMessage(m_enableCtrl, BM_GETCHECK, 0, 0) == BST_CHECKED;
+    *m_enable = isChecked(m_enableCtrl);
     break;
   case ACTION_SELECT_ALL:
     m_list->selectAll();

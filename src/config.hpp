@@ -42,8 +42,14 @@ struct InstallOpts {
 };
 
 struct NetworkOpts {
+  enum StaleThreshold {
+    NoThreshold = 0,
+    OneWeekThreshold = 7 * 24 * 3600,
+  };
+
   std::string proxy;
   bool verifyPeer;
+  time_t staleThreshold;
 };
 
 class Config {
@@ -71,6 +77,8 @@ private:
   void setString(const auto_char *grp,
     const auto_string &key, const std::string &val) const;
 
+  bool getBool(const auto_char *grp,
+    const auto_string &key, bool fallback = false) const;
   unsigned int getUInt(const auto_char *grp,
     const auto_string &key, unsigned int fallback = 0) const;
   void setUInt(const auto_char *, const auto_string &, unsigned int) const;

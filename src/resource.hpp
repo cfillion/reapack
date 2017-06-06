@@ -41,7 +41,7 @@
 #define IDD_IMPORT_DIALOG   104
 #define IDD_BROWSER_DIALOG  105
 #define IDD_NETCONF_DIALOG  106
-#define IDD_OBSQUERY_DIALOG    107
+#define IDD_OBSQUERY_DIALOG 107
 
 #define IDC_LABEL      200
 #define IDC_LABEL2     201
@@ -71,5 +71,6 @@
 #define IDC_ENABLE     232
 #define IDC_CHANGELOG  233
 #define IDC_DISCOVER   234
+#define IDC_STALETHRSH 235
 
 #endif

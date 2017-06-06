@@ -85,6 +85,8 @@ public:
   void disable(HWND handle) { setEnabled(false, handle); }
   void setEnabled(bool enable) { setEnabled(enable, m_handle); }
   void setEnabled(bool, HWND);
+  bool isChecked(HWND) const;
+  void setChecked(bool, HWND);
 
   bool isVisible() const;
   void show(HWND handle = nullptr) { setVisible(true, handle); }

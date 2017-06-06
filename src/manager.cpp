@@ -744,8 +744,10 @@ void NetworkConfig::onInit()
   SetWindowText(m_proxy, make_autostring(m_opts->proxy).c_str());
 
   m_verifyPeer = getControl(IDC_VERIFYPEER);
-  SendMessage(m_verifyPeer, BM_SETCHECK,
-    m_opts->verifyPeer ? BST_CHECKED : BST_UNCHECKED, 0);
+  setChecked(m_opts->verifyPeer, m_verifyPeer);
+
+  m_staleThreshold = getControl(IDC_STALETHRSH);
+  setChecked(m_opts->staleThreshold > 0, m_staleThreshold);
 }
 
 void NetworkConfig::onCommand(const int id, int)
@@ -763,5 +765,7 @@ void NetworkConfig::onCommand(const int id, int)
 void NetworkConfig::apply()
 {
   m_opts->proxy = getText(m_proxy);
-  m_opts->verifyPeer = SendMessage(m_verifyPeer, BM_GETCHECK, 0, 0) == BST_CHECKED;
+  m_opts->verifyPeer = isChecked(m_verifyPeer);
+  m_opts->staleThreshold = isChecked(m_staleThreshold)
+    ? NetworkOpts::OneWeekThreshold : NetworkOpts::NoThreshold;
 }

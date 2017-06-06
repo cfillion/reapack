@@ -30,8 +30,6 @@
 
 using namespace std;
 
-static const time_t STALE_THRESHOLD = 7 * 24 * 3600;
-
 Transaction::Transaction(Config *config)
   : m_isCancelled(false), m_config(config),
     m_registry(Path::prefixRoot(Path::REGISTRY))
@@ -139,7 +137,8 @@ void Transaction::fetchIndex(const Remote &remote, const bool stale,
   time_t mtime = 0, now = time(nullptr);
   FS::mtime(path, &mtime);
 
-  if(!stale && mtime > now - STALE_THRESHOLD) {
+  const time_t threshold = m_config->network.staleThreshold;
+  if(!stale && mtime && (!threshold || mtime > now - threshold)) {
     load();
     return;
   }

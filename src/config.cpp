@@ -45,6 +45,7 @@ static const auto_char *STATE_KEY = AUTO_STR("state");
 static const auto_char *NETWORK_GRP = AUTO_STR("network");
 static const auto_char *PROXY_KEY = AUTO_STR("proxy");
 static const auto_char *VERIFYPEER_KEY = AUTO_STR("verifypeer");
+static const auto_char *STALETHRSH_KEY = AUTO_STR("stalethreshold");
 
 static const auto_char *SIZE_KEY = AUTO_STR("size");
 
@@ -68,7 +69,7 @@ void Config::resetOptions()
 {
   browser = {true};
   install = {false, false, true};
-  network = {"", true};
+  network = {"", true, NetworkOpts::OneWeekThreshold};
   windowState = {};
 }
 
@@ -136,19 +137,17 @@ void Config::read(const Path &path)
 {
   m_path = make_autostring(path.join());
 
-  install.autoInstall = getUInt(INSTALL_GRP,
-    AUTOINSTALL_KEY, install.autoInstall) > 0;
-  install.bleedingEdge = getUInt(INSTALL_GRP,
-    PRERELEASES_KEY, install.bleedingEdge) > 0;
-  install.promptObsolete = getUInt(INSTALL_GRP,
-    PROMPTOBSOLETE_KEY, install.promptObsolete) > 0;
+  install.autoInstall = getBool(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
+  install.bleedingEdge = getBool(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
+  install.promptObsolete = getBool(INSTALL_GRP,
+    PROMPTOBSOLETE_KEY, install.promptObsolete);
 
-  browser.showDescs = getUInt(BROWSER_GRP,
-    SHOWDESCS_KEY, browser.showDescs) > 0;
+  browser.showDescs = getBool(BROWSER_GRP, SHOWDESCS_KEY, browser.showDescs);
 
   network.proxy = getString(NETWORK_GRP, PROXY_KEY, network.proxy);
-  network.verifyPeer = getUInt(NETWORK_GRP,
-    VERIFYPEER_KEY, network.verifyPeer) > 0;
+  network.verifyPeer = getBool(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
+  network.staleThreshold = (time_t)getUInt(NETWORK_GRP,
+    STALETHRSH_KEY, (unsigned int)network.staleThreshold);
 
   windowState.about = getString(ABOUT_GRP, STATE_KEY, windowState.about);
   windowState.browser = getString(BROWSER_GRP, STATE_KEY, windowState.browser);
@@ -171,6 +170,7 @@ void Config::write()
 
   setString(NETWORK_GRP, PROXY_KEY, network.proxy);
   setUInt(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
+  setUInt(NETWORK_GRP, STALETHRSH_KEY, (unsigned int)network.staleThreshold);
 
   setString(ABOUT_GRP, STATE_KEY, windowState.about);
   setString(BROWSER_GRP, STATE_KEY, windowState.browser);
@@ -225,6 +225,12 @@ unsigned int Config::getUInt(const auto_char *group,
   const auto_string &key, const unsigned int fallback) const
 {
   return GetPrivateProfileInt(group, key.c_str(), fallback, m_path.c_str());
+}
+
+bool Config::getBool(const auto_char *group,
+  const auto_string &key, const bool fallback) const
+{
+  return getUInt(group, key, fallback) > 0;
 }
 
 void Config::setUInt(const auto_char *group, const auto_string &key,

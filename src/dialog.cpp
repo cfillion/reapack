@@ -296,6 +296,16 @@ void Dialog::setEnabled(const bool enabled, HWND handle)
   EnableWindow(handle, enabled);
 }
 
+bool Dialog::isChecked(HWND handle) const
+{
+  return SendMessage(handle, BM_GETCHECK, 0, 0) == BST_CHECKED;
+}
+
+void Dialog::setChecked(const bool checked, HWND handle)
+{
+  SendMessage(handle, BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0);
+}
+
 int Dialog::startTimer(const int ms, int id, const bool replace)
 {
   if(id == 0) {
