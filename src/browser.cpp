@@ -422,6 +422,10 @@ void Browser::displayButton()
     {AUTO_STR("E&xtensions"), Package::ExtensionType},
     {AUTO_STR("&Themes"), Package::ThemeType},
     {AUTO_STR("&Language Packs"), Package::LangPackType},
+    {AUTO_STR("&Web Interfaces"), Package::WebInterfaceType},
+    {AUTO_STR("&Project Templates"), Package::ProjectTemplateType},
+    {AUTO_STR("&Track Templates"), Package::TrackTemplateType},
+    {AUTO_STR("&MIDI Note Names"), Package::MIDINoteNamesType},
     {AUTO_STR("&Other packages"), Package::UnknownType},
   };
 
@@ -472,12 +476,12 @@ bool Browser::isFiltered(Package::Type type) const
   case Package::ExtensionType:
   case Package::ThemeType:
   case Package::LangPackType:
-    break;
-  case Package::DataType:
   case Package::WebInterfaceType:
   case Package::ProjectTemplateType:
   case Package::TrackTemplateType:
   case Package::MIDINoteNamesType:
+    break;
+  case Package::DataType:
     type = Package::UnknownType;
     break;
   }
