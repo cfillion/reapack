@@ -239,6 +239,13 @@ bool Import::import(const ImportData &data)
   Config *config = m_reapack->config();
   config->remotes.add(data.remote);
 
+  if(config->install.autoInstall || data.remote.autoInstall()) {
+    if(Transaction *tx = m_reapack->setupTransaction()) {
+      tx->synchronize(data.remote);
+      return true;
+    }
+  }
+
   FS::write(Index::pathFor(data.remote.name()), data.contents);
 
   return true;
