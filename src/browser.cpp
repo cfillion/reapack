@@ -475,6 +475,9 @@ bool Browser::isFiltered(Package::Type type) const
     break;
   case Package::DataType:
   case Package::WebInterfaceType:
+  case Package::ProjectTemplateType:
+  case Package::TrackTemplateType:
+  case Package::MIDINoteNamesType:
     type = Package::UnknownType;
     break;
   }

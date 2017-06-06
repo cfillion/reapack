@@ -42,6 +42,12 @@ Package::Type Package::getType(const char *type)
     return LangPackType;
   else if(!strcmp(type, "webinterface"))
     return WebInterfaceType;
+  else if(!strcmp(type, "projecttpl"))
+    return ProjectTemplateType;
+  else if(!strcmp(type, "tracktpl"))
+    return TrackTemplateType;
+  else if(!strcmp(type, "midinotenames"))
+    return MIDINoteNamesType;
   else
     return UnknownType;
 }
@@ -49,6 +55,8 @@ Package::Type Package::getType(const char *type)
 string Package::displayType(const Type type)
 {
   switch(type) {
+  case UnknownType:
+    break;
   case ScriptType:
     return "Script";
   case ExtensionType:
@@ -63,9 +71,15 @@ string Package::displayType(const Type type)
     return "Language Pack";
   case WebInterfaceType:
     return "Web Interface";
-  default:
-    return "Unknown";
+  case ProjectTemplateType:
+    return "Project Template";
+  case TrackTemplateType:
+    return "Track Template";
+  case MIDINoteNamesType:
+    return "MIDI Note Names";
   }
+
+  return "Unknown";
 }
 
 const string &Package::displayName(const string &name,

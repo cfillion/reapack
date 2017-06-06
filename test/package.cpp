@@ -13,58 +13,42 @@ using namespace std;
 static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
-  SECTION("unknown")
-    REQUIRE(Package::getType("yoyo") == Package::UnknownType);
+  const vector<pair<const char *, Package::Type> > tests{
+    {"yoyo", Package::UnknownType},
+    {"script", Package::ScriptType},
+    {"extension", Package::ExtensionType},
+    {"effect", Package::EffectType},
+    {"data", Package::DataType},
+    {"theme", Package::ThemeType},
+    {"langpack", Package::LangPackType},
+    {"webinterface", Package::WebInterfaceType},
+    {"projecttpl", Package::ProjectTemplateType},
+    {"tracktpl", Package::TrackTemplateType},
+    {"midinotenames", Package::MIDINoteNamesType},
+  };
 
-  SECTION("script")
-    REQUIRE(Package::getType("script") == Package::ScriptType);
-
-  SECTION("extension")
-    REQUIRE(Package::getType("extension") == Package::ExtensionType);
-
-  SECTION("effect")
-    REQUIRE(Package::getType("effect") == Package::EffectType);
-
-  SECTION("data")
-    REQUIRE(Package::getType("data") == Package::DataType);
-
-  SECTION("theme")
-    REQUIRE(Package::getType("theme") == Package::ThemeType);
-
-  SECTION("langpack")
-    REQUIRE(Package::getType("langpack") == Package::LangPackType);
-
-  SECTION("web interface")
-    REQUIRE(Package::getType("webinterface") == Package::WebInterfaceType);
+  for(const auto &pair : tests)
+    REQUIRE(Package::getType(pair.first) == pair.second);
 }
 
 TEST_CASE("package type to string", M) {
-  SECTION("unknown")
-    REQUIRE("Unknown" == Package::displayType(Package::UnknownType));
+  const vector<pair<Package::Type, string> > tests{
+    {Package::UnknownType,           "Unknown"},
+    {Package::ScriptType,            "Script"},
+    {Package::ExtensionType,         "Extension"},
+    {Package::EffectType,            "Effect"},
+    {Package::DataType,              "Data"},
+    {Package::ThemeType,             "Theme"},
+    {Package::LangPackType,          "Language Pack"},
+    {Package::WebInterfaceType,      "Web Interface"},
+    {Package::ProjectTemplateType,   "Project Template"},
+    {Package::TrackTemplateType,     "Track Template"},
+    {Package::MIDINoteNamesType,     "MIDI Note Names"},
+    {static_cast<Package::Type>(-1), "Unknown"},
+  };
 
-  SECTION("script")
-    REQUIRE("Script" == Package::displayType(Package::ScriptType));
-
-  SECTION("extension")
-    REQUIRE("Extension" == Package::displayType(Package::ExtensionType));
-
-  SECTION("effect")
-    REQUIRE("Effect" == Package::displayType(Package::EffectType));
-
-  SECTION("data")
-    REQUIRE("Data" == Package::displayType(Package::DataType));
-
-  SECTION("theme")
-    REQUIRE("Theme" == Package::displayType(Package::ThemeType));
-
-  SECTION("langpack")
-    REQUIRE("Language Pack" == Package::displayType(Package::LangPackType));
-
-  SECTION("web interface")
-    REQUIRE("Web Interface" == Package::displayType(Package::WebInterfaceType));
-
-  SECTION("invalid")
-    REQUIRE("Unknown" == Package::displayType(static_cast<Package::Type>(-1)));
+  for(const auto &pair : tests)
+    REQUIRE(Package::displayType(pair.first) == pair.second);
 }
 
 TEST_CASE("invalid package name", M) {

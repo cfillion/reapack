@@ -146,46 +146,22 @@ TEST_CASE("source target path", M) {
 
   Source source("file.name", "url", &ver);
 
-  SECTION("script") {
-    source.setTypeOverride(Package::ScriptType);
-    const Path expected("Scripts/Index Name/Category Name/file.name");
-    REQUIRE(source.targetPath() == expected);
-  }
+  const vector<pair<Package::Type, string> > tests{
+    {Package::ScriptType,          "Scripts/Index Name/Category Name/file.name"},
+    {Package::EffectType,          "Effects/Index Name/Category Name/file.name"},
+    {Package::ExtensionType,       "UserPlugins/file.name"},
+    {Package::DataType,            "Data/file.name"},
+    {Package::ThemeType,           "ColorThemes/file.name"},
+    {Package::LangPackType,        "LangPack/file.name"},
+    {Package::WebInterfaceType,    "reaper_www_root/file.name"},
+    {Package::ProjectTemplateType, "ProjectTemplates/file.name"},
+    {Package::TrackTemplateType,   "TrackTemplates/file.name"},
+    {Package::MIDINoteNamesType,   "MIDINoteNames/file.name"},
+  };
 
-  SECTION("effect") {
-    source.setTypeOverride(Package::EffectType);
-    const Path expected("Effects/Index Name/Category Name/file.name");
-    REQUIRE(source.targetPath() == expected);
-  }
-
-  SECTION("extension") {
-    source.setTypeOverride(Package::ExtensionType);
-    const Path expected("UserPlugins/file.name");
-    REQUIRE(source.targetPath() == expected);
-  }
-
-  SECTION("data") {
-    source.setTypeOverride(Package::DataType);
-    const Path expected("Data/file.name");
-    REQUIRE(source.targetPath() == expected);
-  }
-
-  SECTION("theme") {
-    source.setTypeOverride(Package::ThemeType);
-    const Path expected("ColorThemes/file.name");
-    REQUIRE(source.targetPath() == expected);
-  }
-
-  SECTION("langpack") {
-    source.setTypeOverride(Package::LangPackType);
-    const Path expected("LangPack/file.name");
-    REQUIRE(source.targetPath() == expected);
-  }
-
-  SECTION("web interface") {
-    source.setTypeOverride(Package::WebInterfaceType);
-    const Path expected("reaper_www_root/file.name");
-    REQUIRE(source.targetPath() == expected);
+  for(const auto &pair : tests) {
+    source.setTypeOverride(pair.first);
+    REQUIRE(source.targetPath() == Path(pair.second));
   }
 }
 

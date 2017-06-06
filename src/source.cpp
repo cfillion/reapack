@@ -115,6 +115,15 @@ Path Source::targetPath() const
   case Package::WebInterfaceType:
     path += "reaper_www_root";
     break;
+  case Package::ProjectTemplateType:
+    path += "ProjectTemplates";
+    break;
+  case Package::TrackTemplateType:
+    path += "TrackTemplates";
+    break;
+  case Package::MIDINoteNamesType:
+    path += "MIDINoteNames";
+    break;
   case Package::UnknownType:
     // The package has an unsupported type, so we make an empty path.
     // The empty path won't be used because the category will reject
@@ -140,6 +149,9 @@ Path Source::targetPath() const
   case Package::DataType:
   case Package::LangPackType:
   case Package::WebInterfaceType:
+  case Package::ProjectTemplateType:
+  case Package::TrackTemplateType:
+  case Package::MIDINoteNamesType:
     path.append(file(), false); // no directory traversal
     break;
   case Package::UnknownType:

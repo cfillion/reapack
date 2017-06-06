@@ -34,6 +34,9 @@ public:
     ThemeType,
     LangPackType,
     WebInterfaceType,
+    ProjectTemplateType,
+    TrackTemplateType,
+    MIDINoteNamesType,
   };
 
   static Type getType(const char *);
