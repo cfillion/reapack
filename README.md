@@ -41,7 +41,7 @@ vendor
 1. Install boost development files and tup
 2. Run `rake` from this directory
 3. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
-4. Apply this patch to your build of SWELL: [lv-getnextitem-istart](https://github.com/cfillion/WDL/commit/64c16e60884479faba68e8a22e4644806b1244d0.patch)
+4. Apply this patch to your build of SWELL: [lv-getnextitem-istart](https://github.com/cfillion/WDL/commit/5fba2360ea8e33cdc36e364090525925c8f20b19.patch)
 
 ### macOS
 
