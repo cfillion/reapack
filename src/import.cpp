@@ -94,9 +94,6 @@ ThreadPool *Import::setupPool()
     m_pool->onDone([=] {
       setWaiting(false);
 
-      if(m_queue.empty())
-        m_state = Close;
-
       if(!m_state)
         processQueue();
 
@@ -143,7 +140,7 @@ void Import::fetch()
       case ThreadTask::Failure: {
         auto_char msg[1024];
         auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("Download failed: %s\r\n\r\nURL: %s"),
+          AUTO_STR("Download failed: %s\r\nn%s"),
           make_autostring(dl->error().message).c_str(), make_autostring(url).c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
         m_pool->abort();
@@ -213,7 +210,7 @@ bool Import::read(MemoryDownload *dl)
 
 void Import::processQueue()
 {
-  bool ok = true;
+  bool ok = true, commit = !m_queue.empty();
 
   while(!m_queue.empty()) {
     if(!import(m_queue.front()))
@@ -225,7 +222,8 @@ void Import::processQueue()
   if(ok)
     m_state = Close;
 
-  m_reapack->commitConfig();
+  if(commit)
+    m_reapack->commitConfig();
 }
 
 bool Import::import(const ImportData &data)
