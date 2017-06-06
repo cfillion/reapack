@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="edbb3775e7f324ec0aa2e9e47e5af5299372c499" name="ReaPack">
+<index version="1" commit="6439531cfa47f073a7e182c59e24c17b4e0070bc" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -445,6 +445,48 @@ Fixed:
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack64.dll</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2beta1/reaper_reapack64.so</source>
+      </version>
+      <version name="1.2beta2" author="cfillion" time="2017-06-06T23:13:35Z">
+        <changelog><![CDATA[Added:
+* add support for project templates, track templates and midi note names [p=1823893]
+* add support for the MIDI Inline Editor section [p=1829130]
+* api: create AboutInstalledPackage
+* api: create AboutRepository
+* api: create AddSetRepository
+* api: create BrowsePackages
+* api: create CompareVersions
+* api: create EnumOwnedFiles
+* api: create FreeEntry
+* api: create GetEntryInfo
+* api: create GetOwner
+* api: create GetRepositoryInfo
+* browser: add Web Interfaces, Project & Track Templates and MIDI Note Names to the menu
+* config: add a setting to control the refresh rate of cached indexes
+* import: add a "Discover repositories..." button opening https://reapack.com/repos
+* import: allow multiline input, support importing many repos at once
+Fixed:
+* about: fix positionning of link buttons on resize
+* download: fix a possible crash when a finished download is cancelled
+* fix a possible race condition when downloading indexes
+* manager: don't synchronize uninstalled/disabled repos when enabling auto-install mode
+* report every repository loading error together in the same popup
+Changed:
+* archive: list missing files on export if any
+* browser: always show "no repo enabled" message when manually triggering a browser refresh
+* browser: reload whenever a repo index is downloaded
+* import: preserve auto-install setting when overwriting an existing repository
+* import: synchronize newly imported repo when autoinstall is enabled
+* listview: optimize insertion of items when view is sorted
+* manager: make the window bigger by default
+* report: don't show "All Done" message when there are only errors
+* transaction: load cached index if possible after a download failure
+* win32: update boost, curl and sqlite to latest
+* win32: update to Visual Studio 2017's C++ compiler and runtime libraries]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack64.dll</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack64.so</source>
       </version>
     </reapack>
   </category>
