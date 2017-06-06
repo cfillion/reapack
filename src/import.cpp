@@ -238,7 +238,6 @@ bool Import::import(const ImportData &data)
 
   Config *config = m_reapack->config();
   config->remotes.add(data.remote);
-  config->write();
 
   FS::write(Index::pathFor(data.remote.name()), data.contents);
 
