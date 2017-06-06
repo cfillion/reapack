@@ -327,8 +327,8 @@ autoInstall: usually set to 2 (obey user setting).)",
 
       reapack->setRemoteEnabled(enable, existing);
     }
-
-    reapack->config()->remotes.add(remote);
+    else
+      reapack->config()->remotes.add(remote);
   }
   catch(const reapack_error &e) {
     if(errorOut)
