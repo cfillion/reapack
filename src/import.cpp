@@ -189,7 +189,7 @@ bool Import::read(MemoryDownload *dl)
           return true;
       }
     }
-    else if(exists && remote.isEnabled())
+    else if(exists && remote.isEnabled()) // url is also the same
       return true; // nothing to do
 
     remote.setName(index->name());
@@ -240,7 +240,7 @@ bool Import::import(const ImportData &data)
   Config *config = m_reapack->config();
   config->remotes.add(data.remote);
 
-  if(config->install.autoInstall || data.remote.autoInstall()) {
+  if(config->install.autoInstall) {
     if(Transaction *tx = m_reapack->setupTransaction()) {
       tx->synchronize(data.remote);
       return true;
