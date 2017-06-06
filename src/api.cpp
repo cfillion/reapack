@@ -342,7 +342,7 @@ autoInstall: usually set to 2 (obey user setting).)",
   }
 
   if(commit)
-    reapack->commit();
+    reapack->commitConfig();
 
   return true;
 });

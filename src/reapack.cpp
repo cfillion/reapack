@@ -354,19 +354,20 @@ void ReaPack::teardownTransaction()
   // Update the browser only after the transaction is deleted because
   // it must be able to start a new one to load the indexes
   refreshBrowser();
-  refreshManager();
 }
 
-void ReaPack::commit()
+void ReaPack::commitConfig()
 {
-  if(m_tx)
+  if(m_tx) {
+    m_tx->onFinish(bind(&ReaPack::refreshManager, this));
+    m_tx->onFinish(bind(&Config::write, m_config));
     m_tx->runTasks();
-  else {
-    refreshBrowser();
-    refreshManager();
   }
-
-  m_config->write();
+  else {
+    refreshManager();
+    refreshBrowser();
+    m_config->write();
+  }
 }
 
 void ReaPack::refreshManager()

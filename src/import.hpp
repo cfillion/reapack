@@ -20,7 +20,6 @@
 
 #include "dialog.hpp"
 
-#include "encoding.hpp"
 #include "remote.hpp"
 
 #include <queue>

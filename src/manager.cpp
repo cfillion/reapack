@@ -692,8 +692,8 @@ bool Manager::apply()
   if(syncAll)
     m_reapack->synchronizeAll();
 
+  tx->onFinish(bind(&Config::write, m_config));
   tx->runTasks();
-  m_config->write();
   reset();
 
   return true;

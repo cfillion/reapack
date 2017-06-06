@@ -222,7 +222,7 @@ void Import::processQueue()
   if(ok)
     m_state = Close;
 
-  m_reapack->commit();
+  m_reapack->commitConfig();
 }
 
 bool Import::import(const ImportData &data)

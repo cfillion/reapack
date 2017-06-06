@@ -78,7 +78,7 @@ public:
   Remote remote(const std::string &name) const;
 
   Transaction *setupTransaction();
-  void commit();
+  void commitConfig();
   Config *config() const { return m_config; }
 
 private:
