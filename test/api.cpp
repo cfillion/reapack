@@ -2,6 +2,8 @@
 
 #include "helper/io.hpp"
 
+#include <cstring>
+
 #include <api.hpp>
 
 using namespace std;
