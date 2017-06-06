@@ -650,11 +650,15 @@ bool Manager::apply()
   if(!tx)
     return false;
 
-  bool syncAll = false;
+  set<Remote> syncList;
 
   if(m_autoInstall) {
     m_config->install.autoInstall = m_autoInstall.value();
-    syncAll = m_autoInstall.value();
+
+    if(m_autoInstall.value()) {
+      const auto &enabledNow = m_config->remotes.getEnabled();
+      copy(enabledNow.begin(), enabledNow.end(), inserter(syncList, syncList.end()));
+    }
   }
 
   if(m_bleedingEdge)
@@ -673,24 +677,29 @@ bool Manager::apply()
     if(mods.enable) {
       m_reapack->setRemoteEnabled(*mods.enable, remote);
 
-      if(*mods.enable && !syncAll)
-        tx->synchronize(remote);
+      if(*mods.enable)
+        syncList.insert(remote);
+      else
+        syncList.erase(remote);
     }
     if(mods.autoInstall) {
       remote.setAutoInstall(*mods.autoInstall);
       m_config->remotes.add(remote);
 
       const bool isEnabled = mods.enable.value_or(remote.isEnabled());
-      if(isEnabled && *mods.autoInstall && !syncAll)
-        tx->synchronize(remote);
+
+      if(isEnabled && *mods.autoInstall)
+        syncList.insert(remote);
     }
   }
 
-  for(const Remote &remote : m_uninstall)
+  for(const Remote &remote : m_uninstall) {
     m_reapack->uninstall(remote);
+    syncList.erase(remote);
+  }
 
-  if(syncAll)
-    m_reapack->synchronizeAll();
+  for(const Remote &remote : syncList)
+    tx->synchronize(remote);
 
   tx->onFinish(bind(&Config::write, m_config));
   tx->runTasks();
