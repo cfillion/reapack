@@ -48,6 +48,7 @@ namespace API {
   extern APIFunc AboutInstalledPackage;
   extern APIFunc AboutRepository;
   extern APIFunc AddSetRepository;
+  extern APIFunc BrowsePackages;
   extern APIFunc CompareVersions;
   extern APIFunc EnumOwnedFiles;
   extern APIFunc FreeEntry;

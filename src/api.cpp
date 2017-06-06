@@ -25,6 +25,7 @@
 #include <reaper_plugin_functions.h>
 
 #include "about.hpp"
+#include "browser.hpp"
 #include "config.hpp"
 #include "errors.hpp"
 #include "index.hpp"
@@ -161,6 +162,13 @@ tab: 0=about (if available), 1=packages, 2=installed files)",
   }
 
   return false;
+});
+
+DEFINE_API(void, BrowsePackages, ((const char*, filter)),
+R"(Opens the package browser with the given filter string.)",
+{
+  if(Browser *browser = reapack->browsePackages())
+    browser->setFilter(filter);
 });
 
 DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))

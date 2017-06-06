@@ -163,6 +163,7 @@ static void setupAPI()
   reapack->setupAPI(&API::AboutInstalledPackage);
   reapack->setupAPI(&API::AboutRepository);
   reapack->setupAPI(&API::AddSetRepository);
+  reapack->setupAPI(&API::BrowsePackages);
   reapack->setupAPI(&API::CompareVersions);
   reapack->setupAPI(&API::EnumOwnedFiles);
   reapack->setupAPI(&API::FreeEntry);
