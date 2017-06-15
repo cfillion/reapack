@@ -400,14 +400,10 @@ void ReaPack::registerSelf()
     reg.push(&ver);
     reg.commit();
   }
-  catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-
-    auto_char msg[255];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not register itself! Please report this issue.\n\n")
-      AUTO_STR("Error description: %s"), desc.c_str());
-
-    MessageBox(Splash_GetWnd(), msg, AUTO_STR("ReaPack"), MB_OK);
+  catch(const reapack_error &) {
+    // Best to ignore the error for now. If something is wrong with the registry
+    // we'll show a message once when the user really wants to interact with ReaPack.
+    //
+    // Right now the user is likely to just want to use REAPER without being bothered.
   }
 }
