@@ -85,7 +85,7 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   DownloadContext::GlobalInit();
   RichEdit::Init();
 
-  FS::mkdir(Path::CACHE);
+  createDirectories();
 
   m_config = new Config;
   m_config->read(Path::prefixRoot(Path::CONFIG));
@@ -383,6 +383,25 @@ void ReaPack::refreshBrowser()
 {
   if(m_browser)
     m_browser->refresh();
+}
+
+void ReaPack::createDirectories()
+{
+  const Path &path = Path::CACHE;
+
+  if(FS::mkdir(path))
+    return;
+
+  const auto_string &desc = make_autostring(FS::lastError());
+
+  auto_char msg[255];
+  auto_snprintf(msg, auto_size(msg),
+    AUTO_STR("ReaPack could not create %s! ")
+    AUTO_STR("Please investigate or report this issue.\n\n")
+    AUTO_STR("Error description: %s"),
+    make_autostring(Path::prefixRoot(path).join()).c_str(), desc.c_str());
+
+  MessageBox(Splash_GetWnd(), msg, AUTO_STR("ReaPack"), MB_OK);
 }
 
 void ReaPack::registerSelf()

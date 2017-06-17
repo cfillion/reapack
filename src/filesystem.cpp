@@ -55,7 +55,8 @@ bool FS::open(ifstream &stream, const Path &path)
 
 bool FS::open(ofstream &stream, const Path &path)
 {
-  mkdir(path.dirname());
+  if(!mkdir(path.dirname()))
+    return false;
 
   const Path &fullPath = Path::prefixRoot(path);
   stream.open(make_autostring(fullPath.join()), ios_base::binary);
@@ -169,10 +170,13 @@ bool FS::exists(const Path &path)
   return file_exists(fullPath.join().c_str());
 }
 
-void FS::mkdir(const Path &path)
+bool FS::mkdir(const Path &path)
 {
+  if(exists(path))
+    return true;
+
   const Path &fullPath = Path::prefixRoot(path);
-  RecursiveCreateDirectory(fullPath.join().c_str(), 0);
+  return RecursiveCreateDirectory(fullPath.join().c_str(), 0) == 0;
 }
 
 string FS::lastError()

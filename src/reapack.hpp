@@ -82,6 +82,7 @@ public:
   Config *config() const { return m_config; }
 
 private:
+  void createDirectories();
   void registerSelf();
   void teardownTransaction();
 
