@@ -77,10 +77,9 @@ std::string ReaPack::resourcePath()
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   : syncAction(), browseAction(), importAction(), configAction(),
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
-    m_about(nullptr), m_instance(instance)
+    m_about(nullptr), m_instance(instance), m_useRootPath(resourcePath())
 {
   m_mainWindow = GetMainHwnd();
-  m_useRootPath = new UseRootPath(resourcePath());
 
   DownloadContext::GlobalInit();
   RichEdit::Init();
@@ -108,8 +107,6 @@ ReaPack::~ReaPack()
   delete m_config;
 
   DownloadContext::GlobalCleanup();
-
-  delete m_useRootPath;
 }
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)
