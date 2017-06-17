@@ -25,10 +25,10 @@ class UseRootPath;
 
 class Path {
 public:
-  static Path DATA;
-  static Path CACHE;
-  static Path CONFIG;
-  static Path REGISTRY;
+  static const Path DATA;
+  static const Path CACHE;
+  static const Path CONFIG;
+  static const Path REGISTRY;
 
   static Path prefixRoot(const Path &p) { return s_root + p; }
   static Path prefixRoot(const std::string &p) { return s_root + p; }
