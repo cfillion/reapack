@@ -175,8 +175,23 @@ bool FS::mkdir(const Path &path)
   if(exists(path))
     return true;
 
-  const Path &fullPath = Path::prefixRoot(path);
-  return RecursiveCreateDirectory(fullPath.join().c_str(), 0) == 0;
+  Path fullPath = Path::root();
+
+  for(const string &dir : path) {
+    fullPath.append(dir);
+
+    const auto_string &joined = make_autostring(fullPath.join());
+
+#ifdef _WIN32
+    if(!CreateDirectory(joined.c_str(), nullptr) && GetLastError() != ERROR_PATH_NOT_FOUND)
+      return false;
+#else
+    if(::mkdir(joined.c_str(), 0777) && errno != EEXIST)
+      return false;
+#endif
+  }
+
+  return true;
 }
 
 string FS::lastError()

@@ -32,10 +32,11 @@ public:
 
   static Path prefixRoot(const Path &p) { return s_root + p; }
   static Path prefixRoot(const std::string &p) { return s_root + p; }
+  static const Path &root() { return s_root; }
 
   Path(const std::string &path = std::string());
 
-  void append(const std::string &part, bool traversal = true);
+  void append(const std::string &parts, bool traversal = true);
   void append(const Path &other);
   void remove(size_t pos, size_t count);
   void removeLast();
@@ -51,6 +52,9 @@ public:
   std::string first() const;
   std::string last() const;
   bool startsWith(const Path &) const;
+
+  std::list<std::string>::const_iterator begin() const { return m_parts.begin(); }
+  std::list<std::string>::const_iterator end() const { return m_parts.end(); }
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;
