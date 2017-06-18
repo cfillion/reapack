@@ -33,6 +33,25 @@
 
 using namespace std;
 
+#ifdef _WIN32
+#define stat _stat
+#endif
+
+static bool stat(const Path &path, struct stat *out)
+{
+  const Path &fullPath = Path::prefixRoot(path);
+
+#ifdef _WIN32
+  if(_wstat(make_autostring(fullPath.join()).c_str(), out))
+    return false;
+#else
+  if(::stat(fullPath.join().c_str(), out))
+    return false;
+#endif
+
+  return true;
+}
+
 FILE *FS::open(const Path &path)
 {
   const Path &fullPath = Path::prefixRoot(path);
@@ -145,34 +164,29 @@ bool FS::removeRecursive(const Path &file)
 
 bool FS::mtime(const Path &path, time_t *time)
 {
-  const Path &fullPath = Path::prefixRoot(path);
-
-#ifdef _WIN32
-  struct _stat st;
-
-  if(_wstat(make_autostring(fullPath.join()).c_str(), &st))
-    return false;
-#else
   struct stat st;
 
-  if(stat(fullPath.join().c_str(), &st))
+  if(!stat(path, &st))
     return false;
-#endif
 
   *time = st.st_mtime;
 
   return true;
 }
 
-bool FS::exists(const Path &path)
+bool FS::exists(const Path &path, const bool dir)
 {
-  const Path &fullPath = Path::prefixRoot(path);
-  return file_exists(fullPath.join().c_str());
+  struct stat st;
+
+  if(stat(path, &st))
+    return (bool)(st.st_mode & S_IFDIR) == dir;
+  else
+    return false;
 }
 
 bool FS::mkdir(const Path &path)
 {
-  if(exists(path))
+  if(exists(path, true))
     return true;
 
   Path fullPath = Path::root();

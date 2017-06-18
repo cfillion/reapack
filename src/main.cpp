@@ -37,13 +37,11 @@ static bool loadAPI(void *(*getFunc)(const char *))
   const ApiFunc funcs[] = {
 
     REQUIRED_API(AddExtensionsMainMenu),
-    REQUIRED_API(file_exists),
     REQUIRED_API(GetAppVersion),
     REQUIRED_API(GetMainHwnd),
     REQUIRED_API(GetResourcePath),
     REQUIRED_API(NamedCommandLookup),        // v3.1415
     REQUIRED_API(plugin_register),
-    REQUIRED_API(RecursiveCreateDirectory),  // v4.60
     REQUIRED_API(ShowMessageBox),
     REQUIRED_API(Splash_GetWnd),             // v4.7
 
