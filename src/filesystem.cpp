@@ -197,7 +197,7 @@ bool FS::mkdir(const Path &path)
     const auto_string &joined = make_autostring(fullPath.join());
 
 #ifdef _WIN32
-    if(!CreateDirectory(joined.c_str(), nullptr) && GetLastError() != ERROR_PATH_NOT_FOUND)
+    if(!CreateDirectory(joined.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS)
       return false;
 #else
     if(::mkdir(joined.c_str(), 0777) && errno != EEXIST)
