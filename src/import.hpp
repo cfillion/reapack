@@ -22,7 +22,7 @@
 
 #include "remote.hpp"
 
-#include <queue>
+#include <deque>
 #include <string>
 
 class MemoryDownload;
@@ -46,11 +46,17 @@ private:
     Close,
   };
 
-  struct ImportData { Remote remote; std::string contents; };
+  struct ImportData {
+    size_t index;
+    Remote remote;
+    std::string contents;
+
+    bool operator<(const ImportData &o) const { return index < o.index; }
+  };
 
   ThreadPool *setupPool();
   void fetch();
-  bool read(MemoryDownload *);
+  bool read(MemoryDownload *, size_t index);
   void processQueue();
   bool import(const ImportData &);
   void setWaiting(bool);
@@ -58,7 +64,7 @@ private:
   ReaPack *m_reapack;
   ThreadPool *m_pool;
   State m_state;
-  std::queue<ImportData> m_queue;
+  std::deque<ImportData> m_queue;
   short m_fakePos;
 
   HWND m_url;

@@ -97,8 +97,7 @@ ThreadPool *Import::setupPool()
       if(!m_state)
         processQueue();
 
-      queue<ImportData> clear;
-      m_queue.swap(clear);
+      m_queue.clear();
 
       delete m_pool;
       m_pool = nullptr;
@@ -120,6 +119,7 @@ void Import::fetch()
 
   const auto &opts = m_reapack->config()->network;
 
+  size_t index = 0;
   stringstream stream(getText(m_url));
   string url;
   while(getline(stream, url)) {
@@ -129,12 +129,13 @@ void Import::fetch()
       continue;
 
     MemoryDownload *dl = new MemoryDownload(url, opts);
+    ++index;
 
     dl->onFinish([=] {
       switch(dl->state()) {
       case ThreadTask::Success:
         // copy for later use, as `dl` won't be around after this callback
-        if(!read(dl))
+        if(!read(dl, index))
           m_pool->abort();
         break;
       case ThreadTask::Failure: {
@@ -160,7 +161,7 @@ void Import::fetch()
     close();
 }
 
-bool Import::read(MemoryDownload *dl)
+bool Import::read(MemoryDownload *dl, const size_t idx)
 {
   auto_char msg[1024];
 
@@ -194,7 +195,7 @@ bool Import::read(MemoryDownload *dl)
 
     remote.setName(index->name());
     remote.setUrl(dl->url());
-    m_queue.push({remote, dl->contents()});
+    m_queue.push_back({idx, remote, dl->contents()});
 
     return true;
   }
@@ -212,11 +213,13 @@ void Import::processQueue()
 {
   bool ok = true, commit = !m_queue.empty();
 
+  sort(m_queue.begin(), m_queue.end());
+
   while(!m_queue.empty()) {
     if(!import(m_queue.front()))
       ok = false;
 
-    m_queue.pop();
+    m_queue.pop_front();
   }
 
   if(ok)
