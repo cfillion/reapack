@@ -69,7 +69,7 @@ public:
   void importRemote();
   void manageRemotes();
   void aboutSelf();
-  void about(const Remote &);
+  void about(const Remote &, bool focus = true);
   About *about(bool instantiate = true);
   Browser *browsePackages();
   void refreshManager();

@@ -72,7 +72,8 @@ void Manager::onInit()
     {AUTO_STR("State"), 60},
   });
 
-  m_list->onActivate([=] { m_reapack->about(getRemote(m_list->currentIndex())); });
+  m_list->onActivate(bind(&Manager::aboutRepo, this, true));
+  m_list->onSelect(bind(&Dialog::startTimer, this, 100, 0, true));
   m_list->onContextMenu(bind(&Manager::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
 
@@ -91,6 +92,16 @@ void Manager::onInit()
   refresh();
 
   m_list->autoSizeHeader();
+}
+
+void Manager::onTimer(const int id)
+{
+  stopTimer(id);
+
+  if(About *about = m_reapack->about(false)) {
+    if(about->testDelegate<AboutIndexDelegate>())
+      aboutRepo(false);
+  }
 }
 
 void Manager::onClose()
@@ -461,6 +472,11 @@ void Manager::copyUrl()
     values.push_back(getRemote(index).url());
 
   setClipboard(values);
+}
+
+void Manager::aboutRepo(const bool focus)
+{
+  m_reapack->about(getRemote(m_list->currentIndex()), focus);
 }
 
 void Manager::importExport()

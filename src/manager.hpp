@@ -45,6 +45,7 @@ protected:
   void onInit() override;
   void onCommand(int, int) override;
   bool onKeyDown(int, int) override;
+  void onTimer(int) override;
   void onClose() override;
 
 private:
@@ -75,6 +76,7 @@ private:
   void setupNetwork();
   void importArchive();
   void exportArchive();
+  void aboutRepo(bool focus = true);
 
   void setChange(int);
   bool confirm() const;

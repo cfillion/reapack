@@ -227,7 +227,7 @@ Remote ReaPack::remote(const string &name) const
   return m_config->remotes.get(name);
 }
 
-void ReaPack::about(const Remote &repo)
+void ReaPack::about(const Remote &repo, const bool focus)
 {
   Transaction *tx = setupTransaction();
   if(!tx)
@@ -239,7 +239,7 @@ void ReaPack::about(const Remote &repo)
   tx->onFinish([=] {
     const auto &indexes = tx->getIndexes(repos);
     if(!indexes.empty())
-      about()->setDelegate(make_shared<AboutIndexDelegate>(indexes.front()));
+      about()->setDelegate(make_shared<AboutIndexDelegate>(indexes.front()), focus);
   });
   tx->runTasks();
 }
