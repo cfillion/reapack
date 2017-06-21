@@ -28,7 +28,7 @@
 using namespace std;
 
 Registry::Registry(const Path &path)
-  : m_db(path.join()), m_savePoint(0)
+  : m_db(path.join())
 {
   migrate();
 
@@ -141,7 +141,7 @@ void Registry::migrate()
 
 auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 {
-  savepoint();
+  m_db.savepoint();
 
   bool hasConflicts = false;
 
@@ -196,18 +196,18 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
         conflicts->push_back(path);
       }
       else {
-        restore();
+        m_db.restore();
         throw;
       }
     }
   }
 
   if(hasConflicts) {
-    restore();
+    m_db.restore();
     return {};
   }
   else {
-    release();
+    m_db.release();
     return {entryId, ri->name(), cat->name(),
       pkg->name(), pkg->description(), pkg->type(), ver->name(), ver->author()};
   }
@@ -317,35 +317,6 @@ void Registry::forget(const Entry &entry)
 
   m_forgetEntry->bind(1, entry.id);
   m_forgetEntry->exec();
-}
-
-void Registry::savepoint()
-{
-  char sql[64];
-  sprintf(sql, "SAVEPOINT sp%zu", m_savePoint++);
-
-  m_db.exec(sql);
-}
-
-void Registry::restore()
-{
-  char sql[64];
-  sprintf(sql, "ROLLBACK TO SAVEPOINT sp%zu", --m_savePoint);
-
-  m_db.exec(sql);
-}
-
-void Registry::release()
-{
-  char sql[64];
-  sprintf(sql, "RELEASE SAVEPOINT sp%zu", --m_savePoint);
-
-  m_db.exec(sql);
-}
-
-void Registry::commit()
-{
-  m_db.commit();
 }
 
 void Registry::convertImplicitSections()

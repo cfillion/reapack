@@ -53,8 +53,12 @@ public:
   Version version() const;
   void setVersion(const Version &);
   int errorCode() const;
+
   void begin();
   void commit();
+  void savepoint();
+  void restore();
+  void release();
 
 private:
   friend Statement;
@@ -63,6 +67,7 @@ private:
 
   sqlite3 *m_db;
   std::vector<Statement *> m_statements;
+  size_t m_savePoint;
 };
 
 class Statement {

@@ -63,10 +63,10 @@ public:
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
   void setPinned(const Entry &, bool pinned);
   void forget(const Entry &);
-  void savepoint();
-  void restore();
-  void release();
-  void commit();
+
+  void savepoint() { m_db.savepoint(); }
+  void restore() { m_db.restore(); }
+  void commit() { m_db.commit(); }
 
 private:
   void migrate();
@@ -86,8 +86,6 @@ private:
   Statement *m_insertFile;
   Statement *m_clearFiles;
   Statement *m_forgetFiles;
-
-  size_t m_savePoint;
 };
 
 namespace std {

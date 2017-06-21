@@ -227,3 +227,50 @@ TEST_CASE("invalid string column", M) {
     return false;
   });
 }
+
+TEST_CASE("database transaction locking", M) {
+  Database db;
+  db.begin();
+
+  try {
+    db.begin();
+    FAIL("created a transaction within a transaction");
+  }
+  catch(const reapack_error &) {}
+
+  db.commit();
+  db.begin();
+}
+
+TEST_CASE("save points", M) {
+  Database db;
+  db.exec("CREATE TABLE test (value INTEGER NOT NULL);");
+
+  Statement *insert = db.prepare("INSERT INTO test VALUES (1);");
+  Statement *select = db.prepare("SELECT COUNT(*) FROM test");
+
+  auto count = [select] {
+    int count = -255;
+    select->exec([&] { count = select->intColumn(0); return false; });
+    return count;
+  };
+
+  db.savepoint();
+
+  insert->exec();
+  REQUIRE(count() == 1);
+
+  SECTION("rollback to savepoint") {
+    db.restore();
+    REQUIRE(count() == 0);
+    try { db.restore(); FAIL("rolled back unexistant savepoint"); }
+    catch(const reapack_error &) {}
+  }
+
+  SECTION("release savepoint") {
+    db.release();
+    REQUIRE(count() == 1);
+    try { db.release(); FAIL("released unexistant savepoint"); }
+    catch(const reapack_error &) {}
+  }
+}

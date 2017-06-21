@@ -25,6 +25,7 @@
 using namespace std;
 
 Database::Database(const string &filename)
+  : m_savePoint(0)
 {
   const char *file = ":memory:";
 
@@ -111,6 +112,30 @@ void Database::begin()
 void Database::commit()
 {
   exec("COMMIT");
+}
+
+void Database::savepoint()
+{
+  char sql[64];
+  sprintf(sql, "SAVEPOINT sp%zu", m_savePoint++);
+
+  exec(sql);
+}
+
+void Database::restore()
+{
+  char sql[64];
+  sprintf(sql, "ROLLBACK TO SAVEPOINT sp%zu", --m_savePoint);
+
+  exec(sql);
+}
+
+void Database::release()
+{
+  char sql[64];
+  sprintf(sql, "RELEASE SAVEPOINT sp%zu", --m_savePoint);
+
+  exec(sql);
 }
 
 Statement::Statement(const char *sql, const Database *db)
