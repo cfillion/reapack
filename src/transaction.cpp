@@ -34,9 +34,6 @@ Transaction::Transaction(Config *config)
   : m_isCancelled(false), m_config(config),
     m_registry(Path::prefixRoot(Path::REGISTRY))
 {
-  // don't keep pre-install pushes (for conflict checks); released in runTasks
-  m_registry.savepoint();
-
   m_threadPool.onPush([this] (ThreadTask *task) {
     task->onFinish([=] {
       if(task->state() == ThreadTask::Failure)
