@@ -35,6 +35,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
   struct ApiFunc { void **ptr; const char *name; bool required; };
 
   const ApiFunc funcs[] = {
+    REQUIRED_API(Splash_GetWnd),             // v4.7
 
     REQUIRED_API(AddExtensionsMainMenu),
     REQUIRED_API(GetAppVersion),
@@ -43,10 +44,8 @@ static bool loadAPI(void *(*getFunc)(const char *))
     REQUIRED_API(NamedCommandLookup),        // v3.1415
     REQUIRED_API(plugin_register),
     REQUIRED_API(ShowMessageBox),
-    REQUIRED_API(Splash_GetWnd),             // v4.7
 
     OPTIONAL_API(AddRemoveReaScript),        // v5.12
-
   };
 
   for(const ApiFunc &func : funcs) {
