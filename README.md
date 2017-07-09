@@ -38,7 +38,7 @@ vendor
 
 ### Linux
 
-1. Install boost development files and tup
+1. Install boost development files, tup, ruby and php
 2. Run `rake` from this directory
 3. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
 
