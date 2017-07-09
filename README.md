@@ -38,9 +38,10 @@ vendor
 
 ### Linux
 
-1. Install boost development files, tup, ruby and php
-2. Run `rake` from this directory
-3. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
+1. Install gcc, tup, ruby and php
+2. Install boost, curl and sqlite3 development files
+3. Run `rake` from this directory
+4. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
 
 ### macOS
 
