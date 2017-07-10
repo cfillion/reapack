@@ -68,9 +68,6 @@ static bool loadAPI(void *(*getFunc)(const char *))
   return true;
 }
 
-#undef REQUIRED_API
-#undef OPTIONAL_API
-
 static bool commandHook(const int id, const int flag)
 {
   return reapack->execActions(id, flag);
