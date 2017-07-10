@@ -36,6 +36,10 @@ vendor
 └── reaper_plugin_functions.h
 ```
 
+All instructions and paths below are relative to the directory containing the
+current file (README.md) on your computer (aka "this directory").
+
+
 ### Linux
 
 1. Install gcc, tup, ruby and php
@@ -68,7 +72,7 @@ vendor
    or set the `OptIn` registry key to `0` in
    `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\15.0\SQM`
 3. Download the latest [boost](http://www.boost.org/) and copy the
-  `boost` subdirectory into `<reapack>\vendor`
+  `boost` subdirectory into `vendor`
 4. Download the latest [curl](http://curl.haxx.se/download.html) source
   code and extract it as `vendor/curl`:
 
@@ -85,7 +89,7 @@ vendor
     └── ...
     ```
 5. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
-   Put `sqlite3.h` and `sqlite3.c` in `<reapack>\vendor`.
+   Put `sqlite3.h` and `sqlite3.c` in `vendor`.
 6. Run `build_deps.bat` and `rake` from this directory using
   "Developer Command Prompt for VS 2017"
 7. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
