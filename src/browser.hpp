@@ -126,6 +126,7 @@ private:
   void displayButton();
   void actionsButton();
   void fillMenu(Menu &);
+  void fillPackageMenu(const Entry *, Menu &);
   bool isFiltered(Package::Type) const;
   void toggleDescs();
   bool hasAction(const Entry *) const;

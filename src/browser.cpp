@@ -321,8 +321,18 @@ void Browser::fillMenu(Menu &menu)
     menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
     menu.addAction(AUTO_STR("&Clear queued actions"), ACTION_RESET_ALL);
     menu.addSeparator();
-  }
 
+    if(entry) {
+      Menu pkgMenu = menu.addMenu(AUTO_STR("Package under cursor"));
+      fillPackageMenu(entry, pkgMenu);
+    }
+  }
+  else if(entry)
+    fillPackageMenu(entry, menu);
+}
+
+void Browser::fillPackageMenu(const Entry *entry, Menu &menu)
+{
   if(entry->test(InstalledFlag)) {
     if(entry->test(OutOfDateFlag)) {
       auto_char installLabel[32];
