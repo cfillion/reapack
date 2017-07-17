@@ -302,6 +302,12 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   m_currentIndex = index;
   fillMenu(menu);
 
+  if(!menu.empty())
+    menu.addSeparator();
+
+  menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
+  menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
+
   return true;
 }
 
@@ -315,12 +321,6 @@ void Browser::fillMenu(Menu &menu)
     menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
     menu.addAction(AUTO_STR("&Clear queued actions"), ACTION_RESET_ALL);
     menu.addSeparator();
-  }
-
-  if(!entry) {
-    menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
-    menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
-    return;
   }
 
   if(entry->test(InstalledFlag)) {
