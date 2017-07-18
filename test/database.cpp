@@ -250,7 +250,7 @@ TEST_CASE("save points", M) {
   Statement *select = db.prepare("SELECT COUNT(*) FROM test");
 
   auto count = [select] {
-    int count = -255;
+    int64_t count = -255;
     select->exec([&] { count = select->intColumn(0); return false; });
     return count;
   };
