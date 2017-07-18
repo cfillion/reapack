@@ -93,39 +93,9 @@ void Browser::onInit()
   m_list->onContextMenu(bind(&Browser::fillContextMenu,
     this, placeholders::_1, placeholders::_2));
 
+  m_list->setSortCallback(3, bind(&Browser::sortByVersion, this, _1, _2));
+  m_list->setSortCallback(7, bind(&Browser::sortByLastUpdate, this, _1, _2));
   m_list->sortByColumn(1);
-
-  m_list->setSortCallback(3 /* version */, [&] (const int ai, const int bi) {
-    const Entry &a = m_entries[m_visibleEntries[ai]];
-    const Entry &b = m_entries[m_visibleEntries[bi]];
-
-    const VersionName *l = nullptr;
-    const VersionName *r = nullptr;
-
-    if(a.test(InstalledFlag))
-      l = &a.regEntry.version;
-    else
-      l = &a.latest->name();
-
-    if(b.test(InstalledFlag))
-      r = &b.regEntry.version;
-    else
-      r = &b.latest->name();
-
-    return l->compare(*r);
-  });
-
-  m_list->setSortCallback(7 /* last update */, [&] (const int ai, const int bi) {
-    const Entry &a = m_entries[m_visibleEntries[ai]];
-    const Entry &b = m_entries[m_visibleEntries[bi]];
-
-    if(!a.latest)
-      return -1;
-    else if(!b.latest)
-      return 1;
-
-    return a.latest->time().compare(b.latest->time());
-  });
 
   Dialog::onInit();
   setMinimumSize({600, 250});
@@ -295,6 +265,40 @@ void Browser::onSelection()
 {
   setEnabled(m_list->hasSelection(), m_actionsBtn);
   startTimer(100, TIMER_ABOUT);
+}
+
+int Browser::sortByVersion(const int ai, const int bi) const
+{
+  const Entry &a = m_entries[m_visibleEntries[ai]];
+  const Entry &b = m_entries[m_visibleEntries[bi]];
+
+  const VersionName *l = nullptr;
+  const VersionName *r = nullptr;
+
+  if(a.test(InstalledFlag))
+    l = &a.regEntry.version;
+  else
+    l = &a.latest->name();
+
+  if(b.test(InstalledFlag))
+    r = &b.regEntry.version;
+  else
+    r = &b.latest->name();
+
+  return l->compare(*r);
+}
+
+int Browser::sortByLastUpdate(const int ai, const int bi) const
+{
+  const Entry &a = m_entries[m_visibleEntries[ai]];
+  const Entry &b = m_entries[m_visibleEntries[bi]];
+
+  if(!a.latest)
+    return -1;
+  else if(!b.latest)
+    return 1;
+
+  return a.latest->time().compare(b.latest->time());
 }
 
 bool Browser::fillContextMenu(Menu &menu, const int index)
