@@ -90,8 +90,7 @@ void Browser::onInit()
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
   m_list->onSelect(bind(&Browser::onSelection, this));
-  m_list->onContextMenu(bind(&Browser::fillContextMenu,
-    this, placeholders::_1, placeholders::_2));
+  m_list->onContextMenu(bind(&Browser::fillContextMenu, this, _1, _2));
 
   m_list->setSortCallback(3, bind(&Browser::sortByVersion, this, _1, _2));
   m_list->setSortCallback(7, bind(&Browser::sortByLastUpdate, this, _1, _2));
@@ -166,13 +165,13 @@ void Browser::onCommand(const int id, const int event)
     reinstall(m_currentIndex);
     break;
   case ACTION_REINSTALL_ALL:
-    selectionDo(bind(&Browser::reinstall, this, placeholders::_1, false));
+    selectionDo(bind(&Browser::reinstall, this, _1, false));
     break;
   case ACTION_UNINSTALL:
     uninstall(m_currentIndex);
     break;
   case ACTION_UNINSTALL_ALL:
-    selectionDo(bind(&Browser::uninstall, this, placeholders::_1, false));
+    selectionDo(bind(&Browser::uninstall, this, _1, false));
     break;
   case ACTION_PIN:
     togglePin(m_currentIndex);
@@ -184,7 +183,7 @@ void Browser::onCommand(const int id, const int event)
     aboutRemote(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
-    selectionDo(bind(&Browser::resetActions, this, placeholders::_1));
+    selectionDo(bind(&Browser::resetActions, this, _1));
     break;
   case ACTION_SHOWDESCS:
     toggleDescs();
@@ -915,7 +914,7 @@ void Browser::installLatestAll()
     }
   }
 
-  selectionDo(bind(&Browser::installLatest, this, placeholders::_1, false));
+  selectionDo(bind(&Browser::installLatest, this, _1, false));
 }
 
 void Browser::installLatest(const int index, const bool toggle)

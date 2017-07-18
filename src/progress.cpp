@@ -27,7 +27,7 @@ Progress::Progress(ThreadPool *pool)
     m_pool(pool), m_label(nullptr), m_progress(nullptr),
     m_done(0), m_total(0)
 {
-  m_pool->onPush(bind(&Progress::addTask, this, placeholders::_1));
+  m_pool->onPush(bind(&Progress::addTask, this, _1));
 }
 
 void Progress::onInit()

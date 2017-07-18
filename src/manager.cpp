@@ -74,8 +74,7 @@ void Manager::onInit()
 
   m_list->onActivate(bind(&Manager::aboutRepo, this, true));
   m_list->onSelect(bind(&Dialog::startTimer, this, 100, 0, true));
-  m_list->onContextMenu(bind(&Manager::fillContextMenu,
-    this, placeholders::_1, placeholders::_2));
+  m_list->onContextMenu(bind(&Manager::fillContextMenu, this, _1, _2));
 
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_IMPORT), AnchorTop | AnchorBottom);
