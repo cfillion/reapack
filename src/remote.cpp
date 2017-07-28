@@ -37,11 +37,11 @@ static bool validateName(const string &name)
   static const regex invalidPattern(
     "[\\.\x20].+|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d", icase);
 
-  smatch match, invalid;
-  regex_match(name, match, validPattern);
+  smatch valid, invalid;
+  regex_match(name, valid, validPattern);
   regex_match(name, invalid, invalidPattern);
 
-  return !match.empty() && invalid.empty();
+  return !valid.empty() && invalid.empty();
 }
 
 static bool validateUrl(const string &url)
