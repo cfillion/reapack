@@ -333,7 +333,7 @@ autoInstall: usually set to 2 (obey user setting).)",
       if(!tx)
         return false;
 
-      reapack->setRemoteEnabled(enable, existing);
+      reapack->setRemoteEnabled(enable, remote);
     }
     else
       reapack->config()->remotes.add(remote);
