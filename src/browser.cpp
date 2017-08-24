@@ -1069,14 +1069,16 @@ auto Browser::currentView() const -> View
 
 bool Browser::confirm() const
 {
-  if(m_actions.empty())
-    return true;
+  // count uninstallation actions
+  const size_t count = count_if(m_actions.begin(), m_actions.end(),
+    [](const Entry *e) { return e->target && *e->target == nullptr; });
 
-  const size_t count = m_actions.size();
+  if(!count)
+    return true;
 
   auto_char msg[255];
   auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("Confirm execution of %zu action%s?\n"),
+    AUTO_STR("Are you sure to uninstall %zu package%s?\r\nThe files and settings will be permanently deleted from this computer."),
     count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
 
   const auto_char *title = AUTO_STR("ReaPack Query");
