@@ -24,6 +24,7 @@ if "%1%"=="curl64" (
 
 call %self%\wrapper i386 cmd /c %self%\build_deps curl32
 call %self%\wrapper x86_64 cmd /c %self%\build_deps curl64
+exit
 
 :AssertExists
 if not exist "%~1" (
