@@ -690,7 +690,7 @@ bool Manager::apply()
       continue;
 
     if(mods.enable) {
-      m_reapack->setRemoteEnabled(*mods.enable, remote);
+      m_reapack->setRemoteEnabled(remote, *mods.enable);
 
       if(*mods.enable)
         syncList.insert(remote);

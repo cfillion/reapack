@@ -62,8 +62,8 @@ public:
   void setupAPI(const APIFunc *func);
 
   void synchronizeAll();
-  void setRemoteEnabled(bool enable, const Remote &);
-  void enable(const Remote &r) { setRemoteEnabled(true, r); }
+  bool addSetRemote(const Remote &, bool enable = true);
+  void setRemoteEnabled(const Remote &, bool enable = true);
   void uninstall(const Remote &);
 
   void importRemote();

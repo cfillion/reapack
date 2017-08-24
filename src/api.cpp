@@ -325,18 +325,13 @@ autoInstall: usually set to 2 (obey user setting).)",
       return false;
     }
 
-    Remote remote(name, url, enable, boost::lexical_cast<tribool>(autoInstall));
+    Remote remote = reapack->remote(name);
+    remote.setName(name);
+    remote.setUrl(url);
+    remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
 
-    if(existing && enable != existing.isEnabled()) {
-      Transaction *tx = reapack->setupTransaction();
-
-      if(!tx)
-        return false;
-
-      reapack->setRemoteEnabled(enable, remote);
-    }
-    else
-      reapack->config()->remotes.add(remote);
+    if(!reapack->addSetRemote(remote, enable))
+      return false;
   }
   catch(const reapack_error &e) {
     if(errorOut)

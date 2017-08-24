@@ -165,7 +165,34 @@ void ReaPack::synchronizeAll()
   tx->runTasks();
 }
 
-void ReaPack::setRemoteEnabled(const bool enable, const Remote &remote)
+bool ReaPack::addSetRemote(const Remote &remote, const bool enable)
+{
+  if(remote.isEnabled() != enable) {
+    if(Transaction *tx = setupTransaction()) {
+      setRemoteEnabled(remote, enable); // adds the new remote to the list
+
+      if(enable)
+        tx->synchronize(remote);
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  m_config->remotes.add(remote);
+
+  if(m_config->install.autoInstall) {
+    if(Transaction *tx = setupTransaction()) {
+      tx->synchronize(remote);
+      return true;
+    }
+  }
+
+  return true;
+}
+
+void ReaPack::setRemoteEnabled(const Remote &remote, const bool enable)
 {
   assert(m_tx);
 

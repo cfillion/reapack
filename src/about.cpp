@@ -507,7 +507,7 @@ void AboutIndexDelegate::install()
   if(!tx)
     return;
 
-  reapack->enable(remote);
+  reapack->setRemoteEnabled(remote);
 
   tx->synchronize(remote, choice == INSTALL_ALL);
   tx->runTasks();

@@ -231,25 +231,8 @@ void Import::processQueue()
 
 bool Import::import(const ImportData &data)
 {
-  if(!data.remote.isEnabled()) {
-    if(Transaction *tx = m_reapack->setupTransaction()) {
-      m_reapack->enable(data.remote);
-      tx->synchronize(data.remote);
-      return true;
-    }
-    else
-      return false;
-  }
-
-  Config *config = m_reapack->config();
-  config->remotes.add(data.remote);
-
-  if(config->install.autoInstall) {
-    if(Transaction *tx = m_reapack->setupTransaction()) {
-      tx->synchronize(data.remote);
-      return true;
-    }
-  }
+  if(!m_reapack->addSetRemote(data.remote))
+    return false;
 
   FS::write(Index::pathFor(data.remote.name()), data.contents);
 
