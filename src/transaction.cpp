@@ -71,7 +71,7 @@ void Transaction::synchronize(const Remote &remote,
 
     if(m_config->install.promptObsolete && !remote.isProtected()) {
       for(const Registry::Entry &entry : m_registry.getEntries(ri->name())) {
-        if(!ri->find(entry.category, entry.package))
+        if(!entry.pinned && !ri->find(entry.category, entry.package))
           m_obsolete.insert(entry);
       }
     }
