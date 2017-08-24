@@ -766,9 +766,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
   switch(col) {
   case StateColumn: {
-    if(entry.regEntry.pinned)
-      display += 'p';
-    else if(entry.test(ObsoleteFlag))
+    if(entry.test(ObsoleteFlag))
       display += 'o';
     else if(entry.test(OutOfDateFlag))
       display += 'u';
@@ -776,6 +774,9 @@ string Browser::getValue(const Column col, const Entry &entry) const
       display += 'i';
     else
       display += '\x20';
+
+    if(entry.regEntry.pinned)
+      display += 'p';
 
     if(entry.target)
       display += *entry.target == nullptr ? 'R' : 'I';
