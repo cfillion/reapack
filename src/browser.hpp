@@ -35,7 +35,6 @@
 class Index;
 class ListView;
 class Menu;
-class ReaPack;
 class Remote;
 class Version;
 
@@ -43,7 +42,7 @@ typedef std::shared_ptr<const Index> IndexPtr;
 
 class Browser : public Dialog {
 public:
-  Browser(ReaPack *);
+  Browser();
   void refresh(bool stale = false);
   void setFilter(const std::string &);
 
@@ -150,7 +149,6 @@ private:
   void aboutRemote(int index, bool focus = true);
   void aboutPackage(int index, bool focus = true);
 
-  ReaPack *m_reapack;
   LoadState m_loadState;
   int m_currentIndex;
 

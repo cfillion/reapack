@@ -24,7 +24,6 @@
 
 #include <vector>
 
-class Config;
 class ListView;
 
 class ObsoleteQuery : public Dialog {

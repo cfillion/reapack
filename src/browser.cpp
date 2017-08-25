@@ -51,9 +51,8 @@ enum Action {
 
 enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
-Browser::Browser(ReaPack *reapack)
-  : Dialog(IDD_BROWSER_DIALOG), m_reapack(reapack),
-    m_loadState(Init), m_currentIndex(-1)
+Browser::Browser()
+  : Dialog(IDD_BROWSER_DIALOG), m_loadState(Init), m_currentIndex(-1)
 {
 }
 
@@ -112,7 +111,7 @@ void Browser::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_applyBtn, AnchorAll);
 
-  auto data = m_serializer.read(m_reapack->config()->windowState.browser, 1);
+  auto data = m_serializer.read(g_reapack->config()->windowState.browser, 1);
   restoreState(data);
   m_list->restoreState(data);
 
@@ -124,7 +123,7 @@ void Browser::onClose()
   Serializer::Data data;
   saveState(data);
   m_list->saveState(data);
-  m_reapack->config()->windowState.browser = m_serializer.write(data);
+  g_reapack->config()->windowState.browser = m_serializer.write(data);
 }
 
 void Browser::onCommand(const int id, const int event)
@@ -192,7 +191,7 @@ void Browser::onCommand(const int id, const int event)
     refresh(true);
     break;
   case ACTION_MANAGE:
-    m_reapack->manageRemotes();
+    g_reapack->manageRemotes();
     break;
   case ACTION_FILTERTYPE:
     m_typeFilter = boost::none;
@@ -459,7 +458,7 @@ void Browser::displayButton()
   menu.addSeparator();
 
   const auto i = menu.addAction(AUTO_STR("Show &descriptions"), ACTION_SHOWDESCS);
-  if(m_reapack->config()->browser.showDescs)
+  if(g_reapack->config()->browser.showDescs)
     menu.check(i);
 
   menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
@@ -504,7 +503,7 @@ bool Browser::isFiltered(Package::Type type) const
 
 void Browser::toggleDescs()
 {
-  auto &config = m_reapack->config()->browser;
+  auto &config = g_reapack->config()->browser;
   config.showDescs = !config.showDescs;
   fillList();
 }
@@ -529,7 +528,7 @@ void Browser::updateAbout()
 {
   stopTimer(TIMER_ABOUT);
 
-  About *about = m_reapack->about(false);
+  About *about = g_reapack->about(false);
 
   if(!about)
     return;
@@ -555,7 +554,7 @@ void Browser::refresh(const bool stale)
     break;
   }
 
-  const vector<Remote> &remotes = m_reapack->config()->remotes.getEnabled();
+  const vector<Remote> &remotes = g_reapack->config()->remotes.getEnabled();
 
   if(remotes.empty()) {
     if(!isVisible() || stale) {
@@ -571,7 +570,7 @@ void Browser::refresh(const bool stale)
     return;
   }
 
-  if(Transaction *tx = m_reapack->setupTransaction()) {
+  if(Transaction *tx = g_reapack->setupTransaction()) {
     const bool firstLoad = m_loadState == Init;
     m_loadState = Loading;
 
@@ -677,7 +676,7 @@ auto Browser::makeEntry(const Package *pkg,
     const Registry::Entry &regEntry, const IndexPtr &index)
   const -> Entry
 {
-  const auto &instOpts = m_reapack->config()->install;
+  const auto &instOpts = g_reapack->config()->install;
   const Version *latest = pkg->lastVersion(instOpts.bleedingEdge, regEntry.version);
   const Version *current = nullptr;
 
@@ -786,7 +785,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
     return display;
   }
   case NameColumn: {
-    const auto &config = m_reapack->config()->browser;
+    const auto &config = g_reapack->config()->browser;
 
     if(pkg)
       return pkg->displayName(config.showDescs);
@@ -823,7 +822,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
 
 Remote Browser::getRemote(const Entry &entry) const
 {
-  return m_reapack->remote(getValue(RemoteColumn, entry));
+  return g_reapack->remote(getValue(RemoteColumn, entry));
 }
 
 bool Browser::match(const Entry &entry) const
@@ -880,7 +879,7 @@ void Browser::aboutPackage(const int index, const bool focus)
   const Entry *entry = getEntry(index);
 
   if(entry && entry->package) {
-    m_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(
+    g_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(
       entry->package, entry->regEntry.version), focus);
   }
 }
@@ -888,14 +887,14 @@ void Browser::aboutPackage(const int index, const bool focus)
 void Browser::aboutRemote(const int index, const bool focus)
 {
   if(const Entry *entry = getEntry(index)) {
-    m_reapack->about()->setDelegate(
+    g_reapack->about()->setDelegate(
       make_shared<AboutIndexDelegate>(entry->index), focus);
   }
 }
 
 void Browser::installLatestAll()
 {
-  InstallOpts &installOpts = m_reapack->config()->install;
+  InstallOpts &installOpts = g_reapack->config()->install;
   const bool isEverything = (size_t)m_list->selectionSize() == m_entries.size();
 
   if(isEverything && !installOpts.autoInstall) {
@@ -1092,7 +1091,7 @@ bool Browser::apply()
   if(m_actions.empty())
     return true;
 
-  Transaction *tx = m_reapack->setupTransaction();
+  Transaction *tx = g_reapack->setupTransaction();
 
   if(!tx)
     return false;

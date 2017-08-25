@@ -23,6 +23,7 @@
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
+#include "reapack.hpp"
 #include "remote.hpp"
 #include "task.hpp"
 
@@ -30,9 +31,8 @@
 
 using namespace std;
 
-Transaction::Transaction(Config *config)
-  : m_isCancelled(false), m_config(config),
-    m_registry(Path::prefixRoot(Path::REGISTRY))
+Transaction::Transaction()
+  : m_isCancelled(false), m_registry(Path::prefixRoot(Path::REGISTRY))
 {
   m_threadPool.onPush([this] (ThreadTask *task) {
     task->onFinish([=] {
@@ -58,7 +58,7 @@ void Transaction::synchronize(const Remote &remote,
 
   m_syncedRemotes.insert(remote.name());
 
-  InstallOpts opts = m_config->install;
+  InstallOpts opts = g_reapack->config()->install;
 
   if(forceAutoInstall)
     opts.autoInstall = *forceAutoInstall;
@@ -69,7 +69,7 @@ void Transaction::synchronize(const Remote &remote,
     for(const Package *pkg : ri->packages())
       synchronize(pkg, opts);
 
-    if(m_config->install.promptObsolete && !remote.isProtected()) {
+    if(opts.promptObsolete && !remote.isProtected()) {
       for(const Registry::Entry &entry : m_registry.getEntries(ri->name())) {
         if(!entry.pinned && !ri->find(entry.category, entry.package))
           m_obsolete.insert(entry);
@@ -124,6 +124,8 @@ vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
 void Transaction::fetchIndex(const Remote &remote, const bool stale,
   const function<void (const IndexPtr &)> &cb)
 {
+  const auto &netConfig = g_reapack->config()->network;
+
   const auto load = [=] {
     const IndexPtr ri = loadIndex(remote);
     if(cb && ri)
@@ -134,14 +136,13 @@ void Transaction::fetchIndex(const Remote &remote, const bool stale,
   time_t mtime = 0, now = time(nullptr);
   FS::mtime(path, &mtime);
 
-  const time_t threshold = m_config->network.staleThreshold;
+  const time_t threshold = netConfig.staleThreshold;
   if(!stale && mtime && (!threshold || mtime > now - threshold)) {
     load();
     return;
   }
 
-  auto dl = new FileDownload(path, remote.url(),
-    m_config->network, Download::NoCacheFlag);
+  auto dl = new FileDownload(path, remote.url(), netConfig, Download::NoCacheFlag);
   dl->setName(remote.name());
 
   dl->onFinish([=] {
@@ -385,7 +386,7 @@ void Transaction::inhibit(const Remote &remote)
 
 void Transaction::promptObsolete()
 {
-  if(!m_config->install.promptObsolete || m_obsolete.empty())
+  if(!g_reapack->config()->install.promptObsolete || m_obsolete.empty())
     return;
 
   vector<Registry::Entry> selected;

@@ -27,8 +27,6 @@
 #include <map>
 #include <set>
 
-class Config;
-class ReaPack;
 class Remote;
 struct NetworkOpts;
 
@@ -36,7 +34,7 @@ typedef boost::logic::tribool tribool;
 
 class Manager : public Dialog {
 public:
-  Manager(ReaPack *);
+  Manager();
 
   void refresh();
   bool importRepo();
@@ -84,8 +82,6 @@ private:
   void reset();
 
   HWND m_apply;
-  ReaPack *m_reapack;
-  Config *m_config;
   ListView *m_list;
 
   size_t m_changes;

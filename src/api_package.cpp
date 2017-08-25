@@ -26,7 +26,6 @@
 #include "remote.hpp"
 #include "transaction.hpp"
 
-using namespace API;
 using namespace std;
 
 struct PackageEntry {
@@ -46,11 +45,11 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
   // the one given by the user may be deleted while we download the idnex
   const Registry::Entry entryCopy = entry->regEntry;
 
-  const Remote &repo = reapack->remote(entryCopy.remote);
+  const Remote &repo = g_reapack->remote(entryCopy.remote);
   if(!repo)
     return false;
 
-  Transaction *tx = reapack->setupTransaction();
+  Transaction *tx = g_reapack->setupTransaction();
   if(!tx)
     return false;
 
@@ -64,7 +63,7 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
 
     const Package *pkg = indexes.front()->find(entryCopy.category, entryCopy.package);
     if(pkg)
-      reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
+      g_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
   });
   tx->runTasks();
 

@@ -37,6 +37,8 @@ class Remote;
 class Transaction;
 struct APIFunc;
 
+#define g_reapack (ReaPack::instance())
+
 class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
@@ -44,12 +46,13 @@ public:
   static const char *VERSION;
   static const char *BUILDTIME;
 
+  static ReaPack *instance() { return s_instance; }
+  static std::string resourcePath();
+
   gaccel_register_t syncAction;
   gaccel_register_t browseAction;
   gaccel_register_t importAction;
   gaccel_register_t configAction;
-
-  static std::string resourcePath();
 
   ReaPack(REAPER_PLUGIN_HINSTANCE);
   ~ReaPack();
@@ -82,6 +85,8 @@ public:
   Config *config() const { return m_config; }
 
 private:
+  static ReaPack *s_instance;
+
   void createDirectories();
   void registerSelf();
   void teardownTransaction();

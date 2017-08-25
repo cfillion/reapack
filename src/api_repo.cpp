@@ -25,15 +25,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/logic/tribool_io.hpp> // required to get correct tribool casts
 
-using namespace API;
 using namespace std;
 
 DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
 R"(Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
 The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",
 {
-  if(const Remote &repo = reapack->remote(repoName)) {
-    reapack->about(repo);
+  if(const Remote &repo = g_reapack->remote(repoName)) {
+    g_reapack->about(repo);
     return true;
   }
 
@@ -48,7 +47,7 @@ R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to ke
 autoInstall: usually set to 2 (obey user setting).)",
 {
   try {
-    const Remote &existing = reapack->remote(name);
+    const Remote &existing = g_reapack->remote(name);
 
     if(!url || strlen(url) == 0)
       url = existing.url().c_str();
@@ -59,12 +58,12 @@ autoInstall: usually set to 2 (obey user setting).)",
       return false;
     }
 
-    Remote remote = reapack->remote(name);
+    Remote remote = g_reapack->remote(name);
     remote.setName(name);
     remote.setUrl(url);
     remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
 
-    if(!reapack->addSetRemote(remote, enable))
+    if(!g_reapack->addSetRemote(remote, enable))
       return false;
   }
   catch(const reapack_error &e) {
@@ -79,7 +78,7 @@ autoInstall: usually set to 2 (obey user setting).)",
   }
 
   if(commit)
-    reapack->commitConfig();
+    g_reapack->commitConfig();
 
   return true;
 });
@@ -91,7 +90,7 @@ R"(Get the infos of the given repository.
 
 autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
 {
-  const Remote &remote = reapack->remote(name);
+  const Remote &remote = g_reapack->remote(name);
 
   if(!remote)
     return false;

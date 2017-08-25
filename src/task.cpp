@@ -23,6 +23,7 @@
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
+#include "reapack.hpp"
 #include "transaction.hpp"
 
 using namespace std;
@@ -76,7 +77,7 @@ bool InstallTask::start()
       push(ex, ex->path());
     }
     else {
-      const NetworkOpts &opts = tx()->config()->network;
+      const NetworkOpts &opts = g_reapack->config()->network;
       FileDownload *dl = new FileDownload(targetPath, src->url(), opts);
       push(dl, dl->path());
     }

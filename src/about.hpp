@@ -31,7 +31,6 @@ class Index;
 class ListView;
 class Menu;
 class Metadata;
-class ReaPack;
 class RichEdit;
 class TabBar;
 struct Link;
@@ -42,7 +41,7 @@ class About : public Dialog {
 public:
   typedef std::shared_ptr<AboutDelegate> DelegatePtr;
 
-  About(ReaPack *);
+  About();
   void setDelegate(const DelegatePtr &, bool focus = true);
   template<typename T>
   bool testDelegate() { return dynamic_cast<T *>(m_delegate.get()) != nullptr; }
@@ -51,7 +50,6 @@ public:
   void setMetadata(const Metadata *, bool substitution = false);
   void setAction(const std::string &);
 
-  ReaPack *reapack() const { return  m_reapack; }
   TabBar *tabs() const { return m_tabs; }
   RichEdit *desc() const { return m_desc; }
   ListView *menu() const { return m_menu; }
@@ -71,7 +69,6 @@ private:
   int m_currentIndex;
   std::map<int, std::vector<const Link *> > m_links;
 
-  ReaPack *m_reapack;
   TabBar *m_tabs;
   RichEdit *m_desc;
   ListView *m_menu;

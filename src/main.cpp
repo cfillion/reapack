@@ -25,8 +25,6 @@
 
 using namespace std;
 
-static ReaPack *reapack = nullptr;
-
 #define REQUIRED_API(name) {(void **)&name, #name, true}
 #define OPTIONAL_API(name) {(void **)&name, #name, false}
 
@@ -70,7 +68,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
 
 static bool commandHook(const int id, const int flag)
 {
-  return reapack->execActions(id, flag);
+  return g_reapack->execActions(id, flag);
 }
 
 static void menuHook(const char *name, HMENU handle, int f)
@@ -137,33 +135,33 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 
 static void setupActions()
 {
-  reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
-    &reapack->syncAction, bind(&ReaPack::synchronizeAll, reapack));
+  g_reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
+    &g_reapack->syncAction, bind(&ReaPack::synchronizeAll, g_reapack));
 
-  reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
-    &reapack->browseAction, bind(&ReaPack::browsePackages, reapack));
+  g_reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
+    &g_reapack->browseAction, bind(&ReaPack::browsePackages, g_reapack));
 
-  reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import repositories...",
-    &reapack->importAction, bind(&ReaPack::importRemote, reapack));
+  g_reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import repositories...",
+    &g_reapack->importAction, bind(&ReaPack::importRemote, g_reapack));
 
-  reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
-    &reapack->configAction, bind(&ReaPack::manageRemotes, reapack));
+  g_reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
+    &g_reapack->configAction, bind(&ReaPack::manageRemotes, g_reapack));
 
-  reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, reapack));
+  g_reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, g_reapack));
 }
 
 static void setupAPI()
 {
-  reapack->setupAPI(&API::AboutInstalledPackage);
-  reapack->setupAPI(&API::AboutRepository);
-  reapack->setupAPI(&API::AddSetRepository);
-  reapack->setupAPI(&API::BrowsePackages);
-  reapack->setupAPI(&API::CompareVersions);
-  reapack->setupAPI(&API::EnumOwnedFiles);
-  reapack->setupAPI(&API::FreeEntry);
-  reapack->setupAPI(&API::GetEntryInfo);
-  reapack->setupAPI(&API::GetOwner);
-  reapack->setupAPI(&API::GetRepositoryInfo);
+  g_reapack->setupAPI(&API::AboutInstalledPackage);
+  g_reapack->setupAPI(&API::AboutRepository);
+  g_reapack->setupAPI(&API::AddSetRepository);
+  g_reapack->setupAPI(&API::BrowsePackages);
+  g_reapack->setupAPI(&API::CompareVersions);
+  g_reapack->setupAPI(&API::EnumOwnedFiles);
+  g_reapack->setupAPI(&API::FreeEntry);
+  g_reapack->setupAPI(&API::GetEntryInfo);
+  g_reapack->setupAPI(&API::GetOwner);
+  g_reapack->setupAPI(&API::GetRepositoryInfo);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
@@ -173,7 +171,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
     plugin_register("-hookcommand", (void *)commandHook);
     plugin_register("-hookcustommenu", (void *)menuHook);
 
-    delete reapack;
+    delete g_reapack;
 
     return 0;
   }
@@ -187,7 +185,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   if(!checkLocation(instance))
     return 0;
 
-  reapack = API::reapack = new ReaPack(instance);
+  new ReaPack(instance);
 
   setupActions();
   setupAPI();

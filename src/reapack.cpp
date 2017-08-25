@@ -39,6 +39,8 @@ using namespace std;
 const char *ReaPack::VERSION = "1.2beta2";
 const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 
+ReaPack *ReaPack::s_instance = nullptr;
+
 #ifdef _WIN32
 // Removes temporary files that could not be removed by an installation task
 // (eg. extensions dll that were in use by REAPER).
@@ -79,6 +81,9 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
     m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
     m_about(nullptr), m_instance(instance), m_useRootPath(resourcePath())
 {
+  assert(!s_instance);
+  s_instance = this;
+
   m_mainWindow = GetMainHwnd();
 
   DownloadContext::GlobalInit();
@@ -107,6 +112,8 @@ ReaPack::~ReaPack()
   delete m_config;
 
   DownloadContext::GlobalCleanup();
+
+  s_instance = nullptr;
 }
 
 int ReaPack::setupAction(const char *name, const ActionCallback &callback)
@@ -240,7 +247,7 @@ void ReaPack::manageRemotes()
     return;
   }
 
-  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow, this);
+  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow);
   m_manager->show();
 
   m_manager->setCloseHandler([=] (INT_PTR) {
@@ -283,7 +290,7 @@ About *ReaPack::about(const bool instantiate)
   else if(!instantiate)
     return nullptr;
 
-  m_about = Dialog::Create<About>(m_instance, m_mainWindow, this);
+  m_about = Dialog::Create<About>(m_instance, m_mainWindow);
 
   m_about->setCloseHandler([=] (INT_PTR) {
     Dialog::Destroy(m_about);
@@ -307,7 +314,7 @@ Browser *ReaPack::browsePackages()
     return nullptr;
   }
 
-  m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow, this);
+  m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow);
   m_browser->refresh();
   m_browser->setCloseHandler([=] (INT_PTR) {
     Dialog::Destroy(m_browser);
@@ -326,7 +333,7 @@ Transaction *ReaPack::setupTransaction()
     return m_tx;
 
   try {
-    m_tx = new Transaction(m_config);
+    m_tx = new Transaction;
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());

@@ -22,15 +22,14 @@
 #include "path.hpp"
 #include "thread.hpp"
 
-class ReaPack;
 class ThreadPool;
 
 typedef void *zipFile;
 
 namespace Archive {
-  void import(const auto_string &path, ReaPack *);
+  void import(const auto_string &path);
   size_t create(const auto_string &path,
-    std::vector<std::string> *errors, ThreadPool *pool, ReaPack *);
+    std::vector<std::string> *errors, ThreadPool *pool);
 };
 
 class ArchiveReader {

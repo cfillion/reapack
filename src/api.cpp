@@ -19,8 +19,6 @@
 
 #include <reaper_plugin_functions.h>
 
-ReaPack *API::reapack = nullptr;
-
 APIDef::APIDef(const APIFunc *func)
   : m_func(func)
 {

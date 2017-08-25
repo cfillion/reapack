@@ -31,7 +31,6 @@
 #include <unordered_set>
 
 class ArchiveReader;
-class Config;
 class Path;
 class Remote;
 struct InstallOpts;
@@ -46,7 +45,7 @@ public:
   typedef std::function<void()> CleanupHandler;
   typedef std::function<bool(std::vector<Registry::Entry> &)> ObsoleteHandler;
 
-  Transaction(Config *);
+  Transaction();
 
   void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
@@ -67,7 +66,6 @@ public:
 
   Receipt *receipt() { return &m_receipt; }
   Registry *registry() { return &m_registry; }
-  const Config *config() { return m_config; }
   ThreadPool *threadPool() { return &m_threadPool; }
 
   void registerAll(bool add, const Registry::Entry &);
@@ -98,7 +96,6 @@ private:
   void finish();
 
   bool m_isCancelled;
-  const Config *m_config;
   Registry m_registry;
   Receipt m_receipt;
 

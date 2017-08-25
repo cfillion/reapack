@@ -26,13 +26,12 @@
 #include <string>
 
 class MemoryDownload;
-class ReaPack;
 class ThreadPool;
 
 class Import : public Dialog
 {
 public:
-  Import(ReaPack *);
+  Import();
 
 protected:
   void onInit() override;
@@ -61,7 +60,6 @@ private:
   bool import(const ImportData &);
   void setWaiting(bool);
 
-  ReaPack *m_reapack;
   ThreadPool *m_pool;
   State m_state;
   std::deque<ImportData> m_queue;

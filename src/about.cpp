@@ -46,8 +46,8 @@ enum {
   ACTION_COPY_URL, ACTION_LOCATE
 };
 
-About::About(ReaPack *reapack)
-  : Dialog(IDD_ABOUT_DIALOG), m_reapack(reapack)
+About::About()
+  : Dialog(IDD_ABOUT_DIALOG)
 {
 }
 
@@ -78,7 +78,7 @@ void About::onInit()
   setAnchor(getControl(IDC_ACTION), AnchorAll);
   setAnchor(getControl(IDOK), AnchorAll);
 
-  auto data = m_serializer.read(m_reapack->config()->windowState.about, 1);
+  auto data = m_serializer.read(g_reapack->config()->windowState.about, 1);
   restoreState(data);
 }
 
@@ -86,7 +86,7 @@ void About::onClose()
 {
   Serializer::Data data;
   saveState(data);
-  m_reapack->config()->windowState.about = m_serializer.write(data);
+  g_reapack->config()->windowState.about = m_serializer.write(data);
 }
 
 void About::onCommand(const int id, int)
@@ -421,13 +421,12 @@ const Package *AboutIndexDelegate::currentPackage() const
 
 void AboutIndexDelegate::findInBrowser()
 {
-  ReaPack *reapack = m_dialog->reapack();
-  Browser *browser = reapack->browsePackages();
+  Browser *browser = g_reapack->browsePackages();
   if(!browser)
     return;
 
   const Package *pkg = currentPackage();
-  const string &name = pkg->displayName(reapack->config()->browser.showDescs);
+  const string &name = pkg->displayName(g_reapack->config()->browser.showDescs);
 
   ostringstream stream;
   stream << '^' << quoted(name) << "$ ^" << quoted(m_index->name()) << '$';
@@ -451,7 +450,7 @@ void AboutIndexDelegate::aboutPackage()
 
 void AboutIndexDelegate::itemCopy()
 {
-  Config *config = m_dialog->reapack()->config();
+  Config *config = g_reapack->config();
 
   if(const Package *pkg = currentPackage())
     m_dialog->setClipboard(pkg->displayName(config->browser.showDescs));
@@ -470,8 +469,7 @@ void AboutIndexDelegate::install()
   if(!choice)
     return;
 
-  ReaPack *reapack = m_dialog->reapack();
-  Remote remote = reapack->remote(m_index->name());
+  Remote remote = g_reapack->remote(m_index->name());
 
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
@@ -481,7 +479,7 @@ void AboutIndexDelegate::install()
     return;
   }
 
-  const InstallOpts &installOpts = reapack->config()->install;
+  const InstallOpts &installOpts = g_reapack->config()->install;
 
   if(choice == INSTALL_ALL && boost::logic::indeterminate(remote.autoInstall())
       && !installOpts.autoInstall) {
@@ -495,19 +493,19 @@ void AboutIndexDelegate::install()
     switch(btn) {
     case IDYES:
       remote.setAutoInstall(true);
-      reapack->config()->remotes.add(remote);
+      g_reapack->config()->remotes.add(remote);
       break;
     case IDCANCEL:
       return;
     }
   }
 
-  Transaction *tx = reapack->setupTransaction();
+  Transaction *tx = g_reapack->setupTransaction();
 
   if(!tx)
     return;
 
-  reapack->setRemoteEnabled(remote);
+  g_reapack->setRemoteEnabled(remote);
 
   tx->synchronize(remote, choice == INSTALL_ALL);
   tx->runTasks();

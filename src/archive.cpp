@@ -71,16 +71,17 @@ struct ImportArchive {
   IndexPtr m_lastIndex;
 };
 
-void Archive::import(const auto_string &path, ReaPack *reapack)
+void Archive::import(const auto_string &path)
 {
-  ImportArchive state{make_shared<ArchiveReader>(path), &reapack->config()->remotes};
+  ImportArchive state{make_shared<ArchiveReader>(path),
+    &g_reapack->config()->remotes};
 
   stringstream toc;
   if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
     throw reapack_error(format("Cannot locate the table of contents (%d)") % err);
 
   // starting import, do not abort process (eg. by throwing) at this point
-  if(!(state.m_tx = reapack->setupTransaction()))
+  if(!(state.m_tx = g_reapack->setupTransaction()))
     return;
 
   string line;
@@ -108,7 +109,7 @@ void Archive::import(const auto_string &path, ReaPack *reapack)
     }
   }
 
-  reapack->config()->write();
+  g_reapack->config()->write();
   state.m_tx->runTasks();
 }
 
@@ -241,7 +242,7 @@ bool FileExtractor::run()
 }
 
 size_t Archive::create(const auto_string &path, vector<string> *errors,
-  ThreadPool *pool, ReaPack *reapack)
+  ThreadPool *pool)
 {
   size_t count = 0;
   vector<ThreadTask *> jobs;
@@ -260,7 +261,7 @@ size_t Archive::create(const auto_string &path, vector<string> *errors,
     }
   };
 
-  for(const Remote &remote : reapack->config()->remotes.getEnabled()) {
+  for(const Remote &remote : g_reapack->config()->remotes.getEnabled()) {
     bool addedRemote = false;
 
     for(const Registry::Entry &entry : reg.getEntries(remote.name())) {

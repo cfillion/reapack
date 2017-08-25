@@ -48,10 +48,9 @@ enum {
   ACTION_IMPORT_ARCHIVE, ACTION_EXPORT_ARCHIVE
 };
 
-Manager::Manager(ReaPack *reapack)
+Manager::Manager()
   : Dialog(IDD_CONFIG_DIALOG),
-    m_reapack(reapack), m_config(reapack->config()), m_list(nullptr),
-    m_changes(0), m_importing(false)
+    m_list(nullptr), m_changes(0), m_importing(false)
 {
 }
 
@@ -84,7 +83,7 @@ void Manager::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_apply, AnchorAll);
 
-  auto data = m_serializer.read(m_reapack->config()->windowState.manager, 1);
+  auto data = m_serializer.read(g_reapack->config()->windowState.manager, 1);
   restoreState(data);
   m_list->restoreState(data);
 
@@ -97,7 +96,7 @@ void Manager::onTimer(const int id)
 {
   stopTimer(id);
 
-  if(About *about = m_reapack->about(false)) {
+  if(About *about = g_reapack->about(false)) {
     if(about->testDelegate<AboutIndexDelegate>())
       aboutRepo(false);
   }
@@ -108,7 +107,7 @@ void Manager::onClose()
   Serializer::Data data;
   saveState(data);
   m_list->saveState(data);
-  m_reapack->config()->windowState.manager = m_serializer.write(data);
+  g_reapack->config()->windowState.manager = m_serializer.write(data);
 }
 
 void Manager::onCommand(const int id, int)
@@ -157,20 +156,20 @@ void Manager::onCommand(const int id, int)
     exportArchive();
     break;
   case ACTION_AUTOINSTALL:
-    toggle(m_autoInstall, m_config->install.autoInstall);
+    toggle(m_autoInstall, g_reapack->config()->install.autoInstall);
     break;
   case ACTION_BLEEDINGEDGE:
-    toggle(m_bleedingEdge, m_config->install.bleedingEdge);
+    toggle(m_bleedingEdge, g_reapack->config()->install.bleedingEdge);
     break;
   case ACTION_PROMPTOBSOLETE:
-    toggle(m_promptObsolete, m_config->install.promptObsolete);
+    toggle(m_promptObsolete, g_reapack->config()->install.promptObsolete);
     break;
   case ACTION_NETCONFIG:
     setupNetwork();
     break;
   case ACTION_RESETCONFIG:
-    m_config->resetOptions();
-    m_config->restoreDefaultRemotes();
+    g_reapack->config()->resetOptions();
+    g_reapack->config()->restoreDefaultRemotes();
     refresh();
     break;
   case ACTION_SELECT:
@@ -201,7 +200,7 @@ void Manager::onCommand(const int id, int)
   default:
     const int action = id >> 8;
     if(action == ACTION_ABOUT)
-      m_reapack->about(getRemote(id & 0xff));
+      g_reapack->about(getRemote(id & 0xff));
     break;
   }
 }
@@ -322,7 +321,7 @@ void Manager::refresh()
 
   m_list->clear();
 
-  for(const Remote &remote : m_config->remotes) {
+  for(const Remote &remote : g_reapack->config()->remotes) {
     if(m_uninstall.count(remote))
       continue;
 
@@ -420,7 +419,7 @@ void Manager::refreshIndex()
   for(size_t i = 0; i < selection.size(); i++)
     remotes[i] = getRemote(selection[i]);
 
-  if(Transaction *tx = m_reapack->setupTransaction())
+  if(Transaction *tx = g_reapack->setupTransaction())
     tx->fetchIndexes(remotes, true);
 }
 
@@ -475,7 +474,7 @@ void Manager::copyUrl()
 
 void Manager::aboutRepo(const bool focus)
 {
-  m_reapack->about(getRemote(m_list->currentIndex()), focus);
+  g_reapack->about(getRemote(m_list->currentIndex()), focus);
 }
 
 void Manager::importExport()
@@ -495,7 +494,7 @@ bool Manager::importRepo()
     return true;
 
   m_importing = true;
-  const auto ret = Dialog::Show<Import>(instance(), handle(), m_reapack);
+  const auto ret = Dialog::Show<Import>(instance(), handle());
   m_importing = false;
 
   return ret != 0;
@@ -512,7 +511,7 @@ void Manager::importArchive()
     return;
 
   try {
-    Archive::import(path, m_reapack);
+    Archive::import(path);
   }
   catch(const reapack_error &e) {
     const auto_string &desc = make_autostring(e.what());
@@ -542,7 +541,7 @@ void Manager::exportArchive()
 
   try {
     vector<string> errors;
-    const size_t count = Archive::create(path, &errors, pool, m_reapack);
+    const size_t count = Archive::create(path, &errors, pool);
 
     const auto finish = [=] {
       Dialog::Destroy(progress);
@@ -599,7 +598,7 @@ void Manager::launchBrowser()
   if(m_changes && promptApply())
     apply();
 
-  m_reapack->browsePackages();
+  g_reapack->browsePackages();
 }
 
 void Manager::options()
@@ -608,17 +607,17 @@ void Manager::options()
 
   UINT index = menu.addAction(
     AUTO_STR("&Install new packages when synchronizing"), ACTION_AUTOINSTALL);
-  if(m_autoInstall.value_or(m_config->install.autoInstall))
+  if(m_autoInstall.value_or(g_reapack->config()->install.autoInstall))
     menu.check(index);
 
   index = menu.addAction(
     AUTO_STR("Enable &pre-releases globally (bleeding edge)"), ACTION_BLEEDINGEDGE);
-  if(m_bleedingEdge.value_or(m_config->install.bleedingEdge))
+  if(m_bleedingEdge.value_or(g_reapack->config()->install.bleedingEdge))
     menu.check(index);
 
   index = menu.addAction(
     AUTO_STR("Prompt to uninstall obsolete packages"), ACTION_PROMPTOBSOLETE);
-  if(m_promptObsolete.value_or(m_config->install.promptObsolete))
+  if(m_promptObsolete.value_or(g_reapack->config()->install.promptObsolete))
     menu.check(index);
 
   menu.addAction(AUTO_STR("&Network settings..."), ACTION_NETCONFIG);
@@ -632,8 +631,8 @@ void Manager::options()
 
 void Manager::setupNetwork()
 {
-  if(IDOK == Dialog::Show<NetworkConfig>(instance(), handle(), &m_config->network))
-    m_config->write();
+  if(IDOK == Dialog::Show<NetworkConfig>(instance(), handle(), &g_reapack->config()->network))
+    g_reapack->config()->write();
 }
 
 bool Manager::confirm() const
@@ -660,7 +659,7 @@ bool Manager::apply()
   if(!m_changes)
     return true;
 
-  Transaction *tx = m_reapack->setupTransaction();
+  Transaction *tx = g_reapack->setupTransaction();
 
   if(!tx)
     return false;
@@ -668,19 +667,19 @@ bool Manager::apply()
   set<Remote> syncList;
 
   if(m_autoInstall) {
-    m_config->install.autoInstall = m_autoInstall.value();
+    g_reapack->config()->install.autoInstall = m_autoInstall.value();
 
     if(m_autoInstall.value()) {
-      const auto &enabledNow = m_config->remotes.getEnabled();
+      const auto &enabledNow = g_reapack->config()->remotes.getEnabled();
       copy(enabledNow.begin(), enabledNow.end(), inserter(syncList, syncList.end()));
     }
   }
 
   if(m_bleedingEdge)
-    m_config->install.bleedingEdge = m_bleedingEdge.value();
+    g_reapack->config()->install.bleedingEdge = m_bleedingEdge.value();
 
   if(m_promptObsolete)
-    m_config->install.promptObsolete = m_promptObsolete.value();
+    g_reapack->config()->install.promptObsolete = m_promptObsolete.value();
 
   for(const auto &pair : m_mods) {
     Remote remote = pair.first;
@@ -690,7 +689,7 @@ bool Manager::apply()
       continue;
 
     if(mods.enable) {
-      m_reapack->setRemoteEnabled(remote, *mods.enable);
+      g_reapack->setRemoteEnabled(remote, *mods.enable);
 
       if(*mods.enable)
         syncList.insert(remote);
@@ -699,7 +698,7 @@ bool Manager::apply()
     }
     if(mods.autoInstall) {
       remote.setAutoInstall(*mods.autoInstall);
-      m_config->remotes.add(remote);
+      g_reapack->config()->remotes.add(remote);
 
       const bool isEnabled = mods.enable.value_or(remote.isEnabled());
 
@@ -709,14 +708,14 @@ bool Manager::apply()
   }
 
   for(const Remote &remote : m_uninstall) {
-    m_reapack->uninstall(remote);
+    g_reapack->uninstall(remote);
     syncList.erase(remote);
   }
 
   for(const Remote &remote : syncList)
     tx->synchronize(remote);
 
-  tx->onFinish(bind(&Config::write, m_config));
+  tx->onFinish(bind(&Config::write, g_reapack->config()));
   tx->runTasks();
   reset();
 
@@ -752,7 +751,7 @@ Remote Manager::getRemote(const int index) const
   const ListView::Row &row = m_list->row(index);
   const string &remoteName = from_autostring(row[0]);
 
-  return m_config->remotes.get(remoteName);
+  return g_reapack->config()->remotes.get(remoteName);
 }
 
 NetworkConfig::NetworkConfig(NetworkOpts *opts)

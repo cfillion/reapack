@@ -34,8 +34,8 @@ using namespace std;
 static const auto_char *TITLE = AUTO_STR("ReaPack: Import repositories");
 static const string DISCOVER_URL = "https://reapack.com/repos";
 
-Import::Import(ReaPack *reapack)
-  : Dialog(IDD_IMPORT_DIALOG), m_reapack(reapack), m_pool(nullptr), m_state(OK)
+Import::Import()
+  : Dialog(IDD_IMPORT_DIALOG), m_pool(nullptr), m_state(OK)
 {
 }
 
@@ -117,7 +117,7 @@ void Import::fetch()
   if(m_pool) // ignore repeated presses on OK
     return;
 
-  const auto &opts = m_reapack->config()->network;
+  const auto &opts = g_reapack->config()->network;
 
   size_t index = 0;
   stringstream stream(getText(m_url));
@@ -167,7 +167,7 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
 
   try {
     IndexPtr index = Index::load({}, dl->contents().c_str());
-    Remote remote = m_reapack->remote(index->name());
+    Remote remote = g_reapack->remote(index->name());
     const bool exists = !remote.isNull();
 
     if(exists && remote.url() != dl->url()) {
@@ -226,12 +226,12 @@ void Import::processQueue()
     m_state = Close;
 
   if(commit)
-    m_reapack->commitConfig();
+    g_reapack->commitConfig();
 }
 
 bool Import::import(const ImportData &data)
 {
-  if(!m_reapack->addSetRemote(data.remote))
+  if(!g_reapack->addSetRemote(data.remote))
     return false;
 
   FS::write(Index::pathFor(data.remote.name()), data.contents);
