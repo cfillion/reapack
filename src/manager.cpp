@@ -364,6 +364,9 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     if(updateRow)
       m_list->replaceRow(index, makeRow(remote));
   }
+
+  if(updateRow)
+    m_list->sort();
 }
 
 void Manager::setRemoteEnabled(const bool enabled)
@@ -396,7 +399,7 @@ void Manager::setRemoteAutoInstall(const tribool &enabled)
       mods->autoInstall = boost::none;
     else
       mods->autoInstall = enabled;
-  }, true);
+  }, false);
 }
 
 tribool Manager::remoteAutoInstall(const Remote &remote) const

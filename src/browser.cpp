@@ -1012,8 +1012,10 @@ void Browser::updateAction(const int index)
     m_visibleEntries.erase(m_visibleEntries.begin() + index);
     updateDisplayLabel();
   }
-  else
+  else {
     m_list->replaceRow(index, makeRow(*entry));
+    m_list->sort(); // TODO: only re-sort if sorted by status column
+  }
 
   if(m_actions.empty())
     disable(m_applyBtn);
