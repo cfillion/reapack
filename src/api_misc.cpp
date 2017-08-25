@@ -16,29 +16,33 @@
  */
 
 #include "api.hpp"
+#include "api_helper.hpp"
 
-#include <reaper_plugin_functions.h>
+#include "browser.hpp"
+#include "reapack.hpp"
 
-ReaPack *API::reapack = nullptr;
+using namespace API;
+using namespace std;
 
-APIDef::APIDef(const APIFunc *func)
-  : m_func(func)
+DEFINE_API(void, BrowsePackages, ((const char*, filter)),
+R"(Opens the package browser with the given filter string.)",
 {
-  plugin_register(m_func->cKey, m_func->cImpl);
-  plugin_register(m_func->reascriptKey, m_func->reascriptImpl);
-  plugin_register(m_func->definitionKey, m_func->definition);
-}
+  if(Browser *browser = reapack->browsePackages())
+    browser->setFilter(filter);
+});
 
-APIDef::~APIDef()
+DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
+    ((char*, errorOut))((int, errorOut_sz)),
+R"(Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.)",
 {
-  unregister(m_func->cKey, m_func->cImpl);
-  unregister(m_func->reascriptKey, m_func->reascriptImpl);
-  unregister(m_func->definitionKey, m_func->definition);
-}
+  VersionName a, b;
+  string error;
 
-void APIDef::unregister(const char *key, void *ptr)
-{
-  char buf[255];
-  snprintf(buf, sizeof(buf), "-%s", key);
-  plugin_register(buf, ptr);
-}
+  b.tryParse(ver2, &error);
+  a.tryParse(ver1, &error);
+
+  if(errorOut)
+    snprintf(errorOut, errorOut_sz, "%s", error.c_str());
+
+  return a.compare(b);
+});

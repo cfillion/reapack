@@ -45,15 +45,20 @@ private:
 namespace API {
   extern ReaPack *reapack;
 
-  extern APIFunc AboutInstalledPackage;
-  extern APIFunc AboutRepository;
-  extern APIFunc AddSetRepository;
+  // api_misc.cpp
   extern APIFunc BrowsePackages;
   extern APIFunc CompareVersions;
+
+  // api_package.cpp
+  extern APIFunc AboutInstalledPackage;
   extern APIFunc EnumOwnedFiles;
   extern APIFunc FreeEntry;
   extern APIFunc GetEntryInfo;
   extern APIFunc GetOwner;
+
+  // api_repo.cpp
+  extern APIFunc AboutRepository;
+  extern APIFunc AddSetRepository;
   extern APIFunc GetRepositoryInfo;
 };
 
