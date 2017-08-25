@@ -252,11 +252,7 @@ TEST_CASE("package description", M) {
 TEST_CASE("package display name", M) {
   Package pack(Package::ScriptType, "test.lua", nullptr);
   REQUIRE(pack.displayName() == "test.lua");
-  REQUIRE(pack.displayName(false) == "test.lua");
-  REQUIRE(pack.displayName(true) == "test.lua");
 
   pack.setDescription("hello world");
   REQUIRE(pack.displayName() == "hello world");
-  REQUIRE(pack.displayName(false) == "test.lua");
-  REQUIRE(pack.displayName(true) == "hello world");
 }

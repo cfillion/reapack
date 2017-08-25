@@ -426,10 +426,9 @@ void AboutIndexDelegate::findInBrowser()
     return;
 
   const Package *pkg = currentPackage();
-  const string &name = pkg->displayName(g_reapack->config()->browser.showDescs);
 
   ostringstream stream;
-  stream << '^' << quoted(name) << "$ ^" << quoted(m_index->name()) << '$';
+  stream << '^' << quoted(pkg->displayName()) << "$ ^" << quoted(m_index->name()) << '$';
   browser->setFilter(stream.str());
 }
 
@@ -450,10 +449,8 @@ void AboutIndexDelegate::aboutPackage()
 
 void AboutIndexDelegate::itemCopy()
 {
-  Config *config = g_reapack->config();
-
   if(const Package *pkg = currentPackage())
-    m_dialog->setClipboard(pkg->displayName(config->browser.showDescs));
+    m_dialog->setClipboard(pkg->displayName());
 }
 
 void AboutIndexDelegate::install()

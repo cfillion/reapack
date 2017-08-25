@@ -129,7 +129,6 @@ private:
   void fillMenu(Menu &);
   void fillPackageMenu(const Entry *, Menu &);
   bool isFiltered(Package::Type) const;
-  void toggleDescs();
   bool hasAction(const Entry *) const;
   void setTarget(const int index, const Version *, bool toggle = true);
   void resetTarget(int index);

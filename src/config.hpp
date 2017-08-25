@@ -31,10 +31,6 @@ struct WindowState {
   std::string manager;
 };
 
-struct BrowserOpts {
-  bool showDescs;
-};
-
 struct InstallOpts {
   bool autoInstall;
   bool bleedingEdge;
@@ -64,7 +60,6 @@ public:
 
   bool isFirstRun() const { return m_isFirstRun; }
 
-  BrowserOpts browser;
   InstallOpts install;
   NetworkOpts network;
   WindowState windowState;

@@ -42,7 +42,7 @@ public:
   static Type getType(const char *);
   static std::string displayType(Type);
   static const std::string &displayName(const std::string &name,
-    const std::string &desc, bool enableDesc = true);
+    const std::string &desc);
 
   Package(const Type, const std::string &name, const Category *);
   ~Package();
@@ -54,8 +54,8 @@ public:
   std::string fullName() const;
   void setDescription(const std::string &d) { m_desc = d; }
   const std::string &description() const { return m_desc; }
-  const std::string &displayName(bool enableDescs = true) const
-    { return displayName(m_name, m_desc, enableDescs); }
+  const std::string &displayName() const
+    { return displayName(m_name, m_desc); }
 
   Metadata *metadata() { return &m_metadata; }
   const Metadata *metadata() const { return &m_metadata; }

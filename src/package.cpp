@@ -82,13 +82,9 @@ string Package::displayType(const Type type)
   return "Unknown";
 }
 
-const string &Package::displayName(const string &name,
-  const string &desc, const bool enableDesc)
+const string &Package::displayName(const string &name, const string &desc)
 {
-  if(!enableDesc || desc.empty())
-    return name;
-  else
-    return desc;
+  return desc.empty() ? name : desc;
 }
 
 Package::Package(const Type type, const string &name, const Category *cat)

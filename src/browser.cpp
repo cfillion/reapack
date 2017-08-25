@@ -44,7 +44,6 @@ enum Action {
   ACTION_ABOUT_PKG,
   ACTION_ABOUT_REMOTE,
   ACTION_RESET_ALL,
-  ACTION_SHOWDESCS,
   ACTION_REFRESH,
   ACTION_MANAGE,
 };
@@ -183,9 +182,6 @@ void Browser::onCommand(const int id, const int event)
     break;
   case ACTION_RESET_ALL:
     selectionDo(bind(&Browser::resetActions, this, _1));
-    break;
-  case ACTION_SHOWDESCS:
-    toggleDescs();
     break;
   case ACTION_REFRESH:
     refresh(true);
@@ -457,10 +453,6 @@ void Browser::displayButton()
 
   menu.addSeparator();
 
-  const auto i = menu.addAction(AUTO_STR("Show &descriptions"), ACTION_SHOWDESCS);
-  if(g_reapack->config()->browser.showDescs)
-    menu.check(i);
-
   menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
   menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
 
@@ -499,13 +491,6 @@ bool Browser::isFiltered(Package::Type type) const
   }
 
   return m_typeFilter != type;
-}
-
-void Browser::toggleDescs()
-{
-  auto &config = g_reapack->config()->browser;
-  config.showDescs = !config.showDescs;
-  fillList();
 }
 
 void Browser::updateFilter()
@@ -785,13 +770,10 @@ string Browser::getValue(const Column col, const Entry &entry) const
     return display;
   }
   case NameColumn: {
-    const auto &config = g_reapack->config()->browser;
-
     if(pkg)
-      return pkg->displayName(config.showDescs);
+      return pkg->displayName();
     else
-      return Package::displayName(regEntry.package,
-        regEntry.description, config.showDescs);
+      return Package::displayName(regEntry.package, regEntry.description);
   }
   case CategoryColumn:
     return pkg ? pkg->category()->name() : regEntry.category;

@@ -39,7 +39,6 @@ static const auto_char *ABOUT_GRP = AUTO_STR("about");
 static const auto_char *MANAGER_GRP = AUTO_STR("manager");
 
 static const auto_char *BROWSER_GRP = AUTO_STR("browser");
-static const auto_char *SHOWDESCS_KEY = AUTO_STR("showdescs");
 static const auto_char *STATE_KEY = AUTO_STR("state");
 
 static const auto_char *NETWORK_GRP = AUTO_STR("network");
@@ -67,7 +66,6 @@ Config::Config()
 
 void Config::resetOptions()
 {
-  browser = {true};
   install = {false, false, true};
   network = {"", true, NetworkOpts::OneWeekThreshold};
   windowState = {};
@@ -142,8 +140,6 @@ void Config::read(const Path &path)
   install.promptObsolete = getBool(INSTALL_GRP,
     PROMPTOBSOLETE_KEY, install.promptObsolete);
 
-  browser.showDescs = getBool(BROWSER_GRP, SHOWDESCS_KEY, browser.showDescs);
-
   network.proxy = getString(NETWORK_GRP, PROXY_KEY, network.proxy);
   network.verifyPeer = getBool(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
   network.staleThreshold = (time_t)getUInt(NETWORK_GRP,
@@ -165,8 +161,6 @@ void Config::write()
   setUInt(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
   setUInt(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
   setUInt(INSTALL_GRP, PROMPTOBSOLETE_KEY, install.promptObsolete);
-
-  setUInt(BROWSER_GRP, SHOWDESCS_KEY, browser.showDescs);
 
   setString(NETWORK_GRP, PROXY_KEY, network.proxy);
   setUInt(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
