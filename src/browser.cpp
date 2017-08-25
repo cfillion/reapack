@@ -497,11 +497,7 @@ void Browser::updateFilter()
 {
   stopTimer(TIMER_FILTER);
 
-  auto_string wideFilter(4096, 0);
-  GetWindowText(m_filterHandle, &wideFilter[0], (int)wideFilter.size());
-  wideFilter.resize(wideFilter.find(AUTO_STR('\0')));
-
-  const string &filter = from_autostring(wideFilter);
+  const string &filter = getText(m_filterHandle);
 
   if(m_filter != filter) {
     m_filter = filter;
