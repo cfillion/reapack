@@ -138,16 +138,18 @@ void ListView::sort()
 {
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
+    const int indexDiff = aRow - bRow;
+
     ListView *view = reinterpret_cast<ListView *>(param);
 
     if(!view->m_sort)
-      return (int)(aRow - bRow);
-
-    const int column = view->m_sort->column;
+      return indexDiff;
 
     int ret;
 
+    const int column = view->m_sort->column;
     const auto it = view->m_sortFuncs.find(column);
+
     if(it != view->m_sortFuncs.end())
       ret = it->second((int)aRow, (int)bRow);
     else {
@@ -160,13 +162,10 @@ void ListView::sort()
       ret = a.compare(b);
     }
 
-    switch(view->m_sort->order) {
-    case AscendingOrder:
-      return ret;
-    case DescendingOrder:
-    default: // for MSVC
-      return -ret;
-    }
+    if(view->m_sort->order == DescendingOrder)
+      ret = -ret;
+
+    return ret ? ret : indexDiff;
   };
 
   ListView_SortItems(handle(), compare, (LPARAM)this);
