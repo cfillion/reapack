@@ -62,8 +62,6 @@ private:
   };
 
   struct Entry {
-    typedef std::tuple<std::string, std::string, std::string> Hash;
-
     int flags;
     Registry::Entry regEntry;
     IndexPtr index;
@@ -71,13 +69,16 @@ private:
     const Version *latest;
     const Version *current;
 
+    const std::string &indexName() const;
+    const std::string &categoryName() const;
+    const std::string &packageName() const;
+
     boost::optional<const Version *> target;
     boost::optional<bool> pin;
 
-    Hash hash() const;
     bool test(Flag f) const { return (flags & f) != 0; }
     bool canPin() const { return target ? *target != nullptr : test(InstalledFlag); }
-    bool operator==(const Entry &o) const { return hash() == o.hash(); }
+    bool operator==(const Entry &o) const;
   };
 
   enum Column {

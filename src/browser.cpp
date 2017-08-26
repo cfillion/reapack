@@ -772,7 +772,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
       return Package::displayName(regEntry.package, regEntry.description);
   }
   case CategoryColumn:
-    return pkg ? pkg->category()->name() : regEntry.category;
+    return entry.categoryName();
   case VersionColumn:
     if(entry.test(InstalledFlag))
       display = regEntry.version.toString();
@@ -790,7 +790,7 @@ string Browser::getValue(const Column col, const Entry &entry) const
   case TypeColumn:
     return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
   case RemoteColumn:
-    return pkg ? pkg->category()->index()->name() : regEntry.remote;
+    return entry.indexName();
   case TimeColumn:
     return ver ? ver->time().toString() : string();
   }
@@ -1105,12 +1105,23 @@ bool Browser::apply()
   return true;
 }
 
-auto Browser::Entry::hash() const -> Hash
+const string &Browser::Entry::indexName() const
 {
-  if(package) {
-    return make_tuple(package->category()->index()->name(),
-      package->category()->name(), package->name());
-  }
-  else
-    return make_tuple(regEntry.remote, regEntry.category, regEntry.package);
+  return package ? package->category()->index()->name() : regEntry.remote;
+}
+
+const string &Browser::Entry::categoryName() const
+{
+  return package ? package->category()->name() : regEntry.category;
+}
+
+const string &Browser::Entry::packageName() const
+{
+  return package ? package->name() : regEntry.package;
+}
+
+bool Browser::Entry::operator==(const Entry &o) const
+{
+  return indexName() == o.indexName() && categoryName() == o.categoryName() &&
+    packageName() == o.packageName();
 }
