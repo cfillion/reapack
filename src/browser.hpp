@@ -21,13 +21,11 @@
 #include "dialog.hpp"
 
 #include "filter.hpp"
-#include "listview.hpp"
-#include "registry.hpp"
+#include "package.hpp"
 
 #include <boost/optional.hpp>
 #include <functional>
 #include <list>
-#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -35,13 +33,29 @@
 class Index;
 class ListView;
 class Menu;
-class Remote;
 class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;
 
 class Browser : public Dialog {
 public:
+  enum Action {
+    ACTION_VERSION = 80,
+    ACTION_FILTERTYPE,
+    ACTION_LATEST = 300,
+    ACTION_LATEST_ALL,
+    ACTION_REINSTALL,
+    ACTION_REINSTALL_ALL,
+    ACTION_UNINSTALL,
+    ACTION_UNINSTALL_ALL,
+    ACTION_PIN,
+    ACTION_ABOUT_PKG,
+    ACTION_ABOUT_REMOTE,
+    ACTION_RESET_ALL,
+    ACTION_REFRESH,
+    ACTION_MANAGE,
+  };
+
   Browser();
   void refresh(bool stale = false);
   void setFilter(const std::string &);
@@ -54,43 +68,7 @@ protected:
   void onClose() override;
 
 private:
-  enum Flag {
-    UninstalledFlag = 1<<0,
-    InstalledFlag   = 1<<1,
-    OutOfDateFlag   = 1<<2,
-    ObsoleteFlag    = 1<<3,
-  };
-
-  struct Entry {
-    int flags;
-    Registry::Entry regEntry;
-    IndexPtr index;
-    const Package *package;
-    const Version *latest;
-    const Version *current;
-
-    const std::string &indexName() const;
-    const std::string &categoryName() const;
-    const std::string &packageName() const;
-
-    boost::optional<const Version *> target;
-    boost::optional<bool> pin;
-
-    bool test(Flag f) const { return (flags & f) != 0; }
-    bool canPin() const { return target ? *target != nullptr : test(InstalledFlag); }
-    bool operator==(const Entry &o) const;
-  };
-
-  enum Column {
-    StateColumn,
-    NameColumn,
-    CategoryColumn,
-    VersionColumn,
-    AuthorColumn,
-    TypeColumn,
-    RemoteColumn,
-    TimeColumn,
-  };
+  class Entry; // browser_entry.hpp
 
   enum View {
     AllView,
@@ -108,8 +86,6 @@ private:
     Done,
   };
 
-  Entry makeEntry(const Package *, const Registry::Entry &, const IndexPtr &) const;
-
   void onSelection();
   bool fillContextMenu(Menu &, int index);
   void populate(const std::vector<IndexPtr> &);
@@ -118,15 +94,11 @@ private:
   void updateFilter();
   void updateAbout();
   void fillList();
-  std::string getValue(Column, const Entry &entry) const;
-  ListView::Row makeRow(const Entry &) const;
   Entry *getEntry(int);
-  Remote getRemote(const Entry &) const;
   void updateDisplayLabel();
   void displayButton();
   void actionsButton();
   void fillMenu(Menu &);
-  void fillPackageMenu(const Entry *, Menu &);
   bool isFiltered(Package::Type) const;
   bool hasAction(const Entry *) const;
   void setTarget(const int index, const Version *, bool toggle = true);
