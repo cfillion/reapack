@@ -304,15 +304,9 @@ void AboutIndexDelegate::init(About *dialog)
     dialog->menu()->addRow({make_autostring(cat->name())});
 
   dialog->list()->addColumn({AUTO_STR("Package"), 382});
-  dialog->list()->addColumn({AUTO_STR("Version"), 80});
+  dialog->list()->addColumn({AUTO_STR("Version"), 80,
+    0, bind(&AboutIndexDelegate::sortByVersion, this, _1, _2)});
   dialog->list()->addColumn({AUTO_STR("Author"), 90});
-
-  dialog->list()->setSortCallback(1, [&] (const int a, const int b) {
-    auto pkgA = (const Package *)dialog->list()->row(a).userData();
-    auto pkgB = (const Package *)dialog->list()->row(b).userData();
-
-    return pkgA->lastVersion()->name().compare(pkgB->lastVersion()->name());
-  });
 
   initInstalledFiles();
 }
@@ -383,7 +377,7 @@ void AboutIndexDelegate::updateList(const int index)
     const auto_string &author = make_autostring(lastVer->displayAuthor());
 
     ListView::Row row{name, version, author};
-    row.setUserData((void *)pkg);
+    row.userData = (void *)pkg;
     m_dialog->list()->addRow(row);
   }
 }
@@ -397,6 +391,14 @@ bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
   menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG);
 
   return true;
+}
+
+int AboutIndexDelegate::sortByVersion(const int a, const int b) const
+{
+  auto pkgA = (const Package *)m_dialog->list()->row(a).userData;
+  auto pkgB = (const Package *)m_dialog->list()->row(b).userData;
+
+  return pkgA->lastVersion()->name().compare(pkgB->lastVersion()->name());
 }
 
 void AboutIndexDelegate::onCommand(const int id)
@@ -421,7 +423,7 @@ const Package *AboutIndexDelegate::currentPackage() const
   if(index < 0)
     return nullptr;
   else
-    return (const Package *)m_dialog->list()->row(index).userData();
+    return (const Package *)m_dialog->list()->row(index).userData;
 }
 
 void AboutIndexDelegate::findInBrowser()
@@ -533,7 +535,8 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->tabs()->addTab({AUTO_STR("Contents"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
 
-  dialog->menu()->addColumn({AUTO_STR("Version"), 142});
+  dialog->menu()->addColumn({AUTO_STR("Version"), 142,
+    0, bind(&AboutPackageDelegate::sortByVersion, this, _1, _2)});
 
   dialog->list()->addColumn({AUTO_STR("File"), 474});
   dialog->list()->addColumn({AUTO_STR("Action List"), 84});
@@ -545,10 +548,6 @@ void AboutPackageDelegate::init(About *dialog)
     if(m_current == ver->name())
       dialog->menu()->select(index);
   }
-
-  dialog->menu()->setSortCallback(0, [&] (const int a, const int b) {
-    return m_package->version(a)->name().compare(m_package->version(b)->name());
-  });
 
   dialog->menu()->sortByColumn(0, ListView::DescendingOrder);
 
@@ -599,7 +598,7 @@ void AboutPackageDelegate::updateList(const int index)
 
     ListView::Row row{
       make_autostring(src->targetPath().join()), make_autostring(actionList)};
-    row.setUserData((void *)src);
+    row.userData = (void *)src;
     m_dialog->list()->addRow(row);
   }
 }
@@ -609,13 +608,18 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
-  auto src = (const Source *)m_dialog->list()->row(index).userData();
+  auto src = (const Source *)m_dialog->list()->row(index).userData;
 
   menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
   menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
     menu.addAction(AUTO_STR("Locate in explorer/finder"), ACTION_LOCATE));
 
   return true;
+}
+
+int AboutPackageDelegate::sortByVersion(const int a, const int b) const
+{
+  return m_package->version(a)->name().compare(m_package->version(b)->name());
 }
 
 void AboutPackageDelegate::onCommand(const int id)
@@ -640,7 +644,7 @@ const Source *AboutPackageDelegate::currentSource() const
   if(index < 0)
     return nullptr;
   else
-    return (const Source *)m_dialog->list()->row(index).userData();
+    return (const Source *)m_dialog->list()->row(index).userData;
 }
 
 void AboutPackageDelegate::copySourceUrl()

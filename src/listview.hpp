@@ -43,6 +43,7 @@ public:
     auto_string label;
     int width;
     int flags;
+    std::function<int (int, int)> sortCallback;
 
     bool test(ColumnFlag f) const { return (flags & f) != 0; }
   };
@@ -53,16 +54,11 @@ public:
   public:
     using std::vector<auto_string>::vector;
 
-    void setUserData(void *ptr) { m_userData = ptr; }
-    void *userData() const { return m_userData; };
-
-  private:
-    void *m_userData; // TODO: use lParam/LVIF_PARAM?
+    void *userData;
   };
 
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
-  typedef std::function<int (int, int)> SortCallback;
 
   ListView(HWND handle, const Columns & = {});
 
@@ -96,7 +92,6 @@ public:
 
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
-  void setSortCallback(int i, const SortCallback &cb) { m_sortFuncs[i] = cb; }
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
@@ -133,7 +128,6 @@ private:
   std::vector<Row> m_rows;
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
-  std::map<int, SortCallback> m_sortFuncs;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;

@@ -79,19 +79,16 @@ void Browser::onInit()
     {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
     {AUTO_STR("Package"), 345},
     {AUTO_STR("Category"), 105},
-    {AUTO_STR("Version"), 55},
+    {AUTO_STR("Version"), 55, 0, bind(&Browser::sortByVersion, this, _1, _2)},
     {AUTO_STR("Author"), 95},
     {AUTO_STR("Type"), 70},
     {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
-    {AUTO_STR("Last Update"), 105},
+    {AUTO_STR("Last Update"), 105, 0, bind(&Browser::sortByLastUpdate, this, _1, _2)},
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
   m_list->onSelect(bind(&Browser::onSelection, this));
   m_list->onContextMenu(bind(&Browser::fillContextMenu, this, _1, _2));
-
-  m_list->setSortCallback(3, bind(&Browser::sortByVersion, this, _1, _2));
-  m_list->setSortCallback(7, bind(&Browser::sortByLastUpdate, this, _1, _2));
   m_list->sortByColumn(1);
 
   Dialog::onInit();
@@ -686,7 +683,7 @@ void Browser::fillList()
   const vector<int> selectedIndexes = m_list->selection();
   vector<const Entry *> oldSelection(selectedIndexes.size());
   for(size_t i = 0; i < selectedIndexes.size(); i++)
-    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i]).userData();
+    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i]).userData;
 
   m_list->clear();
 
@@ -725,7 +722,7 @@ ListView::Row Browser::makeRow(const Entry &entry) const
     make_autostring(version), make_autostring(author), make_autostring(type),
     make_autostring(remote), make_autostring(date),
   };
-  row.setUserData((void *)&entry);
+  row.userData = (void *)&entry;
   return row;
 }
 
@@ -842,7 +839,7 @@ auto Browser::getEntry(const int index) -> Entry *
   if(index < 0)
     return nullptr;
   else
-    return (Entry *)m_list->row(index).userData();
+    return (Entry *)m_list->row(index).userData;
 }
 
 void Browser::aboutPackage(const int index, const bool focus)

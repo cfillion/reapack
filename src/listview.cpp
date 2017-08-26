@@ -147,16 +147,16 @@ void ListView::sort()
 
     int ret;
 
-    const int column = view->m_sort->column;
-    const auto it = view->m_sortFuncs.find(column);
+    const int columnIndex = view->m_sort->column;
+    const Column &column = view->m_cols[columnIndex];
 
-    if(it != view->m_sortFuncs.end())
-      ret = it->second((int)aRow, (int)bRow);
+    if(column.sortCallback)
+      ret = column.sortCallback((int)aRow, (int)bRow);
     else {
-      auto_string a = view->m_rows[aRow][column];
+      auto_string a = view->m_rows[aRow][columnIndex];
       boost::algorithm::to_lower(a);
 
-      auto_string b = view->m_rows[bRow][column];
+      auto_string b = view->m_rows[bRow][columnIndex];
       boost::algorithm::to_lower(b);
 
       ret = a.compare(b);
@@ -233,7 +233,6 @@ void ListView::reset()
   m_customizable = false;
   m_sort = boost::none;
   m_defaultSort = boost::none;
-  m_sortFuncs.clear();
 }
 
 void ListView::setSelected(const int index, const bool select)
