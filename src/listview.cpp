@@ -254,15 +254,15 @@ int ListView::currentIndex() const
 vector<int> ListView::selection(const bool sort) const
 {
   int index = -1;
-  vector<int> indexes;
+  vector<int> selectedIndexes;
 
   while((index = ListView_GetNextItem(handle(), index, LVNI_SELECTED)) != -1)
-    indexes.push_back(translateBack(index));
+    selectedIndexes.push_back(translateBack(index));
 
   if(sort)
-    std::sort(indexes.begin(), indexes.end());
+    std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
-  return indexes;
+  return selectedIndexes;
 }
 
 int ListView::selectionSize() const
