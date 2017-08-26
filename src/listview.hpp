@@ -48,7 +48,17 @@ public:
   };
 
   typedef std::vector<Column> Columns;
-  typedef std::vector<auto_string> Row;
+
+  class Row : public std::vector<auto_string> {
+  public:
+    using std::vector<auto_string>::vector;
+
+    void setUserData(void *ptr) { m_userData = ptr; }
+    void *userData() const { return m_userData; };
+
+  private:
+    void *m_userData; // TODO: use lParam/LVIF_PARAM?
+  };
 
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;

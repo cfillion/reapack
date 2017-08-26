@@ -587,11 +587,6 @@ void Browser::populate(const vector<IndexPtr> &indexes)
 
     m_currentIndex = -1;
 
-    // Prevent #fillList from trying to restore the selection as
-    // entry indexes may mismatch depending on the new repository contents
-    // thus causing the wrong package to be selected!
-    m_visibleEntries.clear();
-
     for(const IndexPtr &index : indexes) {
       for(const Package *pkg : index->packages())
         m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg), index));
@@ -688,12 +683,10 @@ void Browser::fillList()
 
   const int scroll = m_list->scroll();
 
-  // store the indexes to the selected entries if they still exists
-  // and m_visibleEntries hasn't been emptied
-  const vector<int> selection = m_list->selection();
-  vector<size_t> selected(min(selection.size(), m_visibleEntries.size()));
-  for(size_t i = 0; i < selected.size(); i++)
-    selected[i] = m_visibleEntries[selection[i]];
+  const vector<int> selectedIndexes = m_list->selection();
+  vector<const Entry *> oldSelection(selectedIndexes.size());
+  for(size_t i = 0; i < selectedIndexes.size(); i++)
+    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i]).userData();
 
   m_list->clear();
   m_visibleEntries.clear();
@@ -704,9 +697,12 @@ void Browser::fillList()
     if(!match(entry))
       continue;
 
+    const auto &matchingEntryIt = find_if(oldSelection.begin(), oldSelection.end(),
+      [&entry] (const Entry *oldEntry) { return *oldEntry == entry; });
+
     const int index = m_list->addRow(makeRow(entry));
 
-    if(find(selected.begin(), selected.end(), i) != selected.end())
+    if(matchingEntryIt != oldSelection.end())
       m_list->select(index);
 
     m_visibleEntries.push_back(i);
@@ -729,11 +725,13 @@ ListView::Row Browser::makeRow(const Entry &entry) const
   const string &remote = getValue(RemoteColumn, entry);
   const string &date = getValue(TimeColumn, entry);
 
-  return {
+  ListView::Row row{
     make_autostring(state), make_autostring(name), make_autostring(category),
     make_autostring(version), make_autostring(author), make_autostring(type),
     make_autostring(remote), make_autostring(date),
   };
+  row.setUserData((void *)&entry);
+  return row;
 }
 
 string Browser::getValue(const Column col, const Entry &entry) const
