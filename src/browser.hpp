@@ -111,8 +111,6 @@ private:
   Entry makeEntry(const Package *, const Registry::Entry &, const IndexPtr &) const;
 
   void onSelection();
-  int sortByVersion(int l, int r) const;
-  int sortByLastUpdate(int l, int r) const;
   bool fillContextMenu(Menu &, int index);
   void populate(const std::vector<IndexPtr> &);
   void transferActions();

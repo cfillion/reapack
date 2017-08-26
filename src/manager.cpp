@@ -317,7 +317,7 @@ void Manager::refresh()
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = from_autostring(m_list->row(selection[i])[0]);
+    selected[i] = from_autostring(m_list->row(selection[i])[0].value); // TODO: use data ptr to Remote
 
   m_list->clear();
 
@@ -752,7 +752,7 @@ Remote Manager::getRemote(const int index) const
     return {};
 
   const ListView::Row &row = m_list->row(index);
-  const string &remoteName = from_autostring(row[0]);
+  const string &remoteName = from_autostring(row[0].value);
 
   return g_reapack->config()->remotes.get(remoteName);
 }

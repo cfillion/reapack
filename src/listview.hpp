@@ -39,20 +39,35 @@ public:
     CollapseFlag = 1<<1,
   };
 
+  enum ColumnDataType {
+    NoDataType,
+    VersionType,
+    TimeType,
+  };
+
+  struct Cell {
+    Cell(const auto_char *val, void *ptr = nullptr) : value(val), data(ptr) {}
+    Cell(const auto_string &val, void *ptr = nullptr) : value(val), data(ptr) {}
+
+    auto_string value;
+    void *data;
+  };
+
   struct Column {
     auto_string label;
     int width;
     int flags;
-    std::function<int (int, int)> sortCallback;
+    ColumnDataType dataType;
 
     bool test(ColumnFlag f) const { return (flags & f) != 0; }
+    int compare(const Cell &, const Cell &) const;
   };
 
   typedef std::vector<Column> Columns;
 
-  class Row : public std::vector<auto_string> {
+  class Row : public std::vector<Cell> {
   public:
-    using std::vector<auto_string>::vector;
+    using std::vector<Cell>::vector;
 
     void *userData;
   };

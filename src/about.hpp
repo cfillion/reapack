@@ -113,7 +113,6 @@ private:
   void findInBrowser();
   void aboutPackage();
   void install();
-  int sortByVersion(int, int) const;
 
   IndexPtr m_index;
 
@@ -139,7 +138,6 @@ private:
   const Source *currentSource() const;
   void copySourceUrl();
   void locate();
-  int sortByVersion(int, int) const;
 
   const Package *m_package;
   VersionName m_current;

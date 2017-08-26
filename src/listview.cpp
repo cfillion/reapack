@@ -18,6 +18,8 @@
 #include "listview.hpp"
 
 #include "menu.hpp"
+#include "time.hpp"
+#include "version.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -96,7 +98,7 @@ void ListView::replaceRow(int index, const Row &content, const bool isUserIndex)
     index = translate(index);
 
   for(int i = 0; i < columnCount(); i++) {
-    auto_char *text = const_cast<auto_char *>(content[i].c_str());
+    auto_char *text = const_cast<auto_char *>(content[i].value.c_str());
     ListView_SetItemText(handle(), index, i, text);
   }
 }
@@ -145,22 +147,12 @@ void ListView::sort()
     if(!view->m_sort)
       return indexDiff;
 
-    int ret;
-
     const int columnIndex = view->m_sort->column;
     const Column &column = view->m_cols[columnIndex];
 
-    if(column.sortCallback)
-      ret = column.sortCallback((int)aRow, (int)bRow);
-    else {
-      auto_string a = view->m_rows[aRow][columnIndex];
-      boost::algorithm::to_lower(a);
+    int ret = column.compare(
+      view->m_rows[aRow][columnIndex], view->m_rows[bRow][columnIndex]);
 
-      auto_string b = view->m_rows[bRow][columnIndex];
-      boost::algorithm::to_lower(b);
-
-      ret = a.compare(b);
-    }
 
     if(view->m_sort->order == DescendingOrder)
       ret = -ret;
@@ -547,4 +539,32 @@ void ListView::saveState(Serializer::Data &data) const
 
   for(int i = 0; i < columnCount(); i++)
     data.push_back({order[i], columnWidth(i)});
+}
+
+int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr) const
+{
+  if(dataType) {
+    if(!cl.data)
+      return -1;
+    else if(!cr.data)
+      return 1;
+  }
+
+  switch(dataType) {
+  case NoDataType: {
+    auto_string l = cl.value;
+    boost::algorithm::to_lower(l);
+
+    auto_string r = cr.value;
+    boost::algorithm::to_lower(r);
+
+    return l.compare(r);
+  }
+  case VersionType:
+    return reinterpret_cast<const VersionName *>(cl.data)->compare(
+      *reinterpret_cast<const VersionName *>(cr.data));
+  case TimeType:
+    return reinterpret_cast<const Time *>(cl.data)->compare(
+      *reinterpret_cast<const Time *>(cr.data));
+  }
 }

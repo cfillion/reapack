@@ -79,11 +79,11 @@ void Browser::onInit()
     {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
     {AUTO_STR("Package"), 345},
     {AUTO_STR("Category"), 105},
-    {AUTO_STR("Version"), 55, 0, bind(&Browser::sortByVersion, this, _1, _2)},
+    {AUTO_STR("Version"), 55, 0, ListView::VersionType},
     {AUTO_STR("Author"), 95},
     {AUTO_STR("Type"), 70},
     {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
-    {AUTO_STR("Last Update"), 105, 0, bind(&Browser::sortByLastUpdate, this, _1, _2)},
+    {AUTO_STR("Last Update"), 105, 0, ListView::TimeType},
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
@@ -256,40 +256,6 @@ void Browser::onSelection()
 {
   setEnabled(m_list->hasSelection(), m_actionsBtn);
   startTimer(100, TIMER_ABOUT);
-}
-
-int Browser::sortByVersion(const int ai, const int bi) const
-{
-  const Entry &a = m_entries[ai];
-  const Entry &b = m_entries[bi];
-
-  const VersionName *l = nullptr;
-  const VersionName *r = nullptr;
-
-  if(a.test(InstalledFlag))
-    l = &a.regEntry.version;
-  else
-    l = &a.latest->name();
-
-  if(b.test(InstalledFlag))
-    r = &b.regEntry.version;
-  else
-    r = &b.latest->name();
-
-  return l->compare(*r);
-}
-
-int Browser::sortByLastUpdate(const int ai, const int bi) const
-{
-  const Entry &a = m_entries[ai];
-  const Entry &b = m_entries[bi];
-
-  if(!a.latest)
-    return -1;
-  else if(!b.latest)
-    return 1;
-
-  return a.latest->time().compare(b.latest->time());
 }
 
 bool Browser::fillContextMenu(Menu &menu, const int index)
