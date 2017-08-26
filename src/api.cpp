@@ -17,6 +17,8 @@
 
 #include "api.hpp"
 
+#include <cstdio>
+ 
 #include <reaper_plugin_functions.h>
 
 APIDef::APIDef(const APIFunc *func)

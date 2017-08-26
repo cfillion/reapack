@@ -138,7 +138,7 @@ void ListView::sort()
 {
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
-    const int indexDiff = aRow - bRow;
+    const int indexDiff = (int)(aRow - bRow);
 
     ListView *view = reinterpret_cast<ListView *>(param);
 
