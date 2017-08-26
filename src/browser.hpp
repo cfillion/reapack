@@ -155,7 +155,6 @@ private:
   Filter m_filter;
   boost::optional<Package::Type> m_typeFilter;
   std::vector<Entry> m_entries;
-  std::vector<size_t> m_visibleEntries;
   std::list<Entry *> m_actions;
 
   HWND m_filterHandle;

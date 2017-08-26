@@ -263,8 +263,8 @@ void Browser::onSelection()
 
 int Browser::sortByVersion(const int ai, const int bi) const
 {
-  const Entry &a = m_entries[m_visibleEntries[ai]];
-  const Entry &b = m_entries[m_visibleEntries[bi]];
+  const Entry &a = m_entries[ai];
+  const Entry &b = m_entries[bi];
 
   const VersionName *l = nullptr;
   const VersionName *r = nullptr;
@@ -284,8 +284,8 @@ int Browser::sortByVersion(const int ai, const int bi) const
 
 int Browser::sortByLastUpdate(const int ai, const int bi) const
 {
-  const Entry &a = m_entries[m_visibleEntries[ai]];
-  const Entry &b = m_entries[m_visibleEntries[bi]];
+  const Entry &a = m_entries[ai];
+  const Entry &b = m_entries[bi];
 
   if(!a.latest)
     return -1;
@@ -689,11 +689,8 @@ void Browser::fillList()
     oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i]).userData();
 
   m_list->clear();
-  m_visibleEntries.clear();
 
-  for(size_t i = 0; i < m_entries.size(); i++) {
-    const Entry &entry = m_entries[i];
-
+  for(const Entry &entry : m_entries) {
     if(!match(entry))
       continue;
 
@@ -704,8 +701,6 @@ void Browser::fillList()
 
     if(matchingEntryIt != oldSelection.end())
       m_list->select(index);
-
-    m_visibleEntries.push_back(i);
   }
 
   m_list->setScroll(scroll);
@@ -842,12 +837,12 @@ bool Browser::match(const Entry &entry) const
   return m_filter.match({name, category, author, remote});
 }
 
-auto Browser::getEntry(const int listIndex) -> Entry *
+auto Browser::getEntry(const int index) -> Entry *
 {
-  if(listIndex < 0 || listIndex >= (int)m_visibleEntries.size())
+  if(index < 0)
     return nullptr;
-
-  return &m_entries[m_visibleEntries[listIndex]];
+  else
+    return (Entry *)m_list->row(index).userData();
 }
 
 void Browser::aboutPackage(const int index, const bool focus)
@@ -1007,7 +1002,6 @@ void Browser::updateAction(const int index)
 
   if(currentView() == QueuedView && !hasAction(entry)) {
     m_list->removeRow(index);
-    m_visibleEntries.erase(m_visibleEntries.begin() + index);
     updateDisplayLabel();
   }
   else {
