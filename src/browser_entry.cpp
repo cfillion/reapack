@@ -249,7 +249,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
   auto_char aboutLabel[64];
   const auto_string &name = make_autostring(indexName());
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About %s..."), name.c_str());
+    AUTO_STR("&About %s"), name.c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
 }
 

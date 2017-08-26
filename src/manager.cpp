@@ -242,7 +242,7 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   auto_char aboutLabel[64];
   const auto_string &name = make_autostring(remote.name());
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About %s..."), name.c_str());
+    AUTO_STR("&About %s"), name.c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
   bool allEnabled = true;
