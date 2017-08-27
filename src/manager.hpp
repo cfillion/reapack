@@ -20,13 +20,13 @@
 
 #include "dialog.hpp"
 
-#include "listview.hpp"
-
 #include <boost/logic/tribool.hpp>
 #include <boost/optional.hpp>
 #include <map>
 #include <set>
 
+class ListView;
+class Menu;
 class Remote;
 struct NetworkOpts;
 
@@ -55,10 +55,9 @@ private:
 
   typedef std::function<void (const Remote &, RemoteMods *)> ModsCallback;
 
-  ListView::Row makeRow(const Remote &) const;
-
   Remote getRemote(int index) const;
   bool fillContextMenu(Menu &, int index) const;
+  void updateEnabledCell(int index, const Remote &);
   void setMods(const ModsCallback &, bool updateRow);
   void setRemoteEnabled(bool);
   bool isRemoteEnabled(const Remote &) const;

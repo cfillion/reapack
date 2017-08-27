@@ -72,8 +72,10 @@ int ListView::addColumn(const Column &col)
   return index;
 }
 
-int ListView::addRow(const Row &content)
+int ListView::addRow(const Row &row)
 {
+  assert(row.size() == m_cols.size());
+
   LVITEM item{};
   item.iItem = rowCount();
 
@@ -82,25 +84,25 @@ int ListView::addRow(const Row &content)
 
   ListView_InsertItem(handle(), &item);
 
-  m_rows.resize(item.iItem + 1); // make room for the new row
-  replaceRow(item.iItem, content, false);
+  for(size_t i = 0; i < m_cols.size(); i++)
+    updateCellText(item.iItem, i, row[i]);
+
+  m_rows.push_back(row);
 
   return item.iItem;
 }
 
-void ListView::replaceRow(int index, const Row &content, const bool isUserIndex)
+void ListView::setCell(int row, int index, const Cell &cell)
 {
-  assert(content.size() == m_cols.size());
+  updateCellText(translate(row), index, cell);
 
-  m_rows[index] = content;
+  m_rows[row][index] = cell;
+}
 
-  if(isUserIndex)
-    index = translate(index);
-
-  for(int i = 0; i < columnCount(); i++) {
-    auto_char *text = const_cast<auto_char *>(content[i].value.c_str());
-    ListView_SetItemText(handle(), index, i, text);
-  }
+void ListView::updateCellText(int viewRowIndex, int cellIndex, const Cell &cell)
+{
+  ListView_SetItemText(handle(), viewRowIndex, cellIndex,
+    const_cast<auto_char *>(cell.value.c_str()));
 }
 
 void ListView::removeRow(const int userIndex)

@@ -46,6 +46,7 @@ public:
   };
 
   struct Cell {
+    Cell() : data(nullptr) {}
     Cell(const auto_char *val, void *ptr = nullptr) : value(val), data(ptr) {}
     Cell(const auto_string &val, void *ptr = nullptr) : value(val), data(ptr) {}
 
@@ -77,19 +78,22 @@ public:
 
   ListView(HWND handle, const Columns & = {});
 
-  int addRow(const Row &);
+  int addRow(const Row &row);
   const Row &row(int index) const { return m_rows[index]; }
-  void replaceRow(int index, const Row &, bool isUserIndex = true);
+  void setCell(int row, int index, const Cell &);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
-  bool empty() const { return rowCount() < 1; }
+  bool empty() const { return m_rows.empty(); }
+
   void clear();
   void reset();
+  void autoSizeHeader();
+
   int currentIndex() const;
   int itemUnderMouse() const;
+
   int scroll() const;
   void setScroll(int);
-  void autoSizeHeader();
 
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }
@@ -130,6 +134,7 @@ private:
   };
 
   static int adjustWidth(int);
+  void updateCellText(int viewRowIndex, int cellIndex, const Cell &);
   void setExStyle(int style, bool enable);
   void setSortArrow(bool);
   void handleDoubleClick();

@@ -24,6 +24,7 @@
 #include "errors.hpp"
 #include "filedialog.hpp"
 #include "import.hpp"
+#include "listview.hpp"
 #include "menu.hpp"
 #include "progress.hpp"
 #include "reapack.hpp"
@@ -325,13 +326,24 @@ void Manager::refresh()
     if(m_uninstall.count(remote))
       continue;
 
-    const int index = m_list->addRow(makeRow(remote));
+    ListView::Row row(3, ListView::Cell{});
+    row[0] = make_autostring(remote.name());
+    row[1] = make_autostring(remote.url());
+
+    const int index = m_list->addRow(row);
+    updateEnabledCell(index, remote);
 
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
       m_list->select(index);
   }
 
   m_list->sort();
+}
+
+void Manager::updateEnabledCell(int index, const Remote &remote)
+{
+  m_list->setCell(index, 2, isRemoteEnabled(remote) ?
+    AUTO_STR("Enabled") : AUTO_STR("Disabled"));
 }
 
 void Manager::setMods(const ModsCallback &cb, const bool updateRow)
@@ -362,7 +374,7 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     }
 
     if(updateRow)
-      m_list->replaceRow(index, makeRow(remote));
+      updateEnabledCell(index, remote);
   }
 
   if(updateRow)
@@ -735,15 +747,6 @@ void Manager::reset()
 
   m_changes = 0;
   disable(m_apply);
-}
-
-ListView::Row Manager::makeRow(const Remote &remote) const
-{
-  const auto_string &name = make_autostring(remote.name());
-  const auto_string &url = make_autostring(remote.url());
-
-  return {name, url, isRemoteEnabled(remote) ?
-    AUTO_STR("Enabled") : AUTO_STR("Disabled")};
 }
 
 Remote Manager::getRemote(const int index) const

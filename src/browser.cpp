@@ -745,7 +745,7 @@ void Browser::updateAction(const int index)
     updateDisplayLabel();
   }
   else {
-    m_list->replaceRow(index, entry->makeRow());
+    m_list->setCell(index, 0, entry->displayState());
     m_list->sort(); // TODO: only re-sort if sorted by status column
   }
 
