@@ -18,35 +18,18 @@
 #include "browser.hpp"
 
 #include "about.hpp"
+#include "browser_entry.hpp"
 #include "config.hpp"
 #include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
+#include "listview.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
 
-#include <boost/range/adaptor/reversed.hpp>
-
 using namespace std;
-
-enum Action {
-  ACTION_VERSION = 80,
-  ACTION_FILTERTYPE,
-  ACTION_LATEST = 300,
-  ACTION_LATEST_ALL,
-  ACTION_REINSTALL,
-  ACTION_REINSTALL_ALL,
-  ACTION_UNINSTALL,
-  ACTION_UNINSTALL_ALL,
-  ACTION_PIN,
-  ACTION_ABOUT_PKG,
-  ACTION_ABOUT_REMOTE,
-  ACTION_RESET_ALL,
-  ACTION_REFRESH,
-  ACTION_MANAGE,
-};
 
 enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
@@ -79,19 +62,16 @@ void Browser::onInit()
     {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
     {AUTO_STR("Package"), 345},
     {AUTO_STR("Category"), 105},
-    {AUTO_STR("Version"), 55},
+    {AUTO_STR("Version"), 55, 0, ListView::VersionType},
     {AUTO_STR("Author"), 95},
     {AUTO_STR("Type"), 70},
     {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
-    {AUTO_STR("Last Update"), 105},
+    {AUTO_STR("Last Update"), 105, 0, ListView::TimeType},
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
   m_list->onSelect(bind(&Browser::onSelection, this));
   m_list->onContextMenu(bind(&Browser::fillContextMenu, this, _1, _2));
-
-  m_list->setSortCallback(3, bind(&Browser::sortByVersion, this, _1, _2));
-  m_list->setSortCallback(7, bind(&Browser::sortByLastUpdate, this, _1, _2));
   m_list->sortByColumn(1);
 
   Dialog::onInit();
@@ -231,7 +211,7 @@ bool Browser::onKeyDown(const int key, const int mods)
     vector<string> values;
 
     for(const int index : m_list->selection(false))
-      values.push_back(getValue(NameColumn, *getEntry(index)));
+      values.push_back(getEntry(index)->displayName());
 
     setClipboard(values);
   }
@@ -261,40 +241,6 @@ void Browser::onSelection()
   startTimer(100, TIMER_ABOUT);
 }
 
-int Browser::sortByVersion(const int ai, const int bi) const
-{
-  const Entry &a = m_entries[m_visibleEntries[ai]];
-  const Entry &b = m_entries[m_visibleEntries[bi]];
-
-  const VersionName *l = nullptr;
-  const VersionName *r = nullptr;
-
-  if(a.test(InstalledFlag))
-    l = &a.regEntry.version;
-  else
-    l = &a.latest->name();
-
-  if(b.test(InstalledFlag))
-    r = &b.regEntry.version;
-  else
-    r = &b.latest->name();
-
-  return l->compare(*r);
-}
-
-int Browser::sortByLastUpdate(const int ai, const int bi) const
-{
-  const Entry &a = m_entries[m_visibleEntries[ai]];
-  const Entry &b = m_entries[m_visibleEntries[bi]];
-
-  if(!a.latest)
-    return -1;
-  else if(!b.latest)
-    return 1;
-
-  return a.latest->time().compare(b.latest->time());
-}
-
 bool Browser::fillContextMenu(Menu &menu, const int index)
 {
   m_currentIndex = index;
@@ -322,94 +268,11 @@ void Browser::fillMenu(Menu &menu)
 
     if(entry) {
       Menu pkgMenu = menu.addMenu(AUTO_STR("Package under cursor"));
-      fillPackageMenu(entry, pkgMenu);
+      entry->fillMenu(pkgMenu);
     }
   }
   else if(entry)
-    fillPackageMenu(entry, menu);
-}
-
-void Browser::fillPackageMenu(const Entry *entry, Menu &menu)
-{
-  if(entry->test(InstalledFlag)) {
-    if(entry->test(OutOfDateFlag)) {
-      auto_char installLabel[32];
-      auto_snprintf(installLabel, auto_size(installLabel),
-        AUTO_STR("U&pdate to v%s"),
-        make_autostring(entry->latest->name().toString()).c_str());
-
-      const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
-      if(entry->target && *entry->target == entry->latest)
-        menu.check(actionIndex);
-    }
-
-    auto_char reinstallLabel[32];
-    auto_snprintf(reinstallLabel, auto_size(reinstallLabel),
-      AUTO_STR("&Reinstall v%s"),
-      make_autostring(entry->regEntry.version.toString()).c_str());
-
-    const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
-    if(!entry->current || entry->test(ObsoleteFlag))
-      menu.disable(actionIndex);
-    else if(entry->target && *entry->target == entry->current)
-      menu.check(actionIndex);
-  }
-  else {
-    auto_char installLabel[32];
-    auto_snprintf(installLabel, auto_size(installLabel),
-      AUTO_STR("&Install v%s"),
-      make_autostring(entry->latest->name().toString()).c_str());
-
-    const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
-    if(entry->target && *entry->target == entry->latest)
-      menu.check(actionIndex);
-  }
-
-  Menu versionMenu = menu.addMenu(AUTO_STR("Versions"));
-  const UINT versionMenuIndex = menu.size() - 1;
-  if(entry->test(ObsoleteFlag))
-    menu.disable(versionMenuIndex);
-  else {
-    const auto &versions = entry->package->versions();
-    int verIndex = (int)versions.size();
-    for(const Version *ver : versions | boost::adaptors::reversed) {
-      const UINT actionIndex = versionMenu.addAction(
-        make_autostring(ver->name().toString()).c_str(),
-        --verIndex | (ACTION_VERSION << 8));
-
-      if(entry->target ? *entry->target == ver : ver == entry->current) {
-        if(entry->target && ver != entry->latest)
-          menu.check(versionMenuIndex);
-
-        versionMenu.checkRadio(actionIndex);
-      }
-    }
-  }
-
-  const UINT pinIndex = menu.addAction(
-    AUTO_STR("&Pin current version"), ACTION_PIN);
-  if(!entry->canPin())
-    menu.disable(pinIndex);
-  if(entry->pin.value_or(entry->regEntry.pinned))
-    menu.check(pinIndex);
-
-  const UINT uninstallIndex =
-    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
-  if(!entry->test(InstalledFlag) || getRemote(*entry).isProtected())
-    menu.disable(uninstallIndex);
-  else if(entry->target && *entry->target == nullptr)
-    menu.check(uninstallIndex);
-
-  menu.addSeparator();
-
-  menu.setEnabled(!entry->test(ObsoleteFlag),
-    menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG));
-
-  auto_char aboutLabel[64];
-  const auto_string &name = make_autostring(getValue(RemoteColumn, *entry));
-  auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About %s..."), name.c_str());
-  menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
+    entry->fillMenu(menu);
 }
 
 void Browser::updateDisplayLabel()
@@ -587,19 +450,14 @@ void Browser::populate(const vector<IndexPtr> &indexes)
 
     m_currentIndex = -1;
 
-    // Prevent #fillList from trying to restore the selection as
-    // entry indexes may mismatch depending on the new repository contents
-    // thus causing the wrong package to be selected!
-    m_visibleEntries.clear();
-
     for(const IndexPtr &index : indexes) {
       for(const Package *pkg : index->packages())
-        m_entries.push_back(makeEntry(pkg, reg.getEntry(pkg), index));
+        m_entries.push_back({pkg, reg.getEntry(pkg), index});
 
       // obsolete packages
       for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
         if(!index->find(regEntry.category, regEntry.package))
-          m_entries.push_back({InstalledFlag | ObsoleteFlag, regEntry, index});
+          m_entries.push_back({regEntry, index});
       }
     }
 
@@ -653,154 +511,38 @@ void Browser::transferActions()
     disable(m_applyBtn);
 }
 
-auto Browser::makeEntry(const Package *pkg,
-    const Registry::Entry &regEntry, const IndexPtr &index)
-  const -> Entry
-{
-  const auto &instOpts = g_reapack->config()->install;
-  const Version *latest = pkg->lastVersion(instOpts.bleedingEdge, regEntry.version);
-  const Version *current = nullptr;
-
-  int flags = 0;
-
-  if(regEntry) {
-    flags |= InstalledFlag;
-
-    if(latest && regEntry.version < latest->name())
-      flags |= OutOfDateFlag;
-
-    current = pkg->findVersion(regEntry.version);
-  }
-  else
-    flags |= UninstalledFlag;
-
-  // Show latest pre-release if no stable version is available,
-  // or the newest available version if older than current installed version.
-  if(!latest)
-    latest = pkg->lastVersion(true);
-
-  return {flags, regEntry, index, pkg, latest, current};
-}
-
 void Browser::fillList()
 {
   InhibitControl freeze(m_list);
 
   const int scroll = m_list->scroll();
 
-  // store the indexes to the selected entries if they still exists
-  // and m_visibleEntries hasn't been emptied
-  const vector<int> selection = m_list->selection();
-  vector<size_t> selected(min(selection.size(), m_visibleEntries.size()));
-  for(size_t i = 0; i < selected.size(); i++)
-    selected[i] = m_visibleEntries[selection[i]];
+  const vector<int> selectedIndexes = m_list->selection();
+  vector<const Entry *> oldSelection(selectedIndexes.size());
+  for(size_t i = 0; i < selectedIndexes.size(); i++)
+    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i])->userData;
 
   m_list->clear();
-  m_visibleEntries.clear();
+  m_list->reserveRows(m_entries.size());
 
-  for(size_t i = 0; i < m_entries.size(); i++) {
-    const Entry &entry = m_entries[i];
-
+  for(const Entry &entry : m_entries) {
     if(!match(entry))
       continue;
 
-    const int index = m_list->addRow(makeRow(entry));
+    const auto &matchingEntryIt = find_if(oldSelection.begin(), oldSelection.end(),
+      [&entry] (const Entry *oldEntry) { return *oldEntry == entry; });
 
-    if(find(selected.begin(), selected.end(), i) != selected.end())
-      m_list->select(index);
+    auto row = m_list->createRow((void *)&entry);
+    entry.updateRow(row);
 
-    m_visibleEntries.push_back(i);
+    if(matchingEntryIt != oldSelection.end())
+      m_list->select(row->index());
   }
 
   m_list->setScroll(scroll);
   m_list->sort();
 
   updateDisplayLabel();
-}
-
-ListView::Row Browser::makeRow(const Entry &entry) const
-{
-  const string &state = getValue(StateColumn, entry);
-  const string &name = getValue(NameColumn, entry);
-  const string &category = getValue(CategoryColumn, entry);
-  const string &version = getValue(VersionColumn, entry);
-  const string &author = getValue(AuthorColumn, entry);
-  const string &type = getValue(TypeColumn, entry);
-  const string &remote = getValue(RemoteColumn, entry);
-  const string &date = getValue(TimeColumn, entry);
-
-  return {
-    make_autostring(state), make_autostring(name), make_autostring(category),
-    make_autostring(version), make_autostring(author), make_autostring(type),
-    make_autostring(remote), make_autostring(date),
-  };
-}
-
-string Browser::getValue(const Column col, const Entry &entry) const
-{
-  const Package *pkg = entry.package;
-  const Version *ver = entry.latest;
-  const Registry::Entry &regEntry = entry.regEntry;
-
-  string display;
-
-  switch(col) {
-  case StateColumn: {
-    if(entry.test(ObsoleteFlag))
-      display += 'o';
-    else if(entry.test(OutOfDateFlag))
-      display += 'u';
-    else if(entry.test(InstalledFlag))
-      display += 'i';
-    else
-      display += '\x20';
-
-    if(entry.regEntry.pinned)
-      display += 'p';
-
-    if(entry.target)
-      display += *entry.target == nullptr ? 'R' : 'I';
-    if(entry.pin && entry.canPin())
-      display += 'P';
-
-    return display;
-  }
-  case NameColumn: {
-    if(pkg)
-      return pkg->displayName();
-    else
-      return Package::displayName(regEntry.package, regEntry.description);
-  }
-  case CategoryColumn:
-    return entry.categoryName();
-  case VersionColumn:
-    if(entry.test(InstalledFlag))
-      display = regEntry.version.toString();
-
-    if(ver && (!regEntry || ver->name() > regEntry.version)) {
-      if(!display.empty())
-        display += '\x20';
-
-      display += '(' + ver->name().toString() + ')';
-    }
-
-    return display;
-  case AuthorColumn:
-    return ver ? ver->displayAuthor() : Version::displayAuthor(regEntry.author);
-  case TypeColumn:
-    return pkg ? pkg->displayType() : Package::displayType(regEntry.type);
-  case RemoteColumn:
-    return entry.indexName();
-  case TimeColumn:
-    return ver ? ver->time().toString() : string();
-  }
-
-  return {}; // for MSVC
-}
-
-Remote Browser::getRemote(const Entry &entry) const
-{
-  return g_reapack->remote(getValue(RemoteColumn, entry));
 }
 
 bool Browser::match(const Entry &entry) const
@@ -813,43 +555,36 @@ bool Browser::match(const Entry &entry) const
       return false;
     break;
   case InstalledView:
-    if(!entry.test(InstalledFlag))
+    if(!entry.test(Entry::InstalledFlag))
       return false;
     break;
   case OutOfDateView:
-    if(!entry.test(OutOfDateFlag))
+    if(!entry.test(Entry::OutOfDateFlag))
       return false;
     break;
   case UninstalledView:
-    if(!entry.test(UninstalledFlag))
+    if(!entry.test(Entry::UninstalledFlag))
       return false;
     break;
   case ObsoleteView:
-    if(!entry.test(ObsoleteFlag))
+    if(!entry.test(Entry::ObsoleteFlag))
       return false;
     break;
   }
 
-  const Package::Type type =
-    entry.latest ? entry.package->type() : entry.regEntry.type;
-
-  if(isFiltered(type))
+  if(isFiltered(entry.type()))
     return false;
 
-  const string &name = getValue(NameColumn, entry);
-  const string &category = getValue(CategoryColumn, entry);
-  const string &author = getValue(AuthorColumn, entry);
-  const string &remote = getValue(RemoteColumn, entry);
-
-  return m_filter.match({name, category, author, remote});
+  return m_filter.match({entry.displayName(), entry.categoryName(),
+    entry.displayAuthor(), entry.indexName()});
 }
 
-auto Browser::getEntry(const int listIndex) -> Entry *
+auto Browser::getEntry(const int index) -> Entry *
 {
-  if(listIndex < 0 || listIndex >= (int)m_visibleEntries.size())
+  if(index < 0)
     return nullptr;
-
-  return &m_entries[m_visibleEntries[listIndex]];
+  else
+    return (Entry *)m_list->row(index)->userData;
 }
 
 void Browser::aboutPackage(const int index, const bool focus)
@@ -934,7 +669,7 @@ void Browser::uninstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(entry && entry->test(InstalledFlag) && !getRemote(*entry).isProtected())
+  if(entry && entry->test(Entry::InstalledFlag) && !entry->remote().isProtected())
     setTarget(index, nullptr, toggle);
 }
 
@@ -1009,12 +744,13 @@ void Browser::updateAction(const int index)
 
   if(currentView() == QueuedView && !hasAction(entry)) {
     m_list->removeRow(index);
-    m_visibleEntries.erase(m_visibleEntries.begin() + index);
     updateDisplayLabel();
   }
   else {
-    m_list->replaceRow(index, makeRow(*entry));
-    m_list->sort(); // TODO: only re-sort if sorted by status column
+    m_list->row(index)->setCell(0, make_autostring(entry->displayState()));
+
+    if(m_list->sortColumn() == 0)
+      m_list->sort();
   }
 
   if(m_actions.empty())
@@ -1103,25 +839,4 @@ bool Browser::apply()
   }
 
   return true;
-}
-
-const string &Browser::Entry::indexName() const
-{
-  return package ? package->category()->index()->name() : regEntry.remote;
-}
-
-const string &Browser::Entry::categoryName() const
-{
-  return package ? package->category()->name() : regEntry.category;
-}
-
-const string &Browser::Entry::packageName() const
-{
-  return package ? package->name() : regEntry.package;
-}
-
-bool Browser::Entry::operator==(const Entry &o) const
-{
-  return indexName() == o.indexName() && categoryName() == o.categoryName() &&
-    packageName() == o.packageName();
 }

@@ -18,6 +18,8 @@
 #include "listview.hpp"
 
 #include "menu.hpp"
+#include "time.hpp"
+#include "version.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -70,7 +72,7 @@ int ListView::addColumn(const Column &col)
   return index;
 }
 
-int ListView::addRow(const Row &content)
+auto ListView::createRow(void *data) -> RowPtr
 {
   LVITEM item{};
   item.iItem = rowCount();
@@ -80,25 +82,17 @@ int ListView::addRow(const Row &content)
 
   ListView_InsertItem(handle(), &item);
 
-  m_rows.resize(item.iItem + 1); // make room for the new row
-  replaceRow(item.iItem, content, false);
+  RowPtr row = make_shared<Row>(m_cols.size(), data, this);
+  m_rows.push_back(row);
 
-  return item.iItem;
+  return row;
 }
 
-void ListView::replaceRow(int index, const Row &content, const bool isUserIndex)
+void ListView::updateCell(int row, int cell)
 {
-  assert(content.size() == m_cols.size());
-
-  m_rows[index] = content;
-
-  if(isUserIndex)
-    index = translate(index);
-
-  for(int i = 0; i < columnCount(); i++) {
-    auto_char *text = const_cast<auto_char *>(content[i].c_str());
-    ListView_SetItemText(handle(), index, i, text);
-  }
+  const int viewRowIndex = translate(row);
+  ListView_SetItemText(handle(), viewRowIndex, cell,
+    const_cast<auto_char *>(m_rows[row]->cell(cell).value.c_str()));
 }
 
 void ListView::removeRow(const int userIndex)
@@ -145,22 +139,11 @@ void ListView::sort()
     if(!view->m_sort)
       return indexDiff;
 
-    int ret;
+    const int columnIndex = view->m_sort->column;
+    const Column &column = view->m_cols[columnIndex];
 
-    const int column = view->m_sort->column;
-    const auto it = view->m_sortFuncs.find(column);
-
-    if(it != view->m_sortFuncs.end())
-      ret = it->second((int)aRow, (int)bRow);
-    else {
-      auto_string a = view->m_rows[aRow][column];
-      boost::algorithm::to_lower(a);
-
-      auto_string b = view->m_rows[bRow][column];
-      boost::algorithm::to_lower(b);
-
-      ret = a.compare(b);
-    }
+    int ret = column.compare(view->row(aRow)->cell(columnIndex),
+      view->row(bRow)->cell(columnIndex));
 
     if(view->m_sort->order == DescendingOrder)
       ret = -ret;
@@ -169,6 +152,15 @@ void ListView::sort()
   };
 
   ListView_SortItems(handle(), compare, (LPARAM)this);
+
+  for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
+    LVITEM item{};
+    item.iItem = viewIndex;
+    item.mask |= LVIF_PARAM;
+    ListView_GetItem(handle(), &item);
+
+    row(item.lParam)->viewIndex = viewIndex;
+  }
 }
 
 void ListView::sortByColumn(const int index, const SortOrder order, const bool user)
@@ -233,7 +225,6 @@ void ListView::reset()
   m_customizable = false;
   m_sort = boost::none;
   m_defaultSort = boost::none;
-  m_sortFuncs.clear();
 }
 
 void ListView::setSelected(const int index, const bool select)
@@ -255,15 +246,15 @@ int ListView::currentIndex() const
 vector<int> ListView::selection(const bool sort) const
 {
   int index = -1;
-  vector<int> indexes;
+  vector<int> selectedIndexes;
 
   while((index = ListView_GetNextItem(handle(), index, LVNI_SELECTED)) != -1)
-    indexes.push_back(translateBack(index));
+    selectedIndexes.push_back(translateBack(index));
 
   if(sort)
-    std::sort(indexes.begin(), indexes.end());
+    std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
-  return indexes;
+  return selectedIndexes;
 }
 
 int ListView::selectionSize() const
@@ -408,18 +399,8 @@ int ListView::translate(const int userIndex) const
 {
   if(!m_sort || userIndex < 0)
     return userIndex;
-
-  for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
-    LVITEM item{};
-    item.iItem = viewIndex;
-    item.mask |= LVIF_PARAM;
-    ListView_GetItem(handle(), &item);
-
-    if(item.lParam == userIndex)
-      return viewIndex;
-  }
-
-  return -1;
+  else
+    return row(userIndex)->viewIndex;
 }
 
 int ListView::translateBack(const int internalIndex) const
@@ -548,4 +529,51 @@ void ListView::saveState(Serializer::Data &data) const
 
   for(int i = 0; i < columnCount(); i++)
     data.push_back({order[i], columnWidth(i)});
+}
+
+int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr) const
+{
+  if(dataType) {
+    if(!cl.userData)
+      return -1;
+    else if(!cr.userData)
+      return 1;
+  }
+
+  switch(dataType) {
+  case UserType: { // arbitrary data or no data: sort by visible text
+    auto_string l = cl.value;
+    boost::algorithm::to_lower(l);
+
+    auto_string r = cr.value;
+    boost::algorithm::to_lower(r);
+
+    return l.compare(r);
+  }
+  case VersionType:
+    return reinterpret_cast<const VersionName *>(cl.userData)->compare(
+      *reinterpret_cast<const VersionName *>(cr.userData));
+  case TimeType:
+    return reinterpret_cast<const Time *>(cl.userData)->compare(
+      *reinterpret_cast<const Time *>(cr.userData));
+  default:
+    return 0;
+  }
+
+  return 0; // to make MSVC happy
+}
+
+ListView::Row::Row(const size_t size, void *data, ListView *list)
+  : userData(data), viewIndex(list->rowCount()), m_userIndex(viewIndex),
+  m_list(list), m_cells(new Cell[size])
+{
+}
+
+void ListView::Row::setCell(const int i, const auto_string &val, void *data)
+{
+  Cell &cell = m_cells[i];
+  cell.value = val;
+  cell.userData = data;
+
+  m_list->updateCell(m_userIndex, i);
 }

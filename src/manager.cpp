@@ -24,6 +24,7 @@
 #include "errors.hpp"
 #include "filedialog.hpp"
 #include "import.hpp"
+#include "listview.hpp"
 #include "menu.hpp"
 #include "progress.hpp"
 #include "reapack.hpp"
@@ -242,7 +243,7 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   auto_char aboutLabel[64];
   const auto_string &name = make_autostring(remote.name());
   auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About %s..."), name.c_str());
+    AUTO_STR("&About %s"), name.c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
   bool allEnabled = true;
@@ -317,21 +318,34 @@ void Manager::refresh()
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = from_autostring(m_list->row(selection[i])[0]);
+    selected[i] = from_autostring(m_list->row(selection[i])->cell(0).value); // TODO: use data ptr to Remote
+
+  const auto &remotes = g_reapack->config()->remotes;
 
   m_list->clear();
+  m_list->reserveRows(remotes.size());
 
-  for(const Remote &remote : g_reapack->config()->remotes) {
+  for(const Remote &remote : remotes) {
     if(m_uninstall.count(remote))
       continue;
 
-    const int index = m_list->addRow(makeRow(remote));
+    int c = 0;
+    auto row = m_list->createRow();
+    row->setCell(c++, make_autostring(remote.name()));
+    row->setCell(c++, make_autostring(remote.url()));
+    updateEnabledCell(row->index(), remote);
 
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
-      m_list->select(index);
+      m_list->select(row->index());
   }
 
   m_list->sort();
+}
+
+void Manager::updateEnabledCell(int index, const Remote &remote)
+{
+  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ?
+    AUTO_STR("Enabled") : AUTO_STR("Disabled"));
 }
 
 void Manager::setMods(const ModsCallback &cb, const bool updateRow)
@@ -362,10 +376,10 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     }
 
     if(updateRow)
-      m_list->replaceRow(index, makeRow(remote));
+      updateEnabledCell(index, remote);
   }
 
-  if(updateRow)
+  if(updateRow && m_list->sortColumn() == 2)
     m_list->sort();
 }
 
@@ -737,23 +751,12 @@ void Manager::reset()
   disable(m_apply);
 }
 
-ListView::Row Manager::makeRow(const Remote &remote) const
-{
-  const auto_string &name = make_autostring(remote.name());
-  const auto_string &url = make_autostring(remote.url());
-
-  return {name, url, isRemoteEnabled(remote) ?
-    AUTO_STR("Enabled") : AUTO_STR("Disabled")};
-}
-
 Remote Manager::getRemote(const int index) const
 {
   if(index < 0 || index > m_list->rowCount() - 1)
     return {};
 
-  const ListView::Row &row = m_list->row(index);
-  const string &remoteName = from_autostring(row[0]);
-
+  const string &remoteName = from_autostring(m_list->row(index)->cell(0).value);
   return g_reapack->config()->remotes.get(remoteName);
 }
 

@@ -39,36 +39,79 @@ public:
     CollapseFlag = 1<<1,
   };
 
+  enum ColumnDataType {
+    UserType,
+    VersionType,
+    TimeType,
+  };
+
+  struct Cell {
+    Cell() : userData(nullptr) {}
+    Cell(const Cell &) = delete;
+
+    auto_string value;
+    void *userData;
+  };
+
+  class Row {
+  public:
+    Row(size_t size, void *data, ListView *);
+    Row(const Row &) = delete;
+    ~Row() { delete[] m_cells; }
+
+    void *userData;
+
+    int index() const { return m_userIndex; }
+
+    const Cell &cell(const int i) const { return m_cells[i]; }
+    void setCell(const int i, const auto_string &, void *data = nullptr);
+
+  protected:
+    friend ListView;
+    int viewIndex;
+
+  private:
+    int m_userIndex;
+    ListView *m_list;
+    Cell *m_cells;
+  };
+
+  typedef std::shared_ptr<Row> RowPtr;
+
   struct Column {
     auto_string label;
     int width;
     int flags;
+    ColumnDataType dataType;
 
     bool test(ColumnFlag f) const { return (flags & f) != 0; }
+    int compare(const Cell &, const Cell &) const;
   };
 
   typedef std::vector<Column> Columns;
-  typedef std::vector<auto_string> Row;
 
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
-  typedef std::function<int (int, int)> SortCallback;
 
   ListView(HWND handle, const Columns & = {});
 
-  int addRow(const Row &);
-  const Row &row(int index) const { return m_rows[index]; }
-  void replaceRow(int index, const Row &, bool isUserIndex = true);
+  void reserveRows(size_t count) { m_rows.reserve(count); }
+  RowPtr createRow(void *data = nullptr);
+  const RowPtr &row(size_t index) const { return m_rows[index]; }
+  void updateCell(int row, int cell);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
-  bool empty() const { return rowCount() < 1; }
+  bool empty() const { return m_rows.empty(); }
+
   void clear();
   void reset();
+  void autoSizeHeader();
+
   int currentIndex() const;
   int itemUnderMouse() const;
+
   int scroll() const;
   void setScroll(int);
-  void autoSizeHeader();
 
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }
@@ -86,7 +129,7 @@ public:
 
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
-  void setSortCallback(int i, const SortCallback &cb) { m_sortFuncs[i] = cb; }
+  int sortColumn() const { return m_sort ? m_sort->column : -1; }
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
@@ -120,10 +163,9 @@ private:
 
   bool m_customizable;
   std::vector<Column> m_cols;
-  std::vector<Row> m_rows;
+  std::vector<RowPtr> m_rows;
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
-  std::map<int, SortCallback> m_sortFuncs;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;

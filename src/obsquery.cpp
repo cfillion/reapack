@@ -52,11 +52,13 @@ void ObsoleteQuery::onInit()
     return true;
   });
 
+  m_list->reserveRows(m_entries->size());
+
   for(const Registry::Entry &entry : *m_entries) {
     ostringstream stream;
     stream << entry.remote << '/' << entry.category << '/'
       << Package::displayName(entry.package, entry.description);
-    m_list->addRow({make_autostring(stream.str())});
+    m_list->createRow()->setCell(0, make_autostring(stream.str()));
   }
 
   m_list->autoSizeHeader();

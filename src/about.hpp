@@ -115,7 +115,6 @@ private:
   void install();
 
   IndexPtr m_index;
-  const std::vector<const Package *> *m_packagesData;
 
   About *m_dialog;
 };
@@ -143,7 +142,6 @@ private:
   const Package *m_package;
   VersionName m_current;
   IndexPtr m_index; // keeps the package loaded in memory
-  const std::vector<const Source *> *m_sources;
 
   About *m_dialog;
 };
