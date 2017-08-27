@@ -329,7 +329,7 @@ void Manager::refresh()
     if(m_uninstall.count(remote))
       continue;
 
-    size_t c = 0;
+    int c = 0;
     auto row = m_list->createRow();
     row->setCell(c++, make_autostring(remote.name()));
     row->setCell(c++, make_autostring(remote.url()));

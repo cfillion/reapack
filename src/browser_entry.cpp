@@ -153,7 +153,7 @@ Remote Browser::Entry::remote() const
 
 void Browser::Entry::updateRow(const ListView::RowPtr &row) const
 {
-  size_t c = 0;
+  int c = 0;
   const Time *time = lastUpdate();
 
   row->setCell(c++, make_autostring(displayState()));

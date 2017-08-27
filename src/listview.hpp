@@ -63,8 +63,8 @@ public:
 
     int index() const { return m_userIndex; }
 
-    const Cell &cell(const size_t i) const { return m_cells[i]; }
-    void setCell(const size_t i, const auto_string &, void *data = nullptr);
+    const Cell &cell(const int i) const { return m_cells[i]; }
+    void setCell(const int i, const auto_string &, void *data = nullptr);
 
   protected:
     friend ListView;
@@ -97,7 +97,7 @@ public:
 
   void reserveRows(size_t count) { m_rows.reserve(count); }
   RowPtr createRow(void *data = nullptr);
-  const RowPtr &row(int index) const { return m_rows[index]; }
+  const RowPtr &row(size_t index) const { return m_rows[index]; }
   void updateCell(int row, int cell);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }

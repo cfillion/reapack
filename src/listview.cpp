@@ -569,7 +569,7 @@ ListView::Row::Row(const size_t size, void *data, ListView *list)
 {
 }
 
-void ListView::Row::setCell(const size_t i, const auto_string &val, void *data)
+void ListView::Row::setCell(const int i, const auto_string &val, void *data)
 {
   Cell &cell = m_cells[i];
   cell.value = val;

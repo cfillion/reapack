@@ -373,7 +373,7 @@ void AboutIndexDelegate::updateList(const int index)
   m_dialog->list()->reserveRows(packages->size());
 
   for(const Package *pkg : *packages) {
-    size_t c = 0;
+    int c = 0;
     const Version *lastVer = pkg->lastVersion();
 
     auto row = m_dialog->list()->createRow((void *)pkg);
@@ -591,7 +591,7 @@ void AboutPackageDelegate::updateList(const int index)
     else
       actionList = "No";
 
-    size_t c = 0;
+    int c = 0;
     auto row = m_dialog->list()->createRow((void *)src);
     row->setCell(c++, make_autostring(src->targetPath().join()));
     row->setCell(c++, make_autostring(actionList));

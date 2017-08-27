@@ -747,7 +747,7 @@ void Browser::updateAction(const int index)
     updateDisplayLabel();
   }
   else {
-    m_list->row(index)->setCell(0, entry->displayState());
+    m_list->row(index)->setCell(0, make_autostring(entry->displayState()));
 
     if(m_list->sortColumn() == 0)
       m_list->sort();
