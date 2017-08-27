@@ -53,9 +53,10 @@ current file (README.md) on your computer (aka "this directory").
 2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Apply these patches to WDL:
+    - [optimize-listview-setitemtext](https://github.com/cfillion/WDL/commit/a6d7f802762e5e9d9833829bab83696e0db50de6.patch)
     - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
-    - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
     - [richtext-off](https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch)
+    - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
 4. Run `rake` from this directory
 5. Copy or link `x64/bin/reaper_reapack64.dylib` or `x86/bin/reaper_reapack32.dylib`
    to REAPER's extension directory
