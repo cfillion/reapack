@@ -156,16 +156,18 @@ ListView::Row Browser::Entry::makeRow() const
   const Time *time = lastUpdate();
 
   ListView::Row row;
+  row.reserve(8);
   row.userData = (void *)this;
-  row.push_back(make_autostring(displayState()));
-  row.push_back(make_autostring(displayName()));
-  row.push_back(make_autostring(categoryName()));
-  row.push_back({make_autostring(displayVersion()), (void *)sortVersion()});
-  row.push_back(make_autostring(displayAuthor()));
-  row.push_back(make_autostring(displayType()));
-  row.push_back(make_autostring(indexName()));
-  row.push_back({time ? make_autostring(time->toString()) : auto_string(),
-    (void *)time});
+  row.emplace_back(make_autostring(displayState()));
+  row.emplace_back(make_autostring(displayName()));
+  row.emplace_back(make_autostring(categoryName()));
+  row.emplace_back(ListView::Cell{
+    make_autostring(displayVersion()), (void *)sortVersion()});
+  row.emplace_back(make_autostring(displayAuthor()));
+  row.emplace_back(make_autostring(displayType()));
+  row.emplace_back(make_autostring(indexName()));
+  row.emplace_back(ListView::Cell{time ?
+    make_autostring(time->toString()) : auto_string(), (void *)time});
 
   return row;
 }

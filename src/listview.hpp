@@ -79,6 +79,7 @@ public:
   ListView(HWND handle, const Columns & = {});
 
   int addRow(const Row &row);
+  void reserveRows(size_t count) { m_rows.reserve(count); }
   const Row &row(int index) const { return m_rows[index]; }
   void setCell(int row, int index, const Cell &);
   void removeRow(int index);

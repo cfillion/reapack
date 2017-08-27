@@ -523,6 +523,7 @@ void Browser::fillList()
     oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i]).userData;
 
   m_list->clear();
+  m_list->reserveRows(m_entries.size());
 
   for(const Entry &entry : m_entries) {
     if(!match(entry))

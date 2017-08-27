@@ -298,6 +298,7 @@ void AboutIndexDelegate::init(About *dialog)
 
   dialog->menu()->addColumn({AUTO_STR("Category"), 142});
 
+  dialog->menu()->reserveRows(m_index->categories().size() + 1);
   dialog->menu()->addRow({AUTO_STR("<All Packages>")});
 
   for(const Category *cat : m_index->categories())
@@ -369,6 +370,7 @@ void AboutIndexDelegate::updateList(const int index)
   else
     packages = &m_index->category(catIndex)->packages();
 
+  m_dialog->list()->reserveRows(packages->size());
   for(const Package *pkg : *packages) {
     const Version *lastVer = pkg->lastVersion();
     const auto_string &name = make_autostring(pkg->displayName());
@@ -534,6 +536,7 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->list()->addColumn({AUTO_STR("File"), 474});
   dialog->list()->addColumn({AUTO_STR("Action List"), 84});
 
+  dialog->menu()->reserveRows(m_package->versions().size());
   for(const Version *ver : m_package->versions()) {
     const auto index = dialog->menu()->addRow({
       {make_autostring(ver->name().toString()), (void *)&ver->name()}
@@ -566,6 +569,7 @@ void AboutPackageDelegate::updateList(const int index)
   SetWindowText(m_dialog->getControl(IDC_CHANGELOG),
     make_autostring(stream.str()).c_str());
 
+  m_dialog->list()->reserveRows(ver->sources().size());
   for(const Source *src : ver->sources()) {
     int sections = src->sections();
     string actionList;

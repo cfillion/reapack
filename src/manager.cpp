@@ -320,15 +320,20 @@ void Manager::refresh()
   for(size_t i = 0; i < selection.size(); i++)
     selected[i] = from_autostring(m_list->row(selection[i])[0].value); // TODO: use data ptr to Remote
 
-  m_list->clear();
+  const auto &remotes = g_reapack->config()->remotes;
 
-  for(const Remote &remote : g_reapack->config()->remotes) {
+  m_list->clear();
+  m_list->reserveRows(remotes.size());
+
+  for(const Remote &remote : remotes) {
     if(m_uninstall.count(remote))
       continue;
 
-    ListView::Row row(3, ListView::Cell{});
-    row[0] = make_autostring(remote.name());
-    row[1] = make_autostring(remote.url());
+    ListView::Row row;
+    row.reserve(3);
+    row.emplace_back(make_autostring(remote.name()));
+    row.emplace_back(make_autostring(remote.url()));
+    row.emplace_back(ListView::Cell{});
 
     const int index = m_list->addRow(row);
     updateEnabledCell(index, remote);

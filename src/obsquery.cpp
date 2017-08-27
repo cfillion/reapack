@@ -52,6 +52,8 @@ void ObsoleteQuery::onInit()
     return true;
   });
 
+  m_list->reserveRows(m_entries->size());
+
   for(const Registry::Entry &entry : *m_entries) {
     ostringstream stream;
     stream << entry.remote << '/' << entry.category << '/'
