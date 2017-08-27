@@ -152,6 +152,15 @@ void ListView::sort()
   };
 
   ListView_SortItems(handle(), compare, (LPARAM)this);
+
+  for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
+    LVITEM item{};
+    item.iItem = viewIndex;
+    item.mask |= LVIF_PARAM;
+    ListView_GetItem(handle(), &item);
+
+    row(item.lParam)->viewIndex = viewIndex;
+  }
 }
 
 void ListView::sortByColumn(const int index, const SortOrder order, const bool user)
@@ -390,18 +399,8 @@ int ListView::translate(const int userIndex) const
 {
   if(!m_sort || userIndex < 0)
     return userIndex;
-
-  for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
-    LVITEM item{};
-    item.iItem = viewIndex;
-    item.mask |= LVIF_PARAM;
-    ListView_GetItem(handle(), &item);
-
-    if(item.lParam == userIndex)
-      return viewIndex;
-  }
-
-  return -1;
+  else
+    return row(userIndex)->viewIndex;
 }
 
 int ListView::translateBack(const int internalIndex) const
@@ -565,7 +564,8 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
 }
 
 ListView::Row::Row(const size_t size, void *data, ListView *list)
-  : userData(data), m_cells(new Cell[size]), m_index(list->rowCount()), m_list(list)
+  : userData(data), viewIndex(list->rowCount()), m_userIndex(viewIndex),
+  m_list(list), m_cells(new Cell[size])
 {
 }
 
@@ -575,5 +575,5 @@ void ListView::Row::setCell(const size_t i, const auto_string &val, void *data)
   cell.value = val;
   cell.userData = data;
 
-  m_list->updateCell(m_index, i);
+  m_list->updateCell(m_userIndex, i);
 }

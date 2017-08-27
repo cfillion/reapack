@@ -61,15 +61,19 @@ public:
 
     void *userData;
 
-    int index() const { return m_index; }
+    int index() const { return m_userIndex; }
 
     const Cell &cell(const size_t i) const { return m_cells[i]; }
     void setCell(const size_t i, const auto_string &, void *data = nullptr);
 
+  protected:
+    friend ListView;
+    int viewIndex;
+
   private:
-    Cell *m_cells;
-    int m_index;
+    int m_userIndex;
     ListView *m_list;
+    Cell *m_cells;
   };
 
   typedef std::shared_ptr<Row> RowPtr;
