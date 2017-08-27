@@ -746,7 +746,9 @@ void Browser::updateAction(const int index)
   }
   else {
     m_list->setCell(index, 0, entry->displayState());
-    m_list->sort(); // TODO: only re-sort if sorted by status column
+
+    if(m_list->sortColumn() == 0)
+      m_list->sort();
   }
 
   if(m_actions.empty())

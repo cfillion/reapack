@@ -377,7 +377,7 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
       updateEnabledCell(index, remote);
   }
 
-  if(updateRow)
+  if(updateRow && m_list->sortColumn() == 2)
     m_list->sort();
 }
 

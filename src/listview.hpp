@@ -111,6 +111,7 @@ public:
 
   void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
+  int sortColumn() const { return m_sort ? m_sort->column : -1; }
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
