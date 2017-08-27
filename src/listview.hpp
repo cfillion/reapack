@@ -40,19 +40,39 @@ public:
   };
 
   enum ColumnDataType {
-    NoDataType,
+    UserType,
     VersionType,
     TimeType,
   };
 
   struct Cell {
-    Cell() : data(nullptr) {}
-    Cell(const auto_char *val, void *ptr = nullptr) : value(val), data(ptr) {}
-    Cell(const auto_string &val, void *ptr = nullptr) : value(val), data(ptr) {}
+    Cell() : userData(nullptr) {}
+    Cell(const Cell &) = delete;
 
     auto_string value;
-    void *data;
+    void *userData;
   };
+
+  class Row {
+  public:
+    Row(size_t size, void *data, ListView *);
+    Row(const Row &) = delete;
+    ~Row() { delete[] m_cells; }
+
+    void *userData;
+
+    int index() const { return m_index; }
+
+    const Cell &cell(const size_t i) const { return m_cells[i]; }
+    void setCell(const size_t i, const auto_string &, void *data = nullptr);
+
+  private:
+    Cell *m_cells;
+    int m_index;
+    ListView *m_list;
+  };
+
+  typedef std::shared_ptr<Row> RowPtr;
 
   struct Column {
     auto_string label;
@@ -66,22 +86,15 @@ public:
 
   typedef std::vector<Column> Columns;
 
-  class Row : public std::vector<Cell> {
-  public:
-    using std::vector<Cell>::vector;
-
-    void *userData;
-  };
-
   typedef boost::signals2::signal<void ()> VoidSignal;
   typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
 
   ListView(HWND handle, const Columns & = {});
 
-  int addRow(const Row &row);
   void reserveRows(size_t count) { m_rows.reserve(count); }
-  const Row &row(int index) const { return m_rows[index]; }
-  void setCell(int row, int index, const Cell &);
+  RowPtr createRow(void *data = nullptr);
+  const RowPtr &row(int index) const { return m_rows[index]; }
+  void updateCell(int row, int cell);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
   bool empty() const { return m_rows.empty(); }
@@ -136,7 +149,6 @@ private:
   };
 
   static int adjustWidth(int);
-  void updateCellText(int viewRowIndex, int cellIndex, const Cell &);
   void setExStyle(int style, bool enable);
   void setSortArrow(bool);
   void handleDoubleClick();
@@ -147,7 +159,7 @@ private:
 
   bool m_customizable;
   std::vector<Column> m_cols;
-  std::vector<Row> m_rows;
+  std::vector<RowPtr> m_rows;
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
 

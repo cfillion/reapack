@@ -318,7 +318,7 @@ void Manager::refresh()
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = from_autostring(m_list->row(selection[i])[0].value); // TODO: use data ptr to Remote
+    selected[i] = from_autostring(m_list->row(selection[i])->cell(0).value); // TODO: use data ptr to Remote
 
   const auto &remotes = g_reapack->config()->remotes;
 
@@ -329,17 +329,14 @@ void Manager::refresh()
     if(m_uninstall.count(remote))
       continue;
 
-    ListView::Row row;
-    row.reserve(3);
-    row.emplace_back(make_autostring(remote.name()));
-    row.emplace_back(make_autostring(remote.url()));
-    row.emplace_back(ListView::Cell{});
-
-    const int index = m_list->addRow(row);
-    updateEnabledCell(index, remote);
+    size_t c = 0;
+    auto row = m_list->createRow();
+    row->setCell(c++, make_autostring(remote.name()));
+    row->setCell(c++, make_autostring(remote.url()));
+    updateEnabledCell(row->index(), remote);
 
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
-      m_list->select(index);
+      m_list->select(row->index());
   }
 
   m_list->sort();
@@ -347,7 +344,7 @@ void Manager::refresh()
 
 void Manager::updateEnabledCell(int index, const Remote &remote)
 {
-  m_list->setCell(index, 2, isRemoteEnabled(remote) ?
+  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ?
     AUTO_STR("Enabled") : AUTO_STR("Disabled"));
 }
 
@@ -759,9 +756,7 @@ Remote Manager::getRemote(const int index) const
   if(index < 0 || index > m_list->rowCount() - 1)
     return {};
 
-  const ListView::Row &row = m_list->row(index);
-  const string &remoteName = from_autostring(row[0].value);
-
+  const string &remoteName = from_autostring(m_list->row(index)->cell(0).value);
   return g_reapack->config()->remotes.get(remoteName);
 }
 

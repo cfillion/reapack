@@ -151,25 +151,19 @@ Remote Browser::Entry::remote() const
   return g_reapack->remote(indexName());
 }
 
-ListView::Row Browser::Entry::makeRow() const
+void Browser::Entry::updateRow(const ListView::RowPtr &row) const
 {
+  size_t c = 0;
   const Time *time = lastUpdate();
 
-  ListView::Row row;
-  row.reserve(8);
-  row.userData = (void *)this;
-  row.emplace_back(make_autostring(displayState()));
-  row.emplace_back(make_autostring(displayName()));
-  row.emplace_back(make_autostring(categoryName()));
-  row.emplace_back(ListView::Cell{
-    make_autostring(displayVersion()), (void *)sortVersion()});
-  row.emplace_back(make_autostring(displayAuthor()));
-  row.emplace_back(make_autostring(displayType()));
-  row.emplace_back(make_autostring(indexName()));
-  row.emplace_back(ListView::Cell{time ?
-    make_autostring(time->toString()) : auto_string(), (void *)time});
-
-  return row;
+  row->setCell(c++, make_autostring(displayState()));
+  row->setCell(c++, make_autostring(displayName()));
+  row->setCell(c++, make_autostring(categoryName()));
+  row->setCell(c++, make_autostring(displayVersion()), (void *)sortVersion());
+  row->setCell(c++, make_autostring(displayAuthor()));
+  row->setCell(c++, make_autostring(displayType()));
+  row->setCell(c++, make_autostring(indexName()));
+  row->setCell(c++, time ? make_autostring(time->toString()) : auto_string(), (void *)time);
 }
 
 void Browser::Entry::fillMenu(Menu &menu) const

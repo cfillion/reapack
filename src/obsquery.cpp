@@ -58,7 +58,7 @@ void ObsoleteQuery::onInit()
     ostringstream stream;
     stream << entry.remote << '/' << entry.category << '/'
       << Package::displayName(entry.package, entry.description);
-    m_list->addRow({make_autostring(stream.str())});
+    m_list->createRow()->setCell(0, make_autostring(stream.str()));
   }
 
   m_list->autoSizeHeader();

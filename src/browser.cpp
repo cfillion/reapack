@@ -520,7 +520,7 @@ void Browser::fillList()
   const vector<int> selectedIndexes = m_list->selection();
   vector<const Entry *> oldSelection(selectedIndexes.size());
   for(size_t i = 0; i < selectedIndexes.size(); i++)
-    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i]).userData;
+    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i])->userData;
 
   m_list->clear();
   m_list->reserveRows(m_entries.size());
@@ -532,10 +532,11 @@ void Browser::fillList()
     const auto &matchingEntryIt = find_if(oldSelection.begin(), oldSelection.end(),
       [&entry] (const Entry *oldEntry) { return *oldEntry == entry; });
 
-    const int index = m_list->addRow(entry.makeRow());
+    auto row = m_list->createRow((void *)&entry);
+    entry.updateRow(row);
 
     if(matchingEntryIt != oldSelection.end())
-      m_list->select(index);
+      m_list->select(row->index());
   }
 
   m_list->setScroll(scroll);
@@ -583,7 +584,7 @@ auto Browser::getEntry(const int index) -> Entry *
   if(index < 0)
     return nullptr;
   else
-    return (Entry *)m_list->row(index).userData;
+    return (Entry *)m_list->row(index)->userData;
 }
 
 void Browser::aboutPackage(const int index, const bool focus)
@@ -746,7 +747,7 @@ void Browser::updateAction(const int index)
     updateDisplayLabel();
   }
   else {
-    m_list->setCell(index, 0, entry->displayState());
+    m_list->row(index)->setCell(0, entry->displayState());
 
     if(m_list->sortColumn() == 0)
       m_list->sort();

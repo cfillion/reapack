@@ -299,10 +299,10 @@ void AboutIndexDelegate::init(About *dialog)
   dialog->menu()->addColumn({AUTO_STR("Category"), 142});
 
   dialog->menu()->reserveRows(m_index->categories().size() + 1);
-  dialog->menu()->addRow({AUTO_STR("<All Packages>")});
+  dialog->menu()->createRow()->setCell(0, AUTO_STR("<All Packages>"));
 
   for(const Category *cat : m_index->categories())
-    dialog->menu()->addRow({make_autostring(cat->name())});
+    dialog->menu()->createRow()->setCell(0, make_autostring(cat->name()));
 
   dialog->list()->addColumn({AUTO_STR("Package"), 382});
   dialog->list()->addColumn({AUTO_STR("Version"), 80, 0, ListView::VersionType});
@@ -371,18 +371,15 @@ void AboutIndexDelegate::updateList(const int index)
     packages = &m_index->category(catIndex)->packages();
 
   m_dialog->list()->reserveRows(packages->size());
-  for(const Package *pkg : *packages) {
-    const Version *lastVer = pkg->lastVersion();
-    const auto_string &name = make_autostring(pkg->displayName());
-    const auto_string &version = make_autostring(lastVer->name().toString());
-    const auto_string &author = make_autostring(lastVer->displayAuthor());
 
-    ListView::Row row;
-    row.userData = (void *)pkg;
-    row.push_back(name);
-    row.push_back({version, (void *)&lastVer->name()});
-    row.push_back(author);
-    m_dialog->list()->addRow(row);
+  for(const Package *pkg : *packages) {
+    size_t c = 0;
+    const Version *lastVer = pkg->lastVersion();
+
+    auto row = m_dialog->list()->createRow((void *)pkg);
+    row->setCell(c++, make_autostring(pkg->displayName()));
+    row->setCell(c++, make_autostring(lastVer->name().toString()), (void *)&lastVer->name());
+    row->setCell(c++, make_autostring(lastVer->displayAuthor()));
   }
 }
 
@@ -419,7 +416,7 @@ const Package *AboutIndexDelegate::currentPackage() const
   if(index < 0)
     return nullptr;
   else
-    return (const Package *)m_dialog->list()->row(index).userData;
+    return (const Package *)m_dialog->list()->row(index)->userData;
 }
 
 void AboutIndexDelegate::findInBrowser()
@@ -537,13 +534,13 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->list()->addColumn({AUTO_STR("Action List"), 84});
 
   dialog->menu()->reserveRows(m_package->versions().size());
+
   for(const Version *ver : m_package->versions()) {
-    const auto index = dialog->menu()->addRow({
-      {make_autostring(ver->name().toString()), (void *)&ver->name()}
-    });
+    auto row = dialog->menu()->createRow();
+    row->setCell(0, make_autostring(ver->name().toString()), (void *)&ver->name());
 
     if(m_current == ver->name())
-      dialog->menu()->select(index);
+      dialog->menu()->select(row->index());
   }
 
   dialog->menu()->sortByColumn(0, ListView::DescendingOrder);
@@ -594,10 +591,10 @@ void AboutPackageDelegate::updateList(const int index)
     else
       actionList = "No";
 
-    ListView::Row row{
-      make_autostring(src->targetPath().join()), make_autostring(actionList)};
-    row.userData = (void *)src;
-    m_dialog->list()->addRow(row);
+    size_t c = 0;
+    auto row = m_dialog->list()->createRow((void *)src);
+    row->setCell(c++, make_autostring(src->targetPath().join()));
+    row->setCell(c++, make_autostring(actionList));
   }
 }
 
@@ -606,7 +603,7 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
-  auto src = (const Source *)m_dialog->list()->row(index).userData;
+  auto src = (const Source *)m_dialog->list()->row(index)->userData;
 
   menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
   menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
@@ -637,7 +634,7 @@ const Source *AboutPackageDelegate::currentSource() const
   if(index < 0)
     return nullptr;
   else
-    return (const Source *)m_dialog->list()->row(index).userData;
+    return (const Source *)m_dialog->list()->row(index)->userData;
 }
 
 void AboutPackageDelegate::copySourceUrl()

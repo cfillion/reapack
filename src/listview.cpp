@@ -72,10 +72,8 @@ int ListView::addColumn(const Column &col)
   return index;
 }
 
-int ListView::addRow(const Row &row)
+auto ListView::createRow(void *data) -> RowPtr
 {
-  assert(row.size() == m_cols.size());
-
   LVITEM item{};
   item.iItem = rowCount();
 
@@ -84,25 +82,17 @@ int ListView::addRow(const Row &row)
 
   ListView_InsertItem(handle(), &item);
 
-  for(size_t i = 0; i < m_cols.size(); i++)
-    updateCellText(item.iItem, i, row[i]);
-
+  RowPtr row = make_shared<Row>(m_cols.size(), data, this);
   m_rows.push_back(row);
 
-  return item.iItem;
+  return row;
 }
 
-void ListView::setCell(int row, int index, const Cell &cell)
+void ListView::updateCell(int row, int cell)
 {
-  updateCellText(translate(row), index, cell);
-
-  m_rows[row][index] = cell;
-}
-
-void ListView::updateCellText(int viewRowIndex, int cellIndex, const Cell &cell)
-{
-  ListView_SetItemText(handle(), viewRowIndex, cellIndex,
-    const_cast<auto_char *>(cell.value.c_str()));
+  const int viewRowIndex = translate(row);
+  ListView_SetItemText(handle(), viewRowIndex, cell,
+    const_cast<auto_char *>(m_rows[row]->cell(cell).value.c_str()));
 }
 
 void ListView::removeRow(const int userIndex)
@@ -152,9 +142,8 @@ void ListView::sort()
     const int columnIndex = view->m_sort->column;
     const Column &column = view->m_cols[columnIndex];
 
-    int ret = column.compare(
-      view->m_rows[aRow][columnIndex], view->m_rows[bRow][columnIndex]);
-
+    int ret = column.compare(view->row(aRow)->cell(columnIndex),
+      view->row(bRow)->cell(columnIndex));
 
     if(view->m_sort->order == DescendingOrder)
       ret = -ret;
@@ -546,14 +535,14 @@ void ListView::saveState(Serializer::Data &data) const
 int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr) const
 {
   if(dataType) {
-    if(!cl.data)
+    if(!cl.userData)
       return -1;
-    else if(!cr.data)
+    else if(!cr.userData)
       return 1;
   }
 
   switch(dataType) {
-  case NoDataType: {
+  case UserType: { // arbitrary data or no data: sort by visible text
     auto_string l = cl.value;
     boost::algorithm::to_lower(l);
 
@@ -563,12 +552,28 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
     return l.compare(r);
   }
   case VersionType:
-    return reinterpret_cast<const VersionName *>(cl.data)->compare(
-      *reinterpret_cast<const VersionName *>(cr.data));
+    return reinterpret_cast<const VersionName *>(cl.userData)->compare(
+      *reinterpret_cast<const VersionName *>(cr.userData));
   case TimeType:
-    return reinterpret_cast<const Time *>(cl.data)->compare(
-      *reinterpret_cast<const Time *>(cr.data));
+    return reinterpret_cast<const Time *>(cl.userData)->compare(
+      *reinterpret_cast<const Time *>(cr.userData));
+  default:
+    return 0;
   }
 
   return 0; // to make MSVC happy
+}
+
+ListView::Row::Row(const size_t size, void *data, ListView *list)
+  : userData(data), m_cells(new Cell[size]), m_index(list->rowCount()), m_list(list)
+{
+}
+
+void ListView::Row::setCell(const size_t i, const auto_string &val, void *data)
+{
+  Cell &cell = m_cells[i];
+  cell.value = val;
+  cell.userData = data;
+
+  m_list->updateCell(m_index, i);
 }

@@ -59,7 +59,7 @@ public:
   const Time *lastUpdate() const;
 
   Remote remote() const;
-  ListView::Row makeRow() const;
+  void updateRow(const ListView::RowPtr &) const;
   void fillMenu(Menu &) const;
 
   bool test(Flag f) const { return (m_flags & f) != 0; }
