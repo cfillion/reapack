@@ -517,10 +517,11 @@ void Browser::fillList()
 
   const int scroll = m_list->scroll();
 
-  const vector<int> selectedIndexes = m_list->selection();
-  vector<const Entry *> oldSelection(selectedIndexes.size());
-  for(size_t i = 0; i < selectedIndexes.size(); i++)
-    oldSelection[i] = (Entry *)m_list->row(selectedIndexes[i])->userData;
+  vector<int> selectIndexes = m_list->selection();
+  vector<const Entry *> oldSelection(selectIndexes.size());
+  for(size_t i = 0; i < selectIndexes.size(); i++)
+    oldSelection[i] = (Entry *)m_list->row(selectIndexes[i])->userData;
+  selectIndexes.clear(); // will put new indexes below
 
   m_list->clear();
   m_list->reserveRows(m_entries.size());
@@ -529,18 +530,23 @@ void Browser::fillList()
     if(!match(entry))
       continue;
 
-    const auto &matchingEntryIt = find_if(oldSelection.begin(), oldSelection.end(),
-      [&entry] (const Entry *oldEntry) { return *oldEntry == entry; });
-
     auto row = m_list->createRow((void *)&entry);
     entry.updateRow(row);
 
+    const auto &matchingEntryIt = find_if(oldSelection.begin(), oldSelection.end(),
+      [&entry] (const Entry *oldEntry) { return *oldEntry == entry; });
+
     if(matchingEntryIt != oldSelection.end())
-      m_list->select(row->index());
+      selectIndexes.push_back(row->index());
   }
 
   m_list->setScroll(scroll);
   m_list->sort();
+
+  // restore selection only after having sorted the table
+  // in order to get the same scroll position as before if possible
+  for(const int index : selectIndexes)
+    m_list->select(index);
 
   updateDisplayLabel();
 }
