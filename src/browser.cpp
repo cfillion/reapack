@@ -752,12 +752,8 @@ void Browser::updateAction(const int index)
     m_list->removeRow(index);
     updateDisplayLabel();
   }
-  else {
+  else
     m_list->row(index)->setCell(0, make_autostring(entry->displayState()));
-
-    if(m_list->sortColumn() == 0)
-      m_list->sort();
-  }
 
   if(m_actions.empty())
     disable(m_applyBtn);
@@ -781,6 +777,11 @@ void Browser::selectionDo(const function<void (int)> &func)
       offset++;
     lastSize = newSize;
   }
+
+  // re-sort here rather than doing it once per entry after updating the
+  // status cell in updateAction
+  if(m_list->sortColumn() == 0)
+    m_list->sort();
 }
 
 auto Browser::currentView() const -> View
