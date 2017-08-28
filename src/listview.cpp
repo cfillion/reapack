@@ -556,8 +556,6 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
   case TimeType:
     return reinterpret_cast<const Time *>(cl.userData)->compare(
       *reinterpret_cast<const Time *>(cr.userData));
-  default:
-    return 0;
   }
 
   return 0; // to make MSVC happy
