@@ -20,7 +20,7 @@ TEST_CASE("construct remote", M) {
 
 TEST_CASE("remote name validation", M) {
   SECTION("invalid") {
-    const string invalidNames[] = {
+    const String invalidNames[] = {
       "",
       "ab/cd",
       "ab\\cd",
@@ -40,19 +40,19 @@ TEST_CASE("remote name validation", M) {
       "lpt1",
     };
 
-    for(const string &name : invalidNames) {
+    for(const String &name : invalidNames) {
       try {
         Remote remote(name, "url");
         FAIL("'" + name + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(string(e.what()) == "invalid name");
+        REQUIRE(String(e.what()) == "invalid name");
       }
     }
   }
 
   SECTION("valid") {
-    const string validNames[] = {
+    const String validNames[] = {
       "1234",
       "hello world",
       "hello_world",
@@ -61,7 +61,7 @@ TEST_CASE("remote name validation", M) {
       "Repository #1"
     };
 
-    for(const string &name : validNames) {
+    for(const String &name : validNames) {
       try {
         Remote remote(name, "url");
       }
@@ -74,18 +74,18 @@ TEST_CASE("remote name validation", M) {
 
 TEST_CASE("remote url validation", M) {
   SECTION("invalid") {
-    const string invalidUrls[] = {
+    const String invalidUrls[] = {
       "",
       "hello world", // space should be %20
     };
 
-    for(const string &url : invalidUrls) {
+    for(const String &url : invalidUrls) {
       try {
         Remote remote("hello", url);
         FAIL("'" + url + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(string(e.what()) == "invalid url");
+        REQUIRE(String(e.what()) == "invalid url");
       }
     }
   }
@@ -100,7 +100,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid name");
+      REQUIRE(String(e.what()) == "invalid name");
     }
   }
 
@@ -110,7 +110,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid url");
+      REQUIRE(String(e.what()) == "invalid url");
     }
   }
 }

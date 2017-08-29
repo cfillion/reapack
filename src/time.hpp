@@ -19,7 +19,8 @@
 #define REAPACK_TIME_HPP
 
 #include <ctime>
-#include <string>
+
+class String;
 
 class Time {
 public:
@@ -37,7 +38,7 @@ public:
   int minute() const { return m_tm.tm_min; }
   int second() const { return m_tm.tm_sec; }
 
-  std::string toString() const;
+  String toString() const;
 
   int compare(const Time &) const;
   bool operator<(const Time &o) const { return compare(o) < 0; }

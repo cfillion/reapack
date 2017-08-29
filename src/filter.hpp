@@ -19,21 +19,22 @@
 #define REAPACK_FILTER_HPP
 
 #include <memory>
-#include <string>
 #include <vector>
+
+#include "string.hpp"
 
 class Filter {
 public:
-  Filter(const std::string & = {});
+  Filter(const String & = {});
 
-  const std::string get() const { return m_input; }
-  void set(const std::string &);
+  const String get() const { return m_input; }
+  void set(const String &);
 
-  bool match(std::vector<std::string> rows) const;
+  bool match(std::vector<String> rows) const;
 
-  Filter &operator=(const std::string &f) { set(f); return *this; }
-  bool operator==(const std::string &f) const { return m_input == f; }
-  bool operator!=(const std::string &f) const { return !(*this == f); }
+  Filter &operator=(const String &f) { set(f); return *this; }
+  bool operator==(const String &f) const { return m_input == f; }
+  bool operator!=(const String &f) const { return !(*this == f); }
 
 private:
   class Node {
@@ -48,7 +49,7 @@ private:
 
     Node(int flags) : m_flags(flags) {}
 
-    virtual bool match(const std::vector<std::string> &) const = 0;
+    virtual bool match(const std::vector<String> &) const = 0;
     bool test(Flag f) const { return (m_flags & f) != 0; }
 
   private:
@@ -66,8 +67,8 @@ private:
 
     Group(Type type, int flags = 0, Group *parent = nullptr);
     void clear() { m_nodes.clear(); }
-    Group *push(std::string, int *flags);
-    bool match(const std::vector<std::string> &) const override;
+    Group *push(String, int *flags);
+    bool match(const std::vector<String> &) const override;
 
   private:
     void push(const NodePtr &);
@@ -80,15 +81,15 @@ private:
 
   class Token : public Node {
   public:
-    Token(const std::string &buf, int flags);
-    bool match(const std::vector<std::string> &) const override;
-    bool matchRow(const std::string &) const;
+    Token(const String &buf, int flags);
+    bool match(const std::vector<String> &) const override;
+    bool matchRow(const String &) const;
 
   private:
-    std::string m_buf;
+    String m_buf;
   };
 
-  std::string m_input;
+  String m_input;
   Group m_root;
 };
 

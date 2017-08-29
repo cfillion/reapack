@@ -22,17 +22,15 @@
 #include <cinttypes>
 #include <sqlite3.h>
 
-using namespace std;
-
-Database::Database(const string &filename)
+Database::Database(const String &filename)
   : m_savePoint(0)
 {
-  const char *file = ":memory:";
+  std::string utf8file(":memory:");
 
   if(!filename.empty())
-    file = filename.c_str();
+    utf8file = move(filename.toUtf8());
 
-  if(sqlite3_open(file, &m_db)) {
+  if(sqlite3_open(utf8file.c_str(), &m_db)) {
     const auto &error = lastError();
     sqlite3_close(m_db);
 
@@ -150,9 +148,9 @@ Statement::~Statement()
   sqlite3_finalize(m_stmt);
 }
 
-void Statement::bind(const int index, const string &text)
+void Statement::bind(const int index, const String &text)
 {
-  if(sqlite3_bind_text(m_stmt, index, text.c_str(), -1, SQLITE_TRANSIENT))
+  if(sqlite3_bind_text(m_stmt, index, text.toUtf8().c_str(), -1, SQLITE_TRANSIENT))
     throw m_db->lastError();
 }
 
@@ -191,7 +189,7 @@ int64_t Statement::intColumn(const int index) const
   return sqlite3_column_int64(m_stmt, index);
 }
 
-string Statement::stringColumn(const int index) const
+String Statement::stringColumn(const int index) const
 {
   char *col = (char *)sqlite3_column_text(m_stmt, index);
 

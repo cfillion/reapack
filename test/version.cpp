@@ -54,7 +54,7 @@ TEST_CASE("parse valid versions", M) {
 
 TEST_CASE("parse invalid versions", M) {
   VersionName ver;
-  string name;
+  String name;
 
   SECTION("only letters")
     name = "hello";
@@ -67,10 +67,10 @@ TEST_CASE("parse invalid versions", M) {
 
   try {
     ver.parse(name);
-    FAIL(string("'") + name + "' was accepted");
+    FAIL(String("'") + name + "' was accepted");
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == string("invalid version name '") + name + "'");
+    REQUIRE(String(e.what()) == String("invalid version name '") + name + "'");
   }
 
   REQUIRE(ver.toString().empty());
@@ -90,7 +90,7 @@ TEST_CASE("parse version failsafe", M) {
   SECTION("invalid") {
     REQUIRE_FALSE(ver.tryParse("hello"));
 
-    string error;
+    String error;
     REQUIRE_FALSE(ver.tryParse("world", &error));
 
     REQUIRE(ver.toString().empty());
@@ -118,7 +118,7 @@ TEST_CASE("version segment overflow", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "version segment overflow in '9999999999999999999999'");
+    REQUIRE(String(e.what()) == "version segment overflow in '9999999999999999999999'");
   }
 }
 
@@ -230,7 +230,7 @@ TEST_CASE("add owned source", M) {
   }
   catch(const reapack_error &e) {
     delete src;
-    REQUIRE(string(e.what()) == "source belongs to another version");
+    REQUIRE(String(e.what()) == "source belongs to another version");
   }
 }
 

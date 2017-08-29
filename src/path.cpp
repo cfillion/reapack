@@ -29,8 +29,8 @@ static const char SEPARATOR = '/';
 static const char SEPARATOR = '\\';
 #endif
 
-static const string DOT = ".";
-static const string DOTDOT = "..";
+static const String DOT = ".";
+static const String DOTDOT = "..";
 
 const Path Path::DATA = Path("ReaPack");
 const Path Path::CACHE = Path::DATA + "cache";
@@ -39,9 +39,9 @@ const Path Path::REGISTRY = Path::DATA + "registry.db";
 
 Path Path::s_root;
 
-static vector<string> Split(const string &input, bool *absolute)
+static vector<String> Split(const String &input, bool *absolute)
 {
-  vector<string> list;
+  vector<String> list;
 
   size_t last = 0, size = input.size();
 
@@ -58,7 +58,7 @@ static vector<string> Split(const string &input, bool *absolute)
       continue;
     }
 
-    const string part = input.substr(last, pos - last);
+    const String &part = input.substr(last, pos - last);
 
     if(!part.empty() && part != ".")
       list.push_back(part);
@@ -69,12 +69,12 @@ static vector<string> Split(const string &input, bool *absolute)
   return list;
 }
 
-Path::Path(const string &path) : m_absolute(false)
+Path::Path(const String &path) : m_absolute(false)
 {
   append(path);
 }
 
-void Path::append(const string &input, const bool traversal)
+void Path::append(const String &input, const bool traversal)
 {
   if(input.empty())
     return;
@@ -85,7 +85,7 @@ void Path::append(const string &input, const bool traversal)
   if(m_parts.empty() && absolute)
     m_absolute = true;
 
-  for(const string &part : parts) {
+  for(const String &part : parts) {
     if(part == DOTDOT) {
       if(traversal)
         removeLast();
@@ -130,7 +130,7 @@ void Path::removeLast()
     m_parts.pop_back();
 }
 
-string Path::basename() const
+String Path::basename() const
 {
   if(empty())
     return {};
@@ -148,11 +148,11 @@ Path Path::dirname() const
   return dir;
 }
 
-string Path::join(const char sep) const
+String Path::join(const char sep) const
 {
-  string path;
+  String path;
 
-  for(const string &part : m_parts) {
+  for(const String &part : m_parts) {
     if(!path.empty() || m_absolute)
       path += sep ? sep : SEPARATOR;
 
@@ -162,7 +162,7 @@ string Path::join(const char sep) const
   return path;
 }
 
-string Path::first() const
+String Path::first() const
 {
   if(empty())
     return {};
@@ -170,7 +170,7 @@ string Path::first() const
   return m_parts.front();
 }
 
-string Path::last() const
+String Path::last() const
 {
   if(empty())
     return {};
@@ -206,7 +206,7 @@ bool Path::operator<(const Path &o) const
   return m_parts < o.m_parts;
 }
 
-Path Path::operator+(const string &part) const
+Path Path::operator+(const String &part) const
 {
   Path path(*this);
   path.append(part);
@@ -222,7 +222,7 @@ Path Path::operator+(const Path &o) const
   return path;
 }
 
-const Path &Path::operator+=(const string &parts)
+const Path &Path::operator+=(const String &parts)
 {
   append(parts);
   return *this;
@@ -234,7 +234,7 @@ const Path &Path::operator+=(const Path &o)
   return *this;
 }
 
-const string &Path::at(const size_t index) const
+const String &Path::at(const size_t index) const
 {
   auto it = m_parts.begin();
   advance(it, index);
@@ -242,17 +242,17 @@ const string &Path::at(const size_t index) const
   return *it;
 }
 
-string &Path::operator[](const size_t index)
+String &Path::operator[](const size_t index)
 {
-  return const_cast<string &>(at(index));
+  return const_cast<String &>(at(index));
 }
 
-const string &Path::operator[](const size_t index) const
+const String &Path::operator[](const size_t index) const
 {
   return at(index);
 }
 
-UseRootPath::UseRootPath(const string &path)
+UseRootPath::UseRootPath(const String &path)
   : m_backup(move(Path::s_root))
 {
   Path::s_root = path;

@@ -19,10 +19,11 @@
 #define REAPACK_METADATA_HPP
 
 #include <map>
-#include <string>
 #include <vector>
 
-struct Link { std::string name; std::string url; };
+#include "string.hpp"
+
+struct Link { String name; String url; };
 
 class Metadata {
 public:
@@ -34,13 +35,13 @@ public:
 
   static LinkType getLinkType(const char *rel);
 
-  void setAbout(const std::string &rtf) { m_about = rtf; }
-  const std::string &about() const { return m_about; }
+  void setAbout(const String &rtf) { m_about = rtf; }
+  const String &about() const { return m_about; }
   void addLink(const LinkType, const Link &);
   const auto &links() const { return m_links; }
 
 private:
-  std::string m_about;
+  String m_about;
   std::multimap<LinkType, Link> m_links;
 };
 

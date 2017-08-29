@@ -24,7 +24,7 @@
 #include <swell/swell.h>
 #endif
 
-#include "encoding.hpp"
+#include "string.hpp"
 
 class Menu {
 public:
@@ -34,9 +34,9 @@ public:
   UINT size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  UINT addAction(const auto_char *label, int commandId);
+  UINT addAction(const Char *label, int commandId);
   void addSeparator();
-  Menu addMenu(const auto_char *label);
+  Menu addMenu(const Char *label);
 
   int show(int x, int y, HWND parent) const;
   int show(HWND control, HWND parent) const;

@@ -55,7 +55,7 @@ public:
 
   void start(); // start a new thread
   void exec();  // runs in the current thread
-  const std::string &summary() const { return m_summary; }
+  const String &summary() const { return m_summary; }
   void setState(State);
   State state() const { return m_state; }
   void setError(const ErrorInfo &err) { m_error = err; }
@@ -71,10 +71,10 @@ public:
 protected:
   virtual bool run() = 0;
 
-  void setSummary(const std::string &s) { m_summary = s; }
+  void setSummary(const String &s) { m_summary = s; }
 
 private:
-  std::string m_summary;
+  String m_summary;
   State m_state;
   ErrorInfo m_error;
   std::atomic_bool m_abort;

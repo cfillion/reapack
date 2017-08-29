@@ -35,13 +35,13 @@ DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
 R"(Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.)",
 {
   VersionName a, b;
-  string error;
+  String error;
 
   b.tryParse(ver2, &error);
   a.tryParse(ver1, &error);
 
   if(errorOut)
-    snprintf(errorOut, errorOut_sz, "%s", error.c_str());
+    snprintf(errorOut, errorOut_sz, "%s", error.toUtf8().c_str());
 
   return a.compare(b);
 });

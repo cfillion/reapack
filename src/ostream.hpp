@@ -18,7 +18,7 @@
 #ifndef REAPACK_OSTREAM_HPP
 #define REAPACK_OSTREAM_HPP
 
-#include <sstream>
+#include "string.hpp"
 
 class Version;
 
@@ -26,10 +26,10 @@ class OutputStream {
 public:
   OutputStream();
 
-  std::ostringstream::pos_type tellp() { return m_stream.tellp(); }
-  std::string str() const { return m_stream.str(); }
+  StringStreamO::pos_type tellp() { return m_stream.tellp(); }
+  String str() const { return m_stream.str(); }
 
-  void indented(const std::string &);
+  void indented(const String &);
 
   template<typename T>
   OutputStream &operator<<(T t) { m_stream << t; return *this; }

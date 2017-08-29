@@ -19,7 +19,6 @@
 #define REAPACK_RECEIPT_HPP
 
 #include <set>
-#include <string>
 #include <unordered_set>
 #include <vector>
 

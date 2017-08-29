@@ -21,20 +21,20 @@
 
 using namespace std;
 
-Filter::Filter(const string &input)
+Filter::Filter(const String &input)
   : m_root(Group::MatchAll)
 {
   set(input);
 }
 
-void Filter::set(const string &input)
+void Filter::set(const String &input)
 {
   enum State { Default, DoubleQuote, SingleQuote };
 
   m_input = input;
   m_root.clear();
 
-  string buf;
+  String buf;
   int flags = 0;
   State state = Default;
   Group *group = &m_root;
@@ -66,7 +66,7 @@ void Filter::set(const string &input)
   group->push(buf, &flags);
 }
 
-bool Filter::match(vector<string> rows) const
+bool Filter::match(vector<String> rows) const
 {
   for_each(rows.begin(), rows.end(), [](string &str) { boost::to_lower(str); });
   return m_root.match(rows);
@@ -77,7 +77,7 @@ Filter::Group::Group(Type type, int flags, Group *parent)
 {
 }
 
-Filter::Group *Filter::Group::push(string buf, int *flags)
+Filter::Group *Filter::Group::push(String buf, int *flags)
 {
   if(buf.empty())
     return this;
@@ -145,7 +145,7 @@ void Filter::Group::push(const NodePtr &node)
     m_open = false;
 }
 
-bool Filter::Group::match(const vector<string> &rows) const
+bool Filter::Group::match(const vector<String> &rows) const
 {
   for(const NodePtr &node : m_nodes) {
     if(node->match(rows)) {
@@ -159,18 +159,18 @@ bool Filter::Group::match(const vector<string> &rows) const
   return m_type == MatchAll && !test(NotFlag);
 }
 
-Filter::Token::Token(const string &buf, int flags)
+Filter::Token::Token(const String &buf, int flags)
   : Node(flags), m_buf(buf)
 {
   boost::to_lower(m_buf);
 }
 
-bool Filter::Token::match(const vector<string> &rows) const
+bool Filter::Token::match(const vector<String> &rows) const
 {
   const bool isNot = test(NotFlag);
   bool match = false;
 
-  for(const string &row : rows) {
+  for(const String &row : rows) {
     if(matchRow(row) ^ isNot)
       match = true;
     else if(isNot)
@@ -180,11 +180,11 @@ bool Filter::Token::match(const vector<string> &rows) const
   return match;
 }
 
-bool Filter::Token::matchRow(const string &str) const
+bool Filter::Token::matchRow(const String &str) const
 {
   const size_t pos = str.find(m_buf);
 
-  if(pos == string::npos)
+  if(pos == String::npos)
     return false;
 
   const bool isStart = pos == 0, isEnd = pos + m_buf.size() == str.size();

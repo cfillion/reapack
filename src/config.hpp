@@ -18,17 +18,15 @@
 #ifndef REAPACK_CONFIG_HPP
 #define REAPACK_CONFIG_HPP
 
-#include <string>
-
-#include "encoding.hpp"
+#include "string.hpp"
 #include "remote.hpp"
 
 class Path;
 
 struct WindowState {
-  std::string about;
-  std::string browser;
-  std::string manager;
+  String about;
+  String browser;
+  String manager;
 };
 
 struct InstallOpts {
@@ -43,7 +41,7 @@ struct NetworkOpts {
     OneWeekThreshold = 7 * 24 * 3600,
   };
 
-  std::string proxy;
+  String proxy;
   bool verifyPeer;
   time_t staleThreshold;
 };
@@ -67,24 +65,24 @@ public:
   RemoteList remotes;
 
 private:
-  std::string getString(const auto_char *grp,
-    const auto_string &key, const std::string &fallback = {}) const;
-  void setString(const auto_char *grp,
-    const auto_string &key, const std::string &val) const;
+  String getString(const Char *grp,
+    const String &key, const String &fallback = {}) const;
+  void setString(const Char *grp,
+    const String &key, const String &val) const;
 
-  bool getBool(const auto_char *grp,
-    const auto_string &key, bool fallback = false) const;
-  unsigned int getUInt(const auto_char *grp,
-    const auto_string &key, unsigned int fallback = 0) const;
-  void setUInt(const auto_char *, const auto_string &, unsigned int) const;
+  bool getBool(const Char *grp,
+    const String &key, bool fallback = false) const;
+  unsigned int getUInt(const Char *grp,
+    const String &key, unsigned int fallback = 0) const;
+  void setUInt(const Char *, const String &, unsigned int) const;
 
-  void deleteKey(const auto_char *, const auto_string &) const;
-  void cleanupArray(const auto_char *, const auto_string &,
+  void deleteKey(const Char *, const String &) const;
+  void cleanupArray(const Char *, const String &,
     unsigned int begin, unsigned int end) const;
 
   void migrate();
 
-  auto_string m_path;
+  String m_path;
   bool m_isFirstRun;
   unsigned int m_version;
 

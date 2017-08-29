@@ -46,16 +46,16 @@ public:
   boost::optional<const Version *> target;
   boost::optional<bool> pin;
 
-  std::string displayState() const;
-  const std::string &indexName() const;
-  const std::string &categoryName() const;
-  const std::string &packageName() const;
-  std::string displayName() const;
+  String displayState() const;
+  const String &indexName() const;
+  const String &categoryName() const;
+  const String &packageName() const;
+  String displayName() const;
   Package::Type type() const;
-  std::string displayType() const;
-  std::string displayVersion() const;
+  String displayType() const;
+  String displayVersion() const;
   const VersionName *sortVersion() const;
-  std::string displayAuthor() const;
+  String displayAuthor() const;
   const Time *lastUpdate() const;
 
   Remote remote() const;

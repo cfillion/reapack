@@ -40,21 +40,20 @@ public:
   };
 
   static Type getType(const char *);
-  static std::string displayType(Type);
-  static const std::string &displayName(const std::string &name,
-    const std::string &desc);
+  static String displayType(Type);
+  static const String &displayName(const String &name, const String &desc);
 
-  Package(const Type, const std::string &name, const Category *);
+  Package(const Type, const String &name, const Category *);
   ~Package();
 
   const Category *category() const { return m_category; }
   Type type() const { return m_type; }
-  std::string displayType() const { return displayType(m_type); }
-  const std::string &name() const { return m_name; }
-  std::string fullName() const;
-  void setDescription(const std::string &d) { m_desc = d; }
-  const std::string &description() const { return m_desc; }
-  const std::string &displayName() const
+  String displayType() const { return displayType(m_type); }
+  const String &name() const { return m_name; }
+  String fullName() const;
+  void setDescription(const String &d) { m_desc = d; }
+  const String &description() const { return m_desc; }
+  const String &displayName() const
     { return displayName(m_name, m_desc); }
 
   Metadata *metadata() { return &m_metadata; }
@@ -78,8 +77,8 @@ private:
   const Category *m_category;
 
   Type m_type;
-  std::string m_name;
-  std::string m_desc;
+  String m_name;
+  String m_desc;
   Metadata m_metadata;
   std::set<const Version *, CompareVersion> m_versions;
 

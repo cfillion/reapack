@@ -99,7 +99,7 @@ TEST_CASE("get file list", M) {
 TEST_CASE("query all packages", M) {
   MAKE_PACKAGE
 
-  const string remote = "Remote Name";
+  const String remote = "Remote Name";
 
   Registry reg;
   REQUIRE(reg.getEntries(remote).empty());

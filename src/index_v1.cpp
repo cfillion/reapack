@@ -19,7 +19,6 @@
 
 #include "errors.hpp"
 
-#include <sstream>
 #include <WDL/tinyxml/tinyxml.h>
 
 using namespace std;

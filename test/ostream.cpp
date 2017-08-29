@@ -2,6 +2,7 @@
 
 #include <ostream.hpp>
 
+#include <string.hpp>
 #include <version.hpp>
 
 static const char *M = "[ostream]";

@@ -19,7 +19,7 @@ TEST_CASE("index file not found", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "No such file or directory");
+    REQUIRE(String(e.what()) == "No such file or directory");
   }
 }
 
@@ -34,7 +34,7 @@ TEST_CASE("load index from raw data", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "Error reading end tag.");
+      REQUIRE(String(e.what()) == "Error reading end tag.");
     }
   }
 }
@@ -47,7 +47,7 @@ TEST_CASE("broken index", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "Error reading end tag.");
+    REQUIRE(String(e.what()) == "Error reading end tag.");
   }
 }
 
@@ -59,7 +59,7 @@ TEST_CASE("wrong root tag name", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid index");
+    REQUIRE(String(e.what()) == "invalid index");
   }
 }
 
@@ -71,7 +71,7 @@ TEST_CASE("invalid version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "index version not found");
+    REQUIRE(String(e.what()) == "index version not found");
   }
 }
 
@@ -83,7 +83,7 @@ TEST_CASE("future version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "index version is unsupported");
+    REQUIRE(String(e.what()) == "index version is unsupported");
   }
 }
 
@@ -120,7 +120,7 @@ TEST_CASE("add owned category", M) {
   }
   catch(const reapack_error &e) {
     delete cat;
-    REQUIRE(string(e.what()) == "category belongs to another index");
+    REQUIRE(String(e.what()) == "category belongs to another index");
   }
 }
 
@@ -161,7 +161,7 @@ TEST_CASE("add owned package", M) {
   }
   catch(const reapack_error &e) {
     delete pack;
-    REQUIRE(string(e.what()) == "package belongs to another category");
+    REQUIRE(String(e.what()) == "package belongs to another category");
   }
 }
 
@@ -181,11 +181,11 @@ TEST_CASE("drop unknown package", M) {
 
 TEST_CASE("empty category name", M) {
   try {
-    Category cat{string(), nullptr};
+    Category cat{{}, nullptr};
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty category name");
+    REQUIRE(String(e.what()) == "empty category name");
   }
 }
 
@@ -209,7 +209,7 @@ TEST_CASE("set index name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "index name is already set");
+      REQUIRE(String(e.what()) == "index name is already set");
     }
     REQUIRE(ri.name() == "hello");
   }

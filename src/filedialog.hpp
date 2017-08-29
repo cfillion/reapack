@@ -18,7 +18,7 @@
 #ifndef REAPACK_FILEBROWSE_HPP
 #define REAPACK_FILEBROWSE_HPP
 
-#include "encoding.hpp"
+#include "string.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -29,10 +29,10 @@
 class Path;
 
 namespace FileDialog {
-  auto_string getOpenFileName(HWND, HINSTANCE, const auto_char *title,
-    const Path &directory, const auto_char *filters, const auto_char *defext);
-  auto_string getSaveFileName(HWND, HINSTANCE, const auto_char *title,
-    const Path &directory, const auto_char *filters, const auto_char *defext);
+  String getOpenFileName(HWND, HINSTANCE, const Char *title,
+    const Path &directory, const Char *filters, const Char *defext);
+  String getSaveFileName(HWND, HINSTANCE, const Char *title,
+    const Path &directory, const Char *filters, const Char *defext);
 };
 
 #endif

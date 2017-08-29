@@ -37,7 +37,7 @@ void Progress::onInit()
   m_label = getControl(IDC_LABEL);
   m_progress = GetDlgItem(handle(), IDC_PROGRESS);
 
-  SetWindowText(m_label, AUTO_STR("Initializing..."));
+  SetWindowText(m_label, AUTOSTR("Initializing..."));
 }
 
 void Progress::onCommand(const int id, int)
@@ -68,7 +68,7 @@ void Progress::addTask(ThreadTask *task)
     startTimer(100);
 
   task->onStart([=] {
-    m_current = make_autostring(task->summary());
+    m_current = task->summary();
     updateProgress();
   });
 
@@ -80,21 +80,21 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  auto_char position[32];
-  auto_snprintf(position, auto_size(position), AUTO_STR("%d of %d"),
+  Char position[32];
+  snprintf(position, lengthof(position), AUTOSTR("%d of %d"),
     min(m_done + 1, m_total), m_total);
 
-  auto_char label[1024];
-  auto_snprintf(label, auto_size(label), m_current.c_str(), position);
+  Char label[1024];
+  snprintf(label, lengthof(label), m_current.c_str(), position);
 
   SetWindowText(m_label, label);
 
   const double pos = (double)(min(m_done+1, m_total)) / max(2, m_total);
   const int percent = (int)(pos * 100);
 
-  auto_char title[255];
-  auto_snprintf(title, auto_size(title),
-    AUTO_STR("ReaPack: Operation in progress (%d%%)"), percent);
+  Char title[255];
+  snprintf(title, lengthof(title),
+    AUTOSTR("ReaPack: Operation in progress (%d%%)"), percent);
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
   SetWindowText(handle(), title);

@@ -23,7 +23,6 @@
 #include "remote.hpp"
 
 #include <deque>
-#include <string>
 
 class MemoryDownload;
 class ThreadPool;
@@ -48,7 +47,7 @@ private:
   struct ImportData {
     size_t index;
     Remote remote;
-    std::string contents;
+    String contents;
 
     bool operator<(const ImportData &o) const { return index < o.index; }
   };

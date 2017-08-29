@@ -99,9 +99,9 @@ private:
   Registry m_registry;
   Receipt m_receipt;
 
-  std::unordered_set<std::string> m_syncedRemotes;
-  std::map<std::string, IndexPtr> m_indexes;
-  std::unordered_set<std::string> m_inhibited;
+  std::unordered_set<String> m_syncedRemotes;
+  std::map<String, IndexPtr> m_indexes;
+  std::unordered_set<String> m_inhibited;
   std::unordered_set<Registry::Entry> m_obsolete;
 
   ThreadPool m_threadPool;

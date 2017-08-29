@@ -27,33 +27,33 @@
 
 using namespace std;
 
-static const auto_char *GENERAL_GRP = AUTO_STR("general");
-static const auto_char *VERSION_KEY = AUTO_STR("version");
+static const Char *GENERAL_GRP = AUTOSTR("general");
+static const Char *VERSION_KEY = AUTOSTR("version");
 
-static const auto_char *INSTALL_GRP = AUTO_STR("install");
-static const auto_char *AUTOINSTALL_KEY = AUTO_STR("autoinstall");
-static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
-static const auto_char *PROMPTOBSOLETE_KEY = AUTO_STR("promptobsolete");
+static const Char *INSTALL_GRP = AUTOSTR("install");
+static const Char *AUTOINSTALL_KEY = AUTOSTR("autoinstall");
+static const Char *PRERELEASES_KEY = AUTOSTR("prereleases");
+static const Char *PROMPTOBSOLETE_KEY = AUTOSTR("promptobsolete");
 
-static const auto_char *ABOUT_GRP = AUTO_STR("about");
-static const auto_char *MANAGER_GRP = AUTO_STR("manager");
+static const Char *ABOUT_GRP = AUTOSTR("about");
+static const Char *MANAGER_GRP = AUTOSTR("manager");
 
-static const auto_char *BROWSER_GRP = AUTO_STR("browser");
-static const auto_char *STATE_KEY = AUTO_STR("state");
+static const Char *BROWSER_GRP = AUTOSTR("browser");
+static const Char *STATE_KEY = AUTOSTR("state");
 
-static const auto_char *NETWORK_GRP = AUTO_STR("network");
-static const auto_char *PROXY_KEY = AUTO_STR("proxy");
-static const auto_char *VERIFYPEER_KEY = AUTO_STR("verifypeer");
-static const auto_char *STALETHRSH_KEY = AUTO_STR("stalethreshold");
+static const Char *NETWORK_GRP = AUTOSTR("network");
+static const Char *PROXY_KEY = AUTOSTR("proxy");
+static const Char *VERIFYPEER_KEY = AUTOSTR("verifypeer");
+static const Char *STALETHRSH_KEY = AUTOSTR("stalethreshold");
 
-static const auto_char *SIZE_KEY = AUTO_STR("size");
+static const Char *SIZE_KEY = AUTOSTR("size");
 
-static const auto_char *REMOTES_GRP = AUTO_STR("remotes");
-static const auto_char *REMOTE_KEY  = AUTO_STR("remote");
+static const Char *REMOTES_GRP = AUTOSTR("remotes");
+static const Char *REMOTE_KEY  = AUTOSTR("remote");
 
-static auto_string ArrayKey(const auto_string &key, const unsigned int i)
+static String ArrayKey(const String &key, const unsigned int i)
 {
-  return key + to_autostring(i);
+  return key + String::from(i);
 }
 
 static const int BUFFER_SIZE = 2083;
@@ -73,8 +73,8 @@ void Config::resetOptions()
 
 void Config::restoreSelfRemote()
 {
-  const string name = "ReaPack";
-  const string url = "https://github.com/cfillion/reapack/raw/master/index.xml";
+  const String name = "ReaPack";
+  const String url = "https://github.com/cfillion/reapack/raw/master/index.xml";
 
   Remote remote = remotes.get(name);
   remote.setName(name);
@@ -133,7 +133,7 @@ void Config::migrate()
 
 void Config::read(const Path &path)
 {
-  m_path = make_autostring(path.join());
+  m_path = path.join();
 
   install.autoInstall = getBool(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
   install.bleedingEdge = getBool(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
@@ -179,7 +179,7 @@ void Config::readRemotes()
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
 
   for(unsigned int i = 0; i < m_remotesIniSize; i++) {
-    const string data = getString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i));
+    const String data = getString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i));
 
     remotes.add(Remote::fromString(data));
   }
@@ -198,47 +198,46 @@ void Config::writeRemotes()
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-string Config::getString(const auto_char *group,
-  const auto_string &key, const string &fallback) const
+String Config::getString(const Char *group,
+  const String &key, const String &fallback) const
 {
-  auto_char buffer[BUFFER_SIZE];
-  GetPrivateProfileString(group, key.c_str(), make_autostring(fallback).c_str(),
+  Char buffer[BUFFER_SIZE];
+  GetPrivateProfileString(group, key.c_str(), fallback.c_str(),
     buffer, sizeof(buffer), m_path.c_str());
 
-  return from_autostring(buffer);
+  return buffer;
 }
 
-void Config::setString(const auto_char *group,
-  const auto_string &key, const string &val) const
+void Config::setString(const Char *group,
+  const String &key, const String &val) const
 {
-  WritePrivateProfileString(group, key.c_str(),
-    make_autostring(val).c_str(), m_path.c_str());
+  WritePrivateProfileString(group, key.c_str(), val.c_str(), m_path.c_str());
 }
 
-unsigned int Config::getUInt(const auto_char *group,
-  const auto_string &key, const unsigned int fallback) const
+unsigned int Config::getUInt(const Char *group,
+  const String &key, const unsigned int fallback) const
 {
   return GetPrivateProfileInt(group, key.c_str(), fallback, m_path.c_str());
 }
 
-bool Config::getBool(const auto_char *group,
-  const auto_string &key, const bool fallback) const
+bool Config::getBool(const Char *group,
+  const String &key, const bool fallback) const
 {
   return getUInt(group, key, fallback) > 0;
 }
 
-void Config::setUInt(const auto_char *group, const auto_string &key,
+void Config::setUInt(const Char *group, const String &key,
   const unsigned int val) const
 {
-  setString(group, key, to_string(val));
+  setString(group, key, String::from(val));
 }
 
-void Config::deleteKey(const auto_char *group, const auto_string &key) const
+void Config::deleteKey(const Char *group, const String &key) const
 {
   WritePrivateProfileString(group, key.c_str(), 0, m_path.c_str());
 }
 
-void Config::cleanupArray(const auto_char *group, const auto_string &key,
+void Config::cleanupArray(const Char *group, const String &key,
   const unsigned int begin, const unsigned int end) const
 {
   for(unsigned int i = begin; i < end; i++)

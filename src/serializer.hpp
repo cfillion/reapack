@@ -19,8 +19,9 @@
 #define REAPACK_SERIALIZER_HPP
 
 #include <array>
-#include <string>
 #include <list>
+
+class String;
 
 class Serializer {
 public:
@@ -31,8 +32,8 @@ public:
   int userVersion() const { return m_userVersion; }
   operator bool() const { return m_userVersion > 0; }
 
-  Data read(const std::string &, int userVersion);
-  std::string write(const Data &in) const;
+  Data read(const String &, int userVersion);
+  String write(const Data &in) const;
 
 private:
   int m_userVersion;

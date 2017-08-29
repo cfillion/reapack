@@ -54,11 +54,11 @@ TEST_CASE("package type to string", M) {
 TEST_CASE("invalid package name", M) {
   SECTION("empty") {
     try {
-      Package pack(Package::ScriptType, string(), nullptr);
+      Package pack(Package::ScriptType, {}, nullptr);
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "empty package name");
+      REQUIRE(String(e.what()) == "empty package name");
     }
   }
 
@@ -68,7 +68,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid package name 'hello/world'");
+      REQUIRE(String(e.what()) == "invalid package name 'hello/world'");
     }
   }
 
@@ -78,7 +78,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid package name 'hello\\world'");
+      REQUIRE(String(e.what()) == "invalid package name 'hello\\world'");
     }
   }
 }
@@ -189,7 +189,7 @@ TEST_CASE("add owned version", M) {
   }
   catch(const reapack_error &e) {
     delete ver;
-    REQUIRE(string(e.what()) == "version belongs to another package");
+    REQUIRE(String(e.what()) == "version belongs to another package");
   }
 }
 
@@ -207,7 +207,7 @@ TEST_CASE("add duplicate version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "duplicate version 'r/c/p v1'");
+    REQUIRE(String(e.what()) == "duplicate version 'r/c/p v1'");
   }
 }
 

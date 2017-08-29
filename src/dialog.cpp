@@ -18,7 +18,7 @@
 #include "dialog.hpp"
 
 #include "control.hpp"
-#include "encoding.hpp"
+#include "string.hpp"
 
 #include <algorithm>
 #include <boost/range/adaptor/map.hpp>
@@ -329,13 +329,12 @@ void Dialog::stopTimer(int id)
   m_timers.erase(id);
 }
 
-void Dialog::setClipboard(const string &text)
+void Dialog::setClipboard(const String &text)
 {
-  const auto_string &data = make_autostring(text);
-  const size_t length = (data.size() + 1) * sizeof(auto_char); // null terminator
+  const size_t length = (text.size() + 1) * sizeof(Char); // null terminator
 
   HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
-  memcpy(GlobalLock(mem), data.c_str(), length);
+  memcpy(GlobalLock(mem), text.c_str(), length);
   GlobalUnlock(mem);
 
   OpenClipboard(m_handle);
@@ -348,16 +347,15 @@ void Dialog::setClipboard(const string &text)
   CloseClipboard();
 }
 
-void Dialog::setClipboard(const vector<string> &values)
+void Dialog::setClipboard(const vector<String> &values)
 {
   if(!values.empty())
     setClipboard(boost::algorithm::join(values, "\n"));
 }
 
-void Dialog::openURL(const string &utf8)
+void Dialog::openURL(const String &url)
 {
-  const auto_string &url = make_autostring(utf8);
-  ShellExecute(nullptr, AUTO_STR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
+  ShellExecute(nullptr, AUTOSTR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
 HWND Dialog::getControl(const int idc)
@@ -365,15 +363,15 @@ HWND Dialog::getControl(const int idc)
   return GetDlgItem(m_handle, idc);
 }
 
-string Dialog::getText(HWND handle)
+String Dialog::getText(HWND handle)
 {
-  auto_string buffer(4096, 0);
+  String buffer(4096, 0);
   GetWindowText(handle, &buffer[0], (int)buffer.size());
 
   // remove extra nulls from the string
-  buffer.resize(buffer.find(AUTO_STR('\0')));
+  buffer.resize(buffer.find(AUTOSTR('\0')));
 
-  return from_autostring(buffer);
+  return buffer;
 }
 
 void Dialog::setAnchor(HWND handle, const int flags)

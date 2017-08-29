@@ -18,9 +18,10 @@
 #ifndef REAPACK_DATABASE_HPP
 #define REAPACK_DATABASE_HPP
 
+#include "string.hpp"
+
 #include <cstdint>
 #include <functional>
-#include <string>
 #include <vector>
 
 class reapack_error;
@@ -44,7 +45,7 @@ public:
     }
   };
 
-  Database(const std::string &filename = std::string());
+  Database(const String &filename = {});
   ~Database();
 
   Statement *prepare(const char *sql);
@@ -77,14 +78,14 @@ public:
   Statement(const char *sql, const Database *db);
   ~Statement();
 
-  void bind(int index, const std::string &text);
+  void bind(int index, const String &text);
   void bind(int index, int64_t integer);
   void exec();
   void exec(const ExecCallback &);
 
   int64_t intColumn(int index) const;
   bool boolColumn(int index) const { return intColumn(index) != 0; }
-  std::string stringColumn(int index) const;
+  String stringColumn(int index) const;
 
 private:
   friend Database;

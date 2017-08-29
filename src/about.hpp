@@ -32,6 +32,7 @@ class ListView;
 class Menu;
 class Metadata;
 class RichEdit;
+class String;
 class TabBar;
 struct Link;
 
@@ -46,9 +47,9 @@ public:
   template<typename T>
   bool testDelegate() { return dynamic_cast<T *>(m_delegate.get()) != nullptr; }
 
-  void setTitle(const std::string &);
+  void setTitle(const String &);
   void setMetadata(const Metadata *, bool substitution = false);
-  void setAction(const std::string &);
+  void setAction(const String &);
 
   TabBar *tabs() const { return m_tabs; }
   RichEdit *desc() const { return m_desc; }

@@ -19,7 +19,7 @@
 
 #include <Cocoa/Cocoa.h>
 
-using namespace std;
+#include "string.hpp"
 
 void RichEdit::Init()
 {
@@ -43,7 +43,7 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-bool RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const String &rtf)
 {
   NSString *str = [NSString
     stringWithCString:rtf.c_str()

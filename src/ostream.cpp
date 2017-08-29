@@ -30,10 +30,10 @@ OutputStream::OutputStream()
   m_stream.imbue(locale(""));
 }
 
-void OutputStream::indented(const string &text)
+void OutputStream::indented(const String &text)
 {
-  istringstream stream(text);
-  string line;
+  StringStreamI stream(text);
+  String line;
 
   while(getline(stream, line, '\n')) {
     boost::algorithm::trim(line);
@@ -52,13 +52,13 @@ OutputStream &OutputStream::operator<<(const Version &ver)
   if(!ver.author().empty())
     m_stream << " by " << ver.author();
 
-  const string &date = ver.time().toString();
+  const String &date = ver.time().toString();
   if(!date.empty())
     m_stream << " – " << date;
 
   m_stream << "\r\n";
 
-  const string &changelog = ver.changelog();
+  const String &changelog = ver.changelog();
   indented(changelog.empty() ? "No changelog" : changelog);
 
   return *this;

@@ -15,31 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "encoding.hpp"
+#include "string.hpp"
 
 #ifdef _WIN32
-
-auto_string make_autostring(const std::string &input, UINT codepage)
+string::string(const string &input, UINT codepage)
 {
   const int size = MultiByteToWideChar(codepage, 0,
     &input[0], -1, nullptr, 0) - 1;
 
-  auto_string output(size, 0);
-  MultiByteToWideChar(codepage, 0, &input[0], -1, &output[0], size);
-
-  return output;
+  output.resize(size);
+  MultiByteToWideChar(codepage, 0, data(), -1, &output[0], size);
 }
 
-std::string from_autostring(const auto_string &input)
+std::string String::toUtf8() const
 {
   const int size = WideCharToMultiByte(CP_UTF8, 0,
-    &input[0], -1, nullptr, 0, nullptr, nullptr) - 1;
+    data(), -1, nullptr, 0, nullptr, nullptr) - 1;
 
-  std::string output(size, 0);
+  string output(size, 0);
   WideCharToMultiByte(CP_UTF8, 0,
-    &input[0], -1, &output[0], size, nullptr, nullptr);
+    c_str(), -1, output.data(), size, nullptr, nullptr);
 
   return output;
 }
-
 #endif

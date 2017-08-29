@@ -17,9 +17,10 @@
 
 #include "time.hpp"
 
+#include "string.hpp"
+
 #include <array>
 #include <iomanip>
-#include <sstream>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ Time::Time(const char *iso8601) : m_tm()
 {
   tm time = {};
 
-  istringstream stream(iso8601);
+  StringStreamI stream(iso8601);
   stream >> std::get_time(&time, "%Y-%m-%dT%H:%M:%S");
 
   if(stream.good())
@@ -46,12 +47,12 @@ Time::Time(int year, int month, int day, int hour, int minute, int second)
   m_tm.tm_sec = second;
 }
 
-string Time::toString() const
+String Time::toString() const
 {
   if(!isValid())
     return {};
 
-  char buf[32] = {};
+  Char buf[32] = {};
   strftime(buf, sizeof(buf), "%B %d %Y", &m_tm);
   return buf;
 }

@@ -20,7 +20,7 @@
 
 #include "dialog.hpp"
 
-#include "encoding.hpp"
+#include "string.hpp"
 
 class ThreadPool;
 class ThreadTask;
@@ -39,7 +39,7 @@ private:
   void updateProgress();
 
   ThreadPool *m_pool;
-  auto_string m_current;
+  String m_current;
 
   HWND m_label;
   HWND m_progress;

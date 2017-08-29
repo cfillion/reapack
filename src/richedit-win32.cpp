@@ -22,11 +22,10 @@
 // Starting here and onward is the Win32 implementation of RichEdit
 // The OS X implementation can be found in richedit.mm
 
-#include "encoding.hpp"
+#include "string.hpp"
 
 #include <memory>
 #include <richedit.h>
-#include <sstream>
 
 using namespace std;
 
@@ -34,19 +33,19 @@ static void HandleLink(ENLINK *info, HWND handle)
 {
   const CHARRANGE &range = info->chrg;
 
-  auto_char *url = new auto_char[(range.cpMax - range.cpMin) + 1]();
-  unique_ptr<auto_char[]> ptr(url);
+  Char *url = new auto_char[(range.cpMax - range.cpMin) + 1]();
+  unique_ptr<Char[]> ptr(url);
 
   TEXTRANGE tr{range, url};
   SendMessage(handle, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
   if(info->msg == WM_LBUTTONUP)
-    ShellExecute(nullptr, AUTO_STR("open"), url, nullptr, nullptr, SW_SHOW);
+    ShellExecute(nullptr, AUTOSTR("open"), url, nullptr, nullptr, SW_SHOW);
 }
 
 void RichEdit::Init()
 {
-  LoadLibrary(AUTO_STR("Msftedit.dll"));
+  LoadLibrary(AUTOSTR("Msftedit.dll"));
 }
 
 RichEdit::RichEdit(HWND handle)

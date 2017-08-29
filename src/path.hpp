@@ -19,7 +19,8 @@
 #define REAPACK_PATH_HPP
 
 #include <list>
-#include <string>
+
+#include "string.hpp"
 
 class UseRootPath;
 
@@ -31,12 +32,12 @@ public:
   static const Path REGISTRY;
 
   static Path prefixRoot(const Path &p) { return s_root + p; }
-  static Path prefixRoot(const std::string &p) { return s_root + p; }
+  static Path prefixRoot(const String &p) { return s_root + p; }
   static const Path &root() { return s_root; }
 
-  Path(const std::string &path = std::string());
+  Path(const String &path = {});
 
-  void append(const std::string &parts, bool traversal = true);
+  void append(const String &parts, bool traversal = true);
   void append(const Path &other);
   void remove(size_t pos, size_t count);
   void removeLast();
@@ -46,39 +47,39 @@ public:
   size_t size() const { return m_parts.size(); }
   bool absolute() const { return m_absolute; }
 
-  std::string basename() const;
+  String basename() const;
   Path dirname() const;
-  std::string join(const char sep = 0) const;
-  std::string first() const;
-  std::string last() const;
+  String join(const char sep = 0) const;
+  String first() const;
+  String last() const;
   bool startsWith(const Path &) const;
 
-  std::list<std::string>::const_iterator begin() const { return m_parts.begin(); }
-  std::list<std::string>::const_iterator end() const { return m_parts.end(); }
+  std::list<String>::const_iterator begin() const { return m_parts.begin(); }
+  std::list<String>::const_iterator end() const { return m_parts.end(); }
 
   bool operator==(const Path &) const;
   bool operator!=(const Path &) const;
   bool operator<(const Path &) const;
-  Path operator+(const std::string &) const;
+  Path operator+(const String &) const;
   Path operator+(const Path &) const;
-  const Path &operator+=(const std::string &);
+  const Path &operator+=(const String &);
   const Path &operator+=(const Path &);
-  std::string &operator[](size_t);
-  const std::string &operator[](size_t) const;
+  String &operator[](size_t);
+  const String &operator[](size_t) const;
 
 private:
   static Path s_root;
   friend UseRootPath;
 
-  const std::string &at(size_t) const;
+  const String &at(size_t) const;
 
-  std::list<std::string> m_parts;
+  std::list<String> m_parts;
   bool m_absolute;
 };
 
 class UseRootPath {
 public:
-  UseRootPath(const std::string &);
+  UseRootPath(const String &);
   ~UseRootPath();
 
 private:

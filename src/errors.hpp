@@ -21,15 +21,17 @@
 #include <boost/format.hpp>
 #include <stdexcept>
 
+#include "string.hpp"
+
 class reapack_error : public std::runtime_error {
 public:
-  reapack_error(const char *what) : std::runtime_error(what) {}
-  reapack_error(const boost::format &f) : std::runtime_error(f.str()) {}
+  reapack_error(const Char *what) : std::runtime_error(what) {}
+  reapack_error(const StringFormat &f) : std::runtime_error(f.str()) {}
 };
 
 struct ErrorInfo {
-  std::string message;
-  std::string context;
+  String message;
+  String context;
 };
 
 #endif

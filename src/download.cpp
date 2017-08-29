@@ -24,7 +24,6 @@
 
 #include <reaper_plugin_functions.h>
 
-using boost::format;
 using namespace std;
 
 static const int DOWNLOAD_TIMEOUT = 15;
@@ -68,7 +67,7 @@ DownloadContext::DownloadContext()
 {
   m_curl = curl_easy_init();
 
-  const auto &userAgent = format("ReaPack/%s REAPER/%s")
+  const auto &userAgent = StringFormat("ReaPack/%s REAPER/%s")
     % ReaPack::VERSION % GetAppVersion();
 
   curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent.str().c_str());
@@ -103,12 +102,12 @@ int Download::UpdateProgress(void *ptr, const double, const double,
   return static_cast<Download *>(ptr)->aborted();
 }
 
-Download::Download(const string &url, const NetworkOpts &opts, const int flags)
+Download::Download(const String &url, const NetworkOpts &opts, const int flags)
   : m_url(url), m_opts(opts), m_flags(flags), m_ctx(nullptr)
 {
 }
 
-void Download::setName(const string &name)
+void Download::setName(const String &name)
 {
   setSummary("Downloading %s: " + name);
 }
@@ -142,7 +141,7 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    const auto &err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
+    const auto &err = StringFormat("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
     setError({err.str(), m_url});
     return false;
   }
@@ -150,13 +149,13 @@ bool Download::run()
   return true;
 }
 
-MemoryDownload::MemoryDownload(const string &url, const NetworkOpts &opts, int flags)
+MemoryDownload::MemoryDownload(const String &url, const NetworkOpts &opts, int flags)
   : Download(url, opts, flags)
 {
   setName(url);
 }
 
-FileDownload::FileDownload(const Path &target, const string &url,
+FileDownload::FileDownload(const Path &target, const String &url,
     const NetworkOpts &opts, int flags)
   : Download(url, opts, flags), m_path(target)
 {

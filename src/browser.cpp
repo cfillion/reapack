@@ -20,13 +20,13 @@
 #include "about.hpp"
 #include "browser_entry.hpp"
 #include "config.hpp"
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "resource.hpp"
+#include "string.hpp"
 #include "transaction.hpp"
 
 using namespace std;
@@ -50,23 +50,23 @@ void Browser::onInit()
   disable(m_actionsBtn);
 
   // don't forget to update order of enum View in header file
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTOSTR("All"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTOSTR("Queued"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTOSTR("Installed"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTOSTR("Out of date"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTOSTR("Obsolete"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTOSTR("Uninstalled"));
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
-    {AUTO_STR("Package"), 345},
-    {AUTO_STR("Category"), 105},
-    {AUTO_STR("Version"), 55, 0, ListView::VersionType},
-    {AUTO_STR("Author"), 95},
-    {AUTO_STR("Type"), 70},
-    {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
-    {AUTO_STR("Last Update"), 105, 0, ListView::TimeType},
+    {AUTOSTR("Status"), 23, ListView::NoLabelFlag},
+    {AUTOSTR("Package"), 345},
+    {AUTOSTR("Category"), 105},
+    {AUTOSTR("Version"), 55, 0, ListView::VersionType},
+    {AUTOSTR("Author"), 95},
+    {AUTOSTR("Type"), 70},
+    {AUTOSTR("Repository"), 120, ListView::CollapseFlag},
+    {AUTOSTR("Last Update"), 105, 0, ListView::TimeType},
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
@@ -208,7 +208,7 @@ bool Browser::onKeyDown(const int key, const int mods)
   else if(mods == (CtrlModifier | ShiftModifier) && key == 'A')
     m_list->unselectAll();
   else if(mods == CtrlModifier && key == 'C') {
-    vector<string> values;
+    vector<String> values;
 
     for(const int index : m_list->selection(false))
       values.push_back(getEntry(index)->displayName());
@@ -249,8 +249,8 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   if(!menu.empty())
     menu.addSeparator();
 
-  menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
-  menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
+  menu.addAction(AUTOSTR("&Select all"), IDC_SELECT);
+  menu.addAction(AUTOSTR("&Unselect all"), IDC_UNSELECT);
 
   return true;
 }
@@ -260,14 +260,14 @@ void Browser::fillMenu(Menu &menu)
   const Entry *entry = getEntry(m_currentIndex);
 
   if(m_list->selectionSize() > 1) {
-    menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
-    menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
-    menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
-    menu.addAction(AUTO_STR("&Clear queued actions"), ACTION_RESET_ALL);
+    menu.addAction(AUTOSTR("&Install/update selection"), ACTION_LATEST_ALL);
+    menu.addAction(AUTOSTR("&Reinstall selection"), ACTION_REINSTALL_ALL);
+    menu.addAction(AUTOSTR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
+    menu.addAction(AUTOSTR("&Clear queued actions"), ACTION_RESET_ALL);
     menu.addSeparator();
 
     if(entry) {
-      Menu pkgMenu = menu.addMenu(AUTO_STR("Package under cursor"));
+      Menu pkgMenu = menu.addMenu(AUTOSTR("Package under cursor"));
       entry->fillMenu(pkgMenu);
     }
   }
@@ -277,32 +277,32 @@ void Browser::fillMenu(Menu &menu)
 
 void Browser::updateDisplayLabel()
 {
-  auto_char btnLabel[32];
-  auto_snprintf(btnLabel, auto_size(btnLabel), AUTO_STR("%d/%zu package%s..."),
+  Char btnLabel[32];
+  snprintf(btnLabel, lengthof(btnLabel), AUTOSTR("%d/%zu package%s..."),
     m_list->rowCount(), m_entries.size(),
-    m_entries.size() == 1 ? AUTO_STR("") : AUTO_STR("s"));
+    m_entries.size() == 1 ? AUTOSTR("") : ("s"));
 
   SetWindowText(m_displayBtn, btnLabel);
 }
 
 void Browser::displayButton()
 {
-  static map<const auto_char *, Package::Type> types = {
-    {AUTO_STR("&Scripts"), Package::ScriptType},
-    {AUTO_STR("&Effects"), Package::EffectType},
-    {AUTO_STR("E&xtensions"), Package::ExtensionType},
-    {AUTO_STR("&Themes"), Package::ThemeType},
-    {AUTO_STR("&Language Packs"), Package::LangPackType},
-    {AUTO_STR("&Web Interfaces"), Package::WebInterfaceType},
-    {AUTO_STR("&Project Templates"), Package::ProjectTemplateType},
-    {AUTO_STR("&Track Templates"), Package::TrackTemplateType},
-    {AUTO_STR("&MIDI Note Names"), Package::MIDINoteNamesType},
-    {AUTO_STR("&Other packages"), Package::UnknownType},
+  static map<const Char *, Package::Type> types = {
+    {AUTOSTR("&Scripts"), Package::ScriptType},
+    {AUTOSTR("&Effects"), Package::EffectType},
+    {AUTOSTR("E&xtensions"), Package::ExtensionType},
+    {AUTOSTR("&Themes"), Package::ThemeType},
+    {AUTOSTR("&Language Packs"), Package::LangPackType},
+    {AUTOSTR("&Web Interfaces"), Package::WebInterfaceType},
+    {AUTOSTR("&Project Templates"), Package::ProjectTemplateType},
+    {AUTOSTR("&Track Templates"), Package::TrackTemplateType},
+    {AUTOSTR("&MIDI Note Names"), Package::MIDINoteNamesType},
+    {AUTOSTR("&Other packages"), Package::UnknownType},
   };
 
   Menu menu;
 
-  auto index = menu.addAction(AUTO_STR("&All packages"), ACTION_FILTERTYPE);
+  auto index = menu.addAction(AUTOSTR("&All packages"), ACTION_FILTERTYPE);
   if(!m_typeFilter)
     menu.checkRadio(index);
 
@@ -316,8 +316,8 @@ void Browser::displayButton()
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
-  menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
+  menu.addAction(AUTOSTR("&Refresh repositories"), ACTION_REFRESH);
+  menu.addAction(AUTOSTR("&Manage repositories..."), ACTION_MANAGE);
 
   menu.show(m_displayBtn, handle());
 }
@@ -360,7 +360,7 @@ void Browser::updateFilter()
 {
   stopTimer(TIMER_FILTER);
 
-  const string &filter = getText(m_filterHandle);
+  const String &filter = getText(m_filterHandle);
 
   if(m_filter != filter) {
     m_filter = filter;
@@ -404,10 +404,10 @@ void Browser::refresh(const bool stale)
     if(!isVisible() || stale) {
       show();
 
-      MessageBox(handle(), AUTO_STR("No repository enabled!\r\n")
-        AUTO_STR("Enable or import repositories from ")
-        AUTO_STR("Extensions > ReaPack > Manage repositories."),
-        AUTO_STR("Browse packages"), MB_OK);
+      MessageBox(handle(), AUTOSTR("No repository enabled!\r\n")
+        AUTOSTR("Enable or import repositories from ")
+        AUTOSTR("Extensions > ReaPack > Manage repositories."),
+        AUTOSTR("Browse packages"), MB_OK);
     }
 
     populate({});
@@ -432,9 +432,9 @@ void Browser::refresh(const bool stale)
   }
 }
 
-void Browser::setFilter(const string &newFilter)
+void Browser::setFilter(const String &newFilter)
 {
-  SetWindowText(m_filterHandle, make_autostring(newFilter).c_str());
+  SetWindowText(m_filterHandle, newFilter.c_str());
   updateFilter(); // don't wait for the timer, update now!
   SetFocus(m_filterHandle);
 }
@@ -465,14 +465,12 @@ void Browser::populate(const vector<IndexPtr> &indexes)
     fillList();
   }
   catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-    auto_char msg[255];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not read from the local package registry.\r\n")
-      AUTO_STR("Retry later once all installation task are completed.\r\n")
-      AUTO_STR("\r\nError description: %s"),
-      desc.c_str());
-    MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
+    Char msg[255];
+    snprintf(msg, lengthof(msg),
+      AUTOSTR("ReaPack could not read from the local package registry.\r\n")
+      AUTOSTR("Retry later once all installation task are completed.\r\n")
+      AUTOSTR("\r\nError description: %s"), e.what());
+    MessageBox(handle(), msg, AUTOSTR("ReaPack"), MB_OK);
   }
 
   if(!isVisible())
@@ -618,11 +616,11 @@ void Browser::installLatestAll()
 
   if(isEverything && !installOpts.autoInstall) {
     const int btn = MessageBox(handle(),
-      AUTO_STR("Do you want ReaPack to install new packages automatically when")
-      AUTO_STR(" synchronizing in the future?\r\n\r\nThis setting can also be")
-      AUTO_STR(" customized globally or on a per-repository basis in")
-      AUTO_STR(" ReaPack > Manage repositories."),
-      AUTO_STR("Install every available packages"), MB_YESNOCANCEL);
+      AUTOSTR("Do you want ReaPack to install new packages automatically when")
+      AUTOSTR(" synchronizing in the future?\r\n\r\nThis setting can also be")
+      AUTOSTR(" customized globally or on a per-repository basis in")
+      AUTOSTR(" ReaPack > Manage repositories."),
+      AUTOSTR("Install every available packages"), MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -753,7 +751,7 @@ void Browser::updateAction(const int index)
     updateDisplayLabel();
   }
   else
-    m_list->row(index)->setCell(0, make_autostring(entry->displayState()));
+    m_list->row(index)->setCell(0, entry->displayState());
 
   if(m_actions.empty())
     disable(m_applyBtn);
@@ -798,12 +796,12 @@ bool Browser::confirm() const
   if(!count)
     return true;
 
-  auto_char msg[255];
-  auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("Are you sure to uninstall %zu package%s?\r\nThe files and settings will be permanently deleted from this computer."),
-    count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
+  Char msg[255];
+  snprintf(msg, lengthof(msg),
+    AUTOSTR("Are you sure to uninstall %zu package%s?\r\nThe files and settings will be permanently deleted from this computer."),
+    count, count == 1 ? AUTOSTR("") : ("s"));
 
-  const auto_char *title = AUTO_STR("ReaPack Query");
+  const Char *title = AUTOSTR("ReaPack Query");
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
 
   return btn == IDYES;

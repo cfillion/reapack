@@ -23,7 +23,7 @@ TEST_CASE("append path components", M) {
   Path path;
   REQUIRE(path.empty());
   REQUIRE(path.size() == 0);
-  REQUIRE(path.join() == string());
+  REQUIRE(path.join() == String());
   REQUIRE(path.dirname().empty());
   REQUIRE(path.basename().empty());
 
@@ -69,7 +69,7 @@ TEST_CASE("concatenate paths", M) {
 
 TEST_CASE("empty components", M) {
   Path a;
-  a.append(string());
+  a.append(String());
 
   REQUIRE(a.size() == 0);
 }

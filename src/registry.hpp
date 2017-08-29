@@ -19,7 +19,6 @@
 #define REAPACK_REGISTRY_HPP
 
 #include <set>
-#include <string>
 
 #include "database.hpp"
 #include "package.hpp"
@@ -32,13 +31,13 @@ public:
     typedef int64_t id_t;
 
     id_t id;
-    std::string remote;
-    std::string category;
-    std::string package;
-    std::string description;
+    String remote;
+    String category;
+    String package;
+    String description;
     Package::Type type;
     VersionName version;
-    std::string author;
+    String author;
     bool pinned;
 
     operator bool() const { return id > 0; }
@@ -57,7 +56,7 @@ public:
 
   Entry getEntry(const Package *) const;
   Entry getOwner(const Path &) const;
-  std::vector<Entry> getEntries(const std::string &) const;
+  std::vector<Entry> getEntries(const String &) const;
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);

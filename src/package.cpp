@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
 
-using boost::format;
 using namespace std;
 
 Package::Type Package::getType(const char *type)
@@ -52,7 +51,7 @@ Package::Type Package::getType(const char *type)
     return UnknownType;
 }
 
-string Package::displayType(const Type type)
+String Package::displayType(const Type type)
 {
   switch(type) {
   case UnknownType:
@@ -82,18 +81,18 @@ string Package::displayType(const Type type)
   return "Unknown";
 }
 
-const string &Package::displayName(const string &name, const string &desc)
+const String &Package::displayName(const String &name, const String &desc)
 {
   return desc.empty() ? name : desc;
 }
 
-Package::Package(const Type type, const string &name, const Category *cat)
+Package::Package(const Type type, const String &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");
   else if(m_name.find_first_of("/\\") != string::npos)
-    throw reapack_error(format("invalid package name '%s'") % m_name);
+    throw reapack_error(StringFormat("invalid package name '%s'") % m_name);
 }
 
 Package::~Package()
@@ -102,9 +101,15 @@ Package::~Package()
     delete ver;
 }
 
-string Package::fullName() const
+String Package::fullName() const
 {
-  return m_category ? m_category->fullName() + "/" + displayName() : displayName();
+  if(!m_category)
+    return displayName();
+
+  String out = m_category->fullName();
+  out += '/';
+  out += displayName();
+  return out;
 }
 
 bool Package::addVersion(const Version *ver)
@@ -114,7 +119,7 @@ bool Package::addVersion(const Version *ver)
   else if(ver->sources().empty())
     return false;
   else if(m_versions.count(ver))
-    throw reapack_error(format("duplicate version '%s'") % ver->fullName());
+    throw reapack_error(StringFormat("duplicate version '%s'") % ver->fullName());
 
   m_versions.insert(ver);
 

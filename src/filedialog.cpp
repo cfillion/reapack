@@ -23,49 +23,49 @@
 #include <swell.h>
 #endif
 
-auto_string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
-  const auto_char *title, const Path &initialDir,
-  const auto_char *filters, const auto_char *defaultExt)
+String FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
+  const Char *title, const Path &initialDir,
+  const Char *filters, const Char *defaultExt)
 {
 #ifdef _WIN32
-  const auto_string &dirPath = make_autostring(initialDir.join());
-  auto_char path[4096] = {};
+  const String &dirPath = make_String(initialDir.join());
+  Char path[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;
   of.lpstrFile = path;
-  of.nMaxFile = auto_size(path);
+  of.nMaxFile = lengthof(path);
   of.lpstrInitialDir = dirPath.c_str();
   of.lpstrTitle = title;
   of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_FILEMUSTEXIST;
   of.lpstrDefExt = defaultExt;
 
-  return GetOpenFileName(&of) ? path : auto_string();
+  return GetOpenFileName(&of) ? path : String();
 #else
   char *path = BrowseForFiles(title, initialDir.join().c_str(),
     nullptr, false, filters);
-  return path ? path : auto_string();
+  return path ? path : String();
 #endif
 }
 
-auto_string FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
-  const auto_char *title, const Path &initialDir,
-  const auto_char *filters, const auto_char *defaultExt)
+String FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
+  const Char *title, const Path &initialDir,
+  const Char *filters, const Char *defaultExt)
 {
 #ifdef _WIN32
-  const auto_string &dirPath = make_autostring(initialDir.join());
-  auto_char path[4096] = {};
+  const String &dirPath = make_String(initialDir.join());
+  Char path[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;
   of.lpstrFile = path;
-  of.nMaxFile = auto_size(path);
+  of.nMaxFile = lengthof(path);
   of.lpstrInitialDir = dirPath.c_str();
   of.lpstrTitle = title;
   of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_OVERWRITEPROMPT;
   of.lpstrDefExt = defaultExt;
 
-  return GetSaveFileName(&of) ? path : auto_string();
+  return GetSaveFileName(&of) ? path : String();
 #else
   char path[4096] = {};
 

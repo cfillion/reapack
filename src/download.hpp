@@ -18,12 +18,12 @@
 #ifndef REAPACK_DOWNLOAD_HPP
 #define REAPACK_DOWNLOAD_HPP
 
+#include "string.hpp"
 #include "config.hpp"
 #include "path.hpp"
 #include "thread.hpp"
 
 #include <fstream>
-#include <sstream>
 
 #include <curl/curl.h>
 
@@ -43,10 +43,10 @@ public:
     NoCacheFlag = 1<<0,
   };
 
-  Download(const std::string &url, const NetworkOpts &, int flags = 0);
+  Download(const String &url, const NetworkOpts &, int flags = 0);
 
-  void setName(const std::string &);
-  const std::string &url() const { return m_url; }
+  void setName(const String &);
+  const String &url() const { return m_url; }
   void setContext(DownloadContext *ctx) { m_ctx = ctx; }
 
   bool concurrent() const override { return true; }
@@ -61,7 +61,7 @@ private:
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
-  std::string m_url;
+  String m_url;
   NetworkOpts m_opts;
   int m_flags;
   DownloadContext *m_ctx;
@@ -69,20 +69,20 @@ private:
 
 class MemoryDownload : public Download {
 public:
-  MemoryDownload(const std::string &url, const NetworkOpts &, int flags = 0);
+  MemoryDownload(const String &url, const NetworkOpts &, int flags = 0);
 
-  std::string contents() const { return m_stream.str(); }
+  String contents() const { return m_stream.str(); }
 
 protected:
   std::ostream *openStream() override { return &m_stream; }
 
 private:
-  std::stringstream m_stream;
+  StringStream m_stream;
 };
 
 class FileDownload : public Download {
 public:
-  FileDownload(const Path &target, const std::string &url,
+  FileDownload(const Path &target, const String &url,
     const NetworkOpts &, int flags = 0);
 
   const TempPath &path() const { return m_path; }

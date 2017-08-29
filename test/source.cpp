@@ -137,7 +137,7 @@ TEST_CASE("empty source url", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty source url");
+    REQUIRE(String(e.what()) == "empty source url");
   }
 }
 
@@ -146,7 +146,7 @@ TEST_CASE("source target path", M) {
 
   Source source("file.name", "url", &ver);
 
-  const vector<pair<Package::Type, string> > tests{
+  const vector<pair<Package::Type, String> > tests{
     {Package::ScriptType,          "Scripts/Index Name/Category Name/file.name"},
     {Package::EffectType,          "Effects/Index Name/Category Name/file.name"},
     {Package::ExtensionType,       "UserPlugins/file.name"},

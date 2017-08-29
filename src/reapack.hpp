@@ -47,7 +47,7 @@ public:
   static const char *BUILDTIME;
 
   static ReaPack *instance() { return s_instance; }
-  static std::string resourcePath();
+  static String resourcePath();
 
   gaccel_register_t syncAction;
   gaccel_register_t browseAction;
@@ -78,7 +78,7 @@ public:
   void refreshManager();
   void refreshBrowser();
 
-  Remote remote(const std::string &name) const;
+  Remote remote(const String &name) const;
 
   Transaction *setupTransaction();
   void commitConfig();

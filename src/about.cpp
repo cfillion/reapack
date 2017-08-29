@@ -19,7 +19,6 @@
 
 #include "browser.hpp"
 #include "config.hpp"
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
@@ -37,7 +36,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <iomanip>
-#include <sstream>
 
 using namespace std;
 
@@ -169,17 +167,16 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
   }
 }
 
-void About::setTitle(const string &what)
+void About::setTitle(const String &what)
 {
-  auto_char title[255];
-  auto_snprintf(title, auto_size(title),
-    AUTO_STR("About %s"), make_autostring(what).c_str());
+  Char title[255];
+  snprintf(title, lengthof(title), AUTOSTR("About %s"), what.c_str());
   SetWindowText(handle(), title);
 }
 
 void About::setMetadata(const Metadata *metadata, const bool substitution)
 {
-  string aboutText = metadata->about();
+  String aboutText(metadata->about());
 
   if(substitution) {
     boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
@@ -187,7 +184,7 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   }
 
   if(m_desc->setRichText(aboutText))
-    m_tabs->addTab({AUTO_STR("About"), {m_desc->handle()}});
+    m_tabs->addTab({AUTOSTR("About"), {m_desc->handle()}});
 
   const auto &getLinkControl = [](const Metadata::LinkType type) {
     switch(type) {
@@ -229,10 +226,10 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   onResize(); // update the position of link buttons
 }
 
-void About::setAction(const string &label)
+void About::setAction(const String &label)
 {
   HWND btn = getControl(IDC_ACTION);
-  SetWindowText(btn, make_autostring(label).c_str());
+  SetWindowText(btn, label.c_str());
   show(btn);
 }
 
@@ -251,8 +248,8 @@ void About::selectLink(const int ctrl)
   Menu menu;
 
   for(int i = 0; i < count; i++) {
-    const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
-    menu.addAction(make_autostring(name).c_str(), i | (ctrl << 8));
+    const auto &name = boost::replace_all_copy(links[i]->name, "&", "&&");
+    menu.addAction(name.c_str(), i | (ctrl << 8));
   }
 
   const int choice = menu.show(getControl(ctrl), handle());
@@ -291,22 +288,22 @@ void AboutIndexDelegate::init(About *dialog)
   dialog->setMetadata(m_index->metadata(), m_index->name() == "ReaPack");
   dialog->setAction("Install/update " + m_index->name());
 
-  dialog->tabs()->addTab({AUTO_STR("Packages"),
+  dialog->tabs()->addTab({AUTOSTR("Packages"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
-  dialog->tabs()->addTab({AUTO_STR("Installed Files"),
+  dialog->tabs()->addTab({AUTOSTR("Installed Files"),
     {dialog->getControl(IDC_REPORT)}});
 
-  dialog->menu()->addColumn({AUTO_STR("Category"), 142});
+  dialog->menu()->addColumn({AUTOSTR("Category"), 142});
 
   dialog->menu()->reserveRows(m_index->categories().size() + 1);
-  dialog->menu()->createRow()->setCell(0, AUTO_STR("<All Packages>"));
+  dialog->menu()->createRow()->setCell(0, AUTOSTR("<All Packages>"));
 
   for(const Category *cat : m_index->categories())
-    dialog->menu()->createRow()->setCell(0, make_autostring(cat->name()));
+    dialog->menu()->createRow()->setCell(0, cat->name());
 
-  dialog->list()->addColumn({AUTO_STR("Package"), 382});
-  dialog->list()->addColumn({AUTO_STR("Version"), 80, 0, ListView::VersionType});
-  dialog->list()->addColumn({AUTO_STR("Author"), 90});
+  dialog->list()->addColumn({AUTOSTR("Package"), 382});
+  dialog->list()->addColumn({AUTOSTR("Version"), 80, 0, ListView::VersionType});
+  dialog->list()->addColumn({AUTOSTR("Author"), 90});
 
   initInstalledFiles();
 }
@@ -325,27 +322,25 @@ void AboutIndexDelegate::initInstalledFiles()
     }
   }
   catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-    auto_char msg[255];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("The file list is currently unavailable.\x20")
-      AUTO_STR("Retry later when all installation task are completed.\r\n")
-      AUTO_STR("\r\nError description: %s"),
-      desc.c_str());
+    Char msg[255];
+    snprintf(msg, lengthof(msg),
+      AUTOSTR("The file list is currently unavailable.\x20")
+      AUTOSTR("Retry later when all installation task are completed.\r\n")
+      AUTOSTR("\r\nError description: %s"), e.what());
     SetWindowText(report, msg);
     return;
   }
 
   if(allFiles.empty()) {
     SetWindowText(report,
-      AUTO_STR(
+      AUTOSTR(
       "This repository does not own any file on your computer at this time.\r\n")
 
-      AUTO_STR("It is either not yet installed or it does not provide ")
-      AUTO_STR("any package compatible with your system."));
+      AUTOSTR("It is either not yet installed or it does not provide ")
+      AUTOSTR("any package compatible with your system."));
   }
   else {
-    stringstream stream;
+    StringStream stream;
 
     for(const Registry::File &file : allFiles) {
       stream << file.path.join();
@@ -354,7 +349,7 @@ void AboutIndexDelegate::initInstalledFiles()
       stream << "\r\n";
     }
 
-    SetWindowText(report, make_autostring(stream.str()).c_str());
+    SetWindowText(report, stream.str().c_str());
   }
 }
 
@@ -377,9 +372,9 @@ void AboutIndexDelegate::updateList(const int index)
     const Version *lastVer = pkg->lastVersion();
 
     auto row = m_dialog->list()->createRow((void *)pkg);
-    row->setCell(c++, make_autostring(pkg->displayName()));
-    row->setCell(c++, make_autostring(lastVer->name().toString()), (void *)&lastVer->name());
-    row->setCell(c++, make_autostring(lastVer->displayAuthor()));
+    row->setCell(c++, pkg->displayName());
+    row->setCell(c++, lastVer->name().toString(), (void *)&lastVer->name());
+    row->setCell(c++, lastVer->displayAuthor());
   }
 }
 
@@ -388,8 +383,8 @@ bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
-  menu.addAction(AUTO_STR("Find in the &browser"), ACTION_FIND_IN_BROWSER);
-  menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG);
+  menu.addAction(AUTOSTR("Find in the &browser"), ACTION_FIND_IN_BROWSER);
+  menu.addAction(AUTOSTR("About this &package"), ACTION_ABOUT_PKG);
 
   return true;
 }
@@ -458,8 +453,8 @@ void AboutIndexDelegate::install()
   enum { INSTALL_ALL = 80, UPDATE_ONLY };
 
   Menu menu;
-  menu.addAction(AUTO_STR("Install all packages in this repository"), INSTALL_ALL);
-  menu.addAction(AUTO_STR("Update installed packages only"), UPDATE_ONLY);
+  menu.addAction(AUTOSTR("Install all packages in this repository"), INSTALL_ALL);
+  menu.addAction(AUTOSTR("Update installed packages only"), UPDATE_ONLY);
 
   const int choice = menu.show(m_dialog->getControl(IDC_ACTION), m_dialog->handle());
 
@@ -471,8 +466,8 @@ void AboutIndexDelegate::install()
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
     MessageBox(m_dialog->handle(),
-      AUTO_STR("This repository cannot be found in your current configuration."),
-      AUTO_STR("ReaPack"), MB_OK);
+      AUTOSTR("This repository cannot be found in your current configuration."),
+      AUTOSTR("ReaPack"), MB_OK);
     return;
   }
 
@@ -481,11 +476,11 @@ void AboutIndexDelegate::install()
   if(choice == INSTALL_ALL && boost::logic::indeterminate(remote.autoInstall())
       && !installOpts.autoInstall) {
     const int btn = MessageBox(m_dialog->handle(),
-      AUTO_STR("Do you want ReaPack to install new packages from this repository")
-      AUTO_STR(" when synchronizing in the future?\r\n\r\nThis setting can also be")
-      AUTO_STR(" customized globally or on a per-repository basis in")
-      AUTO_STR(" ReaPack > Manage repositories."),
-      AUTO_STR("Install all packages in this repository"), MB_YESNOCANCEL);
+      AUTOSTR("Do you want ReaPack to install new packages from this repository")
+      AUTOSTR(" when synchronizing in the future?\r\n\r\nThis setting can also be")
+      AUTOSTR(" customized globally or on a per-repository basis in")
+      AUTOSTR(" ReaPack > Manage repositories."),
+      AUTOSTR("Install all packages in this repository"), MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -523,21 +518,21 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->setMetadata(m_package->metadata());
   dialog->setAction("About " + m_index->name());
 
-  dialog->tabs()->addTab({AUTO_STR("History"),
+  dialog->tabs()->addTab({AUTOSTR("History"),
     {dialog->menu()->handle(), dialog->getControl(IDC_CHANGELOG)}});
-  dialog->tabs()->addTab({AUTO_STR("Contents"),
+  dialog->tabs()->addTab({AUTOSTR("Contents"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
 
-  dialog->menu()->addColumn({AUTO_STR("Version"), 142, 0, ListView::VersionType});
+  dialog->menu()->addColumn({AUTOSTR("Version"), 142, 0, ListView::VersionType});
 
-  dialog->list()->addColumn({AUTO_STR("File"), 474});
-  dialog->list()->addColumn({AUTO_STR("Action List"), 84});
+  dialog->list()->addColumn({AUTOSTR("File"), 474});
+  dialog->list()->addColumn({AUTOSTR("Action List"), 84});
 
   dialog->menu()->reserveRows(m_package->versions().size());
 
   for(const Version *ver : m_package->versions()) {
     auto row = dialog->menu()->createRow();
-    row->setCell(0, make_autostring(ver->name().toString()), (void *)&ver->name());
+    row->setCell(0, ver->name().toString(), (void *)&ver->name());
 
     if(m_current == ver->name())
       dialog->menu()->select(row->index());
@@ -551,7 +546,7 @@ void AboutPackageDelegate::init(About *dialog)
 
 void AboutPackageDelegate::updateList(const int index)
 {
-  static const map<Source::Section, string> sectionMap{
+  static const map<Source::Section, const Char *> sectionMap{
     {Source::MainSection, "Main"},
     {Source::MIDIEditorSection, "MIDI Editor"},
     {Source::MIDIInlineEditorSection, "MIDI Inline Editor"},
@@ -563,16 +558,16 @@ void AboutPackageDelegate::updateList(const int index)
   const Version *ver = m_package->version(index);
   OutputStream stream;
   stream << *ver;
-  SetWindowText(m_dialog->getControl(IDC_CHANGELOG),
-    make_autostring(stream.str()).c_str());
+  SetWindowText(m_dialog->getControl(IDC_CHANGELOG), stream.str().c_str());
 
   m_dialog->list()->reserveRows(ver->sources().size());
+
   for(const Source *src : ver->sources()) {
     int sections = src->sections();
-    string actionList;
+    String actionList;
 
     if(sections) {
-      vector<string> sectionNames;
+      vector<String> sectionNames;
 
       for(const auto &pair : sectionMap) {
         if(sections & pair.first) {
@@ -593,8 +588,8 @@ void AboutPackageDelegate::updateList(const int index)
 
     int c = 0;
     auto row = m_dialog->list()->createRow((void *)src);
-    row->setCell(c++, make_autostring(src->targetPath().join()));
-    row->setCell(c++, make_autostring(actionList));
+    row->setCell(c++, src->targetPath().join());
+    row->setCell(c++, actionList);
   }
 }
 
@@ -605,9 +600,9 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
 
   auto src = (const Source *)m_dialog->list()->row(index)->userData;
 
-  menu.addAction(AUTO_STR("Copy source URL"), ACTION_COPY_URL);
+  menu.addAction(AUTOSTR("Copy source URL"), ACTION_COPY_URL);
   menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
-    menu.addAction(AUTO_STR("Locate in explorer/finder"), ACTION_LOCATE));
+    menu.addAction(AUTOSTR("Locate in explorer/finder"), ACTION_LOCATE));
 
   return true;
 }
@@ -651,11 +646,11 @@ void AboutPackageDelegate::locate()
     if(!FS::exists(path))
       return;
 
-    string arg = "/select,\"";
+    String arg("/select,\"");
     arg += Path::prefixRoot(path).join();
-    arg += '"';
+    arg += AUTOSTR('"');
 
-    ShellExecute(nullptr, AUTO_STR("open"), AUTO_STR("explorer.exe"),
-      make_autostring(arg).c_str(), nullptr, SW_SHOW);
+    ShellExecute(nullptr, AUTOSTR("open"), AUTOSTR("explorer.exe"),
+      arg.c_str(), nullptr, SW_SHOW);
   }
 }

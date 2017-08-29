@@ -17,7 +17,6 @@
 
 #include "index.hpp"
 
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "path.hpp"
@@ -27,12 +26,12 @@
 
 using namespace std;
 
-Path Index::pathFor(const string &name)
+Path Index::pathFor(const String &name)
 {
   return Path::CACHE + (name + ".xml");
 }
 
-IndexPtr Index::load(const string &name, const char *data)
+IndexPtr Index::load(const String &name, const char *data)
 {
   TiXmlDocument doc;
 
@@ -81,7 +80,7 @@ IndexPtr Index::load(const string &name, const char *data)
   return IndexPtr(ri);
 }
 
-Index::Index(const string &name)
+Index::Index(const String &name)
   : m_name(name)
 {
 }
@@ -92,7 +91,7 @@ Index::~Index()
     delete cat;
 }
 
-void Index::setName(const string &newName)
+void Index::setName(const String &newName)
 {
   if(!m_name.empty())
     throw reapack_error("index name is already set");
@@ -118,7 +117,7 @@ bool Index::addCategory(const Category *cat)
   return true;
 }
 
-const Category *Index::category(const string &name) const
+const Category *Index::category(const String &name) const
 {
   const auto &it = m_catMap.find(name);
 
@@ -128,7 +127,7 @@ const Category *Index::category(const string &name) const
     return category(it->second);
 }
 
-const Package *Index::find(const string &catName, const string &pkgName) const
+const Package *Index::find(const String &catName, const String &pkgName) const
 {
   if(const Category *cat = category(catName))
     return cat->package(pkgName);
@@ -136,7 +135,7 @@ const Package *Index::find(const string &catName, const string &pkgName) const
     return nullptr;
 }
 
-Category::Category(const string &name, const Index *ri)
+Category::Category(const String &name, const Index *ri)
   : m_index(ri), m_name(name)
 {
   if(m_name.empty())
@@ -149,9 +148,15 @@ Category::~Category()
     delete pack;
 }
 
-string Category::fullName() const
+String Category::fullName() const
 {
-  return m_index ? m_index->name() + "/" + m_name : m_name;
+  if(!m_index)
+    return m_name;
+
+  String out = m_index->name();
+  out += '/';
+  out += m_name;
+  return out;
 }
 
 bool Category::addPackage(const Package *pkg)
@@ -167,7 +172,7 @@ bool Category::addPackage(const Package *pkg)
   return true;
 }
 
-const Package *Category::package(const string &name) const
+const Package *Category::package(const String &name) const
 {
   const auto &it = m_pkgMap.find(name);
 

@@ -31,8 +31,8 @@
 
 using namespace std;
 
-static const auto_char *TITLE = AUTO_STR("ReaPack: Import repositories");
-static const string DISCOVER_URL = "https://reapack.com/repos";
+static const Char *TITLE = AUTOSTR("ReaPack: Import repositories");
+static const String DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import()
   : Dialog(IDD_IMPORT_DIALOG), m_pool(nullptr), m_state(OK)
@@ -120,8 +120,8 @@ void Import::fetch()
   const auto &opts = g_reapack->config()->network;
 
   size_t index = 0;
-  stringstream stream(getText(m_url));
-  string url;
+  StringStream stream(getText(m_url));
+  String url;
   while(getline(stream, url)) {
     boost::algorithm::trim(url);
 
@@ -139,10 +139,9 @@ void Import::fetch()
           m_pool->abort();
         break;
       case ThreadTask::Failure: {
-        auto_char msg[1024];
-        auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("Download failed: %s\r\nn%s"),
-          make_autostring(dl->error().message).c_str(), make_autostring(url).c_str());
+        Char msg[1024];
+        snprintf(msg, lengthof(msg), AUTOSTR("Download failed: %s\r\nn%s"),
+          dl->error().message.c_str(), url.c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
         m_pool->abort();
         break;
@@ -163,7 +162,7 @@ void Import::fetch()
 
 bool Import::read(MemoryDownload *dl, const size_t idx)
 {
-  auto_char msg[1024];
+  Char msg[1024];
 
   try {
     IndexPtr index = Index::load({}, dl->contents().c_str());
@@ -172,17 +171,17 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
 
     if(exists && remote.url() != dl->url()) {
       if(remote.isProtected()) {
-        auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("The repository %s is protected and cannot be overwritten."),
-          make_autostring(index->name()).c_str());
+        snprintf(msg, lengthof(msg),
+          AUTOSTR("The repository %s is protected and cannot be overwritten."),
+          index->name().c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
         return false;
       }
       else {
-        auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("%s is already configured with a different URL.\r\n")
-          AUTO_STR("Do you want to overwrite it?"),
-          make_autostring(index->name()).c_str());
+        snprintf(msg, lengthof(msg),
+          AUTOSTR("%s is already configured with a different URL.\r\n")
+          AUTOSTR("Do you want to overwrite it?"),
+          index->name().c_str());
 
         const auto answer = MessageBox(handle(), msg, TITLE, MB_YESNO);
 
@@ -200,10 +199,9 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
     return true;
   }
   catch(const reapack_error &e) {
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("The received file is invalid: %s\r\n%s"),
-      make_autostring(string(e.what())).c_str(),
-      make_autostring(dl->url()).c_str());
+    snprintf(msg, lengthof(msg),
+      AUTOSTR("The received file is invalid: %s\r\n%s"),
+      e.what(), dl->url().c_str());
     MessageBox(handle(), msg, TITLE, MB_OK);
     return false;
   }

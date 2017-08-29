@@ -18,16 +18,17 @@
 #ifndef REAPACK_FILESYSTEM_HPP
 #define REAPACK_FILESYSTEM_HPP
 
-#include <string>
+#include <fstream>
 
 class Path;
+class String;
 class TempPath;
 
 namespace FS {
   FILE *open(const Path &);
   bool open(std::ifstream &, const Path &);
   bool open(std::ofstream &, const Path &);
-  bool write(const Path &, const std::string &);
+  bool write(const Path &, const String &);
   bool rename(const TempPath &);
   bool rename(const Path &, const Path &);
   bool remove(const Path &);
@@ -36,7 +37,7 @@ namespace FS {
   bool exists(const Path &, bool dir = false);
   bool mkdir(const Path &);
 
-  std::string lastError();
+  String lastError();
 };
 
 #endif

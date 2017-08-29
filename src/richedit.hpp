@@ -20,7 +20,7 @@
 
 #include "control.hpp"
 
-#include <string>
+class String;
 
 class RichEdit : public Control {
 public:
@@ -29,7 +29,7 @@ public:
   RichEdit(HWND);
   ~RichEdit();
 
-  bool setRichText(const std::string &);
+  bool setRichText(const String &);
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;

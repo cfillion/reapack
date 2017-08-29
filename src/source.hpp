@@ -37,9 +37,9 @@ public:
   };
 
   static Section getSection(const char *);
-  static Section detectSection(const std::string &category);
+  static Section detectSection(const String &category);
 
-  Source(const std::string &file, const std::string &url, const Version *);
+  Source(const String &file, const String &url, const Version *);
   const Version *version() const { return m_version; }
 
   void setPlatform(Platform p) { m_platform = p; }
@@ -47,8 +47,8 @@ public:
   void setTypeOverride(Package::Type t) { m_type = t; }
   Package::Type typeOverride() const { return m_type; }
   Package::Type type() const;
-  const std::string &file() const;
-  const std::string &url() const { return m_url; }
+  const String &file() const;
+  const String &url() const { return m_url; }
   void setSections(int);
   int sections() const { return m_sections; }
 
@@ -57,8 +57,8 @@ public:
 private:
   Platform m_platform;
   Package::Type m_type;
-  std::string m_file;
-  std::string m_url;
+  String m_file;
+  String m_url;
   int m_sections;
   Path m_targetPath;
   const Version *m_version;

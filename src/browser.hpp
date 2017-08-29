@@ -27,7 +27,6 @@
 #include <functional>
 #include <list>
 #include <memory>
-#include <string>
 #include <vector>
 
 class Index;
@@ -58,7 +57,7 @@ public:
 
   Browser();
   void refresh(bool stale = false);
-  void setFilter(const std::string &);
+  void setFilter(const String &);
 
 protected:
   void onInit() override;

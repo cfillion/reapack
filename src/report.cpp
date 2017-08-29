@@ -17,10 +17,10 @@
 
 #include "report.hpp"
 
-#include "encoding.hpp"
 #include "package.hpp"
 #include "resource.hpp"
 #include "source.hpp"
+#include "string.hpp"
 #include "transaction.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
@@ -93,11 +93,10 @@ void Report::fillReport()
 
   if(installs + updates + removals == 0) {
     SetDlgItemText(handle(), IDC_LABEL,
-      AUTO_STR("Oops! The following error(s) occured:"));
+      AUTOSTR("Oops! The following error(s) occured:"));
   }
 
-  const auto_string &str = make_autostring(m_stream.str());
-  SetDlgItemText(handle(), IDC_REPORT, str.c_str());
+  SetDlgItemText(handle(), IDC_REPORT, m_stream.str().c_str());
 }
 
 void Report::printInstalls()

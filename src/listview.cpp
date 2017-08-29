@@ -59,7 +59,7 @@ int ListView::addColumn(const Column &col)
 
   if(!col.test(NoLabelFlag)) {
     item.mask |= LVCF_TEXT;
-    item.pszText = const_cast<auto_char *>(col.label.c_str());
+    item.pszText = const_cast<Char *>(col.label.c_str());
   }
 
   const int index = columnCount();
@@ -92,7 +92,7 @@ void ListView::updateCell(int row, int cell)
 {
   const int viewRowIndex = translate(row);
   ListView_SetItemText(handle(), viewRowIndex, cell,
-    const_cast<auto_char *>(m_rows[row]->cell(cell).value.c_str()));
+    const_cast<Char *>(m_rows[row]->cell(cell).value.c_str()));
 }
 
 void ListView::removeRow(const int userIndex)
@@ -444,7 +444,7 @@ void ListView::headerMenu(const int x, const int y)
   }
 
   menu.addSeparator();
-  menu.addAction(AUTO_STR("Reset columns"), ACTION_RESTORE);
+  menu.addAction(AUTOSTR("Reset columns"), ACTION_RESTORE);
 
   const int id = menu.show(x, y, handle());
 
@@ -542,10 +542,10 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
 
   switch(dataType) {
   case UserType: { // arbitrary data or no data: sort by visible text
-    auto_string l = cl.value;
+    String l = cl.value;
     boost::algorithm::to_lower(l);
 
-    auto_string r = cr.value;
+    String r = cr.value;
     boost::algorithm::to_lower(r);
 
     return l.compare(r);
@@ -567,7 +567,7 @@ ListView::Row::Row(const size_t size, void *data, ListView *list)
 {
 }
 
-void ListView::Row::setCell(const int i, const auto_string &val, void *data)
+void ListView::Row::setCell(const int i, const String &val, void *data)
 {
   Cell &cell = m_cells[i];
   cell.value = val;

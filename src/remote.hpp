@@ -20,26 +20,27 @@
 
 #include <boost/logic/tribool.hpp>
 #include <map>
-#include <string>
 #include <vector>
+
+#include "string.hpp"
 
 typedef boost::logic::tribool tribool;
 
 class Remote {
 public:
-  static Remote fromString(const std::string &data);
+  static Remote fromString(const String &data);
 
   Remote();
-  Remote(const std::string &name, const std::string &url, bool enabled = true,
+  Remote(const String &name, const String &url, bool enabled = true,
     const tribool &autoInstall = boost::logic::indeterminate);
 
-  std::string toString() const;
+  String toString() const;
 
-  void setName(const std::string &name);
-  const std::string &name() const { return m_name; }
+  void setName(const String &name);
+  const String &name() const { return m_name; }
 
-  void setUrl(const std::string &url);
-  const std::string &url() const { return m_url; }
+  void setUrl(const String &url);
+  const String &url() const { return m_url; }
 
   bool isNull() const { return m_name.empty() || m_url.empty(); }
 
@@ -58,8 +59,8 @@ public:
   operator bool() const { return !isNull(); }
 
 private:
-  std::string m_name;
-  std::string m_url;
+  String m_name;
+  String m_url;
   bool m_enabled;
   bool m_protected;
   tribool m_autoInstall;
@@ -72,20 +73,20 @@ public:
 
   void add(const Remote &);
   void remove(const Remote &remote) { remove(remote.name()); }
-  void remove(const std::string &name);
-  Remote get(const std::string &name) const;
+  void remove(const String &name);
+  Remote get(const String &name) const;
   std::vector<Remote> getEnabled() const;
 
   bool empty() const { return m_remotes.empty(); }
   size_t size() const { return m_remotes.size(); }
-  bool hasName(const std::string &name) const { return m_map.count(name) > 0; }
+  bool hasName(const String &name) const { return m_map.count(name) > 0; }
 
   std::vector<Remote>::const_iterator begin() const { return m_remotes.begin(); }
   std::vector<Remote>::const_iterator end() const { return m_remotes.end(); }
 
 private:
   std::vector<Remote> m_remotes;
-  std::map<std::string, size_t> m_map;
+  std::map<String, size_t> m_map;
 };
 
 #endif

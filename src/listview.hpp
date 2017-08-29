@@ -25,7 +25,7 @@
 #include <functional>
 #include <vector>
 
-#include "encoding.hpp"
+#include "string.hpp"
 #include "serializer.hpp"
 
 class Menu;
@@ -49,7 +49,7 @@ public:
     Cell() : userData(nullptr) {}
     Cell(const Cell &) = delete;
 
-    auto_string value;
+    String value;
     void *userData;
   };
 
@@ -64,7 +64,7 @@ public:
     int index() const { return m_userIndex; }
 
     const Cell &cell(const int i) const { return m_cells[i]; }
-    void setCell(const int i, const auto_string &, void *data = nullptr);
+    void setCell(const int i, const String &, void *data = nullptr);
 
   protected:
     friend ListView;
@@ -79,7 +79,7 @@ public:
   typedef std::shared_ptr<Row> RowPtr;
 
   struct Column {
-    auto_string label;
+    String label;
     int width;
     int flags;
     ColumnDataType dataType;

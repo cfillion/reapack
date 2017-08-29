@@ -25,10 +25,9 @@
 #include <cctype>
 #include <regex>
 
-using boost::format;
 using namespace std;
 
-string Version::displayAuthor(const string &author)
+String Version::displayAuthor(const String &author)
 {
   if(author.empty())
     return "Unknown";
@@ -36,7 +35,7 @@ string Version::displayAuthor(const string &author)
     return author;
 }
 
-Version::Version(const string &str, const Package *pkg)
+Version::Version(const String &str, const Package *pkg)
   : m_name(str), m_time(), m_package(pkg)
 {
 }
@@ -47,9 +46,9 @@ Version::~Version()
     delete source;
 }
 
-string Version::fullName() const
+String Version::fullName() const
 {
-  string name = m_package->fullName();
+  String name = m_package->fullName();
   name += " v";
   name += m_name.toString();
 
@@ -77,7 +76,7 @@ bool Version::addSource(const Source *source)
 VersionName::VersionName() : m_stable(true)
 {}
 
-VersionName::VersionName(const string &str)
+VersionName::VersionName(const String &str)
 {
   parse(str);
 }
@@ -87,7 +86,7 @@ VersionName::VersionName(const VersionName &o)
 {
 }
 
-void VersionName::parse(const string &str)
+void VersionName::parse(const String &str)
 {
   static const regex pattern("\\d+|[a-zA-Z]+");
 
@@ -98,12 +97,12 @@ void VersionName::parse(const string &str)
   vector<Segment> segments;
 
   for(sregex_iterator it = begin; it != end; it++) {
-    const string match = it->str(0);
+    const String match = it->str(0);
     const char first = tolower(match[0]);
 
     if(first >= 'a' || first >= 'z') {
       if(segments.empty()) // got leading letters
-        throw reapack_error(format("invalid version name '%s'") % str);
+        throw reapack_error(StringFormat("invalid version name '%s'") % str);
 
       segments.push_back(match);
       letters++;
@@ -113,20 +112,20 @@ void VersionName::parse(const string &str)
         segments.push_back(boost::lexical_cast<Numeric>(match));
       }
       catch(const boost::bad_lexical_cast &) {
-        throw reapack_error(format("version segment overflow in '%s'") % str);
+        throw reapack_error(StringFormat("version segment overflow in '%s'") % str);
       }
     }
   }
 
   if(segments.empty()) // version doesn't have any numbers
-    throw reapack_error(format("invalid version name '%s'") % str);
+    throw reapack_error(StringFormat("invalid version name '%s'") % str);
 
   m_string = str;
   swap(m_segments, segments);
   m_stable = letters < 1;
 }
 
-bool VersionName::tryParse(const string &str, string *errorOut)
+bool VersionName::tryParse(const String &str, String *errorOut)
 {
   try {
     parse(str);
@@ -162,11 +161,11 @@ int VersionName::compare(const VersionName &o) const
   for(size_t i = 0; i < biggest; i++) {
     const Segment &lseg = segment(i);
     const Numeric *lnum = boost::get<Numeric>(&lseg);
-    const string *lstr = boost::get<string>(&lseg);
+    const String *lstr = boost::get<String>(&lseg);
 
     const Segment &rseg = o.segment(i);
     const Numeric *rnum = boost::get<Numeric>(&rseg);
-    const string *rstr = boost::get<string>(&rseg);
+    const String *rstr = boost::get<String>(&rseg);
 
     if(lnum && rnum) {
       if(*lnum < *rnum)

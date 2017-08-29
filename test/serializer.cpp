@@ -2,6 +2,8 @@
 
 #include <serializer.hpp>
 
+#include <string.hpp>
+
 static const char *M = "[serializer]";
 
 TEST_CASE("read from serialized data", M) {

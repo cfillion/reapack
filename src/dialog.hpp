@@ -100,11 +100,11 @@ public:
   void setFocus();
   int startTimer(int elapse, int id = 0, bool replace = true);
   void stopTimer(int id);
-  void setClipboard(const std::string &);
-  void setClipboard(const std::vector<std::string> &);
-  static void openURL(const std::string &url);
+  void setClipboard(const String &);
+  void setClipboard(const std::vector<String> &);
+  static void openURL(const String &url);
   HWND getControl(int idc);
-  std::string getText(HWND);
+  String getText(HWND);
   void setAnchor(HWND, int flags);
   void setAnchorPos(HWND, const LONG *left = nullptr, const LONG *top = nullptr,
     const LONG *right = nullptr, const LONG *bottom = nullptr);

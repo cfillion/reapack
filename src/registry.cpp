@@ -239,7 +239,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   return entry;
 }
 
-auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
+auto Registry::getEntries(const String &remoteName) const -> vector<Entry>
 {
   vector<Registry::Entry> list;
 
@@ -326,7 +326,7 @@ void Registry::convertImplicitSections()
   Statement entries("SELECT id, category FROM entries", &m_db);
   entries.exec([&] {
     const auto id = entries.intColumn(0);
-    const string &category = entries.stringColumn(1);
+    const String &category = entries.stringColumn(1);
     const auto section = Source::detectSection(category);
 
     Statement update("UPDATE files SET main = ? WHERE entry = ? AND main != 0", &m_db);
