@@ -66,7 +66,7 @@ bool InstallTask::start()
   for(const Source *src : m_version->sources()) {
     const Path &targetPath = src->targetPath();
 
-    const auto old = find_if(m_oldFiles.begin(), m_oldFiles.end(),
+    const auto &old = find_if(m_oldFiles.begin(), m_oldFiles.end(),
       [&](const Registry::File &f) { return f.path == targetPath; });
 
     if(old != m_oldFiles.end())

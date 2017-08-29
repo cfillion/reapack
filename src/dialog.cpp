@@ -40,7 +40,7 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
   if(msg == WM_INITDIALOG)
     dlg = reinterpret_cast<Dialog *>(lParam);
   else {
-    const auto it = Dialog::s_instances.find(handle);
+    const auto &it = Dialog::s_instances.find(handle);
     if(it == Dialog::s_instances.end())
       return false;
     else
@@ -463,7 +463,7 @@ void Dialog::onCommand(const int id, int)
 
 void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 {
-  const auto it = m_controls.find((int)info->idFrom);
+  const auto &it = m_controls.find((int)info->idFrom);
 
   if(it != m_controls.end())
     it->second->onNotify(info, lParam);

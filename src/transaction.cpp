@@ -113,7 +113,7 @@ vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
   vector<IndexPtr> indexes;
 
   for(const Remote &remote : remotes) {
-    const auto it = m_indexes.find(remote.name());
+    const auto &it = m_indexes.find(remote.name());
     if(it != m_indexes.end())
       indexes.push_back(it->second);
   }
@@ -158,7 +158,7 @@ void Transaction::fetchIndex(const Remote &remote, const bool stale,
 
 IndexPtr Transaction::loadIndex(const Remote &remote)
 {
-  const auto it = m_indexes.find(remote.name());
+  const auto &it = m_indexes.find(remote.name());
   if(it != m_indexes.end())
     return it->second;
 
@@ -377,7 +377,7 @@ void Transaction::inhibit(const Remote &remote)
   // AND prevents files from this remote from being registered in REAPER
   // (UNregistering is not affected)
 
-  const auto it = m_syncedRemotes.find(remote.name());
+  const auto &it = m_syncedRemotes.find(remote.name());
   if(it != m_syncedRemotes.end())
     m_syncedRemotes.erase(it);
 

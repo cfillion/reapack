@@ -120,7 +120,7 @@ bool Index::addCategory(const Category *cat)
 
 const Category *Index::category(const string &name) const
 {
-  const auto it = m_catMap.find(name);
+  const auto &it = m_catMap.find(name);
 
   if(it == m_catMap.end())
     return nullptr;
@@ -169,7 +169,7 @@ bool Category::addPackage(const Package *pkg)
 
 const Package *Category::package(const string &name) const
 {
-  const auto it = m_pkgMap.find(name);
+  const auto &it = m_pkgMap.find(name);
 
   if(it == m_pkgMap.end())
     return nullptr;

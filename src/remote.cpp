@@ -135,7 +135,7 @@ void RemoteList::add(const Remote &remote)
     return;
 
   size_t index = 0;
-  const auto it = m_map.find(remote.name());
+  const auto &it = m_map.find(remote.name());
 
   if(it == m_map.end()) {
     // insert remote
@@ -153,7 +153,7 @@ void RemoteList::add(const Remote &remote)
 
 void RemoteList::remove(const string &name)
 {
-  const auto it = m_map.find(name);
+  const auto &it = m_map.find(name);
 
   if(it == m_map.end())
     return;
@@ -170,7 +170,7 @@ void RemoteList::remove(const string &name)
 
 Remote RemoteList::get(const string &name) const
 {
-  const auto it = m_map.find(name);
+  const auto &it = m_map.find(name);
 
   if(it == m_map.end())
     return {};

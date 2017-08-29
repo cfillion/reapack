@@ -395,7 +395,7 @@ void Manager::setRemoteEnabled(const bool enabled)
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
 {
-  const auto it = m_mods.find(remote);
+  const auto &it = m_mods.find(remote);
 
   if(it == m_mods.end())
     return remote.isEnabled();
@@ -418,7 +418,7 @@ void Manager::setRemoteAutoInstall(const tribool &enabled)
 
 tribool Manager::remoteAutoInstall(const Remote &remote) const
 {
-  const auto it = m_mods.find(remote);
+  const auto &it = m_mods.find(remote);
 
   if(it == m_mods.end())
     return remote.autoInstall();

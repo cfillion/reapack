@@ -256,7 +256,7 @@ size_t Archive::create(const auto_string &path, vector<string> *errors,
     if(FS::exists(path))
       jobs.push_back(new FileCompressor(path, writer));
     else {
-      const auto fmt = format("%s (%s)") % path.join() % FS::lastError();
+      const auto &fmt = format("%s (%s)") % path.join() % FS::lastError();
       errors->push_back(fmt.str());
     }
   };

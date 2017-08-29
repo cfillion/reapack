@@ -658,7 +658,7 @@ void Browser::installVersion(const int index, const size_t verIndex)
   if(!entry)
     return;
 
-  const auto versions = entry->package->versions();
+  const auto &versions = entry->package->versions();
 
   if(verIndex >= versions.size())
     return;
@@ -740,7 +740,7 @@ void Browser::updateAction(const int index)
   if(!entry)
     return;
 
-  const auto it = find(m_actions.begin(), m_actions.end(), entry);
+  const auto &it = find(m_actions.begin(), m_actions.end(), entry);
   if(!entry->target && (!entry->pin || !entry->canPin())) {
     if(it != m_actions.end())
       m_actions.erase(it);

@@ -68,7 +68,7 @@ DownloadContext::DownloadContext()
 {
   m_curl = curl_easy_init();
 
-  const auto userAgent = format("ReaPack/%s REAPER/%s")
+  const auto &userAgent = format("ReaPack/%s REAPER/%s")
     % ReaPack::VERSION % GetAppVersion();
 
   curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent.str().c_str());
@@ -142,7 +142,7 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    const auto err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
+    const auto &err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
     setError({err.str(), m_url});
     return false;
   }
