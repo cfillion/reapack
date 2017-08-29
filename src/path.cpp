@@ -24,18 +24,18 @@
 using namespace std;
 
 #ifndef _WIN32
-static const char SEPARATOR = '/';
+static const Char SEPARATOR = '/';
 #else
-static const char SEPARATOR = '\\';
+static const Char SEPARATOR = '\\';
 #endif
 
-static const String DOT = ".";
-static const String DOTDOT = "..";
+static const String DOT = L".";
+static const String DOTDOT = L"..";
 
-const Path Path::DATA = Path("ReaPack");
-const Path Path::CACHE = Path::DATA + "cache";
-const Path Path::CONFIG = Path("reapack.ini");
-const Path Path::REGISTRY = Path::DATA + "registry.db";
+const Path Path::DATA(L"ReaPack");
+const Path Path::CACHE = Path::DATA + L"cache";
+const Path Path::CONFIG(L"reapack.ini");
+const Path Path::REGISTRY = Path::DATA + L"registry.db";
 
 Path Path::s_root;
 
@@ -46,7 +46,7 @@ static vector<String> Split(const String &input, bool *absolute)
   size_t last = 0, size = input.size();
 
   while(last < size) {
-    const size_t pos = input.find_first_of("\\/", last);
+    const size_t pos = input.find_first_of(L"\\/", last);
 
     if(pos == string::npos) {
       list.push_back(input.substr(last));
@@ -60,7 +60,7 @@ static vector<String> Split(const String &input, bool *absolute)
 
     const String &part = input.substr(last, pos - last);
 
-    if(!part.empty() && part != ".")
+    if(!part.empty() && part != L".")
       list.push_back(part);
 
     last = pos + 1;
@@ -252,7 +252,7 @@ const String &Path::operator[](const size_t index) const
   return at(index);
 }
 
-UseRootPath::UseRootPath(const String &path)
+UseRootPath::UseRootPath(const Path &path)
   : m_backup(move(Path::s_root))
 {
   Path::s_root = path;
@@ -266,5 +266,5 @@ UseRootPath::~UseRootPath()
 TempPath::TempPath(const Path &target)
   : m_target(target), m_temp(target)
 {
-  m_temp[m_temp.size() - 1] += ".part";
+  m_temp[m_temp.size() - 1] += L".part";
 }

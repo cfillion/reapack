@@ -11,26 +11,26 @@ TEST_CASE("repository links", M) {
   CHECK(md.links().empty());
 
   SECTION("website links") {
-    md.addLink(Metadata::WebsiteLink, {"First", "http://example.com"});
+    md.addLink(Metadata::WebsiteLink, {L"First", L"http://example.com"});
     REQUIRE(md.links().count(Metadata::WebsiteLink) == 1);
-    md.addLink(Metadata::WebsiteLink, {"Second", "http://example.com"});
+    md.addLink(Metadata::WebsiteLink, {L"Second", L"http://example.com"});
 
     auto link = md.links().begin();
     REQUIRE(link->first == Metadata::WebsiteLink);
-    REQUIRE(link->second.name == "First");
-    REQUIRE((++link)->second.name == "Second");
+    REQUIRE(link->second.name == L"First");
+    REQUIRE((++link)->second.name == L"Second");
 
     REQUIRE(md.links().count(Metadata::DonationLink) == 0);
   }
 
   SECTION("donation links") {
-    md.addLink(Metadata::DonationLink, {"First", "http://example.com"});
+    md.addLink(Metadata::DonationLink, {L"First", L"http://example.com"});
     REQUIRE(md.links().count(Metadata::DonationLink) == 1);
     REQUIRE(md.links().begin()->first == Metadata::DonationLink);
   }
 
   SECTION("drop invalid links") {
-    md.addLink(Metadata::WebsiteLink, {"name", "not http(s)"});
+    md.addLink(Metadata::WebsiteLink, {L"name", L"not http(s)"});
     REQUIRE(md.links().count(Metadata::WebsiteLink) == 0);
   }
 }
@@ -46,6 +46,6 @@ TEST_CASE("about text", M) {
   Metadata md;
   CHECK(md.about().empty());
 
-  md.setAbout("Hello World");
-  REQUIRE(md.about() == "Hello World");
+  md.setAbout(L"Hello World");
+  REQUIRE(md.about() == L"Hello World");
 }

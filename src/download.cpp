@@ -24,6 +24,7 @@
 
 #include <reaper_plugin_functions.h>
 
+using boost::format;
 using namespace std;
 
 static const int DOWNLOAD_TIMEOUT = 15;
@@ -67,8 +68,8 @@ DownloadContext::DownloadContext()
 {
   m_curl = curl_easy_init();
 
-  const auto &userAgent = StringFormat("ReaPack/%s REAPER/%s")
-    % ReaPack::VERSION % GetAppVersion();
+  const auto &userAgent = format("ReaPack/%s REAPER/%s")
+    % String(ReaPack::VERSION).toUtf8().c_str() % GetAppVersion();
 
   curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent.str().c_str());
   curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1);
@@ -109,7 +110,7 @@ Download::Download(const String &url, const NetworkOpts &opts, const int flags)
 
 void Download::setName(const String &name)
 {
-  setSummary("Downloading %s: " + name);
+  setSummary(L"Downloading %s: " + name);
 }
 
 bool Download::run()
@@ -118,8 +119,8 @@ bool Download::run()
   if(!stream)
     return false;
 
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.c_str());
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.toUtf8().c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.toUtf8().c_str());
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
@@ -141,7 +142,7 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    const auto &err = StringFormat("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
+    const auto &err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
     setError({err.str(), m_url});
     return false;
   }

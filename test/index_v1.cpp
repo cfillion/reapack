@@ -5,11 +5,10 @@
 
 #include <string>
 
-#define RIPATH "test/indexes/v1/"
-
 using namespace std;
 
 static const char *M = "[reapack_v1]";
+static const Path RIPATH(L"test/indexes");
 
 TEST_CASE("unnamed category", M) {
   UseRootPath root(RIPATH);
@@ -19,7 +18,7 @@ TEST_CASE("unnamed category", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "empty category name");
+    REQUIRE(e.what() == L"empty category name");
   }
 }
 
@@ -47,7 +46,7 @@ TEST_CASE("null package name", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "empty package name");
+    REQUIRE(e.what() == L"empty package name");
   }
 }
 
@@ -75,7 +74,7 @@ TEST_CASE("read version author", M) {
 
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->version(0)->author()
-    == "Watanabe Saki");
+    == L"Watanabe Saki");
 }
 
 TEST_CASE("read version time", M) {
@@ -105,7 +104,7 @@ TEST_CASE("null package version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "invalid version name ''");
+    REQUIRE(e.what() == L"invalid version name ''");
   }
 }
 
@@ -117,7 +116,7 @@ TEST_CASE("null source url", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "empty source url");
+    REQUIRE(e.what() == L"empty source url");
   }
 }
 
@@ -148,7 +147,7 @@ TEST_CASE("version changelog", M) {
   CHECK(ri->packages().size() == 1);
 
   REQUIRE(ri->category(0)->package(0)->version(0)->changelog()
-    == "Hello\nWorld");
+    == L"Hello\nWorld");
 }
 
 TEST_CASE("full index", M) {
@@ -158,30 +157,30 @@ TEST_CASE("full index", M) {
 
   REQUIRE(ri->categories().size() == 1);
   const Category *cat = ri->category(0);
-  REQUIRE(cat->name() == "Category Name");
+  REQUIRE(cat->name() == L"Category Name");
 
   REQUIRE(cat->packages().size() == 1);
   const Package *pack = cat->package(0);
   REQUIRE(pack->type() == Package::ScriptType);
-  REQUIRE(pack->name() == "Hello World.lua");
+  REQUIRE(pack->name() == L"Hello World.lua");
 
   REQUIRE(pack->versions().size() == 1);
   const Version *ver = pack->version(0);
   REQUIRE(ver->name() == VersionName("1.0"));
-  REQUIRE(ver->changelog() == "Fixed a division by zero error.");
+  REQUIRE(ver->changelog() == L"Fixed a division by zero error.");
 
   REQUIRE(ver->sources().size() == 2);
   const Source *source1 = ver->source(0);
   REQUIRE(source1->platform() == Platform::GenericPlatform);
-  REQUIRE(source1->file() == "test.lua");
+  REQUIRE(source1->file() == L"test.lua");
   REQUIRE(source1->sections() == Source::MainSection);
-  REQUIRE(source1->url() == "https://google.com/");
+  REQUIRE(source1->url() == L"https://google.com/");
 
   const Source *source2 = ver->source(1);
   REQUIRE(source2->platform() == Platform::GenericPlatform);
-  REQUIRE(source2->file() == "background.png");
+  REQUIRE(source2->file() == L"background.png");
   REQUIRE_FALSE(source2->sections() == Source::MainSection);
-  REQUIRE(source2->url() == "http://cfillion.tk/");
+  REQUIRE(source2->url() == L"http://cfillion.tk/");
 }
 
 TEST_CASE("read index metadata", M) {
@@ -190,11 +189,11 @@ TEST_CASE("read index metadata", M) {
   IndexPtr ri = Index::load("metadata");
 
   SECTION("name (ignored)") {
-    REQUIRE(ri->name() == "metadata");
+    REQUIRE(ri->name() == L"metadata");
   }
 
   SECTION("description") {
-    REQUIRE(ri->metadata()->about() == "Chunky\nBacon");
+    REQUIRE(ri->metadata()->about() == L"Chunky\nBacon");
   }
 
   SECTION("links") {
@@ -202,21 +201,21 @@ TEST_CASE("read index metadata", M) {
 
     auto link = ri->metadata()->links().begin();
     REQUIRE(link->first == Metadata::WebsiteLink);
-    REQUIRE(link->second.name == "http://cfillion.tk");
-    REQUIRE(link->second.url == "http://cfillion.tk");
+    REQUIRE(link->second.name == L"http://cfillion.tk");
+    REQUIRE(link->second.url == L"http://cfillion.tk");
 
-    REQUIRE((++link)->second.name == "https://github.com/cfillion");
-    REQUIRE(link->second.url == "https://github.com/cfillion");
+    REQUIRE((++link)->second.name == L"https://github.com/cfillion");
+    REQUIRE(link->second.url == L"https://github.com/cfillion");
 
-    REQUIRE((++link)->second.name == "http://twitter.com/cfi30");
-    REQUIRE(link->second.url == "http://twitter.com/cfi30");
+    REQUIRE((++link)->second.name == L"http://twitter.com/cfi30");
+    REQUIRE(link->second.url == L"http://twitter.com/cfi30");
 
-    REQUIRE((++link)->second.name == "http://google.com");
-    REQUIRE(link->second.url == "http://google.com");
+    REQUIRE((++link)->second.name == L"http://google.com");
+    REQUIRE(link->second.url == L"http://google.com");
 
     REQUIRE((++link)->first == Metadata::DonationLink);
-    REQUIRE(link->second.name == "Donate");
-    REQUIRE(link->second.url == "http://paypal.com");
+    REQUIRE(link->second.name == L"Donate");
+    REQUIRE(link->second.url == L"http://paypal.com");
   }
 }
 
@@ -229,7 +228,7 @@ TEST_CASE("read package metadata", M) {
   const Package *pkg = ri->packages()[0];
 
   SECTION("description") {
-    REQUIRE(pkg->metadata()->about() == "Chunky\nBacon");
+    REQUIRE(pkg->metadata()->about() == L"Chunky\nBacon");
   }
 
   SECTION("links") {
@@ -237,24 +236,24 @@ TEST_CASE("read package metadata", M) {
 
     auto link = pkg->metadata()->links().begin();
     REQUIRE(link->first == Metadata::WebsiteLink);
-    REQUIRE(link->second.name == "http://cfillion.tk");
-    REQUIRE(link->second.url == "http://cfillion.tk");
+    REQUIRE(link->second.name == L"http://cfillion.tk");
+    REQUIRE(link->second.url == L"http://cfillion.tk");
 
     REQUIRE((++link)->first == Metadata::DonationLink);
-    REQUIRE(link->second.name == "Donate");
-    REQUIRE(link->second.url == "http://paypal.com");
+    REQUIRE(link->second.name == L"Donate");
+    REQUIRE(link->second.url == L"http://paypal.com");
   }
 }
 
 TEST_CASE("read index name (from raw data only)") {
   SECTION("valid") {
     IndexPtr ri = Index::load({}, "<index version=\"1\" name=\"Hello World\"/>\n");
-    REQUIRE(ri->name() == "Hello World");
+    REQUIRE(ri->name() == L"Hello World");
   }
 
   SECTION("missing") {
     IndexPtr ri = Index::load({}, "<index version=\"1\"/>\n");
-    REQUIRE(ri->name() == "");
+    REQUIRE(ri->name() == L"");
   }
 }
 
@@ -293,7 +292,7 @@ TEST_CASE("read package description", M) {
   IndexPtr ri = Index::load("pkg_desc");
 
   CHECK(ri->packages().size() == 1);
-  REQUIRE(ri->category(0)->package(0)->description() == "From the New World");
+  REQUIRE(ri->category(0)->package(0)->description() == L"From the New World");
 }
 
 TEST_CASE("read multiple sections", M) {

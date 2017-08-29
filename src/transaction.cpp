@@ -169,7 +169,7 @@ IndexPtr Transaction::loadIndex(const Remote &remote)
   }
   catch(const reapack_error &e) {
     m_receipt.addError({
-      "Couldn't load repository: " + string(e.what()), remote.name()});
+      L"Couldn't load repository: " + e.what(), remote.name()});
     return nullptr;
   }
 }
@@ -339,7 +339,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
   if(!AddRemoveReaScript || !reg.file.sections)
     return; // do nothing if REAPER < v5.12 and skip non-main files
 
-  const string &fullPath = Path::prefixRoot(reg.file.path).join();
+  const string &fullPath = Path::prefixRoot(reg.file.path).join().toUtf8();
 
   vector<int> sections;
 

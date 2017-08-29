@@ -39,7 +39,7 @@ void Filter::set(const String &input)
   State state = Default;
   Group *group = &m_root;
 
-  for(const char c : input) {
+  for(const Char c : input) {
     if(c == '"' && state != SingleQuote) {
       state = state == Default ? DoubleQuote : Default;
       flags |= Node::QuotedFlag;
@@ -68,7 +68,7 @@ void Filter::set(const String &input)
 
 bool Filter::match(vector<String> rows) const
 {
-  for_each(rows.begin(), rows.end(), [](string &str) { boost::to_lower(str); });
+  for_each(rows.begin(), rows.end(), [](String &str) { boost::to_lower(str); });
   return m_root.match(rows);
 }
 
@@ -83,11 +83,11 @@ Filter::Group *Filter::Group::push(String buf, int *flags)
     return this;
 
   if((*flags & QuotedFlag) == 0) {
-    if(buf == "NOT") {
+    if(buf == L"NOT") {
       *flags ^= Token::NotFlag;
       return this;
     }
-    else if(buf == "OR") {
+    else if(buf == L"OR") {
       if(m_nodes.empty())
         return this;
       else if(m_type == MatchAny) {
@@ -104,13 +104,13 @@ Filter::Group *Filter::Group::push(String buf, int *flags)
 
       return newGroup.get();
     }
-    else if(buf == "(") {
+    else if(buf == L"(") {
       auto newGroup = make_shared<Group>(MatchAll, *flags, this);
       m_nodes.push_back(newGroup);
       *flags = 0;
       return newGroup.get();
     }
-    else if(buf == ")") {
+    else if(buf == L")") {
       for(Group *parent = this; parent->m_parent; parent = parent->m_parent) {
         if(parent->m_type == MatchAll)
           return parent->m_parent;
@@ -120,11 +120,11 @@ Filter::Group *Filter::Group::push(String buf, int *flags)
     }
   }
 
-  if(buf.size() > 1 && buf.front() == '^') {
+  if(buf.size() > 1 && buf.front() == L'^') {
     *flags |= Node::StartAnchorFlag;
     buf.erase(0, 1); // we need to recheck the size() below, for '$'
   }
-  if(buf.size() > 1 && buf.back() == '$') {
+  if(buf.size() > 1 && buf.back() == L'$') {
     *flags |= Node::EndAnchorFlag;
     buf.pop_back();
   }

@@ -79,7 +79,7 @@ private:
 
 class UseRootPath {
 public:
-  UseRootPath(const String &);
+  UseRootPath(const Path &);
   ~UseRootPath();
 
 private:

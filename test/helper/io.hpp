@@ -5,6 +5,7 @@
 #include <set>
 
 class Path;
+class String;
 class Time;
 class Version;
 

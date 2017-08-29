@@ -18,13 +18,13 @@
 #include "string.hpp"
 
 #ifdef _WIN32
-string::string(const string &input, UINT codepage)
+void String::convert(const std::string &input, UINT codepage)
 {
   const int size = MultiByteToWideChar(codepage, 0,
     &input[0], -1, nullptr, 0) - 1;
 
-  output.resize(size);
-  MultiByteToWideChar(codepage, 0, data(), -1, &output[0], size);
+  resize(size);
+  MultiByteToWideChar(codepage, 0, &input[0], -1, &(*this)[0], size);
 }
 
 std::string String::toUtf8() const
@@ -32,10 +32,23 @@ std::string String::toUtf8() const
   const int size = WideCharToMultiByte(CP_UTF8, 0,
     data(), -1, nullptr, 0, nullptr, nullptr) - 1;
 
-  string output(size, 0);
+  std::string output(size, 0);
   WideCharToMultiByte(CP_UTF8, 0,
-    c_str(), -1, output.data(), size, nullptr, nullptr);
+    data(), -1, &output[0], size, nullptr, nullptr);
 
   return output;
 }
+
+#define SNPRINTF_DEF(T, impl) \
+  int snprintf_auto(T *buf, size_t size, const T *fmt, ...) { \
+    va_list va; \
+    va_start(va, fmt); \
+    int ret = impl(buf, size - 1, fmt, va); \
+    va_end(va); \
+    return ret; \
+  }
+
+SNPRINTF_DEF(char, _vsnprintf);
+SNPRINTF_DEF(wchar_t, _vsnwprintf);
+
 #endif

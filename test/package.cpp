@@ -32,19 +32,19 @@ TEST_CASE("package type from string", M) {
 }
 
 TEST_CASE("package type to string", M) {
-  const vector<pair<Package::Type, string> > tests{
-    {Package::UnknownType,           "Unknown"},
-    {Package::ScriptType,            "Script"},
-    {Package::ExtensionType,         "Extension"},
-    {Package::EffectType,            "Effect"},
-    {Package::DataType,              "Data"},
-    {Package::ThemeType,             "Theme"},
-    {Package::LangPackType,          "Language Pack"},
-    {Package::WebInterfaceType,      "Web Interface"},
-    {Package::ProjectTemplateType,   "Project Template"},
-    {Package::TrackTemplateType,     "Track Template"},
-    {Package::MIDINoteNamesType,     "MIDI Note Names"},
-    {static_cast<Package::Type>(-1), "Unknown"},
+  const vector<pair<Package::Type, String> > tests{
+    {Package::UnknownType,           L"Unknown"},
+    {Package::ScriptType,            L"Script"},
+    {Package::ExtensionType,         L"Extension"},
+    {Package::EffectType,            L"Effect"},
+    {Package::DataType,              L"Data"},
+    {Package::ThemeType,             L"Theme"},
+    {Package::LangPackType,          L"Language Pack"},
+    {Package::WebInterfaceType,      L"Web Interface"},
+    {Package::ProjectTemplateType,   L"Project Template"},
+    {Package::TrackTemplateType,     L"Track Template"},
+    {Package::MIDINoteNamesType,     L"MIDI Note Names"},
+    {static_cast<Package::Type>(-1), L"Unknown"},
   };
 
   for(const auto &pair : tests)
@@ -58,7 +58,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "empty package name");
+      REQUIRE(e.what() == L"empty package name");
     }
   }
 
@@ -68,7 +68,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "invalid package name 'hello/world'");
+      REQUIRE(e.what() == L"invalid package name 'hello/world'");
     }
   }
 
@@ -78,7 +78,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "invalid package name 'hello\\world'");
+      REQUIRE(e.what() == L"invalid package name 'hello\\world'");
     }
   }
 }
@@ -189,7 +189,7 @@ TEST_CASE("add owned version", M) {
   }
   catch(const reapack_error &e) {
     delete ver;
-    REQUIRE(String(e.what()) == "version belongs to another package");
+    REQUIRE(e.what() == L"version belongs to another package");
   }
 }
 
@@ -207,7 +207,7 @@ TEST_CASE("add duplicate version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "duplicate version 'r/c/p v1'");
+    REQUIRE(e.what() == L"duplicate version 'r/c/p v1'");
   }
 }
 
@@ -235,10 +235,10 @@ TEST_CASE("package full name", M) {
   const Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "file.name", &cat);
 
-  REQUIRE(pack.fullName() == "Index Name/Category Name/file.name");
+  REQUIRE(pack.fullName() == L"Index Name/Category Name/file.name");
 
   pack.setDescription("Hello World");
-  REQUIRE(pack.fullName() == "Index Name/Category Name/Hello World");
+  REQUIRE(pack.fullName() == L"Index Name/Category Name/Hello World");
 }
 
 TEST_CASE("package description", M) {
@@ -246,13 +246,13 @@ TEST_CASE("package description", M) {
   REQUIRE(pack.description().empty());
 
   pack.setDescription("hello world");
-  REQUIRE(pack.description() == "hello world");
+  REQUIRE(pack.description() == L"hello world");
 }
 
 TEST_CASE("package display name", M) {
   Package pack(Package::ScriptType, "test.lua", nullptr);
-  REQUIRE(pack.displayName() == "test.lua");
+  REQUIRE(pack.displayName() == L"test.lua");
 
   pack.setDescription("hello world");
-  REQUIRE(pack.displayName() == "hello world");
+  REQUIRE(pack.displayName() == L"hello world");
 }

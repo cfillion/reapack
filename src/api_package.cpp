@@ -84,7 +84,7 @@ type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.)",
 
   const Registry::File &file = entry->files[i];
   if(pathOut)
-    snprintf(pathOut, pathOut_sz, "%s", Path::prefixRoot(file.path).join().c_str());
+    snprintf(pathOut, pathOut_sz, "%s", Path::prefixRoot(file.path).join().toUtf8().c_str());
   if(sectionsOut)
     *sectionsOut = file.sections;
   if(typeOut)
@@ -120,19 +120,19 @@ type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterfa
   const Registry::Entry &regEntry = entry->regEntry;
 
   if(repoOut)
-    snprintf(repoOut, repoOut_sz, "%s", regEntry.remote.c_str());
+    snprintf(repoOut, repoOut_sz, "%s", regEntry.remote.toUtf8().c_str());
   if(catOut)
-    snprintf(catOut, catOut_sz, "%s", regEntry.category.c_str());
+    snprintf(catOut, catOut_sz, "%s", regEntry.category.toUtf8().c_str());
   if(pkgOut)
-    snprintf(pkgOut, pkgOut_sz, "%s", regEntry.package.c_str());
+    snprintf(pkgOut, pkgOut_sz, "%s", regEntry.package.toUtf8().c_str());
   if(descOut)
-    snprintf(descOut, descOut_sz, "%s", regEntry.description.c_str());
+    snprintf(descOut, descOut_sz, "%s", regEntry.description.toUtf8().c_str());
   if(typeOut)
     *typeOut = (int)regEntry.type;
   if(verOut)
-    snprintf(verOut, verOut_sz, "%s", regEntry.version.toString().c_str());
+    snprintf(verOut, verOut_sz, "%s", regEntry.version.toString().toUtf8().c_str());
   if(authorOut)
-    snprintf(authorOut, authorOut_sz, "%s", regEntry.author.c_str());
+    snprintf(authorOut, authorOut_sz, "%s", regEntry.author.toUtf8().c_str());
   if(pinnedOut)
     *pinnedOut = regEntry.pinned;
   if(fileCountOut)
@@ -169,7 +169,7 @@ Delete the returned object from memory after use with <a href="#ReaPack_FreeEntr
   catch(const reapack_error &e)
   {
     if(errorOut)
-      snprintf(errorOut, errorOut_sz, "%s", e.what());
+      snprintf(errorOut, errorOut_sz, "%s", e.what().c_str());
 
     return nullptr;
   }

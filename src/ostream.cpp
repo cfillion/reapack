@@ -35,31 +35,31 @@ void OutputStream::indented(const String &text)
   StringStreamI stream(text);
   String line;
 
-  while(getline(stream, line, '\n')) {
+  while(getline(stream, line, L'\n')) {
     boost::algorithm::trim(line);
 
     if(!line.empty())
-      m_stream << "\x20\x20" << line;
+      m_stream << L"\x20\x20" << line;
 
-    m_stream << "\r\n";
+    m_stream << L"\r\n";
   }
 }
 
 OutputStream &OutputStream::operator<<(const Version &ver)
 {
-  m_stream << 'v' << ver.name().toString();
+  m_stream << L'v' << ver.name().toString();
 
   if(!ver.author().empty())
-    m_stream << " by " << ver.author();
+    m_stream << L" by " << ver.author();
 
   const String &date = ver.time().toString();
   if(!date.empty())
-    m_stream << " – " << date;
+    m_stream << L" – " << date;
 
-  m_stream << "\r\n";
+  m_stream << L"\r\n";
 
   const String &changelog = ver.changelog();
-  indented(changelog.empty() ? "No changelog" : changelog);
+  indented(changelog.empty() ? L"No changelog" : changelog);
 
   return *this;
 }

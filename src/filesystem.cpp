@@ -42,14 +42,12 @@ static bool stat(const Path &path, struct stat *out)
   const Path &fullPath = Path::prefixRoot(path);
 
 #ifdef _WIN32
-  if(_wstat(autocstring(fullPath.join()), out))
-    return false;
+  const auto func = &_wstat;
 #else
-  if(::stat(fullPath.join().c_str(), out))
-    return false;
+  const auto func = &::stat;
 #endif
 
-  return true;
+  return !func(fullPath.join().c_str(), out);
 }
 
 FILE *FS::open(const Path &path)
@@ -58,7 +56,7 @@ FILE *FS::open(const Path &path)
 
 #ifdef _WIN32
   FILE *file = nullptr;
-  _wfopen_s(&file, autocstring(fullPath.join()), L"rb");
+  _wfopen_s(&file, fullPath.join().c_str(), L"rb");
   return file;
 #else
   return fopen(fullPath.join().c_str(), "rb");
@@ -82,7 +80,7 @@ bool FS::open(ofstream &stream, const Path &path)
   return stream.good();
 }
 
-bool FS::write(const Path &path, const String &contents)
+bool FS::write(const Path &path, const string &contents)
 {
   ofstream file;
   if(!open(file, path))
@@ -109,12 +107,12 @@ bool FS::rename(const Path &from, const Path &to)
   const String &fullTo = Path::prefixRoot(to).join();
 
 #ifdef _WIN32
-  const auto osRename = &_wrename;
+  const auto func = &_wrename;
 #else
-  const auto osRename = &::rename;
+  const auto func = &::rename;
 #endif
 
-  return !osRename(fullFrom.c_str(), fullTo.c_str());
+  return !func(fullFrom.c_str(), fullTo.c_str());
 }
 
 bool FS::remove(const Path &path)
@@ -136,7 +134,7 @@ bool FS::remove(const Path &path)
   // Windows is so great!
 
   Path workaroundPath = Path::DATA;
-  workaroundPath.append("old_" + path.last() + ".tmp");
+  workaroundPath.append(L"old_" + path.last() + L".tmp");
 
   return rename(path, workaroundPath);
 #else

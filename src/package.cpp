@@ -57,25 +57,25 @@ String Package::displayType(const Type type)
   case UnknownType:
     break;
   case ScriptType:
-    return "Script";
+    return L"Script";
   case ExtensionType:
-    return "Extension";
+    return L"Extension";
   case EffectType:
-    return "Effect";
+    return L"Effect";
   case DataType:
-    return "Data";
+    return L"Data";
   case ThemeType:
-    return "Theme";
+    return L"Theme";
   case LangPackType:
-    return "Language Pack";
+    return L"Language Pack";
   case WebInterfaceType:
-    return "Web Interface";
+    return L"Web Interface";
   case ProjectTemplateType:
-    return "Project Template";
+    return L"Project Template";
   case TrackTemplateType:
-    return "Track Template";
+    return L"Track Template";
   case MIDINoteNamesType:
-    return "MIDI Note Names";
+    return L"MIDI Note Names";
   }
 
   return "Unknown";
@@ -90,9 +90,9 @@ Package::Package(const Type type, const String &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
-    throw reapack_error("empty package name");
-  else if(m_name.find_first_of("/\\") != string::npos)
-    throw reapack_error(StringFormat("invalid package name '%s'") % m_name);
+    throw reapack_error(L"empty package name");
+  else if(m_name.find_first_of(L"/\\") != string::npos)
+    throw reapack_error(StringFormat(L"invalid package name '%s'") % m_name);
 }
 
 Package::~Package()
@@ -107,7 +107,7 @@ String Package::fullName() const
     return displayName();
 
   String out = m_category->fullName();
-  out += '/';
+  out += L'/';
   out += displayName();
   return out;
 }
@@ -115,11 +115,11 @@ String Package::fullName() const
 bool Package::addVersion(const Version *ver)
 {
   if(ver->package() != this)
-    throw reapack_error("version belongs to another package");
+    throw reapack_error(L"version belongs to another package");
   else if(ver->sources().empty())
     return false;
   else if(m_versions.count(ver))
-    throw reapack_error(StringFormat("duplicate version '%s'") % ver->fullName());
+    throw reapack_error(StringFormat(L"duplicate version '%s'") % ver->fullName());
 
   m_versions.insert(ver);
 

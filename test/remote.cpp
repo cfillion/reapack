@@ -12,8 +12,8 @@ static const char *M = "[remote]";
 
 TEST_CASE("construct remote", M) {
   Remote remote{"name", "url", true};
-  REQUIRE(remote.name() == "name");
-  REQUIRE(remote.url() == "url");
+  REQUIRE(remote.name() == L"name");
+  REQUIRE(remote.url() == L"url");
   REQUIRE(remote.isEnabled());
   REQUIRE_FALSE(remote.isProtected());
 }
@@ -42,31 +42,31 @@ TEST_CASE("remote name validation", M) {
 
     for(const String &name : invalidNames) {
       try {
-        Remote remote(name, "url");
-        FAIL("'" + name + "' was allowed");
+        Remote remote(name, L"url");
+        FAIL("'" + name.toUtf8() + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(String(e.what()) == "invalid name");
+        REQUIRE(e.what() == L"invalid name");
       }
     }
   }
 
   SECTION("valid") {
     const String validNames[] = {
-      "1234",
-      "hello world",
-      "hello_world",
-      "Новая папка",
-      "Hello ~World~",
-      "Repository #1"
+      L"1234",
+      L"hello world",
+      L"hello_world",
+      L"Новая папка",
+      L"Hello ~World~",
+      L"Repository #1"
     };
 
     for(const String &name : validNames) {
       try {
-        Remote remote(name, "url");
+        Remote remote(name, L"url");
       }
       catch(const reapack_error &e) {
-        FAIL("'" + name + "' was denied (" + e.what() + ')');
+        FAIL("'" + name.toUtf8() + "' was denied (" + e.what().toUtf8() + ')');
       }
     }
   }
@@ -75,17 +75,17 @@ TEST_CASE("remote name validation", M) {
 TEST_CASE("remote url validation", M) {
   SECTION("invalid") {
     const String invalidUrls[] = {
-      "",
-      "hello world", // space should be %20
+      L"",
+      L"hello world", // space should be %20
     };
 
     for(const String &url : invalidUrls) {
       try {
-        Remote remote("hello", url);
-        FAIL("'" + url + "' was allowed");
+        Remote remote(L"hello", url);
+        FAIL("'" + url.toUtf8() + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(String(e.what()) == "invalid url");
+        REQUIRE(e.what() == L"invalid url");
       }
     }
   }
@@ -100,7 +100,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "invalid name");
+      REQUIRE(e.what() == L"invalid name");
     }
   }
 
@@ -110,7 +110,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "invalid url");
+      REQUIRE(e.what() == L"invalid url");
     }
   }
 }
@@ -136,13 +136,13 @@ TEST_CASE("null remote", M) {
 
   SECTION("set name") {
     remote.setName("test");
-    REQUIRE(remote.name() == "test");
+    REQUIRE(remote.name() == L"test");
     REQUIRE(remote.isNull());
   }
 
   SECTION("set url") {
     remote.setUrl("test");
-    REQUIRE(remote.url() == "test");
+    REQUIRE(remote.url() == L"test");
     REQUIRE(remote.isNull());
   }
 
@@ -190,7 +190,7 @@ TEST_CASE("replace remote", M) {
   list.add({"name", "url2"});
 
   REQUIRE(list.size() == 1);
-  REQUIRE(list.get("name").url() == "url2");
+  REQUIRE(list.get("name").url() == L"url2");
 };
 
 TEST_CASE("get remote by name", M) {
@@ -212,15 +212,15 @@ TEST_CASE("unserialize remote", M) {
     Remote remote = Remote::fromString("name|url|1");
     REQUIRE(remote);
 
-    REQUIRE(remote.name() == "name");
-    REQUIRE(remote.url() == "url");
+    REQUIRE(remote.name() == L"name");
+    REQUIRE(remote.url() == L"url");
     REQUIRE(remote.isEnabled());
   }
 
   SECTION("disabled") {
     Remote remote = Remote::fromString("name|url|0");
-    REQUIRE(remote.name() == "name");
-    REQUIRE(remote.url() == "url");
+    REQUIRE(remote.name() == L"name");
+    REQUIRE(remote.url() == L"url");
     REQUIRE_FALSE(remote.isEnabled());
   }
 
@@ -247,13 +247,13 @@ TEST_CASE("unserialize remote", M) {
 
 TEST_CASE("serialize remote", M) {
   SECTION("default")
-    REQUIRE(Remote("name", "url").toString() == "name|url|1|2");
+    REQUIRE(Remote("name", "url").toString() == L"name|url|1|2");
 
   SECTION("enabled")
-    REQUIRE(Remote("name", "url", true, true).toString() == "name|url|1|1");
+    REQUIRE(Remote("name", "url", true, true).toString() == L"name|url|1|1");
 
   SECTION("disabled")
-    REQUIRE(Remote("name", "url", false, false).toString() == "name|url|0|0");
+    REQUIRE(Remote("name", "url", false, false).toString() == L"name|url|0|0");
 }
 
 TEST_CASE("get enabled remotes", M) {
@@ -264,7 +264,7 @@ TEST_CASE("get enabled remotes", M) {
   const vector<Remote> array = list.getEnabled();
 
   REQUIRE(array.size() == 1);
-  REQUIRE(array[0].name() == "hello");
+  REQUIRE(array[0].name() == L"hello");
 }
 
 TEST_CASE("remove remote", M) {

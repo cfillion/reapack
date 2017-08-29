@@ -27,29 +27,29 @@
 
 using namespace std;
 
-static const Char *GENERAL_GRP = AUTOSTR("general");
-static const Char *VERSION_KEY = AUTOSTR("version");
+static const Char *GENERAL_GRP = L"general";
+static const Char *VERSION_KEY = L"version";
 
-static const Char *INSTALL_GRP = AUTOSTR("install");
-static const Char *AUTOINSTALL_KEY = AUTOSTR("autoinstall");
-static const Char *PRERELEASES_KEY = AUTOSTR("prereleases");
-static const Char *PROMPTOBSOLETE_KEY = AUTOSTR("promptobsolete");
+static const Char *INSTALL_GRP = L"install";
+static const Char *AUTOINSTALL_KEY = L"autoinstall";
+static const Char *PRERELEASES_KEY = L"prereleases";
+static const Char *PROMPTOBSOLETE_KEY = L"promptobsolete";
 
-static const Char *ABOUT_GRP = AUTOSTR("about");
-static const Char *MANAGER_GRP = AUTOSTR("manager");
+static const Char *ABOUT_GRP = L"about";
+static const Char *MANAGER_GRP = L"manager";
 
-static const Char *BROWSER_GRP = AUTOSTR("browser");
-static const Char *STATE_KEY = AUTOSTR("state");
+static const Char *BROWSER_GRP = L"browser";
+static const Char *STATE_KEY = L"state";
 
-static const Char *NETWORK_GRP = AUTOSTR("network");
-static const Char *PROXY_KEY = AUTOSTR("proxy");
-static const Char *VERIFYPEER_KEY = AUTOSTR("verifypeer");
-static const Char *STALETHRSH_KEY = AUTOSTR("stalethreshold");
+static const Char *NETWORK_GRP = L"network";
+static const Char *PROXY_KEY = L"proxy";
+static const Char *VERIFYPEER_KEY = L"verifypeer";
+static const Char *STALETHRSH_KEY = L"stalethreshold";
 
-static const Char *SIZE_KEY = AUTOSTR("size");
+static const Char *SIZE_KEY = L"size";
 
-static const Char *REMOTES_GRP = AUTOSTR("remotes");
-static const Char *REMOTE_KEY  = AUTOSTR("remote");
+static const Char *REMOTES_GRP = L"remotes";
+static const Char *REMOTE_KEY  = L"remote";
 
 static String ArrayKey(const String &key, const unsigned int i)
 {

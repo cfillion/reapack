@@ -355,7 +355,7 @@ void Dialog::setClipboard(const vector<String> &values)
 
 void Dialog::openURL(const String &url)
 {
-  ShellExecute(nullptr, AUTOSTR("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
+  ShellExecute(nullptr, L"open", url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
 HWND Dialog::getControl(const int idc)
@@ -369,7 +369,7 @@ String Dialog::getText(HWND handle)
   GetWindowText(handle, &buffer[0], (int)buffer.size());
 
   // remove extra nulls from the string
-  buffer.resize(buffer.find(AUTOSTR('\0')));
+  buffer.resize(buffer.find(L'\0'));
 
   return buffer;
 }

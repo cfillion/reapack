@@ -19,6 +19,7 @@
 #define REAPACK_FILESYSTEM_HPP
 
 #include <fstream>
+#include <string>
 
 class Path;
 class String;
@@ -28,7 +29,7 @@ namespace FS {
   FILE *open(const Path &);
   bool open(std::ifstream &, const Path &);
   bool open(std::ofstream &, const Path &);
-  bool write(const Path &, const String &);
+  bool write(const Path &, const std::string &);
   bool rename(const TempPath &);
   bool rename(const Path &, const Path &);
   bool remove(const Path &);

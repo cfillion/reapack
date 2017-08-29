@@ -36,7 +36,7 @@ TEST_CASE("parse valid versions", M) {
 
   SECTION("valid") {
     ver.parse("1.0.1");
-    REQUIRE(ver.toString() == "1.0.1");
+    REQUIRE(ver.toString() == L"1.0.1");
     REQUIRE(ver.size() == 3);
   }
 
@@ -67,10 +67,10 @@ TEST_CASE("parse invalid versions", M) {
 
   try {
     ver.parse(name);
-    FAIL(String("'") + name + "' was accepted");
+    FAIL("'" + name.toUtf8() + "' was accepted");
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == String("invalid version name '") + name + "'");
+    REQUIRE(e.what() == L"invalid version name '" + name + L"'");
   }
 
   REQUIRE(ver.toString().empty());
@@ -83,7 +83,7 @@ TEST_CASE("parse version failsafe", M) {
   SECTION("valid") {
     REQUIRE(ver.tryParse("1.0"));
 
-    REQUIRE(ver.toString() == "1.0");
+    REQUIRE(ver.toString() == L"1.0");
     REQUIRE(ver.size() == 2);
   }
 
@@ -95,7 +95,7 @@ TEST_CASE("parse version failsafe", M) {
 
     REQUIRE(ver.toString().empty());
     REQUIRE(ver.size() == 0);
-    REQUIRE(error == "invalid version name 'world'");
+    REQUIRE(error == L"invalid version name 'world'");
   }
 }
 
@@ -118,7 +118,7 @@ TEST_CASE("version segment overflow", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "version segment overflow in '9999999999999999999999'");
+    REQUIRE(e.what() == L"version segment overflow in '9999999999999999999999'");
   }
 }
 
@@ -194,7 +194,7 @@ TEST_CASE("copy version constructor", M) {
   const VersionName original("1.1test");
   const VersionName copy(original);
 
-  REQUIRE(copy.toString() == "1.1test");
+  REQUIRE(copy.toString() == L"1.1test");
   REQUIRE(copy.size() == original.size());
   REQUIRE(copy.isStable() == original.isStable());
 }
@@ -203,7 +203,7 @@ TEST_CASE("version full name", M) {
   MAKE_PACKAGE;
 
   Version ver("1.0", &pkg);
-  REQUIRE(ver.fullName() == "Index Name/Category Name/Package Name v1.0");
+  REQUIRE(ver.fullName() == L"Index Name/Category Name/Package Name v1.0");
 }
 
 TEST_CASE("add source", M) {
@@ -230,7 +230,7 @@ TEST_CASE("add owned source", M) {
   }
   catch(const reapack_error &e) {
     delete src;
-    REQUIRE(String(e.what()) == "source belongs to another version");
+    REQUIRE(e.what() == L"source belongs to another version");
   }
 }
 
@@ -275,14 +275,14 @@ TEST_CASE("drop sources for unknown platforms", M) {
 TEST_CASE("version author", M) {
   Version ver("1.0", nullptr);
   CHECK(ver.author().empty());
-  REQUIRE(ver.displayAuthor() == "Unknown");
+  REQUIRE(ver.displayAuthor() == L"Unknown");
 
   ver.setAuthor("cfillion");
-  REQUIRE(ver.author() == "cfillion");
+  REQUIRE(ver.author() == L"cfillion");
   REQUIRE(ver.displayAuthor() == ver.author());
 
-  REQUIRE(Version::displayAuthor({}) == "Unknown");
-  REQUIRE(Version::displayAuthor("cfillion") == "cfillion");
+  REQUIRE(Version::displayAuthor({}) == L"Unknown");
+  REQUIRE(Version::displayAuthor("cfillion") == L"cfillion");
 }
 
 TEST_CASE("version date", M) {

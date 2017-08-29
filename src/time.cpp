@@ -28,7 +28,7 @@ Time::Time(const char *iso8601) : m_tm()
 {
   tm time = {};
 
-  StringStreamI stream(iso8601);
+  istringstream stream(iso8601);
   stream >> std::get_time(&time, "%Y-%m-%dT%H:%M:%S");
 
   if(stream.good())
@@ -52,8 +52,14 @@ String Time::toString() const
   if(!isValid())
     return {};
 
+#ifdef _WIN32
+  const auto func = &wcsftime;
+#else
+  const auto func = &strftime;
+#endif
+
   Char buf[32] = {};
-  strftime(buf, sizeof(buf), "%B %d %Y", &m_tm);
+  func(buf, sizeof(buf), L"%B %d %Y", &m_tm);
   return buf;
 }
 

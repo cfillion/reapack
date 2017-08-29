@@ -43,11 +43,11 @@ class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
 
-  static const char *VERSION;
-  static const char *BUILDTIME;
+  static const Char *VERSION;
+  static const Char *BUILDTIME;
 
   static ReaPack *instance() { return s_instance; }
-  static String resourcePath();
+  static Path resourcePath();
 
   gaccel_register_t syncAction;
   gaccel_register_t browseAction;

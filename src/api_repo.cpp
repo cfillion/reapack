@@ -49,26 +49,23 @@ autoInstall: usually set to 2 (obey user setting).)",
   try {
     const Remote &existing = g_reapack->remote(name);
 
-    if(!url || strlen(url) == 0)
-      url = existing.url().c_str();
-
-    if(existing.isProtected() && url != existing.url()) {
-      if(errorOut)
-        snprintf(errorOut, errorOut_sz, "cannot change URL of a protected repository");
-      return false;
-    }
-
     Remote remote = g_reapack->remote(name);
     remote.setName(name);
-    remote.setUrl(url);
+    remote.setUrl(url && strlen(url) > 0 ? url : existing.url());
     remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
+
+    if(existing.isProtected() && remote.url() != existing.url()) {
+      if(errorOut)
+        snprintf(errorOut, errorOut_sz, "cannot change the URL of a protected repository");
+      return false;
+    }
 
     if(!g_reapack->addSetRemote(remote, enable))
       return false;
   }
   catch(const reapack_error &e) {
     if(errorOut)
-      snprintf(errorOut, errorOut_sz, "%s", e.what());
+      snprintf(errorOut, errorOut_sz, "%s", e.what().toUtf8().c_str());
     return false;
   }
   catch(const boost::bad_lexical_cast &) {
@@ -96,7 +93,7 @@ autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
     return false;
 
   if(urlOut)
-    snprintf(urlOut, urlOut_sz, "%s", remote.url().c_str());
+    snprintf(urlOut, urlOut_sz, "%s", remote.url().toUtf8().c_str());
   if(enabledOut)
     *enabledOut = remote.isEnabled();
   if(autoInstallOut)

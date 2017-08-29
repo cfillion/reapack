@@ -33,19 +33,19 @@ static void HandleLink(ENLINK *info, HWND handle)
 {
   const CHARRANGE &range = info->chrg;
 
-  Char *url = new auto_char[(range.cpMax - range.cpMin) + 1]();
+  Char *url = new Char[(range.cpMax - range.cpMin) + 1]();
   unique_ptr<Char[]> ptr(url);
 
   TEXTRANGE tr{range, url};
   SendMessage(handle, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
   if(info->msg == WM_LBUTTONUP)
-    ShellExecute(nullptr, AUTOSTR("open"), url, nullptr, nullptr, SW_SHOW);
+    ShellExecute(nullptr, L"open", url, nullptr, nullptr, SW_SHOW);
 }
 
 void RichEdit::Init()
 {
-  LoadLibrary(AUTOSTR("Msftedit.dll"));
+  LoadLibrary(L"Msftedit.dll");
 }
 
 RichEdit::RichEdit(HWND handle)
@@ -70,9 +70,9 @@ void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
   };
 }
 
-bool RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const String &rtf)
 {
-  stringstream stream(rtf);
+  StringStream stream(rtf);
 
   EDITSTREAM es{};
   es.dwCookie = (DWORD_PTR)&stream;

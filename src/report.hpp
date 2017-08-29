@@ -36,7 +36,7 @@ protected:
 
   void fillReport();
 
-  void printHeader(const char *);
+  void printHeader(const Char *);
 
   void printInstalls();
   void printUpdates();

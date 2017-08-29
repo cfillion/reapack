@@ -36,7 +36,7 @@ public:
   OutputStream &operator<<(const Version &);
 
 private:
-  std::ostringstream m_stream;
+  StringStreamO m_stream;
 };
 
 #endif

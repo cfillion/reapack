@@ -28,7 +28,7 @@ String FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
   const Char *filters, const Char *defaultExt)
 {
 #ifdef _WIN32
-  const String &dirPath = make_String(initialDir.join());
+  const String &dirPath = initialDir.join();
   Char path[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
@@ -53,7 +53,7 @@ String FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
   const Char *filters, const Char *defaultExt)
 {
 #ifdef _WIN32
-  const String &dirPath = make_String(initialDir.join());
+  const String &dirPath = initialDir.join();
   Char path[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};

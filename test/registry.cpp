@@ -42,12 +42,12 @@ TEST_CASE("query installed package", M) {
   const Registry::Entry &entry = reg.push(&ver);
   REQUIRE(entry);
   REQUIRE(entry.id == 1);
-  REQUIRE(entry.remote == "Remote Name");
-  REQUIRE(entry.category == "Category Name");
-  REQUIRE(entry.package == "Hello");
+  REQUIRE(entry.remote == L"Remote Name");
+  REQUIRE(entry.category == L"Category Name");
+  REQUIRE(entry.package == L"Hello");
   REQUIRE(entry.type == Package::ScriptType);
-  REQUIRE(entry.version.toString() == "1.0");
-  REQUIRE(entry.author == "John Doe");
+  REQUIRE(entry.version.toString() == L"1.0");
+  REQUIRE(entry.author == L"John Doe");
 
   const Registry::Entry &selectEntry = reg.getEntry(&pkg);
   REQUIRE(selectEntry.id == entry.id);
@@ -70,13 +70,13 @@ TEST_CASE("bump version", M) {
   reg.push(&ver);
 
   const Registry::Entry &entry1 = reg.getEntry(&pkg);
-  REQUIRE(entry1.version.toString() == "1.0");
-  CHECK(entry1.author == "John Doe");
+  REQUIRE(entry1.version.toString() == L"1.0");
+  CHECK(entry1.author == L"John Doe");
 
   reg.push(&ver2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
-  REQUIRE(entry2.version.toString() == "2.0");
-  CHECK(entry2.author == "");
+  REQUIRE(entry2.version.toString() == L"2.0");
+  CHECK(entry2.author == L"");
   
   REQUIRE(entry2.id == entry1.id);
 }
@@ -109,12 +109,12 @@ TEST_CASE("query all packages", M) {
   const vector<Registry::Entry> &entries = reg.getEntries(remote);
   REQUIRE(entries.size() == 1);
   REQUIRE(entries[0].id == 1);
-  REQUIRE(entries[0].remote == "Remote Name");
-  REQUIRE(entries[0].category == "Category Name");
-  REQUIRE(entries[0].package == "Hello");
+  REQUIRE(entries[0].remote == L"Remote Name");
+  REQUIRE(entries[0].category == L"Category Name");
+  REQUIRE(entries[0].package == L"Hello");
   REQUIRE(entries[0].type == Package::ScriptType);
-  REQUIRE(entries[0].version.toString() == "1.0");
-  REQUIRE(entries[0].author == "John Doe");
+  REQUIRE(entries[0].version.toString() == L"1.0");
+  REQUIRE(entries[0].author == L"John Doe");
 }
 
 TEST_CASE("forget registry entry", M) {

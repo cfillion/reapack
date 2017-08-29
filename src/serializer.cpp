@@ -22,8 +22,8 @@
 #include <boost/lexical_cast.hpp>
 
 static const unsigned short VERSION = 1;
-static const char FIELD_END = '\x20';
-static const char RECORD_END = ',';
+static const Char FIELD_END = L'\x20';
+static const Char RECORD_END = L',';
 
 using namespace std;
 
@@ -37,7 +37,7 @@ auto Serializer::read(const String &input, const int userVersion) -> Data
   Data out;
 
   while(!stream.eof()) {
-    string line;
+    String line;
     getline(stream, line, RECORD_END);
 
     StringStreamI lineStream(line);
@@ -47,7 +47,7 @@ auto Serializer::read(const String &input, const int userVersion) -> Data
       if(lineStream.eof())
         return out;
 
-      string field;
+      String field;
       getline(lineStream, field, FIELD_END);
 
       int value;
@@ -80,7 +80,7 @@ String Serializer::write(const Data &data) const
   if(!m_userVersion)
     return {};
 
-  ostringstream stream;
+  StringStreamO stream;
 
   stream
     << m_userVersion << FIELD_END

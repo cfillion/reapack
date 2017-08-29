@@ -40,21 +40,21 @@ void ObsoleteQuery::onInit()
   m_okBtn = getControl(IDOK);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTOSTR("Package"), 550}
+    {L"Package", 550}
   });
 
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_okBtn); });
   m_list->onContextMenu([=] (Menu &menu, int) {
-    menu.addAction(AUTOSTR("Select &all"), ACTION_SELECT_ALL);
-    menu.addAction(AUTOSTR("&Unselect all"), ACTION_UNSELECT_ALL);
+    menu.addAction(L"Select &all", ACTION_SELECT_ALL);
+    menu.addAction(L"&Unselect all", ACTION_UNSELECT_ALL);
     return true;
   });
 
   m_list->reserveRows(m_entries->size());
 
   for(const Registry::Entry &entry : *m_entries) {
-    ostringstream stream;
-    stream << entry.remote << '/' << entry.category << '/'
+    StringStreamO stream;
+    stream << entry.remote << L'/' << entry.category << L'/'
       << Package::displayName(entry.package, entry.description);
     m_list->createRow()->setCell(0, stream.str());
   }

@@ -60,5 +60,5 @@ TEST_CASE("write to string", M) {
   REQUIRE(s.write({{1, 2}}).empty()); // no user version set
   s.read({}, 42);
 
-  REQUIRE(s.write({{1, 2}, {3, 4}}) == "42 1,1 2,3 4");
+  REQUIRE(s.write({{1, 2}, {3, 4}}) == L"42 1,1 2,3 4");
 }

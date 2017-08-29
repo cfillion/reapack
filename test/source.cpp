@@ -137,7 +137,7 @@ TEST_CASE("empty source url", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "empty source url");
+    REQUIRE(e.what() == L"empty source url");
   }
 }
 

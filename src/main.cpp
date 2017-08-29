@@ -52,12 +52,12 @@ static bool loadAPI(void *(*getFunc)(const char *))
     if(func.required && *func.ptr == nullptr) {
       Char msg[1024];
       snprintf(msg, lengthof(msg),
-        AUTOSTR("ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n")
-        AUTOSTR("(Unable to import the following API function: %s)"),
+        L"ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n"
+        L"(Unable to import the following API function: %s)",
         ReaPack::VERSION, String(func.name).c_str());
 
       MessageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
-        msg, AUTOSTR("ReaPack: Fatal Error"), MB_OK);
+        msg, L"ReaPack: Fatal Error", MB_OK);
 
       return false;
     }
@@ -76,25 +76,25 @@ static void menuHook(const char *name, HMENU handle, int f)
   if(strcmp(name, "Main extensions") || f != 0)
     return;
 
-  Menu menu = Menu(handle).addMenu(AUTOSTR("ReaPack"));
+  Menu menu = Menu(handle).addMenu(L"ReaPack");
 
-  menu.addAction(AUTOSTR("&Synchronize packages"),
+  menu.addAction(L"&Synchronize packages",
     NamedCommandLookup("_REAPACK_SYNC"));
 
-  menu.addAction(AUTOSTR("&Browse packages..."),
+  menu.addAction(L"&Browse packages...",
     NamedCommandLookup("_REAPACK_BROWSE"));
 
-  menu.addAction(AUTOSTR("&Import repositories..."),
+  menu.addAction(L"&Import repositories...",
     NamedCommandLookup("_REAPACK_IMPORT"));
 
-  menu.addAction(AUTOSTR("&Manage repositories..."),
+  menu.addAction(L"&Manage repositories...",
     NamedCommandLookup("_REAPACK_MANAGE"));
 
   menu.addSeparator();
 
   Char aboutLabel[32];
   snprintf(aboutLabel, lengthof(aboutLabel),
-    AUTOSTR("&About ReaPack v%s"), ReaPack::VERSION);
+    L"&About ReaPack v%s", ReaPack::VERSION);
   menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
@@ -102,13 +102,13 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 {
   Path expected;
   expected.append(ReaPack::resourcePath());
-  expected.append("UserPlugins");
+  expected.append(L"UserPlugins");
   expected.append(REAPACK_FILE);
 
 #ifdef _WIN32
   Char self[MAX_PATH] = {};
   GetModuleFileName(module, self, lengthof(self));
-  Path current(from_String(self).c_str());
+  Path current(self);
 #else
   Dl_info info{};
   dladdr((const void *)checkLocation, &info);
@@ -121,14 +121,14 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 
   Char msg[4096];
   snprintf(msg, lengthof(msg),
-    AUTOSTR("ReaPack was not loaded from the standard extension path")
-    AUTOSTR(" or its filename was altered.\n")
-    AUTOSTR("Move or rename it to the expected location and retry.\n\n")
-    AUTOSTR("Current:\xa0%s\n\nExpected:\xa0%s"),
+    L"ReaPack was not loaded from the standard extension path"
+    L" or its filename was altered.\n"
+    L"Move or rename it to the expected location and retry.\n\n"
+    L"Current:\xa0%s\n\nExpected:\xa0%s",
     self, expected.join().c_str());
 
   MessageBox(Splash_GetWnd(), msg,
-    AUTOSTR("ReaPack: Installation path mismatch"), MB_OK);
+    L"ReaPack: Installation path mismatch", MB_OK);
 
   return false;
 }

@@ -5,11 +5,10 @@
 
 #include <string>
 
-#define RIPATH "test/indexes/"
-
 using namespace std;
 
 static const char *M = "[index]";
+static const Path RIPATH(L"test/indexes");
 
 TEST_CASE("index file not found", M) {
   UseRootPath root(RIPATH);
@@ -19,7 +18,7 @@ TEST_CASE("index file not found", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "No such file or directory");
+    REQUIRE(e.what() == L"No such file or directory");
   }
 }
 
@@ -34,7 +33,7 @@ TEST_CASE("load index from raw data", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "Error reading end tag.");
+      REQUIRE(e.what() == L"Error reading end tag.");
     }
   }
 }
@@ -47,7 +46,7 @@ TEST_CASE("broken index", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "Error reading end tag.");
+    REQUIRE(e.what() == L"Error reading end tag.");
   }
 }
 
@@ -59,7 +58,7 @@ TEST_CASE("wrong root tag name", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "invalid index");
+    REQUIRE(e.what() == L"invalid index");
   }
 }
 
@@ -71,7 +70,7 @@ TEST_CASE("invalid version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "index version not found");
+    REQUIRE(e.what() == L"index version not found");
   }
 }
 
@@ -83,7 +82,7 @@ TEST_CASE("future version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "index version is unsupported");
+    REQUIRE(e.what() == L"index version is unsupported");
   }
 }
 
@@ -120,7 +119,7 @@ TEST_CASE("add owned category", M) {
   }
   catch(const reapack_error &e) {
     delete cat;
-    REQUIRE(String(e.what()) == "category belongs to another index");
+    REQUIRE(e.what() == L"category belongs to another index");
   }
 }
 
@@ -161,7 +160,7 @@ TEST_CASE("add owned package", M) {
   }
   catch(const reapack_error &e) {
     delete pack;
-    REQUIRE(String(e.what()) == "package belongs to another category");
+    REQUIRE(e.what() == L"package belongs to another category");
   }
 }
 
@@ -185,21 +184,21 @@ TEST_CASE("empty category name", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "empty category name");
+    REQUIRE(e.what() == L"empty category name");
   }
 }
 
 TEST_CASE("category full name", M) {
   Index ri("Remote Name");
   Category cat2("Category Name", &ri);
-  REQUIRE(cat2.fullName() == "Remote Name/Category Name");
+  REQUIRE(cat2.fullName() == L"Remote Name/Category Name");
 }
 
 TEST_CASE("set index name", M) {
   SECTION("set") {
     Index ri({});
     ri.setName("Hello/World!");
-    REQUIRE(ri.name() == "Hello/World!");
+    REQUIRE(ri.name() == L"Hello/World!");
   }
 
   SECTION("override") {
@@ -209,9 +208,9 @@ TEST_CASE("set index name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(String(e.what()) == "index name is already set");
+      REQUIRE(e.what() == L"index name is already set");
     }
-    REQUIRE(ri.name() == "hello");
+    REQUIRE(ri.name() == L"hello");
   }
 }
 

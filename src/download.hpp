@@ -23,9 +23,8 @@
 #include "path.hpp"
 #include "thread.hpp"
 
-#include <fstream>
-
 #include <curl/curl.h>
+#include <fstream>
 
 struct DownloadContext {
   static void GlobalInit();
@@ -71,13 +70,13 @@ class MemoryDownload : public Download {
 public:
   MemoryDownload(const String &url, const NetworkOpts &, int flags = 0);
 
-  String contents() const { return m_stream.str(); }
+  std::string contents() const { return m_stream.str(); }
 
 protected:
   std::ostream *openStream() override { return &m_stream; }
 
 private:
-  StringStream m_stream;
+  std::stringstream m_stream;
 };
 
 class FileDownload : public Download {

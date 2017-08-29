@@ -17,7 +17,7 @@ TEST_CASE("open bad sqlite file path", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "unable to open database file");
+    REQUIRE(e.what() == L"unable to open database file");
   }
 }
 
@@ -29,7 +29,7 @@ TEST_CASE("execute invalid sql", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "near \"WHERE\": syntax error");
+    REQUIRE(e.what() == L"near \"WHERE\": syntax error");
   }
 }
 
@@ -41,7 +41,7 @@ TEST_CASE("prepare invalid sql", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "near \"WHERE\": syntax error");
+    REQUIRE(e.what() == L"near \"WHERE\": syntax error");
   }
 }
 
@@ -64,8 +64,8 @@ TEST_CASE("get rows from prepared statement", M) {
     });
 
     REQUIRE(values.size() == 2);
-    REQUIRE(values[0] == "hello");
-    REQUIRE(values[1] == "世界");
+    REQUIRE(values[0] == L"hello");
+    REQUIRE(values[1] == L"世界");
   }
 
   SECTION("abort") {
@@ -75,7 +75,7 @@ TEST_CASE("get rows from prepared statement", M) {
     });
 
     REQUIRE(values.size() == 1);
-    REQUIRE(values[0] == "hello");
+    REQUIRE(values[0] == L"hello");
   }
 }
 
@@ -92,7 +92,7 @@ TEST_CASE("bind values and clear", M) {
     FAIL("bindings not cleared");
   }
   catch(const reapack_error &e) {
-    REQUIRE(String(e.what()) == "NOT NULL constraint failed: test.value");
+    REQUIRE(e.what() == L"NOT NULL constraint failed: test.value");
   }
 }
 
@@ -175,7 +175,7 @@ TEST_CASE("bind temporary strings", M) {
     return false;
   });
 
-  REQUIRE(got == "hello");
+  REQUIRE(got == L"hello");
 }
 
 TEST_CASE("get integers from sqlite", M) {

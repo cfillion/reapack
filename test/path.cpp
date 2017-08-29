@@ -30,29 +30,29 @@ TEST_CASE("append path components", M) {
   path.append("hello");
   REQUIRE_FALSE(path.empty());
   REQUIRE(path.size() == 1);
-  REQUIRE(path.join() == "hello");
+  REQUIRE(path.join() == L"hello");
   REQUIRE(path.dirname().empty());
-  REQUIRE(path.basename() == "hello");
+  REQUIRE(path.basename() == L"hello");
 
   path.append("world");
   REQUIRE(path.size() == 2);
 #ifndef _WIN32
-  REQUIRE(path.join() == "hello/world");
+  REQUIRE(path.join() == L"hello/world");
 #else
-  REQUIRE(path.join() == "hello\\world");
+  REQUIRE(path.join() == L"hello\\world");
 #endif
-  REQUIRE(path.dirname().join() == "hello");
-  REQUIRE(path.basename() == "world");
+  REQUIRE(path.dirname().join() == L"hello");
+  REQUIRE(path.basename() == L"world");
 
   path.append("test");
   REQUIRE(path.size() == 3);
 #ifndef _WIN32
-  REQUIRE(path.join() == "hello/world/test");
+  REQUIRE(path.join() == L"hello/world/test");
 #else
-  REQUIRE(path.join() == "hello\\world\\test");
+  REQUIRE(path.join() == L"hello\\world\\test");
 #endif
   REQUIRE(path.dirname() == Path("hello/world"));
-  REQUIRE(path.basename() == "test");
+  REQUIRE(path.basename() == L"test");
 }
 
 TEST_CASE("concatenate paths", M) {
@@ -82,9 +82,9 @@ TEST_CASE("strip trailing/leading slashes", M) {
 
   REQUIRE(a.size() == 6);
 #ifndef _WIN32
-  REQUIRE(a.join() == "a/b/c/d/e/f");
+  REQUIRE(a.join() == L"a/b/c/d/e/f");
 #else
-  REQUIRE(a.join() == "a\\b\\c\\d\\e\\f");
+  REQUIRE(a.join() == L"a\\b\\c\\d\\e\\f");
 #endif
 }
 
@@ -102,7 +102,7 @@ TEST_CASE("modify path", M) {
   a.append("hello");
 
   a[0] = "world";
-  REQUIRE(a.join() == "world");
+  REQUIRE(a.join() == L"world");
 }
 
 TEST_CASE("custom separator", M) {
@@ -110,7 +110,7 @@ TEST_CASE("custom separator", M) {
   a.append("hello");
   a.append("world");
 
-  REQUIRE(a.join('-') == "hello-world");
+  REQUIRE(a.join('-') == L"hello-world");
 }
 
 TEST_CASE("split input", M) {
@@ -118,16 +118,16 @@ TEST_CASE("split input", M) {
     const Path a("hello/world");
 
     REQUIRE(a.size() == 2);
-    REQUIRE(a[0] == "hello");
-    REQUIRE(a[1] == "world");
+    REQUIRE(a[0] == L"hello");
+    REQUIRE(a[1] == L"world");
   }
 
   SECTION("backslash") {
     const Path a("hello\\world");
 
     REQUIRE(a.size() == 2);
-    REQUIRE(a[0] == "hello");
-    REQUIRE(a[1] == "world");
+    REQUIRE(a[0] == L"hello");
+    REQUIRE(a[1] == L"world");
   }
 
   SECTION("append") {
@@ -143,8 +143,8 @@ TEST_CASE("split input", M) {
     const Path a("hello//world/");
 
     REQUIRE(a.size() == 2);
-    REQUIRE(a[0] == "hello");
-    REQUIRE(a[1] == "world");
+    REQUIRE(a[0] == L"hello");
+    REQUIRE(a[1] == L"world");
   }
 }
 
@@ -156,8 +156,8 @@ TEST_CASE("absolute path (unix)", M) {
 
   REQUIRE(a.size() == 3);
   REQUIRE(a.absolute());
-  REQUIRE(a[0] == "usr");
-  REQUIRE(a.join() == "/usr/bin/zsh");
+  REQUIRE(a[0] == L"usr");
+  REQUIRE(a.join() == L"/usr/bin/zsh");
 }
 #endif
 
@@ -171,7 +171,7 @@ TEST_CASE("remove last component of path", M) {
   a.removeLast();
 
   REQUIRE(a.size() == 1);
-  REQUIRE(a[0] == "a");
+  REQUIRE(a[0] == L"a");
 
   a.removeLast();
   REQUIRE(a.empty());
@@ -185,7 +185,7 @@ TEST_CASE("path generation utilities", M) {
   REQUIRE(Path::prefixRoot(path) == Path("world"));
 
   {
-    UseRootPath root("hello");
+    UseRootPath root(Path("hello"));
     (void)root;
 
     REQUIRE(Path::prefixRoot(path) == Path("hello/world"));
@@ -200,8 +200,8 @@ TEST_CASE("first and last path component", M) {
   REQUIRE(Path().last().empty());
 
   const Path path("hello/world/chunky/bacon");
-  REQUIRE(path.first() == "hello");
-  REQUIRE(path.last() == "bacon");
+  REQUIRE(path.first() == L"hello");
+  REQUIRE(path.last() == L"bacon");
 }
 
 TEST_CASE("directory traversal", M) {

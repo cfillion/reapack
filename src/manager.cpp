@@ -34,8 +34,8 @@
 #include <boost/algorithm/string/join.hpp>
 
 static const Char *ARCHIVE_FILTER =
-  AUTOSTR("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
-static const Char *ARCHIVE_EXT = AUTOSTR("ReaPackArchive");
+  L"ReaPack Offline Archive (*.ReaPackArchive\0*.ReaPackArchive\0)";
+static const Char *ARCHIVE_EXT = L"ReaPackArchive";
 
 using namespace std;
 
@@ -66,9 +66,9 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTOSTR("Name"), 115},
-    {AUTOSTR("Index URL"), 415},
-    {AUTOSTR("State"), 60},
+    {L"Name", 115},
+    {L"Index URL", 415},
+    {L"State", 60},
   });
 
   m_list->onActivate(bind(&Manager::aboutRepo, this, true));
@@ -210,38 +210,38 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   const Remote &remote = getRemote(index);
 
   if(!remote) {
-    menu.addAction(AUTOSTR("&Select all"), ACTION_SELECT);
-    menu.addAction(AUTOSTR("&Unselect all"), ACTION_UNSELECT);
+    menu.addAction(L"&Select all", ACTION_SELECT);
+    menu.addAction(L"&Unselect all", ACTION_UNSELECT);
     return true;
   }
 
   const UINT enableAction =
-    menu.addAction(AUTOSTR("&Enable"), ACTION_ENABLE);
+    menu.addAction(L"&Enable", ACTION_ENABLE);
   const UINT disableAction =
-    menu.addAction(AUTOSTR("&Disable"), ACTION_DISABLE);
+    menu.addAction(L"&Disable", ACTION_DISABLE);
 
   menu.addSeparator();
 
-  menu.addAction(AUTOSTR("&Refresh"), ACTION_REFRESH);
+  menu.addAction(L"&Refresh", ACTION_REFRESH);
 
-  Menu autoInstallMenu = menu.addMenu(AUTOSTR("&Install new packages"));
+  Menu autoInstallMenu = menu.addMenu(L"&Install new packages");
   const UINT autoInstallGlobal = autoInstallMenu.addAction(
-    AUTOSTR("Use &global setting"), ACTION_AUTOINSTALL_GLOBAL);
+    L"Use &global setting", ACTION_AUTOINSTALL_GLOBAL);
   const UINT autoInstallOff = autoInstallMenu.addAction(
-    AUTOSTR("Manually"), ACTION_AUTOINSTALL_OFF);
+    L"Manually", ACTION_AUTOINSTALL_OFF);
   const UINT autoInstallOn = autoInstallMenu.addAction(
-    AUTOSTR("When synchronizing"), ACTION_AUTOINSTALL_ON);
+    L"When synchronizing", ACTION_AUTOINSTALL_ON);
 
-  menu.addAction(AUTOSTR("&Copy URL"), ACTION_COPYURL);
+  menu.addAction(L"&Copy URL", ACTION_COPYURL);
 
   const UINT uninstallAction =
-    menu.addAction(AUTOSTR("&Uninstall"), ACTION_UNINSTALL);
+    menu.addAction(L"&Uninstall", ACTION_UNINSTALL);
 
   menu.addSeparator();
 
   Char aboutLabel[64];
   snprintf(aboutLabel, lengthof(aboutLabel),
-    AUTOSTR("&About %s"), remote.name().c_str());
+    L"&About %s", remote.name().c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
   bool allEnabled = true;
@@ -342,7 +342,7 @@ void Manager::refresh()
 
 void Manager::updateEnabledCell(int index, const Remote &remote)
 {
-  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ? "Enabled" : "Disabled");
+  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ? L"Enabled" : L"Disabled");
 }
 
 void Manager::setMods(const ModsCallback &cb, const bool updateRow)
@@ -494,10 +494,10 @@ void Manager::aboutRepo(const bool focus)
 void Manager::importExport()
 {
   Menu menu;
-  menu.addAction(AUTOSTR("Import &repositories..."), ACTION_IMPORT_REPO);
+  menu.addAction(L"Import &repositories...", ACTION_IMPORT_REPO);
   menu.addSeparator();
-  menu.addAction(AUTOSTR("Import offline archive..."), ACTION_IMPORT_ARCHIVE);
-  menu.addAction(AUTOSTR("&Export offline archive..."), ACTION_EXPORT_ARCHIVE);
+  menu.addAction(L"Import offline archive...", ACTION_IMPORT_ARCHIVE);
+  menu.addAction(L"&Export offline archive...", ACTION_EXPORT_ARCHIVE);
 
   menu.show(getControl(IDC_IMPORT), handle());
 }
@@ -516,7 +516,7 @@ bool Manager::importRepo()
 
 void Manager::importArchive()
 {
-  const Char *title = AUTOSTR("Import offline archive");
+  const Char *title = L"Import offline archive";
 
   const String &path = FileDialog::getOpenFileName(handle(), instance(),
     title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
@@ -530,8 +530,8 @@ void Manager::importArchive()
   catch(const reapack_error &e) {
     Char msg[512];
     snprintf(msg, lengthof(msg),
-      AUTOSTR("An error occured while reading %s.\r\n\r\n%s."),
-      path.c_str(), e.what()
+      L"An error occured while reading %s.\r\n\r\n%s.",
+      path.c_str(), e.what().c_str()
     );
 
     MessageBox(handle(), msg, title, MB_OK);
@@ -540,7 +540,7 @@ void Manager::importArchive()
 
 void Manager::exportArchive()
 {
-  const Char *title = AUTOSTR("Export offline archive");
+  const Char *title = L"Export offline archive";
 
   const String &path = FileDialog::getSaveFileName(handle(), instance(),
     title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
@@ -563,16 +563,16 @@ void Manager::exportArchive()
         error[0] = 0;
       else {
         snprintf(error, lengthof(error),
-          AUTOSTR("\r\n\r\n%zu file%s could not be archived. ")
-          AUTOSTR("Synchronize packages to repair any missing file.\r\n\r\n%s"),
-          errors.size(), errors.size() == 1 ? AUTOSTR("") : AUTOSTR("s"),
-          boost::algorithm::join(errors, "\r\n").c_str());
+          L"\r\n\r\n%zu file%s could not be archived. "
+          L"Synchronize packages to repair any missing file.\r\n\r\n%s",
+          errors.size(), errors.size() == 1 ? L"" : L"s",
+          boost::algorithm::join(errors, L"\r\n").c_str());
       }
 
       Char msg[2048];
       snprintf(msg, lengthof(msg),
-        AUTOSTR("Done! %zu package%s were exported in the archive.%s"),
-        count, count == 1 ? AUTOSTR("") : AUTOSTR("s"), error);
+        L"Done! %zu package%s were exported in the archive.%s",
+        count, count == 1 ? L"" : L"s", error);
       MessageBox(handle(), msg, title, MB_OK);
 
       delete pool;
@@ -589,8 +589,8 @@ void Manager::exportArchive()
 
     Char msg[512];
     snprintf(msg, lengthof(msg),
-      AUTOSTR("An error occured while writing into %s.\r\n\r\n%s."),
-      path.c_str(), e.what()
+      L"An error occured while writing into %s.\r\n\r\n%s.",
+      path.c_str(), e.what().c_str()
     );
     MessageBox(handle(), msg, title, MB_OK);
   }
@@ -599,8 +599,8 @@ void Manager::exportArchive()
 void Manager::launchBrowser()
 {
   const auto promptApply = [&] {
-    const Char *title = AUTOSTR("ReaPack Query");
-    const Char *msg = AUTOSTR("Apply unsaved changes?");
+    const Char *title = L"ReaPack Query";
+    const Char *msg = L"Apply unsaved changes?";
     const int btn = MessageBox(handle(), msg, title, MB_YESNO);
     return btn == IDYES;
   };
@@ -616,25 +616,25 @@ void Manager::options()
   Menu menu;
 
   UINT index = menu.addAction(
-    AUTOSTR("&Install new packages when synchronizing"), ACTION_AUTOINSTALL);
+    L"&Install new packages when synchronizing", ACTION_AUTOINSTALL);
   if(m_autoInstall.value_or(g_reapack->config()->install.autoInstall))
     menu.check(index);
 
   index = menu.addAction(
-    AUTOSTR("Enable &pre-releases globally (bleeding edge)"), ACTION_BLEEDINGEDGE);
+    L"Enable &pre-releases globally (bleeding edge)", ACTION_BLEEDINGEDGE);
   if(m_bleedingEdge.value_or(g_reapack->config()->install.bleedingEdge))
     menu.check(index);
 
   index = menu.addAction(
-    AUTOSTR("Prompt to uninstall obsolete packages"), ACTION_PROMPTOBSOLETE);
+    L"Prompt to uninstall obsolete packages", ACTION_PROMPTOBSOLETE);
   if(m_promptObsolete.value_or(g_reapack->config()->install.promptObsolete))
     menu.check(index);
 
-  menu.addAction(AUTOSTR("&Network settings..."), ACTION_NETCONFIG);
+  menu.addAction(L"&Network settings...", ACTION_NETCONFIG);
 
   menu.addSeparator();
 
-  menu.addAction(AUTOSTR("&Restore default settings"), ACTION_RESETCONFIG);
+  menu.addAction(L"&Restore default settings", ACTION_RESETCONFIG);
 
   menu.show(getControl(IDC_OPTIONS), handle());
 }
@@ -653,12 +653,12 @@ bool Manager::confirm() const
   const size_t uninstallSize = m_uninstall.size();
 
   Char msg[255];
-  snprintf(msg, lengthof(msg), AUTOSTR("Uninstall %zu %s?\n")
-    AUTOSTR("Every file they contain will be removed from your computer."),
+  snprintf(msg, lengthof(msg), L"Uninstall %zu %s?\n"
+    L"Every file they contain will be removed from your computer.",
     uninstallSize,
-    uninstallSize == 1 ? AUTOSTR("repository") : AUTOSTR("repositories"));
+    uninstallSize == 1 ? L"repository" : L"repositories");
 
-  const Char *title = AUTOSTR("ReaPack Query");
+  const Char *title = L"ReaPack Query";
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
 
   return btn == IDYES;

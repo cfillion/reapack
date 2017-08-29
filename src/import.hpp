@@ -47,7 +47,7 @@ private:
   struct ImportData {
     size_t index;
     Remote remote;
-    String contents;
+    std::string contents;
 
     bool operator<(const ImportData &o) const { return index < o.index; }
   };

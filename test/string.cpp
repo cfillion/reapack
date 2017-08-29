@@ -7,7 +7,7 @@ using namespace std;
 static const char *M = "[string]";
 
 TEST_CASE("to_(w)string wrapper", M) {
-  REQUIRE(String::from(42) == AUTOSTR("42"));
+  REQUIRE(String::from(42) == L"42");
 }
 
 TEST_CASE("string to wstring to string", M) {
@@ -15,7 +15,7 @@ TEST_CASE("string to wstring to string", M) {
     REQUIRE(String("hello world").toUtf8() == "hello world");
 
   SECTION("cyrillic")
-    REQUIRE(String("Новая папка") == "Новая папка");
+    REQUIRE(String("Новая папка") == L"Новая папка");
 }
 
 TEST_CASE("lengthof(array)", M) {

@@ -23,44 +23,36 @@
 // "C:\Users\Test\Downloads\Новая папка" work on Windows...
 
 #include <cstdio>
-#include <sstream>
 #include <string>
-
-#include <boost/format/format_fwd.hpp>
 
 #ifdef _WIN32
   #include <windows.h>
 
   typedef wchar_t Char;
 
-  #define AUTOSTR(text) L##text
-  #define snprintf(buf, size, ...) _snwprintf(buf, size - 1,  __VA_ARGS__)
-
-  typedef boost::wformat StringFormat;
+  extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
+  extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
+  #define snprintf(...) snprintf_auto(__VA_ARGS__)
 #else
   typedef char Char;
-
-  #define AUTOSTR(text) text
-
-  typedef boost::format StringFormat;
+  #define L
 #endif
 
-#define lengthof(arr) (sizeof(arr) / sizeof(*arr))
+typedef std::basic_string<Char> BasicString;
 
-typedef std::basic_stringstream<Char> StringStream;
-typedef std::basic_ostringstream<Char> StringStreamO;
-typedef std::basic_istringstream<Char> StringStreamI;
-
-class String : public std::basic_string<Char> {
+class String : public BasicString {
 public:
-  using std::basic_string<Char>::basic_string;
+  using BasicString::basic_string;
 
   String() : basic_string() {}
-  String(const std::basic_string<Char> &&s) : basic_string(move(s)) {}
+  String(const BasicString &&s) : basic_string(move(s)) {}
 
 #ifdef _WIN32
-  String(const std::string &, UINT codepage = CP_UTF8);
+  String(const std::string &str, UINT codepage = CP_UTF8) : basic_string() { convert(str, codepage); }
+  String(const char *str) : basic_string() { convert(str, CP_UTF8); }
+
   std::string toUtf8() const;
+  void convert(const std::string &, UINT codepage);
 #else
   const String &toUtf8() const { return *this; }
 #endif
@@ -76,7 +68,23 @@ public:
 
 template<> struct std::hash<String> {
   size_t operator()(const String &str) const {
-    return std::hash<std::basic_string<Char> >{}(str); }
+    return std::hash<BasicString>{}(str); }
 };
+
+#include <sstream>
+typedef std::basic_ostream<Char> BasicStreamO;
+typedef std::basic_stringstream<Char> StringStream;
+typedef std::basic_ostringstream<Char> StringStreamO;
+typedef std::basic_istringstream<Char> StringStreamI;
+
+#include <boost/format/format_fwd.hpp>
+typedef boost::basic_format<Char> StringFormat;
+
+#include <regex>
+typedef std::basic_regex<Char> Regex;
+typedef std::regex_iterator<String::const_iterator> RegexIterator;
+typedef std::match_results<String::const_iterator> MatchResults;
+
+#define lengthof(arr) (sizeof(arr) / sizeof(*arr))
 
 #endif

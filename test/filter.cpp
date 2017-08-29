@@ -23,11 +23,11 @@ TEST_CASE("get/set filter", M) {
   REQUIRE(f.get().empty());
 
   f.set("hello");
-  REQUIRE(f.get() == "hello");
+  REQUIRE(f.get() == L"hello");
   REQUIRE(f.match({"hello"}));
 
   f.set("world");
-  REQUIRE(f.get() == "world");
+  REQUIRE(f.get() == L"world");
   REQUIRE(f.match({"world"}));
 }
 
@@ -35,12 +35,12 @@ TEST_CASE("filter operators", M) {
   SECTION("assignment") {
     Filter f;
     f = "hello";
-    REQUIRE(f.get() == "hello");
+    REQUIRE(f.get() == L"hello");
   }
 
   SECTION("equal") {
-    REQUIRE(Filter("hello") == "hello");
-    REQUIRE_FALSE(Filter("hello") == "world");
+    REQUIRE(Filter("hello") == L"hello");
+    REQUIRE_FALSE(Filter("hello") == L"world");
   }
 
   SECTION("not equal") {
