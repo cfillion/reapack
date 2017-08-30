@@ -64,7 +64,8 @@ void Database::exec(const char *sql)
 
 reapack_error Database::lastError() const
 {
-  return reapack_error(sqlite3_errmsg(m_db));
+  const char *error = sqlite3_errmsg(m_db);
+  return reapack_error(error);
 }
 
 int64_t Database::lastInsertId() const

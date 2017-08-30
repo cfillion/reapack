@@ -7,7 +7,7 @@ using namespace std;
 static const char *M = "[string]";
 
 TEST_CASE("to_(w)string wrapper", M) {
-  REQUIRE(String::from(42) == L"42");
+  REQUIRE(String::from(42) == L("42"));
 }
 
 TEST_CASE("string to wstring to string", M) {

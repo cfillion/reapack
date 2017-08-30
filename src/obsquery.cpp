@@ -40,13 +40,13 @@ void ObsoleteQuery::onInit()
   m_okBtn = getControl(IDOK);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {L"Package", 550}
+    {L("Package"), 550}
   });
 
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_okBtn); });
   m_list->onContextMenu([=] (Menu &menu, int) {
-    menu.addAction(L"Select &all", ACTION_SELECT_ALL);
-    menu.addAction(L"&Unselect all", ACTION_UNSELECT_ALL);
+    menu.addAction(L("Select &all"), ACTION_SELECT_ALL);
+    menu.addAction(L("&Unselect all"), ACTION_UNSELECT_ALL);
     return true;
   });
 

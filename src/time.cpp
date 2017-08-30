@@ -53,13 +53,13 @@ String Time::toString() const
     return {};
 
 #ifdef _WIN32
-  const auto func = &wcsftime;
+  constexpr auto func = &wcsftime;
 #else
-  const auto func = &strftime;
+  constexpr auto func = &strftime;
 #endif
 
   Char buf[32] = {};
-  func(buf, sizeof(buf), L"%B %d %Y", &m_tm);
+  func(buf, sizeof(buf), L("%B %d %Y"), &m_tm);
   return buf;
 }
 

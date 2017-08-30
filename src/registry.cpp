@@ -120,7 +120,7 @@ void Registry::migrate()
       break;
     default:
       throw reapack_error(
-        "The package registry was created by a newer version of ReaPack");
+        L("The package registry was created by a newer version of ReaPack"));
     }
 
     switch(current.minor) {

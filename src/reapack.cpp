@@ -36,8 +36,8 @@
 
 using namespace std;
 
-const Char *ReaPack::VERSION = L"1.2beta2";
-const Char *ReaPack::BUILDTIME = __DATE__ L" " __TIME__;
+const Char *ReaPack::VERSION = L("1.2beta2");
+const Char *ReaPack::BUILDTIME = __DATE__ L(" ") __TIME__;
 
 ReaPack *ReaPack::s_instance = nullptr;
 
@@ -47,7 +47,7 @@ ReaPack *ReaPack::s_instance = nullptr;
 // Surely there must be a better way...
 static void CleanupTempFiles()
 {
-  const Path &path = Path::prefixRoot(Path::DATA + L"*.tmp");
+  const Path &path = Path::prefixRoot(Path::DATA + L("*.tmp"));
   const String &pattern = path.join();
 
   WIN32_FIND_DATA fd = {};
@@ -69,8 +69,9 @@ static void CleanupTempFiles()
 Path ReaPack::resourcePath()
 {
 #ifdef _WIN32
-  // convert from current system encoding to unicode...
-  return String(GetResourcePath(), CP_ACP);
+  // convert from the current system codepage to Unicode
+  const char *path = GetResourcePath();
+  return String(path, CP_ACP);
 #else
   return GetResourcePath();
 #endif
@@ -280,7 +281,7 @@ void ReaPack::about(const Remote &repo, const bool focus)
 
 void ReaPack::aboutSelf()
 {
-  about(remote(L"ReaPack"));
+  about(remote(L("ReaPack")));
 }
 
 About *ReaPack::about(const bool instantiate)
@@ -338,11 +339,11 @@ Transaction *ReaPack::setupTransaction()
   catch(const reapack_error &e) {
     Char msg[512];
     snprintf(msg, lengthof(msg),
-      L"The following error occurred while creating a transaction:\n\n%s",
+      L("The following error occurred while creating a transaction:\n\n%s"),
       e.what().c_str()
     );
 
-    MessageBox(m_mainWindow, msg, L"ReaPack", MB_OK);
+    MessageBox(m_mainWindow, msg, L("ReaPack"), MB_OK);
     return nullptr;
   }
 
@@ -420,23 +421,23 @@ void ReaPack::createDirectories()
 
   Char msg[255];
   snprintf(msg, lengthof(msg),
-    L"ReaPack could not create %s! "
-    L"Please investigate or report this issue.\n\n"
-    L"Error description: %s",
+    L("ReaPack could not create %s! ")
+    L("Please investigate or report this issue.\n\n")
+    L("Error description: %s"),
     Path::prefixRoot(path).join().c_str(), FS::lastError().c_str());
 
-  MessageBox(Splash_GetWnd(), msg, L"ReaPack", MB_OK);
+  MessageBox(Splash_GetWnd(), msg, L("ReaPack"), MB_OK);
 }
 
 void ReaPack::registerSelf()
 {
   // hard-coding galore!
-  Index ri(L"ReaPack");
-  Category cat(L"Extensions", &ri);
-  Package pkg(Package::ExtensionType, L"ReaPack.ext", &cat);
+  Index ri(L("ReaPack"));
+  Category cat(L("Extensions"), &ri);
+  Package pkg(Package::ExtensionType, L("ReaPack.ext"), &cat);
   Version ver(VERSION, &pkg);
-  ver.setAuthor(L"cfillion");
-  ver.addSource(new Source(REAPACK_FILE, L"dummy url", &ver));
+  ver.setAuthor(L("cfillion"));
+  ver.addSource(new Source(REAPACK_FILE, L("dummy url"), &ver));
 
   try {
     Registry reg(Path::prefixRoot(Path::REGISTRY));

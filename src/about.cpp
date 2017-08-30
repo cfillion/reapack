@@ -170,7 +170,7 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 void About::setTitle(const String &what)
 {
   Char title[255];
-  snprintf(title, lengthof(title), L"About %s", what.c_str());
+  snprintf(title, lengthof(title), L("About %s"), what.c_str());
   SetWindowText(handle(), title);
 }
 
@@ -184,7 +184,7 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   }
 
   if(m_desc->setRichText(aboutText))
-    m_tabs->addTab({L"About", {m_desc->handle()}});
+    m_tabs->addTab({L("About"), {m_desc->handle()}});
 
   const auto &getLinkControl = [](const Metadata::LinkType type) {
     switch(type) {
@@ -285,25 +285,25 @@ void AboutIndexDelegate::init(About *dialog)
   m_dialog = dialog;
 
   dialog->setTitle(m_index->name());
-  dialog->setMetadata(m_index->metadata(), m_index->name() == L"ReaPack");
-  dialog->setAction(L"Install/update " + m_index->name());
+  dialog->setMetadata(m_index->metadata(), m_index->name() == L("ReaPack"));
+  dialog->setAction(L("Install/update ") + m_index->name());
 
-  dialog->tabs()->addTab({L"Packages",
+  dialog->tabs()->addTab({L("Packages"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
-  dialog->tabs()->addTab({L"Installed Files",
+  dialog->tabs()->addTab({L("Installed Files"),
     {dialog->getControl(IDC_REPORT)}});
 
-  dialog->menu()->addColumn({L"Category", 142});
+  dialog->menu()->addColumn({L("Category"), 142});
 
   dialog->menu()->reserveRows(m_index->categories().size() + 1);
-  dialog->menu()->createRow()->setCell(0, L"<All Packages>");
+  dialog->menu()->createRow()->setCell(0, L("<All Packages>"));
 
   for(const Category *cat : m_index->categories())
     dialog->menu()->createRow()->setCell(0, cat->name());
 
-  dialog->list()->addColumn({L"Package", 382});
-  dialog->list()->addColumn({L"Version", 80, 0, ListView::VersionType});
-  dialog->list()->addColumn({L"Author", 90});
+  dialog->list()->addColumn({L("Package"), 382});
+  dialog->list()->addColumn({L("Version"), 80, 0, ListView::VersionType});
+  dialog->list()->addColumn({L("Author"), 90});
 
   initInstalledFiles();
 }
@@ -324,19 +324,19 @@ void AboutIndexDelegate::initInstalledFiles()
   catch(const reapack_error &e) {
     Char msg[255];
     snprintf(msg, lengthof(msg),
-      L"The file list is currently unavailable.\x20"
-      L"Retry later when all installation task are completed.\r\n"
-      L"\r\nError description: %s", e.what().c_str());
+      L("The file list is currently unavailable.\x20")
+      L("Retry later when all installation task are completed.\r\n")
+      L("\r\nError description: %s"), e.what().c_str());
     SetWindowText(report, msg);
     return;
   }
 
   if(allFiles.empty()) {
     SetWindowText(report,
-      L"This repository does not own any file on your computer at this time.\r\n"
+      L("This repository does not own any file on your computer at this time.\r\n")
 
-      L"It is either not yet installed or it does not provide "
-      L"any package compatible with your system.");
+      L("It is either not yet installed or it does not provide ")
+      L("any package compatible with your system."));
   }
   else {
     StringStream stream;
@@ -382,8 +382,8 @@ bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
-  menu.addAction(L"Find in the &browser", ACTION_FIND_IN_BROWSER);
-  menu.addAction(L"About this &package", ACTION_ABOUT_PKG);
+  menu.addAction(L("Find in the &browser"), ACTION_FIND_IN_BROWSER);
+  menu.addAction(L("About this &package"), ACTION_ABOUT_PKG);
 
   return true;
 }
@@ -422,7 +422,7 @@ void AboutIndexDelegate::findInBrowser()
   const Package *pkg = currentPackage();
 
   StringStreamO stream;
-  stream << L'^' << quoted(pkg->displayName()) << L"$ ^" << quoted(m_index->name()) << L'$';
+  stream << L'^' << quoted(pkg->displayName()) << L("$ ^") << quoted(m_index->name()) << L'$';
   browser->setFilter(stream.str());
 }
 
@@ -452,8 +452,8 @@ void AboutIndexDelegate::install()
   enum { INSTALL_ALL = 80, UPDATE_ONLY };
 
   Menu menu;
-  menu.addAction(L"Install all packages in this repository", INSTALL_ALL);
-  menu.addAction(L"Update installed packages only", UPDATE_ONLY);
+  menu.addAction(L("Install all packages in this repository"), INSTALL_ALL);
+  menu.addAction(L("Update installed packages only"), UPDATE_ONLY);
 
   const int choice = menu.show(m_dialog->getControl(IDC_ACTION), m_dialog->handle());
 
@@ -465,8 +465,8 @@ void AboutIndexDelegate::install()
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
     MessageBox(m_dialog->handle(),
-      L"This repository cannot be found in your current configuration.",
-      L"ReaPack", MB_OK);
+      L("This repository cannot be found in your current configuration."),
+      L("ReaPack"), MB_OK);
     return;
   }
 
@@ -475,11 +475,11 @@ void AboutIndexDelegate::install()
   if(choice == INSTALL_ALL && boost::logic::indeterminate(remote.autoInstall())
       && !installOpts.autoInstall) {
     const int btn = MessageBox(m_dialog->handle(),
-      L"Do you want ReaPack to install new packages from this repository"
-      L" when synchronizing in the future?\r\n\r\nThis setting can also be"
-      L" customized globally or on a per-repository basis in"
-      L" ReaPack > Manage repositories.",
-      L"Install all packages in this repository", MB_YESNOCANCEL);
+      L("Do you want ReaPack to install new packages from this repository")
+      L(" when synchronizing in the future?\r\n\r\nThis setting can also be")
+      L(" customized globally or on a per-repository basis in")
+      L(" ReaPack > Manage repositories."),
+      L("Install all packages in this repository"), MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -515,17 +515,17 @@ void AboutPackageDelegate::init(About *dialog)
 
   dialog->setTitle(m_package->displayName());
   dialog->setMetadata(m_package->metadata());
-  dialog->setAction(L"About " + m_index->name());
+  dialog->setAction(L("About ") + m_index->name());
 
-  dialog->tabs()->addTab({L"History",
+  dialog->tabs()->addTab({L("History"),
     {dialog->menu()->handle(), dialog->getControl(IDC_CHANGELOG)}});
-  dialog->tabs()->addTab({L"Contents",
+  dialog->tabs()->addTab({L("Contents"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
 
-  dialog->menu()->addColumn({L"Version", 142, 0, ListView::VersionType});
+  dialog->menu()->addColumn({L("Version"), 142, 0, ListView::VersionType});
 
-  dialog->list()->addColumn({L"File", 474});
-  dialog->list()->addColumn({L"Action List", 84});
+  dialog->list()->addColumn({L("File"), 474});
+  dialog->list()->addColumn({L("Action List"), 84});
 
   dialog->menu()->reserveRows(m_package->versions().size());
 
@@ -546,9 +546,9 @@ void AboutPackageDelegate::init(About *dialog)
 void AboutPackageDelegate::updateList(const int index)
 {
   static const map<Source::Section, const Char *> sectionMap{
-    {Source::MainSection, L"Main"},
-    {Source::MIDIEditorSection, L"MIDI Editor"},
-    {Source::MIDIInlineEditorSection, L"MIDI Inline Editor"},
+    {Source::MainSection, L("Main")},
+    {Source::MIDIEditorSection, L("MIDI Editor")},
+    {Source::MIDIInlineEditorSection, L("MIDI Inline Editor")},
   };
 
   if(index < 0)
@@ -576,14 +576,14 @@ void AboutPackageDelegate::updateList(const int index)
       }
 
       if(sections) // In case we forgot to add a section to sectionMap!
-        sectionNames.push_back(L"Other");
+        sectionNames.push_back(L("Other"));
 
-      actionList = L"Yes (";
-      actionList += boost::algorithm::join(sectionNames, L", ");
+      actionList = L("Yes (");
+      actionList += boost::algorithm::join(sectionNames, L(", "));
       actionList += L')';
     }
     else
-      actionList = L"No";
+      actionList = L("No");
 
     int c = 0;
     auto row = m_dialog->list()->createRow((void *)src);
@@ -599,9 +599,9 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
 
   auto src = (const Source *)m_dialog->list()->row(index)->userData;
 
-  menu.addAction(L"Copy source URL", ACTION_COPY_URL);
+  menu.addAction(L("Copy source URL"), ACTION_COPY_URL);
   menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
-    menu.addAction(L"Locate in explorer/finder", ACTION_LOCATE));
+    menu.addAction(L("Locate in explorer/finder"), ACTION_LOCATE));
 
   return true;
 }
@@ -645,11 +645,11 @@ void AboutPackageDelegate::locate()
     if(!FS::exists(path))
       return;
 
-    String arg(L"/select,\"");
+    String arg(L("/select,\""));
     arg += Path::prefixRoot(path).join();
     arg += L'"';
 
-    ShellExecute(nullptr, L"open", L"explorer.exe",
+    ShellExecute(nullptr, L("open"), L("explorer.exe"),
       arg.c_str(), nullptr, SW_SHOW);
   }
 }

@@ -18,7 +18,7 @@
 #include "string.hpp"
 
 #ifdef _WIN32
-String::String(const char *input, UINT codepage)
+void String::from(const char *input, UINT codepage)
 {
   const int size = MultiByteToWideChar(codepage, 0, input, -1, nullptr, 0) - 1;
 

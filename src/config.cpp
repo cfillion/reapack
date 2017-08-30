@@ -27,29 +27,29 @@
 
 using namespace std;
 
-static const Char *GENERAL_GRP = L"general";
-static const Char *VERSION_KEY = L"version";
+static const Char *GENERAL_GRP = L("general");
+static const Char *VERSION_KEY = L("version");
 
-static const Char *INSTALL_GRP = L"install";
-static const Char *AUTOINSTALL_KEY = L"autoinstall";
-static const Char *PRERELEASES_KEY = L"prereleases";
-static const Char *PROMPTOBSOLETE_KEY = L"promptobsolete";
+static const Char *INSTALL_GRP = L("install");
+static const Char *AUTOINSTALL_KEY = L("autoinstall");
+static const Char *PRERELEASES_KEY = L("prereleases");
+static const Char *PROMPTOBSOLETE_KEY = L("promptobsolete");
 
-static const Char *ABOUT_GRP = L"about";
-static const Char *MANAGER_GRP = L"manager";
+static const Char *ABOUT_GRP = L("about");
+static const Char *MANAGER_GRP = L("manager");
 
-static const Char *BROWSER_GRP = L"browser";
-static const Char *STATE_KEY = L"state";
+static const Char *BROWSER_GRP = L("browser");
+static const Char *STATE_KEY = L("state");
 
-static const Char *NETWORK_GRP = L"network";
-static const Char *PROXY_KEY = L"proxy";
-static const Char *VERIFYPEER_KEY = L"verifypeer";
-static const Char *STALETHRSH_KEY = L"stalethreshold";
+static const Char *NETWORK_GRP = L("network");
+static const Char *PROXY_KEY = L("proxy");
+static const Char *VERIFYPEER_KEY = L("verifypeer");
+static const Char *STALETHRSH_KEY = L("stalethreshold");
 
-static const Char *SIZE_KEY = L"size";
+static const Char *SIZE_KEY = L("size");
 
-static const Char *REMOTES_GRP = L"remotes";
-static const Char *REMOTE_KEY  = L"remote";
+static const Char *REMOTES_GRP = L("remotes");
+static const Char *REMOTE_KEY  = L("remote");
 
 static String ArrayKey(const String &key, const unsigned int i)
 {
@@ -86,23 +86,23 @@ void Config::restoreSelfRemote()
 
 void Config::restoreDefaultRemotes()
 {
-  Remote self = remotes.get("ReaPack");
+  Remote self = remotes.get(L("ReaPack"));
   self.setEnabled(true);
   remotes.add(self);
 
   const Remote repos[] = {
-    {"ReaTeam Scripts",
-      "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
-    {"ReaTeam JSFX",
-      "https://github.com/ReaTeam/JSFX/raw/master/index.xml"},
-    {"ReaTeam Themes",
-      "https://github.com/ReaTeam/Themes/raw/master/index.xml"},
-    {"ReaTeam LangPacks",
-      "https://github.com/ReaTeam/LangPacks/raw/master/index.xml"},
-    {"MPL Scripts",
-      "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml"},
-    {"X-Raym Scripts",
-      "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml"},
+    {L("ReaTeam Scripts"),
+      L("https://github.com/ReaTeam/ReaScripts/raw/master/index.xml")},
+    {L("ReaTeam JSFX"),
+      L("https://github.com/ReaTeam/JSFX/raw/master/index.xml")},
+    {L("ReaTeam Themes"),
+      L("https://github.com/ReaTeam/Themes/raw/master/index.xml")},
+    {L("ReaTeam LangPacks"),
+      L("https://github.com/ReaTeam/LangPacks/raw/master/index.xml")},
+    {L("MPL Scripts"),
+      L("https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml")},
+    {L("X-Raym Scripts"),
+      L("https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml")},
   };
 
   for(const Remote &repo : repos)

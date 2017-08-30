@@ -110,7 +110,7 @@ Download::Download(const String &url, const NetworkOpts &opts, const int flags)
 
 void Download::setName(const String &name)
 {
-  setSummary(L"Downloading %s: " + name);
+  setSummary(L("Downloading %s: ") + name);
 }
 
 bool Download::run()

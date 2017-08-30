@@ -42,9 +42,9 @@ static bool stat(const Path &path, struct stat *out)
   const Path &fullPath = Path::prefixRoot(path);
 
 #ifdef _WIN32
-  const auto func = &_wstat;
+  constexpr auto func = &_wstat;
 #else
-  const auto func = &::stat;
+  constexpr auto func = &::stat;
 #endif
 
   return !func(fullPath.join().c_str(), out);
@@ -56,7 +56,7 @@ FILE *FS::open(const Path &path)
 
 #ifdef _WIN32
   FILE *file = nullptr;
-  _wfopen_s(&file, fullPath.c_str(), L"rb");
+  _wfopen_s(&file, fullPath.c_str(), L("rb"));
   return file;
 #else
   return fopen(fullPath.c_str(), "rb");
@@ -134,7 +134,7 @@ bool FS::remove(const Path &path)
   // Windows is so great!
 
   Path workaroundPath = Path::DATA;
-  workaroundPath.append(L"old_" + path.last() + L".tmp");
+  workaroundPath.append(L("old_") + path.last() + L(".tmp"));
 
   return rename(path, workaroundPath);
 #else

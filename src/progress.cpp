@@ -37,7 +37,7 @@ void Progress::onInit()
   m_label = getControl(IDC_LABEL);
   m_progress = GetDlgItem(handle(), IDC_PROGRESS);
 
-  SetWindowText(m_label, L"Initializing...");
+  SetWindowText(m_label, L("Initializing..."));
 }
 
 void Progress::onCommand(const int id, int)
@@ -81,7 +81,7 @@ void Progress::addTask(ThreadTask *task)
 void Progress::updateProgress()
 {
   Char position[32];
-  snprintf(position, lengthof(position), L"%d of %d",
+  snprintf(position, lengthof(position), L("%d of %d"),
     min(m_done + 1, m_total), m_total);
 
   Char label[1024];
@@ -94,7 +94,7 @@ void Progress::updateProgress()
 
   Char title[255];
   snprintf(title, lengthof(title),
-    L"ReaPack: Operation in progress (%d%%)", percent);
+    L("ReaPack: Operation in progress (%d%%)"), percent);
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
   SetWindowText(handle(), title);

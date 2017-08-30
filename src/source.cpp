@@ -45,9 +45,9 @@ auto Source::detectSection(const String &category) -> Section
   String topcategory = Path(category).first();
   boost::algorithm::to_lower(topcategory);
 
-  if(topcategory == L"midi editor")
+  if(topcategory == L("midi editor"))
     return MIDIEditorSection;
-  else if(topcategory == L"midi inline editor")
+  else if(topcategory == L("midi inline editor"))
     return MIDIInlineEditorSection;
   else
     return MainSection;
@@ -58,7 +58,7 @@ Source::Source(const String &file, const String &url, const Version *ver)
     m_version(ver)
 {
   if(m_url.empty())
-    throw reapack_error(L"empty source url");
+    throw reapack_error(L("empty source url"));
 }
 
 Package::Type Source::type() const
@@ -95,34 +95,34 @@ Path Source::targetPath() const
   // select the target directory
   switch(type) {
   case Package::ScriptType:
-    path += L"Scripts";
+    path += L("Scripts");
     break;
   case Package::EffectType:
-    path += L"Effects";
+    path += L("Effects");
     break;
   case Package::DataType:
-    path += L"Data";
+    path += L("Data");
     break;
   case Package::ExtensionType:
-    path += L"UserPlugins";
+    path += L("UserPlugins");
     break;
   case Package::ThemeType:
-    path += L"ColorThemes";
+    path += L("ColorThemes");
     break;
   case Package::LangPackType:
-    path += L"LangPack";
+    path += L("LangPack");
     break;
   case Package::WebInterfaceType:
-    path += L"reaper_www_root";
+    path += L("reaper_www_root");
     break;
   case Package::ProjectTemplateType:
-    path += L"ProjectTemplates";
+    path += L("ProjectTemplates");
     break;
   case Package::TrackTemplateType:
-    path += L"TrackTemplates";
+    path += L("TrackTemplates");
     break;
   case Package::MIDINoteNamesType:
-    path += L"MIDINoteNames";
+    path += L("MIDINoteNames");
     break;
   case Package::UnknownType:
     // The package has an unsupported type, so we make an empty path.

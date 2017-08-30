@@ -13,11 +13,11 @@ static const char *M = "[database]";
 
 TEST_CASE("open bad sqlite file path", M) {
   try {
-    Database db("/a\\");
+    Database db(L("/a\\"));
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(e.what() == L"unable to open database file");
+    REQUIRE(e.what() == L("unable to open database file"));
   }
 }
 
@@ -29,7 +29,7 @@ TEST_CASE("execute invalid sql", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(e.what() == L"near \"WHERE\": syntax error");
+    REQUIRE(e.what() == L("near \"WHERE\": syntax error"));
   }
 }
 
@@ -41,7 +41,7 @@ TEST_CASE("prepare invalid sql", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(e.what() == L"near \"WHERE\": syntax error");
+    REQUIRE(e.what() == L("near \"WHERE\": syntax error"));
   }
 }
 
@@ -64,8 +64,8 @@ TEST_CASE("get rows from prepared statement", M) {
     });
 
     REQUIRE(values.size() == 2);
-    REQUIRE(values[0] == L"hello");
-    REQUIRE(values[1] == L"\u4E16\u754C");
+    REQUIRE(values[0] == L("hello"));
+    REQUIRE(values[1] == L("\u4E16\u754C"));
   }
 
   SECTION("abort") {
@@ -75,7 +75,7 @@ TEST_CASE("get rows from prepared statement", M) {
     });
 
     REQUIRE(values.size() == 1);
-    REQUIRE(values[0] == L"hello");
+    REQUIRE(values[0] == L("hello"));
   }
 }
 
@@ -84,7 +84,7 @@ TEST_CASE("bind values and clear", M) {
   db.exec("CREATE TABLE test (value TEXT NOT NULL)");
 
   Statement *stmt = db.prepare("INSERT INTO test VALUES (?)");
-  stmt->bind(1, "hello");
+  stmt->bind(1, L("hello"));
   stmt->exec();
 
   try {
@@ -92,7 +92,7 @@ TEST_CASE("bind values and clear", M) {
     FAIL("bindings not cleared");
   }
   catch(const reapack_error &e) {
-    REQUIRE(e.what() == L"NOT NULL constraint failed: test.value");
+    REQUIRE(e.what() == L("NOT NULL constraint failed: test.value"));
   }
 }
 
@@ -162,9 +162,9 @@ TEST_CASE("bind temporary strings", M) {
 
   Statement *insert = db.prepare("INSERT INTO a VALUES(?)");
 
-  String str("hello");
+  String str(L("hello"));
   insert->bind(1, str);
-  str = "world";
+  str = L("world");
 
   insert->exec();
 
@@ -175,7 +175,7 @@ TEST_CASE("bind temporary strings", M) {
     return false;
   });
 
-  REQUIRE(got == L"hello");
+  REQUIRE(got == L("hello"));
 }
 
 TEST_CASE("get integers from sqlite", M) {
@@ -219,7 +219,7 @@ TEST_CASE("invalid string column", M) {
   db.exec("CREATE TABLE a(text TEXT NOT NULL)");
 
   Statement *insert = db.prepare("INSERT INTO a VALUES(?)");
-  insert->bind(1, "hello");
+  insert->bind(1, L("hello"));
   insert->exec();
 
   Statement *select = db.prepare("SELECT text FROM a LIMIT 1");

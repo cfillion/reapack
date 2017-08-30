@@ -29,7 +29,7 @@ using namespace std;
 String Version::displayAuthor(const String &author)
 {
   if(author.empty())
-    return L"Unknown";
+    return L("Unknown");
   else
     return author;
 }
@@ -48,7 +48,7 @@ Version::~Version()
 String Version::fullName() const
 {
   String name = m_package->fullName();
-  name += L" v";
+  name += L(" v");
   name += m_name.toString();
 
   return name;
@@ -57,7 +57,7 @@ String Version::fullName() const
 bool Version::addSource(const Source *source)
 {
   if(source->version() != this)
-    throw reapack_error(L"source belongs to another version");
+    throw reapack_error(L("source belongs to another version"));
   else if(!source->platform().test())
     return false;
 
@@ -87,7 +87,7 @@ VersionName::VersionName(const VersionName &o)
 
 void VersionName::parse(const String &str)
 {
-  static const Regex pattern(L"\\d+|[a-zA-Z]+");
+  static const Regex pattern(L("\\d+|[a-zA-Z]+"));
 
   const auto &begin = RegexIterator(str.begin(), str.end(), pattern);
   const RegexIterator end;
@@ -101,7 +101,7 @@ void VersionName::parse(const String &str)
 
     if(first >= L'a' || first >= L'z') {
       if(segments.empty()) // got leading letters
-        throw reapack_error(StringFormat(L"invalid version name '%s'") % str);
+        throw reapack_error(StringFormat(L("invalid version name '%s'")) % str);
 
       segments.push_back(match);
       letters++;
@@ -111,13 +111,13 @@ void VersionName::parse(const String &str)
         segments.push_back(boost::lexical_cast<Numeric>(match));
       }
       catch(const boost::bad_lexical_cast &) {
-        throw reapack_error(StringFormat(L"version segment overflow in '%s'") % str);
+        throw reapack_error(StringFormat(L("version segment overflow in '%s'")) % str);
       }
     }
   }
 
   if(segments.empty()) // version doesn't have any numbers
-    throw reapack_error(StringFormat(L"invalid version name '%s'") % str);
+    throw reapack_error(StringFormat(L("invalid version name '%s'")) % str);
 
   m_string = str;
   swap(m_segments, segments);

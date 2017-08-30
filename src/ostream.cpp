@@ -39,9 +39,9 @@ void OutputStream::indented(const String &text)
     boost::algorithm::trim(line);
 
     if(!line.empty())
-      m_stream << L"\x20\x20" << line;
+      m_stream << L("\x20\x20") << line;
 
-    m_stream << L"\r\n";
+    m_stream << L("\r\n");
   }
 }
 
@@ -50,16 +50,16 @@ OutputStream &OutputStream::operator<<(const Version &ver)
   m_stream << L'v' << ver.name().toString();
 
   if(!ver.author().empty())
-    m_stream << L" by " << ver.author();
+    m_stream << L(" by ") << ver.author();
 
   const String &date = ver.time().toString();
   if(!date.empty())
     m_stream << " – " << date;
 
-  m_stream << L"\r\n";
+  m_stream << L("\r\n");
 
   const String &changelog = ver.changelog();
-  indented(changelog.empty() ? L"No changelog" : changelog);
+  indented(changelog.empty() ? L("No changelog") : changelog);
 
   return *this;
 }

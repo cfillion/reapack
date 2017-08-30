@@ -28,7 +28,7 @@ using namespace std;
 
 Path Index::pathFor(const String &name)
 {
-  return Path::CACHE + (name + L".xml");
+  return Path::CACHE + (name + L(".xml"));
 }
 
 IndexPtr Index::load(const String &name, const char *data)
@@ -47,20 +47,22 @@ IndexPtr Index::load(const String &name, const char *data)
     fclose(file);
   }
 
-  if(doc.ErrorId())
-    throw reapack_error(doc.ErrorDesc());
+  if(doc.ErrorId()) {
+    const char *err = doc.ErrorDesc();
+    throw reapack_error(err);
+  }
 
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();
 
   if(strcmp(root->Value(), "index"))
-    throw reapack_error(L"invalid index");
+    throw reapack_error(L("invalid index"));
 
   int version = 0;
   root->Attribute("version", &version);
 
   if(!version)
-    throw reapack_error(L"index version not found");
+    throw reapack_error(L("index version not found"));
 
   Index *ri = new Index(name);
 
@@ -73,7 +75,7 @@ IndexPtr Index::load(const String &name, const char *data)
     loadV1(root, ri);
     break;
   default:
-    throw reapack_error(L"index version is unsupported");
+    throw reapack_error(L("index version is unsupported"));
   }
 
   ptr.release();
@@ -94,7 +96,7 @@ Index::~Index()
 void Index::setName(const String &newName)
 {
   if(!m_name.empty())
-    throw reapack_error(L"index name is already set");
+    throw reapack_error(L("index name is already set"));
 
   // validation is taken care of later by Remote's constructor
   m_name = newName;
@@ -103,7 +105,7 @@ void Index::setName(const String &newName)
 bool Index::addCategory(const Category *cat)
 {
   if(cat->index() != this)
-    throw reapack_error(L"category belongs to another index");
+    throw reapack_error(L("category belongs to another index"));
 
   if(cat->packages().empty())
     return false;
@@ -139,7 +141,7 @@ Category::Category(const String &name, const Index *ri)
   : m_index(ri), m_name(name)
 {
   if(m_name.empty())
-    throw reapack_error(L"empty category name");
+    throw reapack_error(L("empty category name"));
 }
 
 Category::~Category()
@@ -162,7 +164,7 @@ String Category::fullName() const
 bool Category::addPackage(const Package *pkg)
 {
   if(pkg->category() != this)
-    throw reapack_error(L"package belongs to another category");
+    throw reapack_error(L("package belongs to another category"));
 
   if(pkg->type() == Package::UnknownType || pkg->versions().empty())
     return false; // silently discard unknown package types

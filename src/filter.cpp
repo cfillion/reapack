@@ -83,11 +83,11 @@ Filter::Group *Filter::Group::push(String buf, int *flags)
     return this;
 
   if((*flags & QuotedFlag) == 0) {
-    if(buf == L"NOT") {
+    if(buf == L("NOT")) {
       *flags ^= Token::NotFlag;
       return this;
     }
-    else if(buf == L"OR") {
+    else if(buf == L("OR")) {
       if(m_nodes.empty())
         return this;
       else if(m_type == MatchAny) {
@@ -104,13 +104,13 @@ Filter::Group *Filter::Group::push(String buf, int *flags)
 
       return newGroup.get();
     }
-    else if(buf == L"(") {
+    else if(buf == L("(")) {
       auto newGroup = make_shared<Group>(MatchAll, *flags, this);
       m_nodes.push_back(newGroup);
       *flags = 0;
       return newGroup.get();
     }
-    else if(buf == L")") {
+    else if(buf == L(")")) {
       for(Group *parent = this; parent->m_parent; parent = parent->m_parent) {
         if(parent->m_type == MatchAll)
           return parent->m_parent;

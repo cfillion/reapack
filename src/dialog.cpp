@@ -355,7 +355,7 @@ void Dialog::setClipboard(const vector<String> &values)
 
 void Dialog::openURL(const String &url)
 {
-  ShellExecute(nullptr, L"open", url.c_str(), nullptr, nullptr, SW_SHOW);
+  ShellExecute(nullptr, L("open"), url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
 HWND Dialog::getControl(const int idc)

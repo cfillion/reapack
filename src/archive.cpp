@@ -35,7 +35,7 @@
 
 using namespace std;
 
-static const Path ARCHIVE_TOC(L"toc");
+static const Path ARCHIVE_TOC(L("toc"));
 static const size_t BUFFER_SIZE = 4096;
 
 #ifdef _WIN32
@@ -44,11 +44,11 @@ static void *wide_fopen(voidpf, const void *filename, int mode)
   const wchar_t *fopen_mode = nullptr;
 
   if((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_READ)
-    fopen_mode = L"rb";
+    fopen_mode = L("rb");
   else if(mode & ZLIB_FILEFUNC_MODE_EXISTING)
-    fopen_mode = L"r+b";
+    fopen_mode = L("r+b");
   else if(mode & ZLIB_FILEFUNC_MODE_CREATE)
-    fopen_mode = L"wb";
+    fopen_mode = L("wb");
 
   FILE *file = nullptr;
 
@@ -76,7 +76,7 @@ void Archive::import(const String &path)
 
   stringstream toc;
   if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
-    throw reapack_error(StringFormat(L"Cannot locate the table of contents (%d)") % err);
+    throw reapack_error(StringFormat(L("Cannot locate the table of contents (%d)")) % err);
 
   // starting import, do not abort process (eg. by throwing) at this point
   if(!(state.m_tx = g_reapack->setupTransaction()))
@@ -98,7 +98,7 @@ void Archive::import(const String &path)
         state.importPackage(data);
         break;
       default:
-        throw reapack_error(StringFormat(L"Unknown token '%s' (skipping)")
+        throw reapack_error(StringFormat(L("Unknown token '%s' (skipping)"))
           % String(line.substr(0, 4)));
       }
     }
@@ -117,7 +117,7 @@ void ImportArchive::importRemote(const string &data)
   Remote remote = Remote::fromString(data);
 
   if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
-    throw reapack_error(StringFormat(L"Failed to extract index of %s (%d)")
+    throw reapack_error(StringFormat(L("Failed to extract index of %s (%d)"))
       % remote.name() % err);
   }
 
@@ -150,8 +150,9 @@ void ImportArchive::importPackage(const string &data)
   const Version *ver = pkg ? pkg->findVersion(String(versionName)) : nullptr;
 
   if(!ver) {
-    throw reapack_error(StringFormat(L"%s/%s/%s v%s cannot be found or is"
-      " incompatible with your operating system.")
+    throw reapack_error(StringFormat(
+      L("%s/%s/%s v%s cannot be found or is")
+      L(" incompatible with your operating system."))
       % m_lastIndex->name() % String(categoryName) % String(packageName)
       % String(versionName));
   }
@@ -185,12 +186,12 @@ int ArchiveReader::extractFile(const Path &path)
   if(FS::open(stream, path))
     return extractFile(path, stream);
   else
-    throw reapack_error(StringFormat(L"%s: %s") % path.join() % FS::lastError());
+    throw reapack_error(StringFormat(L("%s: %s")) % path.join() % FS::lastError());
 }
 
 int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
 {
-  int status = unzLocateFile(m_zip, path.join(L'/').toUtf8().c_str(), false);
+  int status = unzLocateFile(m_zip, path.join(L('/')).toUtf8().c_str(), false);
   if(status != UNZ_OK)
     return status;
 
@@ -217,7 +218,7 @@ int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
 FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
   : m_path(target), m_reader(reader)
 {
-  setSummary(L"Extracting %s: " + target.join());
+  setSummary(L("Extracting %s: ") + target.join());
 }
 
 bool FileExtractor::run()
@@ -232,7 +233,7 @@ bool FileExtractor::run()
   stream.close();
 
   if(error) {
-    const auto &msg = StringFormat(L"Failed to extract file (%d)") % error;
+    const auto &msg = StringFormat(L("Failed to extract file (%d)")) % error;
     setError({msg.str(), m_path.target().join()});
     return false;
   }
@@ -255,7 +256,7 @@ size_t Archive::create(const String &path, vector<String> *errors,
     if(FS::exists(path))
       jobs.push_back(new FileCompressor(path, writer));
     else {
-      const auto &fmt = StringFormat(L"%s (%s)") % path.join() % FS::lastError();
+      const auto &fmt = StringFormat(L("%s (%s)")) % path.join() % FS::lastError();
       errors->push_back(fmt.str());
     }
   };
@@ -322,12 +323,12 @@ int ArchiveWriter::addFile(const Path &path)
   if(FS::open(stream, path))
     return addFile(path, stream);
   else
-    throw reapack_error(StringFormat(L"%s: %s") % path.join() % FS::lastError());
+    throw reapack_error(StringFormat(L("%s: %s")) % path.join() % FS::lastError());
 }
 
 int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
 {
-  const int status = zipOpenNewFileInZip(m_zip, path.join(L'/').toUtf8().c_str(),
+  const int status = zipOpenNewFileInZip(m_zip, path.join(L('/')).toUtf8().c_str(),
     nullptr, nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 
   if(status != ZIP_OK)
@@ -353,7 +354,7 @@ int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
 FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &writer)
   : m_path(target), m_writer(writer)
 {
-  setSummary(L"Compressing %s: " + target.join());
+  setSummary(L("Compressing %s: ") + target.join());
 }
 
 bool FileCompressor::run()
@@ -368,7 +369,7 @@ bool FileCompressor::run()
   stream.close();
 
   if(error) {
-    const auto &msg = StringFormat(L"Failed to compress file (%d)") % error;
+    const auto &msg = StringFormat(L("Failed to compress file (%d)")) % error;
     setError({msg.str(), m_path.join()});
     return false;
   }

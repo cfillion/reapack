@@ -172,7 +172,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
     if(test(OutOfDateFlag)) {
       Char installLabel[32];
       snprintf(installLabel, lengthof(installLabel),
-        L"U&pdate to v%s", latest->name().toString().c_str());
+        L("U&pdate to v%s"), latest->name().toString().c_str());
 
       const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
       if(target && *target == latest)
@@ -181,7 +181,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
 
     Char reinstallLabel[32];
     snprintf(reinstallLabel, lengthof(reinstallLabel),
-      L"&Reinstall v%s", regEntry.version.toString().c_str());
+      L("&Reinstall v%s"), regEntry.version.toString().c_str());
 
     const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
     if(!current || test(ObsoleteFlag))
@@ -192,14 +192,14 @@ void Browser::Entry::fillMenu(Menu &menu) const
   else {
     Char installLabel[32];
     snprintf(installLabel, lengthof(installLabel),
-      L"&Install v%s", latest->name().toString().c_str());
+      L("&Install v%s"), latest->name().toString().c_str());
 
     const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
     if(target && *target == latest)
       menu.check(actionIndex);
   }
 
-  Menu versionMenu = menu.addMenu(L"Versions");
+  Menu versionMenu = menu.addMenu(L("Versions"));
   const UINT versionMenuIndex = menu.size() - 1;
   if(test(ObsoleteFlag))
     menu.disable(versionMenuIndex);
@@ -220,14 +220,14 @@ void Browser::Entry::fillMenu(Menu &menu) const
   }
 
   const UINT pinIndex = menu.addAction(
-    L"&Pin current version", ACTION_PIN);
+    L("&Pin current version"), ACTION_PIN);
   if(!canPin())
     menu.disable(pinIndex);
   if(pin.value_or(regEntry.pinned))
     menu.check(pinIndex);
 
   const UINT uninstallIndex =
-    menu.addAction(L"&Uninstall", ACTION_UNINSTALL);
+    menu.addAction(L("&Uninstall"), ACTION_UNINSTALL);
   if(!test(InstalledFlag) || remote().isProtected())
     menu.disable(uninstallIndex);
   else if(target && *target == nullptr)
@@ -236,11 +236,11 @@ void Browser::Entry::fillMenu(Menu &menu) const
   menu.addSeparator();
 
   menu.setEnabled(!test(ObsoleteFlag),
-    menu.addAction(L"About this &package", ACTION_ABOUT_PKG));
+    menu.addAction(L("About this &package"), ACTION_ABOUT_PKG));
 
   Char aboutLabel[64];
   snprintf(aboutLabel, lengthof(aboutLabel),
-    L"&About %s", indexName().c_str());
+    L("&About %s"), indexName().c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
 }
 

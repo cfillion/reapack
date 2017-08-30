@@ -57,25 +57,25 @@ String Package::displayType(const Type type)
   case UnknownType:
     break;
   case ScriptType:
-    return L"Script";
+    return L("Script");
   case ExtensionType:
-    return L"Extension";
+    return L("Extension");
   case EffectType:
-    return L"Effect";
+    return L("Effect");
   case DataType:
-    return L"Data";
+    return L("Data");
   case ThemeType:
-    return L"Theme";
+    return L("Theme");
   case LangPackType:
-    return L"Language Pack";
+    return L("Language Pack");
   case WebInterfaceType:
-    return L"Web Interface";
+    return L("Web Interface");
   case ProjectTemplateType:
-    return L"Project Template";
+    return L("Project Template");
   case TrackTemplateType:
-    return L"Track Template";
+    return L("Track Template");
   case MIDINoteNamesType:
-    return L"MIDI Note Names";
+    return L("MIDI Note Names");
   }
 
   return "Unknown";
@@ -90,9 +90,9 @@ Package::Package(const Type type, const String &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
-    throw reapack_error(L"empty package name");
-  else if(m_name.find_first_of(L"/\\") != string::npos)
-    throw reapack_error(StringFormat(L"invalid package name '%s'") % m_name);
+    throw reapack_error(L("empty package name"));
+  else if(m_name.find_first_of(L("/\\")) != string::npos)
+    throw reapack_error(StringFormat(L("invalid package name '%s'")) % m_name);
 }
 
 Package::~Package()
@@ -115,11 +115,11 @@ String Package::fullName() const
 bool Package::addVersion(const Version *ver)
 {
   if(ver->package() != this)
-    throw reapack_error(L"version belongs to another package");
+    throw reapack_error(L("version belongs to another package"));
   else if(ver->sources().empty())
     return false;
   else if(m_versions.count(ver))
-    throw reapack_error(StringFormat(L"duplicate version '%s'") % ver->fullName());
+    throw reapack_error(StringFormat(L("duplicate version '%s'")) % ver->fullName());
 
   m_versions.insert(ver);
 

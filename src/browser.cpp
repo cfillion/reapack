@@ -50,23 +50,23 @@ void Browser::onInit()
   disable(m_actionsBtn);
 
   // don't forget to update order of enum View in header file
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L"All");
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L"Queued");
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L"Installed");
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L"Out of date");
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L"Obsolete");
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L"Uninstalled");
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("All"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Queued"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Installed"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Out of date"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Obsolete"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Uninstalled"));
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {L"Status", 23, ListView::NoLabelFlag},
-    {L"Package", 345},
-    {L"Category", 105},
-    {L"Version", 55, 0, ListView::VersionType},
-    {L"Author", 95},
-    {L"Type", 70},
-    {L"Repository", 120, ListView::CollapseFlag},
-    {L"Last Update", 105, 0, ListView::TimeType},
+    {L("Status"), 23, ListView::NoLabelFlag},
+    {L("Package"), 345},
+    {L("Category"), 105},
+    {L("Version"), 55, 0, ListView::VersionType},
+    {L("Author"), 95},
+    {L("Type"), 70},
+    {L("Repository"), 120, ListView::CollapseFlag},
+    {L("Last Update"), 105, 0, ListView::TimeType},
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
@@ -249,8 +249,8 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   if(!menu.empty())
     menu.addSeparator();
 
-  menu.addAction(L"&Select all", IDC_SELECT);
-  menu.addAction(L"&Unselect all", IDC_UNSELECT);
+  menu.addAction(L("&Select all"), IDC_SELECT);
+  menu.addAction(L("&Unselect all"), IDC_UNSELECT);
 
   return true;
 }
@@ -260,14 +260,14 @@ void Browser::fillMenu(Menu &menu)
   const Entry *entry = getEntry(m_currentIndex);
 
   if(m_list->selectionSize() > 1) {
-    menu.addAction(L"&Install/update selection", ACTION_LATEST_ALL);
-    menu.addAction(L"&Reinstall selection", ACTION_REINSTALL_ALL);
-    menu.addAction(L"&Uninstall selection", ACTION_UNINSTALL_ALL);
-    menu.addAction(L"&Clear queued actions", ACTION_RESET_ALL);
+    menu.addAction(L("&Install/update selection"), ACTION_LATEST_ALL);
+    menu.addAction(L("&Reinstall selection"), ACTION_REINSTALL_ALL);
+    menu.addAction(L("&Uninstall selection"), ACTION_UNINSTALL_ALL);
+    menu.addAction(L("&Clear queued actions"), ACTION_RESET_ALL);
     menu.addSeparator();
 
     if(entry) {
-      Menu pkgMenu = menu.addMenu(L"Package under cursor");
+      Menu pkgMenu = menu.addMenu(L("Package under cursor"));
       entry->fillMenu(pkgMenu);
     }
   }
@@ -278,9 +278,9 @@ void Browser::fillMenu(Menu &menu)
 void Browser::updateDisplayLabel()
 {
   Char btnLabel[32];
-  snprintf(btnLabel, lengthof(btnLabel), L"%d/%zu package%s...",
+  snprintf(btnLabel, lengthof(btnLabel), L("%d/%zu package%s..."),
     m_list->rowCount(), m_entries.size(),
-    m_entries.size() == 1 ? L"" : L"s");
+    m_entries.size() == 1 ? L("") : L("s"));
 
   SetWindowText(m_displayBtn, btnLabel);
 }
@@ -288,21 +288,21 @@ void Browser::updateDisplayLabel()
 void Browser::displayButton()
 {
   static map<const Char *, Package::Type> types = {
-    {L"&Scripts", Package::ScriptType},
-    {L"&Effects", Package::EffectType},
-    {L"E&xtensions", Package::ExtensionType},
-    {L"&Themes", Package::ThemeType},
-    {L"&Language Packs", Package::LangPackType},
-    {L"&Web Interfaces", Package::WebInterfaceType},
-    {L"&Project Templates", Package::ProjectTemplateType},
-    {L"&Track Templates", Package::TrackTemplateType},
-    {L"&MIDI Note Names", Package::MIDINoteNamesType},
-    {L"&Other packages", Package::UnknownType},
+    {L("&Scripts"), Package::ScriptType},
+    {L("&Effects"), Package::EffectType},
+    {L("E&xtensions"), Package::ExtensionType},
+    {L("&Themes"), Package::ThemeType},
+    {L("&Language Packs"), Package::LangPackType},
+    {L("&Web Interfaces"), Package::WebInterfaceType},
+    {L("&Project Templates"), Package::ProjectTemplateType},
+    {L("&Track Templates"), Package::TrackTemplateType},
+    {L("&MIDI Note Names"), Package::MIDINoteNamesType},
+    {L("&Other packages"), Package::UnknownType},
   };
 
   Menu menu;
 
-  auto index = menu.addAction(L"&All packages", ACTION_FILTERTYPE);
+  auto index = menu.addAction(L("&All packages"), ACTION_FILTERTYPE);
   if(!m_typeFilter)
     menu.checkRadio(index);
 
@@ -316,8 +316,8 @@ void Browser::displayButton()
 
   menu.addSeparator();
 
-  menu.addAction(L"&Refresh repositories", ACTION_REFRESH);
-  menu.addAction(L"&Manage repositories...", ACTION_MANAGE);
+  menu.addAction(L("&Refresh repositories"), ACTION_REFRESH);
+  menu.addAction(L("&Manage repositories..."), ACTION_MANAGE);
 
   menu.show(m_displayBtn, handle());
 }
@@ -404,10 +404,10 @@ void Browser::refresh(const bool stale)
     if(!isVisible() || stale) {
       show();
 
-      MessageBox(handle(), L"No repository enabled!\r\n"
-        L"Enable or import repositories from "
-        L"Extensions > ReaPack > Manage repositories.",
-        L"Browse packages", MB_OK);
+      MessageBox(handle(), L("No repository enabled!\r\n")
+        L("Enable or import repositories from ")
+        L("Extensions > ReaPack > Manage repositories."),
+        L("Browse packages"), MB_OK);
     }
 
     populate({});
@@ -467,10 +467,10 @@ void Browser::populate(const vector<IndexPtr> &indexes)
   catch(const reapack_error &e) {
     Char msg[255];
     snprintf(msg, lengthof(msg),
-      L"ReaPack could not read from the local package registry.\r\n"
-      L"Retry later once all installation task are completed.\r\n"
-      L"\r\nError description: %s", e.what().c_str());
-    MessageBox(handle(), msg, L"ReaPack", MB_OK);
+      L("ReaPack could not read from the local package registry.\r\n")
+      L("Retry later once all installation task are completed.\r\n")
+      L("\r\nError description: %s"), e.what().c_str());
+    MessageBox(handle(), msg, L("ReaPack"), MB_OK);
   }
 
   if(!isVisible())
@@ -616,11 +616,11 @@ void Browser::installLatestAll()
 
   if(isEverything && !installOpts.autoInstall) {
     const int btn = MessageBox(handle(),
-      L"Do you want ReaPack to install new packages automatically when"
-      L" synchronizing in the future?\r\n\r\nThis setting can also be"
-      L" customized globally or on a per-repository basis in"
-      L" ReaPack > Manage repositories.",
-      L"Install every available packages", MB_YESNOCANCEL);
+      L("Do you want ReaPack to install new packages automatically when")
+      L(" synchronizing in the future?\r\n\r\nThis setting can also be")
+      L(" customized globally or on a per-repository basis in")
+      L(" ReaPack > Manage repositories."),
+      L("Install every available packages"), MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -798,11 +798,11 @@ bool Browser::confirm() const
 
   Char msg[255];
   snprintf(msg, lengthof(msg),
-    L"Are you sure to uninstall %zu package%s?\r\nThe files and settings will"
-    L" be permanently deleted from this computer.",
-    count, count == 1 ? L"" : L"s");
+    L("Are you sure to uninstall %zu package%s?\r\nThe files and settings will")
+    L(" be permanently deleted from this computer."),
+    count, count == 1 ? L("") : L("s"));
 
-  const Char *title = L"ReaPack Query";
+  const Char *title = L("ReaPack Query");
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
 
   return btn == IDYES;

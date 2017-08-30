@@ -31,7 +31,7 @@
 
 using namespace std;
 
-static const Char *TITLE = L"ReaPack: Import repositories";
+static const Char *TITLE = L("ReaPack: Import repositories");
 static const String DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import()
@@ -140,7 +140,7 @@ void Import::fetch()
         break;
       case ThreadTask::Failure: {
         Char msg[1024];
-        snprintf(msg, lengthof(msg), L"Download failed: %s\r\nn%s",
+        snprintf(msg, lengthof(msg), L("Download failed: %s\r\nn%s"),
           dl->error().message.c_str(), url.c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
         m_pool->abort();
@@ -172,15 +172,15 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
     if(exists && remote.url() != dl->url()) {
       if(remote.isProtected()) {
         snprintf(msg, lengthof(msg),
-          L"The repository %s is protected and cannot be overwritten.",
+          L("The repository %s is protected and cannot be overwritten."),
           index->name().c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
         return false;
       }
       else {
         snprintf(msg, lengthof(msg),
-          L"%s is already configured with a different URL.\r\n"
-          L"Do you want to overwrite it?",
+          L("%s is already configured with a different URL.\r\n")
+          L("Do you want to overwrite it?"),
           index->name().c_str());
 
         const auto answer = MessageBox(handle(), msg, TITLE, MB_YESNO);
@@ -200,7 +200,7 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
   }
   catch(const reapack_error &e) {
     snprintf(msg, lengthof(msg),
-      L"The received file is invalid: %s\r\n%s",
+      L("The received file is invalid: %s\r\n%s"),
       e.what().c_str(), dl->url().c_str());
     MessageBox(handle(), msg, TITLE, MB_OK);
     return false;

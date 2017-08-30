@@ -29,13 +29,14 @@
   #include <windows.h>
 
   typedef wchar_t Char;
+  #define L(str) L##str
 
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
   #define snprintf(...) snprintf_auto(__VA_ARGS__)
 #else
   typedef char Char;
-  #define L
+  #define L(str) str
 #endif
 
 typedef std::basic_string<Char> BasicString;
@@ -48,8 +49,9 @@ public:
   String(const BasicString &&s) : basic_string(move(s)) {}
 
 #ifdef _WIN32
-  String(const char *str, UINT codepage = CP_UTF8);
-  String(const std::string &utf8) : String(utf8.c_str()) {}
+  // reference to pointer to deny string literals (forcing the use of the L macro)
+  String(const char *&str, UINT codepage = CP_UTF8) { from(str, codepage); }
+  String(const std::string &utf8) { from(utf8.c_str(), CP_UTF8); }
 
   std::string toUtf8() const;
 #else
@@ -63,11 +65,17 @@ public:
     return std::to_string(v);
 #endif
   }
+
+#ifdef _WIN32
+protected:
+  void from(const char *, UINT codepage);
+#endif
 };
 
 template<> struct std::hash<String> {
   size_t operator()(const String &str) const {
-    return std::hash<BasicString>{}(str); }
+    return std::hash<BasicString>{}(str);
+  }
 };
 
 #include <sstream>

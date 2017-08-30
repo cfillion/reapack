@@ -51,8 +51,8 @@ bool InstallTask::start()
 
     if(!conflicts.empty()) {
       for(const Path &path : conflicts) {
-        tx()->receipt()->addError({L"Conflict: " + path.join() +
-          L" is already owned by another package", m_version->fullName()});
+        tx()->receipt()->addError({L("Conflict: ") + path.join() +
+          L(" is already owned by another package"), m_version->fullName()});
       }
 
       return false;
@@ -107,7 +107,7 @@ void InstallTask::commit()
 
   for(const TempPath &paths : m_newFiles) {
     if(!FS::rename(paths)) {
-      tx()->receipt()->addError({L"Cannot rename to target: " + FS::lastError(),
+      tx()->receipt()->addError({L("Cannot rename to target: ") + FS::lastError(),
         paths.target().join()});
 
       // it's a bit late to rollback here as some files might already have been

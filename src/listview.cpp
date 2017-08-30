@@ -444,7 +444,7 @@ void ListView::headerMenu(const int x, const int y)
   }
 
   menu.addSeparator();
-  menu.addAction(L"Reset columns", ACTION_RESTORE);
+  menu.addAction(L("Reset columns"), ACTION_RESTORE);
 
   const int id = menu.show(x, y, handle());
 

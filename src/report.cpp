@@ -47,7 +47,7 @@ void Report::printHeader(const Char *title)
     m_stream << "\r\n";
 
   const String sep(10, L'=');
-  m_stream << sep << L' ' << title << L": " << sep << "\r\n\r\n";
+  m_stream << sep << L' ' << title << L(": ") << sep << "\r\n\r\n";
 }
 
 void Report::fillReport()
@@ -57,26 +57,26 @@ void Report::fillReport()
   const size_t removals = m_receipt.removals().size();
   const size_t errors = m_receipt.errors().size();
 
-  m_stream << installs << L" installed package";
+  m_stream << installs << L(" installed package");
   if(installs != 1) m_stream << 's';
 
-  m_stream << L", " << updates << L" update";
+  m_stream << L(", ") << updates << L(" update");
   if(updates != 1) m_stream << L's';
 
-  m_stream << L", " << removals << L" removed file";
+  m_stream << L(", ") << removals << L(" removed file");
   if(removals != 1) m_stream << 's';
 
-  m_stream << L" and " << errors << L" error";
+  m_stream << L(" and ") << errors << L(" error");
   if(errors != 1) m_stream << L's';
 
-  m_stream << L"\r\n";
+  m_stream << L("\r\n");
 
   if(m_receipt.isRestartNeeded()) {
     m_stream
-      << L"\r\n"
-      << L"Notice: One or more native REAPER extensions were installed.\r\n"
-      << L"The newly installed files won't be loaded until REAPER is restarted."
-      << L"\r\n";
+      << L("\r\n")
+      << L("Notice: One or more native REAPER extensions were installed.\r\n")
+      << L("The newly installed files won't be loaded until REAPER is restarted.")
+      << L("\r\n");
   }
 
   if(errors)
@@ -93,7 +93,7 @@ void Report::fillReport()
 
   if(installs + updates + removals == 0) {
     SetDlgItemText(handle(), IDC_LABEL,
-      L"Oops! The following error(s) occured:");
+      L("Oops! The following error(s) occured:"));
   }
 
   SetDlgItemText(handle(), IDC_REPORT, m_stream.str().c_str());
@@ -101,7 +101,7 @@ void Report::fillReport()
 
 void Report::printInstalls()
 {
-  printHeader(L"Installed packages");
+  printHeader(L("Installed packages"));
 
   for(const InstallTicket &ticket : m_receipt.installs())
     m_stream << ticket.version->fullName() << "\r\n";
@@ -109,7 +109,7 @@ void Report::printInstalls()
 
 void Report::printUpdates()
 {
-  printHeader(L"Updates");
+  printHeader(L("Updates"));
 
   const auto start = m_stream.tellp();
 
@@ -118,9 +118,9 @@ void Report::printUpdates()
     const auto &versions = pkg->versions();
 
     if(m_stream.tellp() != start)
-      m_stream << L"\r\n";
+      m_stream << L("\r\n");
 
-    m_stream << pkg->fullName() << L":\r\n";
+    m_stream << pkg->fullName() << L(":\r\n");
 
     for(const Version *ver : versions | boost::adaptors::reversed) {
       if(ver->name() <= ticket.previous.version)
@@ -133,23 +133,23 @@ void Report::printUpdates()
 
 void Report::printErrors()
 {
-  printHeader(L"Errors");
+  printHeader(L("Errors"));
 
   const auto start = m_stream.tellp();
 
   for(const ErrorInfo &err : m_receipt.errors()) {
     if(m_stream.tellp() != start)
-      m_stream << L"\r\n";
+      m_stream << L("\r\n");
 
-    m_stream << err.context << L":\r\n";
+    m_stream << err.context << L(":\r\n");
     m_stream.indented(err.message);
   }
 }
 
 void Report::printRemovals()
 {
-  printHeader(L"Removed files");
+  printHeader(L("Removed files"));
 
   for(const Path &path : m_receipt.removals())
-    m_stream << path.join() << L"\r\n";
+    m_stream << path.join() << L("\r\n");
 }

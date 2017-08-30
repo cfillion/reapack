@@ -40,12 +40,12 @@ static void HandleLink(ENLINK *info, HWND handle)
   SendMessage(handle, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
   if(info->msg == WM_LBUTTONUP)
-    ShellExecute(nullptr, L"open", url, nullptr, nullptr, SW_SHOW);
+    ShellExecute(nullptr, L("open"), url, nullptr, nullptr, SW_SHOW);
 }
 
 void RichEdit::Init()
 {
-  LoadLibrary(L"Msftedit.dll");
+  LoadLibrary(L("Msftedit.dll"));
 }
 
 RichEdit::RichEdit(HWND handle)

@@ -12,13 +12,13 @@ using namespace std;
 static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
-  Index ri("Remote Name"); \
-  Category cat("Category Name", &ri); \
-  Package pkg(Package::ScriptType, "Hello", &cat); \
-  pkg.setDescription("Hello World"); \
-  Version ver("1.0", &pkg); \
-  ver.setAuthor("John Doe"); \
-  Source *src = new Source("file", "url", &ver); \
+  Index ri(L("Remote Name")); \
+  Category cat(L("Category Name"), &ri); \
+  Package pkg(Package::ScriptType, L("Hello"), &cat); \
+  pkg.setDescription(L("Hello World")); \
+  Version ver(L("1.0"), &pkg); \
+  ver.setAuthor(L("John Doe")); \
+  Source *src = new Source(L("file"), L("url"), &ver); \
   ver.addSource(src);
 
 TEST_CASE("query uninstalled package", M) {
@@ -40,12 +40,12 @@ TEST_CASE("query installed package", M) {
   const Registry::Entry &entry = reg.push(&ver);
   REQUIRE(entry);
   REQUIRE(entry.id == 1);
-  REQUIRE(entry.remote == L"Remote Name");
-  REQUIRE(entry.category == L"Category Name");
-  REQUIRE(entry.package == L"Hello");
+  REQUIRE(entry.remote == L("Remote Name"));
+  REQUIRE(entry.category == L("Category Name"));
+  REQUIRE(entry.package == L("Hello"));
   REQUIRE(entry.type == Package::ScriptType);
-  REQUIRE(entry.version.toString() == L"1.0");
-  REQUIRE(entry.author == L"John Doe");
+  REQUIRE(entry.version.toString() == L("1.0"));
+  REQUIRE(entry.author == L("John Doe"));
 
   const Registry::Entry &selectEntry = reg.getEntry(&pkg);
   REQUIRE(selectEntry.id == entry.id);
@@ -61,20 +61,20 @@ TEST_CASE("query installed package", M) {
 TEST_CASE("bump version", M) {
   MAKE_PACKAGE
 
-  Version ver2("2.0", &pkg);
-  ver2.addSource(new Source("file", "url", &ver2));
+  Version ver2(L("2.0"), &pkg);
+  ver2.addSource(new Source(L("file"), L("url"), &ver2));
 
   Registry reg;
   reg.push(&ver);
 
   const Registry::Entry &entry1 = reg.getEntry(&pkg);
-  REQUIRE(entry1.version.toString() == L"1.0");
-  CHECK(entry1.author == L"John Doe");
+  REQUIRE(entry1.version.toString() == L("1.0"));
+  CHECK(entry1.author == L("John Doe"));
 
   reg.push(&ver2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
-  REQUIRE(entry2.version.toString() == L"2.0");
-  CHECK(entry2.author == L"");
+  REQUIRE(entry2.version.toString() == L("2.0"));
+  CHECK(entry2.author == L(""));
   
   REQUIRE(entry2.id == entry1.id);
 }
@@ -97,7 +97,7 @@ TEST_CASE("get file list", M) {
 TEST_CASE("query all packages", M) {
   MAKE_PACKAGE
 
-  const String remote = "Remote Name";
+  const String remote = L("Remote Name");
 
   Registry reg;
   REQUIRE(reg.getEntries(remote).empty());
@@ -107,12 +107,12 @@ TEST_CASE("query all packages", M) {
   const vector<Registry::Entry> &entries = reg.getEntries(remote);
   REQUIRE(entries.size() == 1);
   REQUIRE(entries[0].id == 1);
-  REQUIRE(entries[0].remote == L"Remote Name");
-  REQUIRE(entries[0].category == L"Category Name");
-  REQUIRE(entries[0].package == L"Hello");
+  REQUIRE(entries[0].remote == L("Remote Name"));
+  REQUIRE(entries[0].category == L("Category Name"));
+  REQUIRE(entries[0].package == L("Hello"));
   REQUIRE(entries[0].type == Package::ScriptType);
-  REQUIRE(entries[0].version.toString() == L"1.0");
-  REQUIRE(entries[0].author == L"John Doe");
+  REQUIRE(entries[0].version.toString() == L("1.0"));
+  REQUIRE(entries[0].author == L("John Doe"));
 }
 
 TEST_CASE("forget registry entry", M) {
@@ -133,13 +133,13 @@ TEST_CASE("file conflicts", M) {
     reg.push(&ver);
   }
 
-  Index ri("Remote Name");
-  Category cat("Category Name", &ri);
-  Package pkg(Package::ScriptType, "Duplicate Package", &cat);
-  Version ver("1.0", &pkg);
-  Source *src1 = new Source("file", "url", &ver);
+  Index ri(L("Remote Name"));
+  Category cat(L("Category Name"), &ri);
+  Package pkg(Package::ScriptType, L("Duplicate Package"), &cat);
+  Version ver(L("1.0"), &pkg);
+  Source *src1 = new Source(L("file"), L("url"), &ver);
   ver.addSource(src1);
-  Source *src2 = new Source("file2", "url", &ver);
+  Source *src2 = new Source(L("file2"), L("url"), &ver);
   ver.addSource(src2);
 
   CHECK(reg.getEntry(&pkg).id == 0); // uninstalled
@@ -168,12 +168,12 @@ TEST_CASE("get main files", M) {
   Registry reg;
   REQUIRE(reg.getMainFiles({}).empty());
 
-  Source *main1 = new Source({}, "url", &ver);
+  Source *main1 = new Source({}, L("url"), &ver);
   main1->setSections(Source::MIDIEditorSection);
   main1->setTypeOverride(Package::EffectType);
   ver.addSource(main1);
 
-  Source *main2 = new Source({}, "url", &ver); // duplicate file ignored
+  Source *main2 = new Source({}, L("url"), &ver); // duplicate file ignored
   main2->setSections(Source::MainSection);
   main2->setTypeOverride(Package::EffectType);
   ver.addSource(main2);

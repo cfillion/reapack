@@ -29,13 +29,13 @@ static const Char SEPARATOR = '/';
 static const Char SEPARATOR = '\\';
 #endif
 
-static const String DOT = L".";
-static const String DOTDOT = L"..";
+static const String DOT = L(".");
+static const String DOTDOT = L("..");
 
-const Path Path::DATA(L"ReaPack");
-const Path Path::CACHE = Path::DATA + L"cache";
-const Path Path::CONFIG(L"reapack.ini");
-const Path Path::REGISTRY = Path::DATA + L"registry.db";
+const Path Path::DATA(L("ReaPack"));
+const Path Path::CACHE = Path::DATA + L("cache");
+const Path Path::CONFIG(L("reapack.ini"));
+const Path Path::REGISTRY = Path::DATA + L("registry.db");
 
 Path Path::s_root;
 
@@ -46,7 +46,7 @@ static vector<String> Split(const String &input, bool *absolute)
   size_t last = 0, size = input.size();
 
   while(last < size) {
-    const size_t pos = input.find_first_of(L"\\/", last);
+    const size_t pos = input.find_first_of(L("\\/"), last);
 
     if(pos == string::npos) {
       list.push_back(input.substr(last));
@@ -60,7 +60,7 @@ static vector<String> Split(const String &input, bool *absolute)
 
     const String &part = input.substr(last, pos - last);
 
-    if(!part.empty() && part != L".")
+    if(!part.empty() && part != L("."))
       list.push_back(part);
 
     last = pos + 1;
@@ -266,5 +266,5 @@ UseRootPath::~UseRootPath()
 TempPath::TempPath(const Path &target)
   : m_target(target), m_temp(target)
 {
-  m_temp[m_temp.size() - 1] += L".part";
+  m_temp[m_temp.size() - 1] += L(".part");
 }

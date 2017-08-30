@@ -25,16 +25,16 @@
 
 using namespace std;
 
-static Char DATA_DELIMITER = L'|';
+static Char DATA_DELIMITER = L('|');
 
 static bool validateName(const String &name)
 {
   using namespace std::regex_constants;
 
   // see https://en.wikipedia.org/wiki/Filename#Reserved%5Fcharacters%5Fand%5Fwords
-  static const Regex validPattern(L"[^*\\\\:<>?/|\"[:cntrl:]]{3,}");
+  static const Regex validPattern(L("[^*\\\\:<>?/|\"[:cntrl:]]{3,}"));
   static const Regex invalidPattern(
-    L"[\\.\x20].+|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d", icase);
+    L("[\\.\x20].+|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d"), icase);
 
   MatchResults valid, invalid;
   regex_match(name, valid, validPattern);
@@ -47,7 +47,7 @@ static bool validateUrl(const String &url)
 {
   // see http://tools.ietf.org/html/rfc3986#section-2
   static const Regex pattern(
-    L"(?:[a-zA-Z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+");
+    L("(?:[a-zA-Z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+"));
 
   MatchResults match;
   regex_match(url, match, pattern);
@@ -104,7 +104,7 @@ Remote::Remote(const String &name, const String &url, const bool enabled, const 
 void Remote::setName(const String &name)
 {
   if(!validateName(name))
-    throw reapack_error(L"invalid name");
+    throw reapack_error(L("invalid name"));
   else
     m_name = name;
 }
@@ -112,7 +112,7 @@ void Remote::setName(const String &name)
 void Remote::setUrl(const String &url)
 {
   if(!validateUrl(url))
-    throw reapack_error(L"invalid url");
+    throw reapack_error(L("invalid url"));
   else
     m_url = url;
 }
