@@ -65,7 +65,7 @@ TEST_CASE("get rows from prepared statement", M) {
 
     REQUIRE(values.size() == 2);
     REQUIRE(values[0] == L"hello");
-    REQUIRE(values[1] == L"世界");
+    REQUIRE(values[1] == L"\u4E16\u754C");
   }
 
   SECTION("abort") {
