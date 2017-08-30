@@ -25,6 +25,8 @@
 #include <string>
 
 #ifdef _WIN32
+  #include <windows.h>
+
   typedef wchar_t Char;
   #define L(str) L##str
 
@@ -56,7 +58,7 @@ public:
 protected:
   void from(const char *, UINT codepage);
 #else
-  const std::string &toUtf8() const { return *this; }
+  inline const std::string &toUtf8() const { return *this; }
 #endif
 
 public:

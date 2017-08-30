@@ -19,7 +19,6 @@
 
 #ifdef _WIN32
 #include <cstdio>
-#include <windows.h>
 
 void String::from(const char *input, UINT codepage)
 {
