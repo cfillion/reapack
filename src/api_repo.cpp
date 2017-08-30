@@ -49,7 +49,7 @@ autoInstall: usually set to 2 (obey user setting).)",
   try {
     const Remote &existing = g_reapack->remote(name);
 
-    Remote remote = g_reapack->remote(name);
+    Remote remote(existing);
     remote.setName(name);
     remote.setUrl(url && strlen(url) > 0 ? url : existing.url());
     remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));

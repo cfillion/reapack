@@ -1,6 +1,4 @@
-#include <catch.hpp>
-
-#include "helper/io.hpp"
+#include "helper.hpp"
 
 #include <version.hpp>
 

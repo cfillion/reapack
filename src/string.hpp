@@ -48,13 +48,12 @@ public:
   String(const BasicString &&s) : basic_string(move(s)) {}
 
 #ifdef _WIN32
-  String(const std::string &str, UINT codepage = CP_UTF8) : basic_string() { convert(str, codepage); }
-  String(const char *str) : basic_string() { convert(str, CP_UTF8); }
+  String(const char *str, UINT codepage = CP_UTF8);
+  String(const std::string &utf8) : String(utf8.c_str()) {}
 
   std::string toUtf8() const;
-  void convert(const std::string &, UINT codepage);
 #else
-  const String &toUtf8() const { return *this; }
+  const std::string &toUtf8() const { return *this; }
 #endif
 
   template<typename T> static String from(const T v) {

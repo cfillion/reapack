@@ -23,10 +23,15 @@
 
 #include "string.hpp"
 
-class reapack_error : public std::runtime_error {
+class reapack_error {
 public:
-  reapack_error(const Char *what) : std::runtime_error(what) {}
-  reapack_error(const StringFormat &f) : std::runtime_error(f.str()) {}
+  reapack_error(const String &&what) : m_what(move(what)) {}
+  reapack_error(const StringFormat &f) : m_what(move(f.str())) {}
+
+  const String &what() const noexcept { return m_what; }
+
+private:
+  String m_what;
 };
 
 struct ErrorInfo {

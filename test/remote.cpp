@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <remote.hpp>
 
@@ -66,6 +66,7 @@ TEST_CASE("remote name validation", M) {
         Remote remote(name, L"url");
       }
       catch(const reapack_error &e) {
+        INFO(name);
         FAIL("'" + name.toUtf8() + "' was denied (" + e.what().toUtf8() + ')');
       }
     }

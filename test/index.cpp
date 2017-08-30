@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <errors.hpp>
 #include <index.hpp>

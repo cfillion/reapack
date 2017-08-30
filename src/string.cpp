@@ -18,13 +18,12 @@
 #include "string.hpp"
 
 #ifdef _WIN32
-void String::convert(const std::string &input, UINT codepage)
+String::String(const char *input, UINT codepage)
 {
-  const int size = MultiByteToWideChar(codepage, 0,
-    &input[0], -1, nullptr, 0) - 1;
+  const int size = MultiByteToWideChar(codepage, 0, input, -1, nullptr, 0) - 1;
 
   resize(size);
-  MultiByteToWideChar(codepage, 0, &input[0], -1, &(*this)[0], size);
+  MultiByteToWideChar(codepage, 0, input, -1, &(*this)[0], size);
 }
 
 std::string String::toUtf8() const

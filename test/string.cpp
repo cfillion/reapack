@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <string.hpp>
 
@@ -10,12 +10,20 @@ TEST_CASE("to_(w)string wrapper", M) {
   REQUIRE(String::from(42) == L"42");
 }
 
+TEST_CASE("String construction from UTF-8") {
+  SECTION("ascii")
+    REQUIRE(String("abc") == L"abc");
+
+  SECTION("japanese")
+    REQUIRE(String("世界") == L"世界");
+}
+
 TEST_CASE("string to wstring to string", M) {
   SECTION("ascii")
     REQUIRE(String("hello world").toUtf8() == "hello world");
 
   SECTION("cyrillic")
-    REQUIRE(String("Новая папка") == L"Новая папка");
+    REQUIRE(String("Новая папка").toUtf8() == "Новая папка");
 }
 
 TEST_CASE("lengthof(array)", M) {
