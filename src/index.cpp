@@ -41,14 +41,14 @@ IndexPtr Index::load(const String &name, const char *data)
     FILE *file = FS::open(pathFor(name));
 
     if(!file)
-      throw reapack_error(FS::lastError().c_str());
+      throw reapack_error(FS::lastError());
 
     doc.LoadFile(file);
     fclose(file);
   }
 
   if(doc.ErrorId())
-    throw reapack_error(String(doc.ErrorDesc()));
+    throw reapack_error(doc.ErrorDesc());
 
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();

@@ -10,14 +10,6 @@ TEST_CASE("to_(w)string wrapper", M) {
   REQUIRE(String::from(42) == L"42");
 }
 
-TEST_CASE("String construction from UTF-8") {
-  SECTION("ascii")
-    REQUIRE(String("abc") == L"abc");
-
-  SECTION("japanese")
-    REQUIRE(String("世界") == L"世界");
-}
-
 TEST_CASE("string to wstring to string", M) {
   SECTION("ascii")
     REQUIRE(String("hello world").toUtf8() == "hello world");

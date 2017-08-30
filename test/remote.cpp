@@ -56,7 +56,7 @@ TEST_CASE("remote name validation", M) {
       L"1234",
       L"hello world",
       L"hello_world",
-      L"Новая папка",
+      "Новая папка",
       L"Hello ~World~",
       L"Repository #1"
     };

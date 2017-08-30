@@ -52,21 +52,21 @@ static bool stat(const Path &path, struct stat *out)
 
 FILE *FS::open(const Path &path)
 {
-  const Path &fullPath = Path::prefixRoot(path);
+  const String &fullPath = Path::prefixRoot(path).join();
 
 #ifdef _WIN32
   FILE *file = nullptr;
-  _wfopen_s(&file, fullPath.join().c_str(), L"rb");
+  _wfopen_s(&file, fullPath.c_str(), L"rb");
   return file;
 #else
-  return fopen(fullPath.join().c_str(), "rb");
+  return fopen(fullPath.c_str(), "rb");
 #endif
 }
 
 bool FS::open(ifstream &stream, const Path &path)
 {
-  const Path &fullPath = Path::prefixRoot(path);
-  stream.open(String(fullPath.join()), ios_base::binary);
+  const String &fullPath = Path::prefixRoot(path).join();
+  stream.open(fullPath, ios_base::binary);
   return stream.good();
 }
 
@@ -75,8 +75,8 @@ bool FS::open(ofstream &stream, const Path &path)
   if(!mkdir(path.dirname()))
     return false;
 
-  const Path &fullPath = Path::prefixRoot(path);
-  stream.open(String(fullPath.join()), ios_base::binary);
+  const String &fullPath = Path::prefixRoot(path).join();
+  stream.open(fullPath, ios_base::binary);
   return stream.good();
 }
 
