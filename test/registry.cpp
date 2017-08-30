@@ -74,7 +74,7 @@ TEST_CASE("bump version", M) {
   reg.push(&ver2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
   REQUIRE(entry2.version.toString() == L("2.0"));
-  CHECK(entry2.author == L(""));
+  CHECK(entry2.author == String());
   
   REQUIRE(entry2.id == entry1.id);
 }

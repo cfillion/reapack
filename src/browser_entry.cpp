@@ -122,7 +122,7 @@ String Browser::Entry::displayVersion() const
     if(!display.empty())
       display += L'\x20';
 
-    display += L'(' + latest->name().toString() + L')';
+    display += L('(') + latest->name().toString() + L(')');
   }
 
   return display;

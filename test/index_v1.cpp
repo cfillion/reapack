@@ -253,7 +253,7 @@ TEST_CASE("read index name (from raw data only)") {
 
   SECTION("missing") {
     IndexPtr ri = Index::load({}, "<index version=\"1\"/>\n");
-    REQUIRE(ri->name() == L"");
+    REQUIRE(ri->name() == String());
   }
 }
 

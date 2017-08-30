@@ -44,7 +44,7 @@ static bool stat(const Path &path, struct stat *out)
 #ifdef _WIN32
   constexpr auto func = &_wstat;
 #else
-  constexpr auto func = &::stat;
+  constexpr int(*func)(const char *, struct stat *) = &::stat;
 #endif
 
   return !func(fullPath.join().c_str(), out);

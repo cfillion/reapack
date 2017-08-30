@@ -73,7 +73,7 @@ TEST_CASE("remote name validation", M) {
 TEST_CASE("remote url validation", M) {
   SECTION("invalid") {
     const String invalidUrls[] = {
-      L"",
+      {}, // empty string
       L("hello world"), // space should be %20
     };
 
@@ -245,7 +245,7 @@ TEST_CASE("unserialize remote", M) {
 
 TEST_CASE("serialize remote", M) {
   SECTION("default")
-    REQUIRE(Remote(L("name"), L("url")).toString() == L"name|url|1|2");
+    REQUIRE(Remote(L("name"), L("url")).toString() == L("name|url|1|2"));
 
   SECTION("enabled")
     REQUIRE(Remote(L("name"), L("url"), true, true).toString() == L("name|url|1|1"));

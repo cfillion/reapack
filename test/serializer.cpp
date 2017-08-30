@@ -50,7 +50,7 @@ TEST_CASE("read from serialized data", M) {
   }
 
   SECTION("empty string") {
-    const auto &out = s.read(L(""), 1);
+    const auto &out = s.read({}, 1);
     REQUIRE(out.empty());
   }
 }

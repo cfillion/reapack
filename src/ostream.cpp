@@ -35,7 +35,7 @@ void OutputStream::indented(const String &text)
   StringStreamI stream(text);
   String line;
 
-  while(getline(stream, line, L'\n')) {
+  while(getline(stream, line, L('\n'))) {
     boost::algorithm::trim(line);
 
     if(!line.empty())
@@ -47,7 +47,7 @@ void OutputStream::indented(const String &text)
 
 OutputStream &OutputStream::operator<<(const Version &ver)
 {
-  m_stream << L'v' << ver.name().toString();
+  m_stream << L('v') << ver.name().toString();
 
   if(!ver.author().empty())
     m_stream << L(" by ") << ver.author();

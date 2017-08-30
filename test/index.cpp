@@ -24,12 +24,12 @@ TEST_CASE("index file not found", M) {
 
 TEST_CASE("load index from raw data", M) {
   SECTION("valid") {
-    Index::load(L(""), "<index version=\"1\"/>\n");
+    Index::load({}, "<index version=\"1\"/>\n");
   }
 
   SECTION("broken") {
     try {
-      Index::load(L(""), "<index>\n");
+      Index::load({}, "<index>\n");
       FAIL();
     }
     catch(const reapack_error &e) {

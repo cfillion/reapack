@@ -73,7 +73,7 @@ Path ReaPack::resourcePath()
   const char *path = GetResourcePath();
   return String(path, CP_ACP);
 #else
-  return GetResourcePath();
+  return {GetResourcePath()};
 #endif
 }
 

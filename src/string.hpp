@@ -22,12 +22,9 @@
 // MultiByteToWideChar is required to make file path like
 // "C:\Users\Test\Downloads\Новая папка" work on Windows...
 
-#include <cstdio>
 #include <string>
 
 #ifdef _WIN32
-  #include <windows.h>
-
   typedef wchar_t Char;
   #define L(str) L##str
 
@@ -46,6 +43,7 @@ public:
   using BasicString::basic_string;
 
   String() : basic_string() {}
+  String(const BasicString &s) : basic_string(s) {}
   String(const BasicString &&s) : basic_string(move(s)) {}
 
 #ifdef _WIN32
@@ -54,10 +52,14 @@ public:
   String(const std::string &utf8) { from(utf8.c_str(), CP_UTF8); }
 
   std::string toUtf8() const;
+
+protected:
+  void from(const char *, UINT codepage);
 #else
   const std::string &toUtf8() const { return *this; }
 #endif
 
+public:
   template<typename T> static String from(const T v) {
 #ifdef _WIN32
     return std::to_wstring(v);
@@ -65,11 +67,6 @@ public:
     return std::to_string(v);
 #endif
   }
-
-#ifdef _WIN32
-protected:
-  void from(const char *, UINT codepage);
-#endif
 };
 
 template<> struct std::hash<String> {
