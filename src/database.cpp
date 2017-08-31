@@ -28,7 +28,7 @@ Database::Database(const String &filename)
   std::string utf8file(":memory:");
 
   if(!filename.empty())
-    utf8file = move(filename.toUtf8());
+    utf8file = filename;
 
   if(sqlite3_open(utf8file.c_str(), &m_db)) {
     const auto &error = lastError();
@@ -151,7 +151,8 @@ Statement::~Statement()
 
 void Statement::bind(const int index, const String &text)
 {
-  if(sqlite3_bind_text(m_stmt, index, text.toUtf8().c_str(), -1, SQLITE_TRANSIENT))
+  if(sqlite3_bind_text(m_stmt, index,
+      static_cast<std::string>(text).c_str(), -1, SQLITE_TRANSIENT))
     throw m_db->lastError();
 }
 

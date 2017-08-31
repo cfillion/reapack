@@ -72,7 +72,7 @@ void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
 
 bool RichEdit::setRichText(const String &rtf)
 {
-  stringstream stream(rtf.toUtf8());
+  stringstream stream(rtf);
 
   EDITSTREAM es{};
   es.dwCookie = (DWORD_PTR)&stream;

@@ -30,12 +30,14 @@
   typedef wchar_t Char;
   #define L(str) L##str
 
-  #define strtoutf8(str) (String(static_cast<const Char *>(str)).toUtf8().c_str())
+  #define strtoutf8(str) (static_cast<std::string>(String(static_cast<const Char *>(str))).c_str())
   #define strfromutf8(str) (String(static_cast<const char *>(str)).c_str())
 
+  #define snprintf(...) snprintf_auto(__VA_ARGS__)
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
-  #define snprintf(...) snprintf_auto(__VA_ARGS__)
+
+  #define to_string(v) to_wstring(v)
 #else
   typedef char Char;
   #define L(str) str
@@ -46,42 +48,34 @@
 
 typedef std::basic_string<Char> BasicString;
 
-class String : public BasicString {
-public:
-  using BasicString::basic_string;
-
-  String() : basic_string() {}
-  String(const BasicString &s) : basic_string(s) {}
-  String(const BasicString &&s) : basic_string(move(s)) {}
-
 #ifdef _WIN32
-  // reference to pointer to deny string literals (forcing the use of the L macro)
-  String(const char *&str, UINT codepage = CP_UTF8) { from(str, codepage); }
-  String(const std::string &utf8) { from(utf8.c_str(), CP_UTF8); }
+  class String : public BasicString {
+  public:
+    using BasicString::basic_string;
 
-  std::string toUtf8() const;
+    String() : basic_string() {}
+    String(const BasicString &s) : basic_string(s) {}
+    String(const BasicString &&s) : basic_string(move(s)) {}
 
-protected:
-  void from(const char *, UINT codepage);
+    // reference to pointer to deny string literals (forcing the use of the L macro)
+    String(const char *&str, UINT codepage = CP_UTF8) { convert(str, codepage); }
+    String(const std::string &utf8) { convert(utf8.c_str(), CP_UTF8); }
+
+    operator std::string() const;
+
+  protected:
+    void convert(const char *, UINT codepage);
+  };
+
+  template<> struct std::hash<String> {
+    size_t operator()(const String &str) const {
+      return std::hash<BasicString>{}(str);
+    }
+  };
 #else
-  inline const std::string &toUtf8() const { return *this; }
+  typedef String BasicString;
 #endif
 
-public:
-  template<typename T> static String from(const T v) {
-#ifdef _WIN32
-    return std::to_wstring(v);
-#else
-    return std::to_string(v);
-#endif
-  }
-};
-
-template<> struct std::hash<String> {
-  size_t operator()(const String &str) const {
-    return std::hash<BasicString>{}(str);
-  }
-};
 
 #include <sstream>
 typedef std::basic_ostream<Char> BasicStreamO;

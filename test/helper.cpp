@@ -8,7 +8,7 @@ using namespace std;
 
 ostream &operator<<(ostream &os, const Path &path)
 {
-  os << '"' << path.join().toUtf8() << '"';
+  os << '"' << path.join() << '"';
   return os;
 }
 
@@ -26,7 +26,7 @@ ostream &operator<<(ostream &os, const set<Path> &list)
 
 ostream &operator<<(ostream &os, const String &str)
 {
-  os << '"' << str.toUtf8() << '"';
+  os << '"' << static_cast<string>(str) << '"';
   return os;
 }
 
@@ -43,5 +43,5 @@ ostream &operator<<(ostream &os, const Version &ver)
 }
 
 CATCH_TRANSLATE_EXCEPTION(reapack_error &e) {
-  return e.what().toUtf8();
+  return e.what();
 }

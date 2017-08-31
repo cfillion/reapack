@@ -20,7 +20,7 @@
 #ifdef _WIN32
 #include <cstdio>
 
-void String::from(const char *input, UINT codepage)
+void String::convert(const char *input, UINT codepage)
 {
   const int size = MultiByteToWideChar(codepage, 0, input, -1, nullptr, 0) - 1;
 
@@ -28,7 +28,7 @@ void String::from(const char *input, UINT codepage)
   MultiByteToWideChar(codepage, 0, input, -1, &(*this)[0], size);
 }
 
-std::string String::toUtf8() const
+String::operator std::string() const
 {
   const int size = WideCharToMultiByte(CP_UTF8, 0,
     data(), -1, nullptr, 0, nullptr, nullptr) - 1;

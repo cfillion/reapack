@@ -53,7 +53,7 @@ static const Char *REMOTE_KEY  = L("remote");
 
 static String ArrayKey(const String &key, const unsigned int i)
 {
-  return key + String::from(i);
+  return key + to_string(i);
 }
 
 static const int BUFFER_SIZE = 2083;
@@ -229,7 +229,7 @@ bool Config::getBool(const Char *group,
 void Config::setUInt(const Char *group, const String &key,
   const unsigned int val) const
 {
-  setString(group, key, String::from(val));
+  setString(group, key, to_string(val));
 }
 
 void Config::deleteKey(const Char *group, const String &key) const

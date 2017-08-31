@@ -52,23 +52,23 @@ TEST_CASE("parse valid versions", M) {
 
 TEST_CASE("parse invalid versions", M) {
   VersionName ver;
-  String name;
+  string name;
 
   SECTION("only letters")
-    name = L("hello");
+    name = "hello";
 
   SECTION("leading letter")
-    name = L("v1.0");
+    name = "v1.0";
 
   SECTION("empty")
     name = {};
 
   try {
     ver.parse(name);
-    FAIL("'" + name.toUtf8() + "' was accepted");
+    FAIL("'" + name + "' was accepted");
   }
   catch(const reapack_error &e) {
-    REQUIRE(e.what() == L("invalid version name '") + name + L("'"));
+    REQUIRE((string)e.what() == "invalid version name '" + name + "'");
   }
 
   REQUIRE(ver.toString().empty());

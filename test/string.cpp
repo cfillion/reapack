@@ -6,16 +6,16 @@ using namespace std;
 
 static const char *M = "[string]";
 
-TEST_CASE("to_(w)string wrapper", M) {
-  REQUIRE(String::from(42) == L("42"));
+TEST_CASE("to_string -> to_wstring alias", M) {
+  REQUIRE(to_string(42) == L("42"));
 }
 
 TEST_CASE("string to wstring to string", M) {
   SECTION("ascii")
-    REQUIRE(String("hello world").toUtf8() == "hello world");
+    REQUIRE(static_cast<string>(String("hello world")) == "hello world");
 
   SECTION("cyrillic")
-    REQUIRE(String("Новая папка").toUtf8() == "Новая папка");
+    REQUIRE(static_cast<string>(String("Новая папка")) == "Новая папка");
 }
 
 TEST_CASE("lengthof(array)", M) {

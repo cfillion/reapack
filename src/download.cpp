@@ -20,11 +20,8 @@
 #include "filesystem.hpp"
 #include "reapack.hpp"
 
-#include <boost/format.hpp>
-
 #include <reaper_plugin_functions.h>
 
-using boost::format;
 using namespace std;
 
 static const int DOWNLOAD_TIMEOUT = 15;
@@ -120,8 +117,10 @@ bool Download::run()
   if(!stream)
     return false;
 
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.toUtf8().c_str());
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.toUtf8().c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL,
+    static_cast<string>(m_url).c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY,
+    static_cast<string>(m_opts.proxy).c_str());
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
@@ -143,8 +142,9 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    const auto &err = format("%s (%d): %s") % curl_easy_strerror(res) % res % errbuf;
-    setError({err.str(), m_url});
+    char err[255];
+    snprintf(err, lengthof(err), "%s (%d): %s", curl_easy_strerror(res), res, errbuf);
+    setError({err, m_url});
     return false;
   }
 

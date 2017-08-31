@@ -17,7 +17,7 @@ TEST_CASE("construct remote", M) {
 
 TEST_CASE("remote name validation", M) {
   SECTION("invalid") {
-    const String invalidNames[] = {
+    const string invalidNames[] = {
       "",
       "ab/cd",
       "ab\\cd",
@@ -37,10 +37,10 @@ TEST_CASE("remote name validation", M) {
       "lpt1",
     };
 
-    for(const String &name : invalidNames) {
+    for(const string &name : invalidNames) {
       try {
         Remote remote(name, L("url"));
-        FAIL("'" + name.toUtf8() + "' was allowed");
+        FAIL("'" + name + "' was allowed");
       }
       catch(const reapack_error &e) {
         REQUIRE(e.what() == L("invalid name"));
@@ -49,22 +49,21 @@ TEST_CASE("remote name validation", M) {
   }
 
   SECTION("valid") {
-    const String validNames[] = {
-      L("1234"),
-      L("hello world"),
-      L("hello_world"),
+    const string validNames[] = {
+      "1234",
+      "hello world",
+      "hello_world",
       "Новая папка",
-      L("Hello ~World~"),
-      L("Repository #1")
+      "Hello ~World~",
+      "Repository #1",
     };
 
-    for(const String &name : validNames) {
+    for(const string &name : validNames) {
       try {
         Remote remote(name, L("url"));
       }
       catch(const reapack_error &e) {
-        INFO(name);
-        FAIL("'" + name.toUtf8() + "' was denied (" + e.what().toUtf8() + ')');
+        FAIL("'" + name + "' was denied (" + (string)e.what() + ')');
       }
     }
   }
@@ -72,15 +71,15 @@ TEST_CASE("remote name validation", M) {
 
 TEST_CASE("remote url validation", M) {
   SECTION("invalid") {
-    const String invalidUrls[] = {
+    const string invalidUrls[] = {
       {}, // empty string
-      L("hello world"), // space should be %20
+      "hello world", // space should be %20
     };
 
-    for(const String &url : invalidUrls) {
+    for(const string &url : invalidUrls) {
       try {
         Remote remote(L("hello"), url);
-        FAIL("'" + url.toUtf8() + "' was allowed");
+        FAIL("'" + url + "' was allowed");
       }
       catch(const reapack_error &e) {
         REQUIRE(e.what() == L("invalid url"));

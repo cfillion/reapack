@@ -65,7 +65,7 @@ autoInstall: usually set to 2 (obey user setting).)",
   }
   catch(const reapack_error &e) {
     if(errorOut)
-      snprintf(errorOut, errorOut_sz, "%s", e.what().toUtf8().c_str());
+      snprintf(errorOut, errorOut_sz, "%s", static_cast<string>(e.what()).c_str());
     return false;
   }
   catch(const boost::bad_lexical_cast &) {
@@ -93,7 +93,7 @@ autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
     return false;
 
   if(urlOut)
-    snprintf(urlOut, urlOut_sz, "%s", remote.url().toUtf8().c_str());
+    snprintf(urlOut, urlOut_sz, "%s", static_cast<string>(remote.url()).c_str());
   if(enabledOut)
     *enabledOut = remote.isEnabled();
   if(autoInstallOut)
