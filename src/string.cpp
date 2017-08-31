@@ -45,9 +45,15 @@ std::string String::toUtf8() const
     va_list va; \
     va_start(va, fmt); \
     int ret = impl(buf, size - 1, fmt, va); \
+    buf[size - 1] = 0; \
     va_end(va); \
     return ret; \
   }
+
+// I use _vsnprintf instead of vsnprintf because _vsnwprintf for wide chars
+// doesn't ensure null termination and I want to share code between both
+// implementations of snpritnf_auto (size vs size-1 would be the only
+// difference between the two).
 
 SNPRINTF_DEF(char, _vsnprintf);
 SNPRINTF_DEF(wchar_t, _vsnwprintf);
