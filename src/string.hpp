@@ -37,7 +37,7 @@
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
 
-  #define to_string(v) to_wstring(v)
+  #define to_string(v) std::to_wstring(v)
 #else
   typedef char Char;
   #define L(str) str
@@ -48,34 +48,31 @@
 
 typedef std::basic_string<Char> BasicString;
 
+class String : public BasicString {
+public:
+  using BasicString::basic_string;
+
+  String() : basic_string() {}
+  String(const BasicString &s) : basic_string(s) {}
+  String(const BasicString &&s) : basic_string(move(s)) {}
+
 #ifdef _WIN32
-  class String : public BasicString {
-  public:
-    using BasicString::basic_string;
+  // reference to pointer to deny string literals (forcing the use of the L macro)
+  String(const char *&str, UINT codepage = CP_UTF8) { convert(str, codepage); }
+  String(const std::string &utf8) { convert(utf8.c_str(), CP_UTF8); }
 
-    String() : basic_string() {}
-    String(const BasicString &s) : basic_string(s) {}
-    String(const BasicString &&s) : basic_string(move(s)) {}
+  operator std::string() const;
 
-    // reference to pointer to deny string literals (forcing the use of the L macro)
-    String(const char *&str, UINT codepage = CP_UTF8) { convert(str, codepage); }
-    String(const std::string &utf8) { convert(utf8.c_str(), CP_UTF8); }
-
-    operator std::string() const;
-
-  protected:
-    void convert(const char *, UINT codepage);
-  };
-
-  template<> struct std::hash<String> {
-    size_t operator()(const String &str) const {
-      return std::hash<BasicString>{}(str);
-    }
-  };
-#else
-  typedef String BasicString;
+protected:
+  void convert(const char *, UINT codepage);
 #endif
+};
 
+template<> struct std::hash<String> {
+  size_t operator()(const String &str) const {
+    return std::hash<BasicString>{}(str);
+  }
+};
 
 #include <sstream>
 typedef std::basic_ostream<Char> BasicStreamO;

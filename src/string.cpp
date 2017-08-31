@@ -50,7 +50,7 @@ String::operator std::string() const
     return ret; \
   }
 
-// I use _vsnprintf instead of vsnprintf because _vsnwprintf for wide chars
+// Using _vsnprintf instead of vsnprintf because _vsnwprintf for wide chars
 // doesn't ensure null termination and I want to share code between both
 // implementations of snpritnf_auto (size vs size-1 would be the only
 // difference between the two).
