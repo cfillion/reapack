@@ -31,7 +31,7 @@
   #define L(str) L##str
 
   #define strtoutf8(str) (String(static_cast<const Char *>(str)).toUtf8().c_str())
-  #define strfromutf8(str) (String(static_cast<const Char *>(str)).c_str())
+  #define strfromutf8(str) (String(static_cast<const char *>(str)).c_str())
 
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);

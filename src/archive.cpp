@@ -60,8 +60,8 @@ static void *wide_fopen(voidpf, const void *filename, int mode)
 #endif
 
 struct ImportArchive {
-  void importRemote(const string &);
-  void importPackage(const string &);
+  void importRemote(const String &);
+  void importPackage(const String &);
 
   ArchiveReaderPtr m_reader;
   RemoteList *m_remotes;
@@ -99,7 +99,7 @@ void Archive::import(const String &path)
         break;
       default:
         throw reapack_error(StringFormat(L("Unknown token '%s' (skipping)"))
-          % line.substr(0, 4));
+          % static_cast<const String &>(line.substr(0, 4)));
       }
     }
     catch(const reapack_error &e) {
@@ -111,7 +111,7 @@ void Archive::import(const String &path)
   state.m_tx->runTasks();
 }
 
-void ImportArchive::importRemote(const string &data)
+void ImportArchive::importRemote(const String &data)
 {
   m_lastIndex = nullptr; // clear the previous repository
   Remote remote = Remote::fromString(data);
@@ -131,7 +131,7 @@ void ImportArchive::importRemote(const string &data)
   m_lastIndex = Index::load(remote.name());
 }
 
-void ImportArchive::importPackage(const string &data)
+void ImportArchive::importPackage(const String &data)
 {
   // don't report an error if the index isn't loaded assuming we already
   // did when failing to import the repository above
@@ -141,7 +141,7 @@ void ImportArchive::importPackage(const string &data)
   String categoryName, packageName, versionName;
   bool pinned;
 
-  istringstream stream(data);
+  StringStreamI stream(data);
   stream
     >> quoted(categoryName) >> quoted(packageName) >> quoted(versionName)
     >> pinned;
