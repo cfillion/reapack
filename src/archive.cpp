@@ -99,7 +99,7 @@ void Archive::import(const String &path)
         break;
       default:
         throw reapack_error(StringFormat(L("Unknown token '%s' (skipping)"))
-          % String(line.substr(0, 4)));
+          % line.substr(0, 4));
       }
     }
     catch(const reapack_error &e) {
@@ -138,7 +138,7 @@ void ImportArchive::importPackage(const string &data)
   if(!m_lastIndex)
     return;
 
-  string categoryName, packageName, versionName;
+  String categoryName, packageName, versionName;
   bool pinned;
 
   istringstream stream(data);
@@ -147,14 +147,13 @@ void ImportArchive::importPackage(const string &data)
     >> pinned;
 
   const Package *pkg = m_lastIndex->find(categoryName, packageName);
-  const Version *ver = pkg ? pkg->findVersion(String(versionName)) : nullptr;
+  const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
 
   if(!ver) {
     throw reapack_error(StringFormat(
       L("%s/%s/%s v%s cannot be found or is")
       L(" incompatible with your operating system."))
-      % m_lastIndex->name() % String(categoryName) % String(packageName)
-      % String(versionName));
+      % m_lastIndex->name() % categoryName % packageName % versionName);
   }
 
   m_tx->install(ver, pinned, m_reader);

@@ -68,10 +68,11 @@ DownloadContext::DownloadContext()
 {
   m_curl = curl_easy_init();
 
-  const auto &userAgent = format("ReaPack/%s REAPER/%s")
-    % String(ReaPack::VERSION).toUtf8().c_str() % GetAppVersion();
+  char userAgent[64];
+  snprintf(userAgent, lengthof(userAgent), "ReaPack/%s REAPER/%s",
+    strtoutf8(ReaPack::VERSION), GetAppVersion());
 
-  curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent.str().c_str());
+  curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent);
   curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1);
   curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, DOWNLOAD_TIMEOUT);
   curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, DOWNLOAD_TIMEOUT);

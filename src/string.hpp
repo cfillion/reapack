@@ -30,12 +30,18 @@
   typedef wchar_t Char;
   #define L(str) L##str
 
+  #define strtoutf8(str) (String(static_cast<const Char *>(str)).toUtf8().c_str())
+  #define strfromutf8(str) (String(static_cast<const Char *>(str)).c_str())
+
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
   #define snprintf(...) snprintf_auto(__VA_ARGS__)
 #else
   typedef char Char;
   #define L(str) str
+
+  #define strtoutf8(str) (str)
+  #define strfromutf8(str) (str)
 #endif
 
 typedef std::basic_string<Char> BasicString;
