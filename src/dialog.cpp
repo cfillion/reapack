@@ -369,7 +369,7 @@ String Dialog::getText(HWND handle)
   GetWindowText(handle, &buffer[0], (int)buffer.size());
 
   // remove extra nulls from the string
-  buffer.resize(buffer.find(L'\0'));
+  buffer.resize(buffer.find(L('\0')));
 
   return buffer;
 }

@@ -344,7 +344,7 @@ void AboutIndexDelegate::initInstalledFiles()
     for(const Registry::File &file : allFiles) {
       stream << file.path.join();
       if(file.sections) // is this file registered in the action list?
-        stream << L'*';
+        stream << L('*');
       stream << "\r\n";
     }
 
@@ -422,7 +422,7 @@ void AboutIndexDelegate::findInBrowser()
   const Package *pkg = currentPackage();
 
   StringStreamO stream;
-  stream << L'^' << quoted(pkg->displayName()) << L("$ ^") << quoted(m_index->name()) << L'$';
+  stream << L('^') << quoted(pkg->displayName()) << L("$ ^") << quoted(m_index->name()) << L('$');
   browser->setFilter(stream.str());
 }
 
@@ -580,7 +580,7 @@ void AboutPackageDelegate::updateList(const int index)
 
       actionList = L("Yes (");
       actionList += boost::algorithm::join(sectionNames, L(", "));
-      actionList += L')';
+      actionList += L(')');
     }
     else
       actionList = L("No");
@@ -647,7 +647,7 @@ void AboutPackageDelegate::locate()
 
     String arg(L("/select,\""));
     arg += Path::prefixRoot(path).join();
-    arg += L'"';
+    arg += L('"');
 
     ShellExecute(nullptr, L("open"), L("explorer.exe"),
       arg.c_str(), nullptr, SW_SHOW);

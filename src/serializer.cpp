@@ -22,8 +22,8 @@
 #include <boost/lexical_cast.hpp>
 
 static const unsigned short VERSION = 1;
-static const Char FIELD_END = L'\x20';
-static const Char RECORD_END = L',';
+static const Char FIELD_END = L('\x20');
+static const Char RECORD_END = L(',');
 
 using namespace std;
 

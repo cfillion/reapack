@@ -107,7 +107,7 @@ String Package::fullName() const
     return displayName();
 
   String out = m_category->fullName();
-  out += L'/';
+  out += L('/');
   out += displayName();
   return out;
 }

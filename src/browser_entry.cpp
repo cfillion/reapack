@@ -120,7 +120,7 @@ String Browser::Entry::displayVersion() const
 
   if(latest && (!regEntry || latest->name() > regEntry.version)) {
     if(!display.empty())
-      display += L'\x20';
+      display += L('\x20');
 
     display += L('(') + latest->name().toString() + L(')');
   }

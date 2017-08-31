@@ -46,8 +46,8 @@ void Report::printHeader(const Char *title)
   if(m_stream.tellp())
     m_stream << "\r\n";
 
-  const String sep(10, L'=');
-  m_stream << sep << L' ' << title << L(": ") << sep << "\r\n\r\n";
+  const String sep(10, L('='));
+  m_stream << sep << L(' ') << title << L(": ") << sep << "\r\n\r\n";
 }
 
 void Report::fillReport()
@@ -61,13 +61,13 @@ void Report::fillReport()
   if(installs != 1) m_stream << 's';
 
   m_stream << L(", ") << updates << L(" update");
-  if(updates != 1) m_stream << L's';
+  if(updates != 1) m_stream << L('s');
 
   m_stream << L(", ") << removals << L(" removed file");
   if(removals != 1) m_stream << 's';
 
   m_stream << L(" and ") << errors << L(" error");
-  if(errors != 1) m_stream << L's';
+  if(errors != 1) m_stream << L('s');
 
   m_stream << L("\r\n");
 

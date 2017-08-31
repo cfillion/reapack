@@ -156,7 +156,7 @@ String Category::fullName() const
     return m_name;
 
   String out = m_index->name();
-  out += L'/';
+  out += L('/');
   out += m_name;
   return out;
 }

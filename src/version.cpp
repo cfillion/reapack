@@ -99,7 +99,7 @@ void VersionName::parse(const String &str)
     const String match = it->str(0);
     const char first = tolower(match[0]);
 
-    if(first >= L'a' || first >= L'z') {
+    if(first >= L('a') || first >= L('z')) {
       if(segments.empty()) // got leading letters
         throw reapack_error(StringFormat(L("invalid version name '%s'")) % str);
 

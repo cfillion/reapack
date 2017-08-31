@@ -54,7 +54,7 @@ void ObsoleteQuery::onInit()
 
   for(const Registry::Entry &entry : *m_entries) {
     StringStreamO stream;
-    stream << entry.remote << L'/' << entry.category << L'/'
+    stream << entry.remote << L('/') << entry.category << L('/')
       << Package::displayName(entry.package, entry.description);
     m_list->createRow()->setCell(0, stream.str());
   }

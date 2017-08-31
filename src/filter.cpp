@@ -120,11 +120,11 @@ Filter::Group *Filter::Group::push(String buf, int *flags)
     }
   }
 
-  if(buf.size() > 1 && buf.front() == L'^') {
+  if(buf.size() > 1 && buf.front() == L('^')) {
     *flags |= Node::StartAnchorFlag;
     buf.erase(0, 1); // we need to recheck the size() below, for '$'
   }
-  if(buf.size() > 1 && buf.back() == L'$') {
+  if(buf.size() > 1 && buf.back() == L('$')) {
     *flags |= Node::EndAnchorFlag;
     buf.pop_back();
   }
