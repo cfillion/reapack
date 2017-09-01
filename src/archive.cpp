@@ -268,15 +268,15 @@ size_t Archive::create(const String &path, vector<String> *errors,
       ++count;
 
       if(!addedRemote) {
-        toc << "REPO " << static_cast<string>(remote.toString()) << '\n';
+        toc << "REPO " << remote.toString().toUtf8() << '\n';
         compress(Index::pathFor(remote.name()));
         addedRemote = true;
       }
 
       toc << "PACK "
-        << quoted(static_cast<string>(entry.category)) << '\x20'
-        << quoted(static_cast<string>(entry.package)) << '\x20'
-        << quoted(static_cast<string>(entry.version.toString())) << '\x20'
+        << quoted(entry.category.toUtf8()) << '\x20'
+        << quoted(entry.package.toUtf8()) << '\x20'
+        << quoted(entry.version.toString().toUtf8()) << '\x20'
         << entry.pinned << '\n'
       ;
 
@@ -328,7 +328,7 @@ int ArchiveWriter::addFile(const Path &path)
 
 int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
 {
-  const string &normalizedPath = static_cast<string>(path.join(L('/')));
+  const string &normalizedPath = path.join(L('/')).toUtf8();
   const int status = zipOpenNewFileInZip(m_zip, normalizedPath.c_str(),
     nullptr, nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 

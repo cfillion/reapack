@@ -26,7 +26,7 @@ ostream &operator<<(ostream &os, const set<Path> &list)
 
 ostream &operator<<(ostream &os, const String &str)
 {
-  os << '"' << static_cast<string>(str) << '"';
+  os << '"' << str.toUtf8() << '"';
   return os;
 }
 

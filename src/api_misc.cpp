@@ -41,7 +41,7 @@ R"(Returns 0 if both versions are equal, a positive value if ver1 is higher than
   a.tryParse(ver1, &error);
 
   if(errorOut)
-    snprintf(errorOut, errorOut_sz, "%s", static_cast<string>(error).c_str());
+    snprintf(errorOut, errorOut_sz, "%s", error.toUtf8().c_str());
 
   return a.compare(b);
 });

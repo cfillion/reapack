@@ -36,8 +36,6 @@
   #define snprintf(...) snprintf_auto(__VA_ARGS__)
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
-
-  #define to_string(v) std::to_wstring(v)
 #else
   typedef char Char;
   #define L(str) str
@@ -60,11 +58,16 @@ public:
   // reference to pointer to deny string literals (forcing the use of the L macro)
   String(const char *&str, UINT codepage = CP_UTF8) { convert(str, codepage); }
   String(const std::string &utf8) { convert(utf8.c_str(), CP_UTF8); }
+  template<typename T> explicit String(T v) : basic_string(std::to_wstring(v)) {}
 
   operator std::string() const;
+  inline std::string toUtf8() const { return *this; }
 
 protected:
   void convert(const char *, UINT codepage);
+#else
+  template<typename T> explicit String(T v) : basic_string(std::to_string(v)) {}
+  inline const std::string &toUtf8() const { return *this; }
 #endif
 };
 
@@ -75,7 +78,6 @@ template<> struct std::hash<String> {
 };
 
 #include <sstream>
-typedef std::basic_ostream<Char> BasicStreamO;
 typedef std::basic_stringstream<Char> StringStream;
 typedef std::basic_ostringstream<Char> StringStreamO;
 typedef std::basic_istringstream<Char> StringStreamI;

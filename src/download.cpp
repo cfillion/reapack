@@ -117,10 +117,8 @@ bool Download::run()
   if(!stream)
     return false;
 
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL,
-    static_cast<string>(m_url).c_str());
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY,
-    static_cast<string>(m_opts.proxy).c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.toUtf8().c_str());
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.toUtf8().c_str());
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
