@@ -2,8 +2,6 @@
 
 #include <string.hpp>
 
-using namespace std;
-
 static const char *M = "[string]";
 
 TEST_CASE("number to string", M) {
@@ -12,10 +10,10 @@ TEST_CASE("number to string", M) {
 
 TEST_CASE("string to wstring to string", M) {
   SECTION("ascii")
-    REQUIRE(String("hello world").toUtf8() == "hello world");
+    REQUIRE(String(std::string("hello world")).toUtf8() == "hello world");
 
   SECTION("cyrillic")
-    REQUIRE(String("Новая папка").toUtf8() == "Новая папка");
+    REQUIRE(String(std::string("Новая папка")).toUtf8() == "Новая папка");
 }
 
 TEST_CASE("lengthof(array)", M) {
