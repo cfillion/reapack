@@ -26,8 +26,8 @@ TEST_CASE("snprintf(char)") {
   char buf[10] = "abcdefghi";
   snprintf(buf, 5, "%s", "123456789");
 
-  CHECK(string(buf) == "1234");
-  CHECK(string(&buf[5]) == "fghi");
+  CHECK(std::string(buf) == "1234");
+  CHECK(std::string(&buf[5]) == "fghi");
   REQUIRE(buf[4] == '\0');
 }
 
@@ -36,8 +36,8 @@ TEST_CASE("snprintf(wchar_t)") {
   wchar_t buf[10] = L"abcdefghi";
   snprintf(buf, 5, L"%s", L"123456789");
 
-  CHECK(wstring(buf) == L"1234");
-  CHECK(wstring(&buf[5]) == L"fghi");
+  CHECK(std::wstring(buf) == L"1234");
+  CHECK(std::wstring(&buf[5]) == L"fghi");
   REQUIRE(buf[4] == L'\0');
 }
 #endif
