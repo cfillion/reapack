@@ -331,10 +331,11 @@ void Dialog::stopTimer(int id)
 
 void Dialog::setClipboard(const String &text)
 {
-  const size_t length = (text.size() + 1) * sizeof(CharT); // null terminator
+  // calculate the size in bytes including the null terminator
+  const size_t size = (text.size() + 1) * sizeof(CharT);
 
-  HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
-  memcpy(GlobalLock(mem), text.c_str(), length);
+  HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, size);
+  memcpy(GlobalLock(mem), text.c_str(), size);
   GlobalUnlock(mem);
 
   OpenClipboard(m_handle);
@@ -350,7 +351,7 @@ void Dialog::setClipboard(const String &text)
 void Dialog::setClipboard(const vector<String> &values)
 {
   if(!values.empty())
-    setClipboard(boost::algorithm::join(values, "\n"));
+    setClipboard(boost::algorithm::join(values, L("\n")));
 }
 
 void Dialog::openURL(const String &url)

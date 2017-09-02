@@ -179,8 +179,8 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   String aboutText(metadata->about());
 
   if(substitution) {
-    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
-    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
+    boost::replace_all(aboutText, L("[[REAPACK_VERSION]]"), ReaPack::VERSION);
+    boost::replace_all(aboutText, L("[[REAPACK_BUILDTIME]]"), ReaPack::BUILDTIME);
   }
 
   if(m_desc->setRichText(aboutText))
@@ -248,7 +248,7 @@ void About::selectLink(const int ctrl)
   Menu menu;
 
   for(int i = 0; i < count; i++) {
-    const auto &name = boost::replace_all_copy(links[i]->name, "&", "&&");
+    const auto &name = boost::replace_all_copy(links[i]->name, L("&"), L("&&"));
     menu.addAction(name.c_str(), i | (ctrl << 8));
   }
 

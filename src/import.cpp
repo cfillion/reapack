@@ -32,7 +32,7 @@
 using namespace std;
 
 static const CharT *TITLE = L("ReaPack: Import repositories");
-static const String DISCOVER_URL = "https://reapack.com/repos";
+static const String DISCOVER_URL = L("https://reapack.com/repos");
 
 Import::Import()
   : Dialog(IDD_IMPORT_DIALOG), m_pool(nullptr), m_state(OK)

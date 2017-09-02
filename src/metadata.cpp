@@ -31,6 +31,6 @@ auto Metadata::getLinkType(const char *rel) -> LinkType
 
 void Metadata::addLink(const LinkType type, const Link &link)
 {
-  if(boost::algorithm::starts_with(link.url, "http"))
+  if(boost::algorithm::starts_with(link.url, L("http")))
     m_links.insert({type, link});
 }

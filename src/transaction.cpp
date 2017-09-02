@@ -361,7 +361,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
       isLastCall && isLastSection);
 
     if(!id && enableError) {
-      m_receipt.addError({"This script could not be registered in REAPER.",
+      m_receipt.addError({L("This script could not be registered in REAPER."),
         reg.file.path.join()});
       enableError = false;
     }
