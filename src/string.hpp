@@ -19,7 +19,7 @@
 #define REAPACK_STRING_HPP
 
 // This whole file is a huge hack to support unicode on Windows
-// MultiByteToWideChar is required to make file path like
+// MultiByteToWideCharT is required to make file path like
 // "C:\Users\Test\Downloads\Новая папка" work on Windows...
 
 #include <string>
@@ -27,24 +27,24 @@
 #ifdef _WIN32
   #include <windows.h>
 
-  typedef wchar_t Char;
+  typedef wchar_t CharT;
   #define L(str) L##str
 
-  #define strtoutf8(str) (static_cast<std::string>(String(static_cast<const Char *>(str))).c_str())
+  #define strtoutf8(str) (static_cast<std::string>(String(static_cast<const CharT *>(str))).c_str())
   #define strfromutf8(str) (String(static_cast<const char *>(str)).c_str())
 
   #define snprintf(...) snprintf_auto(__VA_ARGS__)
   extern int snprintf_auto(char *buf, size_t size, const char *fmt, ...);
   extern int snprintf_auto(wchar_t *buf, size_t size, const wchar_t *fmt, ...);
 #else
-  typedef char Char;
+  typedef char CharT;
   #define L(str) str
 
   #define strtoutf8(str) (str)
   #define strfromutf8(str) (str)
 #endif
 
-typedef std::basic_string<Char> BasicString;
+typedef std::basic_string<CharT> BasicString;
 
 class String : public BasicString {
 public:
@@ -78,15 +78,15 @@ template<> struct std::hash<String> {
 };
 
 #include <sstream>
-typedef std::basic_stringstream<Char> StringStream;
-typedef std::basic_ostringstream<Char> StringStreamO;
-typedef std::basic_istringstream<Char> StringStreamI;
+typedef std::basic_stringstream<CharT> StringStream;
+typedef std::basic_ostringstream<CharT> StringStreamO;
+typedef std::basic_istringstream<CharT> StringStreamI;
 
 #include <boost/format/format_fwd.hpp>
-typedef boost::basic_format<Char> StringFormat;
+typedef boost::basic_format<CharT> StringFormat;
 
 #include <regex>
-typedef std::basic_regex<Char> Regex;
+typedef std::basic_regex<CharT> Regex;
 typedef std::regex_iterator<String::const_iterator> RegexIterator;
 typedef std::match_results<String::const_iterator> MatchResults;
 

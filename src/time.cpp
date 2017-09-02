@@ -58,7 +58,7 @@ String Time::toString() const
   constexpr auto func = &strftime;
 #endif
 
-  Char buf[32] = {};
+  CharT buf[32] = {};
   func(buf, sizeof(buf), L("%B %d %Y"), &m_tm);
   return buf;
 }

@@ -39,7 +39,7 @@ void Filter::set(const String &input)
   State state = Default;
   Group *group = &m_root;
 
-  for(const Char c : input) {
+  for(const CharT c : input) {
     if(c == '"' && state != SingleQuote) {
       state = state == Default ? DoubleQuote : Default;
       flags |= Node::QuotedFlag;

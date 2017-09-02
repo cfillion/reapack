@@ -34,9 +34,9 @@ public:
   UINT size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  UINT addAction(const Char *label, int commandId);
+  UINT addAction(const CharT *label, int commandId);
   void addSeparator();
-  Menu addMenu(const Char *label);
+  Menu addMenu(const CharT *label);
 
   int show(int x, int y, HWND parent) const;
   int show(HWND control, HWND parent) const;

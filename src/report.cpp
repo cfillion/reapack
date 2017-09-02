@@ -41,7 +41,7 @@ void Report::onInit()
   SetFocus(getControl(IDOK));
 }
 
-void Report::printHeader(const Char *title)
+void Report::printHeader(const CharT *title)
 {
   if(m_stream.tellp())
     m_stream << "\r\n";

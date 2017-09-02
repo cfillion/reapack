@@ -170,7 +170,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
 {
   if(test(InstalledFlag)) {
     if(test(OutOfDateFlag)) {
-      Char installLabel[32];
+      CharT installLabel[32];
       snprintf(installLabel, lengthof(installLabel),
         L("U&pdate to v%s"), latest->name().toString().c_str());
 
@@ -179,7 +179,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
         menu.check(actionIndex);
     }
 
-    Char reinstallLabel[32];
+    CharT reinstallLabel[32];
     snprintf(reinstallLabel, lengthof(reinstallLabel),
       L("&Reinstall v%s"), regEntry.version.toString().c_str());
 
@@ -190,7 +190,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
       menu.check(actionIndex);
   }
   else {
-    Char installLabel[32];
+    CharT installLabel[32];
     snprintf(installLabel, lengthof(installLabel),
       L("&Install v%s"), latest->name().toString().c_str());
 
@@ -238,7 +238,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
   menu.setEnabled(!test(ObsoleteFlag),
     menu.addAction(L("About this &package"), ACTION_ABOUT_PKG));
 
-  Char aboutLabel[64];
+  CharT aboutLabel[64];
   snprintf(aboutLabel, lengthof(aboutLabel),
     L("&About %s"), indexName().c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);

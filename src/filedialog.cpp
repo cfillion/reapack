@@ -24,12 +24,12 @@
 #endif
 
 String FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
-  const Char *title, const Path &initialDir,
-  const Char *filters, const Char *defaultExt)
+  const CharT *title, const Path &initialDir,
+  const CharT *filters, const CharT *defaultExt)
 {
 #ifdef _WIN32
   const String &dirPath = initialDir.join();
-  Char path[4096] = {};
+  CharT path[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;
@@ -49,12 +49,12 @@ String FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
 }
 
 String FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
-  const Char *title, const Path &initialDir,
-  const Char *filters, const Char *defaultExt)
+  const CharT *title, const Path &initialDir,
+  const CharT *filters, const CharT *defaultExt)
 {
 #ifdef _WIN32
   const String &dirPath = initialDir.join();
-  Char path[4096] = {};
+  CharT path[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;

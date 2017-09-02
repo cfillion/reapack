@@ -29,10 +29,10 @@
 class Path;
 
 namespace FileDialog {
-  String getOpenFileName(HWND, HINSTANCE, const Char *title,
-    const Path &directory, const Char *filters, const Char *defext);
-  String getSaveFileName(HWND, HINSTANCE, const Char *title,
-    const Path &directory, const Char *filters, const Char *defext);
+  String getOpenFileName(HWND, HINSTANCE, const CharT *title,
+    const Path &directory, const CharT *filters, const CharT *defext);
+  String getSaveFileName(HWND, HINSTANCE, const CharT *title,
+    const Path &directory, const CharT *filters, const CharT *defext);
 };
 
 #endif

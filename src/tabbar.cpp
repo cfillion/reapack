@@ -38,7 +38,7 @@ int TabBar::addTab(const Tab &tab)
 
   TCITEM item{};
   item.mask |= TCIF_TEXT;
-  item.pszText = const_cast<Char *>(tab.text.c_str());
+  item.pszText = const_cast<CharT *>(tab.text.c_str());
 
   TabCtrl_InsertItem(handle(), index, &item);
 

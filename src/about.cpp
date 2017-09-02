@@ -169,7 +169,7 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 
 void About::setTitle(const String &what)
 {
-  Char title[255];
+  CharT title[255];
   snprintf(title, lengthof(title), L("About %s"), what.c_str());
   SetWindowText(handle(), title);
 }
@@ -322,7 +322,7 @@ void AboutIndexDelegate::initInstalledFiles()
     }
   }
   catch(const reapack_error &e) {
-    Char msg[255];
+    CharT msg[255];
     snprintf(msg, lengthof(msg),
       L("The file list is currently unavailable.\x20")
       L("Retry later when all installation task are completed.\r\n")
@@ -545,7 +545,7 @@ void AboutPackageDelegate::init(About *dialog)
 
 void AboutPackageDelegate::updateList(const int index)
 {
-  static const map<Source::Section, const Char *> sectionMap{
+  static const map<Source::Section, const CharT *> sectionMap{
     {Source::MainSection, L("Main")},
     {Source::MIDIEditorSection, L("MIDI Editor")},
     {Source::MIDIInlineEditorSection, L("MIDI Inline Editor")},

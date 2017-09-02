@@ -33,9 +33,9 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-static const Char *ARCHIVE_FILTER =
+static const CharT *ARCHIVE_FILTER =
   L("ReaPack Offline Archive (*.ReaPackArchive\0*.ReaPackArchive\0)");
-static const Char *ARCHIVE_EXT = L("ReaPackArchive");
+static const CharT *ARCHIVE_EXT = L("ReaPackArchive");
 
 using namespace std;
 
@@ -239,7 +239,7 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   menu.addSeparator();
 
-  Char aboutLabel[64];
+  CharT aboutLabel[64];
   snprintf(aboutLabel, lengthof(aboutLabel),
     L("&About %s"), remote.name().c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
@@ -516,7 +516,7 @@ bool Manager::importRepo()
 
 void Manager::importArchive()
 {
-  const Char *title = L("Import offline archive");
+  const CharT *title = L("Import offline archive");
 
   const String &path = FileDialog::getOpenFileName(handle(), instance(),
     title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
@@ -528,7 +528,7 @@ void Manager::importArchive()
     Archive::import(path);
   }
   catch(const reapack_error &e) {
-    Char msg[512];
+    CharT msg[512];
     snprintf(msg, lengthof(msg),
       L("An error occured while reading %s.\r\n\r\n%s."),
       path.c_str(), e.what().c_str()
@@ -540,7 +540,7 @@ void Manager::importArchive()
 
 void Manager::exportArchive()
 {
-  const Char *title = L("Export offline archive");
+  const CharT *title = L("Export offline archive");
 
   const String &path = FileDialog::getSaveFileName(handle(), instance(),
     title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
@@ -558,7 +558,7 @@ void Manager::exportArchive()
     const auto finish = [=] {
       Dialog::Destroy(progress);
 
-      Char error[1024];
+      CharT error[1024];
       if(errors.empty())
         error[0] = 0;
       else {
@@ -569,7 +569,7 @@ void Manager::exportArchive()
           boost::algorithm::join(errors, L("\r\n")).c_str());
       }
 
-      Char msg[2048];
+      CharT msg[2048];
       snprintf(msg, lengthof(msg),
         L("Done! %zu package%s were exported in the archive.%s"),
         count, count == 1 ? L("") : L("s"), error);
@@ -587,7 +587,7 @@ void Manager::exportArchive()
     Dialog::Destroy(progress);
     delete pool;
 
-    Char msg[512];
+    CharT msg[512];
     snprintf(msg, lengthof(msg),
       L("An error occured while writing into %s.\r\n\r\n%s."),
       path.c_str(), e.what().c_str()
@@ -599,8 +599,8 @@ void Manager::exportArchive()
 void Manager::launchBrowser()
 {
   const auto promptApply = [&] {
-    const Char *title = L("ReaPack Query");
-    const Char *msg = L("Apply unsaved changes?");
+    const CharT *title = L("ReaPack Query");
+    const CharT *msg = L("Apply unsaved changes?");
     const int btn = MessageBox(handle(), msg, title, MB_YESNO);
     return btn == IDYES;
   };
@@ -652,13 +652,13 @@ bool Manager::confirm() const
 
   const size_t uninstallSize = m_uninstall.size();
 
-  Char msg[255];
+  CharT msg[255];
   snprintf(msg, lengthof(msg), L("Uninstall %zu %s?\n")
     L("Every file they contain will be removed from your computer."),
     uninstallSize,
     uninstallSize == 1 ? L("repository") : L("repositories"));
 
-  const Char *title = L("ReaPack Query");
+  const CharT *title = L("ReaPack Query");
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
 
   return btn == IDYES;

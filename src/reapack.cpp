@@ -36,8 +36,8 @@
 
 using namespace std;
 
-const Char *ReaPack::VERSION = L("1.2beta2");
-const Char *ReaPack::BUILDTIME = __DATE__ L(" ") __TIME__;
+const CharT *ReaPack::VERSION = L("1.2beta2");
+const CharT *ReaPack::BUILDTIME = __DATE__ L(" ") __TIME__;
 
 ReaPack *ReaPack::s_instance = nullptr;
 
@@ -337,7 +337,7 @@ Transaction *ReaPack::setupTransaction()
     m_tx = new Transaction;
   }
   catch(const reapack_error &e) {
-    Char msg[512];
+    CharT msg[512];
     snprintf(msg, lengthof(msg),
       L("The following error occurred while creating a transaction:\n\n%s"),
       e.what().c_str()
@@ -419,7 +419,7 @@ void ReaPack::createDirectories()
   if(FS::mkdir(path))
     return;
 
-  Char msg[255];
+  CharT msg[255];
   snprintf(msg, lengthof(msg),
     L("ReaPack could not create %s! ")
     L("Please investigate or report this issue.\n\n")

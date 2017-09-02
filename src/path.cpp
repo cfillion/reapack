@@ -24,9 +24,9 @@
 using namespace std;
 
 #ifndef _WIN32
-static const Char SEPARATOR = '/';
+static const CharT SEPARATOR = '/';
 #else
-static const Char SEPARATOR = '\\';
+static const CharT SEPARATOR = '\\';
 #endif
 
 static const String DOT = L(".");

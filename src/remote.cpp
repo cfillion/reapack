@@ -25,7 +25,7 @@
 
 using namespace std;
 
-static Char DATA_DELIMITER = L('|');
+static CharT DATA_DELIMITER = L('|');
 
 static bool validateName(const String &name)
 {

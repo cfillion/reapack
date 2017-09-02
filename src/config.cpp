@@ -27,29 +27,29 @@
 
 using namespace std;
 
-static const Char *GENERAL_GRP = L("general");
-static const Char *VERSION_KEY = L("version");
+static const CharT *GENERAL_GRP = L("general");
+static const CharT *VERSION_KEY = L("version");
 
-static const Char *INSTALL_GRP = L("install");
-static const Char *AUTOINSTALL_KEY = L("autoinstall");
-static const Char *PRERELEASES_KEY = L("prereleases");
-static const Char *PROMPTOBSOLETE_KEY = L("promptobsolete");
+static const CharT *INSTALL_GRP = L("install");
+static const CharT *AUTOINSTALL_KEY = L("autoinstall");
+static const CharT *PRERELEASES_KEY = L("prereleases");
+static const CharT *PROMPTOBSOLETE_KEY = L("promptobsolete");
 
-static const Char *ABOUT_GRP = L("about");
-static const Char *MANAGER_GRP = L("manager");
+static const CharT *ABOUT_GRP = L("about");
+static const CharT *MANAGER_GRP = L("manager");
 
-static const Char *BROWSER_GRP = L("browser");
-static const Char *STATE_KEY = L("state");
+static const CharT *BROWSER_GRP = L("browser");
+static const CharT *STATE_KEY = L("state");
 
-static const Char *NETWORK_GRP = L("network");
-static const Char *PROXY_KEY = L("proxy");
-static const Char *VERIFYPEER_KEY = L("verifypeer");
-static const Char *STALETHRSH_KEY = L("stalethreshold");
+static const CharT *NETWORK_GRP = L("network");
+static const CharT *PROXY_KEY = L("proxy");
+static const CharT *VERIFYPEER_KEY = L("verifypeer");
+static const CharT *STALETHRSH_KEY = L("stalethreshold");
 
-static const Char *SIZE_KEY = L("size");
+static const CharT *SIZE_KEY = L("size");
 
-static const Char *REMOTES_GRP = L("remotes");
-static const Char *REMOTE_KEY  = L("remote");
+static const CharT *REMOTES_GRP = L("remotes");
+static const CharT *REMOTE_KEY  = L("remote");
 
 static String ArrayKey(const String &key, const unsigned int i)
 {
@@ -198,46 +198,46 @@ void Config::writeRemotes()
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-String Config::getString(const Char *group,
+String Config::getString(const CharT *group,
   const String &key, const String &fallback) const
 {
-  Char buffer[BUFFER_SIZE];
+  CharT buffer[BUFFER_SIZE];
   GetPrivateProfileString(group, key.c_str(), fallback.c_str(),
     buffer, sizeof(buffer), m_path.c_str());
 
   return buffer;
 }
 
-void Config::setString(const Char *group,
+void Config::setString(const CharT *group,
   const String &key, const String &val) const
 {
   WritePrivateProfileString(group, key.c_str(), val.c_str(), m_path.c_str());
 }
 
-unsigned int Config::getUInt(const Char *group,
+unsigned int Config::getUInt(const CharT *group,
   const String &key, const unsigned int fallback) const
 {
   return GetPrivateProfileInt(group, key.c_str(), fallback, m_path.c_str());
 }
 
-bool Config::getBool(const Char *group,
+bool Config::getBool(const CharT *group,
   const String &key, const bool fallback) const
 {
   return getUInt(group, key, fallback) > 0;
 }
 
-void Config::setUInt(const Char *group, const String &key,
+void Config::setUInt(const CharT *group, const String &key,
   const unsigned int val) const
 {
   setString(group, key, String(val));
 }
 
-void Config::deleteKey(const Char *group, const String &key) const
+void Config::deleteKey(const CharT *group, const String &key) const
 {
   WritePrivateProfileString(group, key.c_str(), 0, m_path.c_str());
 }
 
-void Config::cleanupArray(const Char *group, const String &key,
+void Config::cleanupArray(const CharT *group, const String &key,
   const unsigned int begin, const unsigned int end) const
 {
   for(unsigned int i = begin; i < end; i++)

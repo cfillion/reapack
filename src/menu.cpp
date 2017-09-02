@@ -39,14 +39,14 @@ Menu::~Menu()
     DestroyMenu(m_handle);
 }
 
-UINT Menu::addAction(const Char *label, const int commandId)
+UINT Menu::addAction(const CharT *label, const int commandId)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
-  mii.dwTypeData = const_cast<Char *>(label);
+  mii.dwTypeData = const_cast<CharT *>(label);
 
   mii.fMask |= MIIM_ID;
   mii.wID = commandId;
@@ -67,14 +67,14 @@ void Menu::addSeparator()
   append(mii);
 }
 
-Menu Menu::addMenu(const Char *label)
+Menu Menu::addMenu(const CharT *label)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
-  mii.dwTypeData = const_cast<Char *>(label);
+  mii.dwTypeData = const_cast<CharT *>(label);
 
   mii.fMask |= MIIM_SUBMENU;
   mii.hSubMenu = CreatePopupMenu();

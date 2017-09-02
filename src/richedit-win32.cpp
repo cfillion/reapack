@@ -33,8 +33,8 @@ static void HandleLink(ENLINK *info, HWND handle)
 {
   const CHARRANGE &range = info->chrg;
 
-  Char *url = new Char[(range.cpMax - range.cpMin) + 1]();
-  unique_ptr<Char[]> ptr(url);
+  CharT *url = new CharT[(range.cpMax - range.cpMin) + 1]();
+  unique_ptr<CharT[]> ptr(url);
 
   TEXTRANGE tr{range, url};
   SendMessage(handle, EM_GETTEXTRANGE, 0, (LPARAM)&tr);

@@ -331,7 +331,7 @@ void Dialog::stopTimer(int id)
 
 void Dialog::setClipboard(const String &text)
 {
-  const size_t length = (text.size() + 1) * sizeof(Char); // null terminator
+  const size_t length = (text.size() + 1) * sizeof(CharT); // null terminator
 
   HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, length);
   memcpy(GlobalLock(mem), text.c_str(), length);

@@ -31,7 +31,7 @@
 
 using namespace std;
 
-static const Char *TITLE = L("ReaPack: Import repositories");
+static const CharT *TITLE = L("ReaPack: Import repositories");
 static const String DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import()
@@ -139,7 +139,7 @@ void Import::fetch()
           m_pool->abort();
         break;
       case ThreadTask::Failure: {
-        Char msg[1024];
+        CharT msg[1024];
         snprintf(msg, lengthof(msg), L("Download failed: %s\r\nn%s"),
           dl->error().message.c_str(), url.c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
@@ -162,7 +162,7 @@ void Import::fetch()
 
 bool Import::read(MemoryDownload *dl, const size_t idx)
 {
-  Char msg[1024];
+  CharT msg[1024];
 
   try {
     IndexPtr index = Index::load({}, dl->contents().c_str());

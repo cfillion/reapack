@@ -43,8 +43,8 @@ class ReaPack {
 public:
   typedef std::function<void ()> ActionCallback;
 
-  static const Char *VERSION;
-  static const Char *BUILDTIME;
+  static const CharT *VERSION;
+  static const CharT *BUILDTIME;
 
   static ReaPack *instance() { return s_instance; }
   static Path resourcePath();

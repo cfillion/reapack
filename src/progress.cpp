@@ -80,11 +80,11 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  Char position[32];
+  CharT position[32];
   snprintf(position, lengthof(position), L("%d of %d"),
     min(m_done + 1, m_total), m_total);
 
-  Char label[1024];
+  CharT label[1024];
   snprintf(label, lengthof(label), m_current.c_str(), position);
 
   SetWindowText(m_label, label);
@@ -92,7 +92,7 @@ void Progress::updateProgress()
   const double pos = (double)(min(m_done+1, m_total)) / max(2, m_total);
   const int percent = (int)(pos * 100);
 
-  Char title[255];
+  CharT title[255];
   snprintf(title, lengthof(title),
     L("ReaPack: Operation in progress (%d%%)"), percent);
 

@@ -59,7 +59,7 @@ int ListView::addColumn(const Column &col)
 
   if(!col.test(NoLabelFlag)) {
     item.mask |= LVCF_TEXT;
-    item.pszText = const_cast<Char *>(col.label.c_str());
+    item.pszText = const_cast<CharT *>(col.label.c_str());
   }
 
   const int index = columnCount();
@@ -92,7 +92,7 @@ void ListView::updateCell(int row, int cell)
 {
   const int viewRowIndex = translate(row);
   ListView_SetItemText(handle(), viewRowIndex, cell,
-    const_cast<Char *>(m_rows[row]->cell(cell).value.c_str()));
+    const_cast<CharT *>(m_rows[row]->cell(cell).value.c_str()));
 }
 
 void ListView::removeRow(const int userIndex)

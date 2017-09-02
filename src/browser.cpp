@@ -277,7 +277,7 @@ void Browser::fillMenu(Menu &menu)
 
 void Browser::updateDisplayLabel()
 {
-  Char btnLabel[32];
+  CharT btnLabel[32];
   snprintf(btnLabel, lengthof(btnLabel), L("%d/%zu package%s..."),
     m_list->rowCount(), m_entries.size(),
     m_entries.size() == 1 ? L("") : L("s"));
@@ -287,7 +287,7 @@ void Browser::updateDisplayLabel()
 
 void Browser::displayButton()
 {
-  static map<const Char *, Package::Type> types = {
+  static map<const CharT *, Package::Type> types = {
     {L("&Scripts"), Package::ScriptType},
     {L("&Effects"), Package::EffectType},
     {L("E&xtensions"), Package::ExtensionType},
@@ -465,7 +465,7 @@ void Browser::populate(const vector<IndexPtr> &indexes)
     fillList();
   }
   catch(const reapack_error &e) {
-    Char msg[255];
+    CharT msg[255];
     snprintf(msg, lengthof(msg),
       L("ReaPack could not read from the local package registry.\r\n")
       L("Retry later once all installation task are completed.\r\n")
@@ -796,13 +796,13 @@ bool Browser::confirm() const
   if(!count)
     return true;
 
-  Char msg[255];
+  CharT msg[255];
   snprintf(msg, lengthof(msg),
     L("Are you sure to uninstall %zu package%s?\r\nThe files and settings will")
     L(" be permanently deleted from this computer."),
     count, count == 1 ? L("") : L("s"));
 
-  const Char *title = L("ReaPack Query");
+  const CharT *title = L("ReaPack Query");
   const int btn = MessageBox(handle(), msg, title, MB_YESNO);
 
   return btn == IDYES;
