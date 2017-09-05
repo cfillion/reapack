@@ -43,7 +43,7 @@ TEST_CASE("output version", M) {
   SECTION("with time") {
     ver.setTime("2016-01-02T00:42:11Z");
     stream << ver;
-    REQUIRE(stream.str() == L("v1.2.3 – January 02 2016\r\n  No changelog\r\n"));
+    REQUIRE(stream.str() == L("v1.2.3 \u2013 January 02 2016\r\n  No changelog\r\n"));
   }
 
   SECTION("with changelog") {

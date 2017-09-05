@@ -54,7 +54,7 @@ OutputStream &OutputStream::operator<<(const Version &ver)
 
   const String &date = ver.time().toString();
   if(!date.empty())
-    m_stream << " – " << date;
+    m_stream << L(" \u2013 ") /* en dash */ << date;
 
   m_stream << L("\r\n");
 
