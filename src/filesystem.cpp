@@ -192,7 +192,7 @@ bool FS::mkdir(const Path &path)
   for(const String &dir : path) {
     fullPath.append(dir);
 
-    const String joined(fullPath.join());
+    const String &joined = fullPath.join();
 
 #ifdef _WIN32
     if(!CreateDirectory(joined.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS)

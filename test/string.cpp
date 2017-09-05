@@ -28,7 +28,7 @@ TEST_CASE("snprintf(char)") {
 
   CHECK(std::string(buf) == "1234");
   CHECK(std::string(&buf[5]) == "fghi");
-  REQUIRE(buf[4] == '\0');
+  REQUIRE(buf[4] == 0);
 }
 
 #ifdef _WIN32
@@ -38,6 +38,6 @@ TEST_CASE("snprintf(wchar_t)") {
 
   CHECK(std::wstring(buf) == L"1234");
   CHECK(std::wstring(&buf[5]) == L"fghi");
-  REQUIRE(buf[4] == L'\0');
+  REQUIRE(buf[4] == 0);
 }
 #endif

@@ -78,12 +78,12 @@ bool RichEdit::setRichText(const String &rtf)
   es.dwCookie = (DWORD_PTR)&stream;
   es.pfnCallback = [](DWORD_PTR cookie, LPBYTE buf, LONG size, LONG *pcb)
   {
-	  stringstream *stream = reinterpret_cast<stringstream *>(cookie);
+    stringstream *stream = reinterpret_cast<stringstream *>(cookie);
     *pcb = (LONG)stream->readsome((char *)buf, size);
     return (DWORD)0;
   };
 
-  SendMessage(handle(), EM_STREAMIN, SF_RTF | SF_UNICODE, (LPARAM)&es);
+  SendMessage(handle(), EM_STREAMIN, SF_RTF, (LPARAM)&es);
 
   if(es.dwError)
     return false;

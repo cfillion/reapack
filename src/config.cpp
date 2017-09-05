@@ -197,8 +197,7 @@ void Config::writeRemotes()
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-String Config::getString(const CharT *group,
-  const String &key, const String &fallback) const
+String Config::getString(const CharT *group, const String &key, const String &fallback) const
 {
   CharT buffer[BUFFER_SIZE];
   GetPrivateProfileString(group, key.c_str(), fallback.c_str(),
@@ -207,8 +206,7 @@ String Config::getString(const CharT *group,
   return buffer;
 }
 
-void Config::setString(const CharT *group,
-  const String &key, const String &val) const
+void Config::setString(const CharT *group, const String &key, const String &val) const
 {
   WritePrivateProfileString(group, key.c_str(), val.c_str(), m_path.c_str());
 }
@@ -219,14 +217,12 @@ unsigned int Config::getUInt(const CharT *group,
   return GetPrivateProfileInt(group, key.c_str(), fallback, m_path.c_str());
 }
 
-bool Config::getBool(const CharT *group,
-  const String &key, const bool fallback) const
+bool Config::getBool(const CharT *group, const String &key, const bool fallback) const
 {
   return getUInt(group, key, fallback) > 0;
 }
 
-void Config::setUInt(const CharT *group, const String &key,
-  const unsigned int val) const
+void Config::setUInt(const CharT *group, const String &key, const unsigned int val) const
 {
   setString(group, key, String(val));
 }

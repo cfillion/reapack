@@ -65,20 +65,15 @@ public:
   RemoteList remotes;
 
 private:
-  String getString(const CharT *grp,
-    const String &key, const String &fallback = {}) const;
-  void setString(const CharT *grp,
-    const String &key, const String &val) const;
+  String getString(const CharT *grp, const String &key, const String &fallback = {}) const;
+  void setString(const CharT *grp, const String &key, const String &val) const;
 
-  bool getBool(const CharT *grp,
-    const String &key, bool fallback = false) const;
-  unsigned int getUInt(const CharT *grp,
-    const String &key, unsigned int fallback = 0) const;
+  bool getBool(const CharT *grp, const String &key, bool fallback = false) const;
+  unsigned int getUInt(const CharT *grp, const String &key, unsigned int fallback = 0) const;
   void setUInt(const CharT *, const String &, unsigned int) const;
 
   void deleteKey(const CharT *, const String &) const;
-  void cleanupArray(const CharT *, const String &,
-    unsigned int begin, unsigned int end) const;
+  void cleanupArray(const CharT *, const String &, unsigned int begin, unsigned int end) const;
 
   void migrate();
 

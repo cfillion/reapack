@@ -59,21 +59,21 @@ String Browser::Entry::displayState() const
   String state;
 
   if(test(ObsoleteFlag))
-    state += 'o';
+    state += L('o');
   else if(test(OutOfDateFlag))
-    state += 'u';
+    state += L('u');
   else if(test(InstalledFlag))
-    state += 'i';
+    state += L('i');
   else
-    state += '\x20';
+    state += L('\x20');
 
   if(regEntry.pinned)
-    state += 'p';
+    state += L('p');
 
   if(target)
-    state += *target == nullptr ? 'R' : 'I';
+    state += *target == nullptr ? L('R') : L('I');
   if(pin && canPin())
-    state += 'P';
+    state += L('P');
 
   return state;
 }
@@ -219,15 +219,13 @@ void Browser::Entry::fillMenu(Menu &menu) const
     }
   }
 
-  const UINT pinIndex = menu.addAction(
-    L("&Pin current version"), ACTION_PIN);
+  const UINT pinIndex = menu.addAction(L("&Pin current version"), ACTION_PIN);
   if(!canPin())
     menu.disable(pinIndex);
   if(pin.value_or(regEntry.pinned))
     menu.check(pinIndex);
 
-  const UINT uninstallIndex =
-    menu.addAction(L("&Uninstall"), ACTION_UNINSTALL);
+  const UINT uninstallIndex = menu.addAction(L("&Uninstall"), ACTION_UNINSTALL);
   if(!test(InstalledFlag) || remote().isProtected())
     menu.disable(uninstallIndex);
   else if(target && *target == nullptr)
@@ -239,8 +237,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
     menu.addAction(L("About this &package"), ACTION_ABOUT_PKG));
 
   CharT aboutLabel[64];
-  snprintf(aboutLabel, lengthof(aboutLabel),
-    L("&About %s"), indexName().c_str());
+  snprintf(aboutLabel, lengthof(aboutLabel), L("&About %s"), indexName().c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
 }
 

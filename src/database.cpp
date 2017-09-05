@@ -22,15 +22,10 @@
 #include <cinttypes>
 #include <sqlite3.h>
 
-Database::Database(const String &filename)
+Database::Database(const String &fn)
   : m_savePoint(0)
 {
-  std::string utf8file(":memory:");
-
-  if(!filename.empty())
-    utf8file = filename;
-
-  if(sqlite3_open(utf8file.c_str(), &m_db)) {
+  if(sqlite3_open(fn.empty() ? ":memory:" : fn.toUtf8().c_str(), &m_db)) {
     const auto &error = lastError();
     sqlite3_close(m_db);
 
@@ -151,8 +146,7 @@ Statement::~Statement()
 
 void Statement::bind(const int index, const String &text)
 {
-  if(sqlite3_bind_text(m_stmt, index,
-      static_cast<std::string>(text).c_str(), -1, SQLITE_TRANSIENT))
+  if(sqlite3_bind_text(m_stmt, index, text.toUtf8().c_str(), -1, SQLITE_TRANSIENT))
     throw m_db->lastError();
 }
 

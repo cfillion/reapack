@@ -649,7 +649,6 @@ void AboutPackageDelegate::locate()
     arg += Path::prefixRoot(path).join();
     arg += L('"');
 
-    ShellExecute(nullptr, L("open"), L("explorer.exe"),
-      arg.c_str(), nullptr, SW_SHOW);
+    ShellExecute(nullptr, L("open"), L("explorer.exe"), arg.c_str(), nullptr, SW_SHOW);
   }
 }

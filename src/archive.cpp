@@ -44,11 +44,11 @@ static void *wide_fopen(voidpf, const void *filename, int mode)
   const wchar_t *fopen_mode = nullptr;
 
   if((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_READ)
-    fopen_mode = L("rb");
+    fopen_mode = L"rb";
   else if(mode & ZLIB_FILEFUNC_MODE_EXISTING)
-    fopen_mode = L("r+b");
+    fopen_mode = L"r+b";
   else if(mode & ZLIB_FILEFUNC_MODE_CREATE)
-    fopen_mode = L("wb");
+    fopen_mode = L"wb";
 
   FILE *file = nullptr;
 
@@ -151,8 +151,7 @@ void ImportArchive::importPackage(const String &data)
 
   if(!ver) {
     throw reapack_error(StringFormat(
-      L("%s/%s/%s v%s cannot be found or is")
-      L(" incompatible with your operating system."))
+      L("%s/%s/%s v%s cannot be found or is incompatible with your operating system."))
       % m_lastIndex->name() % categoryName % packageName % versionName);
   }
 

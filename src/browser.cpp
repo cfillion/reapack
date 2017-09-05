@@ -405,8 +405,7 @@ void Browser::refresh(const bool stale)
       show();
 
       MessageBox(handle(), L("No repository enabled!\r\n")
-        L("Enable or import repositories from ")
-        L("Extensions > ReaPack > Manage repositories."),
+        L("Enable or import repositories from Extensions > ReaPack > Manage repositories."),
         L("Browse packages"), MB_OK);
     }
 

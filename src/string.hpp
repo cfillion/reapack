@@ -56,15 +56,15 @@ public:
 
 #ifdef _WIN32
   // reference to pointer to deny string literals (forcing the use of the L macro)
-  String(const char *&str, UINT codepage = CP_UTF8) { convert(str, codepage); }
-  String(const std::string &utf8) { convert(utf8.c_str(), CP_UTF8); }
+  String(const char *&str, UINT codepage = CP_UTF8) { mbtowide(str, codepage); }
+  String(const std::string &utf8) { mbtowide(utf8.c_str(), CP_UTF8); }
   template<typename T> explicit String(T v) : basic_string(std::to_wstring(v)) {}
 
   operator std::string() const;
   inline std::string toUtf8() const { return *this; }
 
 protected:
-  void convert(const char *, UINT codepage);
+  void mbtowide(const char *, UINT codepage);
 #else
   template<typename T> explicit String(T v) : basic_string(std::to_string(v)) {}
   inline const std::string &toUtf8() const { return *this; }

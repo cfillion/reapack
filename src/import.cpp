@@ -140,7 +140,7 @@ void Import::fetch()
         break;
       case ThreadTask::Failure: {
         CharT msg[1024];
-        snprintf(msg, lengthof(msg), L("Download failed: %s\r\nn%s"),
+        snprintf(msg, lengthof(msg), L("Download failed: %s\r\n%s"),
           dl->error().message.c_str(), url.c_str());
         MessageBox(handle(), msg, TITLE, MB_OK);
         m_pool->abort();
@@ -199,8 +199,7 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
     return true;
   }
   catch(const reapack_error &e) {
-    snprintf(msg, lengthof(msg),
-      L("The received file is invalid: %s\r\n%s"),
+    snprintf(msg, lengthof(msg), L("The received file is invalid: %s\r\n%s"),
       e.what().c_str(), dl->url().c_str());
     MessageBox(handle(), msg, TITLE, MB_OK);
     return false;

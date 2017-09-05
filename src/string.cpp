@@ -20,7 +20,7 @@
 #ifdef _WIN32
 #include <cstdio>
 
-void String::convert(const char *input, UINT codepage)
+void String::mbtowide(const char *input, UINT codepage)
 {
   const int size = MultiByteToWideChar(codepage, 0, input, -1, nullptr, 0) - 1;
 
