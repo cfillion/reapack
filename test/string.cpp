@@ -9,11 +9,15 @@ TEST_CASE("number to string", M) {
 }
 
 TEST_CASE("string to wstring to string", M) {
-  SECTION("ascii")
-    REQUIRE(String(std::string("hello world")).toUtf8() == "hello world");
+  SECTION("ascii") {
+    const std::string &utf8 = String(std::string("hello world")).toUtf8();
+    REQUIRE(utf8 == "hello world");
+  }
 
-  SECTION("cyrillic")
-    REQUIRE(String(std::string("Новая папка")).toUtf8() == "Новая папка");
+  SECTION("cyrillic") {
+    const std::string &utf8 = String(std::string("Новая папка")).toUtf8();
+    REQUIRE(utf8 == "Новая папка");
+  }
 }
 
 TEST_CASE("lengthof(array)", M) {

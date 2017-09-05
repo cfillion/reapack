@@ -61,7 +61,6 @@ public:
   template<typename T> explicit String(T v) : basic_string(std::to_wstring(v)) {}
 
   operator std::string() const;
-  inline std::string toUtf8() const { return *this; }
 
 protected:
   void mbtowide(const char *, UINT codepage);
@@ -69,6 +68,8 @@ protected:
   template<typename T> explicit String(T v) : basic_string(std::to_string(v)) {}
   inline const std::string &toUtf8() const { return *this; }
 #endif
+
+  inline std::string toUtf8() { return *this; }
 };
 
 template<> struct std::hash<String> {
