@@ -156,34 +156,32 @@ void Browser::Entry::updateRow(const ListView::RowPtr &row) const
   int c = 0;
   const Time *time = lastUpdate();
 
-  row->setCell(c++, make_autostring(displayState()));
-  row->setCell(c++, make_autostring(displayName()));
-  row->setCell(c++, make_autostring(categoryName()));
-  row->setCell(c++, make_autostring(displayVersion()), (void *)sortVersion());
-  row->setCell(c++, make_autostring(displayAuthor()));
-  row->setCell(c++, make_autostring(displayType()));
-  row->setCell(c++, make_autostring(indexName()));
-  row->setCell(c++, time ? make_autostring(time->toString()) : auto_string(), (void *)time);
+  row->setCell(c++, displayState());
+  row->setCell(c++, displayName());
+  row->setCell(c++, categoryName());
+  row->setCell(c++, displayVersion(), (void *)sortVersion());
+  row->setCell(c++, displayAuthor());
+  row->setCell(c++, displayType());
+  row->setCell(c++, indexName());
+  row->setCell(c++, time ? time->toString() : string(), (void *)time);
 }
 
 void Browser::Entry::fillMenu(Menu &menu) const
 {
   if(test(InstalledFlag)) {
     if(test(OutOfDateFlag)) {
-      auto_char installLabel[32];
-      auto_snprintf(installLabel, auto_size(installLabel),
-        AUTO_STR("U&pdate to v%s"),
-        make_autostring(latest->name().toString()).c_str());
+      char installLabel[32];
+      snprintf(installLabel, sizeof(installLabel),
+        "U&pdate to v%s", latest->name().toString().c_str());
 
       const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
       if(target && *target == latest)
         menu.check(actionIndex);
     }
 
-    auto_char reinstallLabel[32];
-    auto_snprintf(reinstallLabel, auto_size(reinstallLabel),
-      AUTO_STR("&Reinstall v%s"),
-      make_autostring(regEntry.version.toString()).c_str());
+    char reinstallLabel[32];
+    snprintf(reinstallLabel, sizeof(reinstallLabel),
+      "&Reinstall v%s", regEntry.version.toString().c_str());
 
     const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
     if(!current || test(ObsoleteFlag))
@@ -192,17 +190,16 @@ void Browser::Entry::fillMenu(Menu &menu) const
       menu.check(actionIndex);
   }
   else {
-    auto_char installLabel[32];
-    auto_snprintf(installLabel, auto_size(installLabel),
-      AUTO_STR("&Install v%s"),
-      make_autostring(latest->name().toString()).c_str());
+    char installLabel[32];
+    snprintf(installLabel, sizeof(installLabel),
+      "&Install v%s", latest->name().toString().c_str());
 
     const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
     if(target && *target == latest)
       menu.check(actionIndex);
   }
 
-  Menu versionMenu = menu.addMenu(AUTO_STR("Versions"));
+  Menu versionMenu = menu.addMenu("Versions");
   const UINT versionMenuIndex = menu.size() - 1;
   if(test(ObsoleteFlag))
     menu.disable(versionMenuIndex);
@@ -211,8 +208,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
     int verIndex = (int)versions.size();
     for(const Version *ver : versions | boost::adaptors::reversed) {
       const UINT actionIndex = versionMenu.addAction(
-        make_autostring(ver->name().toString()).c_str(),
-        --verIndex | (ACTION_VERSION << 8));
+        ver->name().toString().c_str(), --verIndex | (ACTION_VERSION << 8));
 
       if(target ? *target == ver : ver == current) {
         if(target && ver != latest)
@@ -223,15 +219,13 @@ void Browser::Entry::fillMenu(Menu &menu) const
     }
   }
 
-  const UINT pinIndex = menu.addAction(
-    AUTO_STR("&Pin current version"), ACTION_PIN);
+  const UINT pinIndex = menu.addAction("&Pin current version", ACTION_PIN);
   if(!canPin())
     menu.disable(pinIndex);
   if(pin.value_or(regEntry.pinned))
     menu.check(pinIndex);
 
-  const UINT uninstallIndex =
-    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
+  const UINT uninstallIndex = menu.addAction("&Uninstall", ACTION_UNINSTALL);
   if(!test(InstalledFlag) || remote().isProtected())
     menu.disable(uninstallIndex);
   else if(target && *target == nullptr)
@@ -240,12 +234,10 @@ void Browser::Entry::fillMenu(Menu &menu) const
   menu.addSeparator();
 
   menu.setEnabled(!test(ObsoleteFlag),
-    menu.addAction(AUTO_STR("About this &package"), ACTION_ABOUT_PKG));
+    menu.addAction("About this &package", ACTION_ABOUT_PKG));
 
-  auto_char aboutLabel[64];
-  const auto_string &name = make_autostring(indexName());
-  auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About %s"), name.c_str());
+  char aboutLabel[64];
+  snprintf(aboutLabel, sizeof(aboutLabel), "&About %s", indexName().c_str());
   menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
 }
 

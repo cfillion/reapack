@@ -78,7 +78,7 @@ void ThreadTask::exec()
 
 WorkerThread::WorkerThread() : m_exit(false)
 {
-  m_wake = CreateEvent(nullptr, true, false, AUTO_STR("WakeEvent"));
+  m_wake = CreateEvent(nullptr, true, false, nullptr);
   m_thread = CreateThread(nullptr, 0, run, (void *)this, 0, nullptr);
 }
 

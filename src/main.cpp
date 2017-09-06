@@ -19,6 +19,7 @@
 #include "errors.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
+#include "win32.hpp"
 
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
@@ -50,14 +51,14 @@ static bool loadAPI(void *(*getFunc)(const char *))
     *func.ptr = getFunc(func.name);
 
     if(func.required && *func.ptr == nullptr) {
-      auto_char msg[1024];
-      auto_snprintf(msg, auto_size(msg),
-        AUTO_STR("ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n")
-        AUTO_STR("(Unable to import the following API function: %s)"),
-        make_autocstring(ReaPack::VERSION), make_autocstring(func.name));
+      char msg[1024];
+      snprintf(msg, sizeof(msg),
+        "ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n"
+        "(Unable to import the following API function: %s)",
+        ReaPack::VERSION, func.name);
 
-      MessageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
-        msg, AUTO_STR("ReaPack: Fatal Error"), MB_OK);
+      Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
+        msg, "ReaPack: Fatal Error", MB_OK);
 
       return false;
     }
@@ -76,25 +77,25 @@ static void menuHook(const char *name, HMENU handle, int f)
   if(strcmp(name, "Main extensions") || f != 0)
     return;
 
-  Menu menu = Menu(handle).addMenu(AUTO_STR("ReaPack"));
+  Menu menu = Menu(handle).addMenu("ReaPack");
 
-  menu.addAction(AUTO_STR("&Synchronize packages"),
+  menu.addAction("&Synchronize packages",
     NamedCommandLookup("_REAPACK_SYNC"));
 
-  menu.addAction(AUTO_STR("&Browse packages..."),
+  menu.addAction("&Browse packages...",
     NamedCommandLookup("_REAPACK_BROWSE"));
 
-  menu.addAction(AUTO_STR("&Import repositories..."),
+  menu.addAction("&Import repositories...",
     NamedCommandLookup("_REAPACK_IMPORT"));
 
-  menu.addAction(AUTO_STR("&Manage repositories..."),
+  menu.addAction("&Manage repositories...",
     NamedCommandLookup("_REAPACK_MANAGE"));
 
   menu.addSeparator();
 
-  auto_char aboutLabel[32];
-  auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About ReaPack v%s"), make_autocstring(ReaPack::VERSION));
+  char aboutLabel[32];
+  snprintf(aboutLabel, sizeof(aboutLabel),
+    "&About ReaPack v%s", ReaPack::VERSION);
   menu.addAction(aboutLabel, NamedCommandLookup("_REAPACK_ABOUT"));
 }
 
@@ -106,9 +107,9 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   expected.append(REAPACK_FILE);
 
 #ifdef _WIN32
-  auto_char self[MAX_PATH] = {};
-  GetModuleFileName(module, self, auto_size(self));
-  Path current(from_autostring(self).c_str());
+  Win32::char_type self[MAX_PATH] = {};
+  GetModuleFileName(module, self, lengthof(self));
+  Path current(Win32::narrow(self));
 #else
   Dl_info info{};
   dladdr((const void *)checkLocation, &info);
@@ -119,16 +120,16 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   if(current == expected)
     return true;
 
-  auto_char msg[4096];
-  auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("ReaPack was not loaded from the standard extension path")
-    AUTO_STR(" or its filename was altered.\n")
-    AUTO_STR("Move or rename it to the expected location and retry.\n\n")
-    AUTO_STR("Current:\xa0%s\n\nExpected:\xa0%s"),
-    self, make_autostring(expected.join()).c_str());
+  char msg[4096];
+  snprintf(msg, sizeof(msg),
+    "ReaPack was not loaded from the standard extension path"
+    " or its filename was altered.\n"
+    "Move or rename it to the expected location and retry.\n\n"
+    "Current: %s\n\nExpected: %s",
+    current.join().c_str(), expected.join().c_str());
 
-  MessageBox(Splash_GetWnd(), msg,
-    AUTO_STR("ReaPack: Installation path mismatch"), MB_OK);
+  Win32::messageBox(Splash_GetWnd(), msg,
+    "ReaPack: Installation path mismatch", MB_OK);
 
   return false;
 }

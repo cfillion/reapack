@@ -24,6 +24,7 @@
 #include "path.hpp"
 #include "reapack.hpp"
 #include "transaction.hpp"
+#include "win32.hpp"
 
 #include <boost/format.hpp>
 #include <fstream>
@@ -34,10 +35,10 @@
 #include <zlib/unzip.h>
 #include <zlib/ioapi.h>
 
-using namespace boost;
+using boost::format;
 using namespace std;
 
-static const Path ARCHIVE_TOC = Path("toc");
+static const Path ARCHIVE_TOC("toc");
 static const size_t BUFFER_SIZE = 4096;
 
 #ifdef _WIN32
@@ -54,8 +55,10 @@ static void *wide_fopen(voidpf, const void *filename, int mode)
 
   FILE *file = nullptr;
 
-  if(filename && fopen_mode)
-    _wfopen_s(&file, static_cast<const wchar_t *>(filename), fopen_mode);
+  if(filename && fopen_mode) {
+    const auto &&wideFilename = Win32::widen(static_cast<const char *>(filename));
+    _wfopen_s(&file, wideFilename.c_str(), fopen_mode);
+  }
 
   return file;
 }
@@ -71,7 +74,7 @@ struct ImportArchive {
   IndexPtr m_lastIndex;
 };
 
-void Archive::import(const auto_string &path)
+void Archive::import(const string &path)
 {
   ImportArchive state{make_shared<ArchiveReader>(path),
     &g_reapack->config()->remotes};
@@ -105,7 +108,7 @@ void Archive::import(const auto_string &path)
       }
     }
     catch(const reapack_error &e) {
-      state.m_tx->receipt()->addError({e.what(), from_autostring(path)});
+      state.m_tx->receipt()->addError({e.what(), path});
     }
   }
 
@@ -152,15 +155,15 @@ void ImportArchive::importPackage(const string &data)
   const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
 
   if(!ver) {
-    throw reapack_error(format("%s/%s/%s v%s cannot be found or is"
-      " incompatible with your operating system.")
+    throw reapack_error(format(
+      "%s/%s/%s v%s cannot be found or is incompatible with your operating system.")
       % m_lastIndex->name() % categoryName % packageName % versionName);
   }
 
   m_tx->install(ver, pinned, m_reader);
 }
 
-ArchiveReader::ArchiveReader(const auto_string &path)
+ArchiveReader::ArchiveReader(const string &path)
 {
   zlib_filefunc64_def filefunc;
   fill_fopen64_filefunc(&filefunc);
@@ -168,10 +171,10 @@ ArchiveReader::ArchiveReader(const auto_string &path)
   filefunc.zopen64_file = wide_fopen;
 #endif
 
-  m_zip = unzOpen2_64(reinterpret_cast<const char *>(path.c_str()), &filefunc);
+  m_zip = unzOpen2_64(path.c_str(), &filefunc);
 
   if(!m_zip)
-    throw reapack_error(FS::lastError().c_str());
+    throw reapack_error(FS::lastError());
 }
 
 ArchiveReader::~ArchiveReader()
@@ -241,7 +244,7 @@ bool FileExtractor::run()
   return true;
 }
 
-size_t Archive::create(const auto_string &path, vector<string> *errors,
+size_t Archive::create(const string &path, vector<string> *errors,
   ThreadPool *pool)
 {
   size_t count = 0;
@@ -296,7 +299,7 @@ size_t Archive::create(const auto_string &path, vector<string> *errors,
   return count;
 }
 
-ArchiveWriter::ArchiveWriter(const auto_string &path)
+ArchiveWriter::ArchiveWriter(const string &path)
 {
   zlib_filefunc64_def filefunc;
   fill_fopen64_filefunc(&filefunc);
@@ -304,11 +307,10 @@ ArchiveWriter::ArchiveWriter(const auto_string &path)
   filefunc.zopen64_file = wide_fopen;
 #endif
 
-  m_zip = zipOpen2_64(reinterpret_cast<const char *>(path.c_str()),
-    APPEND_STATUS_CREATE, nullptr, &filefunc);
+  m_zip = zipOpen2_64(path.c_str(), APPEND_STATUS_CREATE, nullptr, &filefunc);
 
   if(!m_zip)
-    throw reapack_error(FS::lastError().c_str());
+    throw reapack_error(FS::lastError());
 }
 
 ArchiveWriter::~ArchiveWriter()

@@ -20,7 +20,6 @@
 #include "about.hpp"
 #include "browser_entry.hpp"
 #include "config.hpp"
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "index.hpp"
 #include "listview.hpp"
@@ -28,6 +27,7 @@
 #include "reapack.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
+#include "win32.hpp"
 
 using namespace std;
 
@@ -50,23 +50,23 @@ void Browser::onInit()
   disable(m_actionsBtn);
 
   // don't forget to update order of enum View in header file
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("All"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Queued"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Installed"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Out of date"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Obsolete"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)AUTO_STR("Uninstalled"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("All"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Queued"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Installed"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Out of date"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Obsolete"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Uninstalled"));
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Status"), 23, ListView::NoLabelFlag},
-    {AUTO_STR("Package"), 345},
-    {AUTO_STR("Category"), 105},
-    {AUTO_STR("Version"), 55, 0, ListView::VersionType},
-    {AUTO_STR("Author"), 95},
-    {AUTO_STR("Type"), 70},
-    {AUTO_STR("Repository"), 120, ListView::CollapseFlag},
-    {AUTO_STR("Last Update"), 105, 0, ListView::TimeType},
+    {"Status", 23, ListView::NoLabelFlag},
+    {"Package", 345},
+    {"Category", 105},
+    {"Version", 55, 0, ListView::VersionType},
+    {"Author", 95},
+    {"Type", 70},
+    {"Repository", 120, ListView::CollapseFlag},
+    {"Last Update", 105, 0, ListView::TimeType},
   });
 
   m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
@@ -249,8 +249,8 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   if(!menu.empty())
     menu.addSeparator();
 
-  menu.addAction(AUTO_STR("&Select all"), IDC_SELECT);
-  menu.addAction(AUTO_STR("&Unselect all"), IDC_UNSELECT);
+  menu.addAction("&Select all", IDC_SELECT);
+  menu.addAction("&Unselect all", IDC_UNSELECT);
 
   return true;
 }
@@ -260,14 +260,14 @@ void Browser::fillMenu(Menu &menu)
   const Entry *entry = getEntry(m_currentIndex);
 
   if(m_list->selectionSize() > 1) {
-    menu.addAction(AUTO_STR("&Install/update selection"), ACTION_LATEST_ALL);
-    menu.addAction(AUTO_STR("&Reinstall selection"), ACTION_REINSTALL_ALL);
-    menu.addAction(AUTO_STR("&Uninstall selection"), ACTION_UNINSTALL_ALL);
-    menu.addAction(AUTO_STR("&Clear queued actions"), ACTION_RESET_ALL);
+    menu.addAction("&Install/update selection", ACTION_LATEST_ALL);
+    menu.addAction("&Reinstall selection", ACTION_REINSTALL_ALL);
+    menu.addAction("&Uninstall selection", ACTION_UNINSTALL_ALL);
+    menu.addAction("&Clear queued actions", ACTION_RESET_ALL);
     menu.addSeparator();
 
     if(entry) {
-      Menu pkgMenu = menu.addMenu(AUTO_STR("Package under cursor"));
+      Menu pkgMenu = menu.addMenu("Package under cursor");
       entry->fillMenu(pkgMenu);
     }
   }
@@ -277,32 +277,32 @@ void Browser::fillMenu(Menu &menu)
 
 void Browser::updateDisplayLabel()
 {
-  auto_char btnLabel[32];
-  auto_snprintf(btnLabel, auto_size(btnLabel), AUTO_STR("%d/%zu package%s..."),
+  char btnLabel[32];
+  snprintf(btnLabel, sizeof(btnLabel), "%d/%zu package%s...",
     m_list->rowCount(), m_entries.size(),
-    m_entries.size() == 1 ? AUTO_STR("") : AUTO_STR("s"));
+    m_entries.size() == 1 ? "" : "s");
 
-  SetWindowText(m_displayBtn, btnLabel);
+  Win32::setWindowText(m_displayBtn, btnLabel);
 }
 
 void Browser::displayButton()
 {
-  static map<const auto_char *, Package::Type> types = {
-    {AUTO_STR("&Scripts"), Package::ScriptType},
-    {AUTO_STR("&Effects"), Package::EffectType},
-    {AUTO_STR("E&xtensions"), Package::ExtensionType},
-    {AUTO_STR("&Themes"), Package::ThemeType},
-    {AUTO_STR("&Language Packs"), Package::LangPackType},
-    {AUTO_STR("&Web Interfaces"), Package::WebInterfaceType},
-    {AUTO_STR("&Project Templates"), Package::ProjectTemplateType},
-    {AUTO_STR("&Track Templates"), Package::TrackTemplateType},
-    {AUTO_STR("&MIDI Note Names"), Package::MIDINoteNamesType},
-    {AUTO_STR("&Other packages"), Package::UnknownType},
+  static map<const char *, Package::Type> types = {
+    {"&Scripts", Package::ScriptType},
+    {"&Effects", Package::EffectType},
+    {"E&xtensions", Package::ExtensionType},
+    {"&Themes", Package::ThemeType},
+    {"&Language Packs", Package::LangPackType},
+    {"&Web Interfaces", Package::WebInterfaceType},
+    {"&Project Templates", Package::ProjectTemplateType},
+    {"&Track Templates", Package::TrackTemplateType},
+    {"&MIDI Note Names", Package::MIDINoteNamesType},
+    {"&Other packages", Package::UnknownType},
   };
 
   Menu menu;
 
-  auto index = menu.addAction(AUTO_STR("&All packages"), ACTION_FILTERTYPE);
+  auto index = menu.addAction("&All packages", ACTION_FILTERTYPE);
   if(!m_typeFilter)
     menu.checkRadio(index);
 
@@ -316,8 +316,8 @@ void Browser::displayButton()
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("&Refresh repositories"), ACTION_REFRESH);
-  menu.addAction(AUTO_STR("&Manage repositories..."), ACTION_MANAGE);
+  menu.addAction("&Refresh repositories", ACTION_REFRESH);
+  menu.addAction("&Manage repositories...", ACTION_MANAGE);
 
   menu.show(m_displayBtn, handle());
 }
@@ -360,7 +360,7 @@ void Browser::updateFilter()
 {
   stopTimer(TIMER_FILTER);
 
-  const string &filter = getText(m_filterHandle);
+  const string &filter = Win32::getWindowText(m_filterHandle);
 
   if(m_filter != filter) {
     m_filter = filter;
@@ -404,10 +404,9 @@ void Browser::refresh(const bool stale)
     if(!isVisible() || stale) {
       show();
 
-      MessageBox(handle(), AUTO_STR("No repository enabled!\r\n")
-        AUTO_STR("Enable or import repositories from ")
-        AUTO_STR("Extensions > ReaPack > Manage repositories."),
-        AUTO_STR("Browse packages"), MB_OK);
+      Win32::messageBox(handle(), "No repository enabled!\r\n"
+        "Enable or import repositories from Extensions > ReaPack > Manage repositories.",
+        "Browse packages", MB_OK);
     }
 
     populate({});
@@ -434,7 +433,7 @@ void Browser::refresh(const bool stale)
 
 void Browser::setFilter(const string &newFilter)
 {
-  SetWindowText(m_filterHandle, make_autostring(newFilter).c_str());
+  Win32::setWindowText(m_filterHandle, newFilter.c_str());
   updateFilter(); // don't wait for the timer, update now!
   SetFocus(m_filterHandle);
 }
@@ -465,14 +464,12 @@ void Browser::populate(const vector<IndexPtr> &indexes)
     fillList();
   }
   catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-    auto_char msg[255];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("ReaPack could not read from the local package registry.\r\n")
-      AUTO_STR("Retry later once all installation task are completed.\r\n")
-      AUTO_STR("\r\nError description: %s"),
-      desc.c_str());
-    MessageBox(handle(), msg, AUTO_STR("ReaPack"), MB_OK);
+    char msg[255];
+    snprintf(msg, sizeof(msg),
+      "ReaPack could not read from the local package registry.\r\n"
+      "Retry later once all installation task are completed.\r\n"
+      "\r\nError description: %s", e.what());
+    Win32::messageBox(handle(), msg, "ReaPack", MB_OK);
   }
 
   if(!isVisible())
@@ -617,12 +614,11 @@ void Browser::installLatestAll()
   const bool isEverything = (size_t)m_list->selectionSize() == m_entries.size();
 
   if(isEverything && !installOpts.autoInstall) {
-    const int btn = MessageBox(handle(),
-      AUTO_STR("Do you want ReaPack to install new packages automatically when")
-      AUTO_STR(" synchronizing in the future?\r\n\r\nThis setting can also be")
-      AUTO_STR(" customized globally or on a per-repository basis in")
-      AUTO_STR(" ReaPack > Manage repositories."),
-      AUTO_STR("Install every available packages"), MB_YESNOCANCEL);
+    const int btn = Win32::messageBox(handle(), "Do you want ReaPack to install new packages"
+      " automatically when  synchronizing in the future?\r\n\r\nThis setting"
+      " can also be customized globally or on a per-repository basis in"
+      " ReaPack > Manage repositories.",
+      "Install every available packages", MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -753,7 +749,7 @@ void Browser::updateAction(const int index)
     updateDisplayLabel();
   }
   else
-    m_list->row(index)->setCell(0, make_autostring(entry->displayState()));
+    m_list->row(index)->setCell(0, entry->displayState());
 
   if(m_actions.empty())
     disable(m_applyBtn);
@@ -798,15 +794,13 @@ bool Browser::confirm() const
   if(!count)
     return true;
 
-  auto_char msg[255];
-  auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("Are you sure to uninstall %zu package%s?\r\nThe files and settings will be permanently deleted from this computer."),
-    count, count == 1 ? AUTO_STR("") : AUTO_STR("s"));
+  char msg[255];
+  snprintf(msg, sizeof(msg),
+    "Are you sure to uninstall %zu package%s?\r\nThe files and settings will"
+    " be permanently deleted from this computer.",
+    count, count == 1 ? "" : "s");
 
-  const auto_char *title = AUTO_STR("ReaPack Query");
-  const int btn = MessageBox(handle(), msg, title, MB_YESNO);
-
-  return btn == IDYES;
+  return IDYES == Win32::messageBox(handle(), msg, "ReaPack Query", MB_YESNO);
 }
 
 bool Browser::apply()

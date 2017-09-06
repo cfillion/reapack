@@ -22,10 +22,9 @@
 #include "path.hpp"
 #include "thread.hpp"
 
+#include <curl/curl.h>
 #include <fstream>
 #include <sstream>
-
-#include <curl/curl.h>
 
 struct DownloadContext {
   static void GlobalInit();

@@ -18,54 +18,58 @@
 #include "filedialog.hpp"
 
 #include "path.hpp"
+#include "win32.hpp"
 
 #ifndef _WIN32
 #  include <swell.h>
 #endif
 
-auto_string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
-  const auto_char *title, const Path &initialDir,
-  const auto_char *filters, const auto_char *defaultExt)
-{
+using namespace std;
+
 #ifdef _WIN32
-  const auto_string &dirPath = make_autostring(initialDir.join());
-  auto_char path[4096] = {};
+static string getFileName(BOOL(__stdcall *func)(LPOPENFILENAME),
+  HWND parent, HINSTANCE instance, const char *title, const Path &initialDir,
+  const Win32::char_type *filters, const Win32::char_type *defaultExt)
+{
+  const auto &&wideTitle = Win32::widen(title);
+  const auto &&wideInitialDir = Win32::widen(initialDir.join());
+
+  wchar_t pathBuffer[4096] = {};
 
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;
-  of.lpstrFile = path;
-  of.nMaxFile = auto_size(path);
-  of.lpstrInitialDir = dirPath.c_str();
-  of.lpstrTitle = title;
-  of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_FILEMUSTEXIST;
+  of.lpstrFile = pathBuffer;
+  of.nMaxFile = lengthof(pathBuffer);
+  of.lpstrInitialDir = wideInitialDir.c_str();
+  of.lpstrTitle = wideTitle.c_str();
+  of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
   of.lpstrDefExt = defaultExt;
 
-  return GetOpenFileName(&of) ? path : auto_string();
+  return func(&of) ? Win32::narrow(pathBuffer) : string();
+}
+#endif
+
+string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
+  const char *title, const Path &initialDir,
+  const Win32::char_type *filters, const Win32::char_type *defaultExt)
+{
+#ifdef _WIN32
+  return getFileName(&GetOpenFileName, parent, instance,
+    title, initialDir, filters, defaultExt);
 #else
-  char *path = BrowseForFiles(title, initialDir.join().c_str(),
+  const char *path = BrowseForFiles(title, initialDir.join().c_str(),
     nullptr, false, filters);
-  return path ? path : auto_string();
+  return path ? path : string();
 #endif
 }
 
-auto_string FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
-  const auto_char *title, const Path &initialDir,
-  const auto_char *filters, const auto_char *defaultExt)
+string FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
+  const char *title, const Path &initialDir,
+  const Win32::char_type *filters, const Win32::char_type *defaultExt)
 {
 #ifdef _WIN32
-  const auto_string &dirPath = make_autostring(initialDir.join());
-  auto_char path[4096] = {};
-
-  OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
-  of.lpstrFilter = filters;
-  of.lpstrFile = path;
-  of.nMaxFile = auto_size(path);
-  of.lpstrInitialDir = dirPath.c_str();
-  of.lpstrTitle = title;
-  of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_OVERWRITEPROMPT;
-  of.lpstrDefExt = defaultExt;
-
-  return GetSaveFileName(&of) ? path : auto_string();
+  return getFileName(&GetSaveFileName, parent, instance,
+    title, initialDir, filters, defaultExt);
 #else
   char path[4096] = {};
 

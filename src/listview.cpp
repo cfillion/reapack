@@ -20,6 +20,7 @@
 #include "menu.hpp"
 #include "time.hpp"
 #include "version.hpp"
+#include "win32.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -57,9 +58,10 @@ int ListView::addColumn(const Column &col)
   item.mask |= LVCF_WIDTH;
   item.cx = col.test(CollapseFlag) ? 0 : adjustWidth(col.width);
 
+  const auto &&label = Win32::widen(col.label);
   if(!col.test(NoLabelFlag)) {
     item.mask |= LVCF_TEXT;
-    item.pszText = const_cast<auto_char *>(col.label.c_str());
+    item.pszText = const_cast<Win32::char_type *>(label.c_str());
   }
 
   const int index = columnCount();
@@ -91,8 +93,9 @@ auto ListView::createRow(void *data) -> RowPtr
 void ListView::updateCell(int row, int cell)
 {
   const int viewRowIndex = translate(row);
+  const auto &&text = Win32::widen(m_rows[row]->cell(cell).value);
   ListView_SetItemText(handle(), viewRowIndex, cell,
-    const_cast<auto_char *>(m_rows[row]->cell(cell).value.c_str()));
+    const_cast<Win32::char_type *>(text.c_str()));
 }
 
 void ListView::removeRow(const int userIndex)
@@ -444,7 +447,7 @@ void ListView::headerMenu(const int x, const int y)
   }
 
   menu.addSeparator();
-  menu.addAction(AUTO_STR("Reset columns"), ACTION_RESTORE);
+  menu.addAction("Reset columns", ACTION_RESTORE);
 
   const int id = menu.show(x, y, handle());
 
@@ -542,10 +545,10 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
 
   switch(dataType) {
   case UserType: { // arbitrary data or no data: sort by visible text
-    auto_string l = cl.value;
+    string l = cl.value;
     boost::algorithm::to_lower(l);
 
-    auto_string r = cr.value;
+    string r = cr.value;
     boost::algorithm::to_lower(r);
 
     return l.compare(r);
@@ -567,7 +570,7 @@ ListView::Row::Row(const size_t size, void *data, ListView *list)
 {
 }
 
-void ListView::Row::setCell(const int i, const auto_string &val, void *data)
+void ListView::Row::setCell(const int i, const string &val, void *data)
 {
   Cell &cell = m_cells[i];
   cell.value = val;

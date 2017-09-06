@@ -17,7 +17,6 @@
 
 #include "index.hpp"
 
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
 #include "path.hpp"
@@ -42,7 +41,7 @@ IndexPtr Index::load(const string &name, const char *data)
     FILE *file = FS::open(pathFor(name));
 
     if(!file)
-      throw reapack_error(FS::lastError().c_str());
+      throw reapack_error(FS::lastError());
 
     doc.LoadFile(file);
     fclose(file);

@@ -18,13 +18,13 @@
 #ifndef REAPACK_MENU_HPP
 #define REAPACK_MENU_HPP
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <swell/swell.h>
-#endif
+#include <string>
 
-#include "encoding.hpp"
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include <swell-types.h>
+#endif
 
 class Menu {
 public:
@@ -34,9 +34,9 @@ public:
   UINT size() { return m_size; }
   bool empty() const { return m_size == 0; }
 
-  UINT addAction(const auto_char *label, int commandId);
+  UINT addAction(const std::string &label, int commandId);
   void addSeparator();
-  Menu addMenu(const auto_char *label);
+  Menu addMenu(const std::string &label);
 
   int show(int x, int y, HWND parent) const;
   int show(HWND control, HWND parent) const;

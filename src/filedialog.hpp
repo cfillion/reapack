@@ -18,21 +18,15 @@
 #ifndef REAPACK_FILEBROWSE_HPP
 #define REAPACK_FILEBROWSE_HPP
 
-#include "encoding.hpp"
-
-#ifdef _WIN32
-#  include <windows.h>
-#else
-#  include <swell-types.h>
-#endif
+#include "win32.hpp"
 
 class Path;
 
 namespace FileDialog {
-  auto_string getOpenFileName(HWND, HINSTANCE, const auto_char *title,
-    const Path &directory, const auto_char *filters, const auto_char *defext);
-  auto_string getSaveFileName(HWND, HINSTANCE, const auto_char *title,
-    const Path &directory, const auto_char *filters, const auto_char *defext);
+  std::string getOpenFileName(HWND, HINSTANCE, const char *title,
+    const Path &directory, const Win32::char_type *filters, const Win32::char_type *defext);
+  std::string getSaveFileName(HWND, HINSTANCE, const char *title,
+    const Path &directory, const Win32::char_type *filters, const Win32::char_type *defext);
 };
 
 #endif

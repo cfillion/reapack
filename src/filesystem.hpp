@@ -36,7 +36,7 @@ namespace FS {
   bool exists(const Path &, bool dir = false);
   bool mkdir(const Path &);
 
-  std::string lastError();
+  const char *lastError();
 };
 
 #endif

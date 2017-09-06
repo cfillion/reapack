@@ -20,7 +20,6 @@
 
 #include <string>
 
-#include "encoding.hpp"
 #include "remote.hpp"
 
 class Path;
@@ -67,24 +66,19 @@ public:
   RemoteList remotes;
 
 private:
-  std::string getString(const auto_char *grp,
-    const auto_string &key, const std::string &fallback = {}) const;
-  void setString(const auto_char *grp,
-    const auto_string &key, const std::string &val) const;
+  std::string getString(const char *g, const char *k, const std::string &fallback = {}) const;
+  void setString(const char *g, const char *k, const std::string &v) const;
 
-  bool getBool(const auto_char *grp,
-    const auto_string &key, bool fallback = false) const;
-  unsigned int getUInt(const auto_char *grp,
-    const auto_string &key, unsigned int fallback = 0) const;
-  void setUInt(const auto_char *, const auto_string &, unsigned int) const;
+  bool getBool(const char *g, const char *k, bool fallback = false) const;
+  unsigned int getUInt(const char *g, const char *k, unsigned int fallback = 0) const;
+  void setUInt(const char *g, const char *k, unsigned int v) const;
 
-  void deleteKey(const auto_char *, const auto_string &) const;
-  void cleanupArray(const auto_char *, const auto_string &,
-    unsigned int begin, unsigned int end) const;
+  void deleteKey(const char *g, const char *k) const;
+  void cleanupArray(const char *g, const char *k, unsigned int begin, unsigned int end) const;
 
   void migrate();
 
-  auto_string m_path;
+  std::string m_path;
   bool m_isFirstRun;
   unsigned int m_version;
 

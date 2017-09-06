@@ -18,6 +18,7 @@
 #include "config.hpp"
 
 #include "path.hpp"
+#include "win32.hpp"
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -27,36 +28,34 @@
 
 using namespace std;
 
-static const auto_char *GENERAL_GRP = AUTO_STR("general");
-static const auto_char *VERSION_KEY = AUTO_STR("version");
+static const char *GENERAL_GRP = "general";
+static const char *VERSION_KEY = "version";
 
-static const auto_char *INSTALL_GRP = AUTO_STR("install");
-static const auto_char *AUTOINSTALL_KEY = AUTO_STR("autoinstall");
-static const auto_char *PRERELEASES_KEY = AUTO_STR("prereleases");
-static const auto_char *PROMPTOBSOLETE_KEY = AUTO_STR("promptobsolete");
+static const char *INSTALL_GRP = "install";
+static const char *AUTOINSTALL_KEY = "autoinstall";
+static const char *PRERELEASES_KEY = "prereleases";
+static const char *PROMPTOBSOLETE_KEY = "promptobsolete";
 
-static const auto_char *ABOUT_GRP = AUTO_STR("about");
-static const auto_char *MANAGER_GRP = AUTO_STR("manager");
+static const char *ABOUT_GRP = "about";
+static const char *MANAGER_GRP = "manager";
 
-static const auto_char *BROWSER_GRP = AUTO_STR("browser");
-static const auto_char *STATE_KEY = AUTO_STR("state");
+static const char *BROWSER_GRP = "browser";
+static const char *STATE_KEY = "state";
 
-static const auto_char *NETWORK_GRP = AUTO_STR("network");
-static const auto_char *PROXY_KEY = AUTO_STR("proxy");
-static const auto_char *VERIFYPEER_KEY = AUTO_STR("verifypeer");
-static const auto_char *STALETHRSH_KEY = AUTO_STR("stalethreshold");
+static const char *NETWORK_GRP = "network";
+static const char *PROXY_KEY = "proxy";
+static const char *VERIFYPEER_KEY = "verifypeer";
+static const char *STALETHRSH_KEY = "stalethreshold";
 
-static const auto_char *SIZE_KEY = AUTO_STR("size");
+static const char *SIZE_KEY = "size";
 
-static const auto_char *REMOTES_GRP = AUTO_STR("remotes");
-static const auto_char *REMOTE_KEY  = AUTO_STR("remote");
+static const char *REMOTES_GRP = "remotes";
+static const char *REMOTE_KEY  = "remote";
 
-static auto_string ArrayKey(const auto_string &key, const unsigned int i)
+inline static string nKey(const char *key, const unsigned int i)
 {
-  return key + to_autostring(i);
+  return key + to_string(i);
 }
-
-static const int BUFFER_SIZE = 2083;
 
 Config::Config()
   : m_isFirstRun(false), m_version(0), m_remotesIniSize(0)
@@ -133,7 +132,7 @@ void Config::migrate()
 
 void Config::read(const Path &path)
 {
-  m_path = make_autostring(path.join());
+  m_path = path.join();
 
   install.autoInstall = getBool(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
   install.bleedingEdge = getBool(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
@@ -178,7 +177,7 @@ void Config::readRemotes()
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
 
   for(unsigned int i = 0; i < m_remotesIniSize; i++) {
-    const string data = getString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i));
+    const string data = getString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str());
 
     remotes.add(Remote::fromString(data));
   }
@@ -190,56 +189,47 @@ void Config::writeRemotes()
 
   unsigned int i = 0;
   for(auto it = remotes.begin(); it != remotes.end(); it++, i++)
-    setString(REMOTES_GRP, ArrayKey(REMOTE_KEY, i), it->toString());
+    setString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str(), it->toString());
 
   cleanupArray(REMOTES_GRP, REMOTE_KEY, i, m_remotesIniSize);
 
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-string Config::getString(const auto_char *group,
-  const auto_string &key, const string &fallback) const
+string Config::getString(const char *group, const char *key, const string &fallback) const
 {
-  auto_char buffer[BUFFER_SIZE];
-  GetPrivateProfileString(group, key.c_str(), make_autostring(fallback).c_str(),
-    buffer, sizeof(buffer), m_path.c_str());
-
-  return from_autostring(buffer);
+  return Win32::getPrivateProfileString(group, key, fallback.c_str(), m_path.c_str());
 }
 
-void Config::setString(const auto_char *group,
-  const auto_string &key, const string &val) const
+void Config::setString(const char *group, const char *key, const string &val) const
 {
-  WritePrivateProfileString(group, key.c_str(),
-    make_autostring(val).c_str(), m_path.c_str());
+  Win32::writePrivateProfileString(group, key, val.c_str(), m_path.c_str());
 }
 
-unsigned int Config::getUInt(const auto_char *group,
-  const auto_string &key, const unsigned int fallback) const
+unsigned int Config::getUInt(const char *group,
+  const char *key, const unsigned int fallback) const
 {
-  return GetPrivateProfileInt(group, key.c_str(), fallback, m_path.c_str());
+  return Win32::getPrivateProfileInt(group, key, fallback, m_path.c_str());
 }
 
-bool Config::getBool(const auto_char *group,
-  const auto_string &key, const bool fallback) const
+bool Config::getBool(const char *group, const char *key, const bool fallback) const
 {
   return getUInt(group, key, fallback) > 0;
 }
 
-void Config::setUInt(const auto_char *group, const auto_string &key,
-  const unsigned int val) const
+void Config::setUInt(const char *group, const char *key, const unsigned int val) const
 {
   setString(group, key, to_string(val));
 }
 
-void Config::deleteKey(const auto_char *group, const auto_string &key) const
+void Config::deleteKey(const char *group, const char *key) const
 {
-  WritePrivateProfileString(group, key.c_str(), 0, m_path.c_str());
+  Win32::writePrivateProfileString(group, key, nullptr, m_path.c_str());
 }
 
-void Config::cleanupArray(const auto_char *group, const auto_string &key,
+void Config::cleanupArray(const char *group, const char *key,
   const unsigned int begin, const unsigned int end) const
 {
   for(unsigned int i = begin; i < end; i++)
-    deleteKey(group, ArrayKey(key, i));
+    deleteKey(group, nKey(key, i).c_str());
 }

@@ -17,8 +17,8 @@
 
 #include "filesystem.hpp"
 
-#include "encoding.hpp"
 #include "path.hpp"
+#include "win32.hpp"
 
 #include <cerrno>
 #include <cstdio>
@@ -36,36 +36,34 @@ using namespace std;
 
 static bool stat(const Path &path, struct stat *out)
 {
-  const Path &fullPath = Path::prefixRoot(path);
+  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
 
 #ifdef _WIN32
-  if(_wstat(make_autostring(fullPath.join()).c_str(), out))
-    return false;
+  constexpr auto func = &_wstat;
 #else
-  if(::stat(fullPath.join().c_str(), out))
-    return false;
+  constexpr int(*func)(const char *, struct stat *) = &::stat;
 #endif
 
-  return true;
+  return !func(fullPath.c_str(), out);
 }
 
 FILE *FS::open(const Path &path)
 {
-  const Path &fullPath = Path::prefixRoot(path);
+  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
 
 #ifdef _WIN32
   FILE *file = nullptr;
-  _wfopen_s(&file, make_autostring(fullPath.join()).c_str(), L"rb");
+  _wfopen_s(&file, fullPath.c_str(), L"rb");
   return file;
 #else
-  return fopen(fullPath.join().c_str(), "rb");
+  return fopen(fullPath.c_str(), "rb");
 #endif
 }
 
 bool FS::open(ifstream &stream, const Path &path)
 {
-  const Path &fullPath = Path::prefixRoot(path);
-  stream.open(make_autostring(fullPath.join()), ios_base::binary);
+  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  stream.open(fullPath, ios_base::binary);
   return stream.good();
 }
 
@@ -74,8 +72,8 @@ bool FS::open(ofstream &stream, const Path &path)
   if(!mkdir(path.dirname()))
     return false;
 
-  const Path &fullPath = Path::prefixRoot(path);
-  stream.open(make_autostring(fullPath.join()), ios_base::binary);
+  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  stream.open(fullPath, ios_base::binary);
   return stream.good();
 }
 
@@ -102,21 +100,21 @@ bool FS::rename(const TempPath &path)
 
 bool FS::rename(const Path &from, const Path &to)
 {
-  const string &fullFrom = Path::prefixRoot(from).join();
-  const string &fullTo = Path::prefixRoot(to).join();
+  const auto &&fullFrom = Win32::widen(Path::prefixRoot(from).join());
+  const auto &&fullTo = Win32::widen(Path::prefixRoot(to).join());
 
 #ifdef _WIN32
-  return !_wrename(make_autostring(fullFrom).c_str(),
-    make_autostring(fullTo).c_str());
+  const auto func = &_wrename;
 #else
-  return !::rename(fullFrom.c_str(), fullTo.c_str());
+  const auto func = &::rename;
 #endif
+
+  return !func(fullFrom.c_str(), fullTo.c_str());
 }
 
 bool FS::remove(const Path &path)
 {
-  const auto_string &fullPath =
-    make_autostring(Path::prefixRoot(path).join());
+  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
 
 #ifdef _WIN32
   if(GetFileAttributes(fullPath.c_str()) == INVALID_FILE_ATTRIBUTES
@@ -191,7 +189,7 @@ bool FS::mkdir(const Path &path)
   for(const string &dir : path) {
     fullPath.append(dir);
 
-    const auto_string &joined = make_autostring(fullPath.join());
+    const auto &&joined = Win32::widen(fullPath.join());
 
 #ifdef _WIN32
     if(!CreateDirectory(joined.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS)
@@ -205,7 +203,7 @@ bool FS::mkdir(const Path &path)
   return true;
 }
 
-string FS::lastError()
+const char *FS::lastError()
 {
   return strerror(errno);
 }

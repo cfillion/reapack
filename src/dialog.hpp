@@ -102,9 +102,7 @@ public:
   void stopTimer(int id);
   void setClipboard(const std::string &);
   void setClipboard(const std::vector<std::string> &);
-  static void openURL(const std::string &url);
   HWND getControl(int idc);
-  std::string getText(HWND);
   void setAnchor(HWND, int flags);
   void setAnchorPos(HWND, const LONG *left = nullptr, const LONG *top = nullptr,
     const LONG *right = nullptr, const LONG *bottom = nullptr);

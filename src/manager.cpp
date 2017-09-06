@@ -20,7 +20,6 @@
 #include "about.hpp"
 #include "archive.hpp"
 #include "config.hpp"
-#include "encoding.hpp"
 #include "errors.hpp"
 #include "filedialog.hpp"
 #include "import.hpp"
@@ -31,12 +30,13 @@
 #include "remote.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
+#include "win32.hpp"
 
 #include <boost/algorithm/string/join.hpp>
 
-static const auto_char *ARCHIVE_FILTER =
-  AUTO_STR("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
-static const auto_char *ARCHIVE_EXT = AUTO_STR("ReaPackArchive");
+static const Win32::char_type *ARCHIVE_FILTER =
+  L("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
+static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
 
 using namespace std;
 
@@ -67,9 +67,9 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Name"), 115},
-    {AUTO_STR("Index URL"), 415},
-    {AUTO_STR("State"), 60},
+    {"Name", 115},
+    {"Index URL", 415},
+    {"State", 60},
   });
 
   m_list->onActivate(bind(&Manager::aboutRepo, this, true));
@@ -212,39 +212,38 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   const Remote &remote = getRemote(index);
 
   if(!remote) {
-    menu.addAction(AUTO_STR("&Select all"), ACTION_SELECT);
-    menu.addAction(AUTO_STR("&Unselect all"), ACTION_UNSELECT);
+    menu.addAction("&Select all", ACTION_SELECT);
+    menu.addAction("&Unselect all", ACTION_UNSELECT);
     return true;
   }
 
   const UINT enableAction =
-    menu.addAction(AUTO_STR("&Enable"), ACTION_ENABLE);
+    menu.addAction("&Enable", ACTION_ENABLE);
   const UINT disableAction =
-    menu.addAction(AUTO_STR("&Disable"), ACTION_DISABLE);
+    menu.addAction("&Disable", ACTION_DISABLE);
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("&Refresh"), ACTION_REFRESH);
+  menu.addAction("&Refresh", ACTION_REFRESH);
 
-  Menu autoInstallMenu = menu.addMenu(AUTO_STR("&Install new packages"));
+  Menu autoInstallMenu = menu.addMenu("&Install new packages");
   const UINT autoInstallGlobal = autoInstallMenu.addAction(
-    AUTO_STR("Use &global setting"), ACTION_AUTOINSTALL_GLOBAL);
+    "Use &global setting", ACTION_AUTOINSTALL_GLOBAL);
   const UINT autoInstallOff = autoInstallMenu.addAction(
-    AUTO_STR("Manually"), ACTION_AUTOINSTALL_OFF);
+    "Manually", ACTION_AUTOINSTALL_OFF);
   const UINT autoInstallOn = autoInstallMenu.addAction(
-    AUTO_STR("When synchronizing"), ACTION_AUTOINSTALL_ON);
+    "When synchronizing", ACTION_AUTOINSTALL_ON);
 
-  menu.addAction(AUTO_STR("&Copy URL"), ACTION_COPYURL);
+  menu.addAction("&Copy URL", ACTION_COPYURL);
 
   const UINT uninstallAction =
-    menu.addAction(AUTO_STR("&Uninstall"), ACTION_UNINSTALL);
+    menu.addAction("&Uninstall", ACTION_UNINSTALL);
 
   menu.addSeparator();
 
-  auto_char aboutLabel[64];
-  const auto_string &name = make_autostring(remote.name());
-  auto_snprintf(aboutLabel, auto_size(aboutLabel),
-    AUTO_STR("&About %s"), name.c_str());
+  char aboutLabel[64];
+  snprintf(aboutLabel, sizeof(aboutLabel),
+    "&About %s", remote.name().c_str());
   menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
 
   bool allEnabled = true;
@@ -319,7 +318,7 @@ void Manager::refresh()
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = from_autostring(m_list->row(selection[i])->cell(0).value); // TODO: use data ptr to Remote
+    selected[i] = m_list->row(selection[i])->cell(0).value; // TODO: use data ptr to Remote
 
   const auto &remotes = g_reapack->config()->remotes;
 
@@ -332,8 +331,8 @@ void Manager::refresh()
 
     int c = 0;
     auto row = m_list->createRow();
-    row->setCell(c++, make_autostring(remote.name()));
-    row->setCell(c++, make_autostring(remote.url()));
+    row->setCell(c++, remote.name());
+    row->setCell(c++, remote.url());
     updateEnabledCell(row->index(), remote);
 
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
@@ -345,8 +344,7 @@ void Manager::refresh()
 
 void Manager::updateEnabledCell(int index, const Remote &remote)
 {
-  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ?
-    AUTO_STR("Enabled") : AUTO_STR("Disabled"));
+  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ? "Enabled" : "Disabled");
 }
 
 void Manager::setMods(const ModsCallback &cb, const bool updateRow)
@@ -498,10 +496,10 @@ void Manager::aboutRepo(const bool focus)
 void Manager::importExport()
 {
   Menu menu;
-  menu.addAction(AUTO_STR("Import &repositories..."), ACTION_IMPORT_REPO);
+  menu.addAction("Import &repositories...", ACTION_IMPORT_REPO);
   menu.addSeparator();
-  menu.addAction(AUTO_STR("Import offline archive..."), ACTION_IMPORT_ARCHIVE);
-  menu.addAction(AUTO_STR("&Export offline archive..."), ACTION_EXPORT_ARCHIVE);
+  menu.addAction("Import offline archive...", ACTION_IMPORT_ARCHIVE);
+  menu.addAction("&Export offline archive...", ACTION_EXPORT_ARCHIVE);
 
   menu.show(getControl(IDC_IMPORT), handle());
 }
@@ -520,9 +518,9 @@ bool Manager::importRepo()
 
 void Manager::importArchive()
 {
-  const auto_char *title = AUTO_STR("Import offline archive");
+  const char *title = "Import offline archive";
 
-  const auto_string &path = FileDialog::getOpenFileName(handle(), instance(),
+  const string &path = FileDialog::getOpenFileName(handle(), instance(),
     title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(path.empty())
@@ -532,23 +530,18 @@ void Manager::importArchive()
     Archive::import(path);
   }
   catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-
-    auto_char msg[512];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("An error occured while reading %s.\r\n\r\n%s."),
-      path.c_str(), desc.c_str()
-    );
-
-    MessageBox(handle(), msg, title, MB_OK);
+    char msg[512];
+    snprintf(msg, sizeof(msg), "An error occured while reading %s.\r\n\r\n%s.",
+      path.c_str(), e.what());
+    Win32::messageBox(handle(), msg, title, MB_OK);
   }
 }
 
 void Manager::exportArchive()
 {
-  const auto_char *title = AUTO_STR("Export offline archive");
+  const char *title = "Export offline archive";
 
-  const auto_string &path = FileDialog::getSaveFileName(handle(), instance(),
+  const string &path = FileDialog::getSaveFileName(handle(), instance(),
     title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(path.empty())
@@ -564,22 +557,22 @@ void Manager::exportArchive()
     const auto finish = [=] {
       Dialog::Destroy(progress);
 
-      auto_char error[1024];
+      char error[1024];
       if(errors.empty())
         error[0] = 0;
       else {
-        auto_snprintf(error, auto_size(error),
-          AUTO_STR("\r\n\r\n%zu file%s could not be archived. ")
-          AUTO_STR("Synchronize packages to repair any missing file.\r\n\r\n%s"),
-          errors.size(), errors.size() == 1 ? AUTO_STR("") : AUTO_STR("s"),
-          make_autostring(boost::algorithm::join(errors, "\r\n")).c_str());
+        snprintf(error, sizeof(error),
+          "\r\n\r\n%zu file%s could not be archived. "
+          "Synchronize packages to repair any missing file.\r\n\r\n%s",
+          errors.size(), errors.size() == 1 ? "" : "s",
+          boost::algorithm::join(errors, "\r\n").c_str());
       }
 
-      auto_char msg[2048];
-      auto_snprintf(msg, auto_size(msg),
-        AUTO_STR("Done! %zu package%s were exported in the archive.%s"),
-        count, count == 1 ? AUTO_STR("") : AUTO_STR("s"), error);
-      MessageBox(handle(), msg, title, MB_OK);
+      char msg[2048];
+      snprintf(msg, sizeof(msg),
+        "Done! %zu package%s were exported in the archive.%s",
+        count, count == 1 ? "" : "s", error);
+      Win32::messageBox(handle(), msg, title, MB_OK);
 
       delete pool;
     };
@@ -593,24 +586,19 @@ void Manager::exportArchive()
     Dialog::Destroy(progress);
     delete pool;
 
-    const auto_string &desc = make_autostring(e.what());
-
-    auto_char msg[512];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("An error occured while writing into %s.\r\n\r\n%s."),
-      path.c_str(), desc.c_str()
+    char msg[512];
+    snprintf(msg, sizeof(msg),
+      "An error occured while writing into %s.\r\n\r\n%s.",
+      path.c_str(), e.what()
     );
-    MessageBox(handle(), msg, title, MB_OK);
+    Win32::messageBox(handle(), msg, title, MB_OK);
   }
 }
 
 void Manager::launchBrowser()
 {
-  const auto promptApply = [&] {
-    const auto_char *title = AUTO_STR("ReaPack Query");
-    const auto_char *msg = AUTO_STR("Apply unsaved changes?");
-    const int btn = MessageBox(handle(), msg, title, MB_YESNO);
-    return btn == IDYES;
+  const auto promptApply = [this] {
+    return IDYES == Win32::messageBox(handle(), "Apply unsaved changes?", "ReaPack Query", MB_YESNO);
   };
 
   if(m_changes && promptApply())
@@ -624,25 +612,25 @@ void Manager::options()
   Menu menu;
 
   UINT index = menu.addAction(
-    AUTO_STR("&Install new packages when synchronizing"), ACTION_AUTOINSTALL);
+    "&Install new packages when synchronizing", ACTION_AUTOINSTALL);
   if(m_autoInstall.value_or(g_reapack->config()->install.autoInstall))
     menu.check(index);
 
   index = menu.addAction(
-    AUTO_STR("Enable &pre-releases globally (bleeding edge)"), ACTION_BLEEDINGEDGE);
+    "Enable &pre-releases globally (bleeding edge)", ACTION_BLEEDINGEDGE);
   if(m_bleedingEdge.value_or(g_reapack->config()->install.bleedingEdge))
     menu.check(index);
 
   index = menu.addAction(
-    AUTO_STR("Prompt to uninstall obsolete packages"), ACTION_PROMPTOBSOLETE);
+    "Prompt to uninstall obsolete packages", ACTION_PROMPTOBSOLETE);
   if(m_promptObsolete.value_or(g_reapack->config()->install.promptObsolete))
     menu.check(index);
 
-  menu.addAction(AUTO_STR("&Network settings..."), ACTION_NETCONFIG);
+  menu.addAction("&Network settings...", ACTION_NETCONFIG);
 
   menu.addSeparator();
 
-  menu.addAction(AUTO_STR("&Restore default settings"), ACTION_RESETCONFIG);
+  menu.addAction("&Restore default settings", ACTION_RESETCONFIG);
 
   menu.show(getControl(IDC_OPTIONS), handle());
 }
@@ -660,16 +648,12 @@ bool Manager::confirm() const
 
   const size_t uninstallSize = m_uninstall.size();
 
-  auto_char msg[255];
-  auto_snprintf(msg, auto_size(msg), AUTO_STR("Uninstall %zu %s?\n")
-    AUTO_STR("Every file they contain will be removed from your computer."),
-    uninstallSize,
-    uninstallSize == 1 ? AUTO_STR("repository") : AUTO_STR("repositories"));
+  char msg[255];
+  snprintf(msg, sizeof(msg), "Uninstall %zu %s?\n"
+    "Every file they contain will be removed from your computer.",
+    uninstallSize, uninstallSize == 1 ? "repository" : "repositories");
 
-  const auto_char *title = AUTO_STR("ReaPack Query");
-  const int btn = MessageBox(handle(), msg, title, MB_YESNO);
-
-  return btn == IDYES;
+  return IDYES == Win32::messageBox(handle(), msg, "ReaPack Query", MB_YESNO);
 }
 
 bool Manager::apply()
@@ -757,7 +741,7 @@ Remote Manager::getRemote(const int index) const
   if(index < 0 || index > m_list->rowCount() - 1)
     return {};
 
-  const string &remoteName = from_autostring(m_list->row(index)->cell(0).value);
+  const string &remoteName = m_list->row(index)->cell(0).value;
   return g_reapack->config()->remotes.get(remoteName);
 }
 
@@ -771,7 +755,7 @@ void NetworkConfig::onInit()
   Dialog::onInit();
 
   m_proxy = getControl(IDC_PROXY);
-  SetWindowText(m_proxy, make_autostring(m_opts->proxy).c_str());
+  Win32::setWindowText(m_proxy, m_opts->proxy.c_str());
 
   m_verifyPeer = getControl(IDC_VERIFYPEER);
   setChecked(m_opts->verifyPeer, m_verifyPeer);
@@ -794,7 +778,7 @@ void NetworkConfig::onCommand(const int id, int)
 
 void NetworkConfig::apply()
 {
-  m_opts->proxy = getText(m_proxy);
+  m_opts->proxy = Win32::getWindowText(m_proxy);
   m_opts->verifyPeer = isChecked(m_verifyPeer);
   m_opts->staleThreshold = isChecked(m_staleThreshold)
     ? NetworkOpts::OneWeekThreshold : NetworkOpts::NoThreshold;

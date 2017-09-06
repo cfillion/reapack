@@ -22,14 +22,13 @@
 
 #include <vector>
 
-#include "encoding.hpp"
 
 class Dialog;
 
 class TabBar : public Control {
 public:
   typedef std::vector<HWND> Page;
-  struct Tab { auto_string text; Page page; };
+  struct Tab { const char *text; Page page; };
   typedef std::vector<Tab> Tabs;
 
   TabBar(HWND handle, Dialog *parent, const Tabs &tabs = {});

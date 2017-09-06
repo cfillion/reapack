@@ -107,7 +107,7 @@ void InstallTask::commit()
 
   for(const TempPath &paths : m_newFiles) {
     if(!FS::rename(paths)) {
-      tx()->receipt()->addError({"Cannot rename to target: " + FS::lastError(),
+      tx()->receipt()->addError({string("Cannot rename to target: ") + FS::lastError(),
         paths.target().join()});
 
       // it's a bit late to rollback here as some files might already have been

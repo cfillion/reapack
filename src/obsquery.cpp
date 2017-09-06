@@ -17,7 +17,6 @@
 
 #include "obsquery.hpp"
 
-#include "encoding.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
 #include "package.hpp"
@@ -42,13 +41,13 @@ void ObsoleteQuery::onInit()
   m_okBtn = getControl(IDOK);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {AUTO_STR("Package"), 550}
+    {"Package", 550}
   });
 
   m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_okBtn); });
   m_list->onContextMenu([=] (Menu &menu, int) {
-    menu.addAction(AUTO_STR("Select &all"), ACTION_SELECT_ALL);
-    menu.addAction(AUTO_STR("&Unselect all"), ACTION_UNSELECT_ALL);
+    menu.addAction("Select &all", ACTION_SELECT_ALL);
+    menu.addAction("&Unselect all", ACTION_UNSELECT_ALL);
     return true;
   });
 
@@ -58,7 +57,7 @@ void ObsoleteQuery::onInit()
     ostringstream stream;
     stream << entry.remote << '/' << entry.category << '/'
       << Package::displayName(entry.package, entry.description);
-    m_list->createRow()->setCell(0, make_autostring(stream.str()));
+    m_list->createRow()->setCell(0, stream.str());
   }
 
   m_list->autoSizeHeader();

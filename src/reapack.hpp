@@ -47,7 +47,7 @@ public:
   static const char *BUILDTIME;
 
   static ReaPack *instance() { return s_instance; }
-  static std::string resourcePath();
+  static Path resourcePath();
 
   gaccel_register_t syncAction;
   gaccel_register_t browseAction;

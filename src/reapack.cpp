@@ -31,6 +31,7 @@
 #include "report.hpp"
 #include "richedit.hpp"
 #include "transaction.hpp"
+#include "win32.hpp"
 
 #include <reaper_plugin_functions.h>
 
@@ -48,7 +49,7 @@ ReaPack *ReaPack::s_instance = nullptr;
 static void CleanupTempFiles()
 {
   const Path &path = Path::prefixRoot(Path::DATA + "*.tmp");
-  const auto_string &pattern = make_autostring(path.join());
+  const wstring &pattern = Win32::widen(path.join());
 
   WIN32_FIND_DATA fd = {};
   HANDLE handle = FindFirstFile(pattern.c_str(), &fd);
@@ -57,7 +58,7 @@ static void CleanupTempFiles()
     return;
 
   do {
-    auto_string file = pattern;
+    wstring file = pattern;
     file.replace(file.size() - 5, 5, fd.cFileName); // 5 == strlen("*.tmp")
     DeleteFile(file.c_str());
   } while(FindNextFile(handle, &fd));
@@ -66,13 +67,13 @@ static void CleanupTempFiles()
 }
 #endif
 
-std::string ReaPack::resourcePath()
+Path ReaPack::resourcePath()
 {
 #ifdef _WIN32
   // convert from the current system codepage to UTF-8
-  return from_autostring(make_autostring(GetResourcePath(), CP_ACP));
+  return Win32::narrow(Win32::widen(GetResourcePath(), CP_ACP));
 #else
-  return GetResourcePath();
+  return {GetResourcePath()};
 #endif
 }
 
@@ -336,15 +337,13 @@ Transaction *ReaPack::setupTransaction()
     m_tx = new Transaction;
   }
   catch(const reapack_error &e) {
-    const auto_string &desc = make_autostring(e.what());
-
-    auto_char msg[512];
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("The following error occurred while creating a transaction:\n\n%s"),
-      desc.c_str()
+    char msg[512];
+    snprintf(msg, sizeof(msg),
+      "The following error occurred while creating a transaction:\n\n%s",
+      e.what()
     );
 
-    MessageBox(m_mainWindow, msg, AUTO_STR("ReaPack"), MB_OK);
+    Win32::messageBox(m_mainWindow, msg, "ReaPack", MB_OK);
     return nullptr;
   }
 
@@ -420,16 +419,14 @@ void ReaPack::createDirectories()
   if(FS::mkdir(path))
     return;
 
-  const auto_string &desc = make_autostring(FS::lastError());
+  char msg[255];
+  snprintf(msg, sizeof(msg),
+    "ReaPack could not create %s! "
+    "Please investigate or report this issue.\n\n"
+    "Error description: %s",
+    Path::prefixRoot(path).join().c_str(), FS::lastError());
 
-  auto_char msg[255];
-  auto_snprintf(msg, auto_size(msg),
-    AUTO_STR("ReaPack could not create %s! ")
-    AUTO_STR("Please investigate or report this issue.\n\n")
-    AUTO_STR("Error description: %s"),
-    make_autostring(Path::prefixRoot(path).join()).c_str(), desc.c_str());
-
-  MessageBox(Splash_GetWnd(), msg, AUTO_STR("ReaPack"), MB_OK);
+  Win32::messageBox(Splash_GetWnd(), msg, "ReaPack", MB_OK);
 }
 
 void ReaPack::registerSelf()

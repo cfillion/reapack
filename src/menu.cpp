@@ -17,9 +17,17 @@
 
 #include "menu.hpp"
 
+#include "win32.hpp"
+
 #ifndef MIIM_FTYPE // for SWELL
-#define MIIM_FTYPE MIIM_TYPE
+#  define MIIM_FTYPE MIIM_TYPE
 #endif
+
+#ifndef _WIN32
+#  include <swell.h>
+#endif
+
+using namespace std;
 
 Menu::Menu(HMENU handle)
   : m_handle(handle), m_ownership(!handle)
@@ -39,14 +47,15 @@ Menu::~Menu()
     DestroyMenu(m_handle);
 }
 
-UINT Menu::addAction(const auto_char *label, const int commandId)
+UINT Menu::addAction(const string &label, const int commandId)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
-  mii.dwTypeData = const_cast<auto_char *>(label);
+  const auto &&wideLabel = Win32::widen(label);
+  mii.dwTypeData = const_cast<Win32::char_type *>(wideLabel.c_str());
 
   mii.fMask |= MIIM_ID;
   mii.wID = commandId;
@@ -67,14 +76,15 @@ void Menu::addSeparator()
   append(mii);
 }
 
-Menu Menu::addMenu(const auto_char *label)
+Menu Menu::addMenu(const string &label)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
-  mii.dwTypeData = const_cast<auto_char *>(label);
+  const auto &&wideLabel = Win32::widen(label);
+  mii.dwTypeData = const_cast<Win32::char_type *>(wideLabel.c_str());
 
   mii.fMask |= MIIM_SUBMENU;
   mii.hSubMenu = CreatePopupMenu();

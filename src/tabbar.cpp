@@ -18,6 +18,7 @@
 #include "tabbar.hpp"
 
 #include "dialog.hpp"
+#include "win32.hpp"
 
 #ifdef _WIN32
 #  include <commctrl.h>
@@ -38,7 +39,8 @@ int TabBar::addTab(const Tab &tab)
 
   TCITEM item{};
   item.mask |= TCIF_TEXT;
-  item.pszText = const_cast<auto_char *>(tab.text.c_str());
+  const auto &&wideText = Win32::widen(tab.text);
+  item.pszText = const_cast<Win32::char_type *>(wideText.c_str());
 
   TabCtrl_InsertItem(handle(), index, &item);
 

@@ -26,13 +26,14 @@
 #include "remote.hpp"
 #include "resource.hpp"
 #include "transaction.hpp"
+#include "win32.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
 
 using namespace std;
 
-static const auto_char *TITLE = AUTO_STR("ReaPack: Import repositories");
-static const string DISCOVER_URL = "https://reapack.com/repos";
+static const char *TITLE = "ReaPack: Import repositories";
+static const char *DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import()
   : Dialog(IDD_IMPORT_DIALOG), m_pool(nullptr), m_state(OK)
@@ -43,7 +44,7 @@ void Import::onInit()
 {
   Dialog::onInit();
 
-  SetWindowText(handle(), TITLE);
+  Win32::setWindowText(handle(), TITLE);
 
   m_url = getControl(IDC_URL);
   m_progress = getControl(IDC_PROGRESS);
@@ -61,7 +62,7 @@ void Import::onCommand(const int id, int)
     fetch();
     break;
   case IDC_DISCOVER:
-    openURL(DISCOVER_URL);
+    Win32::shellExecute(DISCOVER_URL);
     break;
   case IDCANCEL:
     if(m_pool) {
@@ -120,7 +121,7 @@ void Import::fetch()
   const auto &opts = g_reapack->config()->network;
 
   size_t index = 0;
-  stringstream stream(getText(m_url));
+  stringstream stream(Win32::getWindowText(m_url));
   string url;
   while(getline(stream, url)) {
     boost::algorithm::trim(url);
@@ -139,11 +140,10 @@ void Import::fetch()
           m_pool->abort();
         break;
       case ThreadTask::Failure: {
-        auto_char msg[1024];
-        auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("Download failed: %s\r\nn%s"),
-          make_autostring(dl->error().message).c_str(), make_autostring(url).c_str());
-        MessageBox(handle(), msg, TITLE, MB_OK);
+        char msg[1024];
+        snprintf(msg, sizeof(msg), "Download failed: %s\r\n%s",
+          dl->error().message.c_str(), url.c_str());
+        Win32::messageBox(handle(), msg, TITLE, MB_OK);
         m_pool->abort();
         break;
       }
@@ -163,7 +163,7 @@ void Import::fetch()
 
 bool Import::read(MemoryDownload *dl, const size_t idx)
 {
-  auto_char msg[1024];
+  char msg[1024];
 
   try {
     IndexPtr index = Index::load({}, dl->contents().c_str());
@@ -172,19 +172,19 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
 
     if(exists && remote.url() != dl->url()) {
       if(remote.isProtected()) {
-        auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("The repository %s is protected and cannot be overwritten."),
-          make_autostring(index->name()).c_str());
-        MessageBox(handle(), msg, TITLE, MB_OK);
+        snprintf(msg, sizeof(msg),
+          "The repository %s is protected and cannot be overwritten.",
+          index->name().c_str());
+        Win32::messageBox(handle(), msg, TITLE, MB_OK);
         return false;
       }
       else {
-        auto_snprintf(msg, auto_size(msg),
-          AUTO_STR("%s is already configured with a different URL.\r\n")
-          AUTO_STR("Do you want to overwrite it?"),
-          make_autostring(index->name()).c_str());
+        snprintf(msg, sizeof(msg),
+          "%s is already configured with a different URL.\r\n"
+          "Do you want to overwrite it?",
+          index->name().c_str());
 
-        const auto answer = MessageBox(handle(), msg, TITLE, MB_YESNO);
+        const auto answer = Win32::messageBox(handle(), msg, TITLE, MB_YESNO);
 
         if(answer != IDYES)
           return true;
@@ -200,11 +200,9 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
     return true;
   }
   catch(const reapack_error &e) {
-    auto_snprintf(msg, auto_size(msg),
-      AUTO_STR("The received file is invalid: %s\r\n%s"),
-      make_autostring(string(e.what())).c_str(),
-      make_autostring(dl->url()).c_str());
-    MessageBox(handle(), msg, TITLE, MB_OK);
+    snprintf(msg, sizeof(msg), "The received file is invalid: %s\r\n%s",
+      e.what(), dl->url().c_str());
+    Win32::messageBox(handle(), msg, TITLE, MB_OK);
     return false;
   }
 }
