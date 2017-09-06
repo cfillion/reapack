@@ -144,9 +144,7 @@ TEST_CASE("empty source url", M) {
 TEST_CASE("source target path", M) {
   MAKE_VERSION;
 
-  Source source("file.name", "url", &ver);
-
-  const vector<pair<Package::Type, string> > tests{
+  const pair<Package::Type, string> tests[] = {
     {Package::ScriptType,          "Scripts/Index Name/Category Name/file.name"},
     {Package::EffectType,          "Effects/Index Name/Category Name/file.name"},
     {Package::ExtensionType,       "UserPlugins/file.name"},
@@ -159,6 +157,7 @@ TEST_CASE("source target path", M) {
     {Package::MIDINoteNamesType,   "MIDINoteNames/file.name"},
   };
 
+  Source source("file.name", "url", &ver);
   for(const auto &pair : tests) {
     source.setTypeOverride(pair.first);
     REQUIRE(source.targetPath() == Path(pair.second));

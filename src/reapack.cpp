@@ -69,7 +69,7 @@ static void CleanupTempFiles()
 std::string ReaPack::resourcePath()
 {
 #ifdef _WIN32
-  // convert from current system encoding to unicode...
+  // convert from the current system codepage to UTF-8
   return from_autostring(make_autostring(GetResourcePath(), CP_ACP));
 #else
   return GetResourcePath();

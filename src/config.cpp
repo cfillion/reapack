@@ -20,9 +20,9 @@
 #include "path.hpp"
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <swell/swell.h>
+#  include <swell/swell.h>
 #endif
 
 using namespace std;
@@ -137,8 +137,7 @@ void Config::read(const Path &path)
 
   install.autoInstall = getBool(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
   install.bleedingEdge = getBool(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
-  install.promptObsolete = getBool(INSTALL_GRP,
-    PROMPTOBSOLETE_KEY, install.promptObsolete);
+  install.promptObsolete = getBool(INSTALL_GRP, PROMPTOBSOLETE_KEY, install.promptObsolete);
 
   network.proxy = getString(NETWORK_GRP, PROXY_KEY, network.proxy);
   network.verifyPeer = getBool(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);

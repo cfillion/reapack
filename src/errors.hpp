@@ -23,7 +23,7 @@
 
 class reapack_error : public std::runtime_error {
 public:
-  reapack_error(const char *what) : std::runtime_error(what) {}
+  using runtime_error::runtime_error;
   reapack_error(const boost::format &f) : std::runtime_error(f.str()) {}
 };
 

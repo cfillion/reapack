@@ -21,9 +21,9 @@
 #include <map>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <swell/swell.h>
+#  include <swell/swell.h>
 #endif
 
 class Dialog;

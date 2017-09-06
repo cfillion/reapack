@@ -19,13 +19,13 @@
 #define REAPACK_RESOURCE_HPP
 
 #ifdef _WIN32
-#include <commctrl.h>
-#include <richedit.h>
+#  include <commctrl.h>
+#  include <richedit.h>
 #else
-#define PROGRESS_CLASS "msctls_progress32"
-#define WC_LISTVIEW "SysListView32"
-#define WC_TABCONTROL "SysTabControl32"
-#define PBS_MARQUEE 0
+#  define PROGRESS_CLASS "msctls_progress32"
+#  define WC_LISTVIEW "SysListView32"
+#  define WC_TABCONTROL "SysTabControl32"
+#  define PBS_MARQUEE 0
 #endif
 
 #define DIALOG_STYLE \

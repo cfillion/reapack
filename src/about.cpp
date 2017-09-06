@@ -551,7 +551,7 @@ void AboutPackageDelegate::init(About *dialog)
 
 void AboutPackageDelegate::updateList(const int index)
 {
-  static const map<Source::Section, string> sectionMap{
+  const pair<Source::Section, const char *> sectionMap[] = {
     {Source::MainSection, "Main"},
     {Source::MIDIEditorSection, "MIDI Editor"},
     {Source::MIDIInlineEditorSection, "MIDI Inline Editor"},

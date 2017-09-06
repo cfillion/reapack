@@ -28,14 +28,11 @@
 #include <reaper_plugin_functions.h>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
+#  define stat _stat
 #endif
 
 using namespace std;
-
-#ifdef _WIN32
-#define stat _stat
-#endif
 
 static bool stat(const Path &path, struct stat *out)
 {

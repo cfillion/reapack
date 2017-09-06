@@ -24,7 +24,7 @@
 #include <boost/algorithm/string.hpp>
 
 #ifdef _WIN32
-#include <commctrl.h>
+#  include <commctrl.h>
 #endif
 
 using namespace std;

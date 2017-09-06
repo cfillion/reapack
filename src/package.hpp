@@ -41,8 +41,7 @@ public:
 
   static Type getType(const char *);
   static std::string displayType(Type);
-  static const std::string &displayName(const std::string &name,
-    const std::string &desc);
+  static const std::string &displayName(const std::string &name, const std::string &desc);
 
   Package(const Type, const std::string &name, const Category *);
   ~Package();

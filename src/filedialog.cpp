@@ -20,7 +20,7 @@
 #include "path.hpp"
 
 #ifndef _WIN32
-#include <swell.h>
+#  include <swell.h>
 #endif
 
 auto_string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,

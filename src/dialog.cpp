@@ -26,7 +26,7 @@
 #include <reaper_plugin_functions.h>
 
 #ifdef _WIN32
-#include <windowsx.h>
+#  include <windowsx.h>
 #endif
 
 using namespace std;

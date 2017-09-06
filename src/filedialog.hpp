@@ -21,9 +21,9 @@
 #include "encoding.hpp"
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <swell-types.h>
+#  include <swell-types.h>
 #endif
 
 class Path;

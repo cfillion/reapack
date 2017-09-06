@@ -1,7 +1,7 @@
 #include "resource.hpp"
 
 #ifdef _WIN32
-#include "winres.h"
+#  include "winres.h"
 #endif
 
 IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 260, 80

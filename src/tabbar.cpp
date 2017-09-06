@@ -20,7 +20,7 @@
 #include "dialog.hpp"
 
 #ifdef _WIN32
-#include <commctrl.h>
+#  include <commctrl.h>
 #endif
 
 TabBar::TabBar(HWND handle, Dialog *parent, const Tabs &tabs)

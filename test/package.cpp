@@ -9,7 +9,7 @@ using namespace std;
 static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
-  const vector<pair<const char *, Package::Type> > tests{
+  const pair<const char *, Package::Type> tests[] = {
     {"yoyo", Package::UnknownType},
     {"script", Package::ScriptType},
     {"extension", Package::ExtensionType},
@@ -28,7 +28,7 @@ TEST_CASE("package type from string", M) {
 }
 
 TEST_CASE("package type to string", M) {
-  const vector<pair<Package::Type, string> > tests{
+  const pair<Package::Type, string> tests[] = {
     {Package::UnknownType,           "Unknown"},
     {Package::ScriptType,            "Script"},
     {Package::ExtensionType,         "Extension"},

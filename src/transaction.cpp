@@ -330,7 +330,7 @@ void Transaction::registerQueued()
 
 void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 {
-  static const map<Source::Section, int> sectionMap{
+  const pair<Source::Section, int> sectionMap[] = {
     {Source::MainSection, 0},
     {Source::MIDIEditorSection, 32060},
     {Source::MIDIInlineEditorSection, 32062},

@@ -199,11 +199,9 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
 }
 
 #ifndef _WIN32
-#include "resource.hpp"
-
-#include <swell/swell-dlggen.h>
-#include "resource.rc_mac_dlg"
-
-#include <swell/swell-menugen.h>
-#include "resource.rc_mac_menu"
+#  include "resource.hpp"
+#  include <swell/swell-dlggen.h>
+#  include "resource.rc_mac_dlg"
+#  include <swell/swell-menugen.h>
+#  include "resource.rc_mac_menu"
 #endif
