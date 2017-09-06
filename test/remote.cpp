@@ -1,10 +1,7 @@
-#include <catch.hpp>
-
-#include <remote.hpp>
+#include "helper.hpp"
 
 #include <errors.hpp>
-
-#define RPATH "test/remote/"
+#include <remote.hpp>
 
 using namespace std;
 
@@ -58,7 +55,7 @@ TEST_CASE("remote name validation", M) {
       "hello_world",
       "Новая папка",
       "Hello ~World~",
-      "Repository #1"
+      "Repository #1",
     };
 
     for(const string &name : validNames) {

@@ -1,15 +1,14 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <errors.hpp>
 #include <index.hpp>
 
 #include <string>
 
-#define RIPATH "test/indexes/"
-
 using namespace std;
 
 static const char *M = "[index]";
+static const Path RIPATH("test/indexes");
 
 TEST_CASE("index file not found", M) {
   UseRootPath root(RIPATH);
@@ -25,12 +24,12 @@ TEST_CASE("index file not found", M) {
 
 TEST_CASE("load index from raw data", M) {
   SECTION("valid") {
-    Index::load("", "<index version=\"1\"/>\n");
+    Index::load({}, "<index version=\"1\"/>\n");
   }
 
   SECTION("broken") {
     try {
-      Index::load("", "<index>\n");
+      Index::load({}, "<index>\n");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -181,7 +180,7 @@ TEST_CASE("drop unknown package", M) {
 
 TEST_CASE("empty category name", M) {
   try {
-    Category cat{string(), nullptr};
+    Category cat{{}, nullptr};
     FAIL();
   }
   catch(const reapack_error &e) {

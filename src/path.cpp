@@ -32,9 +32,9 @@ static const char SEPARATOR = '\\';
 static const string DOT = ".";
 static const string DOTDOT = "..";
 
-const Path Path::DATA = Path("ReaPack");
+const Path Path::DATA("ReaPack");
 const Path Path::CACHE = Path::DATA + "cache";
-const Path Path::CONFIG = Path("reapack.ini");
+const Path Path::CONFIG("reapack.ini");
 const Path Path::REGISTRY = Path::DATA + "registry.db";
 
 Path Path::s_root;
@@ -58,7 +58,7 @@ static vector<string> Split(const string &input, bool *absolute)
       continue;
     }
 
-    const string part = input.substr(last, pos - last);
+    const string &part = input.substr(last, pos - last);
 
     if(!part.empty() && part != ".")
       list.push_back(part);
@@ -252,7 +252,7 @@ const string &Path::operator[](const size_t index) const
   return at(index);
 }
 
-UseRootPath::UseRootPath(const string &path)
+UseRootPath::UseRootPath(const Path &path)
   : m_backup(move(Path::s_root))
 {
   Path::s_root = path;

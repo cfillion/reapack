@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <serializer.hpp>
 
@@ -48,7 +48,7 @@ TEST_CASE("read from serialized data", M) {
   }
 
   SECTION("empty string") {
-    const auto &out = s.read("", 1);
+    const auto &out = s.read({}, 1);
     REQUIRE(out.empty());
   }
 }

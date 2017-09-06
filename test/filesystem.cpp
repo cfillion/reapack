@@ -1,11 +1,10 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <filesystem.hpp>
 #include <index.hpp>
 
 static const char *M = "[filesystem]";
-
-#define RIPATH "test/indexes"
+static const Path RIPATH("test/indexes");
 
 TEST_CASE("open unicode file", M) {
   UseRootPath root(RIPATH);

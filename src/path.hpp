@@ -34,7 +34,7 @@ public:
   static Path prefixRoot(const std::string &p) { return s_root + p; }
   static const Path &root() { return s_root; }
 
-  Path(const std::string &path = std::string());
+  Path(const std::string &path = {});
 
   void append(const std::string &parts, bool traversal = true);
   void append(const Path &other);
@@ -78,7 +78,7 @@ private:
 
 class UseRootPath {
 public:
-  UseRootPath(const std::string &);
+  UseRootPath(const Path &);
   ~UseRootPath();
 
 private:

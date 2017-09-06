@@ -1,6 +1,4 @@
-#include <catch.hpp>
-
-#include "helper/io.hpp"
+#include "helper.hpp"
 
 #include <version.hpp>
 
@@ -67,10 +65,10 @@ TEST_CASE("parse invalid versions", M) {
 
   try {
     ver.parse(name);
-    FAIL(string("'") + name + "' was accepted");
+    FAIL("'" + name + "' was accepted");
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == string("invalid version name '") + name + "'");
+    REQUIRE(string(e.what()) == "invalid version name '" + name + "'");
   }
 
   REQUIRE(ver.toString().empty());

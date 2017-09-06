@@ -1,6 +1,4 @@
-#include <catch.hpp>
-
-#include "helper/io.hpp"
+#include "helper.hpp"
 
 #include <errors.hpp>
 #include <index.hpp>
@@ -54,7 +52,7 @@ TEST_CASE("package type to string", M) {
 TEST_CASE("invalid package name", M) {
   SECTION("empty") {
     try {
-      Package pack(Package::ScriptType, string(), nullptr);
+      Package pack(Package::ScriptType, {}, nullptr);
       FAIL();
     }
     catch(const reapack_error &e) {

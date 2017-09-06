@@ -1,15 +1,14 @@
-#include <catch.hpp>
+#include "helper.hpp"
 
 #include <index.hpp>
 #include <errors.hpp>
 
 #include <string>
 
-#define RIPATH "test/indexes/v1/"
-
 using namespace std;
 
 static const char *M = "[reapack_v1]";
+static const Path RIPATH("test/indexes/v1");
 
 TEST_CASE("unnamed category", M) {
   UseRootPath root(RIPATH);

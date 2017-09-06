@@ -17,5 +17,4 @@ include @(TUP_PLATFORM).tup
 : build/*.o | $(LINKDEPS) |> !link $(SOFLAGS) |> $(SOTARGET)
 
 : foreach test/*.cpp |> !build -Isrc $(SRCFLAGS) |> build/test/%B.o
-: foreach test/helper/*.cpp |> !build -Isrc $(SRCFLAGS) |> build/test/helper_%B.o
 : build/*.o build/test/*.o | $(LINKDEPS) |> !link $(TSFLAGS) |> $(TSTARGET)

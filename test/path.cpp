@@ -1,6 +1,4 @@
-#include <catch.hpp>
-
-#include "helper/io.hpp"
+#include "helper.hpp"
 
 #include <path.hpp>
 
@@ -185,7 +183,7 @@ TEST_CASE("path generation utilities", M) {
   REQUIRE(Path::prefixRoot(path) == Path("world"));
 
   {
-    UseRootPath root("hello");
+    UseRootPath root(Path("hello"));
     (void)root;
 
     REQUIRE(Path::prefixRoot(path) == Path("hello/world"));
