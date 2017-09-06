@@ -24,15 +24,10 @@
 
 using namespace std;
 
-Database::Database(const string &filename)
+Database::Database(const string &fn)
   : m_savePoint(0)
 {
-  const char *file = ":memory:";
-
-  if(!filename.empty())
-    file = filename.c_str();
-
-  if(sqlite3_open(file, &m_db)) {
+  if(sqlite3_open(fn.empty() ? ":memory:" : fn.c_str(), &m_db)) {
     const auto &error = lastError();
     sqlite3_close(m_db);
 

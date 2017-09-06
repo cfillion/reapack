@@ -44,7 +44,7 @@ public:
     }
   };
 
-  Database(const std::string &filename = std::string());
+  Database(const std::string &filename = {});
   ~Database();
 
   Statement *prepare(const char *sql);
