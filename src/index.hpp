@@ -18,15 +18,15 @@
 #ifndef REAPACK_INDEX_HPP
 #define REAPACK_INDEX_HPP
 
+#include "metadata.hpp"
+#include "package.hpp"
+#include "source.hpp"
+
 #include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include "metadata.hpp"
-#include "package.hpp"
-#include "source.hpp"
 
 class Index;
 class Path;

@@ -20,7 +20,6 @@
 
 #include "dialog.hpp"
 
-
 class ThreadPool;
 class ThreadTask;
 

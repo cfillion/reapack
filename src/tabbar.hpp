@@ -22,7 +22,6 @@
 
 #include <vector>
 
-
 class Dialog;
 
 class TabBar : public Control {

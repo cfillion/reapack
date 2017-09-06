@@ -18,13 +18,13 @@
 #ifndef REAPACK_RECEIPT_HPP
 #define REAPACK_RECEIPT_HPP
 
+#include "errors.hpp"
+#include "registry.hpp"
+
 #include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
-
-#include "errors.hpp"
-#include "registry.hpp"
 
 class Index;
 class Path;

@@ -20,12 +20,12 @@
 
 #include "control.hpp"
 
+#include "serializer.hpp"
+
 #include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
 #include <vector>
-
-#include "serializer.hpp"
 
 class Menu;
 

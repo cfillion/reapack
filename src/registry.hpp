@@ -18,13 +18,13 @@
 #ifndef REAPACK_REGISTRY_HPP
 #define REAPACK_REGISTRY_HPP
 
-#include <set>
-#include <string>
-
 #include "database.hpp"
 #include "package.hpp"
 #include "path.hpp"
 #include "version.hpp"
+
+#include <set>
+#include <string>
 
 class Registry {
 public:

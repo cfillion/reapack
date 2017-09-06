@@ -18,9 +18,9 @@
 #ifndef REAPACK_CONFIG_HPP
 #define REAPACK_CONFIG_HPP
 
-#include <string>
-
 #include "remote.hpp"
+
+#include <string>
 
 class Path;
 

@@ -18,14 +18,13 @@
 #ifndef REAPACK_VERSION_HPP
 #define REAPACK_VERSION_HPP
 
+#include "time.hpp"
+
 #include <boost/variant.hpp>
 #include <cstdint>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
-
-#include "time.hpp"
 
 class Package;
 class Path;
