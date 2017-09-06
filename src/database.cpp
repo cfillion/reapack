@@ -174,6 +174,7 @@ void Statement::exec(const ExecCallback &callback)
     case SQLITE_ROW:
       if(callback())
         break;
+      // FALLTHROUGH
     case SQLITE_DONE:
       sqlite3_clear_bindings(m_stmt);
       sqlite3_reset(m_stmt);

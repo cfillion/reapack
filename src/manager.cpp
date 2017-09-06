@@ -195,6 +195,7 @@ void Manager::onCommand(const int id, int)
       refresh();
       break;
     }
+    // FALLTHRU
   case IDCANCEL:
     close();
     break;
@@ -784,7 +785,7 @@ void NetworkConfig::onCommand(const int id, int)
   switch(id) {
   case IDOK:
     apply();
-    // then close
+    // FALLTHROUGH
   case IDCANCEL:
     close(id);
     break;
