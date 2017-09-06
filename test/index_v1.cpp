@@ -3,8 +3,6 @@
 #include <index.hpp>
 #include <errors.hpp>
 
-#include <string>
-
 using namespace std;
 
 static const char *M = "[reapack_v1]";

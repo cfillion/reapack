@@ -3,8 +3,6 @@
 #include <errors.hpp>
 #include <index.hpp>
 
-#include <string>
-
 using namespace std;
 
 static const char *M = "[index]";
