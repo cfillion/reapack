@@ -97,6 +97,9 @@ void Path::append(const string &input, const bool traversal)
 
 void Path::append(const Path &o)
 {
+  if(m_parts.empty() && o.absolute())
+    m_absolute = true;
+
   m_parts.insert(m_parts.end(), o.m_parts.begin(), o.m_parts.end());
 }
 

@@ -151,11 +151,18 @@ TEST_CASE("absolute path (unix)", M) {
   CHECK_FALSE(Path("a/b").absolute());
 
   const Path a("/usr/bin/zsh");
-
   REQUIRE(a.size() == 3);
   REQUIRE(a.absolute());
   REQUIRE(a[0] == "usr");
   REQUIRE(a.join() == "/usr/bin/zsh");
+}
+
+TEST_CASE("append absolute path (unix)", M) {
+  Path path;
+  path += Path("/a/b");
+
+  CHECK(path == Path("/a/b"));
+  REQUIRE(path.absolute());
 }
 
 TEST_CASE("compare absolute to relative path (unix)", M) {
