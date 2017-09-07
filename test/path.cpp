@@ -157,6 +157,10 @@ TEST_CASE("absolute path (unix)", M) {
   REQUIRE(a[0] == "usr");
   REQUIRE(a.join() == "/usr/bin/zsh");
 }
+
+TEST_CASE("compare absolute to relative path (unix)", M) {
+  REQUIRE(Path("/a/b") != Path("a/b"));
+}
 #endif
 
 TEST_CASE("remove last component of path", M) {

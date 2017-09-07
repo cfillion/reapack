@@ -193,7 +193,7 @@ bool Path::startsWith(const Path &o) const
 
 bool Path::operator==(const Path &o) const
 {
-  return m_parts == o.m_parts;
+  return m_absolute == o.absolute() && m_parts == o.m_parts;
 }
 
 bool Path::operator!=(const Path &o) const
