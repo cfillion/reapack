@@ -26,7 +26,6 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
-#include <boost/format.hpp>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -35,7 +34,6 @@
 #include <zlib/unzip.h>
 #include <zlib/ioapi.h>
 
-using boost::format;
 using namespace std;
 
 static const Path ARCHIVE_TOC("toc");
@@ -81,7 +79,7 @@ void Archive::import(const string &path)
 
   stringstream toc;
   if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
-    throw reapack_error(format("Cannot locate the table of contents (%d)") % err);
+    throw reapack_error("Cannot locate the table of contents (%d)", err);
 
   // starting import, do not abort process (eg. by throwing) at this point
   if(!(state.m_tx = g_reapack->setupTransaction()))
@@ -103,8 +101,7 @@ void Archive::import(const string &path)
         state.importPackage(data);
         break;
       default:
-        throw reapack_error(format("Unknown token '%s' (skipping)")
-          % line.substr(0, 4));
+        throw reapack_error("Unknown token '%s' (skipping)", line.substr(0, 4).c_str());
       }
     }
     catch(const reapack_error &e) {
@@ -122,8 +119,8 @@ void ImportArchive::importRemote(const string &data)
   Remote remote = Remote::fromString(data);
 
   if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
-    throw reapack_error(format("Failed to extract index of %s (%d)")
-      % remote.name() % err);
+    throw reapack_error("Failed to extract index of %s (%d)",
+      remote.name().c_str(), err);
   }
 
   const Remote &original = m_remotes->get(remote.name());
@@ -155,9 +152,10 @@ void ImportArchive::importPackage(const string &data)
   const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
 
   if(!ver) {
-    throw reapack_error(format(
-      "%s/%s/%s v%s cannot be found or is incompatible with your operating system.")
-      % m_lastIndex->name() % categoryName % packageName % versionName);
+    throw reapack_error(
+      "%s/%s/%s v%s cannot be found or is incompatible with your operating system.",
+      m_lastIndex->name().c_str(), categoryName.c_str(),
+      packageName.c_str(), versionName.c_str());
   }
 
   m_tx->install(ver, pinned, m_reader);
@@ -189,7 +187,7 @@ int ArchiveReader::extractFile(const Path &path)
   if(FS::open(stream, path))
     return extractFile(path, stream);
   else
-    throw reapack_error(format("%s: %s") % path.join() % FS::lastError());
+    throw reapack_error("%s: %s", path.join().c_str(), FS::lastError());
 }
 
 int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
@@ -236,8 +234,9 @@ bool FileExtractor::run()
   stream.close();
 
   if(error) {
-    const format &msg = format("Failed to extract file (%d)") % error;
-    setError({msg.str(), m_path.target().join()});
+    char msg[64];
+    snprintf(msg, sizeof(msg), "Failed to extract file (%d)", error);
+    setError({msg, m_path.target().join()});
     return false;
   }
 
@@ -259,8 +258,9 @@ size_t Archive::create(const string &path, vector<string> *errors,
     if(FS::exists(path))
       jobs.push_back(new FileCompressor(path, writer));
     else {
-      const auto &fmt = format("%s (%s)") % path.join() % FS::lastError();
-      errors->push_back(fmt.str());
+      char msg[MAX_PATH];
+      snprintf(msg, sizeof(msg), "%s (%s)", path.join().c_str(), FS::lastError());
+      errors->push_back(msg);
     }
   };
 
@@ -325,7 +325,7 @@ int ArchiveWriter::addFile(const Path &path)
   if(FS::open(stream, path))
     return addFile(path, stream);
   else
-    throw reapack_error(format("%s: %s") % path.join() % FS::lastError());
+    throw reapack_error("%s: %s", path.join().c_str(), FS::lastError());
 }
 
 int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
@@ -371,8 +371,9 @@ bool FileCompressor::run()
   stream.close();
 
   if(error) {
-    const format &msg = format("Failed to compress file (%d)") % error;
-    setError({msg.str(), m_path.join()});
+    char msg[64];
+    snprintf(msg, sizeof(msg), "Failed to compress file (%d)", error);
+    setError({msg, m_path.join()});
     return false;
   }
 

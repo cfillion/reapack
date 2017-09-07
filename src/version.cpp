@@ -25,7 +25,6 @@
 #include <cctype>
 #include <regex>
 
-using boost::format;
 using namespace std;
 
 string Version::displayAuthor(const string &author)
@@ -103,7 +102,7 @@ void VersionName::parse(const string &str)
 
     if(first >= 'a' || first >= 'z') {
       if(segments.empty()) // got leading letters
-        throw reapack_error(format("invalid version name '%s'") % str);
+        throw reapack_error("invalid version name '%s'", str.c_str());
 
       segments.push_back(match);
       letters++;
@@ -113,13 +112,13 @@ void VersionName::parse(const string &str)
         segments.push_back(boost::lexical_cast<Numeric>(match));
       }
       catch(const boost::bad_lexical_cast &) {
-        throw reapack_error(format("version segment overflow in '%s'") % str);
+        throw reapack_error("version segment overflow in '%s'", str.c_str());
       }
     }
   }
 
   if(segments.empty()) // version doesn't have any numbers
-    throw reapack_error(format("invalid version name '%s'") % str);
+    throw reapack_error("invalid version name '%s'", str.c_str());
 
   m_string = str;
   swap(m_segments, segments);

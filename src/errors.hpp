@@ -18,13 +18,24 @@
 #ifndef REAPACK_ERRORS_HPP
 #define REAPACK_ERRORS_HPP
 
-#include <boost/format.hpp>
 #include <stdexcept>
+#include <string>
 
 class reapack_error : public std::runtime_error {
 public:
   using runtime_error::runtime_error;
-  reapack_error(const boost::format &f) : std::runtime_error(f.str()) {}
+
+  template<typename... Args> reapack_error(const char *fmt, Args&&... args)
+    : runtime_error(format(fmt, std::forward<Args>(args)...)) {}
+
+private:
+  template<typename... Args> std::string format(const char *fmt, Args&&... args)
+  {
+    const int size = snprintf(nullptr, 0, fmt, args...);
+    std::string buf(size, 0);
+    snprintf(&buf[0], size + 1, fmt, args...);
+    return buf;
+  }
 };
 
 struct ErrorInfo {
