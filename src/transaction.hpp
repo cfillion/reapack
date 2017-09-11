@@ -60,6 +60,7 @@ public:
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void registerAll(const Remote &);
+  void exportArchive(const std::string &path);
   bool runTasks();
 
   bool isCancelled() const { return m_isCancelled; }

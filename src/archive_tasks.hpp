@@ -15,39 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "receipt.hpp"
+#ifndef REAPACK_ARCHIVE_TASKS
+#define REAPACK_ARCHIVE_TASKS
 
-#include "index.hpp"
+#include "task.hpp"
 
-using namespace std;
+class ExportTask : public Task {
+public:
+  ExportTask(const std::string &path, Transaction *);
 
-Receipt::Receipt()
-  : m_enabled(false), m_needRestart(false)
-{
-}
+protected:
+  bool start() override;
+  void commit() override;
+  void rollback() override;
 
-bool Receipt::empty() const
-{
-  return
-    m_installs.empty() &&
-    m_updates.empty() &&
-    m_removals.empty() &&
-    m_exports.empty() &&
-    m_errors.empty();
-}
+private:
+  TempPath m_path;
+};
 
-void Receipt::addInstall(const InstallTicket &ticket)
-{
-  if(ticket.previous && ticket.previous.version < ticket.version->name())
-    m_updates.push_back(ticket);
-  else
-    m_installs.push_back(ticket);
-
-  m_indexes.insert(ticket.version->package()->category()
-    ->index()->shared_from_this());
-}
-
-void Receipt::addRemovals(const set<Path> &pathList)
-{
-  m_removals.insert(pathList.begin(), pathList.end());
-}
+#endif

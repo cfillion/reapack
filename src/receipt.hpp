@@ -53,6 +53,9 @@ public:
   void addRemovals(const std::set<Path> &);
   const std::set<Path> &removals() const { return m_removals; }
 
+  void addExport(const Path &p) { m_exports.insert(p); }
+  const std::set<Path> &exports() const { return m_exports; }
+
   void addError(const ErrorInfo &err) { m_errors.push_back(err); }
   const std::vector<ErrorInfo> &errors() const { return m_errors; }
   bool hasErrors() const { return !m_errors.empty(); }
@@ -64,6 +67,7 @@ private:
   std::vector<InstallTicket> m_installs;
   std::vector<InstallTicket> m_updates;
   std::set<Path> m_removals;
+  std::set<Path> m_exports;
   std::vector<ErrorInfo> m_errors;
 
   std::unordered_set<IndexPtr> m_indexes; // keep them alive!

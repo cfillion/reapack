@@ -17,7 +17,7 @@
 
 #include "transaction.hpp"
 
-#include "archive.hpp"
+#include "archive_tasks.hpp"
 #include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
@@ -215,6 +215,11 @@ void Transaction::uninstall(const Remote &remote)
 void Transaction::uninstall(const Registry::Entry &entry)
 {
   m_nextQueue.push(make_shared<UninstallTask>(entry, this));
+}
+
+void Transaction::exportArchive(const string &path)
+{
+  m_nextQueue.push(make_shared<ExportTask>(path, this));
 }
 
 bool Transaction::runTasks()

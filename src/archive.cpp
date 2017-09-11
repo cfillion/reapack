@@ -161,7 +161,7 @@ void ImportArchive::importPackage(const string &data)
   m_tx->install(ver, pinned, m_reader);
 }
 
-ArchiveReader::ArchiveReader(const string &path)
+ArchiveReader::ArchiveReader(const Path &path)
 {
   zlib_filefunc64_def filefunc;
   fill_fopen64_filefunc(&filefunc);
@@ -169,7 +169,7 @@ ArchiveReader::ArchiveReader(const string &path)
   filefunc.zopen64_file = wide_fopen;
 #endif
 
-  m_zip = unzOpen2_64(path.c_str(), &filefunc);
+  m_zip = unzOpen2_64(path.join().c_str(), &filefunc);
 
   if(!m_zip)
     throw reapack_error(FS::lastError());
@@ -243,63 +243,7 @@ bool FileExtractor::run()
   return true;
 }
 
-size_t Archive::create(const string &path, vector<string> *errors,
-  ThreadPool *pool)
-{
-  size_t count = 0;
-  vector<ThreadTask *> jobs;
-
-  stringstream toc;
-  Registry reg(Path::REGISTRY.prependRoot());
-
-  ArchiveWriterPtr writer = make_shared<ArchiveWriter>(path);
-
-  const auto compress = [&] (const Path &path) {
-    if(FS::exists(path))
-      jobs.push_back(new FileCompressor(path, writer));
-    else {
-      char msg[MAX_PATH];
-      snprintf(msg, sizeof(msg), "%s (%s)", path.join().c_str(), FS::lastError());
-      errors->push_back(msg);
-    }
-  };
-
-  for(const Remote &remote : g_reapack->config()->remotes.getEnabled()) {
-    bool addedRemote = false;
-
-    for(const Registry::Entry &entry : reg.getEntries(remote.name())) {
-      ++count;
-
-      if(!addedRemote) {
-        toc << "REPO " << remote.toString() << '\n';
-        compress(Index::pathFor(remote.name()));
-        addedRemote = true;
-      }
-
-      toc << "PACK "
-        << quoted(entry.category) << '\x20'
-        << quoted(entry.package) << '\x20'
-        << quoted(entry.version.toString()) << '\x20'
-        << entry.pinned << '\n'
-      ;
-
-      for(const Registry::File &file : reg.getFiles(entry))
-        compress(file.path);
-    }
-  }
-
-  writer->addFile(ARCHIVE_TOC, toc);
-
-  // Start after we've written the table of contents in the main thread
-  // because we cannot safely write into the zip from more than one
-  // thread at the same time.
-  for(ThreadTask *job : jobs)
-    pool->push(job);
-
-  return count;
-}
-
-ArchiveWriter::ArchiveWriter(const string &path)
+ArchiveWriter::ArchiveWriter(const Path &path)
 {
   zlib_filefunc64_def filefunc;
   fill_fopen64_filefunc(&filefunc);
@@ -307,7 +251,7 @@ ArchiveWriter::ArchiveWriter(const string &path)
   filefunc.zopen64_file = wide_fopen;
 #endif
 
-  m_zip = zipOpen2_64(path.c_str(), APPEND_STATUS_CREATE, nullptr, &filefunc);
+  m_zip = zipOpen2_64(path.join().c_str(), APPEND_STATUS_CREATE, nullptr, &filefunc);
 
   if(!m_zip)
     throw reapack_error(FS::lastError());
@@ -363,7 +307,8 @@ bool FileCompressor::run()
 {
   ifstream stream;
   if(!FS::open(stream, m_path)) {
-    setError({FS::lastError(), m_path.join()});
+    setError({string("Could not open file for export (") + FS::lastError() + ')',
+      m_path.join()});
     return false;
   }
 

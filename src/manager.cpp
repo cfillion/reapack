@@ -539,59 +539,14 @@ void Manager::importArchive()
 
 void Manager::exportArchive()
 {
-  const char *title = "Export offline archive";
-
   const string &path = FileDialog::getSaveFileName(handle(), instance(),
-    title, Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
+    "Export offline archive", Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
-  if(path.empty())
-    return;
-
-  ThreadPool *pool = new ThreadPool;
-  Dialog *progress = Dialog::Create<Progress>(instance(), parent(), pool);
-
-  try {
-    vector<string> errors;
-    const size_t count = Archive::create(path, &errors, pool);
-
-    const auto finish = [=] {
-      Dialog::Destroy(progress);
-
-      char error[1024];
-      if(errors.empty())
-        error[0] = 0;
-      else {
-        snprintf(error, sizeof(error),
-          "\r\n\r\n%zu file%s could not be archived. "
-          "Synchronize packages to repair any missing file.\r\n\r\n%s",
-          errors.size(), errors.size() == 1 ? "" : "s",
-          boost::algorithm::join(errors, "\r\n").c_str());
-      }
-
-      char msg[2048];
-      snprintf(msg, sizeof(msg),
-        "Done! %zu package%s were exported in the archive.%s",
-        count, count == 1 ? "" : "s", error);
-      Win32::messageBox(handle(), msg, title, MB_OK);
-
-      delete pool;
-    };
-
-    pool->onDone(finish);
-
-    if(pool->idle())
-      finish();
-  }
-  catch(const reapack_error &e) {
-    Dialog::Destroy(progress);
-    delete pool;
-
-    char msg[512];
-    snprintf(msg, sizeof(msg),
-      "An error occured while writing into %s.\r\n\r\n%s.",
-      path.c_str(), e.what()
-    );
-    Win32::messageBox(handle(), msg, title, MB_OK);
+  if(!path.empty()) {
+    if(Transaction *tx = g_reapack->setupTransaction()) {
+      tx->exportArchive(path);
+      tx->runTasks();
+    }
   }
 }
 

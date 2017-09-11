@@ -27,12 +27,11 @@ typedef void *zipFile;
 
 namespace Archive {
   void import(const std::string &path);
-  size_t create(const std::string &path, std::vector<std::string> *errors, ThreadPool *pool);
 };
 
 class ArchiveReader {
 public:
-  ArchiveReader(const std::string &path);
+  ArchiveReader(const Path &path);
   ~ArchiveReader();
   int extractFile(const Path &);
   int extractFile(const Path &, std::ostream &) noexcept;
@@ -45,7 +44,7 @@ typedef std::shared_ptr<ArchiveReader> ArchiveReaderPtr;
 
 class ArchiveWriter {
 public:
-  ArchiveWriter(const std::string &path);
+  ArchiveWriter(const Path &path);
   ~ArchiveWriter();
   int addFile(const Path &fn);
   int addFile(const Path &fn, std::istream &) noexcept;
@@ -72,6 +71,7 @@ private:
 class FileCompressor : public ThreadTask {
 public:
   FileCompressor(const Path &target, const ArchiveWriterPtr &);
+  const Path &path() const { return m_path; }
 
   bool concurrent() const override { return false; }
   bool run() override;
