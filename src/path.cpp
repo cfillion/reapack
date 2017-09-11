@@ -194,6 +194,11 @@ bool Path::startsWith(const Path &o) const
   return true;
 }
 
+Path Path::prependRoot() const
+{
+  return m_absolute ? *this : s_root + *this;
+}
+
 bool Path::operator==(const Path &o) const
 {
   return m_absolute == o.absolute() && m_parts == o.m_parts;
