@@ -39,6 +39,7 @@ class ThreadTask {
 public:
   enum State {
     Idle,
+    Queued,
     Running,
     Success,
     Failure,
@@ -46,7 +47,6 @@ public:
   };
 
   typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef std::function<void ()> CleanupHandler;
 
   ThreadTask();
   virtual ~ThreadTask();
@@ -62,8 +62,7 @@ public:
   const ErrorInfo &error() { return m_error; }
 
   void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
-  void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
-  void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
+  void onFinish(const VoidSignal::slot_type &slot);
 
   bool aborted() const { return m_abort; }
   void abort() { m_abort = true; }
@@ -81,7 +80,6 @@ private:
 
   VoidSignal m_onStart;
   VoidSignal m_onFinish;
-  CleanupHandler m_cleanupHandler;
 };
 
 class WorkerThread {

@@ -44,6 +44,7 @@ void ThreadTask::setState(const State state)
 
   switch(state) {
   case Idle:
+  case Queued:
     break;
   case Running:
     m_onStart();
@@ -52,7 +53,6 @@ void ThreadTask::setState(const State state)
   case Failure:
   case Aborted:
     m_onFinish();
-    m_cleanupHandler();
     break;
   }
 }
@@ -62,6 +62,15 @@ void ThreadTask::start()
   WorkerThread *thread = new WorkerThread;
   thread->push(this);
   onFinish([thread] { delete thread; });
+}
+
+void ThreadTask::onFinish(const VoidSignal::slot_type &slot)
+{
+  // The task has a slot deleting itself at this point, accepting
+  // any more slots at this point is a very bad idea.
+  assert(m_state < Queued);
+
+  m_onFinish.connect(slot);
 }
 
 void ThreadTask::exec()
@@ -130,6 +139,7 @@ void WorkerThread::push(ThreadTask *task)
 {
   WDL_MutexLock lock(&m_mutex);
 
+  task->setState(ThreadTask::Queued);
   m_queue.push(task);
   SetEvent(m_wake);
 }
@@ -151,12 +161,12 @@ void ThreadPool::push(ThreadTask *task)
   task->onFinish([=] {
     m_running.erase(task);
 
+    delete task;
+
     // call m_onDone() only after every onFinish slots ran
     if(m_running.empty())
       m_onDone();
   });
-
-  task->setCleanupHandler([=] { delete task; });
 
   const size_t nextThread = m_running.size() % m_pool.size();
   auto &thread = task->concurrent() ? m_pool[nextThread] : m_pool.front();
