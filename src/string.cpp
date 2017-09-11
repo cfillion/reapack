@@ -15,21 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_ERRORS_HPP
-#define REAPACK_ERRORS_HPP
-
-#include <stdexcept>
-
 #include "string.hpp"
 
-class reapack_error : public std::runtime_error {
-public:
-  using runtime_error::runtime_error;
-};
+std::string String::format(const char *fmt, ...)
+{
+  va_list args;
 
-struct ErrorInfo {
-  std::string message;
-  std::string context;
-};
+  va_start(args, fmt);
+  const int size = vsnprintf(nullptr, 0, fmt, args);
+  va_end(args);
 
-#endif
+  std::string buf(size, 0);
+
+  va_start(args, fmt);
+  vsnprintf(&buf[0], size + 1, fmt, args);
+  va_end(args);
+
+  return buf;
+}

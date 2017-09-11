@@ -79,7 +79,8 @@ void Archive::import(const string &path)
 
   stringstream toc;
   if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
-    throw reapack_error("Cannot locate the table of contents (%d)", err);
+    throw reapack_error(String::format(
+      "Cannot locate the table of contents (%d)", err));
 
   // starting import, do not abort process (eg. by throwing) at this point
   if(!(state.m_tx = g_reapack->setupTransaction()))
@@ -101,7 +102,8 @@ void Archive::import(const string &path)
         state.importPackage(data);
         break;
       default:
-        throw reapack_error("Unknown token '%s' (skipping)", line.substr(0, 4).c_str());
+        throw reapack_error(String::format("Unknown token '%s' (skipping)",
+          line.substr(0, 4).c_str()));
       }
     }
     catch(const reapack_error &e) {
@@ -119,8 +121,8 @@ void ImportArchive::importRemote(const string &data)
   Remote remote = Remote::fromString(data);
 
   if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
-    throw reapack_error("Failed to extract index of %s (%d)",
-      remote.name().c_str(), err);
+    throw reapack_error(String::format("Failed to extract index of %s (%d)",
+      remote.name().c_str(), err));
   }
 
   const Remote &original = m_remotes->get(remote.name());
@@ -152,10 +154,10 @@ void ImportArchive::importPackage(const string &data)
   const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
 
   if(!ver) {
-    throw reapack_error(
+    throw reapack_error(String::format(
       "%s/%s/%s v%s cannot be found or is incompatible with your operating system.",
       m_lastIndex->name().c_str(), categoryName.c_str(),
-      packageName.c_str(), versionName.c_str());
+      packageName.c_str(), versionName.c_str()));
   }
 
   m_tx->install(ver, pinned, m_reader);
@@ -186,8 +188,10 @@ int ArchiveReader::extractFile(const Path &path)
 
   if(FS::open(stream, path))
     return extractFile(path, stream);
-  else
-    throw reapack_error("%s: %s", path.join().c_str(), FS::lastError());
+  else {
+    throw reapack_error(String::format("%s: %s",
+      path.join().c_str(), FS::lastError()));
+  }
 }
 
 int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
@@ -234,9 +238,8 @@ bool FileExtractor::run()
   stream.close();
 
   if(error) {
-    char msg[64];
-    snprintf(msg, sizeof(msg), "Failed to extract file (%d)", error);
-    setError({msg, m_path.target().join()});
+    setError({String::format("Failed to extract file (%d)", error),
+      m_path.target().join()});
     return false;
   }
 
@@ -268,8 +271,10 @@ int ArchiveWriter::addFile(const Path &path)
 
   if(FS::open(stream, path))
     return addFile(path, stream);
-  else
-    throw reapack_error("%s: %s", path.join().c_str(), FS::lastError());
+  else {
+    throw reapack_error(String::format("%s: %s",
+      path.join().c_str(), FS::lastError()));
+  }
 }
 
 int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
@@ -307,7 +312,8 @@ bool FileCompressor::run()
 {
   ifstream stream;
   if(!FS::open(stream, m_path)) {
-    setError({string("Could not open file for export (") + FS::lastError() + ')',
+    setError({
+      String::format("Could not open file for export (%s)", FS::lastError()),
       m_path.join()});
     return false;
   }
@@ -316,9 +322,7 @@ bool FileCompressor::run()
   stream.close();
 
   if(error) {
-    char msg[64];
-    snprintf(msg, sizeof(msg), "Failed to compress file (%d)", error);
-    setError({msg, m_path.join()});
+    setError({String::format("Failed to compress file (%d)", error), m_path.join()});
     return false;
   }
 

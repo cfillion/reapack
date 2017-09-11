@@ -91,8 +91,10 @@ Package::Package(const Type type, const string &name, const Category *cat)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");
-  else if(m_name.find_first_of("/\\") != string::npos)
-    throw reapack_error("invalid package name '%s'", m_name.c_str());
+  else if(m_name.find_first_of("/\\") != string::npos) {
+    throw reapack_error(
+      String::format("invalid package name '%s'", m_name.c_str()));
+  }
 }
 
 Package::~Package()
@@ -112,8 +114,10 @@ bool Package::addVersion(const Version *ver)
     throw reapack_error("version belongs to another package");
   else if(ver->sources().empty())
     return false;
-  else if(m_versions.count(ver))
-    throw reapack_error("duplicate version '%s'", ver->fullName().c_str());
+  else if(m_versions.count(ver)) {
+    throw reapack_error(String::format("duplicate version '%s'",
+      ver->fullName().c_str()));
+  }
 
   m_versions.insert(ver);
 

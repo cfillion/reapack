@@ -15,21 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_ERRORS_HPP
-#define REAPACK_ERRORS_HPP
+#ifndef REAPACK_STRING_HPP
+#define REAPACK_STRING_HPP
 
-#include <stdexcept>
+#include <string>
 
-#include "string.hpp"
-
-class reapack_error : public std::runtime_error {
-public:
-  using runtime_error::runtime_error;
-};
-
-struct ErrorInfo {
-  std::string message;
-  std::string context;
-};
+namespace String {
+#ifdef __GNUC__
+  __attribute__((format(printf, 1, 2)))
+#endif
+  std::string format(const char *fmt, ...);
+}
 
 #endif

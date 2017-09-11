@@ -169,7 +169,7 @@ IndexPtr Transaction::loadIndex(const Remote &remote)
   }
   catch(const reapack_error &e) {
     m_receipt.addError({
-      string("Couldn't load repository: ") + e.what(), remote.name()});
+      String::format("Could not load repository: %s", e.what()), remote.name()});
     return nullptr;
   }
 }
