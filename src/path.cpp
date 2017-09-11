@@ -199,6 +199,16 @@ Path Path::prependRoot() const
   return m_absolute ? *this : s_root + *this;
 }
 
+Path Path::removeRoot() const
+{
+  Path copy(*this);
+
+  if(startsWith(s_root))
+    copy.remove(0, s_root.size());
+
+  return copy;
+}
+
 bool Path::operator==(const Path &o) const
 {
   return m_absolute == o.absolute() && m_parts == o.m_parts;

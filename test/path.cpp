@@ -188,7 +188,7 @@ TEST_CASE("remove last component of path", M) {
   a.removeLast(); // no crash
 }
 
-TEST_CASE("path generation utilities", M) {
+TEST_CASE("prepend root path", M) {
   const Path path("world");
 
   REQUIRE(path.prependRoot() == Path("world"));
@@ -198,10 +198,24 @@ TEST_CASE("path generation utilities", M) {
     (void)root;
 
     REQUIRE(path.prependRoot() == Path("hello/world"));
-    REQUIRE(Path("world").prependRoot() == Path("hello/world"));
   }
 
   REQUIRE(path.prependRoot() == Path("world"));
+}
+
+TEST_CASE("remove root path", M) {
+  const Path path("hello/world");
+
+  REQUIRE(path.removeRoot() == Path("hello/world"));
+
+  {
+    UseRootPath root(Path("hello"));
+    (void)root;
+
+    REQUIRE(path.removeRoot() == Path("world"));
+  }
+
+  REQUIRE(path.removeRoot() == Path("hello/world"));
 }
 
 TEST_CASE("first and last path component", M) {

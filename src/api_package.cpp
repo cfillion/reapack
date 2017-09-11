@@ -145,16 +145,9 @@ DEFINE_API(PackageEntry*, GetOwner, ((const char*, fn))((char*, errorOut))((int,
 R"(Returns the package entry owning the given file.
 Delete the returned object from memory after use with <a href="#ReaPack_FreeEntry">ReaPack_FreeEntry</a>.)",
 {
-  Path path(fn);
-
-  const Path &rp = ReaPack::resourcePath();
-
-  if(path.startsWith(rp))
-    path.remove(0, rp.size());
-
   try {
     const Registry reg(Path::REGISTRY.prependRoot());
-    const auto &owner = reg.getOwner(path);
+    const auto &owner = reg.getOwner(Path(fn).removeRoot());
 
     if(owner) {
       auto entry = new PackageEntry{owner, reg.getFiles(owner)};

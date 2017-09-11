@@ -50,7 +50,9 @@ public:
   std::string first() const;
   std::string last() const;
   bool startsWith(const Path &) const;
+
   Path prependRoot() const;
+  Path removeRoot() const;
 
   std::list<std::string>::const_iterator begin() const { return m_parts.begin(); }
   std::list<std::string>::const_iterator end() const { return m_parts.end(); }
