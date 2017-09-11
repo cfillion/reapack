@@ -24,13 +24,13 @@
 using namespace std;
 
 #ifndef _WIN32
-static const char SEPARATOR = '/';
+static constexpr char SEPARATOR = '/';
 #else
-static const char SEPARATOR = '\\';
+static constexpr char SEPARATOR = '\\';
 #endif
 
-static const string DOT = ".";
-static const string DOTDOT = "..";
+static constexpr const char *DOT = ".";
+static constexpr const char *DOTDOT = "..";
 
 const Path Path::DATA("ReaPack");
 const Path Path::CACHE = Path::DATA + "cache";
@@ -60,7 +60,7 @@ static vector<string> Split(const string &input, bool *absolute)
 
     const string &part = input.substr(last, pos - last);
 
-    if(!part.empty() && part != ".")
+    if(!part.empty() && part != DOT)
       list.push_back(part);
 
     last = pos + 1;
