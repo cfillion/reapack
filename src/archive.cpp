@@ -250,7 +250,7 @@ size_t Archive::create(const string &path, vector<string> *errors,
   vector<ThreadTask *> jobs;
 
   stringstream toc;
-  Registry reg(Path::prefixRoot(Path::REGISTRY));
+  Registry reg(Path::REGISTRY.prependRoot());
 
   ArchiveWriterPtr writer = make_shared<ArchiveWriter>(path);
 

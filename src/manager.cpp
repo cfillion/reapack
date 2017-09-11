@@ -542,7 +542,7 @@ void Manager::exportArchive()
   const char *title = "Export offline archive";
 
   const string &path = FileDialog::getSaveFileName(handle(), instance(),
-    title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
+    title, Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(path.empty())
     return;
