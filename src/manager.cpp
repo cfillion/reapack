@@ -521,7 +521,7 @@ void Manager::importArchive()
   const char *title = "Import offline archive";
 
   const string &path = FileDialog::getOpenFileName(handle(), instance(),
-    title, Path::prefixRoot(Path::DATA), ARCHIVE_FILTER, ARCHIVE_EXT);
+    title, Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(path.empty())
     return;

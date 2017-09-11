@@ -36,7 +36,7 @@ using namespace std;
 
 static bool stat(const Path &path, struct stat *out)
 {
-  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  const auto &&fullPath = Win32::widen(path.prependRoot().join());
 
 #ifdef _WIN32
   constexpr auto func = &_wstat;
@@ -49,7 +49,7 @@ static bool stat(const Path &path, struct stat *out)
 
 FILE *FS::open(const Path &path)
 {
-  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  const auto &&fullPath = Win32::widen(path.prependRoot().join());
 
 #ifdef _WIN32
   FILE *file = nullptr;
@@ -62,7 +62,7 @@ FILE *FS::open(const Path &path)
 
 bool FS::open(ifstream &stream, const Path &path)
 {
-  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  const auto &&fullPath = Win32::widen(path.prependRoot().join());
   stream.open(fullPath, ios_base::binary);
   return stream.good();
 }
@@ -72,7 +72,7 @@ bool FS::open(ofstream &stream, const Path &path)
   if(!mkdir(path.dirname()))
     return false;
 
-  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  const auto &&fullPath = Win32::widen(path.prependRoot().join());
   stream.open(fullPath, ios_base::binary);
   return stream.good();
 }
@@ -100,8 +100,8 @@ bool FS::rename(const TempPath &path)
 
 bool FS::rename(const Path &from, const Path &to)
 {
-  const auto &&fullFrom = Win32::widen(Path::prefixRoot(from).join());
-  const auto &&fullTo = Win32::widen(Path::prefixRoot(to).join());
+  const auto &&fullFrom = Win32::widen(from.prependRoot().join());
+  const auto &&fullTo = Win32::widen(to.prependRoot().join());
 
 #ifdef _WIN32
   const auto func = &_wrename;
@@ -114,7 +114,7 @@ bool FS::rename(const Path &from, const Path &to)
 
 bool FS::remove(const Path &path)
 {
-  const auto &&fullPath = Win32::widen(Path::prefixRoot(path).join());
+  const auto &&fullPath = Win32::widen(path.prependRoot().join());
 
 #ifdef _WIN32
   if(GetFileAttributes(fullPath.c_str()) == INVALID_FILE_ATTRIBUTES

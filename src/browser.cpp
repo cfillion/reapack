@@ -441,7 +441,7 @@ void Browser::setFilter(const string &newFilter)
 void Browser::populate(const vector<IndexPtr> &indexes)
 {
   try {
-    Registry reg(Path::prefixRoot(Path::REGISTRY));
+    Registry reg(Path::REGISTRY.prependRoot());
 
     // keep previous entries in memory a bit longer for #transferActions
     vector<Entry> oldEntries;

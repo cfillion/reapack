@@ -84,7 +84,7 @@ type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.)",
 
   const Registry::File &file = entry->files[i];
   if(pathOut)
-    snprintf(pathOut, pathOut_sz, "%s", Path::prefixRoot(file.path).join().c_str());
+    snprintf(pathOut, pathOut_sz, "%s", file.path.prependRoot().join().c_str());
   if(sectionsOut)
     *sectionsOut = file.sections;
   if(typeOut)
@@ -153,7 +153,7 @@ Delete the returned object from memory after use with <a href="#ReaPack_FreeEntr
     path.remove(0, rp.size());
 
   try {
-    const Registry reg(Path::prefixRoot(Path::REGISTRY));
+    const Registry reg(Path::REGISTRY.prependRoot());
     const auto &owner = reg.getOwner(path);
 
     if(owner) {

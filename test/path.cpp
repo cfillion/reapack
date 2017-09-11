@@ -191,17 +191,17 @@ TEST_CASE("remove last component of path", M) {
 TEST_CASE("path generation utilities", M) {
   const Path path("world");
 
-  REQUIRE(Path::prefixRoot(path) == Path("world"));
+  REQUIRE(path.prependRoot() == Path("world"));
 
   {
     UseRootPath root(Path("hello"));
     (void)root;
 
-    REQUIRE(Path::prefixRoot(path) == Path("hello/world"));
-    REQUIRE(Path::prefixRoot("world") == Path("hello/world"));
+    REQUIRE(path.prependRoot() == Path("hello/world"));
+    REQUIRE(Path("world").prependRoot() == Path("hello/world"));
   }
 
-  REQUIRE(Path::prefixRoot(path) == Path("world"));
+  REQUIRE(path.prependRoot() == Path("world"));
 }
 
 TEST_CASE("first and last path component", M) {

@@ -316,7 +316,7 @@ void AboutIndexDelegate::initInstalledFiles()
   set<Registry::File> allFiles;
 
   try {
-    Registry reg(Path::prefixRoot(Path::REGISTRY));
+    Registry reg(Path::REGISTRY.prependRoot());
     for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
       const vector<Registry::File> &files = reg.getFiles(entry);
       allFiles.insert(files.begin(), files.end());
@@ -434,7 +434,7 @@ void AboutIndexDelegate::aboutPackage()
   VersionName current;
 
   try {
-    Registry reg(Path::prefixRoot(Path::REGISTRY));
+    Registry reg(Path::REGISTRY.prependRoot());
     current = reg.getEntry(pkg).version;
   }
   catch(const reapack_error &) {}
@@ -647,7 +647,7 @@ void AboutPackageDelegate::locate()
       return;
 
     string arg("/select,\"");
-    arg += Path::prefixRoot(path).join();
+    arg += path.prependRoot().join();
     arg += '"';
 
     Win32::shellExecute("explorer.exe", arg.c_str());

@@ -32,7 +32,7 @@
 using namespace std;
 
 Transaction::Transaction()
-  : m_isCancelled(false), m_registry(Path::prefixRoot(Path::REGISTRY))
+  : m_isCancelled(false), m_registry(Path::REGISTRY.prependRoot())
 {
   m_threadPool.onPush([this] (ThreadTask *task) {
     task->onFinish([=] {
@@ -339,7 +339,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
   if(!AddRemoveReaScript || !reg.file.sections)
     return; // do nothing if REAPER < v5.12 and skip non-main files
 
-  const string &fullPath = Path::prefixRoot(reg.file.path).join();
+  const string &fullPath = reg.file.path.prependRoot().join();
 
   vector<int> sections;
 

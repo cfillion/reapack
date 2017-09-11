@@ -48,7 +48,7 @@ ReaPack *ReaPack::s_instance = nullptr;
 // Surely there must be a better way...
 static void CleanupTempFiles()
 {
-  const Path &path = Path::prefixRoot(Path::DATA + "*.tmp");
+  const Path &path = (Path::DATA + "*.tmp").prependRoot();
   const wstring &pattern = Win32::widen(path.join());
 
   WIN32_FIND_DATA fd = {};
@@ -93,7 +93,7 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   createDirectories();
 
   m_config = new Config;
-  m_config->read(Path::prefixRoot(Path::CONFIG));
+  m_config->read(Path::CONFIG.prependRoot());
 
   if(m_config->isFirstRun())
     manageRemotes();
@@ -424,7 +424,7 @@ void ReaPack::createDirectories()
     "ReaPack could not create %s! "
     "Please investigate or report this issue.\n\n"
     "Error description: %s",
-    Path::prefixRoot(path).join().c_str(), FS::lastError());
+    path.prependRoot().join().c_str(), FS::lastError());
 
   Win32::messageBox(Splash_GetWnd(), msg, "ReaPack", MB_OK);
 }
@@ -440,7 +440,7 @@ void ReaPack::registerSelf()
   ver.addSource(new Source(REAPACK_FILE, "dummy url", &ver));
 
   try {
-    Registry reg(Path::prefixRoot(Path::REGISTRY));
+    Registry reg(Path::REGISTRY.prependRoot());
     reg.push(&ver);
     reg.commit();
   }
