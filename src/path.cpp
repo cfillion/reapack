@@ -53,15 +53,22 @@ static vector<string> Split(const string &input, bool *absolute)
       break;
     }
     else if(last + pos == 0) {
+#ifndef _WIN32
       *absolute = true;
+#endif
       last++;
       continue;
     }
 
     const string &part = input.substr(last, pos - last);
 
-    if(!part.empty() && part != DOT)
+    if(!part.empty() && part != DOT) {
+#ifdef _WIN32
+      if(list.empty() && part.size() == 2 && isalpha(part[0]) && part[1] == ':')
+        *absolute = true;
+#endif
       list.push_back(part);
+    }
 
     last = pos + 1;
   }
@@ -153,10 +160,16 @@ Path Path::dirname() const
 
 string Path::join(const char sep) const
 {
+#ifdef _WIN32
+  constexpr bool absoluteSlash = false;
+#else
+  const bool absoluteSlash = m_absolute;
+#endif
+
   string path;
 
   for(const string &part : m_parts) {
-    if(!path.empty() || m_absolute)
+    if(!path.empty() || absoluteSlash)
       path += sep ? sep : SEPARATOR;
 
     path += part;

@@ -146,25 +146,42 @@ TEST_CASE("split input", M) {
   }
 }
 
-#ifndef _WIN32
-TEST_CASE("absolute path (unix)", M) {
+TEST_CASE("absolute path", M) {
   CHECK_FALSE(Path("a/b").absolute());
 
+#ifdef _WIN32
+  const Path a("C:\\Windows\\System32");
+#else
   const Path a("/usr/bin/zsh");
-  REQUIRE(a.size() == 3);
+#endif
+
   REQUIRE(a.absolute());
-  REQUIRE(a[0] == "usr");
-  REQUIRE(a.join() == "/usr/bin/zsh");
+  CHECK(a.size() == 3);
+
+#ifdef _WIN32
+  CHECK(a[0] == "C:");
+  CHECK(a.join() == "C:\\Windows\\System32");
+#else
+  CHECK(a[0] == "usr");
+  CHECK(a.join() == "/usr/bin/zsh");
+#endif
 }
 
-TEST_CASE("append absolute path (unix)", M) {
-  Path path;
-  path += Path("/a/b");
+TEST_CASE("append absolute path to empty path", M) {
+#ifdef _WIN32
+  const Path abs("C:\\Windows\\");
+#else
+  const Path abs("/usr/bin");
+#endif
 
-  CHECK(path == Path("/a/b"));
+  Path path;
+  path += abs;
+
+  CHECK(path == abs);
   REQUIRE(path.absolute());
 }
 
+#ifndef _WIN32
 TEST_CASE("compare absolute to relative path (unix)", M) {
   REQUIRE(Path("/a/b") != Path("a/b"));
 }
@@ -272,7 +289,9 @@ TEST_CASE("path starts with", M) {
 
   REQUIRE(ref.startsWith(ref));
   REQUIRE(Path("a/b/c").startsWith(ref));
+#ifndef _WIN32
   REQUIRE_FALSE(Path("/a/b/c").startsWith(ref));
+#endif
   REQUIRE_FALSE(Path("0/a/b/c").startsWith(ref));
   REQUIRE_FALSE(Path("a").startsWith(ref));
 }
