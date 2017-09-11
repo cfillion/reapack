@@ -124,14 +124,7 @@ void InstallTask::commit()
     tx()->registerFile({false, m_oldEntry, file});
   }
 
-  InstallTicket::Type type;
-
-  if(m_oldEntry && m_oldEntry.version < m_version->name())
-    type = InstallTicket::Upgrade;
-  else
-    type = InstallTicket::Install;
-
-  tx()->receipt()->addTicket({type, m_version, m_oldEntry});
+  tx()->receipt()->addInstall({m_version, m_oldEntry});
 
   const Registry::Entry newEntry = tx()->registry()->push(m_version);
 

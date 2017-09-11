@@ -35,16 +35,12 @@ bool Receipt::empty() const
     m_errors.empty();
 }
 
-void Receipt::addTicket(const InstallTicket &ticket)
+void Receipt::addInstall(const InstallTicket &ticket)
 {
-  switch(ticket.type) {
-  case InstallTicket::Upgrade:
+  if(ticket.previous && ticket.previous.version < ticket.version->name())
     m_updates.push_back(ticket);
-    break;
-  default:
+  else
     m_installs.push_back(ticket);
-    break;
-  }
 
   m_indexes.insert(ticket.version->package()->category()
     ->index()->shared_from_this());

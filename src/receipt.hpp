@@ -32,9 +32,6 @@ class Path;
 typedef std::shared_ptr<const Index> IndexPtr;
 
 struct InstallTicket {
-  enum Type { Install, Upgrade };
-
-  Type type;
   const Version *version;
   Registry::Entry previous;
 };
@@ -48,7 +45,7 @@ public:
   bool isRestartNeeded() const { return m_needRestart; }
   void setRestartNeeded(bool newVal) { m_needRestart = newVal; }
 
-  void addTicket(const InstallTicket &ticket);
+  void addInstall(const InstallTicket &);
   const std::vector<InstallTicket> &installs() const { return m_installs; }
   const std::vector<InstallTicket> &updates() const { return m_updates; }
 
