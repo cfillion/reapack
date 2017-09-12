@@ -61,7 +61,6 @@ public:
   bool hasErrors() const { return !m_errors.empty(); }
 
 private:
-  bool m_enabled;
   bool m_needRestart;
 
   std::vector<InstallTicket> m_installs;

@@ -22,7 +22,7 @@
 using namespace std;
 
 Receipt::Receipt()
-  : m_enabled(false), m_needRestart(false)
+  : m_needRestart(false)
 {
 }
 
