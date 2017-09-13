@@ -22,7 +22,7 @@
 #include "version.hpp"
 #include "win32.hpp"
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #ifdef _WIN32
 #  include <commctrl.h>

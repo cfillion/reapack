@@ -97,10 +97,9 @@ void VersionName::parse(const string &str)
   vector<Segment> segments;
 
   for(sregex_iterator it = begin; it != end; it++) {
-    const string match = it->str(0);
-    const char first = tolower(match[0]);
+    const string &match = it->str(0);
 
-    if(first >= 'a' || first >= 'z') {
+    if(isalpha(match[0])) {
       if(segments.empty()) // got leading letters
         throw reapack_error(String::format("invalid version name '%s'", str.c_str()));
 
