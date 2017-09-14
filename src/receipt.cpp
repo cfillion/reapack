@@ -19,6 +19,7 @@
 
 #include "index.hpp"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
@@ -40,7 +41,7 @@ bool Receipt::empty() const
 
 void Receipt::addInstall(const Version *ver, const Registry::Entry &entry)
 {
-  m_installs.emplace_back(InstallTicket{ver, entry});
+  m_installs.emplace(InstallTicket{ver, entry});
 
   if(ver->package()->type() == Package::ExtensionType)
     m_flags |= RestartNeeded;
@@ -92,6 +93,17 @@ InstallTicket::InstallTicket(const Version *ver, const Registry::Entry &previous
 {
   m_isUpdate = previous && previous.version < ver->name();
   m_index = ver->package()->category()->index()->shared_from_this();
+}
+
+bool InstallTicket::operator<(const InstallTicket &o) const
+{
+  string l = m_version->package()->displayName(),
+    r = o.m_version->package()->displayName();
+
+  boost::algorithm::to_lower(l);
+  boost::algorithm::to_lower(r);
+
+  return l < r;
 }
 
 ostream &operator<<(ostream &os, const InstallTicket &t)

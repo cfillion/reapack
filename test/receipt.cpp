@@ -79,7 +79,7 @@ TEST_CASE("format receipt page title", M) {
   }
 }
 
-TEST_CASE("format install ticket") {
+TEST_CASE("format install ticket", M) {
   IndexPtr ri = make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
   Package pkg(Package::ScriptType, "Package Name", &cat);
@@ -129,4 +129,35 @@ TEST_CASE("format install ticket") {
     REQUIRE_THAT(stream.str(),
       Contains("v1.0") && !Contains("v2.0") && !Contains("v3.0"));
   }
+}
+
+TEST_CASE("sort InstallTickets (case insensitive)", M) {
+  IndexPtr ri = make_shared<Index>("Index Name");
+  Category cat("Category Name", ri.get());
+  Package pkg1(Package::ScriptType, "a test", &cat);
+  Version ver1("1.0", &pkg1);
+
+  Package pkg2(Package::ScriptType, "Uppercase Name", &cat);
+  Version ver2("1.0", &pkg2);
+
+  Package pkg3(Package::ScriptType, "unused name", &cat);
+  pkg3.setDescription("z is the last letter");
+  Version ver3("1.0", &pkg3);
+
+  REQUIRE(InstallTicket(&ver1, {}) < InstallTicket(&ver2, {}));
+  REQUIRE(InstallTicket(&ver2, {}) < InstallTicket(&ver3, {}));
+  REQUIRE_FALSE(InstallTicket(&ver1, {}) < InstallTicket(&ver1, {}));
+  REQUIRE_FALSE(InstallTicket(&ver2, {}) < InstallTicket(&ver1, {}));
+
+  Receipt r;
+  r.addInstall(&ver1, {}); // a test
+  r.addInstall(&ver3, {}); // z is the last letter
+  r.addInstall(&ver1, {}); // a test (duplicate)
+  r.addInstall(&ver2, {}); // Uppercase Name
+  const string page = r.pages()[0].contents();
+  REQUIRE(page.find(pkg1.name()) < page.find(pkg2.name()));
+  REQUIRE(page.find(pkg2.name()) < page.find(pkg3.name()));
+
+  // duplicate should be preserved
+  REQUIRE(page.find(pkg1.name()) < page.rfind(pkg1.name()));
 }

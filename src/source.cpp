@@ -20,7 +20,7 @@
 #include "errors.hpp"
 #include "index.hpp"
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 using namespace std;
 

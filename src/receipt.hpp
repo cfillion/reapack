@@ -56,7 +56,7 @@ public:
 
 private:
   int m_flags;
-  std::vector<InstallTicket> m_installs;
+  std::multiset<InstallTicket> m_installs;
   std::set<Path> m_removals;
   std::set<Path> m_exports;
   std::vector<ErrorInfo> m_errors;
@@ -92,6 +92,8 @@ private:
 class InstallTicket {
 public:
   InstallTicket(const Version *ver, const Registry::Entry &previousEntry);
+
+  bool operator<(const InstallTicket &) const;
 
 private:
   friend std::ostream &operator<<(std::ostream &, const InstallTicket &);

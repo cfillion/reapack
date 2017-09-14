@@ -545,10 +545,9 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
 
   switch(dataType) {
   case UserType: { // arbitrary data or no data: sort by visible text
-    string l = cl.value;
-    boost::algorithm::to_lower(l);
+    string l = cl.value, r = cr.value;
 
-    string r = cr.value;
+    boost::algorithm::to_lower(l);
     boost::algorithm::to_lower(r);
 
     return l.compare(r);

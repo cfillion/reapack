@@ -42,7 +42,7 @@ string String::format(const char *fmt, ...)
 
 string String::indent(const string &text)
 {
-  ostringstream output;
+  string output;
   istringstream input(text);
   string line;
   bool first = true;
@@ -51,13 +51,16 @@ string String::indent(const string &text)
     if(first)
       first = false;
     else
-      output << "\r\n";
+      output += "\r\n";
 
     boost::algorithm::trim(line);
 
-    if(!line.empty())
-      output << "\x20\x20" << line;
+    if(line.empty())
+      continue;
+
+    output += "\x20\x20";
+    output += line;
   }
 
-  return output.str();
+  return output;
 }
