@@ -239,10 +239,8 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   menu.addSeparator();
 
-  char aboutLabel[64];
-  snprintf(aboutLabel, sizeof(aboutLabel),
-    "&About %s", remote.name().c_str());
-  menu.addAction(aboutLabel, index | (ACTION_ABOUT << 8));
+  menu.addAction(String::format("&About %s", remote.name().c_str()),
+    index | (ACTION_ABOUT << 8));
 
   bool allEnabled = true;
   bool allDisabled = true;

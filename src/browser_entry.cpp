@@ -21,6 +21,7 @@
 #include "index.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
+#include "string.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -170,31 +171,24 @@ void Browser::Entry::fillMenu(Menu &menu) const
 {
   if(test(InstalledFlag)) {
     if(test(OutOfDateFlag)) {
-      char installLabel[32];
-      snprintf(installLabel, sizeof(installLabel),
-        "U&pdate to v%s", latest->name().toString().c_str());
+      const UINT actionIndex = menu.addAction(String::format("U&pdate to v%s",
+        latest->name().toString().c_str()), ACTION_LATEST);
 
-      const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
       if(target && *target == latest)
         menu.check(actionIndex);
     }
 
-    char reinstallLabel[32];
-    snprintf(reinstallLabel, sizeof(reinstallLabel),
-      "&Reinstall v%s", regEntry.version.toString().c_str());
+    const UINT actionIndex = menu.addAction(String::format("&Reinstall v%s",
+      regEntry.version.toString().c_str()), ACTION_REINSTALL);
 
-    const UINT actionIndex = menu.addAction(reinstallLabel, ACTION_REINSTALL);
     if(!current || test(ObsoleteFlag))
       menu.disable(actionIndex);
     else if(target && *target == current)
       menu.check(actionIndex);
   }
   else {
-    char installLabel[32];
-    snprintf(installLabel, sizeof(installLabel),
-      "&Install v%s", latest->name().toString().c_str());
-
-    const UINT actionIndex = menu.addAction(installLabel, ACTION_LATEST);
+    const UINT actionIndex = menu.addAction(String::format("&Install v%s",
+      latest->name().toString().c_str()), ACTION_LATEST);
     if(target && *target == latest)
       menu.check(actionIndex);
   }
@@ -236,9 +230,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
   menu.setEnabled(!test(ObsoleteFlag),
     menu.addAction("About this &package", ACTION_ABOUT_PKG));
 
-  char aboutLabel[64];
-  snprintf(aboutLabel, sizeof(aboutLabel), "&About %s", indexName().c_str());
-  menu.addAction(aboutLabel, ACTION_ABOUT_REMOTE);
+  menu.addAction(String::format("&About %s", indexName().c_str()), ACTION_ABOUT_REMOTE);
 }
 
 bool Browser::Entry::operator==(const Entry &o) const
