@@ -21,6 +21,8 @@
 #include "dialog.hpp"
 
 class Receipt;
+class ReceiptPage;
+class TabBar;
 
 class Report : public Dialog {
 public:
@@ -31,7 +33,11 @@ protected:
   void onTimer(int) override;
 
 private:
+  void addPage(const ReceiptPage &);
+
   const Receipt *m_receipt;
+  bool m_empty;
+  TabBar *m_tabbar;
   std::vector<std::string> m_pages;
 };
 

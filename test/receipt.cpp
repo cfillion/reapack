@@ -159,7 +159,7 @@ TEST_CASE("sort InstallTickets (case insensitive)", M) {
   r.addInstall(&ver3, {}); // z is the last letter
   r.addInstall(&ver1, {}); // a test (duplicate)
   r.addInstall(&ver2, {}); // Uppercase Name
-  const string page = r.pages()[0].contents();
+  const string page = r.installedPage().contents();
   REQUIRE(page.find(pkg1.name()) < page.find(pkg2.name()));
   REQUIRE(page.find(pkg2.name()) < page.find(pkg3.name()));
 

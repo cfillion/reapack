@@ -67,14 +67,24 @@ void Receipt::addError(const ErrorInfo &err)
   m_errors.push_back(err);
 }
 
-ReceiptPages Receipt::pages() const
+ReceiptPage Receipt::installedPage() const
 {
-  return ReceiptPages{{
-    {m_installs, "Installed"},
-    {m_removals, "Removed"},
-    {m_exports, "Exported"},
-    {m_errors, "Error", "Errors"},
-  }};
+  return {m_installs, "Installed"};
+}
+
+ReceiptPage Receipt::removedPage() const
+{
+  return {m_removals, "Removed"};
+}
+
+ReceiptPage Receipt::exportedPage() const
+{
+  return {m_exports, "Exported"};
+}
+
+ReceiptPage Receipt::errorPage() const
+{
+  return {m_errors, "Error", "Errors"};
 }
 
 void ReceiptPage::setTitle(const char *title)

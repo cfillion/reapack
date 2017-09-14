@@ -21,7 +21,6 @@
 #include "registry.hpp"
 #include "errors.hpp"
 
-#include <array>
 #include <vector>
 #include <set>
 
@@ -32,7 +31,6 @@ class ReceiptPage;
 class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;
-typedef std::array<ReceiptPage, 4> ReceiptPages;
 
 class Receipt {
 public:
@@ -44,9 +42,7 @@ public:
   Receipt();
 
   bool test(Flag f) const { return (m_flags & f) != 0; }
-
   bool empty() const;
-  ReceiptPages pages() const;
 
   void addInstall(const Version *, const Registry::Entry &);
   void addRemoval(const Path &p);
@@ -54,8 +50,14 @@ public:
   void addExport(const Path &p);
   void addError(const ErrorInfo &);
 
+  ReceiptPage installedPage() const;
+  ReceiptPage removedPage() const;
+  ReceiptPage exportedPage() const;
+  ReceiptPage errorPage() const;
+
 private:
   int m_flags;
+
   std::multiset<InstallTicket> m_installs;
   std::set<Path> m_removals;
   std::set<Path> m_exports;

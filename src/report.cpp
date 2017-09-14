@@ -25,7 +25,7 @@
 using namespace std;
 
 Report::Report(const Receipt *receipt)
-  : Dialog(IDD_REPORT_DIALOG), m_receipt(receipt)
+  : Dialog(IDD_REPORT_DIALOG), m_receipt(receipt), m_empty(true)
 {
 }
 
@@ -33,24 +33,20 @@ void Report::onInit()
 {
   Dialog::onInit();
 
-  HWND report = getControl(IDC_REPORT);
-  TabBar *tabbar = createControl<TabBar>(IDC_TABS, this);
-
-  tabbar->onTabChange([=] (const int i) {
-    Win32::setWindowText(report, m_pages[i].c_str());
+  m_tabbar = createControl<TabBar>(IDC_TABS, this);
+  m_tabbar->onTabChange([=] (const int i) {
+    Win32::setWindowText(getControl(IDC_REPORT), m_pages[i].c_str());
   });
 
-  bool firstPage = true;
+  const ReceiptPage pages[] = {
+    m_receipt->installedPage(),
+    m_receipt->removedPage(),
+    m_receipt->exportedPage(),
+    m_receipt->errorPage(),
+  };
 
-  for(const ReceiptPage &page : m_receipt->pages()) {
-    m_pages.emplace_back(page.contents());
-    tabbar->addTab({page.title().c_str()});
-
-    if(firstPage && !page.empty()) {
-      tabbar->setCurrentIndex(tabbar->count() - 1);
-      firstPage = false;
-    }
-  }
+  for(const auto &page : pages)
+    addPage(page);
 
   SetFocus(getControl(IDOK));
 
@@ -66,4 +62,15 @@ void Report::onTimer(int timer)
     "One or more native REAPER extensions were installed.\n"
     "These newly installed files won't be loaded until REAPER is restarted.",
     "ReaPack Notice", MB_OK);
+}
+
+void Report::addPage(const ReceiptPage &page)
+{
+  m_pages.emplace_back(page.contents());
+  m_tabbar->addTab({page.title().c_str()});
+
+  if(m_empty && !page.empty()) {
+    m_tabbar->setCurrentIndex(m_tabbar->count() - 1);
+    m_empty = false;
+  }
 }
