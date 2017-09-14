@@ -475,7 +475,7 @@ void AboutIndexDelegate::install()
       && !installOpts.autoInstall) {
     const int btn = Win32::messageBox(m_dialog->handle(),
       "Do you want ReaPack to install new packages from this repository"
-      " when synchronizing in the future?\r\n\r\nThis setting can also be"
+      " when synchronizing in the future?\n\nThis setting can also be"
       " customized globally or on a per-repository basis in"
       " ReaPack > Manage repositories.",
       "Install all packages in this repository", MB_YESNOCANCEL);

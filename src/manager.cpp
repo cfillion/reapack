@@ -527,7 +527,7 @@ void Manager::importArchive()
   }
   catch(const reapack_error &e) {
     char msg[512];
-    snprintf(msg, sizeof(msg), "An error occured while reading %s.\r\n\r\n%s.",
+    snprintf(msg, sizeof(msg), "An error occured while reading %s.\n\n%s.",
       path.c_str(), e.what());
     Win32::messageBox(handle(), msg, title, MB_OK);
   }

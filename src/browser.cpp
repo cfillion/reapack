@@ -404,7 +404,7 @@ void Browser::refresh(const bool stale)
     if(!isVisible() || stale) {
       show();
 
-      Win32::messageBox(handle(), "No repository enabled!\r\n"
+      Win32::messageBox(handle(), "No repository enabled!\n"
         "Enable or import repositories from Extensions > ReaPack > Manage repositories.",
         "Browse packages", MB_OK);
     }
@@ -466,9 +466,9 @@ void Browser::populate(const vector<IndexPtr> &indexes)
   catch(const reapack_error &e) {
     char msg[255];
     snprintf(msg, sizeof(msg),
-      "ReaPack could not read from the local package registry.\r\n"
-      "Retry later once all installation task are completed.\r\n"
-      "\r\nError description: %s", e.what());
+      "ReaPack could not read from the local package registry.\n"
+      "Retry later once all installation task are completed.\n\n"
+      "Error description: %s", e.what());
     Win32::messageBox(handle(), msg, "ReaPack", MB_OK);
   }
 
@@ -614,10 +614,10 @@ void Browser::installLatestAll()
   const bool isEverything = (size_t)m_list->selectionSize() == m_entries.size();
 
   if(isEverything && !installOpts.autoInstall) {
-    const int btn = Win32::messageBox(handle(), "Do you want ReaPack to install new packages"
-      " automatically when  synchronizing in the future?\r\n\r\nThis setting"
-      " can also be customized globally or on a per-repository basis in"
-      " ReaPack > Manage repositories.",
+    const int btn = Win32::messageBox(handle(), "Do you want ReaPack to install"
+      " new packages automatically when  synchronizing in the future?\n\nThis"
+      " setting can also be customized globally or on a per-repository basis"
+      " in ReaPack > Manage repositories.",
       "Install every available packages", MB_YESNOCANCEL);
 
     switch(btn) {
@@ -796,7 +796,7 @@ bool Browser::confirm() const
 
   char msg[255];
   snprintf(msg, sizeof(msg),
-    "Are you sure to uninstall %zu package%s?\r\nThe files and settings will"
+    "Are you sure to uninstall %zu package%s?\nThe files and settings will"
     " be permanently deleted from this computer.",
     count, count == 1 ? "" : "s");
 

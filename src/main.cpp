@@ -53,7 +53,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
     if(func.required && *func.ptr == nullptr) {
       char msg[1024];
       snprintf(msg, sizeof(msg),
-        "ReaPack v%s is incompatible with this version of REAPER.\r\n\r\n"
+        "ReaPack v%s is incompatible with this version of REAPER.\n\n"
         "(Unable to import the following API function: %s)",
         ReaPack::VERSION, func.name);
 

@@ -63,7 +63,7 @@ void Report::onTimer(int timer)
   stopTimer(timer);
 
   Win32::messageBox(handle(),
-    "One or more native REAPER extensions were installed.\r\n"
+    "One or more native REAPER extensions were installed.\n"
     "These newly installed files won't be loaded until REAPER is restarted.",
     "ReaPack Notice", MB_OK);
 }

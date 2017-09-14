@@ -141,7 +141,7 @@ void Import::fetch()
         break;
       case ThreadTask::Failure: {
         char msg[1024];
-        snprintf(msg, sizeof(msg), "Download failed: %s\r\n%s",
+        snprintf(msg, sizeof(msg), "Download failed: %s\n%s",
           dl->error().message.c_str(), url.c_str());
         Win32::messageBox(handle(), msg, TITLE, MB_OK);
         m_pool->abort();
@@ -180,9 +180,8 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
       }
       else {
         snprintf(msg, sizeof(msg),
-          "%s is already configured with a different URL.\r\n"
-          "Do you want to overwrite it?",
-          index->name().c_str());
+          "%s is already configured with a different URL.\n"
+          "Do you want to overwrite it?", index->name().c_str());
 
         const auto answer = Win32::messageBox(handle(), msg, TITLE, MB_YESNO);
 
@@ -200,7 +199,7 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
     return true;
   }
   catch(const reapack_error &e) {
-    snprintf(msg, sizeof(msg), "The received file is invalid: %s\r\n%s",
+    snprintf(msg, sizeof(msg), "The received file is invalid: %s\n%s",
       e.what(), dl->url().c_str());
     Win32::messageBox(handle(), msg, TITLE, MB_OK);
     return false;
