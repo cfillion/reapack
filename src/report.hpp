@@ -33,6 +33,7 @@ protected:
   void onTimer(int) override;
 
 private:
+  void updateLabel();
   void addPage(const ReceiptPage &);
 
   const Receipt *m_receipt;

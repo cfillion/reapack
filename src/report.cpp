@@ -48,9 +48,11 @@ void Report::onInit()
   for(const auto &page : pages)
     addPage(page);
 
+  updateLabel();
+
   SetFocus(getControl(IDOK));
 
-  if(m_receipt->test(Receipt::RestartNeeded))
+  if(m_receipt->test(Receipt::RestartNeededFlag))
     startTimer(1);
 }
 
@@ -62,6 +64,22 @@ void Report::onTimer(int timer)
     "One or more native REAPER extensions were installed.\n"
     "These newly installed files won't be loaded until REAPER is restarted.",
     "ReaPack Notice", MB_OK);
+}
+
+void Report::updateLabel()
+{
+  const char *label;
+
+  if(m_receipt->flags() == Receipt::ErrorFlag)
+    label = "Operation failed. The following error(s) occured:";
+  else if(m_receipt->test(Receipt::ErrorFlag))
+    label = "The operation was partially completed (one or more errors occured):";
+  else if(m_receipt->test(Receipt::InstalledFlag | Receipt::RemovedFlag))
+    label = "All done! Description of the changes:";
+  else
+    label = "Operation completed successfully!";
+
+  Win32::setWindowText(getControl(IDC_LABEL), label);
 }
 
 void Report::addPage(const ReceiptPage &page)

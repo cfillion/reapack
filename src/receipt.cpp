@@ -26,7 +26,7 @@
 using namespace std;
 
 Receipt::Receipt()
-  : m_flags(NoFlags)
+  : m_flags(NoFlag)
 {
 }
 
@@ -42,29 +42,34 @@ bool Receipt::empty() const
 void Receipt::addInstall(const Version *ver, const Registry::Entry &entry)
 {
   m_installs.emplace(InstallTicket{ver, entry});
+  m_flags |= InstalledFlag;
 
   if(ver->package()->type() == Package::ExtensionType)
-    m_flags |= RestartNeeded;
+    m_flags |= RestartNeededFlag;
 }
 
 void Receipt::addRemoval(const Path &path)
 {
   m_removals.insert(path);
+  m_flags |= RemovedFlag;
 }
 
 void Receipt::addRemovals(const set<Path> &pathList)
 {
   m_removals.insert(pathList.begin(), pathList.end());
+  m_flags |= RemovedFlag;
 }
 
 void Receipt::addExport(const Path &path)
 {
   m_exports.insert(path);
+  m_flags |= ExportedFlag;
 }
 
 void Receipt::addError(const ErrorInfo &err)
 {
   m_errors.push_back(err);
+  m_flags |= ErrorFlag;
 }
 
 ReceiptPage Receipt::installedPage() const

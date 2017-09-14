@@ -35,13 +35,18 @@ typedef std::shared_ptr<const Index> IndexPtr;
 class Receipt {
 public:
   enum Flag {
-    NoFlags     = 0,
-    RestartNeeded = 1<<0,
+    NoFlag            = 0,
+    RestartNeededFlag = 1<<0,
+    InstalledFlag     = 1<<1,
+    RemovedFlag       = 1<<2,
+    ExportedFlag      = 1<<3,
+    ErrorFlag         = 1<<4,
   };
 
   Receipt();
 
-  bool test(Flag f) const { return (m_flags & f) != 0; }
+  int flags() const { return m_flags; }
+  bool test(int f) const { return (m_flags & f) != 0; }
   bool empty() const;
 
   void addInstall(const Version *, const Registry::Entry &);

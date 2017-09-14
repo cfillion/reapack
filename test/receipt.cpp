@@ -34,7 +34,42 @@ TEST_CASE("non-empty receipt", M) {
   REQUIRE_FALSE(r.empty());
 }
 
-TEST_CASE("set RestartNeeded flag", M) {
+TEST_CASE("set receipt flags", M) {
+  Receipt r;
+  REQUIRE(r.flags() == Receipt::NoFlag);
+  Receipt::Flag expected;
+
+  SECTION("install") {
+    IndexPtr ri = make_shared<Index>("Index Name");
+    Category cat("Category Name", ri.get());
+    Package pkg(Package::ScriptType, "Package Name", &cat);
+    Version ver("1.0", &pkg);
+    r.addInstall(&ver, {});
+
+    expected = Receipt::InstalledFlag;
+  }
+
+  SECTION("removal") {
+    r.addRemoval(Path("hello/world"));
+    expected = Receipt::RemovedFlag;
+  }
+
+  SECTION("export") {
+    r.addExport(Path("hello/world"));
+    expected = Receipt::ExportedFlag;
+  }
+
+  SECTION("error") {
+    r.addError({"message", "context"});
+    expected = Receipt::ErrorFlag;
+  }
+
+  REQUIRE(r.test(expected));
+  REQUIRE_FALSE(r.test(Receipt::NoFlag));
+  REQUIRE(r.flags() == expected);
+}
+
+TEST_CASE("set restart needed flag", M) {
   IndexPtr ri = make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
   Package script(Package::ScriptType, "Package Name", &cat);
@@ -43,13 +78,13 @@ TEST_CASE("set RestartNeeded flag", M) {
   Version extVer("1.0", &ext);
 
   Receipt r;
-  REQUIRE_FALSE(r.test(Receipt::RestartNeeded));
+  REQUIRE_FALSE(r.test(Receipt::RestartNeededFlag));
 
   r.addInstall(&scriptVer, {});
-  REQUIRE_FALSE(r.test(Receipt::RestartNeeded));
+  REQUIRE_FALSE(r.test(Receipt::RestartNeededFlag));
 
   r.addInstall(&extVer, {});
-  REQUIRE(r.test(Receipt::RestartNeeded));
+  REQUIRE(r.test(Receipt::RestartNeededFlag));
 }
 
 TEST_CASE("format receipt page title", M) {
