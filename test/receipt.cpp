@@ -79,6 +79,11 @@ TEST_CASE("format receipt page title", M) {
   }
 }
 
+TEST_CASE("format receipt page contents", M) {
+  ReceiptPage page{vector<int>{1, 2, 3}, "", ""};
+  REQUIRE(page.contents() == "1\r\n2\r\n3");
+}
+
 TEST_CASE("format install ticket", M) {
   IndexPtr ri = make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
@@ -158,6 +163,6 @@ TEST_CASE("sort InstallTickets (case insensitive)", M) {
   REQUIRE(page.find(pkg1.name()) < page.find(pkg2.name()));
   REQUIRE(page.find(pkg2.name()) < page.find(pkg3.name()));
 
-  // duplicate should be preserved
+  // duplicates should still be preserved
   REQUIRE(page.find(pkg1.name()) < page.rfind(pkg1.name()));
 }

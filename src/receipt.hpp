@@ -72,8 +72,12 @@ public:
 
     std::ostringstream stream;
 
-    for(const auto &item : list)
-      stream << item << "\r\n";
+    for(const auto &item : list) {
+      if(stream.tellp() > 0)
+        stream << "\r\n";
+
+      stream << item;
+    }
 
     m_contents = stream.str();
   }
