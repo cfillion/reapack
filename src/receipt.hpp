@@ -18,58 +18,91 @@
 #ifndef REAPACK_RECEIPT_HPP
 #define REAPACK_RECEIPT_HPP
 
-#include "errors.hpp"
 #include "registry.hpp"
+#include "errors.hpp"
 
-#include <set>
-#include <string>
-#include <unordered_set>
+#include <array>
 #include <vector>
+#include <set>
 
 class Index;
+class InstallTicket;
 class Path;
+class ReceiptPage;
+class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;
-
-struct InstallTicket {
-  const Version *version;
-  Registry::Entry previous;
-};
+typedef std::array<ReceiptPage, 4> ReceiptPages;
 
 class Receipt {
 public:
+  enum Flag {
+    NoFlags     = 0,
+    RestartNeeded = 1<<0,
+  };
+
   Receipt();
 
+  bool test(Flag f) const { return (m_flags & f) != 0; }
+
   bool empty() const;
+  ReceiptPages pages() const;
 
-  bool isRestartNeeded() const { return m_needRestart; }
-  void setRestartNeeded(bool newVal) { m_needRestart = newVal; }
-
-  void addInstall(const InstallTicket &);
-  const std::vector<InstallTicket> &installs() const { return m_installs; }
-  const std::vector<InstallTicket> &updates() const { return m_updates; }
-
-  void addRemoval(const Path &p) { m_removals.insert(p); }
+  void addInstall(const Version *, const Registry::Entry &);
+  void addRemoval(const Path &p);
   void addRemovals(const std::set<Path> &);
-  const std::set<Path> &removals() const { return m_removals; }
-
-  void addExport(const Path &p) { m_exports.insert(p); }
-  const std::set<Path> &exports() const { return m_exports; }
-
-  void addError(const ErrorInfo &err) { m_errors.push_back(err); }
-  const std::vector<ErrorInfo> &errors() const { return m_errors; }
-  bool hasErrors() const { return !m_errors.empty(); }
+  void addExport(const Path &p);
+  void addError(const ErrorInfo &);
 
 private:
-  bool m_needRestart;
-
+  int m_flags;
   std::vector<InstallTicket> m_installs;
-  std::vector<InstallTicket> m_updates;
   std::set<Path> m_removals;
   std::set<Path> m_exports;
   std::vector<ErrorInfo> m_errors;
-
-  std::unordered_set<IndexPtr> m_indexes; // keep them alive!
 };
+
+class ReceiptPage {
+public:
+  template<typename T>
+  ReceiptPage(const T &list, const char *singular, const char *plural = nullptr)
+    : m_size(list.size())
+  {
+    setTitle(m_size == 1 || !plural ? singular : plural);
+
+    std::ostringstream stream;
+
+    for(const auto &item : list)
+      stream << item << "\r\n";
+
+    m_contents = stream.str();
+  }
+
+  const std::string &title() const { return m_title; }
+  const std::string &contents() const { return m_contents; }
+  bool empty() const { return m_size == 0; }
+
+private:
+  void setTitle(const char *title);
+  size_t m_size;
+  std::string m_title;
+  std::string m_contents;
+};
+
+class InstallTicket {
+public:
+  InstallTicket(const Version *ver, const Registry::Entry &previousEntry);
+
+private:
+  friend std::ostream &operator<<(std::ostream &, const InstallTicket &);
+
+  const Version *m_version;
+  VersionName m_previous;
+  bool m_isUpdate;
+
+  IndexPtr m_index; // to keep it alive long enough
+};
+
+std::ostream &operator<<(std::ostream &, const InstallTicket &);
 
 #endif

@@ -292,3 +292,37 @@ TEST_CASE("version date", M) {
   ver.setTime("hello world");
   REQUIRE(ver.time().year() == 2016);
 }
+
+TEST_CASE("output version", M) {
+  ostringstream stream;
+  Version ver("1.2.3", nullptr);
+
+  SECTION("empty version") {
+    stream << ver;
+    REQUIRE(stream.str() == "v1.2.3\r\n  No changelog");
+  }
+
+  SECTION("with author") {
+    ver.setAuthor("Hello World");
+    stream << ver;
+    REQUIRE(stream.str() == "v1.2.3 by Hello World\r\n  No changelog");
+  }
+
+  SECTION("with time") {
+    ver.setTime("2016-01-02T00:42:11Z");
+    stream << ver;
+    REQUIRE(stream.str() == "v1.2.3 – January 02 2016\r\n  No changelog");
+  }
+
+  SECTION("with changelog") {
+    ver.setChangelog("+ added super cool feature\n+ fixed all the bugs!");
+    stream << ver;
+    REQUIRE(stream.str() == "v1.2.3\r\n  + added super cool feature\r\n  + fixed all the bugs!");
+  }
+
+  SECTION("changelog with empty lines") {
+    ver.setChangelog("line1\n\nline2");
+    stream << ver; // no crash!
+    REQUIRE(stream.str() == "v1.2.3\r\n  line1\r\n\r\n  line2");
+  }
+}

@@ -18,6 +18,7 @@
 #ifndef REAPACK_ERRORS_HPP
 #define REAPACK_ERRORS_HPP
 
+#include <ostream>
 #include <stdexcept>
 
 #include "string.hpp"
@@ -31,5 +32,11 @@ struct ErrorInfo {
   std::string message;
   std::string context;
 };
+
+inline std::ostream &operator<<(std::ostream &os, const ErrorInfo &err)
+{
+  os << err.context << ":\r\n" << String::indent(err.message) << "\r\n";
+  return os;
+}
 
 #endif

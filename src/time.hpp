@@ -51,4 +51,6 @@ private:
   std::tm m_tm;
 };
 
+std::ostream &operator<<(std::ostream &os, const Time &time);
+
 #endif

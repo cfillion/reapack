@@ -6,12 +6,6 @@
 
 using namespace std;
 
-ostream &operator<<(ostream &os, const Path &path)
-{
-  os << '"' << path.join() << '"';
-  return os;
-}
-
 ostream &operator<<(ostream &os, const set<Path> &list)
 {
   os << '{';
@@ -21,17 +15,5 @@ ostream &operator<<(ostream &os, const set<Path> &list)
 
   os << '}';
 
-  return os;
-}
-
-ostream &operator<<(ostream &os, const Time &time)
-{
-  os << time.toString();
-  return os;
-}
-
-ostream &operator<<(ostream &os, const Version &ver)
-{
-  os << ver.name().toString();
   return os;
 }

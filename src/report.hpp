@@ -20,32 +20,19 @@
 
 #include "dialog.hpp"
 
-#include "ostream.hpp"
-#include "receipt.hpp"
-#include "registry.hpp"
-
-class Package;
-class Version;
+class Receipt;
 
 class Report : public Dialog {
 public:
-  Report(const Receipt &);
+  Report(const Receipt *);
 
 protected:
   void onInit() override;
-
-  void fillReport();
-
-  void printHeader(const char *);
-
-  void printInstalls();
-  void printUpdates();
-  void printErrors();
-  void printRemovals();
+  void onTimer(int) override;
 
 private:
-  Receipt m_receipt;
-  OutputStream m_stream;
+  const Receipt *m_receipt;
+  std::vector<std::string> m_pages;
 };
 
 #endif

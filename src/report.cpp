@@ -17,17 +17,14 @@
 
 #include "report.hpp"
 
-#include "package.hpp"
+#include "receipt.hpp"
 #include "resource.hpp"
-#include "source.hpp"
-#include "transaction.hpp"
+#include "tabbar.hpp"
 #include "win32.hpp"
-
-#include <boost/range/adaptor/reversed.hpp>
 
 using namespace std;
 
-Report::Report(const Receipt &receipt)
+Report::Report(const Receipt *receipt)
   : Dialog(IDD_REPORT_DIALOG), m_receipt(receipt)
 {
 }
@@ -36,120 +33,37 @@ void Report::onInit()
 {
   Dialog::onInit();
 
-  fillReport();
+  HWND report = getControl(IDC_REPORT);
+  TabBar *tabbar = createControl<TabBar>(IDC_TABS, this);
 
-  SetFocus(getControl(IDOK));
-}
+  tabbar->onTabChange([=] (const int i) {
+    Win32::setWindowText(report, m_pages[i].c_str());
+  });
 
-void Report::printHeader(const char *title)
-{
-  if(m_stream.tellp())
-    m_stream << "\r\n";
+  bool firstPage = true;
 
-  const string sep(10, '=');
-  m_stream << sep << ' ' << title << ": " << sep << "\r\n\r\n";
-}
+  for(const ReceiptPage &page : m_receipt->pages()) {
+    m_pages.emplace_back(page.contents());
+    tabbar->addTab({page.title().c_str()});
 
-void Report::fillReport()
-{
-  const size_t installs = m_receipt.installs().size();
-  const size_t updates = m_receipt.updates().size();
-  const size_t removals = m_receipt.removals().size();
-  const size_t errors = m_receipt.errors().size();
-
-  m_stream << installs << " installed package";
-  if(installs != 1) m_stream << 's';
-
-  m_stream << ", " << updates << " update";
-  if(updates != 1) m_stream << 's';
-
-  m_stream << ", " << removals << " removed file";
-  if(removals != 1) m_stream << 's';
-
-  m_stream << " and " << errors << " error";
-  if(errors != 1) m_stream << 's';
-
-  m_stream << "\r\n";
-
-  if(m_receipt.isRestartNeeded()) {
-    m_stream
-      << "\r\n"
-      << "Notice: One or more native REAPER extensions were installed.\r\n"
-      << "The newly installed files won't be loaded until REAPER is restarted."
-      << "\r\n";
-  }
-
-  if(errors)
-    printErrors();
-
-  if(installs)
-    printInstalls();
-
-  if(updates)
-    printUpdates();
-
-  if(removals)
-    printRemovals();
-
-  if(installs + updates + removals == 0) {
-    Win32::setWindowText(getControl(IDC_LABEL),
-      "Oops! The following error(s) occured:");
-  }
-
-  Win32::setWindowText(getControl(IDC_REPORT), m_stream.str().c_str());
-}
-
-void Report::printInstalls()
-{
-  printHeader("Installed packages");
-
-  for(const InstallTicket &ticket : m_receipt.installs())
-    m_stream << ticket.version->fullName() << "\r\n";
-}
-
-void Report::printUpdates()
-{
-  printHeader("Updates");
-
-  const auto start = m_stream.tellp();
-
-  for(const InstallTicket &ticket : m_receipt.updates()) {
-    const Package *pkg = ticket.version->package();
-    const auto &versions = pkg->versions();
-
-    if(m_stream.tellp() != start)
-      m_stream << "\r\n";
-
-    m_stream << pkg->fullName() << ":\r\n";
-
-    for(const Version *ver : versions | boost::adaptors::reversed) {
-      if(ver->name() <= ticket.previous.version)
-        break;
-      else if(ver->name() <= ticket.version->name())
-        m_stream << *ver;
+    if(firstPage && !page.empty()) {
+      tabbar->setCurrentIndex(tabbar->count() - 1);
+      firstPage = false;
     }
   }
+
+  SetFocus(getControl(IDOK));
+
+  if(m_receipt->test(Receipt::RestartNeeded))
+    startTimer(1);
 }
 
-void Report::printErrors()
+void Report::onTimer(int timer)
 {
-  printHeader("Errors");
+  stopTimer(timer);
 
-  const auto start = m_stream.tellp();
-
-  for(const ErrorInfo &err : m_receipt.errors()) {
-    if(m_stream.tellp() != start)
-      m_stream << "\r\n";
-
-    m_stream << err.context << ":\r\n";
-    m_stream.indented(err.message);
-  }
-}
-
-void Report::printRemovals()
-{
-  printHeader("Removed files");
-
-  for(const Path &path : m_receipt.removals())
-    m_stream << path.join() << "\r\n";
+  Win32::messageBox(handle(),
+    "One or more native REAPER extensions were installed.\r\n"
+    "These newly installed files won't be loaded until REAPER is restarted.",
+    "ReaPack Notice", MB_OK);
 }

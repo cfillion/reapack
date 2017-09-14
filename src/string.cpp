@@ -17,7 +17,13 @@
 
 #include "string.hpp"
 
-std::string String::format(const char *fmt, ...)
+#include <boost/algorithm/string/trim.hpp>
+#include <cstdarg>
+#include <sstream>
+
+using namespace std;
+
+string String::format(const char *fmt, ...)
 {
   va_list args;
 
@@ -25,11 +31,33 @@ std::string String::format(const char *fmt, ...)
   const int size = vsnprintf(nullptr, 0, fmt, args);
   va_end(args);
 
-  std::string buf(size, 0);
+  string buf(size, 0);
 
   va_start(args, fmt);
   vsnprintf(&buf[0], size + 1, fmt, args);
   va_end(args);
 
   return buf;
+}
+
+string String::indent(const string &text)
+{
+  ostringstream output;
+  istringstream input(text);
+  string line;
+  bool first = true;
+
+  while(getline(input, line, '\n')) {
+    if(first)
+      first = false;
+    else
+      output << "\r\n";
+
+    boost::algorithm::trim(line);
+
+    if(!line.empty())
+      output << "\x20\x20" << line;
+  }
+
+  return output.str();
 }

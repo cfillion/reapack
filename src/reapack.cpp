@@ -358,7 +358,7 @@ Transaction *ReaPack::setupTransaction()
       LockDialog managerLock(m_manager);
       LockDialog browserLock(m_browser);
 
-      Dialog::Show<Report>(m_instance, m_mainWindow, *m_tx->receipt());
+      Dialog::Show<Report>(m_instance, m_mainWindow, m_tx->receipt());
     }
   });
 

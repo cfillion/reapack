@@ -125,12 +125,9 @@ void InstallTask::commit()
     tx()->registerFile({false, m_oldEntry, file});
   }
 
-  tx()->receipt()->addInstall({m_version, m_oldEntry});
+  tx()->receipt()->addInstall(m_version, m_oldEntry);
 
   const Registry::Entry newEntry = tx()->registry()->push(m_version);
-
-  if(newEntry.type == Package::ExtensionType)
-    tx()->receipt()->setRestartNeeded(true);
 
   if(m_pin)
     tx()->registry()->setPinned(newEntry, true);

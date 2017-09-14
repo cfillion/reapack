@@ -73,6 +73,24 @@ bool Version::addSource(const Source *source)
   return true;
 }
 
+ostream &operator<<(ostream &os, const Version &ver)
+{
+  os << 'v' << ver.name().toString();
+
+  if(!ver.author().empty())
+    os << " by " << ver.author();
+
+  if(ver.time())
+    os << " – " << ver.time();
+
+  os << "\r\n";
+
+  const string &changelog = ver.changelog();
+  os << String::indent(changelog.empty() ? "No changelog" : changelog);
+
+  return os;
+}
+
 VersionName::VersionName() : m_stable(true)
 {}
 

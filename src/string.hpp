@@ -25,6 +25,8 @@ namespace String {
   __attribute__((format(printf, 1, 2)))
 #endif
   std::string format(const char *fmt, ...);
+
+  std::string indent(const std::string &);
 }
 
 #endif

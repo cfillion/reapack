@@ -20,12 +20,15 @@
 
 #include "control.hpp"
 
+#include <boost/signals2.hpp>
 #include <vector>
 
 class Dialog;
 
 class TabBar : public Control {
 public:
+  typedef boost::signals2::signal<void (int index)> TabSignal;
+
   typedef std::vector<HWND> Page;
   struct Tab { const char *text; Page page; };
   typedef std::vector<Tab> Tabs;
@@ -38,6 +41,7 @@ public:
   void setFocus();
   int count() const;
   void clear();
+  void onTabChange(const TabSignal::slot_type &slot) { m_onTabChange.connect(slot); }
 
 protected:
   void onNotify(LPNMHDR, LPARAM) override;
@@ -48,6 +52,7 @@ private:
   Dialog *m_parent;
   int m_lastPage;
   std::vector<Page> m_pages;
+  TabSignal m_onTabChange;
 };
 
 #endif

@@ -24,7 +24,6 @@
 #include "index.hpp"
 #include "listview.hpp"
 #include "menu.hpp"
-#include "ostream.hpp"
 #include "reapack.hpp"
 #include "registry.hpp"
 #include "remote.hpp"
@@ -37,6 +36,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -556,7 +556,7 @@ void AboutPackageDelegate::updateList(const int index)
     return;
 
   const Version *ver = m_package->version(index);
-  OutputStream stream;
+  ostringstream stream;
   stream << *ver;
   Win32::setWindowText(m_dialog->getControl(IDC_CHANGELOG), stream.str().c_str());
 

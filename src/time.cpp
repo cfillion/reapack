@@ -68,3 +68,9 @@ int Time::compare(const Time &o) const
 
   return 0;
 }
+
+ostream &operator<<(ostream &os, const Time &time)
+{
+  os << time.toString();
+  return os;
+}

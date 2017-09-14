@@ -99,4 +99,6 @@ private:
   std::set<Path> m_files;
 };
 
+std::ostream &operator<<(std::ostream &, const Version &);
+
 #endif

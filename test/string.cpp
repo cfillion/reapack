@@ -11,3 +11,15 @@ TEST_CASE("string format", M) {
   CHECK(formatted.size() == 17);
   REQUIRE(formatted == "100% Hello World!");
 }
+
+TEST_CASE("indent string", M) {
+  string actual;
+
+  SECTION("simple")
+    actual = String::indent("line1\nline2");
+
+  SECTION("already indented")
+    actual = String::indent("  line1\n  line2");
+
+  REQUIRE(actual == "  line1\r\n  line2");
+}

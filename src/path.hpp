@@ -77,6 +77,11 @@ private:
   bool m_absolute;
 };
 
+inline std::ostream &operator<<(std::ostream &os, const Path &p)
+{
+  return os << p.join();
+};
+
 class UseRootPath {
 public:
   UseRootPath(const Path &);

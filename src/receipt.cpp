@@ -19,10 +19,13 @@
 
 #include "index.hpp"
 
+#include <boost/range/adaptor/reversed.hpp>
+#include <sstream>
+
 using namespace std;
 
 Receipt::Receipt()
-  : m_needRestart(false)
+  : m_flags(NoFlags)
 {
 }
 
@@ -30,24 +33,86 @@ bool Receipt::empty() const
 {
   return
     m_installs.empty() &&
-    m_updates.empty() &&
     m_removals.empty() &&
     m_exports.empty() &&
     m_errors.empty();
 }
 
-void Receipt::addInstall(const InstallTicket &ticket)
+void Receipt::addInstall(const Version *ver, const Registry::Entry &entry)
 {
-  if(ticket.previous && ticket.previous.version < ticket.version->name())
-    m_updates.push_back(ticket);
-  else
-    m_installs.push_back(ticket);
+  m_installs.emplace_back(InstallTicket{ver, entry});
 
-  m_indexes.insert(ticket.version->package()->category()
-    ->index()->shared_from_this());
+  if(ver->package()->type() == Package::ExtensionType)
+    m_flags |= RestartNeeded;
+}
+
+void Receipt::addRemoval(const Path &path)
+{
+  m_removals.insert(path);
 }
 
 void Receipt::addRemovals(const set<Path> &pathList)
 {
   m_removals.insert(pathList.begin(), pathList.end());
+}
+
+void Receipt::addExport(const Path &path)
+{
+  m_exports.insert(path);
+}
+
+void Receipt::addError(const ErrorInfo &err)
+{
+  m_errors.push_back(err);
+}
+
+ReceiptPages Receipt::pages() const
+{
+  return ReceiptPages{{
+    {m_installs, "Installed"},
+    {m_removals, "Removed"},
+    {m_exports, "Exported"},
+    {m_errors, "Error", "Errors"},
+  }};
+}
+
+void ReceiptPage::setTitle(const char *title)
+{
+  ostringstream stream;
+
+  // enable number formatting (ie. "1,234" instead of "1234")
+  stream.imbue(locale(""));
+
+  stream << title << " (" << m_size << ')';
+  m_title = stream.str();
+}
+
+InstallTicket::InstallTicket(const Version *ver, const Registry::Entry &previous)
+  : m_version(ver), m_previous(previous.version)
+{
+  m_isUpdate = previous && previous.version < ver->name();
+  m_index = ver->package()->category()->index()->shared_from_this();
+}
+
+ostream &operator<<(ostream &os, const InstallTicket &t)
+{
+  if(os.tellp() > 0)
+    os << "\r\n";
+
+  os << t.m_version->package()->fullName() << "\r\n";
+
+  if(t.m_isUpdate) {
+    const auto &versions = t.m_version->package()->versions();
+
+    for(const Version *ver : versions | boost::adaptors::reversed) {
+      if(ver->name() <= t.m_previous)
+        break;
+      else if(ver->name() <= t.m_version->name())
+        os << *ver;
+    }
+  }
+  else
+    os << *t.m_version;
+
+  return os;
 }
