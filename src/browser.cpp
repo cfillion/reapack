@@ -514,7 +514,7 @@ void Browser::fillList()
   vector<int> selectIndexes = m_list->selection();
   vector<const Entry *> oldSelection(selectIndexes.size());
   for(size_t i = 0; i < selectIndexes.size(); i++)
-    oldSelection[i] = (Entry *)m_list->row(selectIndexes[i])->userData;
+    oldSelection[i] = static_cast<Entry *>(m_list->row(selectIndexes[i])->userData);
   selectIndexes.clear(); // will put new indexes below
 
   m_list->clear();
@@ -584,7 +584,7 @@ auto Browser::getEntry(const int index) -> Entry *
   if(index < 0)
     return nullptr;
   else
-    return (Entry *)m_list->row(index)->userData;
+    return static_cast<Entry *>(m_list->row(index)->userData);
 }
 
 void Browser::aboutPackage(const int index, const bool focus)

@@ -409,7 +409,7 @@ const Package *AboutIndexDelegate::currentPackage() const
   if(index < 0)
     return nullptr;
   else
-    return (const Package *)m_dialog->list()->row(index)->userData;
+    return static_cast<const Package *>(m_dialog->list()->row(index)->userData);
 }
 
 void AboutIndexDelegate::findInBrowser()
@@ -596,7 +596,7 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
-  auto src = (const Source *)m_dialog->list()->row(index)->userData;
+  auto src = static_cast<const Source *>(m_dialog->list()->row(index)->userData);
 
   menu.addAction("Copy source URL", ACTION_COPY_URL);
   menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
@@ -627,7 +627,7 @@ const Source *AboutPackageDelegate::currentSource() const
   if(index < 0)
     return nullptr;
   else
-    return (const Source *)m_dialog->list()->row(index)->userData;
+    return static_cast<const Source *>(m_dialog->list()->row(index)->userData);
 }
 
 void AboutPackageDelegate::copySourceUrl()

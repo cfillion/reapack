@@ -57,7 +57,7 @@ public:
     Dialog *dlg = new T(args...);
     dlg->init(instance, parent, Dialog::Modeless);
 
-    return dynamic_cast<T *>(dlg);
+    return static_cast<T *>(dlg);
   }
 
   template<class T, class... Args>

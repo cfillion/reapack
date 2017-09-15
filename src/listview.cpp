@@ -553,11 +553,11 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
     return l.compare(r);
   }
   case VersionType:
-    return reinterpret_cast<const VersionName *>(cl.userData)->compare(
-      *reinterpret_cast<const VersionName *>(cr.userData));
+    return static_cast<const VersionName *>(cl.userData)->compare(
+      *static_cast<const VersionName *>(cr.userData));
   case TimeType:
-    return reinterpret_cast<const Time *>(cl.userData)->compare(
-      *reinterpret_cast<const Time *>(cr.userData));
+    return static_cast<const Time *>(cl.userData)->compare(
+      *static_cast<const Time *>(cr.userData));
   }
 
   return 0; // to make MSVC happy

@@ -105,7 +105,9 @@ protected:
   void onCommand(int) override;
 
   const void *data() const override
-  { return reinterpret_cast<const void *>(m_index.get()); }
+  {
+    return static_cast<const void *>(m_index.get());
+  }
 
 private:
   void initInstalledFiles();
@@ -132,7 +134,9 @@ protected:
   void onCommand(int) override;
 
   const void *data() const override
-  { return reinterpret_cast<const void *>(m_package); }
+  {
+    return static_cast<const void *>(m_package);
+  }
 
 private:
   const Source *currentSource() const;
