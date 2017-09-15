@@ -59,7 +59,6 @@ public:
   void setPinned(const Registry::Entry &, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
-  void registerAll(const Remote &);
   void exportArchive(const std::string &path);
   bool runTasks();
 

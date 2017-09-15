@@ -617,6 +617,8 @@ bool Manager::apply()
   if(!tx)
     return false;
 
+  // syncList is the list of repos to synchronize for autoinstall
+  // (global or local setting)
   set<Remote> syncList;
 
   if(m_autoInstall) {
@@ -642,22 +644,20 @@ bool Manager::apply()
       continue;
 
     if(mods.enable) {
-      g_reapack->setRemoteEnabled(remote, *mods.enable);
-
-      if(*mods.enable)
-        syncList.insert(remote);
-      else
-        syncList.erase(remote);
+      remote.setEnabled(*mods.enable);
+      syncList.erase(remote);
     }
+
     if(mods.autoInstall) {
       remote.setAutoInstall(*mods.autoInstall);
-      g_reapack->config()->remotes.add(remote);
 
       const bool isEnabled = mods.enable.value_or(remote.isEnabled());
 
       if(isEnabled && *mods.autoInstall)
         syncList.insert(remote);
     }
+
+    g_reapack->addSetRemote(remote);
   }
 
   for(const Remote &remote : m_uninstall) {
@@ -668,9 +668,9 @@ bool Manager::apply()
   for(const Remote &remote : syncList)
     tx->synchronize(remote);
 
-  tx->onFinish(bind(&Config::write, g_reapack->config()));
-  tx->runTasks();
   reset();
+
+  g_reapack->commitConfig();
 
   return true;
 }

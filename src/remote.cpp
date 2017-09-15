@@ -114,8 +114,18 @@ void Remote::setUrl(const string &url)
 {
   if(!validateUrl(url))
     throw reapack_error("invalid url");
+  else if(m_protected)
+    throw reapack_error("cannot change the URL of a protected repository");
   else
     m_url = url;
+}
+
+bool Remote::autoInstall(bool fallback) const
+{
+  if(boost::logic::indeterminate(m_autoInstall))
+    return fallback;
+  else
+    return m_autoInstall;
 }
 
 string Remote::toString() const

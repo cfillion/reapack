@@ -112,7 +112,7 @@ TEST_CASE("set invalid values", M) {
   }
 }
 
-TEST_CASE("valide remote urls", M) {
+TEST_CASE("valid remote urls", M) {
   Remote remote;
 
   SECTION("uppercase")
@@ -157,6 +157,31 @@ TEST_CASE("protect remote", M) {
 
   remote.protect();
   REQUIRE(remote.isProtected());
+
+  try {
+    remote.setUrl("https://google.com");
+    FAIL();
+  }
+  catch(const reapack_error &e) {
+    REQUIRE(string(e.what()) == "cannot change the URL of a protected repository");
+  }
+}
+
+TEST_CASE("autoinstall remote", M) {
+  Remote remote;
+  REQUIRE_FALSE(remote.autoInstall());
+  REQUIRE(remote.autoInstall(true));
+  REQUIRE_FALSE(remote.autoInstall(false));
+
+  remote.setAutoInstall(true);
+  REQUIRE(remote.autoInstall());
+  REQUIRE(remote.autoInstall(true));
+  REQUIRE(remote.autoInstall(false));
+
+  remote.setAutoInstall(false);
+  REQUIRE_FALSE(remote.autoInstall());
+  REQUIRE_FALSE(remote.autoInstall(true));
+  REQUIRE_FALSE(remote.autoInstall(false));
 }
 
 TEST_CASE("add remotes to list", M) {

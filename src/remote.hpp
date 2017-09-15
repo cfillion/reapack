@@ -50,6 +50,7 @@ public:
 
   void setAutoInstall(const tribool &autoInstall) { m_autoInstall = autoInstall; }
   tribool autoInstall() const { return m_autoInstall; }
+  bool autoInstall(bool fallback) const;
 
   void protect() { m_protected = true; }
   bool isProtected() const { return m_protected; }

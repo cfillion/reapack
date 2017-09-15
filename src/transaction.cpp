@@ -59,11 +59,7 @@ void Transaction::synchronize(const Remote &remote,
   m_syncedRemotes.insert(remote.name());
 
   InstallOpts opts = g_reapack->config()->install;
-
-  if(forceAutoInstall)
-    opts.autoInstall = *forceAutoInstall;
-  else if(!boost::logic::indeterminate(remote.autoInstall()))
-    opts.autoInstall = remote.autoInstall();
+  opts.autoInstall = remote.autoInstall(forceAutoInstall.value_or(opts.autoInstall));
 
   fetchIndex(remote, true, [=] (const IndexPtr &ri) {
     for(const Package *pkg : ri->packages())
@@ -183,17 +179,6 @@ void Transaction::install(const Version *ver,
   m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
 }
 
-void Transaction::registerAll(const Remote &remote)
-{
-  const vector<Registry::Entry> &entries = m_registry.getEntries(remote.name());
-
-  for(const auto &entry : entries)
-    registerAll(remote.isEnabled(), entry);
-
-  if(!remote.isEnabled())
-    inhibit(remote);
-}
-
 void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
 {
   m_nextQueue.push(make_shared<PinTask>(entry, pinned, this));
@@ -261,11 +246,7 @@ bool Transaction::runTasks()
       return false;
   }
 
-  // we're done!
-  m_registry.commit();
-  registerQueued();
-
-  finish();
+  finish(); // we're done!
 
   return true;
 }
@@ -291,6 +272,9 @@ bool Transaction::commitTasks()
 
 void Transaction::finish()
 {
+  m_registry.commit();
+  registerQueued();
+
   m_onFinish();
   m_cleanupHandler();
 }

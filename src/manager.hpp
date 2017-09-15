@@ -23,7 +23,6 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/optional.hpp>
 #include <map>
-#include <set>
 
 class ListView;
 class Menu;

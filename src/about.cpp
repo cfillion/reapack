@@ -490,15 +490,15 @@ void AboutIndexDelegate::install()
     }
   }
 
-  Transaction *tx = g_reapack->setupTransaction();
+  if(Transaction *tx = g_reapack->setupTransaction())
+    tx->synchronize(remote, choice == INSTALL_ALL);
 
-  if(!tx)
-    return;
+  if(!remote.isEnabled()) {
+    remote.setEnabled(true);
+    g_reapack->addSetRemote(remote);
+  }
 
-  g_reapack->setRemoteEnabled(remote);
-
-  tx->synchronize(remote, choice == INSTALL_ALL);
-  tx->runTasks();
+  g_reapack->commitConfig();
 }
 
 AboutPackageDelegate::AboutPackageDelegate(

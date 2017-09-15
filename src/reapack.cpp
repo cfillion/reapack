@@ -173,48 +173,18 @@ void ReaPack::synchronizeAll()
   tx->runTasks();
 }
 
-bool ReaPack::addSetRemote(const Remote &remote, const bool enable)
+void ReaPack::addSetRemote(const Remote &remote)
 {
-  if(remote.isEnabled() != enable) {
-    if(Transaction *tx = setupTransaction()) {
-      setRemoteEnabled(remote, enable); // adds the new remote to the list
+  if(remote.isEnabled() && remote.autoInstall(m_config->install.autoInstall)) {
+    const Remote &previous = m_config->remotes.get(remote.name());
 
-      if(enable)
+    if(!previous || !previous.isEnabled()) {
+      if(Transaction *tx = setupTransaction())
         tx->synchronize(remote);
-
-      return true;
     }
-    else
-      return false;
   }
 
   m_config->remotes.add(remote);
-
-  if(m_config->install.autoInstall) {
-    if(Transaction *tx = setupTransaction()) {
-      tx->synchronize(remote);
-      return true;
-    }
-  }
-
-  return true;
-}
-
-void ReaPack::setRemoteEnabled(const Remote &remote, const bool enable)
-{
-  assert(m_tx);
-
-  Remote copy(remote);
-  copy.setEnabled(enable);
-
-  m_tx->registerAll(copy);
-
-  m_tx->onFinish([=] {
-    if(m_tx->isCancelled())
-      return;
-
-    m_config->remotes.add(copy);
-  });
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -385,6 +355,7 @@ void ReaPack::teardownTransaction()
 void ReaPack::commitConfig()
 {
   if(m_tx) {
+    m_tx->receipt()->setIndexChanged(); // force browser refresh
     m_tx->onFinish(bind(&ReaPack::refreshManager, this));
     m_tx->onFinish(bind(&Config::write, m_config));
     m_tx->runTasks();

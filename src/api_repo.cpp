@@ -47,20 +47,13 @@ R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to ke
 autoInstall: usually set to 2 (obey user setting).)",
 {
   try {
-    const Remote &existing = g_reapack->remote(name);
-
-    Remote remote(existing);
+    Remote remote = g_reapack->remote(name);
     remote.setName(name);
-    remote.setUrl(url && strlen(url) > 0 ? url : existing.url());
+    if(url && strlen(url) > 0)
+      remote.setUrl(url);
+    remote.setEnabled(enable);
     remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
-
-    if(existing.isProtected() && remote.url() != existing.url()) {
-      if(errorOut)
-        snprintf(errorOut, errorOut_sz, "cannot change the URL of a protected repository");
-      return false;
-    }
-    if(!g_reapack->addSetRemote(remote, enable))
-      return false;
+    g_reapack->addSetRemote(remote);
   }
   catch(const reapack_error &e) {
     if(errorOut)

@@ -65,8 +65,6 @@ public:
   void setupAPI(const APIFunc *func);
 
   void synchronizeAll();
-  bool addSetRemote(const Remote &, bool enable = true);
-  void setRemoteEnabled(const Remote &, bool enable = true);
   void uninstall(const Remote &);
 
   void importRemote();
@@ -78,6 +76,7 @@ public:
   void refreshManager();
   void refreshBrowser();
 
+  void addSetRemote(const Remote &);
   Remote remote(const std::string &name) const;
 
   Transaction *setupTransaction();

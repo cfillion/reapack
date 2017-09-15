@@ -228,8 +228,7 @@ void Import::processQueue()
 
 bool Import::import(const ImportData &data)
 {
-  if(!g_reapack->addSetRemote(data.remote))
-    return false;
+  g_reapack->addSetRemote(data.remote);
 
   FS::write(Index::pathFor(data.remote.name()), data.contents);
 
