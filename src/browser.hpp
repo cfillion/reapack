@@ -33,6 +33,7 @@
 class Index;
 class ListView;
 class Menu;
+class Registry;
 class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;
@@ -88,7 +89,7 @@ private:
 
   void onSelection();
   bool fillContextMenu(Menu &, int index);
-  void populate(const std::vector<IndexPtr> &);
+  void populate(const std::vector<IndexPtr> &, const Registry *);
   void transferActions();
   bool match(const Entry &) const;
   void updateFilter();

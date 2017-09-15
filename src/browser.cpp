@@ -410,7 +410,8 @@ void Browser::refresh(const bool stale)
         "Browse packages", MB_OK);
     }
 
-    populate({});
+    // Clear the list if it were previously filled.
+    populate({}, nullptr);
     return;
   }
 
@@ -421,7 +422,7 @@ void Browser::refresh(const bool stale)
     tx->fetchIndexes(remotes, stale);
     tx->onFinish([=] {
       if(isFirstLoad || isVisible()) {
-        populate(tx->getIndexes(remotes));
+        populate(tx->getIndexes(remotes), tx->registry());
 
         // Ignore the next call to refreshBrowser() if we know we'll be
         // requested to handle the very same transaction.
@@ -439,39 +440,27 @@ void Browser::refresh(const bool stale)
   }
 }
 
-void Browser::populate(const vector<IndexPtr> &indexes)
+void Browser::populate(const vector<IndexPtr> &indexes, const Registry *reg)
 {
-  try {
-    Registry reg(Path::REGISTRY.prependRoot());
+  // keep previous entries in memory a bit longer for #transferActions
+  vector<Entry> oldEntries;
+  swap(m_entries, oldEntries);
 
-    // keep previous entries in memory a bit longer for #transferActions
-    vector<Entry> oldEntries;
-    swap(m_entries, oldEntries);
+  m_currentIndex = -1;
 
-    m_currentIndex = -1;
+  for(const IndexPtr &index : indexes) {
+    for(const Package *pkg : index->packages())
+      m_entries.push_back({pkg, reg->getEntry(pkg), index});
 
-    for(const IndexPtr &index : indexes) {
-      for(const Package *pkg : index->packages())
-        m_entries.push_back({pkg, reg.getEntry(pkg), index});
-
-      // obsolete packages
-      for(const Registry::Entry &regEntry : reg.getEntries(index->name())) {
-        if(!index->find(regEntry.category, regEntry.package))
-          m_entries.push_back({regEntry, index});
-      }
+    // obsolete packages
+    for(const Registry::Entry &regEntry : reg->getEntries(index->name())) {
+      if(!index->find(regEntry.category, regEntry.package))
+        m_entries.push_back({regEntry, index});
     }
+  }
 
-    transferActions();
-    fillList();
-  }
-  catch(const reapack_error &e) {
-    char msg[255];
-    snprintf(msg, sizeof(msg),
-      "ReaPack could not read from the local package registry.\n"
-      "Retry later once all installation task are completed.\n\n"
-      "Error description: %s", e.what());
-    Win32::messageBox(handle(), msg, "ReaPack", MB_OK);
-  }
+  transferActions();
+  fillList();
 
   if(!isVisible())
     show();
