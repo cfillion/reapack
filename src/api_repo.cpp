@@ -48,8 +48,7 @@ autoInstall: usually set to 2 (obey user setting).)",
   try {
     Remote remote = g_reapack->remote(name);
     remote.setName(name);
-    if(url && strlen(url) > 0)
-      remote.setUrl(url);
+    remote.setUrl(url && strlen(url) > 0 ? url : remote.url());
     remote.setEnabled(enable);
     remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
     g_reapack->addSetRemote(remote);

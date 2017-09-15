@@ -153,6 +153,7 @@ TEST_CASE("null remote", M) {
 
 TEST_CASE("protect remote", M) {
   Remote remote;
+  remote.setUrl("https://cfillion.ca");
   REQUIRE_FALSE(remote.isProtected());
 
   remote.protect();
@@ -165,6 +166,8 @@ TEST_CASE("protect remote", M) {
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "cannot change the URL of a protected repository");
   }
+
+  remote.setUrl(remote.url()); // this should work for AddSetRepository API
 }
 
 TEST_CASE("autoinstall remote", M) {

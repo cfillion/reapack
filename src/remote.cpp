@@ -114,7 +114,7 @@ void Remote::setUrl(const string &url)
 {
   if(!validateUrl(url))
     throw reapack_error("invalid url");
-  else if(m_protected)
+  else if(m_protected && url != m_url)
     throw reapack_error("cannot change the URL of a protected repository");
   else
     m_url = url;
