@@ -44,7 +44,6 @@ public:
   size_t size() const { return m_parts.size(); }
   bool absolute() const { return m_absolute; }
 
-  std::string basename() const;
   Path dirname() const;
   std::string join(const char sep = 0) const;
   std::string first() const;

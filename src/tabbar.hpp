@@ -37,7 +37,6 @@ public:
   int addTab(const Tab &);
   int currentIndex() const;
   void setCurrentIndex(int);
-  void removeTab(int);
   void setFocus();
   int count() const;
   void clear();

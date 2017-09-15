@@ -64,15 +64,6 @@ void TabBar::setCurrentIndex(const int index)
   switchPage();
 }
 
-void TabBar::removeTab(const int index)
-{
-  if(currentIndex() == index)
-    setCurrentIndex(index == 0 ? index + 1 : index - 1);
-
-  if(TabCtrl_DeleteItem(handle(), index))
-    m_pages.erase(m_pages.begin() + index);
-}
-
 void TabBar::setFocus()
 {
   const int index = currentIndex();

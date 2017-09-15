@@ -119,21 +119,9 @@ int Menu::show(HWND control, HWND parent) const
   return show(rect.left, rect.bottom - 1, parent);
 }
 
-void Menu::disableAll()
-{
-  for(UINT i = 0; i < m_size; i++)
-    setEnabled(false, i);
-}
-
 void Menu::disable(const UINT index)
 {
   setEnabled(false, index);
-}
-
-void Menu::enableAll()
-{
-  for(UINT i = 0; i < m_size; i++)
-    setEnabled(false, i);
 }
 
 void Menu::enable(const UINT index)

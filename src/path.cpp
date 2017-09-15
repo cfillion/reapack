@@ -140,14 +140,6 @@ void Path::removeLast()
     m_parts.pop_back();
 }
 
-string Path::basename() const
-{
-  if(empty())
-    return {};
-
-  return m_parts.back();
-}
-
 Path Path::dirname() const
 {
   if(empty())

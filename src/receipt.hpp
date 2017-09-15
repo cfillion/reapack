@@ -56,7 +56,6 @@ public:
   void setIndexChanged() { m_flags |= IndexChangedFlag; }
   void addInstall(const Version *, const Registry::Entry &);
   void addRemoval(const Path &p);
-  void addRemovals(const std::set<Path> &);
   void addExport(const Path &p);
   void addError(const ErrorInfo &);
 

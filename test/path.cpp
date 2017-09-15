@@ -23,14 +23,12 @@ TEST_CASE("append path components", M) {
   REQUIRE(path.size() == 0);
   REQUIRE(path.join() == string());
   REQUIRE(path.dirname().empty());
-  REQUIRE(path.basename().empty());
 
   path.append("hello");
   REQUIRE_FALSE(path.empty());
   REQUIRE(path.size() == 1);
   REQUIRE(path.join() == "hello");
   REQUIRE(path.dirname().empty());
-  REQUIRE(path.basename() == "hello");
 
   path.append("world");
   REQUIRE(path.size() == 2);
@@ -40,7 +38,6 @@ TEST_CASE("append path components", M) {
   REQUIRE(path.join() == "hello\\world");
 #endif
   REQUIRE(path.dirname().join() == "hello");
-  REQUIRE(path.basename() == "world");
 
   path.append("test");
   REQUIRE(path.size() == 3);
@@ -50,7 +47,6 @@ TEST_CASE("append path components", M) {
   REQUIRE(path.join() == "hello\\world\\test");
 #endif
   REQUIRE(path.dirname() == Path("hello/world"));
-  REQUIRE(path.basename() == "test");
 }
 
 TEST_CASE("concatenate paths", M) {

@@ -54,12 +54,6 @@ void Receipt::addRemoval(const Path &path)
   m_flags |= RemovedFlag;
 }
 
-void Receipt::addRemovals(const set<Path> &pathList)
-{
-  m_removals.insert(pathList.begin(), pathList.end());
-  m_flags |= RemovedFlag;
-}
-
 void Receipt::addExport(const Path &path)
 {
   m_exports.insert(path);
