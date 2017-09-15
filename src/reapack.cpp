@@ -307,13 +307,6 @@ Browser *ReaPack::browsePackages()
     m_browser->setFocus();
     return m_browser;
   }
-  else if(m_tx) {
-    ShowMessageBox(
-      "This feature cannot be used while packages are being installed. "
-      "Try again later.", "Browse packages", MB_OK
-    );
-    return nullptr;
-  }
 
   m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow);
   m_browser->refresh();
