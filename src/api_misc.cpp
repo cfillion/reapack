@@ -30,6 +30,12 @@ R"(Opens the package browser with the given filter string.)",
     browser->setFilter(filter);
 });
 
+DEFINE_API(void, Commit, ((bool, refreshUI)),
+R"(Run pending tasks and save the configuration file. If refreshUI is true the browser and manager windows are guaranteed to be refreshed (otherwise it depends on which tasks are performed).)",
+{
+  g_reapack->commitConfig(refreshUI);
+});
+
 DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
     ((char*, errorOut))((int, errorOut_sz)),
 R"(Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.)",

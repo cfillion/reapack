@@ -155,6 +155,7 @@ static void setupAPI()
   g_reapack->setupAPI(&API::AboutRepository);
   g_reapack->setupAPI(&API::AddSetRepository);
   g_reapack->setupAPI(&API::BrowsePackages);
+  g_reapack->setupAPI(&API::Commit);
   g_reapack->setupAPI(&API::CompareVersions);
   g_reapack->setupAPI(&API::EnumOwnedFiles);
   g_reapack->setupAPI(&API::FreeEntry);

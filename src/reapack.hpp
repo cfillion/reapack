@@ -80,7 +80,7 @@ public:
   Remote remote(const std::string &name) const;
 
   Transaction *setupTransaction();
-  void commitConfig();
+  void commitConfig(bool refresh = true);
   Config *config() const { return m_config; }
 
 private:

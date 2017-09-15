@@ -40,9 +40,8 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
 });
 
 DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
-  ((bool, enable))((int, autoInstall))((bool, commit))
-  ((char*, errorOut))((int, errorOut_sz)),
-R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to keep the existing URL. Set commit to true for the last call to process the new list and update the GUI.
+  ((bool, enable))((int, autoInstall))((char*, errorOut))((int, errorOut_sz)),
+R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to keep the existing URL. Call <a href="#ReaPack_Commit">ReaPack_Commit(true)</a> when done to process the new list and update the GUI.
 
 autoInstall: usually set to 2 (obey user setting).)",
 {
@@ -65,9 +64,6 @@ autoInstall: usually set to 2 (obey user setting).)",
       snprintf(errorOut, errorOut_sz, "invalid value for autoInstall");
     return false;
   }
-
-  if(commit)
-    g_reapack->commitConfig();
 
   return true;
 });

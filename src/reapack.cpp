@@ -352,17 +352,21 @@ void ReaPack::teardownTransaction()
     refreshBrowser();
 }
 
-void ReaPack::commitConfig()
+void ReaPack::commitConfig(bool refresh)
 {
   if(m_tx) {
-    m_tx->receipt()->setIndexChanged(); // force browser refresh
-    m_tx->onFinish(bind(&ReaPack::refreshManager, this));
+    if(refresh) {
+      m_tx->receipt()->setIndexChanged(); // force browser refresh
+      m_tx->onFinish(bind(&ReaPack::refreshManager, this));
+    }
     m_tx->onFinish(bind(&Config::write, m_config));
     m_tx->runTasks();
   }
   else {
-    refreshManager();
-    refreshBrowser();
+    if(refresh) {
+      refreshManager();
+      refreshBrowser();
+    }
     m_config->write();
   }
 }

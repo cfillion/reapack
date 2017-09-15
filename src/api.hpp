@@ -43,6 +43,7 @@ private:
 namespace API {
   // api_misc.cpp
   extern APIFunc BrowsePackages;
+  extern APIFunc Commit;
   extern APIFunc CompareVersions;
 
   // api_package.cpp
