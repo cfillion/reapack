@@ -371,12 +371,15 @@ Transaction *ReaPack::setupTransaction()
 
 void ReaPack::teardownTransaction()
 {
+  const bool needRefresh = m_tx->receipt()->test(Receipt::RefreshBrowser);
+
   delete m_tx;
   m_tx = nullptr;
 
   // Update the browser only after the transaction is deleted because
   // it must be able to start a new one to load the indexes
-  refreshBrowser();
+  if(needRefresh)
+    refreshBrowser();
 }
 
 void ReaPack::commitConfig()

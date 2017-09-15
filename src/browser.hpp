@@ -81,9 +81,9 @@ private:
 
   enum LoadState {
     Init,
-    Loaded,
     Loading,
-    Done,
+    Loaded,
+    DeferredLoaded,
   };
 
   void onSelection();

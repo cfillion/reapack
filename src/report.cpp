@@ -74,7 +74,7 @@ void Report::updateLabel()
     label = "Operation failed. The following error(s) occured:";
   else if(m_receipt->test(Receipt::ErrorFlag))
     label = "The operation was partially completed (one or more errors occured):";
-  else if(m_receipt->test(Receipt::InstalledFlag | Receipt::RemovedFlag))
+  else if(m_receipt->test(Receipt::PackageChanged))
     label = "All done! Description of the changes:";
   else
     label = "Operation completed successfully!";

@@ -41,14 +41,19 @@ public:
     RemovedFlag       = 1<<2,
     ExportedFlag      = 1<<3,
     ErrorFlag         = 1<<4,
+    IndexChangedFlag  = 1<<5,
+
+    PackageChanged    = InstalledFlag | RemovedFlag,
+    RefreshBrowser    = PackageChanged | IndexChangedFlag,
   };
 
   Receipt();
 
   int flags() const { return m_flags; }
-  bool test(int f) const { return (m_flags & f) != 0; }
+  bool test(Flag f) const { return (m_flags & f) != 0; }
   bool empty() const;
 
+  void setIndexChanged() { m_flags |= IndexChangedFlag; }
   void addInstall(const Version *, const Registry::Entry &);
   void addRemoval(const Path &p);
   void addRemovals(const std::set<Path> &);

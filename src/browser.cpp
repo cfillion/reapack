@@ -182,8 +182,8 @@ void Browser::onCommand(const int id, const int event)
     else
       break;
   case IDCANCEL:
-    if(m_loadState >= Loading)
-      hide();
+    if(m_loadState == Loading)
+      hide(); // keep ourselves alive
     else
       close();
     break;
@@ -387,12 +387,13 @@ void Browser::updateAbout()
 
 void Browser::refresh(const bool stale)
 {
-  // Do nothing when called again when (or while) the index downloading
-  // transaction finishes. populate() handles the next step of the loading process.
   switch(m_loadState) {
-  case Done:
+  case DeferredLoaded:
+    // We already processed this transaction immediately before.
     m_loadState = Loaded;
+    return;
   case Loading:
+    // Don't refresh again while currently refreshing.
     return;
   default:
     break;
@@ -414,28 +415,28 @@ void Browser::refresh(const bool stale)
   }
 
   if(Transaction *tx = g_reapack->setupTransaction()) {
-    const bool firstLoad = m_loadState == Init;
+    const bool isFirstLoad = m_loadState == Init;
     m_loadState = Loading;
 
     tx->fetchIndexes(remotes, stale);
     tx->onFinish([=] {
-      m_loadState = Done;
-
-      if(firstLoad || isVisible())
+      if(isFirstLoad || isVisible()) {
         populate(tx->getIndexes(remotes));
-      else
+
+        // Ignore the next call to refreshBrowser() if we know we'll be
+        // requested to handle the very same transaction.
+        m_loadState = tx->receipt()->test(Receipt::RefreshBrowser) ?
+          DeferredLoaded : Loaded;
+      }
+      else {
+        // User manually asked to refresh the browser but closed the window
+        // before it could finished fetching the up to date indexes.
         close();
+      }
     });
 
     tx->runTasks();
   }
-}
-
-void Browser::setFilter(const string &newFilter)
-{
-  Win32::setWindowText(m_filterHandle, newFilter.c_str());
-  updateFilter(); // don't wait for the timer, update now!
-  SetFocus(m_filterHandle);
 }
 
 void Browser::populate(const vector<IndexPtr> &indexes)
@@ -474,6 +475,13 @@ void Browser::populate(const vector<IndexPtr> &indexes)
 
   if(!isVisible())
     show();
+}
+
+void Browser::setFilter(const string &newFilter)
+{
+  Win32::setWindowText(m_filterHandle, newFilter.c_str());
+  updateFilter(); // don't wait for the timer, update now!
+  SetFocus(m_filterHandle);
 }
 
 void Browser::transferActions()

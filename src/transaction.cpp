@@ -146,7 +146,9 @@ void Transaction::fetchIndex(const Remote &remote, const bool stale,
   dl->setName(remote.name());
 
   dl->onFinish([=] {
-    if(!dl->save())
+    if(dl->save())
+      m_receipt.setIndexChanged();
+    else
       m_receipt.addError({FS::lastError(), dl->path().target().join()});
 
     if(FS::exists(path))
