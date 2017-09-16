@@ -53,6 +53,7 @@ public:
     ACTION_ABOUT_PKG,
     ACTION_ABOUT_REMOTE,
     ACTION_RESET_ALL,
+    ACTION_COPY,
     ACTION_REFRESH,
     ACTION_MANAGE,
   };
@@ -108,6 +109,7 @@ private:
   void updateAction(const int index);
   void selectionDo(const std::function<void (int)> &);
   View currentView() const;
+  void copy();
   bool confirm() const;
   bool apply();
 

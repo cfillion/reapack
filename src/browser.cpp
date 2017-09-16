@@ -163,6 +163,9 @@ void Browser::onCommand(const int id, const int event)
   case ACTION_RESET_ALL:
     selectionDo(bind(&Browser::resetActions, this, _1));
     break;
+  case ACTION_COPY:
+    copy();
+    break;
   case ACTION_REFRESH:
     refresh(true);
     break;
@@ -207,14 +210,8 @@ bool Browser::onKeyDown(const int key, const int mods)
     m_list->selectAll();
   else if(mods == (CtrlModifier | ShiftModifier) && key == 'A')
     m_list->unselectAll();
-  else if(mods == CtrlModifier && key == 'C') {
-    vector<string> values;
-
-    for(const int index : m_list->selection(false))
-      values.push_back(getEntry(index)->displayName());
-
-    setClipboard(values);
-  }
+  else if(mods == CtrlModifier && key == 'C')
+    copy();
   else if(!mods && key == VK_F5)
     refresh(true);
   else
@@ -249,6 +246,7 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   if(!menu.empty())
     menu.addSeparator();
 
+  menu.addAction("&Copy package name", ACTION_COPY);
   menu.addAction("&Select all", IDC_SELECT);
   menu.addAction("&Unselect all", IDC_UNSELECT);
 
@@ -780,6 +778,16 @@ void Browser::selectionDo(const function<void (int)> &func)
 auto Browser::currentView() const -> View
 {
   return (View)SendMessage(m_view, CB_GETCURSEL, 0, 0);
+}
+
+void Browser::copy()
+{
+  vector<string> values;
+
+  for(const int index : m_list->selection(false))
+    values.push_back(getEntry(index)->displayName());
+
+  setClipboard(values);
 }
 
 bool Browser::confirm() const
