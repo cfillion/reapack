@@ -31,9 +31,11 @@
 #include <unordered_set>
 
 class ArchiveReader;
+class InstallTask;
 class Path;
 class Remote;
-struct InstallOpts;
+class SynchronizeTask;
+class UninstallTask;
 
 typedef std::shared_ptr<Task> TaskPtr;
 
@@ -56,6 +58,8 @@ public:
   void synchronize(const Remote &,
     boost::optional<bool> forceAutoInstall = boost::none);
   void install(const Version *, bool pin = false, const ArchiveReaderPtr & = nullptr);
+  void install(const Version *, const Registry::Entry &oldEntry,
+    bool pin = false, const ArchiveReaderPtr & = nullptr);
   void setPinned(const Registry::Entry &, bool pinned);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
@@ -68,6 +72,13 @@ public:
   Registry *registry() { return &m_registry; }
   ThreadPool *threadPool() { return &m_threadPool; }
 
+protected:
+  friend SynchronizeTask;
+  friend InstallTask;
+  friend UninstallTask;
+
+  IndexPtr loadIndex(const Remote &);
+  void addObsolete(const Registry::Entry &e) { m_obsolete.insert(e); }
   void registerAll(bool add, const Registry::Entry &);
   void registerFile(const HostTicket &t) { m_regQueue.push(t); }
 
@@ -83,15 +94,11 @@ private:
   typedef std::priority_queue<TaskPtr,
     std::vector<TaskPtr>, CompareTask> TaskQueue;
 
-  void fetchIndex(const Remote &, bool stale,
-    const std::function<void (const IndexPtr &)> & = {});
-  IndexPtr loadIndex(const Remote &);
-  void synchronize(const Package *, const InstallOpts &);
-  bool allFilesExists(const std::set<Path> &) const;
   void registerQueued();
   void registerScript(const HostTicket &, bool isLast);
   void inhibit(const Remote &);
   void promptObsolete();
+  void runQueue(TaskQueue &queue);
   bool commitTasks();
   void finish();
 

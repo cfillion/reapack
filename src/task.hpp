@@ -18,8 +18,10 @@
 #ifndef REAPACK_TASK_HPP
 #define REAPACK_TASK_HPP
 
+#include "config.hpp"
 #include "path.hpp"
 #include "registry.hpp"
+#include "remote.hpp"
 
 #include <set>
 #include <unordered_set>
@@ -31,6 +33,7 @@ class Source;
 class ThreadTask;
 class Transaction;
 class Version;
+struct InstallOpts;
 
 typedef std::shared_ptr<ArchiveReader> ArchiveReaderPtr;
 typedef std::shared_ptr<const Index> IndexPtr;
@@ -52,6 +55,24 @@ protected:
 
 private:
   Transaction *m_tx;
+};
+
+class SynchronizeTask : public Task {
+public:
+  SynchronizeTask(const Remote &remote, bool fullSync,
+    const InstallOpts &, Transaction *);
+
+protected:
+  bool start() override;
+  void commit() override;
+
+private:
+  void synchronize(const Package *);
+
+  Remote m_remote;
+  Path m_indexPath;
+  InstallOpts m_opts;
+  bool m_fullSync;
 };
 
 class InstallTask : public Task {

@@ -27,9 +27,32 @@ TEST_CASE("file modification time", M) {
 TEST_CASE("file exists", M) {
   UseRootPath root(RIPATH);
 
-  REQUIRE(FS::exists(Index::pathFor("Новая папка")));
-  REQUIRE_FALSE(FS::exists(Index::pathFor("Новая папка"), true));
+  SECTION("file") {
+    const Path &file = Index::pathFor("Новая папка");
+    REQUIRE(FS::exists(file));
+    REQUIRE_FALSE(FS::exists(file, true));
+  }
 
-  REQUIRE_FALSE(FS::exists(Path("ReaPack")));
-  REQUIRE(FS::exists(Path("ReaPack"), true));
+  SECTION("directory") {
+    REQUIRE_FALSE(FS::exists(Path("ReaPack")));
+    REQUIRE(FS::exists(Path("ReaPack"), true));
+  }
+}
+
+TEST_CASE("all files exists", M) {
+  UseRootPath root(RIPATH);
+
+  REQUIRE(FS::allFilesExists({}));
+
+  REQUIRE(FS::allFilesExists({
+    Index::pathFor("future_version"),
+    Index::pathFor("broken"),
+  }));
+
+  REQUIRE_FALSE(FS::allFilesExists({
+    Index::pathFor("future_version"),
+    Index::pathFor("not_found"),
+  }));
+
+  REQUIRE_FALSE(FS::allFilesExists({Path("ReaPack")})); // directory
 }

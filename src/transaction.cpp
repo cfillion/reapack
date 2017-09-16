@@ -46,7 +46,7 @@ Transaction::Transaction()
     queue<HostTicket>().swap(m_regQueue);
   });
 
-  // run tasks after fetching indexes
+  // run the next task queue when the current one is done
   m_threadPool.onDone(bind(&Transaction::runTasks, this));
 }
 
@@ -61,47 +61,13 @@ void Transaction::synchronize(const Remote &remote,
   InstallOpts opts = g_reapack->config()->install;
   opts.autoInstall = remote.autoInstall(forceAutoInstall.value_or(opts.autoInstall));
 
-  fetchIndex(remote, true, [=] (const IndexPtr &ri) {
-    for(const Package *pkg : ri->packages())
-      synchronize(pkg, opts);
-
-    if(opts.promptObsolete && !remote.isProtected()) {
-      for(const Registry::Entry &entry : m_registry.getEntries(ri->name())) {
-        if(!entry.pinned && !ri->find(entry.category, entry.package))
-          m_obsolete.insert(entry);
-      }
-    }
-  });
-}
-
-void Transaction::synchronize(const Package *pkg, const InstallOpts &opts)
-{
-  const auto &regEntry = m_registry.getEntry(pkg);
-
-  if(!regEntry && !opts.autoInstall)
-    return;
-
-  const Version *latest = pkg->lastVersion(opts.bleedingEdge, regEntry.version);
-
-  // don't crash nor install a pre-release if autoInstall is on with
-  // bleedingEdge mode off and there is no stable release
-  if(!latest)
-    return;
-
-  if(regEntry.version == latest->name()) {
-    if(allFilesExists(latest->files()))
-      return; // latest version is really installed, nothing to do here!
-  }
-  else if(regEntry.pinned || latest->name() < regEntry.version)
-    return;
-
-  m_nextQueue.push(make_shared<InstallTask>(latest, false, regEntry, nullptr, this));
+  m_nextQueue.push(make_shared<SynchronizeTask>(remote, true, opts, this));
 }
 
 void Transaction::fetchIndexes(const vector<Remote> &remotes, const bool stale)
 {
   for(const Remote &remote : remotes)
-    fetchIndex(remote, stale);
+    m_nextQueue.push(make_shared<SynchronizeTask>(remote, false, InstallOpts{}, this));
 }
 
 vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
@@ -115,43 +81,6 @@ vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
   }
 
   return indexes;
-}
-
-void Transaction::fetchIndex(const Remote &remote, const bool stale,
-  const function<void (const IndexPtr &)> &cb)
-{
-  const auto &netConfig = g_reapack->config()->network;
-
-  const auto load = [=] {
-    const IndexPtr ri = loadIndex(remote);
-    if(cb && ri)
-      cb(ri);
-  };
-
-  const Path &path = Index::pathFor(remote.name());
-  time_t mtime = 0, now = time(nullptr);
-  FS::mtime(path, &mtime);
-
-  const time_t threshold = netConfig.staleThreshold;
-  if(!stale && mtime && (!threshold || mtime > now - threshold)) {
-    load();
-    return;
-  }
-
-  auto dl = new FileDownload(path, remote.url(), netConfig, Download::NoCacheFlag);
-  dl->setName(remote.name());
-
-  dl->onFinish([=] {
-    if(dl->save())
-      m_receipt.setIndexChanged();
-    else
-      m_receipt.addError({FS::lastError(), dl->path().target().join()});
-
-    if(FS::exists(path))
-      load(); // try to load anyway, even on failure
-  });
-
-  m_threadPool.push(dl);
 }
 
 IndexPtr Transaction::loadIndex(const Remote &remote)
@@ -172,10 +101,15 @@ IndexPtr Transaction::loadIndex(const Remote &remote)
   }
 }
 
-void Transaction::install(const Version *ver,
+void Transaction::install(const Version *ver, const bool pin,
+  const ArchiveReaderPtr &reader)
+{
+  install(ver, m_registry.getEntry(ver->package()), pin, reader);
+}
+
+void Transaction::install(const Version *ver, const Registry::Entry &oldEntry,
   const bool pin, const ArchiveReaderPtr &reader)
 {
-  const auto &oldEntry = m_registry.getEntry(ver->package());
   m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
 }
 
@@ -211,44 +145,49 @@ void Transaction::exportArchive(const string &path)
 
 bool Transaction::runTasks()
 {
-  if(!m_nextQueue.empty()) {
-    m_taskQueues.push(m_nextQueue);
-    TaskQueue().swap(m_nextQueue);
-  }
-
-  if(!commitTasks())
-    return false; // we're downloading indexes for synchronization
-  else if(m_isCancelled) {
-    finish();
-    return true;
-  }
-
-  promptObsolete();
-
-  while(!m_taskQueues.empty()) {
-    m_registry.savepoint();
-
-    auto &queue = m_taskQueues.front();
-
-    while(!queue.empty()) {
-      const TaskPtr &task = queue.top();
-
-      if(task->start())
-        m_runningTasks.push(task);
-
-      queue.pop();
+  do {
+    if(!m_nextQueue.empty()) {
+      m_taskQueues.push(m_nextQueue);
+      TaskQueue().swap(m_nextQueue);
     }
 
-    m_registry.restore();
-    m_taskQueues.pop();
+    if(!commitTasks())
+      return false; // we're downloading indexes for synchronization
+    else if(m_isCancelled) {
+      finish();
+      return true;
+    }
 
-    if(!commitTasks()) // if the tasks didn't finish immediately (downloading)
-      return false;
-  }
+    promptObsolete();
+
+    while(!m_taskQueues.empty()) {
+      runQueue(m_taskQueues.front());
+      m_taskQueues.pop();
+
+      if(!commitTasks())
+        return false; // if the tasks didn't finish immediately (downloading)
+    }
+  } while(!m_nextQueue.empty()); // restart if a task's commit() added new tasks
 
   finish(); // we're done!
 
   return true;
+}
+
+void Transaction::runQueue(TaskQueue &queue)
+{
+  m_registry.savepoint();
+
+  while(!queue.empty()) {
+    const TaskPtr &task = queue.top();
+
+    if(task->start())
+      m_runningTasks.push(task);
+
+    queue.pop();
+  }
+
+  m_registry.restore();
 }
 
 bool Transaction::commitTasks()
@@ -277,16 +216,6 @@ void Transaction::finish()
 
   m_onFinish();
   m_cleanupHandler();
-}
-
-bool Transaction::allFilesExists(const set<Path> &list) const
-{
-  for(const Path &path : list) {
-    if(!FS::exists(path))
-      return false;
-  }
-
-  return true;
 }
 
 void Transaction::registerAll(const bool add, const Registry::Entry &entry)

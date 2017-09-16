@@ -179,6 +179,16 @@ bool FS::exists(const Path &path, const bool dir)
     return false;
 }
 
+bool FS::allFilesExists(const set<Path> &paths)
+{
+  for(const Path &path : paths) {
+    if(!exists(path))
+      return false;
+  }
+
+  return true;
+}
+
 bool FS::mkdir(const Path &path)
 {
   if(exists(path, true))

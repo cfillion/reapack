@@ -18,6 +18,7 @@
 #ifndef REAPACK_FILESYSTEM_HPP
 #define REAPACK_FILESYSTEM_HPP
 
+#include <set>
 #include <string>
 
 class Path;
@@ -34,6 +35,7 @@ namespace FS {
   bool removeRecursive(const Path &);
   bool mtime(const Path &, time_t *);
   bool exists(const Path &, bool dir = false);
+  bool allFilesExists(const std::set<Path> &);
   bool mkdir(const Path &);
 
   const char *lastError();
