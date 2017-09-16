@@ -486,7 +486,8 @@ void Manager::copyUrl()
 
 void Manager::aboutRepo(const bool focus)
 {
-  g_reapack->about(getRemote(m_list->currentIndex()), focus);
+  if(m_list->hasSelection())
+    g_reapack->about(getRemote(m_list->currentIndex()), focus);
 }
 
 void Manager::importExport()
