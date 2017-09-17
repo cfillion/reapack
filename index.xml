@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="6439531cfa47f073a7e182c59e24c17b4e0070bc" name="ReaPack">
+<index version="1" commit="8cfc6ac0444e9a001a1e02dcf37206b0e3bde87e" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -487,6 +487,61 @@ Changed:
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack64.dll</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2beta2/reaper_reapack64.so</source>
+      </version>
+      <version name="1.2rc1" author="cfillion" time="2017-09-17T22:36:00Z">
+        <changelog><![CDATA[Added:
+* add support for Automation Item files
+* api: add ProcessQueue function
+* api: autosynchronize repositories when using AddSetRepository and the autoinstall option is enabled
+* browser: add "Copy package name" action to context menu (equivalent to Ctrl+C)
+* browser: restore selection after applying changes or synchronyzing
+* manager: make the about repository dialog follow selection
+* path: implement absolute path detection on Windows
+* support 32-bit Linux builds using gcc-multilib
+* support registering scripts into the MIDI Event List Editor and Media Explorer sections
+
+Fixed:
+* api: fix AddSetRepository not saving all repo properties when toggling enabled status
+* browser: manager: re-sort list after changing row contents
+* import: add repositories in the same order as they were entered in the URL text field
+* listview: sort identical columns by row insertion order
+* path: fix appending an absolute path to any empty path resulting in an relative path
+* path: treat absolute and relative paths as always not equal
+
+Changed:
+* archive: export to temporary file first (automatically removed if cancelled)
+* browser: always show selection actions in the context menu
+* browser: avoid opening the database twice when loading the list
+* browser: display pinned state separately from installation state
+* browser: enable Last Update column by default
+* browser: move per-package actions to a submenu when selection > 1
+* browser: show confirmation dialog only when uninstalling packages
+* core: allow opening the browser while a transaction is running
+* core: ignore errors during self-registration
+* core: report an error when folders cannot be created in the resource directory
+* do not prompt to uninstall pinned obsolete packages when syncing
+* listview: update individual cells without replacing the whole row
+* listview: various optimizations
+* path: prepend resource path to relative paths only
+* receipt: sort installed packages alphabetically
+* redesign the report dialog
+* refresh the browser only when necessary
+* report: update top label depending on which operations were performed and their result
+
+Removed:
+* api: remove commit parameter from AddSetRepository (replaced by ProcessQueue)
+* api: remove tab parameter from About* functions
+* browser: manager: remove ellipsis after "About <repository>" actions
+* browser: remove "Show descriptions" option
+* don't add or remove scripts from the Action List when enabling/disabling a repository
+* don't automatically synchronize when enabling a repository unless the autoinstall option is set
+* remote: remove overzealous length limits on repository names]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack64.so">https://build/from/source</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://build/from/source</source>
       </version>
     </reapack>
   </category>
