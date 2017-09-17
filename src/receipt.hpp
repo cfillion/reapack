@@ -21,8 +21,9 @@
 #include "registry.hpp"
 #include "errors.hpp"
 
-#include <vector>
 #include <set>
+#include <sstream>
+#include <vector>
 
 class Index;
 class InstallTicket;
