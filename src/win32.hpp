@@ -55,6 +55,7 @@ namespace Win32 {
   void setWindowText(HWND handle, const char *text);
   std::string getWindowText(HWND handle);
   void shellExecute(const char *what, const char *arg = nullptr);
+  HANDLE globalCopy(const std::string &);
 
   bool writePrivateProfileString(const char *g, const char *k, const char *v, const char *p);
   std::string getPrivateProfileString(const char *g, const char *k, const char *v, const char *p);

@@ -73,6 +73,18 @@ void Win32::shellExecute(const char *what, const char *arg)
   ShellExecute(nullptr, L("open"), widen_cstr(what), widen_cstr(arg), nullptr, SW_SHOW);
 }
 
+HANDLE Win32::globalCopy(const string &text)
+{
+  // calculate the size in bytes including the null terminator
+  const size_t size = (text.size() + 1) * sizeof(char_type);
+
+  HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, size);
+  memcpy(GlobalLock(mem), widen_cstr(text.c_str()), size);
+  GlobalUnlock(mem);
+
+  return mem;
+}
+
 bool Win32::writePrivateProfileString(const char *group, const char *key,
   const char *value, const char *path)
 {

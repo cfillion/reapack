@@ -18,6 +18,7 @@
 #include "dialog.hpp"
 
 #include "control.hpp"
+#include "win32.hpp"
 
 #include <algorithm>
 #include <boost/range/adaptor/map.hpp>
@@ -330,12 +331,7 @@ void Dialog::stopTimer(int id)
 
 void Dialog::setClipboard(const string &text)
 {
-  // calculate the size in bytes including the null terminator
-  const size_t size = (text.size() + 1) * sizeof(char);
-
-  HANDLE mem = GlobalAlloc(GMEM_MOVEABLE, size);
-  memcpy(GlobalLock(mem), text.c_str(), size);
-  GlobalUnlock(mem);
+  const HANDLE mem = Win32::globalCopy(text);
 
   OpenClipboard(m_handle);
   EmptyClipboard();
