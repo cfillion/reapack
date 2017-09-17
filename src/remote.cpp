@@ -33,9 +33,9 @@ static bool validateName(const string &name)
   using namespace std::regex_constants;
 
   // see https://en.wikipedia.org/wiki/Filename#Reserved%5Fcharacters%5Fand%5Fwords
-  static const regex validPattern("[^*\\\\:<>?/|\"[:cntrl:]]{3,}");
+  static const regex validPattern("[^*\\\\:<>?/|\"[:cntrl:]]+");
   static const regex invalidPattern(
-    "[\\.\x20].+|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d", icase);
+    "[\\.\x20].*|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d", icase);
 
   smatch valid, invalid;
   regex_match(name, valid, validPattern);
