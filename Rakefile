@@ -11,8 +11,6 @@ task :build, [:variants] do |_, args|
   vars = Array(args[:variants]) + args.extras
   vars.reject &:empty?
 
-  vars = ['x64'] if vars.empty? && RUBY_PLATFORM.include?('linux')
-
   if Gem.win_platform? && ENV['VCINSTALLDIR'].nil?
     raise "VCINSTALLDIR is unset. Is this Developer Command Prompt for Visual Studio?"
   end

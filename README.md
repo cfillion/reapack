@@ -38,10 +38,12 @@ vendor
 
 ### Linux
 
-1. Install gcc, tup, ruby and php
+1. Install gcc-multilib, tup, ruby and php
 2. Install boost, curl and sqlite3 development files
+  (32-bit and 64-bit versions depending on your vendor)
 3. Build using `rake`
-4. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
+4. Copy or link `x64/bin/reaper_reapack64.so` or `x86/bin/reaper_reapack32.so`
+  to `~/.REAPER/UserPlugins`
 
 ### macOS
 
@@ -55,7 +57,7 @@ vendor
     - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
 3. Build using `rake`
 5. Copy or link `x64/bin/reaper_reapack64.dylib` or `x86/bin/reaper_reapack32.dylib`
-   to REAPER's extension directory
+  to REAPER's extension directory
 
 ### Windows
 
@@ -65,9 +67,9 @@ vendor
   thread](https://groups.google.com/d/topic/tup-users/UNUSE15PQdA/discussion))
   and [Visual Studio 2017, with C++ support](https://www.visualstudio.com/vs/community/)
 2. Prevent Microsoft's C++ compiler from saving telemetry outside of the build directory:
-   [instructions here](https://msdn.microsoft.com/en-us/library/ee225238.aspx#Anchor_5)
-   or set the `OptIn` registry key to `0` in
-   `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\15.0\SQM`
+  [instructions here](https://msdn.microsoft.com/en-us/library/ee225238.aspx#Anchor_5)
+  or set the `OptIn` registry key to `0` in
+  `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\15.0\SQM`
 3. Download the latest [boost](http://www.boost.org/) and copy the
   `boost` subdirectory into `vendor`
 4. Download the latest [curl](http://curl.haxx.se/download.html) source

@@ -33,6 +33,7 @@ public:
     Darwin64Platform,
 
     LinuxPlatform,
+    Linux32Platform,
     Linux64Platform,
   };
 

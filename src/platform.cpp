@@ -37,6 +37,8 @@ auto Platform::parse(const char *platform) -> Enum
     return Darwin64Platform;
   else if(!strcmp(platform, "linux"))
     return LinuxPlatform;
+  else if(!strcmp(platform, "linux32"))
+    return Linux32Platform;
   else if(!strcmp(platform, "linux64"))
     return Linux64Platform;
   else
@@ -49,25 +51,25 @@ bool Platform::test() const
   case GenericPlatform:
 #ifdef __APPLE__
   case DarwinPlatform:
-#ifdef __x86_64__
+#  ifdef __x86_64__
   case Darwin64Platform:
-#else
+#  else
   case Darwin32Platform:
-#endif
-
+#  endif
 #elif __linux__
   case LinuxPlatform:
-#ifdef __x86_64__
+#  ifdef __x86_64__
   case Linux64Platform:
-#endif
-
+#  else
+  case Linux32Platform:
+#  endif
 #elif _WIN32
   case WindowsPlatform:
-#ifdef _WIN64
+#  ifdef _WIN64
   case Win64Platform:
-#else
+#  else
   case Win32Platform:
-#endif
+#  endif
 #endif
     return true;
   default:
