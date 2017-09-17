@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "archive_tasks.hpp"
+#include "task.hpp"
 
 #include "archive.hpp"
 #include "config.hpp"

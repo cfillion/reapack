@@ -40,7 +40,7 @@ typedef std::shared_ptr<const Index> IndexPtr;
 
 class Task {
 public:
-  Task(Transaction *parent);
+  Task(Transaction *parent) : m_tx(parent) {}
   virtual ~Task() {}
 
   virtual bool start() { return true; }
@@ -124,6 +124,19 @@ protected:
 private:
   Registry::Entry m_entry;
   bool m_pin;
+};
+
+class ExportTask : public Task {
+public:
+  ExportTask(const std::string &path, Transaction *);
+
+protected:
+  bool start() override;
+  void commit() override;
+  void rollback() override;
+
+private:
+  TempPath m_path;
 };
 
 #endif
