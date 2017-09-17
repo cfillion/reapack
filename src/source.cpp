@@ -30,8 +30,12 @@ auto Source::getSection(const char *name) -> Section
     return MainSection;
   else if(!strcmp(name, "midi_editor"))
     return MIDIEditorSection;
-  else if(!strcmp(name, "midi_inline_editor"))
+  else if(!strcmp(name, "midi_inlineeditor"))
     return MIDIInlineEditorSection;
+  else if(!strcmp(name, "midi_eventlisteditor"))
+    return MIDIEventListEditorSection;
+  else if(!strcmp(name, "mediaexplorer"))
+    return MediaExplorerSection;
   else if(!strcmp(name, "true"))
     return ImplicitSection;
   else
@@ -47,8 +51,6 @@ auto Source::detectSection(const string &category) -> Section
 
   if(topcategory == "midi editor")
     return MIDIEditorSection;
-  else if(topcategory == "midi inline editor")
-    return MIDIInlineEditorSection;
   else
     return MainSection;
 }

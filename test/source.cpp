@@ -54,11 +54,13 @@ TEST_CASE("source type from package", M) {
 }
 
 TEST_CASE("parse file section", M) {
-  REQUIRE(-1 == Source::getSection("true"));
-  REQUIRE(0 == Source::getSection("hello"));
-  REQUIRE(Source::MainSection == Source::getSection("main"));
-  REQUIRE(Source::MIDIEditorSection == Source::getSection("midi_editor"));
-  REQUIRE(Source::MIDIInlineEditorSection == Source::getSection("midi_inline_editor"));
+  REQUIRE(Source::getSection("true") == -1);
+  REQUIRE(Source::getSection("hello") == Source::UnknownSection);
+  REQUIRE(Source::getSection("main") == Source::MainSection);
+  REQUIRE(Source::getSection("midi_editor") == Source::MIDIEditorSection);
+  REQUIRE(Source::getSection("midi_inlineeditor") == Source::MIDIInlineEditorSection);
+  REQUIRE(Source::getSection("midi_eventlisteditor") == Source::MIDIEventListEditorSection);
+  REQUIRE(Source::getSection("mediaexplorer") == Source::MediaExplorerSection);
 }
 
 TEST_CASE("explicit source section", M) {
@@ -83,7 +85,16 @@ TEST_CASE("explicit source section", M) {
   }
 }
 
-TEST_CASE("implicit source section") {
+TEST_CASE("implicit section detection (v1.0 compatibility)", M) {
+  REQUIRE(Source::MainSection == Source::detectSection("Hello World"));
+  REQUIRE(Source::MainSection == Source::detectSection("Hello/World"));
+  REQUIRE(Source::MainSection == Source::detectSection("Hello/midi editor"));
+
+  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor"));
+  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor/Hello"));
+}
+
+TEST_CASE("implicit section detection from source (v1.0 compatibility)") {
   Index ri("Index Name");
 
   SECTION("main") {
@@ -105,28 +116,6 @@ TEST_CASE("implicit source section") {
     source.setSections(Source::ImplicitSection);
     REQUIRE(source.sections() == Source::MIDIEditorSection);
   }
-
-  SECTION("midi inline editor") {
-    Category cat("MIDI Inline Editor", &ri);
-    Package pack(Package::ScriptType, "package name", &cat);
-    Version ver("1.0", &pack);
-
-    Source source("filename", "url", &ver);
-    source.setSections(Source::ImplicitSection);
-    REQUIRE(source.sections() == Source::MIDIInlineEditorSection);
-  }
-}
-
-TEST_CASE("implicit section detection", M) {
-  REQUIRE(Source::MainSection == Source::detectSection("Hello World"));
-  REQUIRE(Source::MainSection == Source::detectSection("Hello/World"));
-  REQUIRE(Source::MainSection == Source::detectSection("Hello/midi editor"));
-
-  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor"));
-  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor/Hello"));
-
-  REQUIRE(Source::MIDIInlineEditorSection ==
-    Source::detectSection("midi inline editor"));
 }
 
 TEST_CASE("empty source url", M) {

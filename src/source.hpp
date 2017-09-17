@@ -28,10 +28,12 @@ class Version;
 class Source {
 public:
   enum Section {
-    UnknownSection          = 0,
-    MainSection             = 1<<0,
-    MIDIEditorSection       = 1<<1,
-    MIDIInlineEditorSection = 1<<2,
+    UnknownSection             = 0,
+    MainSection                = 1<<0,
+    MIDIEditorSection          = 1<<1,
+    MIDIInlineEditorSection    = 1<<2,
+    MIDIEventListEditorSection = 1<<3,
+    MediaExplorerSection       = 1<<4,
 
     ImplicitSection = -1, // for compatibility with v1.0
   };

@@ -545,9 +545,11 @@ void AboutPackageDelegate::init(About *dialog)
 void AboutPackageDelegate::updateList(const int index)
 {
   const pair<Source::Section, const char *> sectionMap[] = {
-    {Source::MainSection, "Main"},
-    {Source::MIDIEditorSection, "MIDI Editor"},
-    {Source::MIDIInlineEditorSection, "MIDI Inline Editor"},
+    {Source::MainSection,                "Main"},
+    {Source::MIDIEditorSection,          "MIDI Editor"},
+    {Source::MIDIInlineEditorSection,    "MIDI Inline Editor"},
+    {Source::MIDIEventListEditorSection, "MIDI Event List Editor"},
+    {Source::MediaExplorerSection,       "Media Explorer"},
   };
 
   if(index < 0)

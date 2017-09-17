@@ -250,9 +250,11 @@ void Transaction::registerQueued()
 void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 {
   const pair<Source::Section, int> sectionMap[] = {
-    {Source::MainSection, 0},
-    {Source::MIDIEditorSection, 32060},
-    {Source::MIDIInlineEditorSection, 32062},
+    {Source::MainSection,                0},
+    {Source::MIDIEditorSection,          32060},
+    {Source::MIDIEventListEditorSection, 32061},
+    {Source::MIDIInlineEditorSection,    32062},
+    {Source::MediaExplorerSection,       32063},
   };
 
   if(!AddRemoveReaScript || !reg.file.sections)
