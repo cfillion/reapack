@@ -36,15 +36,11 @@ vendor
 └── reaper_plugin_functions.h
 ```
 
-All instructions and paths below are relative to the directory containing the
-current file (README.md) on your computer (aka "this directory").
-
-
 ### Linux
 
 1. Install gcc, tup, ruby and php
 2. Install boost, curl and sqlite3 development files
-3. Run `rake` from this directory
+3. Build using `rake`
 4. Copy or link `x64/bin/reaper_reapack64.so` to `~/.REAPER/UserPlugins`
 
 ### macOS
@@ -57,7 +53,7 @@ current file (README.md) on your computer (aka "this directory").
     - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
     - [richtext-off](https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch)
     - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
-4. Run `rake` from this directory
+3. Build using `rake`
 5. Copy or link `x64/bin/reaper_reapack64.dylib` or `x86/bin/reaper_reapack32.dylib`
    to REAPER's extension directory
 
@@ -91,7 +87,6 @@ current file (README.md) on your computer (aka "this directory").
     ```
 5. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `vendor`.
-6. Run `build_deps.bat` and `rake` from this directory using
-  "Developer Command Prompt for VS 2017"
+6. Run `.\build_deps.bat` and `rake` using "Developer Command Prompt for VS 2017"
 7. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
    to your REAPER plugin folder
