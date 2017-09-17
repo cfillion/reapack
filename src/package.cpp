@@ -47,6 +47,8 @@ Package::Type Package::getType(const char *type)
     return TrackTemplateType;
   else if(!strcmp(type, "midinotenames"))
     return MIDINoteNamesType;
+  else if(!strcmp(type, "autoitem"))
+    return AutomationItemType;
   else
     return UnknownType;
 }
@@ -76,6 +78,8 @@ string Package::displayType(const Type type)
     return "Track Template";
   case MIDINoteNamesType:
     return "MIDI Note Names";
+  case AutomationItemType:
+    return "Automation Item";
   }
 
   return "Unknown";

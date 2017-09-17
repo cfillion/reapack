@@ -124,6 +124,9 @@ Path Source::targetPath() const
   case Package::MIDINoteNamesType:
     path += "MIDINoteNames";
     break;
+  case Package::AutomationItemType:
+    path += "AutomationItems";
+    break;
   case Package::UnknownType:
     // The package has an unsupported type, so we make an empty path.
     // The empty path won't be used because the category will reject
@@ -136,7 +139,8 @@ Path Source::targetPath() const
   // append the rest of the path
   switch(type) {
   case Package::ScriptType:
-  case Package::EffectType: {
+  case Package::EffectType:
+  case Package::AutomationItemType: {
     const Category *cat = m_version->package()->category();
     path += cat->index()->name();
 

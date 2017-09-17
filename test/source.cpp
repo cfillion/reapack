@@ -155,6 +155,7 @@ TEST_CASE("source target path", M) {
     {Package::ProjectTemplateType, "ProjectTemplates/file.name"},
     {Package::TrackTemplateType,   "TrackTemplates/file.name"},
     {Package::MIDINoteNamesType,   "MIDINoteNames/file.name"},
+    {Package::AutomationItemType,  "AutomationItems/Index Name/Category Name/file.name"},
   };
 
   Source source("file.name", "url", &ver);

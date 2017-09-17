@@ -37,6 +37,7 @@ public:
     ProjectTemplateType,
     TrackTemplateType,
     MIDINoteNamesType,
+    AutomationItemType,
   };
 
   static Type getType(const char *);

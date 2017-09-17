@@ -295,6 +295,7 @@ void Browser::displayButton()
     {"&Project Templates", Package::ProjectTemplateType},
     {"&Track Templates", Package::TrackTemplateType},
     {"&MIDI Note Names", Package::MIDINoteNamesType},
+    {"&Automation Items", Package::AutomationItemType},
     {"&Other packages", Package::UnknownType},
   };
 
@@ -345,6 +346,7 @@ bool Browser::isFiltered(Package::Type type) const
   case Package::ProjectTemplateType:
   case Package::TrackTemplateType:
   case Package::MIDINoteNamesType:
+  case Package::AutomationItemType:
     break;
   case Package::DataType:
     type = Package::UnknownType;

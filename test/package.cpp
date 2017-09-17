@@ -21,6 +21,7 @@ TEST_CASE("package type from string", M) {
     {"projecttpl", Package::ProjectTemplateType},
     {"tracktpl", Package::TrackTemplateType},
     {"midinotenames", Package::MIDINoteNamesType},
+    {"autoitem", Package::AutomationItemType},
   };
 
   for(const auto &pair : tests)
@@ -40,6 +41,7 @@ TEST_CASE("package type to string", M) {
     {Package::ProjectTemplateType,   "Project Template"},
     {Package::TrackTemplateType,     "Track Template"},
     {Package::MIDINoteNamesType,     "MIDI Note Names"},
+    {Package::AutomationItemType,    "Automation Item"},
     {static_cast<Package::Type>(-1), "Unknown"},
   };
 
