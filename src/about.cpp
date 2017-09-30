@@ -646,9 +646,8 @@ void AboutPackageDelegate::locate()
     if(!FS::exists(path))
       return;
 
-    string arg("/select,\"");
-    arg += path.prependRoot().join();
-    arg += '"';
+    const string &arg = String::format(R"(/select,"%s")",
+      path.prependRoot().join().c_str());
 
     Win32::shellExecute("explorer.exe", arg.c_str());
   }
