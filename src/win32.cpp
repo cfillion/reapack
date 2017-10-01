@@ -70,7 +70,8 @@ void Win32::setWindowText(const HWND handle, const char *text)
 
 void Win32::shellExecute(const char *what, const char *arg)
 {
-  ShellExecute(nullptr, L("open"), widen_cstr(what), widen_cstr(arg), nullptr, SW_SHOW);
+  ShellExecute(nullptr, L("open"), widen_cstr(what),
+    arg ? widen_cstr(arg) : nullptr, nullptr, SW_SHOW);
 }
 
 HANDLE Win32::globalCopy(const string &text)
