@@ -45,7 +45,7 @@ public:
   bool absolute() const { return m_absolute; }
 
   Path dirname() const;
-  std::string join(const char sep = 0) const;
+  std::string join(bool nativeSeparator = true) const;
   std::string first() const;
   std::string last() const;
   bool startsWith(const Path &) const;

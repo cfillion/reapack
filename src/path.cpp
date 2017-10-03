@@ -23,11 +23,13 @@
 
 using namespace std;
 
+static constexpr char UNIX_SEPARATOR = '/';
+
 #ifndef _WIN32
-static constexpr char SEPARATOR = '/';
+static constexpr char NATIVE_SEPARATOR = UNIX_SEPARATOR;
 #else
 #include <windows.h> // MAX_PATH
-static constexpr char SEPARATOR = '\\';
+static constexpr char NATIVE_SEPARATOR = '\\';
 #endif
 
 static constexpr const char *DOT = ".";
@@ -151,8 +153,10 @@ Path Path::dirname() const
   return dir;
 }
 
-string Path::join(const char sep) const
+string Path::join(const bool nativeSeparator) const
 {
+  const char sep = nativeSeparator ? NATIVE_SEPARATOR : UNIX_SEPARATOR;
+
 #ifdef _WIN32
   constexpr bool absoluteSlash = false;
 #else
@@ -163,7 +167,7 @@ string Path::join(const char sep) const
 
   for(const string &part : m_parts) {
     if(!path.empty() || absoluteSlash)
-      path += sep ? sep : SEPARATOR;
+      path += sep;
 
     path += part;
   }

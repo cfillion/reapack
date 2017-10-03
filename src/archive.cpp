@@ -196,7 +196,7 @@ int ArchiveReader::extractFile(const Path &path)
 
 int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
 {
-  int status = unzLocateFile(m_zip, path.join('/').c_str(), false);
+  int status = unzLocateFile(m_zip, path.join(false).c_str(), false);
   if(status != UNZ_OK)
     return status;
 
@@ -279,7 +279,7 @@ int ArchiveWriter::addFile(const Path &path)
 
 int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
 {
-  const int status = zipOpenNewFileInZip(m_zip, path.join('/').c_str(), nullptr,
+  const int status = zipOpenNewFileInZip(m_zip, path.join(false).c_str(), nullptr,
     nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 
   if(status != ZIP_OK)

@@ -186,7 +186,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     const Path &path = src->targetPath();
 
     m_insertFile->bind(1, entryId);
-    m_insertFile->bind(2, path.join('/'));
+    m_insertFile->bind(2, path.join(false));
     m_insertFile->bind(3, src->sections());
     m_insertFile->bind(4, src->typeOverride());
 
@@ -303,7 +303,7 @@ auto Registry::getOwner(const Path &path) const -> Entry
 {
   Entry entry{};
 
-  m_getOwner->bind(1, path.join('/'));
+  m_getOwner->bind(1, path.join(false));
 
   m_getOwner->exec([&] {
     fillEntry(m_getOwner, &entry);

@@ -101,12 +101,12 @@ TEST_CASE("modify path", M) {
   REQUIRE(a.join() == "world");
 }
 
-TEST_CASE("custom separator", M) {
+TEST_CASE("force unix separator", M) {
   Path a;
   a.append("hello");
   a.append("world");
 
-  REQUIRE(a.join('-') == "hello-world");
+  REQUIRE(a.join(false) == "hello/world");
 }
 
 TEST_CASE("split input", M) {
