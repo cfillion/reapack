@@ -2,6 +2,8 @@
 
 #include <path.hpp>
 
+using Catch::Matchers::StartsWith;
+
 using namespace std;
 
 static const char *M = "[path]";
@@ -175,6 +177,24 @@ TEST_CASE("append absolute path to empty path", M) {
 
   CHECK(path == abs);
   REQUIRE(path.absolute());
+}
+
+TEST_CASE("extended absolute paths", M) {
+#ifdef _WIN32
+  Path abs("C:\\");
+  abs.append(string(260, 'a'));
+
+  CHECK(abs.absolute());
+  REQUIRE_THAT(abs.join(), StartsWith("\\\\?\\"));
+
+  const Path path(string(500, 'a'));
+  CHECK_FALSE(path.absolute());
+#else
+  Path path("/hello");
+  path.append(string(260, 'a'));
+#endif
+
+  REQUIRE_THAT(path.join(), !StartsWith("\\\\?\\"));
 }
 
 #ifndef _WIN32

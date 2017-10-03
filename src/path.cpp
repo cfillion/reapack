@@ -26,6 +26,7 @@ using namespace std;
 #ifndef _WIN32
 static constexpr char SEPARATOR = '/';
 #else
+#include <windows.h> // MAX_PATH
 static constexpr char SEPARATOR = '\\';
 #endif
 
@@ -166,6 +167,11 @@ string Path::join(const char sep) const
 
     path += part;
   }
+
+#ifdef _WIN32
+  if(m_absolute && path.size() > MAX_PATH)
+    path.insert(0, "\\\\?\\");
+#endif
 
   return path;
 }
