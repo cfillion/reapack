@@ -5,6 +5,7 @@
 #include <index.hpp>
 
 using Catch::Matchers::Contains;
+using Catch::Matchers::EndsWith;
 
 using namespace std;
 
@@ -174,7 +175,8 @@ TEST_CASE("format install ticket", M) {
     entry.version = VersionName("1.0");
     stream << InstallTicket{v3, entry};
     REQUIRE_THAT(stream.str(),
-      !Contains("v1.0") && Contains("v2.0") && Contains("v3.0"));
+      !Contains("v1.0") && Contains("\r\nv3.0\r\n  No changelog\r\nv2.0"));
+    REQUIRE_THAT(stream.str(), !EndsWith("\r\n"));
   }
 
   SECTION("downgrade") {

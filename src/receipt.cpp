@@ -120,7 +120,7 @@ ostream &operator<<(ostream &os, const InstallTicket &t)
   if(os.tellp() > 0)
     os << "\r\n";
 
-  os << t.m_version->package()->fullName() << "\r\n";
+  os << t.m_version->package()->fullName();
 
   if(t.m_isUpdate) {
     const auto &versions = t.m_version->package()->versions();
@@ -129,7 +129,7 @@ ostream &operator<<(ostream &os, const InstallTicket &t)
       if(ver->name() <= t.m_previous)
         break;
       else if(ver->name() <= t.m_version->name())
-        os << *ver;
+        os << "\r\n" << *ver;
     }
   }
   else
