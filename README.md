@@ -38,8 +38,8 @@ vendor
 
 ### Linux
 
-1. Install gcc-multilib, tup, ruby and php
-2. Install boost, curl and sqlite3 development files
+1. Install gcc-multilib, tup, Ruby and PHP
+2. Install Boost, curl and SQLite3 development files
   (32-bit and 64-bit versions depending on your vendor)
 3. Build using `rake`
 4. Copy or link `x64/bin/reaper_reapack64.so` or `x86/bin/reaper_reapack32.so`
@@ -48,7 +48,7 @@ vendor
 ### macOS
 
 1. Install [Homebrew](http://brew.sh/) and Xcode Command Line Tools
-2. Install [tup](http://gittup.org/tup/) and [boost](http://www.boost.org/):
+2. Install [tup](http://gittup.org/tup/) and [Boost](http://www.boost.org/):
   `brew tap homebrew/fuse && brew install tup boost`
 3. Apply these patches to WDL:
     - [optimize-listview-setitemtext](https://github.com/cfillion/WDL/commit/a6d7f802762e5e9d9833829bab83696e0db50de6.patch)
@@ -70,7 +70,7 @@ vendor
   [instructions here](https://msdn.microsoft.com/en-us/library/ee225238.aspx#Anchor_5)
   or set the `OptIn` registry key to `0` in
   `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VSCommon\15.0\SQM`
-3. Download the latest [boost](http://www.boost.org/) and copy the
+3. Download the latest [Boost](http://www.boost.org/) and copy the
   `boost` subdirectory into `vendor`
 4. Download the latest [curl](http://curl.haxx.se/download.html) source
   code and extract it as `vendor/curl`:
@@ -87,7 +87,7 @@ vendor
     │   └── ...
     └── ...
     ```
-5. Download the latest stable amalgamation build of [sqlite](https://www.sqlite.org/download.html).
+5. Download the latest stable amalgamation build of [SQLite](https://www.sqlite.org/download.html).
    Put `sqlite3.h` and `sqlite3.c` in `vendor`.
 6. Run `.\build_deps.bat` and `rake` using "Developer Command Prompt for VS 2017"
 7. Copy or symlink `x64\bin\reaper_reapack64.dll` or `x86\bin\reaper_reapack32.dll`
