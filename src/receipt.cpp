@@ -133,7 +133,7 @@ ostream &operator<<(ostream &os, const InstallTicket &t)
     }
   }
   else
-    os << *t.m_version;
+    os << "\r\n" << *t.m_version;
 
   return os;
 }
