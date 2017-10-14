@@ -36,11 +36,14 @@ vendor
 └── reaper_plugin_functions.h
 ```
 
+Follow the following instructions to install prerequisites and build both 64-bit
+and 32-bit versions. Use `rake 'default[x64]'` or `rake 'default[x86]'` instead
+of `rake` to build just one.
+
 ### Linux
 
-1. Install gcc-multilib, tup, Ruby and PHP
-2. Install Boost, curl and SQLite3 development files
-  (32-bit and 64-bit versions depending on your vendor)
+1. Install gcc-multilib (and g++-multilib depending on your vendor), tup, Ruby and PHP
+2. Install Boost, curl and SQLite3 development files (64-bit and 32-bit versions if building both)
 3. Build using `rake`
 4. Copy or link `x64/bin/reaper_reapack64.so` or `x86/bin/reaper_reapack32.so`
   to `~/.REAPER/UserPlugins`
