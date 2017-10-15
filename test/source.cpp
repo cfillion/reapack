@@ -86,12 +86,12 @@ TEST_CASE("explicit source section", M) {
 }
 
 TEST_CASE("implicit section detection (v1.0 compatibility)", M) {
-  REQUIRE(Source::MainSection == Source::detectSection("Hello World"));
-  REQUIRE(Source::MainSection == Source::detectSection("Hello/World"));
-  REQUIRE(Source::MainSection == Source::detectSection("Hello/midi editor"));
+  REQUIRE(Source::MainSection == Source::detectSection(Path{"Hello World"}));
+  REQUIRE(Source::MainSection == Source::detectSection(Path{"Hello/World"}));
+  REQUIRE(Source::MainSection == Source::detectSection(Path{"Hello/midi editor"}));
 
-  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor"));
-  REQUIRE(Source::MIDIEditorSection == Source::detectSection("midi editor/Hello"));
+  REQUIRE(Source::MIDIEditorSection == Source::detectSection(Path{"midi editor"}));
+  REQUIRE(Source::MIDIEditorSection == Source::detectSection(Path{"midi editor/Hello"}));
 }
 
 TEST_CASE("implicit section detection from source (v1.0 compatibility)") {

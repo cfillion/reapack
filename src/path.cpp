@@ -143,6 +143,22 @@ void Path::removeLast()
     m_parts.pop_back();
 }
 
+string Path::front() const
+{
+  if(empty())
+    return {};
+
+  return m_parts.front();
+}
+
+string Path::basename() const
+{
+  if(empty())
+    return {};
+
+  return m_parts.back();
+}
+
 Path Path::dirname() const
 {
   if(empty())
@@ -178,22 +194,6 @@ string Path::join(const bool nativeSeparator) const
 #endif
 
   return path;
-}
-
-string Path::first() const
-{
-  if(empty())
-    return {};
-
-  return m_parts.front();
-}
-
-string Path::last() const
-{
-  if(empty())
-    return {};
-
-  return m_parts.back();
 }
 
 bool Path::startsWith(const Path &o) const

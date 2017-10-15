@@ -42,11 +42,11 @@ auto Source::getSection(const char *name) -> Section
     return UnknownSection;
 }
 
-auto Source::detectSection(const string &category) -> Section
+auto Source::detectSection(const Path &category) -> Section
 {
   // this is for compatibility with indexes made for v1.0
 
-  string topcategory = Path(category).first();
+  string topcategory = category.front();
   boost::algorithm::to_lower(topcategory);
 
   if(topcategory == "midi editor")

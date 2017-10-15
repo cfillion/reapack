@@ -523,7 +523,8 @@ void AboutPackageDelegate::init(About *dialog)
 
   dialog->menu()->addColumn({"Version", 142, 0, ListView::VersionType});
 
-  dialog->list()->addColumn({"File", 474});
+  dialog->list()->addColumn({"File", 267});
+  dialog->list()->addColumn({"Path", 207});
   dialog->list()->addColumn({"Action List", 84});
 
   dialog->menu()->reserveRows(m_package->versions().size());
@@ -588,7 +589,8 @@ void AboutPackageDelegate::updateList(const int index)
 
     int c = 0;
     auto row = m_dialog->list()->createRow((void *)src);
-    row->setCell(c++, src->targetPath().join());
+    row->setCell(c++, src->targetPath().basename());
+    row->setCell(c++, src->targetPath().dirname().join());
     row->setCell(c++, actionList);
   }
 }

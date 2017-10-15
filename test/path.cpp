@@ -19,36 +19,57 @@ TEST_CASE("compare paths", M) {
   REQUIRE_FALSE(a != a);
 }
 
-TEST_CASE("append path components", M) {
+TEST_CASE("append path segments", M) {
   Path path;
   REQUIRE(path.empty());
   REQUIRE(path.size() == 0);
-  REQUIRE(path.join() == string());
-  REQUIRE(path.dirname().empty());
 
-  path.append("hello");
+  path.append(string());
+  REQUIRE(path.empty());
+  REQUIRE(path.size() == 0);
+
+  path.append("foo");
   REQUIRE_FALSE(path.empty());
   REQUIRE(path.size() == 1);
-  REQUIRE(path.join() == "hello");
+
+  path.append("bar");
+  REQUIRE(path.size() == 2);
+
+  path.append("baz");
+  REQUIRE(path.size() == 3);
+}
+
+TEST_CASE("path dirname", M) {
+  Path path;
   REQUIRE(path.dirname().empty());
 
-  path.append("world");
-  REQUIRE(path.size() == 2);
-#ifndef _WIN32
-  REQUIRE(path.join() == "hello/world");
-#else
-  REQUIRE(path.join() == "hello\\world");
-#endif
-  REQUIRE(path.dirname().join() == "hello");
+  path.append("foo");
+  REQUIRE(path.dirname().empty());
 
-  path.append("test");
-  REQUIRE(path.size() == 3);
-#ifndef _WIN32
-  REQUIRE(path.join() == "hello/world/test");
-#else
-  REQUIRE(path.join() == "hello\\world\\test");
-#endif
-  REQUIRE(path.dirname() == Path("hello/world"));
+  path.append("bar");
+  REQUIRE(path.dirname() == Path("foo"));
+
+  path.append("baz");
+  REQUIRE(path.dirname() == Path("foo/bar"));
+}
+
+TEST_CASE("path basename", M) {
+  Path path;
+  REQUIRE(path.basename().empty());
+
+  path.append("foo");
+  REQUIRE(path.basename() == "foo");
+
+  path.append("bar");
+  REQUIRE(path.basename() == "bar");
+}
+
+TEST_CASE("path first segment", M) {
+  Path path;
+  REQUIRE(path.front().empty());
+
+  path.append("foo");
+  REQUIRE(path.front() == "foo");
 }
 
 TEST_CASE("concatenate paths", M) {
@@ -61,13 +82,6 @@ TEST_CASE("concatenate paths", M) {
 
   REQUIRE(a + b == c);
   REQUIRE(a + "world" == c);
-}
-
-TEST_CASE("empty components", M) {
-  Path a;
-  a.append(string());
-
-  REQUIRE(a.size() == 0);
 }
 
 TEST_CASE("strip trailing/leading slashes", M) {
@@ -87,8 +101,8 @@ TEST_CASE("strip trailing/leading slashes", M) {
 TEST_CASE("clear path", M) {
   Path a;
   a.append("test");
-
   CHECK(a.size() == 1);
+
   a.clear();
   REQUIRE(a.size() == 0);
 }
@@ -203,7 +217,7 @@ TEST_CASE("compare absolute to relative path (unix)", M) {
 }
 #endif
 
-TEST_CASE("remove last component of path", M) {
+TEST_CASE("remove last segment of path", M) {
   Path a;
   a.append("a");
   a.append("b");
@@ -251,15 +265,6 @@ TEST_CASE("remove root path", M) {
   REQUIRE(path.removeRoot() == Path("hello/world"));
 }
 
-TEST_CASE("first and last path component", M) {
-  REQUIRE(Path().first().empty());
-  REQUIRE(Path().last().empty());
-
-  const Path path("hello/world/chunky/bacon");
-  REQUIRE(path.first() == "hello");
-  REQUIRE(path.last() == "bacon");
-}
-
 TEST_CASE("directory traversal", M) {
   SECTION("append (enabled)") {
     REQUIRE(Path("a/./b") == Path("a/b"));
@@ -278,7 +283,7 @@ TEST_CASE("directory traversal", M) {
     const Path a = Path("a/b/c") + "../../../d/e/f";
     REQUIRE(a == Path("d/e/f"));
 
-    // here, the directory traversal components are lost before concatenating
+    // here, the directory traversal segments are lost before concatenating
     const Path b = Path("a/b/c") + Path("../../../d/e/f");
     REQUIRE(b == Path("a/b/c/d/e/f"));
   }

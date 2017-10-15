@@ -39,7 +39,7 @@ public:
   };
 
   static Section getSection(const char *);
-  static Section detectSection(const std::string &category);
+  static Section detectSection(const Path &category);
 
   Source(const std::string &file, const std::string &url, const Version *);
   const Version *version() const { return m_version; }
