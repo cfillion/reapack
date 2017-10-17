@@ -203,8 +203,12 @@ void Browser::onCommand(const int id, const int event)
 
 bool Browser::onKeyDown(const int key, const int mods)
 {
-  if(GetFocus() != m_list->handle())
+  if(GetFocus() != m_list->handle()) {
+    if(key == VK_UP || key == VK_DOWN)
+      SetFocus(m_list->handle());
+
     return false;
+  }
 
   if(mods == CtrlModifier && key == 'A')
     m_list->selectAll();
