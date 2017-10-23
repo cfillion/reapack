@@ -218,6 +218,8 @@ bool Browser::onKeyDown(const int key, const int mods)
     copy();
   else if(!mods && key == VK_F5)
     refresh(true);
+  else if(!mods && key == VK_SPACE)
+    aboutPackage(m_list->currentIndex());
   else
     return false;
 
