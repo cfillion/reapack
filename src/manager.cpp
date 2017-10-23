@@ -335,7 +335,7 @@ void Manager::refresh()
       m_list->select(row->index());
   }
 
-  m_list->sort();
+  m_list->endEdit();
 }
 
 void Manager::updateEnabledCell(int index, const Remote &remote)
@@ -374,8 +374,7 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
       updateEnabledCell(index, remote);
   }
 
-  if(updateRow && m_list->sortColumn() == 2)
-    m_list->sort();
+  m_list->endEdit(); // re-sort if required
 }
 
 void Manager::setRemoteEnabled(const bool enabled)

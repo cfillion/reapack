@@ -100,6 +100,7 @@ public:
   void updateCell(int row, int cell);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
+  int visibleRowCount() const;
   bool empty() const { return m_rows.empty(); }
 
   void clear();
@@ -126,9 +127,8 @@ public:
   int columnWidth(int index) const;
   int columnCount() const { return (int)m_cols.size(); }
 
-  void sort();
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
-  int sortColumn() const { return m_sort ? m_sort->column : -1; }
+  void endEdit();
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
@@ -151,6 +151,11 @@ private:
     SortOrder order;
   };
 
+  enum DirtyFlag {
+    NeedSortFlag    = 1<<0,
+    NeedReindexFlag = 1<<1,
+  };
+
   static int adjustWidth(int);
   void setExStyle(int style, bool enable);
   void setSortArrow(bool);
@@ -159,12 +164,16 @@ private:
   int translate(int userIndex) const;
   int translateBack(int internalIndex) const;
   void headerMenu(int x, int y);
+  void sort();
+  void reindexVisible();
 
   bool m_customizable;
   std::vector<Column> m_cols;
   std::vector<RowPtr> m_rows;
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
+
+  int m_dirty;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;

@@ -283,7 +283,7 @@ void Browser::updateDisplayLabel()
 {
   char btnLabel[32];
   snprintf(btnLabel, sizeof(btnLabel), "%d/%zu package%s...",
-    m_list->rowCount(), m_entries.size(),
+    m_list->visibleRowCount(), m_entries.size(),
     m_entries.size() == 1 ? "" : "s");
 
   Win32::setWindowText(m_displayBtn, btnLabel);
@@ -541,7 +541,7 @@ void Browser::fillList()
   }
 
   m_list->setScroll(scroll);
-  m_list->sort();
+  m_list->endEdit();
 
   // restore selection only after having sorted the table
   // in order to get the same scroll position as before if possible
@@ -777,10 +777,7 @@ void Browser::selectionDo(const function<void (int)> &func)
     lastSize = newSize;
   }
 
-  // re-sort here rather than doing it once per entry after updating the
-  // status cell in updateAction
-  if(m_list->sortColumn() == 0)
-    m_list->sort();
+  m_list->endEdit(); // re-sort if required
 }
 
 auto Browser::currentView() const -> View

@@ -154,7 +154,7 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 
   m_delegate = delegate;
   m_delegate->init(this);
-  m_menu->sort();
+  m_menu->endEdit();
 
   m_currentIndex = -255;
   updateList();
@@ -271,7 +271,7 @@ void About::updateList()
   m_delegate->updateList(index);
   m_currentIndex = index;
 
-  m_list->sort();
+  m_list->endEdit();
 }
 
 AboutIndexDelegate::AboutIndexDelegate(const IndexPtr &index)

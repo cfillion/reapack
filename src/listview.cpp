@@ -31,7 +31,7 @@
 using namespace std;
 
 ListView::ListView(HWND handle, const Columns &columns)
-  : Control(handle), m_customizable(false), m_sort(), m_defaultSort()
+  : Control(handle), m_customizable(false), m_sort(), m_defaultSort(), m_dirty(0)
 {
   for(const Column &col : columns)
     addColumn(col);
@@ -94,8 +94,12 @@ void ListView::updateCell(int row, int cell)
 {
   const int viewRowIndex = translate(row);
   const auto &&text = Win32::widen(m_rows[row]->cell(cell).value);
+
   ListView_SetItemText(handle(), viewRowIndex, cell,
     const_cast<Win32::char_type *>(text.c_str()));
+
+  if(m_sort && m_sort->column == cell)
+    m_dirty |= NeedSortFlag;
 }
 
 void ListView::removeRow(const int userIndex)
@@ -156,14 +160,7 @@ void ListView::sort()
 
   ListView_SortItems(handle(), compare, (LPARAM)this);
 
-  for(int viewIndex = 0; viewIndex < rowCount(); viewIndex++) {
-    LVITEM item{};
-    item.iItem = viewIndex;
-    item.mask |= LVIF_PARAM;
-    ListView_GetItem(handle(), &item);
-
-    row(item.lParam)->viewIndex = viewIndex;
-  }
+  m_dirty = (m_dirty | NeedReindexFlag) & ~NeedSortFlag;
 }
 
 void ListView::sortByColumn(const int index, const SortOrder order, const bool user)
@@ -177,6 +174,7 @@ void ListView::sortByColumn(const int index, const SortOrder order, const bool u
     m_defaultSort = settings;
 
   m_sort = settings;
+  m_dirty |= NeedSortFlag;
 
   setSortArrow(true);
 }
@@ -209,6 +207,31 @@ void ListView::setSortArrow(const bool set)
   Header_SetItem(header, m_sort->column, &item);
 }
 
+void ListView::reindexVisible()
+{
+  const int visibleCount = visibleRowCount();
+  for(int viewIndex = 0; viewIndex < visibleCount; viewIndex++) {
+    LVITEM item{};
+    item.iItem = viewIndex;
+    item.mask |= LVIF_PARAM;
+    ListView_GetItem(handle(), &item);
+
+    row(item.lParam)->viewIndex = viewIndex;
+  }
+
+  m_dirty &= ~NeedReindexFlag;
+}
+
+void ListView::endEdit()
+{
+  if(m_dirty & NeedSortFlag)
+    sort(); // sort may set NeedReindexFlag
+  if(m_dirty & NeedReindexFlag)
+    reindexVisible();
+
+  assert(!m_dirty);
+}
+
 void ListView::clear()
 {
   ListView_DeleteAllItems(handle());
@@ -234,6 +257,11 @@ void ListView::setSelected(const int index, const bool select)
 {
   ListView_SetItemState(handle(), translate(index),
     select ? LVIS_SELECTED : 0, LVIS_SELECTED);
+}
+
+int ListView::visibleRowCount() const
+{
+  return ListView_GetItemCount(handle());
 }
 
 int ListView::currentIndex() const
@@ -395,7 +423,7 @@ void ListView::handleColumnClick(LPARAM lParam)
   }
 
   sortByColumn(col, order, true);
-  sort();
+  endEdit();
 }
 
 int ListView::translate(const int userIndex) const
@@ -476,7 +504,9 @@ void ListView::resetColumns()
     setSortArrow(false);
     m_sort = m_defaultSort;
     setSortArrow(true);
-    sort();
+
+    m_dirty |= NeedSortFlag;
+    endEdit();
   }
 }
 
