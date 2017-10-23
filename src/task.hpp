@@ -59,7 +59,8 @@ private:
 
 class SynchronizeTask : public Task {
 public:
-  SynchronizeTask(const Remote &remote, bool fullSync,
+  // TODO: remove InstallOpts argument
+  SynchronizeTask(const Remote &remote, bool stale, bool fullSync,
     const InstallOpts &, Transaction *);
 
 protected:
@@ -72,6 +73,7 @@ private:
   Remote m_remote;
   Path m_indexPath;
   InstallOpts m_opts;
+  bool m_stale;
   bool m_fullSync;
 };
 

@@ -60,13 +60,13 @@ void Transaction::synchronize(const Remote &remote,
   InstallOpts opts = g_reapack->config()->install;
   opts.autoInstall = remote.autoInstall(forceAutoInstall.value_or(opts.autoInstall));
 
-  m_nextQueue.push(make_shared<SynchronizeTask>(remote, true, opts, this));
+  m_nextQueue.push(make_shared<SynchronizeTask>(remote, true, true, opts, this));
 }
 
 void Transaction::fetchIndexes(const vector<Remote> &remotes, const bool stale)
 {
   for(const Remote &remote : remotes)
-    m_nextQueue.push(make_shared<SynchronizeTask>(remote, false, InstallOpts{}, this));
+    m_nextQueue.push(make_shared<SynchronizeTask>(remote, stale, false, InstallOpts{}, this));
 }
 
 vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const

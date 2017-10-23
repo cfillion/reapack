@@ -24,10 +24,10 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 
-SynchronizeTask::SynchronizeTask(const Remote &remote, const bool fullSync,
-    const InstallOpts &opts, Transaction *tx)
+SynchronizeTask::SynchronizeTask(const Remote &remote, const bool stale,
+    const bool fullSync, const InstallOpts &opts, Transaction *tx)
   : Task(tx), m_remote(remote), m_indexPath(Index::pathFor(m_remote.name())),
-    m_opts(opts), m_fullSync(fullSync)
+    m_opts(opts), m_stale(stale), m_fullSync(fullSync)
 {
 }
 
@@ -39,7 +39,7 @@ bool SynchronizeTask::start()
   FS::mtime(m_indexPath, &mtime);
 
   const time_t threshold = netConfig.staleThreshold;
-  if(!m_fullSync && mtime && (!threshold || mtime > now - threshold))
+  if(!m_stale && mtime && (!threshold || mtime > now - threshold))
     return true;
 
   auto dl = new FileDownload(m_indexPath, m_remote.url(),
