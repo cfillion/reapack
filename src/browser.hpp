@@ -20,7 +20,6 @@
 
 #include "dialog.hpp"
 
-#include "filter.hpp"
 #include "package.hpp"
 
 #include <boost/optional.hpp>
@@ -125,12 +124,11 @@ private:
   LoadState m_loadState;
   int m_currentIndex;
 
-  Filter m_filter;
   boost::optional<Package::Type> m_typeFilter;
   std::vector<Entry> m_entries;
   std::list<Entry *> m_actions;
 
-  HWND m_filterHandle;
+  HWND m_filter;
   HWND m_view;
   HWND m_displayBtn;
   HWND m_actionsBtn;

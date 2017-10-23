@@ -20,6 +20,7 @@
 
 #include "control.hpp"
 
+#include "filter.hpp"
 #include "serializer.hpp"
 
 #include <boost/optional.hpp>
@@ -36,6 +37,7 @@ public:
   enum ColumnFlag {
     NoLabelFlag  = 1<<0,
     CollapseFlag = 1<<1,
+    FilterFlag   = 1<<2,
   };
 
   enum ColumnDataType {
@@ -54,7 +56,7 @@ public:
 
   class Row {
   public:
-    Row(size_t size, void *data, ListView *);
+    Row(void *data, ListView *);
     Row(const Row &) = delete;
     ~Row() { delete[] m_cells; }
 
@@ -64,6 +66,8 @@ public:
 
     const Cell &cell(const int i) const { return m_cells[i]; }
     void setCell(const int i, const std::string &, void *data = nullptr);
+
+    std::vector<std::string> filterValues() const;
 
   protected:
     friend ListView;
@@ -97,7 +101,6 @@ public:
   void reserveRows(size_t count) { m_rows.reserve(count); }
   RowPtr createRow(void *data = nullptr);
   const RowPtr &row(size_t index) const { return m_rows[index]; }
-  void updateCell(int row, int cell);
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
   int visibleRowCount() const;
@@ -123,11 +126,13 @@ public:
   std::vector<int> selection(bool sort = true) const;
 
   int addColumn(const Column &);
+  const Column &column(int index) const { return m_cols[index]; }
   void resizeColumn(int index, int width);
   int columnWidth(int index) const;
   int columnCount() const { return (int)m_cols.size(); }
 
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
+  void setFilter(const std::string &);
   void endEdit();
 
   void restoreState(Serializer::Data &);
@@ -139,8 +144,8 @@ public:
   void onContextMenu(const MenuSignal::slot_type &slot) { m_onContextMenu.connect(slot); }
 
 protected:
-  void onNotify(LPNMHDR, LPARAM) override;
-  bool onContextMenu(HWND, int, int) override;
+  friend Row;
+  void updateCell(int row, int cell);
 
 private:
   struct Sort {
@@ -154,7 +159,11 @@ private:
   enum DirtyFlag {
     NeedSortFlag    = 1<<0,
     NeedReindexFlag = 1<<1,
+    NeedFilterFlag  = 1<<2,
   };
+
+  void onNotify(LPNMHDR, LPARAM) override;
+  bool onContextMenu(HWND, int, int) override;
 
   static int adjustWidth(int);
   void setExStyle(int style, bool enable);
@@ -164,8 +173,10 @@ private:
   int translate(int userIndex) const;
   int translateBack(int internalIndex) const;
   void headerMenu(int x, int y);
+  void insertItem(int viewIndex, int rowIndex);
   void sort();
   void reindexVisible();
+  void filter();
 
   bool m_customizable;
   std::vector<Column> m_cols;
@@ -173,6 +184,7 @@ private:
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
 
+  Filter m_filter;
   int m_dirty;
 
   VoidSignal m_onSelect;

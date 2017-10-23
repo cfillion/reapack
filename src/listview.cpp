@@ -76,18 +76,24 @@ int ListView::addColumn(const Column &col)
 
 auto ListView::createRow(void *data) -> RowPtr
 {
-  LVITEM item{};
-  item.iItem = rowCount();
+  const int index = rowCount();
+  insertItem(index, index);
 
-  item.mask |= LVIF_PARAM;
-  item.lParam = item.iItem;
-
-  ListView_InsertItem(handle(), &item);
-
-  RowPtr row = make_shared<Row>(m_cols.size(), data, this);
+  RowPtr row = make_shared<Row>(data, this);
   m_rows.push_back(row);
 
   return row;
+}
+
+void ListView::insertItem(const int viewIndex, const int rowIndex)
+{
+  LVITEM item{};
+  item.iItem = viewIndex;
+
+  item.mask |= LVIF_PARAM;
+  item.lParam = rowIndex;
+
+  ListView_InsertItem(handle(), &item);
 }
 
 void ListView::updateCell(int row, int cell)
@@ -100,6 +106,8 @@ void ListView::updateCell(int row, int cell)
 
   if(m_sort && m_sort->column == cell)
     m_dirty |= NeedSortFlag;
+
+  m_dirty |= NeedFilterFlag;
 }
 
 void ListView::removeRow(const int userIndex)
@@ -207,6 +215,48 @@ void ListView::setSortArrow(const bool set)
   Header_SetItem(header, m_sort->column, &item);
 }
 
+void ListView::filter()
+{
+  vector<int> hide;
+
+  for(int ri = 0; ri < rowCount(); ++ri) {
+    RowPtr &row = m_rows[ri];
+
+    if(m_filter.match(row->filterValues())) {
+      if(row->viewIndex == -1) {
+        row->viewIndex = visibleRowCount();
+        insertItem(row->viewIndex, ri);
+
+        for(int ci = 0; ci < columnCount(); ++ci)
+          updateCell(ri, ci);
+
+        m_dirty |= NeedSortFlag;
+      }
+    }
+    else if(row->viewIndex > -1) {
+      hide.emplace_back(row->viewIndex);
+      row->viewIndex = -1;
+    }
+  }
+
+  std::sort(hide.begin(), hide.end());
+  for(int i = 0; i < (int)hide.size(); ++i) {
+    ListView_DeleteItem(handle(), hide[i] - i);
+    m_dirty |= NeedReindexFlag;
+  }
+
+  m_dirty &= ~NeedFilterFlag;
+}
+
+void ListView::setFilter(const string &newFilter)
+{
+  if(m_filter != newFilter) {
+    m_filter = newFilter;
+    m_dirty |= NeedFilterFlag;
+    endEdit();
+  }
+}
+
 void ListView::reindexVisible()
 {
   const int visibleCount = visibleRowCount();
@@ -224,6 +274,8 @@ void ListView::reindexVisible()
 
 void ListView::endEdit()
 {
+  if(m_dirty & NeedFilterFlag)
+    filter(); // filter may set NeedSortFlag
   if(m_dirty & NeedSortFlag)
     sort(); // sort may set NeedReindexFlag
   if(m_dirty & NeedReindexFlag)
@@ -593,9 +645,9 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
   return 0; // to make MSVC happy
 }
 
-ListView::Row::Row(const size_t size, void *data, ListView *list)
+ListView::Row::Row(void *data, ListView *list)
   : userData(data), viewIndex(list->rowCount()), m_userIndex(viewIndex),
-  m_list(list), m_cells(new Cell[size])
+  m_list(list), m_cells(new Cell[m_list->columnCount()])
 {
 }
 
@@ -606,4 +658,16 @@ void ListView::Row::setCell(const int i, const string &val, void *data)
   cell.userData = data;
 
   m_list->updateCell(m_userIndex, i);
+}
+
+vector<string> ListView::Row::filterValues() const
+{
+  vector<string> values;
+
+  for(int ci = 0; ci < m_list->columnCount(); ++ci) {
+    if(m_list->column(ci).test(FilterFlag))
+      values.push_back(m_cells[ci].value);
+  }
+
+  return values;
 }

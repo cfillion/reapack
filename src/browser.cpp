@@ -41,7 +41,7 @@ Browser::Browser()
 void Browser::onInit()
 {
   m_applyBtn = getControl(IDAPPLY);
-  m_filterHandle = getControl(IDC_FILTER);
+  m_filter = getControl(IDC_FILTER);
   m_view = getControl(IDC_TABS);
   m_displayBtn = getControl(IDC_DISPLAY);
   m_actionsBtn = getControl(IDC_ACTION);
@@ -59,13 +59,13 @@ void Browser::onInit()
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Status", 23, ListView::NoLabelFlag},
-    {"Package", 345},
-    {"Category", 105},
-    {"Version", 55, 0, ListView::VersionType},
-    {"Author", 95},
-    {"Type", 70},
-    {"Repository", 120, ListView::CollapseFlag},
+    {"Status",       23, ListView::NoLabelFlag},
+    {"Package",     345, ListView::FilterFlag},
+    {"Category",    105, ListView::FilterFlag},
+    {"Version",      55, 0, ListView::VersionType},
+    {"Author",       95, ListView::FilterFlag},
+    {"Type",         70},
+    {"Repository",  120, ListView::CollapseFlag | ListView::FilterFlag},
     {"Last Update", 105, 0, ListView::TimeType},
   });
 
@@ -77,7 +77,7 @@ void Browser::onInit()
   Dialog::onInit();
   setMinimumSize({600, 250});
 
-  setAnchor(m_filterHandle, AnchorRight);
+  setAnchor(m_filter, AnchorRight);
   setAnchor(getControl(IDC_CLEAR), AnchorLeftRight);
   setAnchor(getControl(IDC_LABEL2), AnchorLeftRight);
   setAnchor(m_view, AnchorLeftRight);
@@ -366,12 +366,8 @@ void Browser::updateFilter()
 {
   stopTimer(TIMER_FILTER);
 
-  const string &filter = Win32::getWindowText(m_filterHandle);
-
-  if(m_filter != filter) {
-    m_filter = filter;
-    fillList();
-  }
+  m_list->setFilter(Win32::getWindowText(m_filter));
+  updateDisplayLabel();
 }
 
 void Browser::updateAbout()
@@ -474,9 +470,9 @@ void Browser::populate(const vector<IndexPtr> &indexes, const Registry *reg)
 
 void Browser::setFilter(const string &newFilter)
 {
-  Win32::setWindowText(m_filterHandle, newFilter.c_str());
+  Win32::setWindowText(m_filter, newFilter.c_str());
   updateFilter(); // don't wait for the timer, update now!
-  SetFocus(m_filterHandle);
+  SetFocus(m_filter);
 }
 
 void Browser::transferActions()
@@ -553,6 +549,9 @@ void Browser::fillList()
 
 bool Browser::match(const Entry &entry) const
 {
+  if(isFiltered(entry.type()))
+    return false;
+
   switch(currentView()) {
   case AllView:
     break;
@@ -578,11 +577,7 @@ bool Browser::match(const Entry &entry) const
     break;
   }
 
-  if(isFiltered(entry.type()))
-    return false;
-
-  return m_filter.match({entry.displayName(), entry.categoryName(),
-    entry.displayAuthor(), entry.indexName()});
+  return true;
 }
 
 auto Browser::getEntry(const int index) -> Entry *
