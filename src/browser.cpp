@@ -743,10 +743,8 @@ void Browser::updateAction(const int index)
   else if(it == m_actions.end())
     m_actions.push_back(entry);
 
-  if(currentView() == QueuedView && !hasAction(entry)) {
+  if(currentView() == QueuedView && !hasAction(entry))
     m_list->removeRow(index);
-    updateDisplayLabel();
-  }
   else
     m_list->row(index)->setCell(0, entry->displayState());
 
@@ -778,6 +776,9 @@ void Browser::listDo(const function<void (int)> &func, const vector<int> &indexe
       offset++;
     lastSize = newSize;
   }
+
+  if(offset) // rows were deleted
+    updateDisplayLabel();
 }
 
 auto Browser::currentView() const -> View
