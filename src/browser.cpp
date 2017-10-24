@@ -818,7 +818,11 @@ bool Browser::apply()
   if(!tx)
     return false;
 
-  for(Entry *entry : m_actions) {
+  std::list<Entry *> actions;
+  swap(actions, m_actions);
+  disable(m_applyBtn);
+
+  for(Entry *entry : actions) {
     if(entry->target) {
       const Version *target = *entry->target;
 
@@ -835,13 +839,11 @@ bool Browser::apply()
     }
   }
 
-  m_actions.clear();
-  disable(m_applyBtn);
-
   if(!tx->runTasks()) {
     // this is an asynchronous transaction
     // update the state column right away to give visual feedback
-    fillList();
+    for(int i = 0, count = m_list->rowCount(); i < count; ++i)
+      updateAction(i);
   }
 
   return true;
