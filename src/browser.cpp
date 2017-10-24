@@ -249,11 +249,6 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   m_currentIndex = index;
   fillMenu(menu);
 
-  if(!menu.empty())
-    menu.addSeparator();
-
-  if(m_list->hasSelection())
-    menu.addAction("&Copy package name", ACTION_COPY);
   menu.addAction("&Select all", IDC_SELECT);
   menu.addAction("&Unselect all", IDC_UNSELECT);
 
@@ -275,6 +270,12 @@ void Browser::fillMenu(Menu &menu)
   }
   else if(entry)
     entry->fillMenu(menu);
+
+  if(!menu.empty())
+    menu.addSeparator();
+
+  if(m_list->hasSelection())
+    menu.addAction("&Copy package names", ACTION_COPY);
 }
 
 void Browser::fillSelectionMenu(Menu &menu)
