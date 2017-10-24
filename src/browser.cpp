@@ -252,7 +252,8 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   if(!menu.empty())
     menu.addSeparator();
 
-  menu.addAction("&Copy package name", ACTION_COPY);
+  if(m_list->hasSelection())
+    menu.addAction("&Copy package name", ACTION_COPY);
   menu.addAction("&Select all", IDC_SELECT);
   menu.addAction("&Unselect all", IDC_UNSELECT);
 
