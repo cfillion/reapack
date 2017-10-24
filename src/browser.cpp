@@ -816,11 +816,7 @@ bool Browser::apply()
   if(!tx)
     return false;
 
-  std::list<Entry *> actions;
-  swap(actions, m_actions);
-  disable(m_applyBtn);
-
-  for(Entry *entry : actions) {
+  for(Entry *entry : m_actions) {
     if(entry->target) {
       const Version *target = *entry->target;
 
@@ -837,12 +833,22 @@ bool Browser::apply()
     }
   }
 
+  m_actions.clear();
+  disable(m_applyBtn);
+
   if(!tx->runTasks()) {
-    // this is an asynchronous transaction
-    // update the state column right away to give visual feedback
+    // This is an asynchronous transaction.
+    // Updating the state column of all rows (not just visible ones since the
+    // hidden rows can be filtered into view again by user at any time) right away
+    // to give visual feedback.
     ListView::BeginEdit edit(m_list);
-    for(int i = 0, count = m_list->rowCount(); i < count; ++i)
-      updateAction(i);
+
+    if(currentView() == QueuedView)
+      m_list->clear();
+    else {
+      for(int i = 0, count = m_list->rowCount(); i < count; ++i)
+        m_list->row(i)->setCell(0, getEntry(i)->displayState());
+    }
   }
 
   return true;
