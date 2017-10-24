@@ -131,6 +131,8 @@ void ListView::removeRow(const int userIndex)
 
   ListView_DeleteItem(handle(), viewIndex);
   m_rows.erase(m_rows.begin() + userIndex);
+
+  reindexVisible(); // do it now so further removeRow will work as expected
 }
 
 void ListView::resizeColumn(const int index, const int width)
