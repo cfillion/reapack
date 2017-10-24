@@ -29,6 +29,8 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
+#include <numeric>
+
 using namespace std;
 
 enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
@@ -756,16 +758,22 @@ void Browser::updateAction(const int index)
 
 void Browser::selectionDo(const function<void (int)> &func)
 {
+  listDo(func, m_list->selection());
+}
+
+void Browser::listDo(const function<void (int)> &func, const vector<int> &indexes)
+{
   ListView::BeginEdit edit(m_list);
 
   int lastSize = m_list->rowCount();
   int offset = 0;
 
-  for(const int index : m_list->selection()) {
+  // assumes the index vector is sorted
+  for(const int index : indexes) {
     func(index - offset);
 
     // handle row removal
-    int newSize = m_list->rowCount();
+    const int newSize = m_list->rowCount();
     if(newSize < lastSize)
       offset++;
     lastSize = newSize;
@@ -837,11 +845,13 @@ bool Browser::apply()
   }
 
   if(!tx->runTasks()) {
-    // this is an asynchronous transaction
-    // update the state column right away to give visual feedback
-    ListView::BeginEdit edit(m_list);
-    for(int i = 0, count = m_list->rowCount(); i < count; ++i)
-      updateAction(i);
+    // This is an asynchronous transaction.
+    // Updating the state column of all rows (not just visible ones since the
+    // hidden rows can be filtered into view again by user at any time) right away
+    // to give visual feedback.
+    vector<int> fullList(m_list->rowCount());
+    iota(fullList.begin(), fullList.end(), 0);
+    listDo(bind(&Browser::updateAction, this, _1), fullList);
   }
 
   return true;

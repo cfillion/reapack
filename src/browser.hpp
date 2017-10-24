@@ -107,6 +107,7 @@ private:
   void resetActions(int index);
   void updateAction(const int index);
   void selectionDo(const std::function<void (int)> &);
+  void listDo(const std::function<void (int)> &, const std::vector<int> &);
   View currentView() const;
   void copy();
   bool confirm() const;
