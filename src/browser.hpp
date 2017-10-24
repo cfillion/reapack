@@ -102,22 +102,30 @@ private:
   void fillMenu(Menu &);
   bool isFiltered(Package::Type) const;
   bool hasAction(const Entry *) const;
-  void setTarget(const int index, const Version *, bool toggle = true);
-  void resetTarget(int index);
-  void resetActions(int index);
-  void updateAction(const int index);
+  void listDo(const std::function<void (int)> &, const std::vector<int> &);
+  void currentDo(const std::function<void (int)> &);
   void selectionDo(const std::function<void (int)> &);
   View currentView() const;
   void copy();
   bool confirm() const;
   bool apply();
 
-  void installLatest(int index, bool toggle = true);
+  // Only call the following functions using currentDo or selectionDo (listDo)
+  // (so that the display label is updated and the list sorted and filtered as
+  // needed)
+  void resetActions(int index);
+  void updateAction(const int index);
+  void setTarget(const int index, const Version *, bool toggle = true);
+  void resetTarget(int index);
+
+  void installLatest(int index, bool toggle);
   void installLatestAll();
-  void reinstall(int index, bool toggle = true);
+  void reinstall(int index, bool toggle);
   void installVersion(int index, size_t verIndex);
-  void uninstall(int index, bool toggle = true);
+  void uninstall(int index, bool toggle);
   void togglePin(int index);
+
+  // these can be called directly because they don't use updateAction()
   void aboutRemote(int index, bool focus = true);
   void aboutPackage(int index, bool focus = true);
 

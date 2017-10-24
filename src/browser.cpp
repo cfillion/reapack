@@ -134,25 +134,25 @@ void Browser::onCommand(const int id, const int event)
     actionsButton();
     break;
   case ACTION_LATEST:
-    installLatest(m_currentIndex);
+    currentDo(bind(&Browser::installLatest, this, _1, true));
     break;
   case ACTION_LATEST_ALL:
     installLatestAll();
     break;
   case ACTION_REINSTALL:
-    reinstall(m_currentIndex);
+    currentDo(bind(&Browser::reinstall, this, _1, true));
     break;
   case ACTION_REINSTALL_ALL:
     selectionDo(bind(&Browser::reinstall, this, _1, false));
     break;
   case ACTION_UNINSTALL:
-    uninstall(m_currentIndex);
+    currentDo(bind(&Browser::uninstall, this, _1, true));
     break;
   case ACTION_UNINSTALL_ALL:
     selectionDo(bind(&Browser::uninstall, this, _1, false));
     break;
   case ACTION_PIN:
-    togglePin(m_currentIndex);
+    currentDo(bind(&Browser::togglePin, this, _1));
     break;
   case ACTION_ABOUT_PKG:
     aboutPackage(m_currentIndex);
@@ -192,7 +192,7 @@ void Browser::onCommand(const int id, const int event)
     break;
   default:
     if(id >> 8 == ACTION_VERSION)
-      installVersion(m_currentIndex, id & 0xff);
+      currentDo(bind(&Browser::installVersion, this, _1, id & 0xff));
     else if(id >> 8 == ACTION_FILTERTYPE) {
       m_typeFilter = static_cast<Package::Type>(id & 0xff);
       fillList();
@@ -745,21 +745,17 @@ void Browser::updateAction(const int index)
     m_list->removeRow(index);
   else
     m_list->row(index)->setCell(0, entry->displayState());
-
-  if(m_actions.empty())
-    disable(m_applyBtn);
-  else
-    enable(m_applyBtn);
 }
 
-void Browser::selectionDo(const function<void (int)> &func)
+void Browser::listDo(const function<void (int)> &func, const vector<int> &indexes)
 {
   ListView::BeginEdit edit(m_list);
 
   int lastSize = m_list->rowCount();
   int offset = 0;
 
-  for(const int index : m_list->selection()) {
+  // Assumes the index vector is sorted
+  for(const int index : indexes) {
     func(index - offset);
 
     // handle row removal
@@ -771,6 +767,21 @@ void Browser::selectionDo(const function<void (int)> &func)
 
   if(offset) // rows were deleted
     updateDisplayLabel();
+
+  if(m_actions.empty())
+    disable(m_applyBtn);
+  else
+    enable(m_applyBtn);
+}
+
+void Browser::currentDo(const function<void (int)> &func)
+{
+  listDo(func, {m_currentIndex});
+}
+
+void Browser::selectionDo(const function<void (int)> &func)
+{
+  listDo(func, m_list->selection());
 }
 
 auto Browser::currentView() const -> View
