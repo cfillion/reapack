@@ -95,7 +95,7 @@ private:
   void updateFilter();
   void updateAbout();
   void fillList();
-  Entry *getEntry(int);
+  Entry *getEntry(int listIndex);
   void updateDisplayLabel();
   void displayButton();
   void actionsButton();

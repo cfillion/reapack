@@ -76,7 +76,7 @@ string Browser::Entry::displayState() const
 
   if(target)
     state += *target == nullptr ? 'R' : 'I';
-  if(pin && canPin())
+  if(pin && test(CanTogglePin))
     state += 'P';
 
   return state;
@@ -212,7 +212,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
   }
 
   const UINT pinIndex = menu.addAction("&Pin current version", ACTION_PIN);
-  if(!canPin())
+  if(!test(CanTogglePin))
     menu.disable(pinIndex);
   if(pin.value_or(regEntry.pinned))
     menu.check(pinIndex);
@@ -241,6 +241,8 @@ int Browser::Entry::possibleActions() const
     flags |= CanReinstall;
   if(test(InstalledFlag) && !test(ProtectedFlag) && (!target || *target != nullptr))
     flags |= CanUninstall;
+  if(target ? *target != nullptr : test(InstalledFlag))
+    flags |= CanTogglePin;
   if(target || pin)
     flags |= CanClearQueued;
 

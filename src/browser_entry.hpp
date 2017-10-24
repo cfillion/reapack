@@ -41,11 +41,13 @@ public:
     ProtectedFlag   = 1<<4,
   };
 
-  enum PossibleActions {
+  enum PossibleAction {
     CanInstallLatest = 1<<0,
     CanReinstall     = 1<<1,
     CanUninstall     = 1<<2,
     CanClearQueued   = 1<<3,
+
+    CanTogglePin     = 1<<10,
   };
 
   Entry(const Package *, const Registry::Entry &, const IndexPtr &);
@@ -71,7 +73,7 @@ public:
 
   int possibleActions() const;
   bool test(Flag f) const { return (m_flags & f) == f; }
-  bool canPin() const { return target ? *target != nullptr : test(InstalledFlag); }
+  bool test(PossibleAction f) const { return (possibleActions() & f) == f; }
   bool operator==(const Entry &o) const;
 
 private:
