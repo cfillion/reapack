@@ -131,7 +131,7 @@ bool FS::remove(const Path &path)
   // Windows is so great!
 
   Path workaroundPath = Path::DATA;
-  workaroundPath.append("old_" + path.last() + ".tmp");
+  workaroundPath.append("old_" + path.basename() + ".tmp");
 
   return rename(path, workaroundPath);
 #else
