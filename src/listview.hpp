@@ -179,7 +179,7 @@ private:
   bool onContextMenu(HWND, int, int) override;
 
   static int adjustWidth(int);
-  void setExStyle(int style, bool enable);
+  void setExStyle(int style, bool enable = true);
   void setSortArrow(bool);
   void handleDoubleClick();
   void handleColumnClick(LPARAM lpnmlistview);

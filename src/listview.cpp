@@ -36,16 +36,18 @@ ListView::ListView(HWND handle, const Columns &columns)
   for(const Column &col : columns)
     addColumn(col);
 
-  setExStyle(LVS_EX_FULLROWSELECT, true);
+  int style = LVS_EX_FULLROWSELECT;
 
 #ifdef LVS_EX_LABELTIP
-  // unsupported by SWELL, but always enabled on OS X anyway
-  setExStyle(LVS_EX_LABELTIP, true);
+  // unsupported by SWELL, but always enabled on macOS anyway
+  style |= LVS_EX_LABELTIP;
 #endif
 
 #ifdef LVS_EX_DOUBLEBUFFER
-  setExStyle(LVS_EX_DOUBLEBUFFER, true);
+  style |= LVS_EX_DOUBLEBUFFER;
 #endif
+
+  setExStyle(style);
 }
 
 void ListView::setExStyle(const int style, const bool enable)
@@ -571,7 +573,7 @@ void ListView::resetColumns()
 void ListView::restoreState(Serializer::Data &data)
 {
   m_customizable = true;
-  setExStyle(LVS_EX_HEADERDRAGDROP, true); // enable column reordering
+  setExStyle(LVS_EX_HEADERDRAGDROP); // enable column reordering
 
   if(data.empty())
     return;
