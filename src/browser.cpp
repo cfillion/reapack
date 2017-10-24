@@ -509,7 +509,7 @@ void Browser::transferActions()
 
 void Browser::fillList()
 {
-  InhibitControl freeze(m_list);
+  ListView::BeginEdit edit(m_list);
 
   const int scroll = m_list->scroll();
 
@@ -537,7 +537,6 @@ void Browser::fillList()
   }
 
   m_list->setScroll(scroll);
-  m_list->endEdit();
 
   // restore selection only after having sorted the table
   // in order to get the same scroll position as before if possible
@@ -757,7 +756,7 @@ void Browser::updateAction(const int index)
 
 void Browser::selectionDo(const function<void (int)> &func)
 {
-  InhibitControl freeze(m_list);
+  ListView::BeginEdit edit(m_list);
 
   int lastSize = m_list->rowCount();
   int offset = 0;
@@ -771,8 +770,6 @@ void Browser::selectionDo(const function<void (int)> &func)
       offset++;
     lastSize = newSize;
   }
-
-  m_list->endEdit(); // re-sort if required
 }
 
 auto Browser::currentView() const -> View
@@ -842,6 +839,7 @@ bool Browser::apply()
   if(!tx->runTasks()) {
     // this is an asynchronous transaction
     // update the state column right away to give visual feedback
+    ListView::BeginEdit edit(m_list);
     for(int i = 0, count = m_list->rowCount(); i < count; ++i)
       updateAction(i);
   }

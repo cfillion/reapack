@@ -309,7 +309,7 @@ bool Manager::onKeyDown(const int key, const int mods)
 
 void Manager::refresh()
 {
-  InhibitControl lock(m_list);
+  ListView::BeginEdit edit(m_list);
 
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
@@ -334,8 +334,6 @@ void Manager::refresh()
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
       m_list->select(row->index());
   }
-
-  m_list->endEdit();
 }
 
 void Manager::updateEnabledCell(int index, const Remote &remote)
@@ -345,6 +343,8 @@ void Manager::updateEnabledCell(int index, const Remote &remote)
 
 void Manager::setMods(const ModsCallback &cb, const bool updateRow)
 {
+  ListView::BeginEdit edit(m_list);
+
   for(const int index : m_list->selection()) {
     const Remote &remote = getRemote(index);
 
@@ -373,8 +373,6 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     if(updateRow)
       updateEnabledCell(index, remote);
   }
-
-  m_list->endEdit(); // re-sort if required
 }
 
 void Manager::setRemoteEnabled(const bool enabled)

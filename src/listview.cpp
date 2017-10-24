@@ -251,9 +251,9 @@ void ListView::filter()
 void ListView::setFilter(const string &newFilter)
 {
   if(m_filter != newFilter) {
+    ListView::BeginEdit edit(this);
     m_filter = newFilter;
     m_dirty |= NeedFilterFlag;
-    endEdit();
   }
 }
 

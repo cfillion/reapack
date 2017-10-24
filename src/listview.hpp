@@ -91,6 +91,18 @@ public:
     int compare(const Cell &, const Cell &) const;
   };
 
+  // Use before modifying the list's content. It will re-sort and/or re-filter the
+  // list automatically when destructed and, on Windows, also prevents flickering.
+  class BeginEdit {
+  public:
+    BeginEdit(ListView *lv) : m_list(lv), m_inhibit(lv) {}
+    ~BeginEdit() { m_list->endEdit(); }
+
+  private:
+    ListView *m_list;
+    InhibitControl m_inhibit;
+  };
+
   typedef std::vector<Column> Columns;
 
   typedef boost::signals2::signal<void ()> VoidSignal;
@@ -133,7 +145,6 @@ public:
 
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setFilter(const std::string &);
-  void endEdit();
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
@@ -145,7 +156,9 @@ public:
 
 protected:
   friend Row;
+  friend BeginEdit;
   void updateCell(int row, int cell);
+  void endEdit();
 
 private:
   struct Sort {

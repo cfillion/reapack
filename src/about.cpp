@@ -152,9 +152,9 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
   for(const int control : controls)
     hide(getControl(control));
 
+  ListView::BeginEdit menuEdit(m_menu);
   m_delegate = delegate;
   m_delegate->init(this);
-  m_menu->endEdit();
 
   m_currentIndex = -255;
   updateList();
@@ -265,13 +265,11 @@ void About::updateList()
   if((index < 0 && m_currentIndex != -255) || index == m_currentIndex)
     return;
 
-  InhibitControl lock(m_list);
+  ListView::BeginEdit edit(m_list);
   m_list->clear();
 
   m_delegate->updateList(index);
   m_currentIndex = index;
-
-  m_list->endEdit();
 }
 
 AboutIndexDelegate::AboutIndexDelegate(const IndexPtr &index)

@@ -37,7 +37,8 @@ void InhibitControl::inhibitRedraw(const bool inhibit)
     s_lock.insert({m_handle, this});
   else {
     s_lock.erase(m_handle);
-    InvalidateRect(m_handle, nullptr, true);
+    RedrawWindow(m_handle, nullptr, nullptr,
+      RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
   }
 #endif
 }
