@@ -42,6 +42,10 @@ ListView::ListView(HWND handle, const Columns &columns)
   // unsupported by SWELL, but always enabled on OS X anyway
   setExStyle(LVS_EX_LABELTIP, true);
 #endif
+
+#ifdef LVS_EX_DOUBLEBUFFER
+  setExStyle(LVS_EX_DOUBLEBUFFER, true);
+#endif
 }
 
 void ListView::setExStyle(const int style, const bool enable)
