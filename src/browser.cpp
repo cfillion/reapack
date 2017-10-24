@@ -613,7 +613,7 @@ void Browser::installLatestAll()
 
   if(isEverything && !installOpts.autoInstall) {
     const int btn = Win32::messageBox(handle(), "Do you want ReaPack to install"
-      " new packages automatically when  synchronizing in the future?\n\nThis"
+      " new packages automatically when synchronizing in the future?\n\nThis"
       " setting can also be customized globally or on a per-repository basis"
       " in ReaPack > Manage repositories.",
       "Install every available packages", MB_YESNOCANCEL);
