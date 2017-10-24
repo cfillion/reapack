@@ -100,6 +100,7 @@ private:
   void displayButton();
   void actionsButton();
   void fillMenu(Menu &);
+  void fillSelectionMenu(Menu &);
   bool isFiltered(Package::Type) const;
   bool hasAction(const Entry *) const;
   void listDo(const std::function<void (int)> &, const std::vector<int> &);

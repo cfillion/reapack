@@ -265,10 +265,7 @@ void Browser::fillMenu(Menu &menu)
   const Entry *entry = getEntry(m_currentIndex);
 
   if(m_list->selectionSize() > 1) {
-    menu.addAction("&Install/update selection", ACTION_LATEST_ALL);
-    menu.addAction("&Reinstall selection", ACTION_REINSTALL_ALL);
-    menu.addAction("&Uninstall selection", ACTION_UNINSTALL_ALL);
-    menu.addAction("&Clear queued actions", ACTION_RESET_ALL);
+    fillSelectionMenu(menu);
     menu.addSeparator();
 
     if(entry) {
@@ -278,6 +275,23 @@ void Browser::fillMenu(Menu &menu)
   }
   else if(entry)
     entry->fillMenu(menu);
+}
+
+void Browser::fillSelectionMenu(Menu &menu)
+{
+  int selFlags = 0;
+
+  for(const int index : m_list->selection())
+    selFlags |= getEntry(index)->possibleActions();
+
+  menu.setEnabled(selFlags & Entry::CanInstallLatest,
+    menu.addAction("&Install/update selection", ACTION_LATEST_ALL));
+  menu.setEnabled(selFlags & Entry::CanReinstall,
+    menu.addAction("&Reinstall selection", ACTION_REINSTALL_ALL));
+  menu.setEnabled(selFlags & Entry::CanUninstall,
+    menu.addAction("&Uninstall selection", ACTION_UNINSTALL_ALL));
+  menu.setEnabled(selFlags & Entry::CanClearQueued,
+    menu.addAction("&Clear queued actions", ACTION_RESET_ALL));
 }
 
 void Browser::updateDisplayLabel()
@@ -669,7 +683,7 @@ void Browser::uninstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(entry && entry->test(Entry::InstalledFlag) && !entry->remote().isProtected())
+  if(entry && entry->test(Entry::InstalledFlag) && !entry->test(Entry::ProtectedFlag))
     setTarget(index, nullptr, toggle);
 }
 

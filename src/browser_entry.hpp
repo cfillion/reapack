@@ -38,6 +38,14 @@ public:
     InstalledFlag   = 1<<1,
     OutOfDateFlag   = 1<<2,
     ObsoleteFlag    = 1<<3,
+    ProtectedFlag   = 1<<4,
+  };
+
+  enum PossibleActions {
+    CanInstallLatest = 1<<0,
+    CanReinstall     = 1<<1,
+    CanUninstall     = 1<<2,
+    CanClearQueued   = 1<<3,
   };
 
   Entry(const Package *, const Registry::Entry &, const IndexPtr &);
@@ -58,11 +66,11 @@ public:
   std::string displayAuthor() const;
   const Time *lastUpdate() const;
 
-  Remote remote() const;
   void updateRow(const ListView::RowPtr &) const;
   void fillMenu(Menu &) const;
 
-  bool test(Flag f) const { return (m_flags & f) != 0; }
+  int possibleActions() const;
+  bool test(Flag f) const { return (m_flags & f) == f; }
   bool canPin() const { return target ? *target != nullptr : test(InstalledFlag); }
   bool operator==(const Entry &o) const;
 

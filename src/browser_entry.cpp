@@ -48,6 +48,9 @@ Browser::Entry::Entry(const Package *pkg, const Registry::Entry &re, const Index
   // or the newest available version if older than current installed version.
   if(!latest)
     latest = pkg->lastVersion(true);
+
+  if(g_reapack->remote(indexName()).isProtected())
+    m_flags |= ProtectedFlag;
 }
 
 Browser::Entry::Entry(const Registry::Entry &re, const IndexPtr &i)
@@ -147,11 +150,6 @@ const Time *Browser::Entry::lastUpdate() const
   return latest ? &latest->time() : nullptr;
 }
 
-Remote Browser::Entry::remote() const
-{
-  return g_reapack->remote(indexName());
-}
-
 void Browser::Entry::updateRow(const ListView::RowPtr &row) const
 {
   int c = 0;
@@ -220,7 +218,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
     menu.check(pinIndex);
 
   const UINT uninstallIndex = menu.addAction("&Uninstall", ACTION_UNINSTALL);
-  if(!test(InstalledFlag) || remote().isProtected())
+  if(!test(InstalledFlag) || test(ProtectedFlag))
     menu.disable(uninstallIndex);
   else if(target && *target == nullptr)
     menu.check(uninstallIndex);
@@ -231,6 +229,22 @@ void Browser::Entry::fillMenu(Menu &menu) const
     menu.addAction("About this &package", ACTION_ABOUT_PKG));
 
   menu.addAction(String::format("&About %s", indexName().c_str()), ACTION_ABOUT_REMOTE);
+}
+
+int Browser::Entry::possibleActions() const
+{
+  int flags = 0;
+
+  if((test(UninstalledFlag) || test(OutOfDateFlag)) && (!target || *target != latest))
+    flags |= CanInstallLatest;
+  if(test(InstalledFlag) && !test(ObsoleteFlag) && (!target || *target != current))
+    flags |= CanReinstall;
+  if(test(InstalledFlag) && !test(ProtectedFlag) && (!target || *target != nullptr))
+    flags |= CanUninstall;
+  if(target || pin)
+    flags |= CanClearQueued;
+
+  return flags;
 }
 
 bool Browser::Entry::operator==(const Entry &o) const
