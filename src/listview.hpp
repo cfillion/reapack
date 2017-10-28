@@ -66,6 +66,7 @@ public:
 
     const Cell &cell(const int i) const { return m_cells[i]; }
     void setCell(const int i, const std::string &, void *data = nullptr);
+    void setChecked(bool check = true);
 
     std::vector<std::string> filterValues() const;
 
@@ -121,6 +122,7 @@ public:
   void clear();
   void reset();
   void autoSizeHeader();
+  void enableIcons();
 
   int currentIndex() const;
   int itemUnderMouse() const;
@@ -158,6 +160,7 @@ protected:
   friend Row;
   friend BeginEdit;
   void updateCell(int row, int cell);
+  void setRowIcon(int row, int icon);
   void endEdit();
 
 private:
@@ -178,7 +181,6 @@ private:
   void onNotify(LPNMHDR, LPARAM) override;
   bool onContextMenu(HWND, int, int) override;
 
-  static int adjustWidth(int);
   void setExStyle(int style, bool enable = true);
   void setSortArrow(bool);
   void handleDoubleClick();
@@ -191,14 +193,14 @@ private:
   void reindexVisible();
   void filter();
 
+  int m_dirty;
+  Filter m_filter;
+
   bool m_customizable;
   std::vector<Column> m_cols;
   std::vector<RowPtr> m_rows;
   boost::optional<Sort> m_sort;
   boost::optional<Sort> m_defaultSort;
-
-  Filter m_filter;
-  int m_dirty;
 
   VoidSignal m_onSelect;
   VoidSignal m_onActivate;

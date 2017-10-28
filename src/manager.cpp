@@ -65,11 +65,11 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Name", 115},
-    {"Index URL", 415},
-    {"State", 60},
+    {"Name", 145},
+    {"Index URL", 445},
   });
 
+  m_list->enableIcons();
   m_list->onActivate(bind(&Manager::aboutRepo, this, true));
   m_list->onSelect(bind(&Dialog::startTimer, this, 100, 0, true));
   m_list->onContextMenu(bind(&Manager::fillContextMenu, this, _1, _2));
@@ -327,18 +327,13 @@ void Manager::refresh()
 
     int c = 0;
     auto row = m_list->createRow();
+    row->setChecked(isRemoteEnabled(remote));
     row->setCell(c++, remote.name());
     row->setCell(c++, remote.url());
-    updateEnabledCell(row->index(), remote);
 
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
       m_list->select(row->index());
   }
-}
-
-void Manager::updateEnabledCell(int index, const Remote &remote)
-{
-  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ? "Enabled" : "Disabled");
 }
 
 void Manager::setMods(const ModsCallback &cb, const bool updateRow)
@@ -371,7 +366,7 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     }
 
     if(updateRow)
-      updateEnabledCell(index, remote);
+      m_list->row(index)->setChecked(isRemoteEnabled(remote)); // TODO: move into cb
   }
 }
 
