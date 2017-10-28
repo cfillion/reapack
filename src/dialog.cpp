@@ -79,6 +79,12 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     if(wParam != SIZE_MINIMIZED)
       dlg->onResize();
     break;
+  case WM_CTLCOLOREDIT:
+  case WM_CTLCOLORLISTBOX:
+  case WM_CTLCOLORBTN:
+  case WM_CTLCOLORDLG:
+  case WM_CTLCOLORSTATIC:
+    return SendMessage(GetMainHwnd(), msg, wParam, lParam);
   case WM_DESTROY:
     // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG
     // if the dialog resource is invalid (eg. because of an unloaded dll).
