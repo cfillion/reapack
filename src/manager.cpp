@@ -65,8 +65,8 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Name", 145},
-    {"Index URL", 445},
+    {"Name", 155},
+    {"Index URL", 435},
   });
 
   m_list->enableIcons();
@@ -83,7 +83,7 @@ void Manager::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_apply, AnchorAll);
 
-  auto data = m_serializer.read(g_reapack->config()->windowState.manager, 1);
+  auto data = m_serializer.read(g_reapack->config()->windowState.manager, 2);
   restoreState(data);
   m_list->restoreState(data);
 
