@@ -314,7 +314,7 @@ void Manager::refresh()
   }
 }
 
-void Manager::setMods(const ModsCallback &cb, const bool updateRow)
+void Manager::setMods(const ModsCallback &cb)
 {
   ListView::BeginEdit edit(m_list);
 
@@ -325,7 +325,7 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
 
     if(it == m_mods.end()) {
       RemoteMods mods;
-      cb(remote, &mods);
+      cb(remote, index, &mods);
 
       if(!mods)
         continue;
@@ -335,29 +335,28 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     }
     else {
       RemoteMods *mods = &it->second;
-      cb(remote, mods);
+      cb(remote, index, mods);
 
       if(!*mods) {
         m_mods.erase(it);
         setChange(-1);
       }
     }
-
-    if(updateRow)
-      m_list->row(index)->setChecked(isRemoteEnabled(remote)); // TODO: move into cb
   }
 }
 
 void Manager::toggleEnabled()
 {
-  setMods([=](const Remote &remote, RemoteMods *mods) {
-    const bool enabled = !mods->enable.value_or(remote.isEnabled());
+  setMods([=](const Remote &remote, const int index, RemoteMods *mods) {
+    const bool enable = !mods->enable.value_or(remote.isEnabled());
 
-    if(remote.isEnabled() == enabled)
+    if(remote.isEnabled() == enable)
       mods->enable = boost::none;
     else
-      mods->enable = enabled;
-  }, true);
+      mods->enable = enable;
+
+    m_list->row(index)->setChecked(enable);
+  });
 }
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
@@ -372,7 +371,7 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 
 void Manager::setRemoteAutoInstall(const tribool &enabled)
 {
-  setMods([=](const Remote &remote, RemoteMods *mods) {
+  setMods([=](const Remote &remote, int, RemoteMods *mods) {
     const bool same = remote.autoInstall() == enabled
       || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
 
@@ -380,7 +379,7 @@ void Manager::setRemoteAutoInstall(const tribool &enabled)
       mods->autoInstall = boost::none;
     else
       mods->autoInstall = enabled;
-  }, false);
+  });
 }
 
 tribool Manager::remoteAutoInstall(const Remote &remote) const
