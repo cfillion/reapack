@@ -43,24 +43,38 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-bool RichEdit::setRichText(const string &rtf)
+void RichEdit::setPlainText(const string &text)
 {
   NSString *str = [NSString
-    stringWithCString:rtf.c_str()
-    encoding:NSUTF8StringEncoding
+    stringWithCString: text.c_str()
+    encoding: NSUTF8StringEncoding
   ];
 
   NSTextView *textView = (NSTextView *)handle();
 
-  // Manually clear the view so that invalid content will always result
-  // in this function to return false. Without this, the old text would be
-  // retained, length would stay the same and we would return true.
-  [textView setString: @""];
+  NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString: str];
+  [[textView textStorage] setAttributedString: attrStr];
+  [attrStr release];
+}
 
-  [textView
-    replaceCharactersInRange: NSMakeRange(0, [[textView string] length])
-    withRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
+bool RichEdit::setRichText(const string &rtf)
+{
+  NSString *str = [NSString
+    stringWithCString: rtf.c_str()
+    encoding: NSUTF8StringEncoding
   ];
+
+  NSTextView *textView = (NSTextView *)handle();
+
+  NSAttributedString *attrStr = [[NSAttributedString alloc]
+    initWithRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
+    documentAttributes: nullptr];
+
+  if(!attrStr)
+    return false;
+
+  [[textView textStorage] setAttributedString: attrStr];
+  [attrStr release];
 
   // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
   const BOOL isEditable = textView.isEditable;

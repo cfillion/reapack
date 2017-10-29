@@ -29,6 +29,7 @@ public:
   RichEdit(HWND);
   ~RichEdit();
 
+  void setPlainText(const std::string &);
   bool setRichText(const std::string &);
 
 protected:

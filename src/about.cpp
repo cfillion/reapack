@@ -182,8 +182,12 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
     boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
   }
 
-  if(m_desc->setRichText(aboutText))
-    m_tabs->addTab({"About", {m_desc->handle()}});
+  if(aboutText.empty())
+    m_desc->setPlainText("This package or repository does not provide any documentation.");
+  else if(!m_desc->setRichText(aboutText))
+    m_desc->setPlainText("Could not load RTF document.");
+
+  m_tabs->addTab({"About", {m_desc->handle()}});
 
   const auto &getLinkControl = [](const Metadata::LinkType type) {
     switch(type) {

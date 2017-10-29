@@ -20,7 +20,9 @@
 #ifdef _WIN32
 
 // Starting here and onward is the Win32 implementation of RichEdit
-// The OS X implementation can be found in richedit.mm
+// The macOS implementation is in richedit.mm, Linux is in richedit-gtk.cpp
+
+#include "win32.hpp"
 
 #include <memory>
 #include <richedit.h>
@@ -69,14 +71,18 @@ void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
   };
 }
 
+void RichEdit::setPlainText(const string &text)
+{
+  Win32::setWindowText(handle(), text.c_str());
+}
+
 bool RichEdit::setRichText(const string &rtf)
 {
   stringstream stream(rtf);
 
   EDITSTREAM es{};
   es.dwCookie = (DWORD_PTR)&stream;
-  es.pfnCallback = [](DWORD_PTR cookie, LPBYTE buf, LONG size, LONG *pcb)
-  {
+  es.pfnCallback = [](DWORD_PTR cookie, LPBYTE buf, LONG size, LONG *pcb) {
     stringstream *stream = reinterpret_cast<stringstream *>(cookie);
     *pcb = (LONG)stream->readsome((char *)buf, size);
     return (DWORD)0;

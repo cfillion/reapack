@@ -41,6 +41,11 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
+void RichEdit::setPlainText(const string &text)
+{
+  SetWindowText(handle(), text.c_str());
+}
+
 bool RichEdit::setRichText(const string &)
 {
   return false;
