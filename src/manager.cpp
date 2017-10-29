@@ -277,6 +277,8 @@ bool Manager::onKeyDown(const int key, const int mods)
     m_list->unselectAll();
   else if(mods == CtrlModifier && key == 'C')
     copyUrl();
+  else if(!mods && key == VK_SPACE)
+    toggleEnabled();
   else
     return false;
 
