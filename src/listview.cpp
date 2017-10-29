@@ -381,12 +381,15 @@ int ListView::selectionSize() const
   return ListView_GetSelectedCount(handle());
 }
 
-int ListView::itemUnderMouse() const
+int ListView::itemUnderMouse(bool *overIcon) const
 {
   LVHITTESTINFO info{};
   GetCursorPos(&info.pt);
   ScreenToClient(handle(), &info.pt);
   ListView_HitTest(handle(), &info);
+
+  if(overIcon)
+    *overIcon = info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON);
 
   return translateBack(info.iItem);
 }
@@ -424,8 +427,9 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
   case LVN_ITEMCHANGED:
     m_onSelect();
     break;
+  case NM_CLICK:
   case NM_DBLCLK:
-    handleDoubleClick();
+    handleClick(info->code == NM_DBLCLK);
     break;
   case LVN_COLUMNCLICK:
     handleColumnClick(lParam);
@@ -486,16 +490,21 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
   return true;
 }
 
-void ListView::handleDoubleClick()
+void ListView::handleClick(const bool dbclick)
 {
-  // user double clicked on an item
-  if(itemUnderMouse() > -1 && currentIndex() > -1)
-    m_onActivate();
+  bool overIcon;
+
+  if(itemUnderMouse(&overIcon) > -1 && currentIndex() > -1) {
+    if(dbclick)
+      m_onActivate();
+    else if(overIcon)
+      m_onIconClick();
+  }
 }
 
-void ListView::handleColumnClick(LPARAM lParam)
+void ListView::handleColumnClick(const LPARAM lParam)
 {
-  auto info = (LPNMLISTVIEW)lParam;
+  const auto info = reinterpret_cast<LPNMLISTVIEW>(lParam);
   const int col = info->iSubItem;
   SortOrder order = AscendingOrder;
 

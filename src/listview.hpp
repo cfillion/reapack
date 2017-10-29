@@ -125,7 +125,7 @@ public:
   void enableIcons();
 
   int currentIndex() const;
-  int itemUnderMouse() const;
+  int itemUnderMouse(bool *overIcon = nullptr) const;
 
   int scroll() const;
   void setScroll(int);
@@ -153,6 +153,7 @@ public:
   void resetColumns();
 
   void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
+  void onIconClick(const VoidSignal::slot_type &slot) { m_onIconClick.connect(slot); }
   void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }
   void onContextMenu(const MenuSignal::slot_type &slot) { m_onContextMenu.connect(slot); }
 
@@ -183,7 +184,7 @@ private:
 
   void setExStyle(int style, bool enable = true);
   void setSortArrow(bool);
-  void handleDoubleClick();
+  void handleClick(bool dbclick);
   void handleColumnClick(LPARAM lpnmlistview);
   int translate(int userIndex) const;
   int translateBack(int internalIndex) const;
@@ -203,6 +204,7 @@ private:
   boost::optional<Sort> m_defaultSort;
 
   VoidSignal m_onSelect;
+  VoidSignal m_onIconClick;
   VoidSignal m_onActivate;
   MenuSignal m_onContextMenu;
 };

@@ -57,7 +57,7 @@ private:
   Remote getRemote(int index) const;
   bool fillContextMenu(Menu &, int index) const;
   void setMods(const ModsCallback &, bool updateRow);
-  void setRemoteEnabled(bool);
+  void toggleEnabled();
   bool isRemoteEnabled(const Remote &) const;
   void setRemoteAutoInstall(const tribool &);
   tribool remoteAutoInstall(const Remote &) const;

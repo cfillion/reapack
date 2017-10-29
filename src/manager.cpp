@@ -39,12 +39,12 @@ static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
 using namespace std;
 
 enum {
-  ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-  ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-  ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
-  ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
-  ACTION_NETCONFIG, ACTION_RESETCONFIG, ACTION_IMPORT_REPO,
-  ACTION_IMPORT_ARCHIVE, ACTION_EXPORT_ARCHIVE
+  ACTION_UNINSTALL = 80, ACTION_ABOUT, ACTION_REFRESH, ACTION_COPYURL,
+  ACTION_SELECT, ACTION_UNSELECT, ACTION_AUTOINSTALL_GLOBAL,
+  ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON, ACTION_AUTOINSTALL,
+  ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE, ACTION_NETCONFIG,
+  ACTION_RESETCONFIG, ACTION_IMPORT_REPO, ACTION_IMPORT_ARCHIVE,
+  ACTION_EXPORT_ARCHIVE,
 };
 
 Manager::Manager()
@@ -70,8 +70,9 @@ void Manager::onInit()
   });
 
   m_list->enableIcons();
-  m_list->onActivate(bind(&Manager::aboutRepo, this, true));
   m_list->onSelect(bind(&Dialog::startTimer, this, 100, 0, true));
+  m_list->onIconClick(bind(&Manager::toggleEnabled, this));
+  m_list->onActivate(bind(&Manager::aboutRepo, this, true));
   m_list->onContextMenu(bind(&Manager::fillContextMenu, this, _1, _2));
 
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
@@ -120,12 +121,6 @@ void Manager::onCommand(const int id, int)
     break;
   case IDC_OPTIONS:
     options();
-    break;
-  case ACTION_ENABLE:
-    setRemoteEnabled(true);
-    break;
-  case ACTION_DISABLE:
-    setRemoteEnabled(false);
     break;
   case ACTION_REFRESH:
     refreshIndex();
@@ -215,14 +210,8 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
     return true;
   }
 
-  const UINT enableAction =
-    menu.addAction("&Enable", ACTION_ENABLE);
-  const UINT disableAction =
-    menu.addAction("&Disable", ACTION_DISABLE);
-
-  menu.addSeparator();
-
   menu.addAction("&Refresh", ACTION_REFRESH);
+  menu.addAction("&Copy URL", ACTION_COPYURL);
 
   Menu autoInstallMenu = menu.addMenu("&Install new packages");
   const UINT autoInstallGlobal = autoInstallMenu.addAction(
@@ -232,8 +221,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   const UINT autoInstallOn = autoInstallMenu.addAction(
     "When synchronizing", ACTION_AUTOINSTALL_ON);
 
-  menu.addAction("&Copy URL", ACTION_COPYURL);
-
   const UINT uninstallAction =
     menu.addAction("&Uninstall", ACTION_UNINSTALL);
 
@@ -242,8 +229,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   menu.addAction(String::format("&About %s", remote.name().c_str()),
     index | (ACTION_ABOUT << 8));
 
-  bool allEnabled = true;
-  bool allDisabled = true;
   bool allProtected = true;
   bool allAutoInstallGlobal = true;
   bool allAutoInstallOff = true;
@@ -251,11 +236,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   for(const int i : m_list->selection()) {
     const Remote &r = getRemote(i);
-    if(isRemoteEnabled(r))
-      allDisabled = false;
-    else
-      allEnabled = false;
-
     if(!r.isProtected())
       allProtected = false;
 
@@ -273,10 +253,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
     }
   };
 
-  if(allEnabled)
-    menu.disable(enableAction);
-  if(allDisabled)
-    menu.disable(disableAction);
   if(allProtected)
     menu.disable(uninstallAction);
 
@@ -370,9 +346,11 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
   }
 }
 
-void Manager::setRemoteEnabled(const bool enabled)
+void Manager::toggleEnabled()
 {
   setMods([=](const Remote &remote, RemoteMods *mods) {
+    const bool enabled = !mods->enable.value_or(remote.isEnabled());
+
     if(remote.isEnabled() == enabled)
       mods->enable = boost::none;
     else
