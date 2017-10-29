@@ -65,8 +65,9 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Name", 155},
-    {"Index URL", 435},
+    {"Enabled", 18, ListView::NoLabelFlag, ListView::IntegerType},
+    {"Name", 150},
+    {"Index URL", 422},
   });
 
   m_list->enableIcons();
@@ -292,7 +293,7 @@ void Manager::refresh()
   const vector<int> selection = m_list->selection();
   vector<string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = m_list->row(selection[i])->cell(0).value; // TODO: use data ptr to Remote
+    selected[i] = m_list->row(selection[i])->cell(1).value; // TODO: use data ptr to Remote
 
   const auto &remotes = g_reapack->config()->remotes;
 
@@ -303,9 +304,9 @@ void Manager::refresh()
     if(m_uninstall.count(remote))
       continue;
 
-    int c = 0;
+    int c = 1;
     auto row = m_list->createRow();
-    row->setChecked(isRemoteEnabled(remote));
+    updateEnabledCell(row->index(), isRemoteEnabled(remote));
     row->setCell(c++, remote.name());
     row->setCell(c++, remote.url());
 
@@ -345,6 +346,13 @@ void Manager::setMods(const ModsCallback &cb)
   }
 }
 
+void Manager::updateEnabledCell(const int index, const bool isEnabled)
+{
+  const auto &row = m_list->row(index);
+  row->setChecked(isEnabled);
+  row->setCell(0, {}, reinterpret_cast<void *>(isEnabled));
+}
+
 void Manager::toggleEnabled()
 {
   setMods([=](const Remote &remote, const int index, RemoteMods *mods) {
@@ -355,7 +363,7 @@ void Manager::toggleEnabled()
     else
       mods->enable = enable;
 
-    m_list->row(index)->setChecked(enable);
+    updateEnabledCell(index, enable);
   });
 }
 
@@ -664,7 +672,7 @@ Remote Manager::getRemote(const int index) const
   if(index < 0 || index > m_list->rowCount() - 1)
     return {};
 
-  const string &remoteName = m_list->row(index)->cell(0).value;
+  const string &remoteName = m_list->row(index)->cell(1).value;
   return g_reapack->config()->remotes.get(remoteName);
 }
 

@@ -44,6 +44,7 @@ public:
     UserType,
     VersionType,
     TimeType,
+    IntegerType,
   };
 
   struct Cell {
