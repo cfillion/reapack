@@ -170,7 +170,7 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
 
 void About::setTitle(const string &what)
 {
-  Win32::setWindowText(handle(), String::format("About %s", what.c_str()).c_str());
+  Win32::setWindowText(handle(), what.c_str());
 }
 
 void About::setMetadata(const Metadata *metadata, const bool substitution)
