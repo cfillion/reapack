@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2rc1
+@version 1.2rc2
 @author cfillion
 @donation https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=T3DEWBQJAV7WL&lc=CA&item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&no_note=0&cn=Custom%20message&no_shipping=1&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 @provides
@@ -11,49 +11,26 @@
   [linux64]  reaper_reapack64.so    https://build/from/source
 @changelog
   Added:
-  * add support for Automation Item files
-  * api: add ProcessQueue function
-  * api: autosynchronize repositories when using AddSetRepository and the autoinstall option is enabled
-  * browser: add "Copy package name" action to context menu (equivalent to Ctrl+C)
-  * browser: restore selection after applying changes or synchronyzing
-  * manager: make the about repository dialog follow selection
-  * path: implement absolute path detection on Windows
-  * support 32-bit Linux builds using gcc-multilib
-  * support registering scripts into the MIDI Event List Editor and Media Explorer sections
+  * browser: pass all up/down arrow keypresses to the list
+  * browser: show about package window on spacebar
+  * manager: display enabled status using REAPER's checkbox icons
+  * manager: toggle repository enabled status when clicking on the checkbox icons or pressing spacebar
+  * path: allow paths longer than 260 characters on Windows [p=1861355]
 
   Fixed:
-  * api: fix AddSetRepository not saving all repo properties when toggling enabled status
-  * browser: manager: re-sort list after changing row contents
-  * import: add repositories in the same order as they were entered in the URL text field
-  * listview: sort identical columns by row insertion order
-  * path: fix appending an absolute path to any empty path resulting in an relative path
-  * path: treat absolute and relative paths as always not equal
+  * browser: fix Refresh Browser (F5) action (v1.2rc1 regression)
+  * listview: fix clearing queued actions in browser's queued tab (v1.2rc1 regression)
+  * listview: fix header right click detection when list is scrolled on macOS
+  * receipt: fix missing newline when updating through >1 versions (v1.2rc1 regression) [#21]
+  * win32: fix crash when opening links (v1.2rc1 regression)
 
   Changed:
-  * archive: export to temporary file first (automatically removed if cancelled)
-  * browser: always show selection actions in the context menu
-  * browser: avoid opening the database twice when loading the list
-  * browser: display pinned state separately from installation state
-  * browser: enable Last Update column by default
-  * browser: move per-package actions to a submenu when selection > 1
-  * browser: show confirmation dialog only when uninstalling packages
-  * core: allow opening the browser while a transaction is running
-  * core: ignore errors during self-registration
-  * core: report an error when folders cannot be created in the resource directory
-  * do not prompt to uninstall pinned obsolete packages when syncing
-  * listview: update individual cells without replacing the whole row
-  * listview: various optimizations
-  * path: prepend resource path to relative paths only
-  * receipt: sort installed packages alphabetically
-  * redesign the report dialog
-  * refresh the browser only when necessary
-  * report: update top label depending on which operations were performed and their result
-
-  Removed:
-  * api: remove commit parameter from AddSetRepository (replaced by ProcessQueue)
-  * api: remove tab parameter from About* functions
-  * browser: manager: remove ellipsis after "About <repository>" actions
-  * browser: remove "Show descriptions" option
-  * don't add or remove scripts from the Action List when enabling/disabling a repository
-  * don't automatically synchronize when enabling a repository unless the autoinstall option is set
-  * remote: remove overzealous length limits on repository names
+  * about: always show the about tab (even if documentation is empty or invalid)
+  * about: remove "About" prefix in the title bar
+  * about: split File column into File and Path in the Contents tab
+  * browser: avoid repopulating the whole list when applying an asynchronous transaction
+  * browser: disable impossible selection-wide operations in the Actions menu
+  * browser: hide "Copy package name" from the context menu if no packages are selected
+  * browser: show "Copy package names" in the Actions button's menu as well
+  * listview: don't repopulate the entire list whenever the filter is changed
+  * listview: enable double buffering on Windows

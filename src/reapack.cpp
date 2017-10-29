@@ -37,7 +37,7 @@
 
 using namespace std;
 
-const char *ReaPack::VERSION = "1.2rc1";
+const char *ReaPack::VERSION = "1.2rc2";
 const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 
 ReaPack *ReaPack::s_instance = nullptr;
