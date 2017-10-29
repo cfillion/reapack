@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="8cfc6ac0444e9a001a1e02dcf37206b0e3bde87e" name="ReaPack">
+<index version="1" commit="7acc66aa49951b12504571f3f21881e486fadb7f" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -540,6 +540,38 @@ Removed:
         <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack64.dylib</source>
         <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack32.dll</source>
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc1/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack64.so">https://build/from/source</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://build/from/source</source>
+      </version>
+      <version name="1.2rc2" author="cfillion" time="2017-10-29T16:11:17Z">
+        <changelog><![CDATA[Added:
+* browser: pass all up/down arrow keypresses to the list
+* browser: show about package window on spacebar
+* manager: display enabled status using REAPER's checkbox icons
+* manager: toggle repository enabled status when clicking on the checkbox icons or pressing spacebar
+* path: allow paths longer than 260 characters on Windows [p=1861355]
+
+Fixed:
+* browser: fix Refresh Browser (F5) action (v1.2rc1 regression)
+* listview: fix clearing queued actions in browser's queued tab (v1.2rc1 regression)
+* listview: fix header right click detection when list is scrolled on macOS
+* receipt: fix missing newline when updating through >1 versions (v1.2rc1 regression) [#21]
+* win32: fix crash when opening links (v1.2rc1 regression)
+
+Changed:
+* about: always show the about tab (even if documentation is empty or invalid)
+* about: remove "About" prefix in the title bar
+* about: split File column into File and Path in the Contents tab
+* browser: avoid repopulating the whole list when applying an asynchronous transaction
+* browser: disable impossible selection-wide operations in the Actions menu
+* browser: hide "Copy package name" from the context menu if no packages are selected
+* browser: show "Copy package names" in the Actions button's menu as well
+* listview: don't repopulate the entire list whenever the filter is changed
+* listview: enable double buffering on Windows]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc2/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc2/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc2/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc2/reaper_reapack64.dll</source>
         <source platform="linux32" file="reaper_reapack64.so">https://build/from/source</source>
         <source platform="linux64" file="reaper_reapack64.so">https://build/from/source</source>
       </version>
