@@ -386,10 +386,11 @@ int ListView::itemUnderMouse(bool *overIcon) const
   LVHITTESTINFO info{};
   GetCursorPos(&info.pt);
   ScreenToClient(handle(), &info.pt);
-  ListView_HitTest(handle(), &info);
+  ListView_SubItemHitTest(handle(), &info);
 
   if(overIcon) {
-    *overIcon = (info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON)) != 0 &&
+    *overIcon = info.iSubItem == 0 &&
+      (info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON)) != 0 &&
       (info.flags & LVHT_ONITEMLABEL) == 0;
   }
 
