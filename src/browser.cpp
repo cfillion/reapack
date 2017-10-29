@@ -559,6 +559,7 @@ void Browser::fillList()
   for(const int index : selectIndexes)
     m_list->select(index);
 
+  m_list->endEdit(); // filter before calling updateDisplayLabel
   updateDisplayLabel();
 }
 

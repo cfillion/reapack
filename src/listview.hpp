@@ -147,6 +147,7 @@ public:
 
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setFilter(const std::string &);
+  void endEdit();
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
@@ -159,10 +160,9 @@ public:
 
 protected:
   friend Row;
-  friend BeginEdit;
+
   void updateCell(int row, int cell);
   void setRowIcon(int row, int icon);
-  void endEdit();
 
 private:
   struct Sort {
