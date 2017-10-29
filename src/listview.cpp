@@ -17,6 +17,7 @@
 
 #include "listview.hpp"
 
+#include "iconlist.hpp"
 #include "menu.hpp"
 #include "time.hpp"
 #include "version.hpp"
@@ -24,14 +25,22 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#ifdef _WIN32
-#  include <commctrl.h>
-#endif
-
 using namespace std;
 
+static int adjustWidth(const int points)
+{
+#ifdef _WIN32
+  if(points < 1)
+    return points;
+  else
+    return (int)ceil(points * 0.863); // magic number to make pretty sizes...
+#else
+  return points;
+#endif
+}
+
 ListView::ListView(HWND handle, const Columns &columns)
-  : Control(handle), m_customizable(false), m_sort(), m_defaultSort(), m_dirty(0)
+  : Control(handle), m_dirty(0), m_customizable(false), m_sort(), m_defaultSort()
 {
   for(const Column &col : columns)
     addColumn(col);
@@ -114,6 +123,25 @@ void ListView::updateCell(int row, int cell)
     m_dirty |= NeedSortFlag;
 
   m_dirty |= NeedFilterFlag;
+}
+
+void ListView::enableIcons()
+{
+  static IconList list({IconList::UncheckedIcon, IconList::CheckedIcon});
+
+  // NOTE: the list must have the LVS_SHAREIMAGELISTS style to prevent
+  // it from taking ownership of the image list
+  ListView_SetImageList(handle(), list.handle(), LVSIL_SMALL);
+}
+
+void ListView::setRowIcon(const int row, const int image)
+{
+  LVITEM item{};
+  item.iItem = translate(row);
+  item.iImage = image;
+  item.mask |= LVIF_IMAGE;
+
+  ListView_SetItem(handle(), &item);
 }
 
 void ListView::removeRow(const int userIndex)
@@ -353,12 +381,18 @@ int ListView::selectionSize() const
   return ListView_GetSelectedCount(handle());
 }
 
-int ListView::itemUnderMouse() const
+int ListView::itemUnderMouse(bool *overIcon) const
 {
   LVHITTESTINFO info{};
   GetCursorPos(&info.pt);
   ScreenToClient(handle(), &info.pt);
-  ListView_HitTest(handle(), &info);
+  ListView_SubItemHitTest(handle(), &info);
+
+  if(overIcon) {
+    *overIcon = info.iSubItem == 0 &&
+      (info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON)) != 0 &&
+      (info.flags & LVHT_ONITEMLABEL) == 0;
+  }
 
   return translateBack(info.iItem);
 }
@@ -396,8 +430,9 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
   case LVN_ITEMCHANGED:
     m_onSelect();
     break;
+  case NM_CLICK:
   case NM_DBLCLK:
-    handleDoubleClick();
+    handleClick(info->code == NM_DBLCLK);
     break;
   case LVN_COLUMNCLICK:
     handleColumnClick(lParam);
@@ -458,16 +493,21 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
   return true;
 }
 
-void ListView::handleDoubleClick()
+void ListView::handleClick(const bool dbclick)
 {
-  // user double clicked on an item
-  if(itemUnderMouse() > -1 && currentIndex() > -1)
-    m_onActivate();
+  bool overIcon;
+
+  if(itemUnderMouse(&overIcon) > -1 && currentIndex() > -1) {
+    if(dbclick)
+      m_onActivate();
+    else if(overIcon)
+      m_onIconClick();
+  }
 }
 
-void ListView::handleColumnClick(LPARAM lParam)
+void ListView::handleColumnClick(const LPARAM lParam)
 {
-  auto info = (LPNMLISTVIEW)lParam;
+  const auto info = reinterpret_cast<LPNMLISTVIEW>(lParam);
   const int col = info->iSubItem;
   SortOrder order = AscendingOrder;
 
@@ -507,18 +547,6 @@ int ListView::translateBack(const int internalIndex) const
     return (int)item.lParam;
   else
     return -1;
-}
-
-int ListView::adjustWidth(const int points)
-{
-#ifdef _WIN32
-  if(points < 1)
-    return points;
-  else
-    return (int)ceil(points * 0.863); // magic number to make pretty sizes...
-#else
-  return points;
-#endif
 }
 
 void ListView::headerMenu(const int x, const int y)
@@ -666,6 +694,11 @@ void ListView::Row::setCell(const int i, const string &val, void *data)
   cell.userData = data;
 
   m_list->updateCell(m_userIndex, i);
+}
+
+void ListView::Row::setChecked(bool checked)
+{
+  m_list->setRowIcon(m_userIndex, checked);
 }
 
 vector<string> ListView::Row::filterValues() const

@@ -52,13 +52,12 @@ private:
     operator bool() const { return enable || autoInstall; }
   };
 
-  typedef std::function<void (const Remote &, RemoteMods *)> ModsCallback;
+  typedef std::function<void (const Remote &, int index, RemoteMods *)> ModsCallback;
 
   Remote getRemote(int index) const;
   bool fillContextMenu(Menu &, int index) const;
-  void updateEnabledCell(int index, const Remote &);
-  void setMods(const ModsCallback &, bool updateRow);
-  void setRemoteEnabled(bool);
+  void setMods(const ModsCallback &);
+  void toggleEnabled();
   bool isRemoteEnabled(const Remote &) const;
   void setRemoteAutoInstall(const tribool &);
   tribool remoteAutoInstall(const Remote &) const;

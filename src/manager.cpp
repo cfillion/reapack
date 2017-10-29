@@ -39,12 +39,12 @@ static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
 using namespace std;
 
 enum {
-  ACTION_ENABLE = 80, ACTION_DISABLE, ACTION_UNINSTALL, ACTION_ABOUT,
-  ACTION_REFRESH, ACTION_COPYURL, ACTION_SELECT, ACTION_UNSELECT,
-  ACTION_AUTOINSTALL_GLOBAL, ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON,
-  ACTION_AUTOINSTALL, ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE,
-  ACTION_NETCONFIG, ACTION_RESETCONFIG, ACTION_IMPORT_REPO,
-  ACTION_IMPORT_ARCHIVE, ACTION_EXPORT_ARCHIVE
+  ACTION_UNINSTALL = 80, ACTION_ABOUT, ACTION_REFRESH, ACTION_COPYURL,
+  ACTION_SELECT, ACTION_UNSELECT, ACTION_AUTOINSTALL_GLOBAL,
+  ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON, ACTION_AUTOINSTALL,
+  ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE, ACTION_NETCONFIG,
+  ACTION_RESETCONFIG, ACTION_IMPORT_REPO, ACTION_IMPORT_ARCHIVE,
+  ACTION_EXPORT_ARCHIVE,
 };
 
 Manager::Manager()
@@ -65,13 +65,14 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Name", 115},
-    {"Index URL", 415},
-    {"State", 60},
+    {"Name", 155},
+    {"Index URL", 435},
   });
 
-  m_list->onActivate(bind(&Manager::aboutRepo, this, true));
+  m_list->enableIcons();
   m_list->onSelect(bind(&Dialog::startTimer, this, 100, 0, true));
+  m_list->onIconClick(bind(&Manager::toggleEnabled, this));
+  m_list->onActivate(bind(&Manager::aboutRepo, this, true));
   m_list->onContextMenu(bind(&Manager::fillContextMenu, this, _1, _2));
 
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
@@ -82,7 +83,7 @@ void Manager::onInit()
   setAnchor(getControl(IDCANCEL), AnchorAll);
   setAnchor(m_apply, AnchorAll);
 
-  auto data = m_serializer.read(g_reapack->config()->windowState.manager, 1);
+  auto data = m_serializer.read(g_reapack->config()->windowState.manager, 2);
   restoreState(data);
   m_list->restoreState(data);
 
@@ -120,12 +121,6 @@ void Manager::onCommand(const int id, int)
     break;
   case IDC_OPTIONS:
     options();
-    break;
-  case ACTION_ENABLE:
-    setRemoteEnabled(true);
-    break;
-  case ACTION_DISABLE:
-    setRemoteEnabled(false);
     break;
   case ACTION_REFRESH:
     refreshIndex();
@@ -215,14 +210,8 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
     return true;
   }
 
-  const UINT enableAction =
-    menu.addAction("&Enable", ACTION_ENABLE);
-  const UINT disableAction =
-    menu.addAction("&Disable", ACTION_DISABLE);
-
-  menu.addSeparator();
-
   menu.addAction("&Refresh", ACTION_REFRESH);
+  menu.addAction("&Copy URL", ACTION_COPYURL);
 
   Menu autoInstallMenu = menu.addMenu("&Install new packages");
   const UINT autoInstallGlobal = autoInstallMenu.addAction(
@@ -232,8 +221,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   const UINT autoInstallOn = autoInstallMenu.addAction(
     "When synchronizing", ACTION_AUTOINSTALL_ON);
 
-  menu.addAction("&Copy URL", ACTION_COPYURL);
-
   const UINT uninstallAction =
     menu.addAction("&Uninstall", ACTION_UNINSTALL);
 
@@ -242,8 +229,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   menu.addAction(String::format("&About %s", remote.name().c_str()),
     index | (ACTION_ABOUT << 8));
 
-  bool allEnabled = true;
-  bool allDisabled = true;
   bool allProtected = true;
   bool allAutoInstallGlobal = true;
   bool allAutoInstallOff = true;
@@ -251,11 +236,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
 
   for(const int i : m_list->selection()) {
     const Remote &r = getRemote(i);
-    if(isRemoteEnabled(r))
-      allDisabled = false;
-    else
-      allEnabled = false;
-
     if(!r.isProtected())
       allProtected = false;
 
@@ -273,10 +253,6 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
     }
   };
 
-  if(allEnabled)
-    menu.disable(enableAction);
-  if(allDisabled)
-    menu.disable(disableAction);
   if(allProtected)
     menu.disable(uninstallAction);
 
@@ -301,6 +277,8 @@ bool Manager::onKeyDown(const int key, const int mods)
     m_list->unselectAll();
   else if(mods == CtrlModifier && key == 'C')
     copyUrl();
+  else if(!mods && key == VK_SPACE)
+    toggleEnabled();
   else
     return false;
 
@@ -327,21 +305,16 @@ void Manager::refresh()
 
     int c = 0;
     auto row = m_list->createRow();
+    row->setChecked(isRemoteEnabled(remote));
     row->setCell(c++, remote.name());
     row->setCell(c++, remote.url());
-    updateEnabledCell(row->index(), remote);
 
     if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
       m_list->select(row->index());
   }
 }
 
-void Manager::updateEnabledCell(int index, const Remote &remote)
-{
-  m_list->row(index)->setCell(2, isRemoteEnabled(remote) ? "Enabled" : "Disabled");
-}
-
-void Manager::setMods(const ModsCallback &cb, const bool updateRow)
+void Manager::setMods(const ModsCallback &cb)
 {
   ListView::BeginEdit edit(m_list);
 
@@ -352,7 +325,7 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
 
     if(it == m_mods.end()) {
       RemoteMods mods;
-      cb(remote, &mods);
+      cb(remote, index, &mods);
 
       if(!mods)
         continue;
@@ -362,27 +335,28 @@ void Manager::setMods(const ModsCallback &cb, const bool updateRow)
     }
     else {
       RemoteMods *mods = &it->second;
-      cb(remote, mods);
+      cb(remote, index, mods);
 
       if(!*mods) {
         m_mods.erase(it);
         setChange(-1);
       }
     }
-
-    if(updateRow)
-      updateEnabledCell(index, remote);
   }
 }
 
-void Manager::setRemoteEnabled(const bool enabled)
+void Manager::toggleEnabled()
 {
-  setMods([=](const Remote &remote, RemoteMods *mods) {
-    if(remote.isEnabled() == enabled)
+  setMods([=](const Remote &remote, const int index, RemoteMods *mods) {
+    const bool enable = !mods->enable.value_or(remote.isEnabled());
+
+    if(remote.isEnabled() == enable)
       mods->enable = boost::none;
     else
-      mods->enable = enabled;
-  }, true);
+      mods->enable = enable;
+
+    m_list->row(index)->setChecked(enable);
+  });
 }
 
 bool Manager::isRemoteEnabled(const Remote &remote) const
@@ -397,7 +371,7 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 
 void Manager::setRemoteAutoInstall(const tribool &enabled)
 {
-  setMods([=](const Remote &remote, RemoteMods *mods) {
+  setMods([=](const Remote &remote, int, RemoteMods *mods) {
     const bool same = remote.autoInstall() == enabled
       || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
 
@@ -405,7 +379,7 @@ void Manager::setRemoteAutoInstall(const tribool &enabled)
       mods->autoInstall = boost::none;
     else
       mods->autoInstall = enabled;
-  }, false);
+  });
 }
 
 tribool Manager::remoteAutoInstall(const Remote &remote) const

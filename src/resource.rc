@@ -33,7 +33,7 @@ BEGIN
   LTEXT "The repositories enabled in this list are used to populate the package list:",
     IDC_LABEL, 5, 5, 360, 10
   CONTROL "", IDC_LIST, WC_LISTVIEW, LVS_REPORT | LVS_SHOWSELALWAYS |
-    WS_BORDER | WS_TABSTOP, 5, 18, 360, 200
+    LVS_SHAREIMAGELISTS | WS_BORDER | WS_TABSTOP, 5, 18, 360, 200
   PUSHBUTTON "&Browse packages", IDC_BROWSE, 5, 221, 75, 14
   PUSHBUTTON "&Import/export...", IDC_IMPORT, 83, 221, 65, 14
   PUSHBUTTON "&Options...", IDC_OPTIONS, 151, 221, 45, 14
