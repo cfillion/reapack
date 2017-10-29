@@ -388,8 +388,10 @@ int ListView::itemUnderMouse(bool *overIcon) const
   ScreenToClient(handle(), &info.pt);
   ListView_HitTest(handle(), &info);
 
-  if(overIcon)
-    *overIcon = info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON);
+  if(overIcon) {
+    *overIcon = (info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON)) != 0 &&
+      (info.flags & LVHT_ONITEMLABEL) == 0;
+  }
 
   return translateBack(info.iItem);
 }
