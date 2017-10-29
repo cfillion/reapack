@@ -27,6 +27,8 @@
 
 using namespace std;
 
+bool ListView_GetScroll(HWND, POINT *); // undocumented macOS SWELL function
+
 static int adjustWidth(const int points)
 {
 #ifdef _WIN32
@@ -453,8 +455,14 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
   GetWindowRect(header, &rect);
   const int headerHeight = rect.bottom - rect.top;
 #else
-  // point.y is negative on OS X when hovering the header
-  const int headerHeight = 0;
+  // point.y is negative on macOS when hovering the header
+  constexpr int headerHeight = 0;
+
+  #ifdef __APPLE__
+    POINT scroll;
+    ListView_GetScroll(handle(), &scroll);
+    point.y -= scroll.y;
+  #endif
 #endif
 
   if(point.y < headerHeight && x != -1) {
