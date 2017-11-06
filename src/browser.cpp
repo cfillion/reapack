@@ -275,7 +275,7 @@ void Browser::fillMenu(Menu &menu)
     menu.addSeparator();
 
   if(m_list->hasSelection())
-    menu.addAction("&Copy package names", ACTION_COPY);
+    menu.addAction("&Copy package name", ACTION_COPY);
 }
 
 void Browser::fillSelectionMenu(Menu &menu)
