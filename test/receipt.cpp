@@ -47,25 +47,27 @@ TEST_CASE("set receipt flags", M) {
     Version ver("1.0", &pkg);
     r.addInstall(&ver, {});
 
-    CHECK(r.test(Receipt::PackageChanged));
+    CHECK(r.test(Receipt::InstalledOrRemoved));
+    CHECK_FALSE(r.test(Receipt::PackageChangedFlag));
     expected = Receipt::InstalledFlag;
   }
 
   SECTION("removal") {
     r.addRemoval(Path("hello/world"));
-    CHECK(r.test(Receipt::PackageChanged));
+    CHECK(r.test(Receipt::InstalledOrRemoved));
+    CHECK_FALSE(r.test(Receipt::PackageChangedFlag));
     expected = Receipt::RemovedFlag;
   }
 
   SECTION("export") {
     r.addExport(Path("hello/world"));
-    CHECK_FALSE(r.test(Receipt::PackageChanged));
+    CHECK_FALSE(r.test(Receipt::InstalledOrRemoved));
     expected = Receipt::ExportedFlag;
   }
 
   SECTION("error") {
     r.addError({"message", "context"});
-    CHECK_FALSE(r.test(Receipt::PackageChanged));
+    CHECK_FALSE(r.test(Receipt::PackageChangedFlag));
     expected = Receipt::ErrorFlag;
   }
 
@@ -100,6 +102,16 @@ TEST_CASE("set index changed flag", M) {
   r.setIndexChanged();
   REQUIRE(r.test(Receipt::IndexChangedFlag));
   REQUIRE(r.test(Receipt::RefreshBrowser));
+}
+
+TEST_CASE("set package changed flag", M) {
+  Receipt r;
+  REQUIRE_FALSE(r.test(Receipt::PackageChangedFlag));
+
+  r.setPackageChanged();
+  REQUIRE(r.test(Receipt::PackageChangedFlag));
+  REQUIRE(r.test(Receipt::RefreshBrowser));
+  REQUIRE_FALSE(r.test(Receipt::InstalledOrRemoved));
 }
 
 TEST_CASE("format receipt page title", M) {

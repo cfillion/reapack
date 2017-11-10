@@ -36,16 +36,17 @@ typedef std::shared_ptr<const Index> IndexPtr;
 class Receipt {
 public:
   enum Flag {
-    NoFlag            = 0,
-    RestartNeededFlag = 1<<0,
-    InstalledFlag     = 1<<1,
-    RemovedFlag       = 1<<2,
-    ExportedFlag      = 1<<3,
-    ErrorFlag         = 1<<4,
-    IndexChangedFlag  = 1<<5,
+    NoFlag             = 0,
+    ErrorFlag          = 1<<0,
+    RestartNeededFlag  = 1<<1,
+    IndexChangedFlag   = 1<<2,
+    PackageChangedFlag = 1<<3,
+    InstalledFlag      = 1<<4,
+    RemovedFlag        = 1<<5,
+    ExportedFlag       = 1<<6,
 
-    PackageChanged    = InstalledFlag | RemovedFlag,
-    RefreshBrowser    = PackageChanged | IndexChangedFlag,
+    InstalledOrRemoved = InstalledFlag | RemovedFlag,
+    RefreshBrowser = IndexChangedFlag | PackageChangedFlag | InstalledOrRemoved,
   };
 
   Receipt();
@@ -55,6 +56,7 @@ public:
   bool empty() const;
 
   void setIndexChanged() { m_flags |= IndexChangedFlag; }
+  void setPackageChanged() { m_flags |= PackageChangedFlag; }
   void addInstall(const Version *, const Registry::Entry &);
   void addRemoval(const Path &p);
   void addExport(const Path &p);

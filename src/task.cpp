@@ -68,4 +68,5 @@ PinTask::PinTask(const Registry::Entry &re, const bool pin, Transaction *tx)
 void PinTask::commit()
 {
   tx()->registry()->setPinned(m_entry, m_pin);
+  tx()->receipt()->setPackageChanged();
 }
