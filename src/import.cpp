@@ -32,7 +32,7 @@
 
 using namespace std;
 
-static const char *TITLE = "ReaPack: Import repositories";
+static const char *TITLE = "Import repositories";
 static const char *DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import()
