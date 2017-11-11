@@ -308,17 +308,18 @@ void Browser::updateDisplayLabel()
 void Browser::displayButton()
 {
   static map<const char *, Package::Type> types = {
-    {"&Scripts", Package::ScriptType},
-    {"&Effects", Package::EffectType},
-    {"E&xtensions", Package::ExtensionType},
-    {"&Themes", Package::ThemeType},
-    {"&Language Packs", Package::LangPackType},
-    {"&Web Interfaces", Package::WebInterfaceType},
+    {"&Automation Items",  Package::AutomationItemType},
+    {"&Effects",           Package::EffectType},
+    {"E&xtensions",        Package::ExtensionType},
+    {"&Language Packs",    Package::LangPackType},
+    {"&MIDI Note Names",   Package::MIDINoteNamesType},
     {"&Project Templates", Package::ProjectTemplateType},
-    {"&Track Templates", Package::TrackTemplateType},
-    {"&MIDI Note Names", Package::MIDINoteNamesType},
-    {"&Automation Items", Package::AutomationItemType},
-    {"&Other packages", Package::UnknownType},
+    {"&Scripts",           Package::ScriptType},
+    {"&Themes",            Package::ThemeType},
+    {"&Track Templates",   Package::TrackTemplateType},
+    {"&Web Interfaces",    Package::WebInterfaceType},
+
+    {"&Other packages",    Package::UnknownType},
   };
 
   Menu menu;
