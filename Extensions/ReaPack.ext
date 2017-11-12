@@ -11,12 +11,13 @@
   [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Fixed:
-  * browser: don't enable the selection-wide reinstall action if the current version is not in the repository
-  * browser: fix the package list not being refreshed after toggling the pinned status without installing or removing packages (another v1.2rc1 regression)
-  * browser: prevent selection-wide install/update action from installing an older version when the current one is not in the repository
-  * linux: attempt to produce binaries compatible with more Linux flavors (such as Linux Mint)
+  - browser: don't add two consecutive separators in the context menu when selection > 1 and the cursor is not above a package
+  - browser: don't enable the selection-wide reinstall action if the current version is not in the repository
+  - browser: fix the package list not being refreshed after toggling the pinned status without installing or removing packages (another v1.2rc1 regression)
+  - browser: prevent selection-wide install/update action from installing an older version when the current one is not in the repository
+  - linux: attempt to produce binaries compatible with more Linux flavors (such as Linux Mint)
 
   Changed:
-  * browser: rename "Copy package names" back to "Copy package name" in context menu
-  * browser: sort package types alphabetically in the filter menu (top right button)
-  * edit the title of a few windows to match the action/menu name
+  - browser: rename "Copy package names" back to "Copy package name" in context menu
+  - browser: sort package types alphabetically in the filter menu (top right button)
+  - edit the title of a few windows to match the action/menu name
