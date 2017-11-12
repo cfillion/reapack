@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="7acc66aa49951b12504571f3f21881e486fadb7f" name="ReaPack">
+<index version="1" commit="aef207ada7cca48ea25ce4a87596532a1b0b4b49" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
-        <link rel="donation">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=T3DEWBQJAV7WL&amp;lc=CA&amp;item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&amp;no_note=0&amp;cn=Custom%20message&amp;no_shipping=1&amp;currency_code=CAD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted</link>
+        <link rel="donation">https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&amp;cmd=_donations&amp;currency_code=CAD&amp;item_name=ReaPack%3A+Package+manager+for+REAPER</link>
       </metadata>
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
         <changelog><![CDATA[Bug fixes:
@@ -575,6 +575,25 @@ Changed:
         <source platform="linux32" file="reaper_reapack64.so">https://build/from/source</source>
         <source platform="linux64" file="reaper_reapack64.so">https://build/from/source</source>
       </version>
+      <version name="1.2rc3" author="cfillion" time="2017-11-11T20:59:52Z">
+        <changelog><![CDATA[Fixed:
+- browser: don't add two consecutive separators in the context menu when selection > 1 and the cursor is not above a package
+- browser: don't enable the selection-wide reinstall action if the current version is not in the repository
+- browser: fix the package list not being refreshed after toggling the pinned status without installing or removing packages (another v1.2rc1 regression)
+- browser: prevent selection-wide install/update action from installing an older version when the current one is not in the repository
+- linux: attempt to produce binaries compatible with more Linux flavors (such as Linux Mint)
+
+Changed:
+- browser: rename "Copy package names" back to "Copy package name" in context menu
+- browser: sort package types alphabetically in the filter menu (top right button)
+- edit the title of a few windows to match the action/menu name]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack32.so</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack64.so</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -601,10 +620,10 @@ GNU Lesser General Public License.\par}
 }
 ]]></description>
     <link rel="website" href="https://reapack.com">Website</link>
-    <link rel="website" href="https://github.com/cfillion/reapack/wiki">User Guide</link>
-    <link rel="website" href="http://forum.cockos.com/showthread.php?t=177978">Forum Thread</link>
-    <link rel="website" href="https://github.com/cfillion/reapack/issues">Bug Tracker</link>
-    <link rel="website" href="https://github.com/cfillion/reapack/tree/master">Source Code</link>
-    <link rel="donation">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=T3DEWBQJAV7WL&amp;lc=CA&amp;item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&amp;no_note=0&amp;cn=Custom%20message&amp;no_shipping=1&amp;currency_code=CAD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted</link>
+    <link rel="website" href="https://reapack.com/user-guide">User Guide</link>
+    <link rel="website" href="https://forum.cockos.com/showthread.php?t=177978">Forum thread</link>
+    <link rel="website" href="https://github.com/cfillion/reapack/issues">Bug tracker</link>
+    <link rel="website" href="https://github.com/cfillion/reapack">Source code</link>
+    <link rel="donation">https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&amp;cmd=_donations&amp;currency_code=CAD&amp;item_name=ReaPack%3A+Package+manager+for+REAPER</link>
   </metadata>
 </index>
