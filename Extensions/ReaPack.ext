@@ -1,36 +1,22 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2rc2
+@version 1.2rc3
 @author cfillion
-@donation https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=T3DEWBQJAV7WL&lc=CA&item_name=ReaPack%3a%20Package%20Manager%20for%20REAPER&no_note=0&cn=Custom%20message&no_shipping=1&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
+@donation https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER
 @provides
   [darwin32] reaper_reapack32.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64] reaper_reapack64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32]    reaper_reapack32.dll   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64]    reaper_reapack64.dll   https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [linux32]  reaper_reapack64.so    https://build/from/source
-  [linux64]  reaper_reapack64.so    https://build/from/source
+  [linux32]  reaper_reapack32.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  Added:
-  * browser: pass all up/down arrow keypresses to the list
-  * browser: show about package window on spacebar
-  * manager: display enabled status using REAPER's checkbox icons
-  * manager: toggle repository enabled status when clicking on the checkbox icons or pressing spacebar
-  * path: allow paths longer than 260 characters on Windows [p=1861355]
-
   Fixed:
-  * browser: fix Refresh Browser (F5) action (v1.2rc1 regression)
-  * listview: fix clearing queued actions in browser's queued tab (v1.2rc1 regression)
-  * listview: fix header right click detection when list is scrolled on macOS
-  * receipt: fix missing newline when updating through >1 versions (v1.2rc1 regression) [#21]
-  * win32: fix crash when opening links (v1.2rc1 regression)
+  * browser: don't enable the selection-wide reinstall action if the current version is not in the repository
+  * browser: fix the package list not being refreshed after toggling the pinned status without installing or removing packages (another v1.2rc1 regression)
+  * browser: prevent selection-wide install/update action from installing an older version when the current one is not in the repository
+  * linux: attempt to produce binaries compatible with more Linux flavors (such as Linux Mint)
 
   Changed:
-  * about: always show the about tab (even if documentation is empty or invalid)
-  * about: remove "About" prefix in the title bar
-  * about: split File column into File and Path in the Contents tab
-  * browser: avoid repopulating the whole list when applying an asynchronous transaction
-  * browser: disable impossible selection-wide operations in the Actions menu
-  * browser: hide "Copy package name" from the context menu if no packages are selected
-  * browser: show "Copy package names" in the Actions button's menu as well
-  * listview: don't repopulate the entire list whenever the filter is changed
-  * listview: enable double buffering on Windows
+  * browser: rename "Copy package names" back to "Copy package name" in context menu
+  * browser: sort package types alphabetically in the filter menu (top right button)
+  * edit the title of a few windows to match the action/menu name
