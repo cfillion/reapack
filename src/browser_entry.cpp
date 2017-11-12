@@ -237,7 +237,7 @@ int Browser::Entry::possibleActions() const
 
   if((test(UninstalledFlag) || test(OutOfDateFlag)) && (!target || *target != latest))
     flags |= CanInstallLatest;
-  if(test(InstalledFlag) && !test(ObsoleteFlag) && (!target || *target != current))
+  if(test(InstalledFlag) && !test(ObsoleteFlag) && current && (!target || *target != current))
     flags |= CanReinstall;
   if(test(InstalledFlag) && !test(ProtectedFlag) && (!target || *target != nullptr))
     flags |= CanUninstall;
