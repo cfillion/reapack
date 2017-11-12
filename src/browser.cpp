@@ -261,9 +261,9 @@ void Browser::fillMenu(Menu &menu)
 
   if(m_list->selectionSize() > 1) {
     fillSelectionMenu(menu);
-    menu.addSeparator();
 
     if(entry) {
+      menu.addSeparator();
       Menu pkgMenu = menu.addMenu("Package under cursor");
       entry->fillMenu(pkgMenu);
     }
