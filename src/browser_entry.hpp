@@ -71,9 +71,10 @@ public:
   void updateRow(const ListView::RowPtr &) const;
   void fillMenu(Menu &) const;
 
-  int possibleActions() const;
+  int possibleActions(bool allowToggle) const;
   bool test(Flag f) const { return (m_flags & f) == f; }
-  bool test(PossibleAction f) const { return (possibleActions() & f) == f; }
+  bool test(PossibleAction f, bool allowToggle = true) const {
+    return (possibleActions(allowToggle) & f) == f; }
   bool operator==(const Entry &o) const;
 
 private:

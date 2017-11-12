@@ -116,7 +116,7 @@ private:
   // needed)
   void resetActions(int index);
   void updateAction(const int index);
-  void setTarget(const int index, const Version *, bool toggle = true);
+  void toggleTarget(const int index, const Version *);
   void resetTarget(int index);
 
   void installLatest(int index, bool toggle);

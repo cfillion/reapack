@@ -231,15 +231,19 @@ void Browser::Entry::fillMenu(Menu &menu) const
   menu.addAction(String::format("&About %s", indexName().c_str()), ACTION_ABOUT_REMOTE);
 }
 
-int Browser::Entry::possibleActions() const
+int Browser::Entry::possibleActions(bool allowToggle) const
 {
   int flags = 0;
 
-  if((test(UninstalledFlag) || test(OutOfDateFlag)) && (!target || *target != latest))
+  const auto canSetTarget = [=](const Version *ver) {
+    return allowToggle || !target || *target != ver;
+  };
+
+  if((test(UninstalledFlag) || test(OutOfDateFlag)) && canSetTarget(latest))
     flags |= CanInstallLatest;
-  if(test(InstalledFlag) && !test(ObsoleteFlag) && current && (!target || *target != current))
+  if(test(InstalledFlag) && !test(ObsoleteFlag) && current && canSetTarget(current))
     flags |= CanReinstall;
-  if(test(InstalledFlag) && !test(ProtectedFlag) && (!target || *target != nullptr))
+  if(test(InstalledFlag) && !test(ProtectedFlag) && canSetTarget(nullptr))
     flags |= CanUninstall;
   if(target ? *target != nullptr : test(InstalledFlag))
     flags |= CanTogglePin;

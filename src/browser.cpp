@@ -283,7 +283,7 @@ void Browser::fillSelectionMenu(Menu &menu)
   int selFlags = 0;
 
   for(const int index : m_list->selection())
-    selFlags |= getEntry(index)->possibleActions();
+    selFlags |= getEntry(index)->possibleActions(false);
 
   menu.setEnabled(selFlags & Entry::CanInstallLatest,
     menu.addAction("&Install/update selection", ACTION_LATEST_ALL));
@@ -651,16 +651,16 @@ void Browser::installLatest(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(entry && entry->latest && entry->latest != entry->current)
-    setTarget(index, entry->latest, toggle);
+  if(entry && entry->test(Entry::CanInstallLatest, toggle))
+    toggleTarget(index, entry->latest);
 }
 
 void Browser::reinstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(entry && entry->current)
-    setTarget(index, entry->current, toggle);
+  if(entry && entry->test(Entry::CanReinstall, toggle))
+    toggleTarget(index, entry->current);
 }
 
 void Browser::installVersion(const int index, const size_t verIndex)
@@ -679,21 +679,21 @@ void Browser::installVersion(const int index, const size_t verIndex)
   if(target == entry->current)
     resetTarget(index);
   else
-    setTarget(index, target);
+    toggleTarget(index, target);
 }
 
 void Browser::uninstall(const int index, const bool toggle)
 {
   const Entry *entry = getEntry(index);
 
-  if(entry && entry->test(Entry::InstalledFlag) && !entry->test(Entry::ProtectedFlag))
-    setTarget(index, nullptr, toggle);
+  if(entry && entry->test(Entry::CanUninstall, toggle))
+    toggleTarget(index, nullptr);
 }
 
 void Browser::togglePin(const int index)
 {
   Entry *entry = getEntry(index);
-  if(!entry)
+  if(!entry || !entry->test(Entry::CanTogglePin))
     return;
 
   const bool newVal = !entry->pin.value_or(entry->regEntry.pinned);
@@ -711,11 +711,11 @@ bool Browser::hasAction(const Entry *entry) const
   return count(m_actions.begin(), m_actions.end(), entry) > 0;
 }
 
-void Browser::setTarget(const int index, const Version *target, const bool toggle)
+void Browser::toggleTarget(const int index, const Version *target)
 {
   Entry *entry = getEntry(index);
 
-  if(toggle && entry->target && *entry->target == target)
+  if(entry->target && *entry->target == target)
     entry->target = boost::none;
   else
     entry->target = target;
