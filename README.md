@@ -1,4 +1,4 @@
-# ReaPack: Package Manager for REAPER
+# ReaPack: Package manager for REAPER
 
 [![Donate](https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_74x21.png)](https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER)
 
@@ -10,13 +10,13 @@ https://reapack.com/user-guide
 
 Download these files into the `vendor` directory:
 
-1. reaper_plugin.h from
-  [reaper-oss/sws](https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h)
-2. catch.hpp from
+- catch.hpp from
   [philsquared/Catch](https://github.com/philsquared/Catch/raw/master/single_include/catch.hpp)
-3. [WDL](http://www.cockos.com/wdl/) from Cockos:
+- reaper_plugin.h from
+  [reaper-oss/sws](https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h)
+- reaper_plugin_functions.h from the REAPER action
+- [WDL](http://www.cockos.com/wdl/) from Cockos:
   `git clone https://github.com/justinfrankel/WDL.git vendor/WDL`
-4. reaper_plugin_functions.h from the REAPER action
   "[developer] Write C++ API functions header"
 
 The `vendor` directory structure should be as follow:
