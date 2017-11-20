@@ -27,6 +27,8 @@ namespace String {
   std::string format(const char *fmt, ...);
 
   std::string indent(const std::string &);
+
+  void imbueStream(std::ostream &);
 }
 
 #endif

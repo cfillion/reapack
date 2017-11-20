@@ -64,3 +64,15 @@ string String::indent(const string &text)
 
   return output;
 }
+
+void String::imbueStream(ostream &stream)
+{
+  class NumPunct : public std::numpunct<char>
+  {
+  protected:
+    char do_thousands_sep() const override { return ','; }
+    std::string do_grouping() const override { return "\3"; }
+  };
+
+  stream.imbue(locale(locale::classic(), new NumPunct));
+}

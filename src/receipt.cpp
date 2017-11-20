@@ -91,7 +91,7 @@ void ReceiptPage::setTitle(const char *title)
   ostringstream stream;
 
   // enable number formatting (ie. "1,234" instead of "1234")
-  stream.imbue(locale(""));
+  String::imbueStream(stream);
 
   stream << title << " (" << m_size << ')';
   m_title = stream.str();
