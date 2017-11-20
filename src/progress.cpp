@@ -21,6 +21,8 @@
 #include "resource.hpp"
 #include "win32.hpp"
 
+#include <sstream>
+
 using namespace std;
 
 Progress::Progress(ThreadPool *pool)
@@ -81,12 +83,12 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  char position[32];
-  snprintf(position, sizeof(position), "%d of %d",
-    min(m_done + 1, m_total), m_total);
+  ostringstream position;
+  String::imbueStream(position);
+  position << min(m_done + 1, m_total) << " of " << m_total;
 
   char label[1024];
-  snprintf(label, sizeof(label), m_current.c_str(), position);
+  snprintf(label, sizeof(label), m_current.c_str(), position.str().c_str());
 
   Win32::setWindowText(m_label, label);
 
