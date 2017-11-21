@@ -88,7 +88,10 @@ void ThreadTask::exec()
 WorkerThread::WorkerThread() : m_exit(false)
 {
   m_wake = CreateEvent(nullptr, true, false, nullptr);
-  m_thread = CreateThread(nullptr, 0, run, (void *)this, 0, nullptr);
+  m_thread = CreateThread(nullptr, 0, [](void *ptr) -> DWORD {
+    static_cast<WorkerThread *>(ptr)->run();
+    return 0;
+  }, static_cast<void *>(this), 0, nullptr);
 }
 
 WorkerThread::~WorkerThread()
@@ -102,25 +105,21 @@ WorkerThread::~WorkerThread()
   CloseHandle(m_thread);
 }
 
-DWORD WINAPI WorkerThread::run(void *ptr)
+void WorkerThread::run()
 {
-  WorkerThread *thread = static_cast<WorkerThread *>(ptr);
-
   DownloadContext context;
 
-  while(!thread->m_exit) {
-    while(ThreadTask *task = thread->nextTask()) {
+  while(!m_exit) {
+    while(ThreadTask *task = nextTask()) {
       if(auto dl = dynamic_cast<Download *>(task))
         dl->setContext(&context);
 
       task->exec();
     }
 
-    ResetEvent(thread->m_wake);
-    WaitForSingleObject(thread->m_wake, INFINITE);
+    ResetEvent(m_wake);
+    WaitForSingleObject(m_wake, INFINITE);
   }
-
-  return 0;
 }
 
 ThreadTask *WorkerThread::nextTask()

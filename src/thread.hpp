@@ -91,7 +91,7 @@ public:
   void clear();
 
 private:
-  static DWORD WINAPI run(void *);
+  void run();
   ThreadTask *nextTask();
 
   HANDLE m_wake;
