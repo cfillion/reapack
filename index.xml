@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="aef207ada7cca48ea25ce4a87596532a1b0b4b49" name="ReaPack">
+<index version="1" commit="a582f448d5b9e186ea8c3a8d8e4c599da81ae11a" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -594,6 +594,17 @@ Changed:
         <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack32.so</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2rc3/reaper_reapack64.so</source>
       </version>
+      <version name="1.2" author="cfillion" time="2017-11-22T07:53:16Z">
+        <changelog><![CDATA[This is the third stable release of ReaPack. Thank you for using ReaPack and keeping your packages up to date!
+
+The curated list of changes between ReaPack v1.1 and v1.2 is available at <https://reapack.com/release-notes/v1.2>.]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack32.so</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack64.so</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -620,7 +631,7 @@ GNU Lesser General Public License.\par}
 }
 ]]></description>
     <link rel="website" href="https://reapack.com">Website</link>
-    <link rel="website" href="https://reapack.com/user-guide">User Guide</link>
+    <link rel="website" href="https://reapack.com/user-guide">User guide</link>
     <link rel="website" href="https://forum.cockos.com/showthread.php?t=177978">Forum thread</link>
     <link rel="website" href="https://github.com/cfillion/reapack/issues">Bug tracker</link>
     <link rel="website" href="https://github.com/cfillion/reapack">Source code</link>
