@@ -58,6 +58,9 @@ void Progress::onCommand(const int id, int)
 
 void Progress::onTimer(const int id)
 {
+  if(!IsWindowEnabled(handle()))
+    return;
+
   show();
   stopTimer(id);
 }
