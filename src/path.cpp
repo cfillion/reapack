@@ -46,13 +46,25 @@ static vector<string> Split(const string &input, bool *absolute)
 {
   vector<string> list;
 
+  const auto append = [&list, absolute] (const string &part) {
+    if(part.empty() || part == DOT)
+      return;
+
+#ifdef _WIN32
+    if(list.empty() && part.size() == 2 && isalpha(part[0]) && part[1] == ':')
+      *absolute = true;
+#endif
+
+    list.push_back(part);
+  };
+
   size_t last = 0, size = input.size();
 
   while(last < size) {
     const size_t pos = input.find_first_of("\\/", last);
 
     if(pos == string::npos) {
-      list.push_back(input.substr(last));
+      append(input.substr(last));
       break;
     }
     else if(last + pos == 0) {
@@ -63,15 +75,7 @@ static vector<string> Split(const string &input, bool *absolute)
       continue;
     }
 
-    const string &part = input.substr(last, pos - last);
-
-    if(!part.empty() && part != DOT) {
-#ifdef _WIN32
-      if(list.empty() && part.size() == 2 && isalpha(part[0]) && part[1] == ':')
-        *absolute = true;
-#endif
-      list.push_back(part);
-    }
+    append(input.substr(last, pos - last));
 
     last = pos + 1;
   }

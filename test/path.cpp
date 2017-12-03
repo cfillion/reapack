@@ -265,24 +265,34 @@ TEST_CASE("remove root path", M) {
   REQUIRE(path.removeRoot() == Path("hello/world"));
 }
 
-TEST_CASE("directory traversal", M) {
-  SECTION("append (enabled)") {
-    REQUIRE(Path("a/./b") == Path("a/b"));
+TEST_CASE("append with directory traversal enabled", M) {
+  SECTION("dot")
+    REQUIRE(Path("a/./b/.") == Path("a/b"));
+
+  SECTION("dotdot")
     REQUIRE(Path("a/../b") == Path("b"));
-    REQUIRE(Path("../a") == Path("a"));
-  }
+}
 
-  SECTION("append (disabled)") {
-    Path a;
+TEST_CASE("append with directory traversal disabled", M) {
+  Path a;
+
+  SECTION("dot")
+    a.append("a/./b/.", false);
+
+  SECTION("dotdot")
     a.append("a/../b", false);
-    REQUIRE(a == Path("a/b"));
-  }
 
-  SECTION("concatenate") {
+  REQUIRE(a == Path("a/b"));
+}
+
+TEST_CASE("concatenate with directory traversal", M) {
+  SECTION("path + string") {
     // concatenating a std::string to a path, directory traversal is applied
     const Path a = Path("a/b/c") + "../../../d/e/f";
     REQUIRE(a == Path("d/e/f"));
+  }
 
+  SECTION("path + path") {
     // here, the directory traversal segments are lost before concatenating
     const Path b = Path("a/b/c") + Path("../../../d/e/f");
     REQUIRE(b == Path("a/b/c/d/e/f"));
