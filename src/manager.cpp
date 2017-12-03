@@ -47,6 +47,8 @@ enum {
   ACTION_EXPORT_ARCHIVE,
 };
 
+enum { TIMER_ABOUT = 1, };
+
 Manager::Manager()
   : Dialog(IDD_CONFIG_DIALOG),
     m_list(nullptr), m_changes(0), m_importing(false)
@@ -70,7 +72,7 @@ void Manager::onInit()
   });
 
   m_list->enableIcons();
-  m_list->onSelect(bind(&Dialog::startTimer, this, 100, 0, true));
+  m_list->onSelect(bind(&Dialog::startTimer, this, 100, TIMER_ABOUT, true));
   m_list->onIconClick(bind(&Manager::toggleEnabled, this));
   m_list->onActivate(bind(&Manager::aboutRepo, this, true));
   m_list->onContextMenu(bind(&Manager::fillContextMenu, this, _1, _2));
