@@ -179,6 +179,25 @@ TEST_CASE("absolute path", M) {
 #endif
 }
 
+TEST_CASE("absolute path (root only)", M) {
+#ifdef _WIN32
+  const Path a("C:");
+#else
+  const Path a("/");
+#endif
+
+  REQUIRE(a.absolute());
+
+#ifdef _WIN32
+  CHECK(a.size() == 1);
+  CHECK(a[0] == "C:");
+  CHECK(a.join() == "C:");
+#else
+  CHECK(a.size() == 0);
+  CHECK(a.join() == "/");
+#endif
+}
+
 TEST_CASE("append absolute path to empty path", M) {
 #ifdef _WIN32
   const Path abs("C:\\Windows\\");

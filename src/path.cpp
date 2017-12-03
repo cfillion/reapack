@@ -192,6 +192,9 @@ string Path::join(const bool nativeSeparator) const
     path += part;
   }
 
+  if(m_parts.empty() && absoluteSlash)
+    path += sep;
+
 #ifdef _WIN32
   if(m_absolute && path.size() > MAX_PATH)
     path.insert(0, "\\\\?\\");
