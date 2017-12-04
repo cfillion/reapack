@@ -58,8 +58,10 @@ void Progress::onCommand(const int id, int)
 
 void Progress::onTimer(const int id)
 {
+#ifdef _WIN32
   if(!IsWindowEnabled(handle()))
     return;
+#endif
 
   show();
   stopTimer(id);
