@@ -326,9 +326,10 @@ Transaction *ReaPack::setupTransaction()
   });
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
-    LockDialog progressLock(m_progress);
-    LockDialog managerLock(m_manager);
+    LockDialog aboutLock(m_about);
     LockDialog browserLock(m_browser);
+    LockDialog managerLock(m_manager);
+    LockDialog progressLock(m_progress);
 
     return Dialog::Show<ObsoleteQuery>(m_instance, m_mainWindow,
       &entries, &m_config->install.promptObsolete) == IDOK;
