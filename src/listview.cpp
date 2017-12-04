@@ -430,14 +430,14 @@ void ListView::onNotify(LPNMHDR info, LPARAM lParam)
 {
   switch(info->code) {
   case LVN_ITEMCHANGED:
-    m_onSelect();
+    onItemChanged(lParam);
     break;
   case NM_CLICK:
   case NM_DBLCLK:
-    handleClick(info->code == NM_DBLCLK);
+    onClick(info->code == NM_DBLCLK);
     break;
   case LVN_COLUMNCLICK:
-    handleColumnClick(lParam);
+    onColumnClick(lParam);
     break;
   };
 }
@@ -501,7 +501,17 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
   return true;
 }
 
-void ListView::handleClick(const bool dbclick)
+void ListView::onItemChanged(const LPARAM lParam)
+{
+#ifdef _WIN32
+  const auto info = reinterpret_cast<LPNMLISTVIEW>(lParam);
+
+  if(info->uChanged & LVIF_STATE)
+#endif
+    m_onSelect();
+}
+
+void ListView::onClick(const bool dbclick)
 {
   bool overIcon;
 
@@ -513,7 +523,7 @@ void ListView::handleClick(const bool dbclick)
   }
 }
 
-void ListView::handleColumnClick(const LPARAM lParam)
+void ListView::onColumnClick(const LPARAM lParam)
 {
   const auto info = reinterpret_cast<LPNMLISTVIEW>(lParam);
   const int col = info->iSubItem;

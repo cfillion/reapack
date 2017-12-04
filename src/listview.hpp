@@ -184,8 +184,9 @@ private:
 
   void setExStyle(int style, bool enable = true);
   void setSortArrow(bool);
-  void handleClick(bool dbclick);
-  void handleColumnClick(LPARAM lpnmlistview);
+  void onItemChanged(LPARAM lpnmlistview);
+  void onClick(bool dbclick);
+  void onColumnClick(LPARAM lpnmlistview);
   int translate(int userIndex) const;
   int translateBack(int internalIndex) const;
   void headerMenu(int x, int y);
