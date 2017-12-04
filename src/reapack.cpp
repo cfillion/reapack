@@ -178,7 +178,7 @@ void ReaPack::addSetRemote(const Remote &remote)
   if(remote.isEnabled() && remote.autoInstall(m_config->install.autoInstall)) {
     const Remote &previous = m_config->remotes.get(remote.name());
 
-    if(!previous || !previous.isEnabled()) {
+    if(!previous || !previous.isEnabled() || previous.url() != remote.url()) {
       if(Transaction *tx = setupTransaction())
         tx->synchronize(remote);
     }
