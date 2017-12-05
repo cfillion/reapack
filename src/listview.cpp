@@ -151,17 +151,15 @@ void ListView::removeRow(const int userIndex)
   // translate to view index before fixing lParams
   const int viewIndex = translate(userIndex);
 
-  // shift lParam to reflect the new row indexes
-  map<int, int> translations;
+  // shift lParam and userIndex of subsequent rows to reflect the new indexes
   const int size = rowCount();
-  for(int i = userIndex + 1; i < size; i++)
-    translations[translate(i)] = i - 1;
+  for(int i = userIndex + 1; i < size; i++) {
+    m_rows[i]->userIndex = i - 1;
 
-  for(const auto &it : translations) {
     LVITEM item{};
-    item.iItem = it.first;
+    item.iItem = translate(i);
     item.mask |= LVIF_PARAM;
-    item.lParam = it.second;
+    item.lParam = m_rows[i]->userIndex;
     ListView_SetItem(handle(), &item);
   }
 
@@ -700,7 +698,7 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
 }
 
 ListView::Row::Row(void *data, ListView *list)
-  : userData(data), viewIndex(list->rowCount()), m_userIndex(viewIndex),
+  : userData(data), viewIndex(list->rowCount()), userIndex(viewIndex),
   m_list(list), m_cells(new Cell[m_list->columnCount()])
 {
 }
@@ -711,12 +709,12 @@ void ListView::Row::setCell(const int i, const string &val, void *data)
   cell.value = val;
   cell.userData = data;
 
-  m_list->updateCell(m_userIndex, i);
+  m_list->updateCell(userIndex, i);
 }
 
 void ListView::Row::setChecked(bool checked)
 {
-  m_list->setRowIcon(m_userIndex, checked);
+  m_list->setRowIcon(userIndex, checked);
 }
 
 vector<string> ListView::Row::filterValues() const

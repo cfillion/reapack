@@ -62,7 +62,7 @@ public:
 
     void *userData;
 
-    int index() const { return m_userIndex; }
+    int index() const { return userIndex; }
 
     const Cell &cell(const int i) const { return m_cells[i]; }
     void setCell(const int i, const std::string &, void *data = nullptr);
@@ -73,9 +73,9 @@ public:
   protected:
     friend ListView;
     int viewIndex;
+    int userIndex;
 
   private:
-    int m_userIndex;
     ListView *m_list;
     Cell *m_cells;
   };
