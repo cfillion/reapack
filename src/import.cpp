@@ -192,6 +192,7 @@ bool Import::read(MemoryDownload *dl, const size_t idx)
     else if(exists && remote.isEnabled()) // url is also the same
       return true; // nothing to do
 
+    remote.setEnabled(true);
     remote.setName(index->name());
     remote.setUrl(dl->url());
     m_queue.push_back({idx, remote, dl->contents()});
