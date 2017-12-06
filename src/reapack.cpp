@@ -71,10 +71,11 @@ Path ReaPack::resourcePath()
 {
 #ifdef _WIN32
   // convert from the current system codepage to UTF-8
-  return Win32::narrow(Win32::widen(GetResourcePath(), CP_ACP));
-#else
-  return {GetResourcePath()};
+  if(atof(GetAppVersion()) < 5.65)
+    return Win32::narrow(Win32::widen(GetResourcePath(), CP_ACP));
 #endif
+
+  return {GetResourcePath()};
 }
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
