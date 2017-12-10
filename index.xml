@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="a582f448d5b9e186ea8c3a8d8e4c599da81ae11a" name="ReaPack">
+<index version="1" commit="bf09ebe9ef2b13da9eb3243d55b78c3405910ad8" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -604,6 +604,26 @@ The curated list of changes between ReaPack v1.1 and v1.2 is available at <https
         <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack64.dll</source>
         <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack32.so</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2/reaper_reapack64.so</source>
+      </version>
+      <version name="1.2.1beta" author="cfillion" time="2017-12-10T14:48:03Z">
+        <changelog><![CDATA[Fixed:
+* don't open the progress dialog while a modal dialog is shown [p=1920318]
+* fix list desynchronisation when removing rows (eg. uninstalling repositories)
+* fix possible crash when synchronizing a repository from about dialog while the obsolete prompt is displayed
+* fix the about dialog sometime reloading multiple times in a row
+* ignore '.' and do Windows absolute path detection logic when parsing the last or only path segment [p=1919963]
+* use CRLF as newline separator when copying multiple values on Windows
+
+Changed:
+* don't convert the resource path given by REAPER 5.65+ from system default ANSI code page to UTF-8 on Windows [p=1921620]
+* restore behavior of always enabling existing repositories on re-import
+* synchronize when changing the URL of a repository and the autoinstall setting is enabled]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.1beta/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.1beta/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2.1beta/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.1beta/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2.1beta/reaper_reapack32.so</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2.1beta/reaper_reapack64.so</source>
       </version>
     </reapack>
   </category>
