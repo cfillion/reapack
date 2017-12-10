@@ -345,8 +345,14 @@ void Dialog::setClipboard(const string &text)
 
 void Dialog::setClipboard(const vector<string> &values)
 {
+#ifdef _WIN32
+  constexpr const char *nl = "\r\n";
+#else
+  constexpr const char *nl = "\n";
+#endif
+
   if(!values.empty())
-    setClipboard(boost::algorithm::join(values, "\n"));
+    setClipboard(boost::algorithm::join(values, nl));
 }
 
 HWND Dialog::getControl(const int idc)
