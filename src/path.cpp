@@ -53,6 +53,8 @@ static vector<string> Split(const string &input, bool *absolute)
 #ifdef _WIN32
     if(list.empty() && part.size() == 2 && isalpha(part[0]) && part[1] == ':')
       *absolute = true;
+#else
+    (void)absolute;
 #endif
 
     list.push_back(part);
