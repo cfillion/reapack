@@ -404,8 +404,10 @@ void Manager::refreshIndex()
   for(size_t i = 0; i < selection.size(); i++)
     remotes[i] = getRemote(selection[i]);
 
-  if(Transaction *tx = g_reapack->setupTransaction())
+  if(Transaction *tx = g_reapack->setupTransaction()) {
     tx->fetchIndexes(remotes, true);
+    tx->runTasks();
+  }
 }
 
 void Manager::uninstall()
