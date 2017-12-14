@@ -11,4 +11,4 @@
   [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Fixed:
-  * manager: fix the Refresh action not running the queued tasks right away
+  * fix the Refresh action in Manage repositories not downloading a fresh index right away
