@@ -23,6 +23,8 @@
 #include "path.hpp"
 #include "remote.hpp"
 
+#include <algorithm>
+
 #include <sqlite3.h>
 
 using namespace std;

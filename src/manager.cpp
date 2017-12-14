@@ -596,19 +596,19 @@ bool Manager::apply()
   set<Remote> syncList;
 
   if(m_autoInstall) {
-    g_reapack->config()->install.autoInstall = m_autoInstall.value();
+    g_reapack->config()->install.autoInstall = *m_autoInstall;
 
-    if(m_autoInstall.value()) {
+    if(*m_autoInstall) {
       const auto &enabledNow = g_reapack->config()->remotes.getEnabled();
       copy(enabledNow.begin(), enabledNow.end(), inserter(syncList, syncList.end()));
     }
   }
 
   if(m_bleedingEdge)
-    g_reapack->config()->install.bleedingEdge = m_bleedingEdge.value();
+    g_reapack->config()->install.bleedingEdge = *m_bleedingEdge;
 
   if(m_promptObsolete)
-    g_reapack->config()->install.promptObsolete = m_promptObsolete.value();
+    g_reapack->config()->install.promptObsolete = *m_promptObsolete;
 
   for(const auto &pair : m_mods) {
     Remote remote = pair.first;

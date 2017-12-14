@@ -23,6 +23,7 @@
 #include "registry.hpp"
 #include "remote.hpp"
 
+#include <memory>
 #include <set>
 #include <unordered_set>
 #include <vector>

@@ -21,6 +21,7 @@
 #include "registry.hpp"
 #include "errors.hpp"
 
+#include <memory>
 #include <set>
 #include <sstream>
 #include <vector>
