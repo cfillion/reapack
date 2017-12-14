@@ -46,7 +46,7 @@ of `rake` to build just one.
 2. Install Boost, curl and SQLite3 development files (64-bit and 32-bit versions if building both)
 3. Build using `rake`
 4. Copy or link `x64/bin/reaper_reapack64.so` or `x86/bin/reaper_reapack32.so`
-  to `~/.REAPER/UserPlugins`
+  to `~/.config/REAPER/UserPlugins`
 
 ### macOS
 
