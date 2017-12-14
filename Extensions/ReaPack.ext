@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.1beta
+@version 1.2.1
 @author cfillion
 @donation https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER
 @provides
@@ -11,14 +11,4 @@
   [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Fixed:
-  * don't open the progress dialog while a modal dialog is shown [p=1920318]
-  * fix list desynchronisation when removing rows (eg. uninstalling repositories)
-  * fix possible crash when synchronizing a repository from about dialog while the obsolete prompt is displayed
-  * fix the about dialog sometime reloading multiple times in a row
-  * ignore '.' and do Windows absolute path detection logic when parsing the last or only path segment [p=1919963]
-  * use CRLF as newline separator when copying multiple values on Windows
-
-  Changed:
-  * don't convert the resource path given by REAPER 5.70+ from system default ANSI code page to UTF-8 on Windows [p=1921620]
-  * restore behavior of always enabling existing repositories on re-import
-  * synchronize when changing the URL of a repository and the autoinstall setting is enabled
+  * manager: fix the Refresh action not running the queued tasks right away
