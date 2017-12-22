@@ -82,8 +82,8 @@ bool ExportTask::start()
   // thread at the same time.
   for(FileCompressor *job : jobs) {
     job->onFinish([=] {
-    if(job->state() == ThreadTask::Success)
-      tx()->receipt()->addExport(job->path());
+      if(job->state() == ThreadTask::Success)
+        tx()->receipt()->addExport(job->path());
     });
 
     tx()->threadPool()->push(job);
