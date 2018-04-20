@@ -120,6 +120,8 @@ bool Download::run()
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.c_str());
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_CAINFO, nullptr);
+  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY_CAINFO, nullptr);
 
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
   curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSDATA, this);
