@@ -1,6 +1,7 @@
 #include "helper.hpp"
 
 #include <index.hpp>
+#include <remote.hpp>
 #include <source.hpp>
 #include <version.hpp>
 
@@ -11,7 +12,8 @@ using namespace std;
 static const char *M = "[source]";
 
 #define MAKE_VERSION \
-  Index ri("Index Name"); \
+  RemotePtr re = make_shared<Remote>("Remote Name", "url"); \
+  Index ri(re); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::DataType, "Package Name", &cat); \
   Version ver("1.0", &pkg);
@@ -95,7 +97,8 @@ TEST_CASE("implicit section detection (v1.0 compatibility)", M) {
 }
 
 TEST_CASE("implicit section detection from source (v1.0 compatibility)") {
-  Index ri("Index Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
 
   SECTION("main") {
     Category cat("Category Name", &ri);
@@ -134,8 +137,8 @@ TEST_CASE("source target path", M) {
   MAKE_VERSION;
 
   const pair<Package::Type, string> tests[] = {
-    {Package::ScriptType,          "Scripts/Index Name/Category Name/file.name"},
-    {Package::EffectType,          "Effects/Index Name/Category Name/file.name"},
+    {Package::ScriptType,          "Scripts/Remote Name/Category Name/file.name"},
+    {Package::EffectType,          "Effects/Remote Name/Category Name/file.name"},
     {Package::ExtensionType,       "UserPlugins/file.name"},
     {Package::DataType,            "Data/file.name"},
     {Package::ThemeType,           "ColorThemes/file.name"},
@@ -144,7 +147,7 @@ TEST_CASE("source target path", M) {
     {Package::ProjectTemplateType, "ProjectTemplates/file.name"},
     {Package::TrackTemplateType,   "TrackTemplates/file.name"},
     {Package::MIDINoteNamesType,   "MIDINoteNames/file.name"},
-    {Package::AutomationItemType,  "AutomationItems/Index Name/Category Name/file.name"},
+    {Package::AutomationItemType,  "AutomationItems/Remote Name/Category Name/file.name"},
   };
 
   Source source("file.name", "url", &ver);
@@ -155,7 +158,8 @@ TEST_CASE("source target path", M) {
 }
 
 TEST_CASE("target path with parent directory traversal", M) {
-  Index ri("Index Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "package name", &cat);
   Version ver("1.0", &pack);
@@ -164,7 +168,7 @@ TEST_CASE("target path with parent directory traversal", M) {
   SECTION("script") {
     Path expected;
     expected.append("Scripts");
-    expected.append("Index Name");
+    expected.append("Remote Name");
     // expected.append("Category Name"); // only the category can be bypassed!
     expected.append("file.name");
 
@@ -181,7 +185,8 @@ TEST_CASE("target path with parent directory traversal", M) {
 }
 
 TEST_CASE("target path for unknown package type", M) {
-  Index ri("name");
+  RemotePtr re = make_shared<Remote>("name", "url");
+  Index ri(re);
   Category cat("name", &ri);
   Package pack(Package::UnknownType, "a", &cat);
   Version ver("1.0", &pack);
@@ -191,7 +196,8 @@ TEST_CASE("target path for unknown package type", M) {
 }
 
 TEST_CASE("directory traversal in category name", M) {
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("../..", &ri);
   Package pack(Package::ScriptType, "file.name", &cat);
   Version ver("1.0", &pack);

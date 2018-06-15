@@ -3,6 +3,7 @@
 #include <receipt.hpp>
 
 #include <index.hpp>
+#include <remote.hpp>
 
 using Catch::Matchers::Contains;
 using Catch::Matchers::EndsWith;
@@ -16,7 +17,7 @@ TEST_CASE("non-empty receipt", M) {
   REQUIRE(r.empty());
 
   SECTION("install") {
-    IndexPtr ri = make_shared<Index>("Index Name");
+    IndexPtr ri = make_shared<Index>();
     Category cat("Category Name", ri.get());
     Package pkg(Package::ScriptType, "Package Name", &cat);
     Version ver("1.0", &pkg);
@@ -41,7 +42,7 @@ TEST_CASE("set receipt flags", M) {
   Receipt::Flag expected;
 
   SECTION("install") {
-    IndexPtr ri = make_shared<Index>("Index Name");
+    IndexPtr ri = make_shared<Index>();
     Category cat("Category Name", ri.get());
     Package pkg(Package::ScriptType, "Package Name", &cat);
     Version ver("1.0", &pkg);
@@ -77,7 +78,7 @@ TEST_CASE("set receipt flags", M) {
 }
 
 TEST_CASE("set restart needed flag", M) {
-  IndexPtr ri = make_shared<Index>("Index Name");
+  IndexPtr ri = make_shared<Index>();
   Category cat("Category Name", ri.get());
   Package script(Package::ScriptType, "Package Name", &cat);
   Package ext(Package::ExtensionType, "Package Name", &cat);
@@ -147,7 +148,8 @@ TEST_CASE("format receipt page contents", M) {
 }
 
 TEST_CASE("format install ticket", M) {
-  IndexPtr ri = make_shared<Index>("Index Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  IndexPtr ri = make_shared<Index>(re);
   Category cat("Category Name", ri.get());
   Package pkg(Package::ScriptType, "Package Name", &cat);
 
@@ -200,7 +202,8 @@ TEST_CASE("format install ticket", M) {
 }
 
 TEST_CASE("sort InstallTickets (case insensitive)", M) {
-  IndexPtr ri = make_shared<Index>("Index Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  IndexPtr ri = make_shared<Index>(re);
   Category cat("Category Name", ri.get());
   Package pkg1(Package::ScriptType, "a test", &cat);
   Version ver1("1.0", &pkg1);

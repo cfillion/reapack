@@ -33,9 +33,11 @@ class Index;
 class ListView;
 class Menu;
 class Registry;
+class Remote;
 class Version;
 
 typedef std::shared_ptr<const Index> IndexPtr;
+typedef std::shared_ptr<Remote> RemotePtr;
 
 class Browser : public Dialog {
 public:
@@ -89,7 +91,7 @@ private:
 
   void onSelection();
   bool fillContextMenu(Menu &, int index);
-  void populate(const std::vector<IndexPtr> &, const Registry *);
+  void populate(const std::vector<RemotePtr> &, const Registry *);
   void transferActions();
   bool match(const Entry &) const;
   void updateFilter();

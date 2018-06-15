@@ -17,14 +17,13 @@
 
 #include "task.hpp"
 
-#include "archive.hpp"
 #include "config.hpp"
-#include "download.hpp"
-#include "errors.hpp"
-#include "filesystem.hpp"
-#include "index.hpp"
 #include "reapack.hpp"
+#include "receipt.hpp"
+#include "registry.hpp"
+#include "index.hpp"
 #include "transaction.hpp"
+#include "filesystem.hpp"
 
 using namespace std;
 
@@ -57,13 +56,26 @@ void UninstallTask::commit()
   tx()->registry()->forget(m_entry);
 }
 
-PinTask::PinTask(const Registry::Entry &re, const bool pin, Transaction *tx)
-  : Task(tx), m_entry(move(re)), m_pin(pin)
+UninstallRemoteTask::UninstallRemoteTask(const RemotePtr &remote, Transaction *tx)
+  : Task(tx), m_remote(remote)
 {
+  for(const auto &entry : tx->registry()->getEntries(remote->name()))
+    m_subTasks.push_back(make_unique<UninstallTask>(entry, tx));
 }
 
-void PinTask::commit()
+bool UninstallRemoteTask::start()
 {
-  tx()->registry()->setPinned(m_entry, m_pin);
-  tx()->receipt()->setPackageChanged();
+  for(const auto &task : m_subTasks)
+    task->start();
+
+  return true;
+}
+
+void UninstallRemoteTask::commit()
+{
+  for(const auto &task : m_subTasks)
+    task->commit();
+
+  FS::remove(Index::pathFor(m_remote->name()));
+  g_reapack->config()->remotes.remove(m_remote);
 }

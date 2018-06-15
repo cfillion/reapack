@@ -81,21 +81,23 @@ void Config::restoreSelfRemote()
   const string name = "ReaPack";
   const string url = "https://reapack.com/index.xml";
 
-  Remote remote = remotes.get(name);
-  remote.setName(name);
-  remote.setUrl(url);
-  remote.protect();
+  RemotePtr remote = remotes.getByName(name);
 
-  remotes.add(remote);
+  if(remote)
+    remote->setUrl(url);
+  else {
+    remote = make_shared<Remote>(name, url);
+    remotes.add(remote);
+  }
+
+  remote->protect();
 }
 
 void Config::restoreDefaultRemotes()
 {
-  Remote self = remotes.get("ReaPack");
-  self.setEnabled(true);
-  remotes.add(self);
+  remotes.getSelf()->setEnabled(true);
 
-  const Remote repos[] = {
+  const pair<string, string> repos[] = {
     {"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
     {"ReaTeam JSFX",
@@ -110,8 +112,18 @@ void Config::restoreDefaultRemotes()
       "https://github.com/X-Raym/REAPER-ReaScripts/raw/master/index.xml"},
   };
 
-  for(const Remote &repo : repos)
-    remotes.add(repo);
+  for(const auto &[name, url] : repos) {
+    RemotePtr remote = remotes.getByName(name);
+
+    if(remote)
+      remote->setUrl(url);
+    else {
+      remote = make_shared<Remote>(name, url);
+      remotes.add(remote);
+    }
+
+    remote->setEnabled(true);
+  }
 }
 
 void Config::migrate()
@@ -181,8 +193,7 @@ void Config::readRemotes()
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
 
   for(unsigned int i = 0; i < m_remotesIniSize; i++) {
-    const string data = getString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str());
-
+    const string &data = getString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str());
     remotes.add(Remote::fromString(data));
   }
 }
@@ -193,7 +204,7 @@ void Config::writeRemotes()
 
   unsigned int i = 0;
   for(auto it = remotes.begin(); it != remotes.end(); it++, i++)
-    setString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str(), it->toString());
+    setString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str(), (*it)->toString());
 
   cleanupArray(REMOTES_GRP, REMOTE_KEY, i, m_remotesIniSize);
 

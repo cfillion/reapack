@@ -62,7 +62,7 @@ bool Version::addSource(const Source *source)
   else if(!source->platform().test())
     return false;
 
-  const Path path = source->targetPath();
+  const Path &path = source->targetPath();
 
   if(m_files.count(path))
     return false;

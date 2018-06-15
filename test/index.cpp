@@ -2,6 +2,7 @@
 
 #include <errors.hpp>
 #include <index.hpp>
+#include <remote.hpp>
 
 using namespace std;
 
@@ -12,7 +13,9 @@ TEST_CASE("index file not found", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("404");
+    RemotePtr re = make_shared<Remote>("404", "url");
+    Index ri(re);
+    ri.load();
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -21,13 +24,15 @@ TEST_CASE("index file not found", M) {
 }
 
 TEST_CASE("load index from raw data", M) {
+  Index ri;
+
   SECTION("valid") {
-    Index::load({}, "<index version=\"1\"/>\n");
+    ri.load("<index version=\"1\"/>\n");
   }
 
   SECTION("broken") {
     try {
-      Index::load({}, "<index>\n");
+      ri.load("<index>\n");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -40,7 +45,9 @@ TEST_CASE("broken index", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("broken");
+    RemotePtr re = make_shared<Remote>("broken", "url");
+    Index ri(re);
+    ri.load();
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -52,7 +59,9 @@ TEST_CASE("wrong root tag name", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("wrong_root");
+    RemotePtr re = make_shared<Remote>("wrong_root", "url");
+    Index ri(re);
+    ri.load();
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -64,7 +73,9 @@ TEST_CASE("invalid version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("invalid_version");
+    RemotePtr re = make_shared<Remote>("invalid_version", "url");
+    Index ri(re);
+    ri.load();
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -76,7 +87,9 @@ TEST_CASE("future version", M) {
   UseRootPath root(RIPATH);
 
   try {
-    IndexPtr ri = Index::load("future_version");
+    RemotePtr re = make_shared<Remote>("future_version", "url");
+    Index ri(re);
+    ri.load();
     FAIL();
   }
   catch(const reapack_error &e) {
@@ -85,7 +98,8 @@ TEST_CASE("future version", M) {
 }
 
 TEST_CASE("add a category", M) {
-  Index ri("a");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category *cat = new Category("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", cat);
   Version *ver = new Version("1", pack);
@@ -106,8 +120,8 @@ TEST_CASE("add a category", M) {
 }
 
 TEST_CASE("add owned category", M) {
-  Index ri1("a");
-  Index ri2("b");
+  Index ri1;
+  Index ri2;
 
   Category *cat = new Category("name", &ri1);
 
@@ -122,7 +136,7 @@ TEST_CASE("add owned category", M) {
 }
 
 TEST_CASE("drop empty category", M) {
-  Index ri("a");
+  Index ri;
   const Category cat("a", &ri);
   REQUIRE_FALSE(ri.addCategory(&cat));
 
@@ -130,7 +144,8 @@ TEST_CASE("drop empty category", M) {
 }
 
 TEST_CASE("add a package", M) {
-  Index ri("a");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("a", &ri);
   Package *pack = new Package(Package::ScriptType, "name", &cat);
   Version *ver = new Version("1", pack);
@@ -187,33 +202,15 @@ TEST_CASE("empty category name", M) {
 }
 
 TEST_CASE("category full name", M) {
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat2("Category Name", &ri);
   REQUIRE(cat2.fullName() == "Remote Name/Category Name");
 }
 
-TEST_CASE("set index name", M) {
-  SECTION("set") {
-    Index ri({});
-    ri.setName("Hello/World!");
-    REQUIRE(ri.name() == "Hello/World!");
-  }
-
-  SECTION("override") {
-    Index ri("hello");
-    try {
-      ri.setName("world");
-      FAIL();
-    }
-    catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "index name is already set");
-    }
-    REQUIRE(ri.name() == "hello");
-  }
-}
-
 TEST_CASE("find package", M) {
-  Index ri("index name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category *cat = new Category("cat", &ri);
   Package *pack = new Package(Package::ScriptType, "pkg", cat);
   Version *ver = new Version("1", pack);

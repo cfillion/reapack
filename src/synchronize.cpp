@@ -24,27 +24,28 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 
-SynchronizeTask::SynchronizeTask(const Remote &remote, const bool stale,
+SynchronizeTask::SynchronizeTask(const RemotePtr &remote, const bool stale,
     const bool fullSync, const InstallOpts &opts, Transaction *tx)
-  : Task(tx), m_remote(remote), m_indexPath(Index::pathFor(m_remote.name())),
+  : Task(tx), m_remote(remote),
     m_opts(opts), m_stale(stale), m_fullSync(fullSync)
 {
 }
 
 bool SynchronizeTask::start()
 {
+  const Path &indexPath = Index::pathFor(m_remote->name());
   const auto &netConfig = g_reapack->config()->network;
 
   time_t mtime = 0, now = time(nullptr);
-  FS::mtime(m_indexPath, &mtime);
+  FS::mtime(indexPath, &mtime);
 
   const time_t threshold = netConfig.staleThreshold;
   if(!m_stale && mtime && (!threshold || mtime > now - threshold))
     return true;
 
-  auto dl = new FileDownload(m_indexPath, m_remote.url(),
+  auto dl = new FileDownload(indexPath, m_remote->url(),
     netConfig, Download::NoCacheFlag);
-  dl->setName(m_remote.name());
+  dl->setName(m_remote->name());
 
   dl->onFinishAsync >> [=] {
     if(dl->save())
@@ -52,26 +53,47 @@ bool SynchronizeTask::start()
   };
 
   tx()->threadPool()->push(dl);
+
   return true;
 }
 
 void SynchronizeTask::commit()
 {
-  if(!FS::exists(m_indexPath))
-    return;
+  const IndexPtr &index = loadIndex();
 
-  const IndexPtr &index = tx()->loadIndex(m_remote); // TODO: reuse m_indexPath
   if(!index || !m_fullSync)
     return;
 
   for(const Package *pkg : index->packages())
     synchronize(pkg);
 
-  if(m_opts.promptObsolete && !m_remote.isProtected()) {
-    for(const auto &entry : tx()->registry()->getEntries(m_remote.name())) {
+  if(m_opts.promptObsolete && !m_remote->test(Remote::ProtectedFlag)) {
+    for(const auto &entry : tx()->registry()->getEntries(m_remote->name())) {
       if(!entry.pinned && !index->find(entry.category, entry.package))
         tx()->addObsolete(entry);
     }
+  }
+}
+
+IndexPtr SynchronizeTask::loadIndex()
+{
+  try {
+    IndexPtr index;
+
+    if(!m_stale)
+      index = m_remote->index();
+
+    if(!index)
+      index = m_remote->loadIndex();
+
+    tx()->keepAlive(index);
+
+    return index;
+  }
+  catch(const reapack_error &e) {
+    tx()->receipt()->addError({
+      String::format("Could not load repository: %s", e.what()), m_remote->name()});
+    return nullptr;
   }
 }
 

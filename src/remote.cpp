@@ -17,7 +17,12 @@
 
 #include "remote.hpp"
 
+#include "about.hpp"
+#include "config.hpp"
 #include "errors.hpp"
+#include "index.hpp"
+#include "reapack.hpp"
+#include "transaction.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/logic/tribool_io.hpp>
@@ -25,6 +30,8 @@
 #include <sstream>
 
 using namespace std;
+using boost::tribool;
+using boost::logic::indeterminate;
 
 static char DATA_DELIMITER = '|';
 
@@ -56,7 +63,7 @@ static bool validateUrl(const string &url)
   return !match.empty();
 }
 
-Remote Remote::fromString(const string &data)
+RemotePtr Remote::fromString(const string &data)
 {
   istringstream stream(data);
 
@@ -75,28 +82,29 @@ Remote Remote::fromString(const string &data)
   if(!validateName(name) || !validateUrl(url))
     return {};
 
-  Remote remote(name, url);
+  RemotePtr remote = make_shared<Remote>(name, url);
 
   try {
-    remote.setEnabled(boost::lexical_cast<bool>(enabled));
+    remote->setEnabled(boost::lexical_cast<bool>(enabled));
   }
   catch(const boost::bad_lexical_cast &) {}
 
   try {
-    remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
+    remote->setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
   }
   catch(const boost::bad_lexical_cast &) {}
 
   return remote;
 }
 
-Remote::Remote()
-  : m_enabled(true), m_protected(false), m_autoInstall(boost::logic::indeterminate)
+Remote::Remote(const string &name)
+  : m_enabled(true), m_autoInstall(indeterminate), m_flags(0)
 {
+  setName(name);
 }
 
-Remote::Remote(const string &name, const string &url, const bool enabled, const tribool &autoInstall)
-  : m_enabled(enabled), m_protected(false), m_autoInstall(autoInstall)
+Remote::Remote(const string &name, const string &url)
+  : m_enabled(true), m_autoInstall(indeterminate), m_flags(0)
 {
   setName(name);
   setUrl(url);
@@ -106,26 +114,42 @@ void Remote::setName(const string &name)
 {
   if(!validateName(name))
     throw reapack_error("invalid name");
-  else
-    m_name = name;
+
+  m_name = name;
 }
 
 void Remote::setUrl(const string &url)
 {
   if(!validateUrl(url))
     throw reapack_error("invalid url");
-  else if(m_protected && url != m_url)
+  else if(test(ProtectedFlag) && url != m_url)
     throw reapack_error("cannot change the URL of a protected repository");
-  else
-    m_url = url;
+
+  m_url = url;
+}
+
+void Remote::setEnabled(const bool enable)
+{
+  if(m_enabled != enable) {
+    m_enabled = enable;
+    m_flags |= DirtyFlag;
+  }
 }
 
 bool Remote::autoInstall(bool fallback) const
 {
-  if(boost::logic::indeterminate(m_autoInstall))
+  if(indeterminate(m_autoInstall))
     return fallback;
   else
     return m_autoInstall;
+}
+
+void Remote::setAutoInstall(const tribool &autoInstall)
+{
+  if(autoInstall && (!m_autoInstall || indeterminate(m_autoInstall)))
+    m_flags |= DirtyFlag;
+
+  m_autoInstall = autoInstall;
 }
 
 string Remote::toString() const
@@ -139,63 +163,91 @@ string Remote::toString() const
   return out.str();
 }
 
-void RemoteList::add(const Remote &remote)
+bool Remote::fetchIndex(const function<void (const IndexPtr &)> &cb)
 {
-  if(!remote)
-    return;
-
-  size_t index = 0;
-  const auto &it = m_map.find(remote.name());
-
-  if(it == m_map.end()) {
-    // insert remote
-    index = m_remotes.size();
-    m_remotes.push_back(remote);
-  }
-  else {
-    // replace remote
-    index = it->second;
-    m_remotes[index] = remote;
+  // the index is already loaded!
+  if(const IndexPtr &index = this->index()) {
+    cb(index);
+    return true;
   }
 
-  m_map[remote.name()] = index;
+  Transaction *tx = g_reapack->setupTransaction();
+
+  if(!tx)
+    return false;
+
+  tx->fetchIndex(shared_from_this());
+
+  tx->onFinish >> [=] {
+    if(const IndexPtr &index = this->index())
+      cb(index);
+  };
+
+  tx->runTasks();
+
+  return true;
 }
 
-void RemoteList::remove(const string &name)
+void Remote::autoSync()
 {
-  const auto &it = m_map.find(name);
-
-  if(it == m_map.end())
-    return;
-
-  m_remotes.erase(m_remotes.begin() + it->second);
-
-  for(auto walk = m_map.begin(); walk != m_map.end(); walk++) {
-    if(walk->second > it->second)
-      walk->second--;
-  }
-
-  m_map.erase(it);
-}
-
-Remote RemoteList::get(const string &name) const
-{
-  const auto &it = m_map.find(name);
-
-  if(it == m_map.end())
-    return {};
+  if(test(DirtyFlag))
+    m_flags &= ~DirtyFlag;
   else
-    return m_remotes[it->second];
+    return;
+
+  if(m_enabled && autoInstall(g_reapack->config()->install.autoInstall)) {
+    if(Transaction *tx = g_reapack->transaction())
+      tx->synchronize(shared_from_this());
+  }
 }
 
-vector<Remote> RemoteList::getEnabled() const
+void Remote::about(const bool focus)
 {
-  vector<Remote> list;
+  fetchIndex([focus] (const IndexPtr &index) {
+    g_reapack->about()->setDelegate(make_shared<AboutIndexDelegate>(index), focus);
+  });
+}
 
-  for(const Remote &remote : m_remotes) {
-    if(remote.isEnabled())
-      list.push_back(remote);
-  }
+IndexPtr Remote::loadIndex()
+{
+  const auto &index = make_shared<Index>(shared_from_this());
 
+  m_index.reset(); // reset in case loading the new index throws an exception
+  index->load();
+  m_index = index;
+
+  return index;
+}
+
+void RemoteList::add(const RemotePtr &remote)
+{
+  if(!getByName(remote->name()))
+    m_remotes.emplace_back(remote);
+}
+
+RemotePtr RemoteList::getByName(const std::string &name) const
+{
+  const auto it = find_if(m_remotes.begin(), m_remotes.end(),
+    [&name](const RemotePtr &r) { return r->name() == name; });
+
+  if(it == m_remotes.end())
+    return nullptr;
+  else
+    return *it;
+}
+
+vector<RemotePtr> RemoteList::getEnabled() const
+{
+  vector<RemotePtr> list;
+  copy_if(m_remotes.begin(), m_remotes.end(), back_inserter(list),
+    [](const RemotePtr &remote) { return remote->isEnabled(); });
   return list;
+}
+
+void RemoteList::remove(const RemotePtr &remote)
+{
+  const auto &it = find(m_remotes.begin(), m_remotes.end(), remote);
+
+  if(it != m_remotes.end())
+    m_remotes.erase(it);
 }

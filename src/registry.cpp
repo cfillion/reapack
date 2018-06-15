@@ -147,15 +147,16 @@ void Registry::migrate()
 
 auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
 {
-  m_db.savepoint();
-
   bool hasConflicts = false;
 
   const Package *pkg = ver->package();
   const Category *cat = pkg->category();
   const Index *ri = cat->index();
+  const RemotePtr &remote = ri->remote();
 
-  m_clearFiles->bind(1, ri->name());
+  m_db.savepoint();
+
+  m_clearFiles->bind(1, remote->name());
   m_clearFiles->bind(2, cat->name());
   m_clearFiles->bind(3, pkg->name());
   m_clearFiles->exec();
@@ -172,7 +173,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
     m_updateEntry->exec();
   }
   else {
-    m_insertEntry->bind(1, ri->name());
+    m_insertEntry->bind(1, remote->name());
     m_insertEntry->bind(2, cat->name());
     m_insertEntry->bind(3, pkg->name());
     m_insertEntry->bind(4, pkg->description());
@@ -214,7 +215,7 @@ auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
   }
   else {
     m_db.release();
-    return {entryId, ri->name(), cat->name(),
+    return {entryId, remote->name(), cat->name(),
       pkg->name(), pkg->description(), pkg->type(), ver->name(), ver->author()};
   }
 }
@@ -233,7 +234,7 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   const Category *cat = pkg->category();
   const Index *ri = cat->index();
 
-  m_findEntry->bind(1, ri->name());
+  m_findEntry->bind(1, ri->remote()->name());
   m_findEntry->bind(2, cat->name());
   m_findEntry->bind(3, pkg->name());
 

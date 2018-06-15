@@ -36,6 +36,8 @@ static const Win32::char_type *ARCHIVE_FILTER =
   L("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
 static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
 
+using boost::indeterminate;
+using boost::tribool;
 using namespace std;
 
 enum {
@@ -180,32 +182,29 @@ void Manager::onCommand(const int id, int)
   case IDOK:
   case IDAPPLY:
     if(confirm()) {
-      if(!apply() || id == IDAPPLY)
-        break;
-
-      // IDOK -> continue to next case (IDCANCEL)
+      if(apply() && id == IDOK)
+        close();
     }
     else {
-      setChange(-(int)m_uninstall.size());
-      m_uninstall.clear();
+      setChange(-(int)m_mods.size());
+      m_mods.clear();
       refresh();
-      break;
     }
-    [[fallthrough]];
+    break;
   case IDCANCEL:
     close();
     break;
   default:
     const int action = id >> 8;
     if(action == ACTION_ABOUT)
-      g_reapack->about(getRemote(id & 0xff));
+      getRemote(id & 0xff)->about();
     break;
   }
 }
 
 bool Manager::fillContextMenu(Menu &menu, const int index) const
 {
-  const Remote &remote = getRemote(index);
+  const RemotePtr &remote = getRemote(index);
 
   if(!remote) {
     menu.addAction("&Select all", ACTION_SELECT);
@@ -224,12 +223,11 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   const UINT autoInstallOn = autoInstallMenu.addAction(
     "When synchronizing", ACTION_AUTOINSTALL_ON);
 
-  const UINT uninstallAction =
-    menu.addAction("&Uninstall", ACTION_UNINSTALL);
+  const UINT uninstallAction = menu.addAction("&Uninstall", ACTION_UNINSTALL);
 
   menu.addSeparator();
 
-  menu.addAction(String::format("&About %s", remote.name().c_str()),
+  menu.addAction(String::format("&About %s", remote->name().c_str()),
     index | (ACTION_ABOUT << 8));
 
   bool allProtected = true;
@@ -238,12 +236,12 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   bool allAutoInstallOn = true;
 
   for(const int i : m_list->selection()) {
-    const Remote &r = getRemote(i);
-    if(!r.isProtected())
+    const RemotePtr &r = getRemote(i);
+    if(!r->test(Remote::ProtectedFlag))
       allProtected = false;
 
     const tribool &autoInstall = remoteAutoInstall(r);
-    if(boost::logic::indeterminate(autoInstall)) {
+    if(indeterminate(autoInstall)) {
       allAutoInstallOff = false;
       allAutoInstallOn = false;
     }
@@ -293,26 +291,26 @@ void Manager::refresh()
   ListView::BeginEdit edit(m_list);
 
   const vector<int> selection = m_list->selection();
-  vector<string> selected(selection.size());
+  vector<Remote *> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
-    selected[i] = m_list->row(selection[i])->cell(0).value; // TODO: use data ptr to Remote
+    selected[i] = getRemote(selection[i]).get();
 
-  const auto &remotes = g_reapack->config()->remotes;
+  auto &remotes = g_reapack->config()->remotes;
 
   m_list->clear();
   m_list->reserveRows(remotes.size());
 
-  for(const Remote &remote : remotes) {
-    if(m_uninstall.count(remote))
+  for(RemotePtr &remote : remotes) {
+    if(isUninstalled(remote))
       continue;
 
     int c = 0;
-    auto row = m_list->createRow();
+    auto row = m_list->createRow(static_cast<void *>(&remote));
     row->setChecked(isRemoteEnabled(remote));
-    row->setCell(c++, remote.name());
-    row->setCell(c++, remote.url());
+    row->setCell(c++, remote->name());
+    row->setCell(c++, remote->url());
 
-    if(find(selected.begin(), selected.end(), remote.name()) != selected.end())
+    if(find(selected.begin(), selected.end(), remote.get()) != selected.end())
       m_list->select(row->index());
   }
 }
@@ -321,94 +319,81 @@ void Manager::setMods(const ModsCallback &cb)
 {
   ListView::BeginEdit edit(m_list);
 
-  for(const int index : m_list->selection()) {
-    const Remote &remote = getRemote(index);
+  for(const int index : m_list->selection())
+    setMods(index, cb);
+}
 
-    auto it = m_mods.find(remote);
+void Manager::setMods(int index, const ModsCallback &cb)
+{
+  const RemotePtr &remote = getRemote(index);
+  const auto &it = findMods(remote);
 
-    if(it == m_mods.end()) {
-      RemoteMods mods;
-      cb(remote, index, &mods);
+  if(it == m_mods.end()) {
+    RemoteMods mods{remote};
+    cb(mods, index);
 
-      if(!mods)
-        continue;
+    if(!mods)
+      return;
 
-      m_mods.insert({remote, mods});
-      setChange(1);
-    }
-    else {
-      RemoteMods *mods = &it->second;
-      cb(remote, index, mods);
+    m_mods.emplace_back(mods);
+    setChange(1);
+  }
+  else {
+    RemoteMods &mods = *it;
+    cb(mods, index);
 
-      if(!*mods) {
-        m_mods.erase(it);
-        setChange(-1);
-      }
+    if(!mods) {
+      m_mods.erase(it);
+      setChange(-1);
     }
   }
 }
 
 void Manager::toggleEnabled()
 {
-  setMods([=](const Remote &remote, const int index, RemoteMods *mods) {
-    const bool enable = !mods->enable.value_or(remote.isEnabled());
+  setMods([=](RemoteMods &mods, int index) {
+    const bool enable = !mods.enable.value_or(mods.remote->isEnabled());
 
-    if(remote.isEnabled() == enable)
-      mods->enable = nullopt;
+    if(mods.remote->isEnabled() == enable)
+      mods.enable = nullopt;
     else
-      mods->enable = enable;
+      mods.enable = enable;
 
     m_list->row(index)->setChecked(enable);
   });
 }
 
-bool Manager::isRemoteEnabled(const Remote &remote) const
+bool Manager::isRemoteEnabled(const RemotePtr &remote) const
 {
-  const auto &it = m_mods.find(remote);
+  const auto &it = findMods(remote);
 
   if(it == m_mods.end())
-    return remote.isEnabled();
+    return remote->isEnabled();
   else
-    return it->second.enable.value_or(remote.isEnabled());
+    return it->enable.value_or(remote->isEnabled());
 }
 
 void Manager::setRemoteAutoInstall(const tribool &enabled)
 {
-  setMods([=](const Remote &remote, int, RemoteMods *mods) {
-    const bool same = remote.autoInstall() == enabled
-      || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
+  setMods([=](RemoteMods &mods, int) {
+    const bool same = mods.remote->autoInstall() == enabled
+      || (indeterminate(mods.remote->autoInstall()) && indeterminate(enabled));
 
     if(same)
-      mods->autoInstall = nullopt;
+      mods.autoInstall = nullopt;
     else
-      mods->autoInstall = enabled;
+      mods.autoInstall = enabled;
   });
 }
 
-tribool Manager::remoteAutoInstall(const Remote &remote) const
+tribool Manager::remoteAutoInstall(const RemotePtr &remote) const
 {
-  const auto &it = m_mods.find(remote);
+  const auto &it = findMods(remote);
 
   if(it == m_mods.end())
-    return remote.autoInstall();
+    return remote->autoInstall();
   else
-    return it->second.autoInstall.value_or(remote.autoInstall());
-}
-
-void Manager::refreshIndex()
-{
-  if(!m_list->hasSelection())
-    return;
-
-  const vector<int> selection = m_list->selection();
-  vector<Remote> remotes(selection.size());
-  for(size_t i = 0; i < selection.size(); i++)
-    remotes[i] = getRemote(selection[i]);
-
-  if(Transaction *tx = g_reapack->setupTransaction()) {
-    tx->fetchIndexes(remotes, true);
-    tx->runTasks();
-  }
+    return it->autoInstall.value_or(remote->autoInstall());
 }
 
 void Manager::uninstall()
@@ -417,17 +402,36 @@ void Manager::uninstall()
 
   while(m_list->selectionSize() - keep > 0) {
     const int index = m_list->currentIndex() + keep;
-    const Remote &remote = getRemote(index);
 
-    if(remote.isProtected()) {
+    if(getRemote(index)->test(Remote::ProtectedFlag)) {
       keep++;
       continue;
     }
 
-    m_uninstall.insert(remote);
-    setChange(1);
+    setMods(index, [this](RemoteMods &mods, int index) {
+      mods.uninstall = true;
+      m_list->removeRow(index);
+    });
+  }
+}
 
-    m_list->removeRow(index);
+bool Manager::isUninstalled(const RemotePtr &remote) const
+{
+  const auto &it = findMods(remote);
+
+  return it == m_mods.end() ? false : it->uninstall;
+}
+
+void Manager::refreshIndex()
+{
+  if(!m_list->hasSelection())
+    return;
+
+  if(Transaction *tx = g_reapack->setupTransaction()) {
+    for(const int i : m_list->selection())
+      tx->fetchIndex(getRemote(i), true);
+
+    tx->runTasks();
   }
 }
 
@@ -455,7 +459,7 @@ void Manager::copyUrl()
   vector<string> values;
 
   for(const int index : m_list->selection(false))
-    values.push_back(getRemote(index).url());
+    values.push_back(getRemote(index)->url());
 
   setClipboard(values);
 }
@@ -463,7 +467,7 @@ void Manager::copyUrl()
 void Manager::aboutRepo(const bool focus)
 {
   if(m_list->hasSelection())
-    g_reapack->about(getRemote(m_list->currentIndex()), focus);
+    getRemote(m_list->currentIndex())->about(focus);
 }
 
 void Manager::importExport()
@@ -570,7 +574,8 @@ void Manager::setupNetwork()
 
 bool Manager::confirm() const
 {
-  const size_t uninstallCount = m_uninstall.size();
+  const size_t uninstallCount = count_if(m_mods.begin(), m_mods.end(),
+    [](const RemoteMods &mods) { return mods.uninstall; });
 
   if(!uninstallCount)
     return true;
@@ -592,16 +597,14 @@ bool Manager::apply()
   if(!tx)
     return false;
 
-  // syncList is the list of repos to synchronize for autoinstall
-  // (global or local setting)
-  set<Remote> syncList;
-
   if(m_autoInstall) {
     g_reapack->config()->install.autoInstall = *m_autoInstall;
 
     if(*m_autoInstall) {
-      const auto &enabledNow = g_reapack->config()->remotes.getEnabled();
-      copy(enabledNow.begin(), enabledNow.end(), inserter(syncList, syncList.end()));
+      for(const RemotePtr &r : g_reapack->config()->remotes.getEnabled()) {
+        if(!isUninstalled(r))
+          tx->synchronize(r);
+      }
     }
   }
 
@@ -611,37 +614,20 @@ bool Manager::apply()
   if(m_promptObsolete)
     g_reapack->config()->install.promptObsolete = *m_promptObsolete;
 
-  for(const auto &pair : m_mods) {
-    Remote remote = pair.first;
-    const RemoteMods &mods = pair.second;
-
-    if(m_uninstall.find(remote) != m_uninstall.end())
+  for(const RemoteMods &mods : m_mods) {
+    if(mods.uninstall) {
+      tx->uninstall(mods.remote);
       continue;
-
-    if(mods.enable) {
-      remote.setEnabled(*mods.enable);
-      syncList.erase(remote);
     }
 
-    if(mods.autoInstall) {
-      remote.setAutoInstall(*mods.autoInstall);
+    if(mods.enable)
+      mods.remote->setEnabled(*mods.enable);
 
-      const bool isEnabled = mods.enable.value_or(remote.isEnabled());
+    if(mods.autoInstall)
+      mods.remote->setAutoInstall(*mods.autoInstall);
 
-      if(isEnabled && *mods.autoInstall)
-        syncList.insert(remote);
-    }
-
-    g_reapack->addSetRemote(remote);
+    mods.remote->autoSync();
   }
-
-  for(const Remote &remote : m_uninstall) {
-    g_reapack->uninstall(remote);
-    syncList.erase(remote);
-  }
-
-  for(const Remote &remote : syncList)
-    tx->synchronize(remote);
 
   reset();
 
@@ -653,7 +639,6 @@ bool Manager::apply()
 void Manager::reset()
 {
   m_mods.clear();
-  m_uninstall.clear();
   m_autoInstall = nullopt;
   m_bleedingEdge = nullopt;
   m_promptObsolete = nullopt;
@@ -662,13 +647,12 @@ void Manager::reset()
   disable(m_apply);
 }
 
-Remote Manager::getRemote(const int index) const
+RemotePtr Manager::getRemote(const int index) const
 {
-  if(index < 0 || index > m_list->rowCount() - 1)
-    return {};
-
-  const string &remoteName = m_list->row(index)->cell(0).value;
-  return g_reapack->config()->remotes.get(remoteName);
+  if(index < 0)
+    return nullptr;
+  else
+    return *static_cast<RemotePtr *>(m_list->row(index)->userData);
 }
 
 NetworkConfig::NetworkConfig(NetworkOpts *opts)

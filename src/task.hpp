@@ -21,7 +21,6 @@
 #include "config.hpp"
 #include "path.hpp"
 #include "registry.hpp"
-#include "remote.hpp"
 
 #include <memory>
 #include <set>
@@ -30,6 +29,7 @@
 
 class ArchiveReader;
 class Index;
+class Remote;
 class Source;
 class ThreadTask;
 class Transaction;
@@ -61,7 +61,7 @@ private:
 class SynchronizeTask : public Task {
 public:
   // TODO: remove InstallOpts argument
-  SynchronizeTask(const Remote &remote, bool stale, bool fullSync,
+  SynchronizeTask(const std::shared_ptr<Remote> &remote, bool stale, bool fullSync,
     const InstallOpts &, Transaction *);
 
 protected:
@@ -69,10 +69,10 @@ protected:
   void commit() override;
 
 private:
+  IndexPtr loadIndex();
   void synchronize(const Package *);
 
-  Remote m_remote;
-  Path m_indexPath;
+  std::shared_ptr<Remote> m_remote;
   InstallOpts m_opts;
   bool m_stale;
   bool m_fullSync;
@@ -115,6 +115,20 @@ private:
   Registry::Entry m_entry;
   std::vector<Registry::File> m_files;
   std::set<Path> m_removedFiles;
+};
+
+class UninstallRemoteTask : public Task {
+public:
+  UninstallRemoteTask(const RemotePtr &, Transaction *);
+
+protected:
+  int priority() const override { return 1; }
+  bool start() override;
+  void commit() override;
+
+private:
+  RemotePtr m_remote;
+  std::vector<std::unique_ptr<Task>> m_subTasks;
 };
 
 class PinTask : public Task {

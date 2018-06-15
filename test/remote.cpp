@@ -7,12 +7,20 @@ using namespace std;
 
 static const char *M = "[remote]";
 
-TEST_CASE("construct remote", M) {
-  Remote remote{"name", "url", true};
+TEST_CASE("construct remote (name)", M) {
+  Remote remote("name");
+  REQUIRE(remote.name() == "name");
+  REQUIRE(remote.url() == "");
+  REQUIRE(remote.isEnabled());
+  REQUIRE(remote.flags() == 0);
+}
+
+TEST_CASE("construct remote (name, url)", M) {
+  Remote remote("name", "url");
   REQUIRE(remote.name() == "name");
   REQUIRE(remote.url() == "url");
   REQUIRE(remote.isEnabled());
-  REQUIRE_FALSE(remote.isProtected());
+  REQUIRE(remote.flags() == 0);
 }
 
 TEST_CASE("remote name validation", M) {
@@ -89,11 +97,9 @@ TEST_CASE("remote url validation", M) {
 }
 
 TEST_CASE("set invalid values", M) {
-  Remote remote;
-  
   SECTION("name") {
     try {
-      remote.setName("/");
+      Remote r("/", "url");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -103,7 +109,7 @@ TEST_CASE("set invalid values", M) {
 
   SECTION("url") {
     try {
-      remote.setUrl("http://google.com/hello?invalid=|");
+      Remote r("ReaPack", "http://google.com/hello?invalid=|");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -113,7 +119,7 @@ TEST_CASE("set invalid values", M) {
 }
 
 TEST_CASE("valid remote urls", M) {
-  Remote remote;
+  Remote remote("name");
 
   SECTION("uppercase")
     remote.setUrl("https://google.com/AAA");
@@ -125,53 +131,28 @@ TEST_CASE("valid remote urls", M) {
     remote.setUrl("https://google.com/RRR");
 }
 
-TEST_CASE("null remote", M) {
-  Remote remote;
-  REQUIRE(remote.isNull());
-  REQUIRE_FALSE(remote);
-  CHECK(remote.isEnabled());
-
-  SECTION("set name") {
-    remote.setName("test");
-    REQUIRE(remote.name() == "test");
-    REQUIRE(remote.isNull());
-  }
-
-  SECTION("set url") {
-    remote.setUrl("test");
-    REQUIRE(remote.url() == "test");
-    REQUIRE(remote.isNull());
-  }
-
-  SECTION("set both") {
-    remote.setName("hello");
-    remote.setUrl("world");
-    REQUIRE_FALSE(remote.isNull());
-    REQUIRE(remote);
-  }
-}
-
 TEST_CASE("protect remote", M) {
-  Remote remote;
-  remote.setUrl("https://cfillion.ca");
-  REQUIRE_FALSE(remote.isProtected());
+  Remote remote("name");
+  REQUIRE_FALSE(remote.test(Remote::ProtectedFlag));
+  remote.setUrl("https://google.com");
 
   remote.protect();
-  REQUIRE(remote.isProtected());
+  REQUIRE(remote.test(Remote::ProtectedFlag));
 
   try {
-    remote.setUrl("https://google.com");
+    remote.setUrl("https://different.url");
     FAIL();
   }
   catch(const reapack_error &e) {
     REQUIRE(string(e.what()) == "cannot change the URL of a protected repository");
   }
 
-  remote.setUrl(remote.url()); // this should work for AddSetRepository API
+  // setting the same url must work for the AddSetRepository API
+  remote.setUrl(remote.url());
 }
 
 TEST_CASE("autoinstall remote", M) {
-  Remote remote;
+  Remote remote("name");
   REQUIRE_FALSE(remote.autoInstall());
   REQUIRE(remote.autoInstall(true));
   REQUIRE_FALSE(remote.autoInstall(false));
@@ -188,42 +169,61 @@ TEST_CASE("autoinstall remote", M) {
 }
 
 TEST_CASE("add remotes to list", M) {
-  RemoteList list;
+  RemotePtr remote = make_shared<Remote>("name");
 
+  RemoteList list;
   REQUIRE(list.empty());
   REQUIRE(list.size() == 0);
-  REQUIRE_FALSE(list.hasName("name"));
+  REQUIRE(list.getByName("name") == nullptr);
 
-  list.add({"name", "url"});
-
+  list.add(remote);
   REQUIRE_FALSE(list.empty());
   REQUIRE(list.size() == 1);
-  REQUIRE(list.hasName("name"));
-}
+  REQUIRE(list.getByName("name") == remote);
 
-TEST_CASE("add invalid remote to list", M) {
-  RemoteList list;
-  list.add({});
-
-  REQUIRE(list.empty());
-}
-
-TEST_CASE("replace remote", M) {
-  RemoteList list;
-
-  list.add({"name", "url1"});
-  list.add({"name", "url2"});
-
+  list.add(remote);
   REQUIRE(list.size() == 1);
-  REQUIRE(list.get("name").url() == "url2");
-};
+}
 
-TEST_CASE("get remote by name", M) {
+TEST_CASE("get enabled remotes only", M) {
+  RemotePtr r1 = make_shared<Remote>("hello"),
+            r2 = make_shared<Remote>("world");
+
+  r1->setEnabled(false);
+  r2->setEnabled(true);
+
   RemoteList list;
-  REQUIRE(list.get("hello").isNull());
+  list.add(r1);
+  list.add(r2);
 
-  list.add({"hello", "world"});
-  REQUIRE_FALSE(list.get("hello").isNull());
+  const vector<RemotePtr> &array = list.getEnabled();
+  REQUIRE(array.size() == 1);
+  REQUIRE(array[0] == r2);
+}
+
+TEST_CASE("get self remote", M) {
+  RemotePtr self = make_shared<Remote>("ReaPack");
+
+  RemoteList list;
+  REQUIRE(list.getSelf() == nullptr);
+
+  list.add(self);
+  REQUIRE(list.getSelf() == self);
+}
+
+TEST_CASE("remove remote", M) {
+  RemotePtr remote = make_shared<Remote>("name");
+
+  RemoteList list;
+  list.add(remote);
+  REQUIRE(list.size() == 1);
+  REQUIRE_FALSE(list.empty());
+
+  list.remove(remote);
+  REQUIRE(list.size() == 0);
+  REQUIRE(list.empty());
+
+  list.remove(remote); // no crash
 }
 
 TEST_CASE("unserialize remote", M) {
@@ -233,97 +233,53 @@ TEST_CASE("unserialize remote", M) {
   SECTION("invalid name")
     REQUIRE_FALSE(Remote::fromString("name||false"));
 
-  SECTION("enabled") {
-    Remote remote = Remote::fromString("name|url|1");
+  SECTION("name & enabled") {
+    RemotePtr remote = Remote::fromString("name|url|1");
     REQUIRE(remote);
 
-    REQUIRE(remote.name() == "name");
-    REQUIRE(remote.url() == "url");
-    REQUIRE(remote.isEnabled());
+    REQUIRE(remote->name() == "name");
+    REQUIRE(remote->url() == "url");
+    REQUIRE(remote->isEnabled());
   }
 
   SECTION("disabled") {
-    Remote remote = Remote::fromString("name|url|0");
-    REQUIRE(remote.name() == "name");
-    REQUIRE(remote.url() == "url");
-    REQUIRE_FALSE(remote.isEnabled());
+    RemotePtr remote = Remote::fromString("name|url|0");
+    REQUIRE(remote->name() == "name");
+    REQUIRE(remote->url() == "url");
+    REQUIRE_FALSE(remote->isEnabled());
   }
 
-  SECTION("missing auto-install") {
-    Remote remote = Remote::fromString("name|url|1");
-    REQUIRE(boost::logic::indeterminate(remote.autoInstall()));
+  SECTION("missing auto-install (backward compatibility)") {
+    RemotePtr remote = Remote::fromString("name|url|1");
+    REQUIRE(boost::logic::indeterminate(remote->autoInstall()));
   }
 
   SECTION("indeterminate auto-install") {
-    Remote remote = Remote::fromString("name|url|1|2");
-    REQUIRE(boost::logic::indeterminate(remote.autoInstall()));
+    RemotePtr remote = Remote::fromString("name|url|1|2");
+    REQUIRE(boost::logic::indeterminate(remote->autoInstall()));
   }
 
   SECTION("auto-install enabled") {
-    Remote remote = Remote::fromString("name|url|1|1");
-    REQUIRE(remote.autoInstall());
+    RemotePtr remote = Remote::fromString("name|url|1|1");
+    REQUIRE(remote->autoInstall());
   }
 
   SECTION("auto-install enabled") {
-    Remote remote = Remote::fromString("name|url|1|0");
-    REQUIRE(remote.autoInstall() == false);
+    RemotePtr remote = Remote::fromString("name|url|1|0");
+    REQUIRE(remote->autoInstall() == false);
   }
 }
 
 TEST_CASE("serialize remote", M) {
-  SECTION("default")
-    REQUIRE(Remote("name", "url").toString() == "name|url|1|2");
+  Remote r("name", "url");
+  REQUIRE(r.toString() == "name|url|1|2");
 
-  SECTION("enabled")
-    REQUIRE(Remote("name", "url", true, true).toString() == "name|url|1|1");
+  r.setAutoInstall(true);
+  REQUIRE(r.toString() == "name|url|1|1");
 
-  SECTION("disabled")
-    REQUIRE(Remote("name", "url", false, false).toString() == "name|url|0|0");
-}
+  r.setEnabled(false);
+  REQUIRE(r.toString() == "name|url|0|1");
 
-TEST_CASE("get enabled remotes", M) {
-  RemoteList list;
-  list.add({"hello", "url1", true});
-  list.add({"world", "url2", false});
-
-  const vector<Remote> array = list.getEnabled();
-
-  REQUIRE(array.size() == 1);
-  REQUIRE(array[0].name() == "hello");
-}
-
-TEST_CASE("remove remote", M) {
-  const Remote remote{"hello", "url"};
-  RemoteList list;
-
-  list.add(remote);
-  REQUIRE(list.size() == 1);
-  REQUIRE_FALSE(list.empty());
-
-  list.remove(remote);
-  REQUIRE(list.size() == 0);
-  REQUIRE(list.empty());
-
-  list.remove("world"); // no crash
-}
-
-TEST_CASE("remove two remotes", M) {
-  RemoteList list;
-
-  list.add({"a_first", "url"});
-  list.add({"z_second", "url"});
-  list.add({"b_third", "url"});
-  REQUIRE(list.size() == 3);
-
-  list.remove("z_second");
-  REQUIRE(list.size() == 2);
-
-  REQUIRE(list.get("z_first").isNull());
-  REQUIRE_FALSE(list.get("b_third").isNull());
-  REQUIRE_FALSE(list.get("a_first").isNull());
-}
-
-TEST_CASE("compare remotes", M) {
-  REQUIRE(Remote("aaa", "aaa") < Remote("bbb", "aaa"));
-  REQUIRE_FALSE(Remote("aaa", "aaa") < Remote("aaa", "bbb"));
+  r.setAutoInstall(false);
+  REQUIRE(r.toString() == "name|url|0|0");
 }

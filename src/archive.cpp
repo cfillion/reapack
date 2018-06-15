@@ -69,6 +69,7 @@ struct ImportArchive {
   ArchiveReaderPtr m_reader;
   RemoteList *m_remotes;
   Transaction *m_tx;
+  RemotePtr m_remote;
   IndexPtr m_lastIndex;
 };
 
@@ -118,21 +119,19 @@ void Archive::import(const string &path)
 void ImportArchive::importRemote(const string &data)
 {
   m_lastIndex = nullptr; // clear the previous repository
-  Remote remote = Remote::fromString(data);
+  m_remote = Remote::fromString(data);
 
-  if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
+  if(const int err = m_reader->extractFile(Index::pathFor(m_remote->name()))) {
     throw reapack_error(String::format("Failed to extract index of %s (%d)",
-      remote.name().c_str(), err));
+      m_remote->name().c_str(), err));
   }
 
-  const Remote &original = m_remotes->get(remote.name());
-  if(original.isProtected()) {
-    remote.setUrl(original.url());
-    remote.protect();
-  }
+  if(const RemotePtr &existing = m_remotes->getByName(m_remote->name()))
+    *existing = *m_remote;
+  else
+    m_remotes->add(m_remote);
 
-  m_remotes->add(remote);
-  m_lastIndex = Index::load(remote.name());
+  m_lastIndex = m_remote->loadIndex();
 }
 
 void ImportArchive::importPackage(const string &data)
@@ -156,7 +155,7 @@ void ImportArchive::importPackage(const string &data)
   if(!ver) {
     throw reapack_error(String::format(
       "%s/%s/%s v%s cannot be found or is incompatible with your operating system.",
-      m_lastIndex->name().c_str(), categoryName.c_str(),
+      m_remote->name().c_str(), categoryName.c_str(),
       packageName.c_str(), versionName.c_str()));
   }
 

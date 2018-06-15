@@ -31,22 +31,43 @@ Path Index::pathFor(const string &name)
   return Path::CACHE + (name + ".xml");
 }
 
-IndexPtr Index::load(const string &name, const char *data)
+Index::Index(const RemotePtr &remote)
+  : m_remote(remote)
+{
+}
+
+Index::~Index()
+{
+  for(const Category *cat : m_categories)
+    delete cat;
+}
+
+void Index::load()
+{
+  FILE *file = FS::open(pathFor(remote()->name()));
+
+  if(!file)
+    throw reapack_error(FS::lastError());
+
+  TiXmlDocument doc;
+  doc.LoadFile(file);
+  fclose(file);
+
+  doLoad(doc);
+}
+
+string Index::load(const char *data)
 {
   TiXmlDocument doc;
+  doc.Parse(data);
 
-  if(data)
-    doc.Parse(data);
-  else {
-    FILE *file = FS::open(pathFor(name));
+  string name;
+  doLoad(doc, &name);
+  return name;
+}
 
-    if(!file)
-      throw reapack_error(FS::lastError());
-
-    doc.LoadFile(file);
-    fclose(file);
-  }
-
+void Index::doLoad(TiXmlDocument &doc, string *name)
+{
   if(doc.ErrorId())
     throw reapack_error(doc.ErrorDesc());
 
@@ -62,42 +83,13 @@ IndexPtr Index::load(const string &name, const char *data)
   if(!version)
     throw reapack_error("index version not found");
 
-  Index *ri = new Index(name);
-
-  // ensure the memory is released if an exception is
-  // thrown during the loading process
-  unique_ptr<Index> ptr(ri);
-
   switch(version) {
   case 1:
-    loadV1(root, ri);
+    loadV1(root, name);
     break;
   default:
     throw reapack_error("index version is unsupported");
   }
-
-  ptr.release();
-  return IndexPtr(ri);
-}
-
-Index::Index(const string &name)
-  : m_name(name)
-{
-}
-
-Index::~Index()
-{
-  for(const Category *cat : m_categories)
-    delete cat;
-}
-
-void Index::setName(const string &newName)
-{
-  if(!m_name.empty())
-    throw reapack_error("index name is already set");
-
-  // validation is taken care of later by Remote's constructor
-  m_name = newName;
 }
 
 bool Index::addCategory(const Category *cat)
@@ -150,7 +142,7 @@ Category::~Category()
 
 string Category::fullName() const
 {
-  return m_index ? m_index->name() + "/" + m_name : m_name;
+  return m_index ? m_index->remote()->name() + "/" + m_name : m_name;
 }
 
 bool Category::addPackage(const Package *pkg)

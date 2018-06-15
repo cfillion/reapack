@@ -51,55 +51,19 @@ Transaction::Transaction()
   m_threadPool.onDone >> bind(&Transaction::runTasks, this);
 }
 
-void Transaction::synchronize(const Remote &remote,
+void Transaction::synchronize(const RemotePtr &remote,
   const std::optional<bool> &forceAutoInstall)
 {
-  if(m_syncedRemotes.count(remote.name()))
-    return;
-
-  m_syncedRemotes.insert(remote.name());
-
   InstallOpts opts = g_reapack->config()->install;
-  opts.autoInstall = remote.autoInstall(forceAutoInstall.value_or(opts.autoInstall));
+  // TODO: BUG? remote->autoInstall taking precedence over forceAutoInstall?
+  opts.autoInstall = remote->autoInstall(forceAutoInstall.value_or(opts.autoInstall));
 
   m_nextQueue.push(make_shared<SynchronizeTask>(remote, true, true, opts, this));
 }
 
-void Transaction::fetchIndexes(const vector<Remote> &remotes, const bool stale)
+void Transaction::fetchIndex(const RemotePtr &remote, const bool stale)
 {
-  for(const Remote &remote : remotes)
-    m_nextQueue.push(make_shared<SynchronizeTask>(remote, stale, false, InstallOpts{}, this));
-}
-
-vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
-{
-  vector<IndexPtr> indexes;
-
-  for(const Remote &remote : remotes) {
-    const auto &it = m_indexes.find(remote.name());
-    if(it != m_indexes.end())
-      indexes.push_back(it->second);
-  }
-
-  return indexes;
-}
-
-IndexPtr Transaction::loadIndex(const Remote &remote)
-{
-  const auto &it = m_indexes.find(remote.name());
-  if(it != m_indexes.end())
-    return it->second;
-
-  try {
-    const IndexPtr &ri = Index::load(remote.name());
-    m_indexes[remote.name()] = ri;
-    return ri;
-  }
-  catch(const reapack_error &e) {
-    m_receipt.addError({
-      String::format("Could not load repository: %s", e.what()), remote.name()});
-    return nullptr;
-  }
+  m_nextQueue.push(make_shared<SynchronizeTask>(remote, stale, false, InstallOpts{}, this));
 }
 
 void Transaction::install(const Version *ver, const bool pin,
@@ -119,24 +83,14 @@ void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
   m_nextQueue.push(make_shared<PinTask>(entry, pinned, this));
 }
 
-void Transaction::uninstall(const Remote &remote)
-{
-  inhibit(remote);
-
-  const Path &indexPath = Index::pathFor(remote.name());
-
-  if(FS::exists(indexPath)) {
-    if(!FS::remove(indexPath))
-      m_receipt.addError({FS::lastError(), indexPath.join()});
-  }
-
-  for(const auto &entry : m_registry.getEntries(remote.name()))
-    uninstall(entry);
-}
-
 void Transaction::uninstall(const Registry::Entry &entry)
 {
   m_nextQueue.push(make_shared<UninstallTask>(entry, this));
+}
+
+void Transaction::uninstall(const RemotePtr &remote)
+{
+  m_nextQueue.push(make_shared<UninstallRemoteTask>(remote, this));
 }
 
 void Transaction::exportArchive(const string &path)
@@ -231,11 +185,12 @@ void Transaction::registerQueued()
   while(!m_regQueue.empty()) {
     const HostTicket &reg = m_regQueue.front();
 
-    // don't register in host if the remote got disabled meanwhile
-    if(reg.add && m_inhibited.count(reg.entry.remote) > 0) {
-      m_regQueue.pop();
-      return;
-    }
+    // don't register in host if the remote got removed meanwhile
+    // TODO: detect if the registry was uninstalled
+    // if(reg.add && m_inhibited.count(reg.entry.remote) > 0) {
+    //   m_regQueue.pop();
+    //   return;
+    // }
 
     switch(reg.file.type) {
     case Package::ScriptType:
@@ -292,19 +247,6 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
     if(isLastSection)
       break;
   }
-}
-
-void Transaction::inhibit(const Remote &remote)
-{
-  // prevents index post-download callbacks from being called
-  // AND prevents files from this remote from being registered in REAPER
-  // (UNregistering is not affected)
-
-  const auto &it = m_syncedRemotes.find(remote.name());
-  if(it != m_syncedRemotes.end())
-    m_syncedRemotes.erase(it);
-
-  m_inhibited.insert(remote.name());
 }
 
 void Transaction::promptObsolete()

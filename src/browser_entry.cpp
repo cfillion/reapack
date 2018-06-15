@@ -49,7 +49,7 @@ Browser::Entry::Entry(const Package *pkg, const Registry::Entry &re, const Index
   if(!latest)
     latest = pkg->lastVersion(true);
 
-  if(g_reapack->remote(indexName()).isProtected())
+  if(package->category()->index()->remote()->test(Remote::ProtectedFlag))
     m_flags |= ProtectedFlag;
 }
 
@@ -84,7 +84,7 @@ string Browser::Entry::displayState() const
 
 const string &Browser::Entry::indexName() const
 {
-  return package ? package->category()->index()->name() : regEntry.remote;
+  return package ? package->category()->index()->remote()->name() : regEntry.remote;
 }
 
 const string &Browser::Entry::categoryName() const

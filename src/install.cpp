@@ -140,3 +140,14 @@ void InstallTask::rollback()
 
   m_fail = true;
 }
+
+PinTask::PinTask(const Registry::Entry &re, const bool pin, Transaction *tx)
+  : Task(tx), m_entry(move(re)), m_pin(pin)
+{
+}
+
+void PinTask::commit()
+{
+  tx()->registry()->setPinned(m_entry, m_pin);
+  tx()->receipt()->setPackageChanged();
+}

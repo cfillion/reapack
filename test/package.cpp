@@ -3,6 +3,7 @@
 #include <errors.hpp>
 #include <index.hpp>
 #include <package.hpp>
+#include <remote.hpp>
 
 using namespace std;
 
@@ -82,7 +83,8 @@ TEST_CASE("invalid package name", M) {
 }
 
 TEST_CASE("package versions are sorted", M) {
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "a", &cat);
@@ -107,7 +109,8 @@ TEST_CASE("package versions are sorted", M) {
 }
 
 TEST_CASE("get latest stable version", M) {
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "a", &cat);
 
@@ -131,7 +134,8 @@ TEST_CASE("get latest stable version", M) {
 }
 
 TEST_CASE("pre-release updates", M) {
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "a", &cat);
 
@@ -192,7 +196,8 @@ TEST_CASE("add owned version", M) {
 }
 
 TEST_CASE("add duplicate version", M) {
-  Index ri("r");
+  RemotePtr re = make_shared<Remote>("r", "url");
+  Index ri(re);
   Category cat("c", &ri);
   Package pack(Package::ScriptType, "p", &cat);
 
@@ -210,7 +215,8 @@ TEST_CASE("add duplicate version", M) {
 }
 
 TEST_CASE("find matching version", M) {
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("Category Name", &ri);
 
   Package pack(Package::ScriptType, "a", &cat);
@@ -229,14 +235,15 @@ TEST_CASE("find matching version", M) {
 }
 
 TEST_CASE("package full name", M) {
-  const Index ri("Index Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   const Category cat("Category Name", &ri);
   Package pack(Package::ScriptType, "file.name", &cat);
 
-  REQUIRE(pack.fullName() == "Index Name/Category Name/file.name");
+  REQUIRE(pack.fullName() == "Remote Name/Category Name/file.name");
 
   pack.setDescription("Hello World");
-  REQUIRE(pack.fullName() == "Index Name/Category Name/Hello World");
+  REQUIRE(pack.fullName() == "Remote Name/Category Name/Hello World");
 }
 
 TEST_CASE("package description", M) {

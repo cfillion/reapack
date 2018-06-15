@@ -53,13 +53,13 @@ bool ExportTask::start()
 
   vector<FileCompressor *> jobs;
 
-  for(const Remote &remote : g_reapack->config()->remotes.getEnabled()) {
+  for(const RemotePtr &remote : g_reapack->config()->remotes.getEnabled()) {
     bool addedRemote = false;
 
-    for(const Registry::Entry &entry : tx()->registry()->getEntries(remote.name())) {
+    for(const Registry::Entry &entry : tx()->registry()->getEntries(remote->name())) {
       if(!addedRemote) {
-        toc << "REPO " << remote.toString() << '\n';
-        jobs.push_back(new FileCompressor(Index::pathFor(remote.name()), writer));
+        toc << "REPO " << remote->toString() << '\n';
+        jobs.push_back(new FileCompressor(Index::pathFor(remote->name()), writer));
         addedRemote = true;
       }
 

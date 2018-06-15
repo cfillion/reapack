@@ -19,6 +19,7 @@
 
 #include "errors.hpp"
 #include "index.hpp"
+#include "remote.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
 
@@ -145,7 +146,7 @@ Path Source::targetPath() const
   case Package::EffectType:
   case Package::AutomationItemType: {
     const Category *cat = m_version->package()->category();
-    path += cat->index()->name();
+    path += cat->index()->remote()->name();
 
     // only allow directory traversal up to the index name
     path += Path(cat->name()) + file();

@@ -161,34 +161,39 @@ void Import::fetch()
 
 bool Import::read(MemoryDownload *dl, const size_t idx)
 try {
-  IndexPtr index = Index::load({}, dl->contents().c_str());
-  Remote remote = g_reapack->remote(index->name());
-  const bool exists = !remote.isNull();
+  // TODO: remove this mess
+  RemotePtr fakeRemote = make_shared<Remote>("temp");
+  Index fakeIndex(fakeRemote);
+  const string &name = fakeIndex.load(dl->contents().c_str());
 
-  if(exists && remote.url() != dl->url()) {
-    if(remote.isProtected()) {
+  RemotePtr remote = g_reapack->config()->remotes.getByName(name);
+
+  if(!remote)
+    remote = make_shared<Remote>(name, dl->url());
+
+  remote->setEnabled(true);
+
+  if(remote->url() != dl->url()) {
+    if(remote->test(Remote::ProtectedFlag)) {
       Win32::messageBox(handle(), String::format(
         "The repository %s is protected and cannot be overwritten.",
-        index->name().c_str()
+        remote->name().c_str()
       ).c_str(), TITLE, MB_OK);
-      return false;
+      return true;
     }
     else {
       const auto answer = Win32::messageBox(handle(), String::format(
         "%s is already configured with a different URL.\n"
-        "Do you want to overwrite it?", index->name().c_str()
+        "Do you want to overwrite it?", remote->name().c_str()
       ).c_str(), TITLE, MB_YESNO);
 
       if(answer != IDYES)
         return true;
     }
-  }
-  else if(exists && remote.isEnabled()) // url is also the same
-    return true; // nothing to do
 
-  remote.setEnabled(true);
-  remote.setName(index->name());
-  remote.setUrl(dl->url());
+    remote->setUrl(dl->url());
+  }
+
   m_queue.push_back({idx, remote, dl->contents()});
 
   return true;
@@ -222,9 +227,8 @@ void Import::processQueue()
 
 bool Import::import(const ImportData &data)
 {
-  g_reapack->addSetRemote(data.remote);
-
-  FS::write(Index::pathFor(data.remote.name()), data.contents);
+  g_reapack->config()->remotes.add(data.remote);
+  FS::write(Index::pathFor(data.remote->name()), data.contents);
 
   return true;
 }

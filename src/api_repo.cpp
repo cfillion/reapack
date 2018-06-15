@@ -18,6 +18,7 @@
 #include "api.hpp"
 #include "api_helper.hpp"
 
+#include "config.hpp"
 #include "errors.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
@@ -31,8 +32,8 @@ DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
 R"(Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
 The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",
 {
-  if(const Remote &repo = g_reapack->remote(repoName)) {
-    g_reapack->about(repo);
+  if(const RemotePtr &repo = g_reapack->config()->remotes.getByName(repoName)) {
+    repo->about();
     return true;
   }
 
@@ -45,13 +46,23 @@ R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to ke
 
 autoInstall: usually set to 2 (obey user setting).)",
 {
+  RemoteList &remotes = g_reapack->config()->remotes;
+
   try {
-    Remote remote = g_reapack->remote(name);
-    remote.setName(name);
-    remote.setUrl(url && strlen(url) > 0 ? url : remote.url());
-    remote.setEnabled(enable);
-    remote.setAutoInstall(boost::lexical_cast<tribool>(autoInstall));
-    g_reapack->addSetRemote(remote);
+    RemotePtr remote = remotes.getByName(name);
+
+    if(remote) {
+      if(url && strlen(url) > 0)
+        remote->setUrl(url);
+    }
+    else {
+      remote = make_shared<Remote>(name, url ? url : "");
+      remotes.add(remote);
+    }
+
+    remote->setEnabled(enable);
+    remote->setAutoInstall(boost::lexical_cast<boost::tribool>(autoInstall));
+    remote->autoSync();
   }
   catch(const reapack_error &e) {
     if(errorOut)
@@ -74,17 +85,17 @@ R"(Get the infos of the given repository.
 
 autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting)",
 {
-  const Remote &remote = g_reapack->remote(name);
+  const RemotePtr &remote = g_reapack->config()->remotes.getByName(name);
 
   if(!remote)
     return false;
 
   if(urlOut)
-    snprintf(urlOut, urlOut_sz, "%s", remote.url().c_str());
+    snprintf(urlOut, urlOut_sz, "%s", remote->url().c_str());
   if(enabledOut)
-    *enabledOut = remote.isEnabled();
+    *enabledOut = remote->isEnabled();
   if(autoInstallOut)
-    *autoInstallOut = boost::lexical_cast<int>(remote.autoInstall());
+    *autoInstallOut = boost::lexical_cast<int>(remote->autoInstall());
 
   return true;
 });

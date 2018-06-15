@@ -30,17 +30,17 @@ static void LoadPackageV1(TiXmlElement *, Category *);
 static void LoadVersionV1(TiXmlElement *, Package *);
 static void LoadSourceV1(TiXmlElement *, Version *);
 
-void Index::loadV1(TiXmlElement *root, Index *ri)
+void Index::loadV1(TiXmlElement *root, string *nameOut)
 {
-  if(ri->name().empty()) {
+  if(nameOut) {
     if(const char *name = root->Attribute("name"))
-      ri->setName(name);
+      *nameOut = name;
   }
 
   TiXmlElement *node = root->FirstChildElement("category");
 
   while(node) {
-    LoadCategoryV1(node, ri);
+    LoadCategoryV1(node, this);
 
     node = node->NextSiblingElement("category");
   }
@@ -48,7 +48,7 @@ void Index::loadV1(TiXmlElement *root, Index *ri)
   node = root->FirstChildElement("metadata");
 
   if(node)
-    LoadMetadataV1(node, ri->metadata());
+    LoadMetadataV1(node, &m_metadata);
 }
 
 void LoadMetadataV1(TiXmlElement *meta, Metadata *md)

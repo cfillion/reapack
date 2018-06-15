@@ -31,21 +31,24 @@
 class Index;
 class Path;
 class Remote;
+class TiXmlDocument;
 class TiXmlElement;
 struct NetworkOpts;
 
 typedef std::shared_ptr<const Index> IndexPtr;
+typedef std::shared_ptr<Remote> RemotePtr;
 
 class Index : public std::enable_shared_from_this<const Index> {
 public:
   static Path pathFor(const std::string &name);
-  static IndexPtr load(const std::string &name, const char *data = nullptr);
 
-  Index(const std::string &name);
+  Index(const RemotePtr & = nullptr);
   ~Index();
 
-  void setName(const std::string &);
-  const std::string &name() const { return m_name; }
+  void load();
+  std::string load(const char *data); // for import
+
+  RemotePtr remote() const { return m_remote.lock(); }
 
   Metadata *metadata() { return &m_metadata; }
   const Metadata *metadata() const { return &m_metadata; }
@@ -59,9 +62,10 @@ public:
   const std::vector<const Package *> &packages() const { return m_packages; }
 
 private:
-  static void loadV1(TiXmlElement *, Index *);
+  void doLoad(TiXmlDocument &, std::string *name = nullptr);
+  void loadV1(TiXmlElement *, std::string *name);
 
-  std::string m_name;
+  std::weak_ptr<Remote> m_remote;
   Metadata m_metadata;
   std::vector<const Category *> m_categories;
   std::vector<const Package *> m_packages;

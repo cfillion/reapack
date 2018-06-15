@@ -285,9 +285,11 @@ void AboutIndexDelegate::init(About *dialog)
 {
   m_dialog = dialog;
 
-  dialog->setTitle(m_index->name());
-  dialog->setMetadata(m_index->metadata(), m_index->name() == "ReaPack");
-  dialog->setAction("Install/update " + m_index->name());
+  const string &name = m_index->remote()->name();
+
+  dialog->setTitle(name);
+  dialog->setMetadata(m_index->metadata(), name == "ReaPack");
+  dialog->setAction("Install/update " + name);
 
   dialog->tabs()->addTab({"Packages",
     {dialog->menu()->handle(), dialog->list()->handle()}});
@@ -317,7 +319,7 @@ void AboutIndexDelegate::initInstalledFiles()
 
   try {
     Registry reg(Path::REGISTRY.prependRoot());
-    for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
+    for(const Registry::Entry &entry : reg.getEntries(m_index->remote()->name())) {
       const vector<Registry::File> &files = reg.getFiles(entry);
       allFiles.insert(files.begin(), files.end());
     }
@@ -415,14 +417,16 @@ const Package *AboutIndexDelegate::currentPackage() const
 
 void AboutIndexDelegate::findInBrowser()
 {
+  const RemotePtr &remote = m_index->remote();
   Browser *browser = g_reapack->browsePackages();
-  if(!browser)
+
+  if(!browser || !remote)
     return;
 
   const Package *pkg = currentPackage();
 
   ostringstream stream;
-  stream << '^' << quoted(pkg->displayName()) << "$ ^" << quoted(m_index->name()) << '$';
+  stream << '^' << quoted(pkg->displayName()) << "$ ^" << quoted(remote->name()) << '$';
   browser->setFilter(stream.str());
 }
 
@@ -460,7 +464,7 @@ void AboutIndexDelegate::install()
   if(!choice)
     return;
 
-  Remote remote = g_reapack->remote(m_index->name());
+  const RemotePtr &remote = m_index->remote();
 
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
@@ -472,7 +476,7 @@ void AboutIndexDelegate::install()
 
   const InstallOpts &installOpts = g_reapack->config()->install;
 
-  if(choice == INSTALL_ALL && boost::logic::indeterminate(remote.autoInstall())
+  if(choice == INSTALL_ALL && indeterminate(remote->autoInstall())
       && !installOpts.autoInstall) {
     const int btn = Win32::messageBox(m_dialog->handle(),
       "Do you want ReaPack to install new packages from this repository"
@@ -483,21 +487,18 @@ void AboutIndexDelegate::install()
 
     switch(btn) {
     case IDYES:
-      remote.setAutoInstall(true);
-      g_reapack->config()->remotes.add(remote);
+      remote->setAutoInstall(true);
       break;
     case IDCANCEL:
       return;
     }
   }
 
+  if(!remote->isEnabled())
+    remote->setEnabled(true);
+
   if(Transaction *tx = g_reapack->setupTransaction())
     tx->synchronize(remote, choice == INSTALL_ALL);
-
-  if(!remote.isEnabled()) {
-    remote.setEnabled(true);
-    g_reapack->addSetRemote(remote);
-  }
 
   g_reapack->commitConfig();
 }
@@ -515,7 +516,7 @@ void AboutPackageDelegate::init(About *dialog)
 
   dialog->setTitle(m_package->displayName());
   dialog->setMetadata(m_package->metadata());
-  dialog->setAction("About " + m_index->name());
+  dialog->setAction("About " + m_index->remote()->name());
 
   dialog->tabs()->addTab({"History",
     {dialog->menu()->handle(), dialog->getControl(IDC_CHANGELOG)}});

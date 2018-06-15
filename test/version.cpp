@@ -5,13 +5,15 @@
 #include <errors.hpp>
 #include <index.hpp>
 #include <package.hpp>
+#include <remote.hpp>
 
 #include <sstream>
 
 using namespace std;
 
 #define MAKE_PACKAGE \
-  Index ri("Index Name"); \
+  RemotePtr re = make_shared<Remote>("Remote Name", "url"); \
+  Index ri(re); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Package Name", &cat); \
 
@@ -203,7 +205,7 @@ TEST_CASE("version full name", M) {
   MAKE_PACKAGE;
 
   Version ver("1.0", &pkg);
-  REQUIRE(ver.fullName() == "Index Name/Category Name/Package Name v1.0");
+  REQUIRE(ver.fullName() == "Remote Name/Category Name/Package Name v1.0");
 }
 
 TEST_CASE("add source", M) {
@@ -255,7 +257,7 @@ TEST_CASE("list files", M) {
 
   Path path1;
   path1.append("Scripts");
-  path1.append("Index Name");
+  path1.append("Remote Name");
   path1.append("Category Name");
   path1.append("file");
 

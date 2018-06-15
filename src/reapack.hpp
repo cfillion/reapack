@@ -52,21 +52,17 @@ public:
   ActionList *actions() { return &m_actions; }
 
   void synchronizeAll();
-  void uninstall(const Remote &);
-
   void importRemote();
   void manageRemotes();
   void aboutSelf();
-  void about(const Remote &, bool focus = true);
+
   About *about(bool instantiate = true);
   Browser *browsePackages();
   void refreshManager();
   void refreshBrowser();
 
-  void addSetRemote(const Remote &);
-  Remote remote(const std::string &name) const;
-
   Transaction *setupTransaction();
+  Transaction *transaction() const { return m_tx; }
   void commitConfig(bool refresh = true);
   Config *config() { return &m_config; }
 

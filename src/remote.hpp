@@ -19,51 +19,64 @@
 #define REAPACK_REMOTE_HPP
 
 #include <boost/logic/tribool.hpp>
-#include <map>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
-typedef boost::logic::tribool tribool;
+class Index;
+typedef std::shared_ptr<const Index> IndexPtr;
 
-class Remote {
+class Remote;
+typedef std::shared_ptr<Remote> RemotePtr;
+
+class Remote : public std::enable_shared_from_this<Remote> {
 public:
-  static Remote fromString(const std::string &data);
+  enum Flag {
+    ProtectedFlag = 1<<0,
+    DirtyFlag     = 1<<1,
+  };
 
-  Remote();
-  Remote(const std::string &name, const std::string &url, bool enabled = true,
-    const tribool &autoInstall = boost::logic::indeterminate);
+  static RemotePtr fromString(const std::string &data);
+
+  Remote(const std::string &name);
+  Remote(const std::string &name, const std::string &url);
+  Remote(const Remote &) = delete;
 
   std::string toString() const;
 
-  void setName(const std::string &name);
   const std::string &name() const { return m_name; }
 
   void setUrl(const std::string &url);
   const std::string &url() const { return m_url; }
 
-  bool isNull() const { return m_name.empty() || m_url.empty(); }
-
-  void enable() { setEnabled(true); }
-  void disable() { setEnabled(false); }
-  void setEnabled(const bool enabled) { m_enabled = enabled; }
   bool isEnabled() const { return m_enabled; }
+  void setEnabled(const bool enabled);
 
-  void setAutoInstall(const tribool &autoInstall) { m_autoInstall = autoInstall; }
-  tribool autoInstall() const { return m_autoInstall; }
+  boost::tribool autoInstall() const { return m_autoInstall; }
   bool autoInstall(bool fallback) const;
+  void setAutoInstall(const boost::tribool &autoInstall);
 
-  void protect() { m_protected = true; }
-  bool isProtected() const { return m_protected; }
+  bool test(Flag f) const { return (m_flags & f) != 0; }
+  int flags() const { return m_flags; }
+  void protect() { m_flags |= ProtectedFlag; }
 
-  bool operator<(const Remote &o) const { return m_name < o.name(); }
-  operator bool() const { return !isNull(); }
+  void autoSync();
+  void about(bool focus = true);
+
+  IndexPtr loadIndex();
+  bool fetchIndex(const std::function<void (const IndexPtr &)> &);
+  IndexPtr index() const { return m_index.lock(); }
 
 private:
+  void setName(const std::string &name);
+
   std::string m_name;
   std::string m_url;
   bool m_enabled;
-  bool m_protected;
-  tribool m_autoInstall;
+  boost::tribool m_autoInstall;
+  int m_flags;
+  std::weak_ptr<const Index> m_index;
 };
 
 class RemoteList {
@@ -71,22 +84,23 @@ public:
   RemoteList() {}
   RemoteList(const RemoteList &) = delete;
 
-  void add(const Remote &);
-  void remove(const Remote &remote) { remove(remote.name()); }
-  void remove(const std::string &name);
-  Remote get(const std::string &name) const;
-  std::vector<Remote> getEnabled() const;
+  void add(const RemotePtr &);
+  void remove(const RemotePtr &);
+
+  RemotePtr getByName(const std::string &name) const;
+  RemotePtr getSelf() const { return getByName("ReaPack"); }
+  std::vector<RemotePtr> getEnabled() const;
 
   bool empty() const { return m_remotes.empty(); }
   size_t size() const { return m_remotes.size(); }
-  bool hasName(const std::string &name) const { return m_map.count(name) > 0; }
 
-  std::vector<Remote>::const_iterator begin() const { return m_remotes.begin(); }
-  std::vector<Remote>::const_iterator end() const { return m_remotes.end(); }
+  auto begin() { return m_remotes.begin(); }
+  auto begin() const { return m_remotes.begin(); }
+  auto end() { return m_remotes.end(); }
+  auto end() const { return m_remotes.end(); }
 
 private:
-  std::vector<Remote> m_remotes;
-  std::map<std::string, size_t> m_map;
+  std::vector<RemotePtr> m_remotes;
 };
 
 #endif

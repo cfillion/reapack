@@ -12,7 +12,8 @@ using namespace std;
 static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
-  Index ri("Remote Name"); \
+  RemotePtr re = make_shared<Remote>("Remote Name", "url"); \
+  Index ri(re); \
   Category cat("Category Name", &ri); \
   Package pkg(Package::ScriptType, "Hello", &cat); \
   pkg.setDescription("Hello World"); \
@@ -133,7 +134,8 @@ TEST_CASE("file conflicts", M) {
     reg.push(&ver);
   }
 
-  Index ri("Remote Name");
+  RemotePtr re = make_shared<Remote>("Remote Name", "url");
+  Index ri(re);
   Category cat("Category Name", &ri);
   Package pkg(Package::ScriptType, "Duplicate Package", &cat);
   Version ver("1.0", &pkg);
@@ -198,7 +200,7 @@ TEST_CASE("pin registry entry", M) {
 
   reg.setPinned(entry, true);
   REQUIRE(reg.getEntry(&pkg).pinned);
-  REQUIRE(reg.getEntries(ri.name())[0].pinned);
+  REQUIRE(reg.getEntries(re->name())[0].pinned);
 
   reg.setPinned(entry, false);
   REQUIRE_FALSE(reg.getEntry(&pkg).pinned);
