@@ -69,6 +69,16 @@ public:
   IndexPtr index() const { return m_index.lock(); }
 
 private:
+  friend void swap(Remote &a, Remote &b)
+  {
+    std::swap(a.m_name, b.m_name);
+    std::swap(a.m_url, b.m_url);
+    std::swap(a.m_enabled, b.m_enabled);
+    std::swap(a.m_autoInstall, b.m_autoInstall);
+    std::swap(a.m_flags, b.m_flags);
+    std::swap(a.m_index, b.m_index);
+  }
+
   void setName(const std::string &name);
 
   std::string m_name;

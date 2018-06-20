@@ -45,37 +45,38 @@ DEFINE_API(bool, AddSetRepository, ((const char*, name))((const char*, url))
 R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to keep the existing URL. Call <a href="#ReaPack_ProcessQueue">ReaPack_ProcessQueue(true)</a> when done to process the new list and update the GUI.
 
 autoInstall: usually set to 2 (obey user setting).)",
-{
+try {
   RemoteList &remotes = g_reapack->config()->remotes;
+  const RemotePtr &existing = remotes.getByName(name);
 
-  try {
-    RemotePtr remote = remotes.getByName(name);
+  RemotePtr remote = make_shared<Remote>(name);
 
-    if(remote) {
-      if(url && strlen(url) > 0)
-        remote->setUrl(url);
-    }
-    else {
-      remote = make_shared<Remote>(name, url ? url : "");
-      remotes.add(remote);
-    }
+  if(!existing || url) // ensure new repositories have an URL set
+    remote->setUrl(url ? url : "");
 
-    remote->setEnabled(enable);
-    remote->setAutoInstall(boost::lexical_cast<boost::tribool>(autoInstall));
-    remote->autoSync();
-  }
-  catch(const reapack_error &e) {
-    if(errorOut)
-      snprintf(errorOut, errorOut_sz, "%s", e.what());
-    return false;
-  }
-  catch(const boost::bad_lexical_cast &) {
-    if(errorOut)
-      snprintf(errorOut, errorOut_sz, "invalid value for autoInstall");
-    return false;
-  }
+  remote->setEnabled(enable);
+  remote->setAutoInstall(boost::lexical_cast<boost::tribool>(autoInstall));
+
+  if(existing)
+    swap(*remote, *existing); // edit the main instance after all validation
+  else
+    remotes.add(remote);
+
+  remote->autoSync();
 
   return true;
+}
+catch(const reapack_error &e) {
+  if(errorOut)
+    snprintf(errorOut, errorOut_sz, "%s", e.what());
+
+  return false;
+}
+catch(const boost::bad_lexical_cast &) {
+  if(errorOut)
+    snprintf(errorOut, errorOut_sz, "invalid value for autoInstall");
+
+  return false;
 });
 
 DEFINE_API(bool, GetRepositoryInfo, ((const char*, name))
