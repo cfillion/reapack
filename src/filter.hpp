@@ -47,6 +47,7 @@ private:
     };
 
     Node(int flags) : m_flags(flags) {}
+    virtual ~Node() = default;
 
     virtual bool match(const std::vector<std::string> &) const = 0;
     bool test(Flag f) const { return (m_flags & f) != 0; }
@@ -67,6 +68,7 @@ private:
     Group(Type type, int flags = 0, Group *parent = nullptr);
     void clear() { m_nodes.clear(); }
     Group *push(std::string, int *flags);
+
     bool match(const std::vector<std::string> &) const override;
 
   private:

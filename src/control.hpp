@@ -31,7 +31,7 @@ class Dialog;
 class Control {
 public:
   Control(HWND handle) : m_handle(handle) {}
-  virtual ~Control() {}
+  virtual ~Control() = default;
 
   HWND handle() const { return m_handle; }
 

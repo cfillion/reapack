@@ -42,7 +42,7 @@ typedef std::shared_ptr<const Index> IndexPtr;
 class Task {
 public:
   Task(Transaction *parent) : m_tx(parent) {}
-  virtual ~Task() {}
+  virtual ~Task() = default;
 
   virtual bool start() { return true; }
   virtual void commit() = 0;

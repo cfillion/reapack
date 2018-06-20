@@ -82,6 +82,8 @@ class AboutDelegate {
 protected:
   friend About;
 
+  virtual ~AboutDelegate() = default;
+
   virtual void init(About *) = 0;
   virtual void updateList(int) = 0;
   virtual bool fillContextMenu(Menu &, int) const = 0;
