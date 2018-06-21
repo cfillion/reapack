@@ -60,6 +60,7 @@ public:
   bool test(Flag f) const { return (m_flags & f) != 0; }
   int flags() const { return m_flags; }
   void protect() { m_flags |= ProtectedFlag; }
+  void setDirty() { m_flags |= DirtyFlag; }
 
   void autoSync();
   void about(bool focus = true);

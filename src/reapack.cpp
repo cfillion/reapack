@@ -279,6 +279,9 @@ void ReaPack::teardownTransaction()
 
 void ReaPack::commitConfig(bool refresh)
 {
+  for(const RemotePtr &remote : m_config->remotes.getEnabled())
+    remote->autoSync();
+
   if(m_tx) {
     if(refresh) {
       m_tx->receipt()->setIndexChanged(); // force browser refresh

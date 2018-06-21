@@ -132,7 +132,7 @@ void Remote::setEnabled(const bool enable)
 {
   if(m_enabled != enable) {
     m_enabled = enable;
-    m_flags |= DirtyFlag;
+    setDirty();
   }
 }
 
@@ -147,7 +147,7 @@ bool Remote::autoInstall(bool fallback) const
 void Remote::setAutoInstall(const tribool &autoInstall)
 {
   if(autoInstall && (!m_autoInstall || indeterminate(m_autoInstall)))
-    m_flags |= DirtyFlag;
+    setDirty();
 
   m_autoInstall = autoInstall;
 }
@@ -196,7 +196,7 @@ void Remote::autoSync()
     return;
 
   if(m_enabled && autoInstall(g_reapack->config()->install.autoInstall)) {
-    if(Transaction *tx = g_reapack->transaction())
+    if(Transaction *tx = g_reapack->setupTransaction())
       tx->synchronize(shared_from_this());
   }
 }
