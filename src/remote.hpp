@@ -41,7 +41,6 @@ public:
 
   Remote(const std::string &name);
   Remote(const std::string &name, const std::string &url);
-  Remote(const Remote &) = delete;
 
   std::string toString() const;
 

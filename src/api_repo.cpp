@@ -47,12 +47,16 @@ R"(Add or modify a repository. Set url to nullptr (or empty string in Lua) to ke
 autoInstall: usually set to 2 (obey user setting).)",
 try {
   RemoteList &remotes = g_reapack->config()->remotes;
-  const RemotePtr &existing = remotes.getByName(name);
+  RemotePtr remote, existing = remotes.getByName(name);
 
-  RemotePtr remote = make_shared<Remote>(name);
+  if(existing) {
+    remote = make_shared<Remote>(*existing);
 
-  if(!existing || url) // ensure new repositories have an URL set
-    remote->setUrl(url ? url : "");
+    if(url && strlen(url) > 0)
+      remote->setUrl(url);
+  }
+  else
+    remote = make_shared<Remote>(name, url);
 
   remote->setEnabled(enable);
   remote->setAutoInstall(boost::lexical_cast<boost::tribool>(autoInstall));
@@ -61,8 +65,6 @@ try {
     swap(*remote, *existing); // edit the main instance after all validation
   else
     remotes.add(remote);
-
-  remote->autoSync();
 
   return true;
 }
