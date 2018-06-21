@@ -184,7 +184,6 @@ void Config::write()
   setString(BROWSER_GRP, STATE_KEY, windowState.browser);
   setString(MANAGER_GRP, STATE_KEY, windowState.manager);
 
-
   writeRemotes();
 }
 
@@ -194,7 +193,8 @@ void Config::readRemotes()
 
   for(unsigned int i = 0; i < m_remotesIniSize; i++) {
     const string &data = getString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str());
-    remotes.add(Remote::fromString(data));
+    if(const RemotePtr &remote = Remote::fromString(data))
+      remotes.add(remote);
   }
 }
 
