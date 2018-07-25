@@ -46,10 +46,7 @@ bool UninstallTask::start()
 void UninstallTask::commit()
 {
   for(const auto &file : m_files) {
-    if(!FS::exists(file.path))
-      continue;
-
-    if(FS::removeRecursive(file.path))
+    if(!FS::exists(file.path) || FS::removeRecursive(file.path))
       tx()->receipt()->addRemoval(file.path);
     else
       tx()->receipt()->addError({FS::lastError(), file.path.join()});
