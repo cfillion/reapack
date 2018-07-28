@@ -1,5 +1,6 @@
 # ReaPack: Package manager for REAPER
 
+[![Win32 build status](https://ci.appveyor.com/api/projects/status/hq0g2nleele3pqrl/branch/master?svg=true)](https://ci.appveyor.com/project/cfillion/reapack/branch/master)
 [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER)
 
 Visit the [ReaPack website](https://reapack.com/) for ready-to-use binaries
