@@ -142,7 +142,7 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    char err[255];
+    char err[512];
     snprintf(err, sizeof(err), "%s (%d): %s", curl_easy_strerror(res), res, errbuf);
     setError({err, m_url});
     return false;
