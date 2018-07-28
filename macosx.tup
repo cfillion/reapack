@@ -6,14 +6,16 @@ CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -Wno-unused-function -Wno-unused-private-field -Wno-missing-braces
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
-CXXFLAGS += -pipe -fPIC -O2
-CXXFLAGS += -arch @(ARCH) -mmacosx-version-min=10.7
+CXXFLAGS += -pipe -fPIC -O2 -arch @(ARCH) -mmacosx-version-min=10.7
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DSWELL_APP_PREFIX=SWELL_REAPACK
 CXXFLAGS += -DREAPACK_FILE=\"$(REAPACK_FILE)\"
 
-SRCFLAGS := -std=c++14 -stdlib=libc++
+SRCFLAGS := -std=c++17 -stdlib=libc++
 WDLFLAGS := -w
+
+# std::uncaught_exceptions is unavailable prior to macOS 10.12
+TSTFLAGS := -DCATCH_CONFIG_NO_CPP17_UNCAUGHT_EXCEPTIONS
 
 SWELL := $(WDL)/swell
 WDLSOURCE += $(SWELL)/swell.cpp $(SWELL)/swell-ini.cpp $(SWELL)/swell-miscdlg.mm

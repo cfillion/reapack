@@ -58,7 +58,7 @@ int Win32::messageBox(const HWND handle, const char *text,
 string Win32::getWindowText(const HWND handle)
 {
   char_type buffer[4096];
-  GetWindowText(handle, buffer, (int)lengthof(buffer));
+  GetWindowText(handle, buffer, static_cast<int>(size(buffer)));
 
   return narrow(buffer);
 }
@@ -98,8 +98,8 @@ string Win32::getPrivateProfileString(const char *group, const char *key,
   const char *fallback, const char *path)
 {
   char_type buffer[4096];
-  GetPrivateProfileString(widen_cstr(group), widen_cstr(key),
-    widen_cstr(fallback), buffer, lengthof(buffer), widen_cstr(path));
+  GetPrivateProfileString(widen_cstr(group), widen_cstr(key), widen_cstr(fallback),
+    buffer, static_cast<DWORD>(size(buffer)), widen_cstr(path));
 
   return narrow(buffer);
 }

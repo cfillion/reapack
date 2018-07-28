@@ -106,7 +106,7 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 
 #ifdef _WIN32
   Win32::char_type self[MAX_PATH] = {};
-  GetModuleFileName(module, self, lengthof(self));
+  GetModuleFileName(module, self, static_cast<DWORD>(size(self)));
   Path current(Win32::narrow(self));
 #else
   Dl_info info{};

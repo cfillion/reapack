@@ -9,7 +9,7 @@ and the user guide.
 
 The following section describes how to build ReaPack on your computer.
 The build system uses Rake and is based on [Tup](http://gittup.org/tup/).
-A modern compiler (gcc/clang/msvc) with C++14 support is needed.
+A modern compiler (gcc/clang/msvc) with C++17 support is needed.
 
 By default the `rake` command triggers both the 64-bit and 32-bit builds and
 runs the test suite.  Use `rake 'default[x64]'` or `rake 'default[x86]'`

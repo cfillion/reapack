@@ -39,7 +39,7 @@ static string getFileName(BOOL(__stdcall *func)(LPOPENFILENAME),
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;
   of.lpstrFile = pathBuffer;
-  of.nMaxFile = lengthof(pathBuffer);
+  of.nMaxFile = static_cast<DWORD>(size(pathBuffer));
   of.lpstrInitialDir = wideInitialDir.c_str();
   of.lpstrTitle = wideTitle.c_str();
   of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;

@@ -14,5 +14,5 @@ include @(TUP_PLATFORM).tup
 : foreach $(WDLSOURCE) |> !build $(WDLFLAGS) |> build/wdl_%B.o
 : build/*.o | $(LINKDEPS) |> !link $(SOFLAGS) |> $(SOTARGET)
 
-: foreach test/*.cpp |> !build -Isrc $(SRCFLAGS) |> build/test/%B.o
+: foreach test/*.cpp |> !build -Isrc $(SRCFLAGS) $(TSTFLAGS) |> build/test/%B.o
 : build/*.o build/test/*.o | $(LINKDEPS) |> !link $(TSFLAGS) |> $(TSTARGET)

@@ -30,8 +30,6 @@
 #  include <swell-types.h>
 #endif
 
-#define lengthof(t) (sizeof(t) / sizeof(*t))
-
 namespace Win32 {
 #ifdef _WIN32
   typedef wchar_t char_type;
