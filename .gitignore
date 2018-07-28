@@ -1,8 +1,9 @@
-.DS_Store
-.tup/
+/.tup/
+
 bin/
 build/
-vendor/*
-!vendor/.gitkeep
 resource.rc_mac*
 resource.res
+
+/vendor/*/
+/vendor/reaper_plugin*.h

@@ -5,35 +5,24 @@ CXX := $(WRAP) cl
 
 REAPACK_FILE := reaper_reapack@(SUFFIX)
 
+VCPKG = vendor/vcpkg/installed/@(VCPKG_TRIPLET)
+
 CXXFLAGS := /nologo /W3 /WX /wd4996 /EHsc /MT
 CXXFLAGS += /O2 /Z7 /Zo
-CXXFLAGS += /Ivendor /Ivendor/WDL /Ivendor/WDL/WDL
-CXXFLAGS += /Ivendor/libcurl@(SUFFIX)/include
-CXXFLAGS += /DWDL_NO_DEFINE_MINMAX
-CXXFLAGS += /DCURL_STATICLIB /DUNICODE /DNDEBUG
+CXXFLAGS += /Ivendor /I$(VCPKG)/include /Ivendor/WDL /Ivendor/WDL/WDL
+CXXFLAGS += /DWDL_NO_DEFINE_MINMAX /DCURL_STATICLIB /DUNICODE /DNDEBUG
 CXXFLAGS += /DREAPACK_FILE#\"$(REAPACK_FILE).dll\"
-
-SQLFLAGS := /Os /wd4101
-SQLFLAGS += /DSQLITE_OMIT_COMPOUND_SELECT /DSQLITE_OMIT_DATETIME_FUNCS
-SQLFLAGS += /DSQLITE_OMIT_INTEGRITY_CHECK /DSQLITE_OMIT_UTF16
-SQLFLAGS += /DSQLITE_OMIT_SHARED_CACHE /DSQLITE_OMIT_INCRBLOB
-SQLFLAGS += /DSQLITE_OMIT_AUTHORIZATION /DSQLITE_OMIT_BUILTIN_TEST
-SQLFLAGS += /DSQLITE_OMIT_SCHEMA_PRAGMAS /DSQLITE_OMIT_TRACE
-SQLFLAGS += /DSQLITE_OMIT_LOAD_EXTENSION /DSQLITE_OMIT_GET_TABLE
-SQLFLAGS += /DSQLITE_OMIT_COMPLETE /DSQLITE_OMIT_TEMPDB
-SQLFLAGS += /DSQLITE_OMIT_COMPILEOPTION_DIAGS /DSQLITE_OMIT_CAST
-SQLFLAGS += /DSQLITE_OMIT_CHECK /DSQLITE_OMIT_DECLTYPE /DSQLITE_OMIT_DEPRECATED
 
 LD := $(WRAP) link
 LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib Comdlg32.lib Comctl32.lib
-LDFLAGS += vendor/libcurl@(SUFFIX)/lib/libcurl_a.lib
+LDFLAGS += $(VCPKG)/lib/libcurl.lib Ws2_32.lib Crypt32.lib Advapi32.lib
+LDFLAGS += $(VCPKG)/lib/sqlite3.lib $(VCPKG)/lib/zlib.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res
-LDFLAGS += $(TUP_VARIANTDIR)/build/vendor/sqlite3.o
 LDFLAGS += /DEBUG /OPT:REF /PDBALTPATH:%_PDB%
 
-LINKDEPS := src/resource.res build/vendor/sqlite3.o
+LINKDEPS := src/resource.res
 
-RC := rc
+RC := $(WRAP) rc
 RCFLAGS += /nologo /fo $(TUP_VARIANTDIR)/src/resource.res
 
 TARGET := bin/$(REAPACK_FILE)
@@ -47,4 +36,3 @@ TSTARGET := bin/test.exe bin/test.lib bin/test.exp bin/test.pdb
 !link = |> $(LD) $(LDFLAGS) %f |>
 
 : src/resource.rc |> $(RC) $(RCFLAGS) %f |> src/resource.res
-: vendor/sqlite3.c |> !build $(SQLFLAGS) |> build/vendor/sqlite3.o

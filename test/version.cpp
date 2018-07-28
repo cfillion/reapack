@@ -6,6 +6,8 @@
 #include <index.hpp>
 #include <package.hpp>
 
+#include <sstream>
+
 using namespace std;
 
 #define MAKE_PACKAGE \

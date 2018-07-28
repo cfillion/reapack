@@ -6,9 +6,7 @@ WDLSOURCE += $(TINYXML)/tinyxml.cpp $(TINYXML)/tinystr.cpp
 WDLSOURCE += $(TINYXML)/tinyxmlparser.cpp $(TINYXML)/tinyxmlerror.cpp
 
 ZLIB := $(WDL)/zlib
-WDLSOURCE += $(ZLIB)/zip.c $(ZLIB)/unzip.c $(ZLIB)/inflate.c $(ZLIB)/deflate.c
-WDLSOURCE += $(ZLIB)/zutil.c $(ZLIB)/crc32.c $(ZLIB)/adler32.c $(ZLIB)/ioapi.c
-WDLSOURCE += $(ZLIB)/trees.c $(ZLIB)/inftrees.c $(ZLIB)/inffast.c
+WDLSOURCE += $(ZLIB)/zip.c $(ZLIB)/unzip.c $(ZLIB)/ioapi.c
 
 include @(TUP_PLATFORM).tup
 

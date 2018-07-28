@@ -1,0 +1,1 @@
+boost-algorithm boost-core boost-logic boost-mpl boost-optional boost-preprocessor boost-range boost-signals2 boost-variant catch2 curl sqlite3

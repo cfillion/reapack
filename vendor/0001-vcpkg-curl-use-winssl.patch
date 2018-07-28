@@ -1,0 +1,23 @@
+diff --git a/vcpkg/triplets/x64-windows-static.cmake b/vcpkg/triplets/x64-windows-static.cmake
+index 75f9b953..0f828565 100644
+--- a/vcpkg/triplets/x64-windows-static.cmake
++++ b/vcpkg/triplets/x64-windows-static.cmake
+@@ -1,3 +1,4 @@
+ set(VCPKG_TARGET_ARCHITECTURE x64)
+ set(VCPKG_CRT_LINKAGE static)
+ set(VCPKG_LIBRARY_LINKAGE static)
++set(CURL_USE_WINSSL ON)
+diff --git a/vcpkg/triplets/x86-windows-static.cmake b/vcpkg/triplets/x86-windows-static.cmake
+index c855f0ca..afd1246d 100644
+--- a/vcpkg/triplets/x86-windows-static.cmake
++++ b/vcpkg/triplets/x86-windows-static.cmake
+@@ -1,3 +1,4 @@
+ set(VCPKG_TARGET_ARCHITECTURE x86)
+ set(VCPKG_CRT_LINKAGE static)
+-set(VCPKG_LIBRARY_LINKAGE static)
+\ No newline at end of file
++set(VCPKG_LIBRARY_LINKAGE static)
++set(CURL_USE_WINSSL ON)
+-- 
+2.18.0.windows.1
+

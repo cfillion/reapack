@@ -21,8 +21,6 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <vector>
 
-using namespace std;
-
 static constexpr char UNIX_SEPARATOR = '/';
 
 #ifndef _WIN32
@@ -34,6 +32,8 @@ static constexpr char NATIVE_SEPARATOR = '\\';
 
 static constexpr const char *DOT = ".";
 static constexpr const char *DOTDOT = "..";
+
+using namespace std;
 
 const Path Path::DATA("ReaPack");
 const Path Path::CACHE = Path::DATA + "cache";
