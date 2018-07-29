@@ -36,8 +36,8 @@ Clone [WDL](http://www.cockos.com/wdl/): `git clone https://github.com/justinfra
 Install GCC/G++ (multilib version if building for both 64-bit and 32-bit),
 tup, Ruby and PHP.
 
-Install libraries and development files for Boost, Catch2, curl, SQLite3 and
-zlib matching the target architecture(s).
+Install libraries and development files for Boost (1.56 or newer), Catch2,
+curl (7.52 or newer), SQLite3 and zlib matching the target architecture(s).
 
 ### macOS
 
