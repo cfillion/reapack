@@ -1,0 +1,42 @@
+---
+.linux: &linux
+  os: linux
+  dist: xenial
+  sudo: required
+.macos: &macos
+  os: osx
+  osx_image: xcode9.2 # 10.12
+
+addons:
+  artifacts:
+    paths:
+      - x64/bin
+      - x86/bin
+matrix:
+  include:
+    - env: PLATFORM=x64
+      <<: *linux
+    - env: PLATFORM=x86
+      <<: *linux
+
+    - env: PLATFORM=x64
+      <<: *macos
+    - env: PLATFORM=x86
+      <<: *macos
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo update-alternatives --install /usr/local/bin/gcc gcc /usr/bin/gcc-8 100;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew cask install osxfuse && brew install curl llvm tup &&
+      brew link --force curl && export PATH="/usr/local/opt/llvm/bin:$PATH";
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      wget -nv https://github.com/catchorg/Catch2/raw/master/single_include/catch2/catch.hpp -P vendor/catch;
+    fi
+install:
+  - wget -nv https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -P vendor
+  - wget -nv https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -P vendor
+  - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
+before_script: tup --version
+script: tup $PLATFORM && $PLATFORM/bin/test
