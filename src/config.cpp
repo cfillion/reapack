@@ -73,7 +73,7 @@ void Config::resetOptions()
 void Config::restoreSelfRemote()
 {
   const string name = "ReaPack";
-  const string url = "https://github.com/cfillion/reapack/raw/master/index.xml";
+  const string url = "https://reapack.com/index.xml";
 
   Remote remote = remotes.get(name);
   remote.setName(name);
