@@ -23,7 +23,7 @@ map<HWND, InhibitControl *> InhibitControl::s_lock;
 
 void InhibitControl::inhibitRedraw(const bool inhibit)
 {
-#ifdef WM_SETREDRAW // not supported by SWELL
+#ifdef _WIN32
   if(s_lock.count(m_handle)) {
     if(inhibit || s_lock[m_handle] != this)
       return;
