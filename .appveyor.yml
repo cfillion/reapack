@@ -1,41 +1,69 @@
 ---
 version: "{build}-{branch}"
-image: Visual Studio 2017
-cache:
-  - C:\Tools\vcpkg\installed\
+image:
+  - &linux   Ubuntu
+  - &windows Visual Studio 2017
 platform:
   - x64
   - x86
-install:
-  - curl -fsSL http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip -o C:\Tools\tup.zip
-  - 7z x C:\Tools\tup.zip -oC:\Tools\tup > NUL
-  - set PATH=C:\Tools\tup;%PATH%
-  - tup --version
+before_build:
+  - curl -fsSL https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -o vendor/reaper_plugin.h
+  - curl -fsSL https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -o vendor/reaper_plugin_functions.h
+  - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
+for:
+  - matrix: { only: [ image: *linux ] }
+    install:
+      - docker run --name arch --rm --privileged -tidv `pwd`:/build -w /build
+        -e CURLSO=:libcurl.so.3 archlinux/base
+      - docker exec arch
+        pacman -Sy --noconfirm boost catch2 gcc git libcurl-compat php tup wget
 
-  - curl -fsSL https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -o vendor\reaper_plugin.h
-  - curl -fsSL https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -o vendor\reaper_plugin_functions.h
-  - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor\WDL
+      - if [[ "$PLATFORM" == "x86" ]]; then
+          docker exec arch sh -c $'
+            echo "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf' &&
+          docker exec arch
+            pacman -Sy --noconfirm lib32-libcurl-compat lib32-gcc-libs lib32-sqlite;
+        fi
+    # HACK: tup needs a parent process to do setpgid successfully
+    build_script: docker exec arch sh -c "echo tup $PLATFORM | sh"
+    before_test:
+      - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+      - sudo apt-get update -qq
+      - sudo apt-get install libstdc++6 -qq
 
-  - mklink /J vendor\vcpkg C:\Tools\vcpkg > NUL
-  - git apply --directory=vendor vendor\0001-vcpkg-curl-use-winssl.patch
-  - set /p vcpkg-deps=<vendor\vcpkg-deps.txt
-  - vcpkg install --triplet %PLATFORM%-windows-static %vcpkg-deps%
+      - if [[ "$PLATFORM" == "x86" ]]; then
+          sudo apt-get install libcurl3:i386 -qq;
+        fi
+    test_script: '$PLATFORM/bin/test'
+    artifacts:
+      - path: $(PLATFORM)/bin/reaper_reapack*.so
+      - path: $(PLATFORM)/bin/test
 
-  - set VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\
-build_script:
-  - tup %PLATFORM%
-test_script:
-  - '%PLATFORM%\bin\test'
-artifacts:
-  - path: $(PLATFORM)\bin\reaper_reapack*.dll
-  - path: $(PLATFORM)\bin\reaper_reapack*.pdb
+  - matrix: { only: [ image: *windows ] }
+    cache:
+      - C:\Tools\vcpkg\installed\
+    install:
+      - curl -fsSL http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip -o C:\Tools\tup.zip
+      - 7z x C:\Tools\tup.zip -oC:\Tools\tup > NUL
+      - set PATH=C:\Tools\tup;%PATH%
+
+      - mklink /J vendor\vcpkg C:\Tools\vcpkg > NUL
+      - git apply --directory=vendor vendor\0001-vcpkg-curl-use-winssl.patch
+      - set /p vcpkg-deps=<vendor\vcpkg-deps.txt
+      - vcpkg install --triplet %PLATFORM%-windows-static %vcpkg-deps%
+    build_script: tup %PLATFORM%
+    test_script: '%PLATFORM%\bin\test'
+    artifacts:
+      - path: $(PLATFORM)\bin\reaper_reapack*.dll
+      - path: $(PLATFORM)\bin\reaper_reapack*.pdb
+      - path: $(PLATFORM)\bin\test.exe
 deploy:
   provider: GitHub
   draft: true
   description: ''
   force_update: true
   auth_token:
-    secure: XJFD9Y8lm7RcigH1ISpirnwxNCNcFvhiXx2FbOJgRzDt3lN0D+dRw3ClksbJWNJE
-  artifact: /.*\.dll/
+    secure: S4kQ8Fky507O9XHtcXdQ/Gv1+EB/6iiJQwd/InbZsl5pUdCX0oPWuP9N1B8t5fbl
+  artifact: /.*\.(dll|so)/
   on:
-    appveyor_repo_tag: true
+    APPVEYOR_REPO_TAG: true
