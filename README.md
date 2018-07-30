@@ -8,18 +8,18 @@ and the user guide.
 ## Compilation
 
 The following section describes how to build ReaPack on your computer.
-The build system uses Rake and is based on [Tup](http://gittup.org/tup/).
+The build system is based on [Tup](http://gittup.org/tup/).
 A modern compiler (gcc/clang/msvc) with C++17 support is needed.
 
-By default the `rake` command triggers both the 64-bit and 32-bit builds and
-runs the test suite.  Use `rake 'default[x64]'` or `rake 'default[x86]'`
-to select a single architecture.
+By default the `tup` command triggers both the 64-bit and 32-bit builds.
+Use `tup x64` or `tup x86` to select a single architecture. Run the test suite
+with `make test`.
 
 The 64-bit and 32-bit binaries (such as `reaper_reapack64.so`) are created in
 `x64/bin` and `x86/bin` respectively. Copy or link the desired one into
 `<REAPER resource path>/UserPlugins` and restart REAPER to use it.
 
-Compiling ReaPack requires several external libraries and files depending
+Compiling ReaPack requires a few external libraries and files depending
 on the operating system.
 
 Put the REAPER extension SDK into the `vendor` directory:
@@ -33,11 +33,8 @@ Clone [WDL](http://www.cockos.com/wdl/): `git clone https://github.com/justinfra
 
 ### Linux
 
-Install GCC/G++ (multilib version if building for both 64-bit and 32-bit),
-tup, Ruby and PHP.
-
-Install libraries and development files for Boost (1.56 or newer), Catch2,
-libcurl (7.52 or newer), SQLite3 and zlib matching the target architecture(s).
+Install GCC/G++, tup, PHP and the development files for Boost (1.56 or later),
+Catch2, libcurl (7.52 or later), SQLite3 and zlib matching the target architecture(s).
 
 #### Custom compiler
 
@@ -75,8 +72,8 @@ Apply these patches to WDL:
 
 ### Windows
 
-Install [Ruby for Windows](http://rubyinstaller.org/),
-tup ([explicit-variant](http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip) branch, see [this thread](https://groups.google.com/d/topic/tup-users/UNUSE15PQdA/discussion))
+Install tup ([explicit-variant](http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip)
+branch, see [this thread](https://groups.google.com/d/topic/tup-users/UNUSE15PQdA/discussion))
 and [Visual Studio 2017 with C++ support](https://www.visualstudio.com/vs/community/).
 
 Clone [vcpkg](https://github.com/Microsoft/vcpkg) into `vendor` and install
@@ -90,7 +87,7 @@ the build dependencies:
     vendor\vcpkg\vcpkg install --triplet x64-windows-static %vcpkg-deps%
     vendor\vcpkg\vcpkg install --triplet x86-windows-static %vcpkg-deps%
 
-Run the build commands using the Developer Command Prompt for VS 2017.
+Always run `tup` using the Developer Command Prompt for VS 2017.
 
 ## Support and feedback
 
