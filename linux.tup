@@ -17,7 +17,7 @@ SWELL := $(WDL)/swell
 WDLSOURCE += $(SWELL)/swell-modstub-generic.cpp
 
 export CURLSO
-LDFLAGS := -lstdc++ -lpthread -ldl ${CURLSO:--lcurl} -lsqlite3 -lz
+LDFLAGS := -lstdc++ -lpthread -ldl -l${CURLSO:-curl} -lsqlite3 -lz
 
 SOFLAGS := -shared
 SOTARGET := bin/$(REAPACK_FILE)

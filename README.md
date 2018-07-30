@@ -37,7 +37,16 @@ Install GCC/G++ (multilib version if building for both 64-bit and 32-bit),
 tup, Ruby and PHP.
 
 Install libraries and development files for Boost (1.56 or newer), Catch2,
-curl (7.52 or newer), SQLite3 and zlib matching the target architecture(s).
+libcurl (7.52 or newer), SQLite3 and zlib matching the target architecture(s).
+
+#### Custom libcurl
+
+Set the `CURLSO` environment variable to override the system default libcurl
+used for linking. Some older distributions still ship libcurl with the old
+pre-7.16 SONAME. Consider using a libcurl built with `--disable-versioned-symbols`
+to produce more compatible binaries (`libcurl-compat` on Arch Linux).
+
+    CURLSO=:libcurl.so.3 tup
 
 ### macOS
 

@@ -24,23 +24,3 @@ task :test do
     sh exe
   }
 end
-
-# HACK: Produce binaries without curl versioned symbols for quick and dirty
-# compatibility with most distributions.
-task :'libcurl-compat' do
-  {
-    'x64' => '/usr/lib/libcurl-compat.so*',
-    'x86' => '/usr/lib32/libcurl-compat.so*',
-  }.each {|variant, pattern|
-    curlso = Dir.glob(pattern).first
-
-    unless curlso
-      raise "'%s' cannot be found for %s. " \
-        "Are libcurl-compat and lib32-libcurl-compat installed (Arch Linux)?" %
-        [pattern, variant]
-    end
-
-    ENV['CURLSO'] = curlso
-    sh 'tup', variant, verbose: false
-  }
-end
