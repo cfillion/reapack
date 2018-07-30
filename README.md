@@ -39,6 +39,13 @@ tup, Ruby and PHP.
 Install libraries and development files for Boost (1.56 or newer), Catch2,
 libcurl (7.52 or newer), SQLite3 and zlib matching the target architecture(s).
 
+#### Custom compiler
+
+Set the `CXX` environement variable to select a different compiler
+(default is `gcc` if unset).
+
+    CXX=gcc-8 tup x64
+
 #### Custom libcurl
 
 Set the `CURLSO` environment variable to override the system default libcurl

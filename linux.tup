@@ -1,4 +1,5 @@
-CXX := gcc
+export CXX
+CXX := ${CXX:-gcc}
 
 REAPACK_FILE = reaper_reapack@(SUFFIX).so
 
@@ -6,12 +7,13 @@ CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -Wno-unused-function -Wno-missing-braces
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
-CXXFLAGS += -pipe -fPIC -O2 -std=c++17 -m@(SUFFIX)
+CXXFLAGS += -pipe -fPIC -O2 -m@(SUFFIX)
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DSWELL_PROVIDED_BY_APP -DSWELL_TARGET_GDK
 CXXFLAGS += -DREAPACK_FILE=\"$(REAPACK_FILE)\"
 
-WDLFLAGS := -std=c++98 -w
+SRCFLAGS := -std=c++17
+WDLFLAGS := -w
 
 SWELL := $(WDL)/swell
 WDLSOURCE += $(SWELL)/swell-modstub-generic.cpp
