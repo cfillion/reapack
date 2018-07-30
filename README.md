@@ -87,8 +87,6 @@ the build dependencies:
     vendor\vcpkg\vcpkg install --triplet x64-windows-static %vcpkg-deps%
     vendor\vcpkg\vcpkg install --triplet x86-windows-static %vcpkg-deps%
 
-Always run `tup` using the Developer Command Prompt for VS 2017.
-
 ## Support and feedback
 
 Ask any ReaPack-releated questions in the

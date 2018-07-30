@@ -1,4 +1,6 @@
 # wrapper.bat selects which compiler to execute depending on the architecture
+export ProgramData
+export ProgramFiles(x86)
 WRAP := cmd /C wrapper.bat @(ARCH)
 
 CXX := $(WRAP) cl
