@@ -12,7 +12,7 @@ static const char *M = "[database]";
 
 TEST_CASE("open bad sqlite file path", M) {
   try {
-    Database db("/a\\");
+    Database db("/");
     FAIL();
   }
   catch(const reapack_error &e) {
