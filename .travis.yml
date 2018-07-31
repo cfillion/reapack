@@ -7,8 +7,7 @@ env:
   - PLATFORM=x86
 install:
   - brew cask install osxfuse
-  - brew install curl llvm tup
-  - brew link --force curl
+  - brew install llvm tup
   - export PATH="/usr/local/opt/llvm/bin:$PATH"
 
   - wget -nv https://github.com/catchorg/Catch2/raw/master/single_include/catch2/catch.hpp -P vendor/catch2

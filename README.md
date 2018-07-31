@@ -36,7 +36,7 @@ Clone [WDL](http://www.cockos.com/wdl/): `git clone https://github.com/justinfra
 ### Linux
 
 Install GCC/G++, tup, PHP and the development files for Boost (1.56 or later),
-Catch2, libcurl (7.52 or later), SQLite3 and zlib matching the target architecture(s).
+Catch2, libcurl, SQLite3 and zlib matching the target architecture(s).
 
 #### Custom compiler
 
@@ -71,9 +71,6 @@ Apply these patches to WDL:
 - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
 - [richtext-off](https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch)
 - [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
-
-curl must be updated if using macOS prior to 10.12.6 (libcurl 7.52 or later is
-required at compile time).
 
 ### Windows
 
