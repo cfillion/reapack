@@ -11,7 +11,7 @@ install:
   - brew link --force curl
   - export PATH="/usr/local/opt/llvm/bin:$PATH"
 
-  - wget -nv https://github.com/catchorg/Catch2/raw/master/single_include/catch2/catch.hpp -P vendor/catch
+  - wget -nv https://github.com/catchorg/Catch2/raw/master/single_include/catch2/catch.hpp -P vendor/catch2
 
   - wget -nv https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -P vendor
   - wget -nv https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -P vendor

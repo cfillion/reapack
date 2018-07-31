@@ -50,7 +50,7 @@ Set the `CXX` environement variable to select a different compiler
 Set the `CURLSO` environment variable to override the system default libcurl
 used for linking. Some older distributions still ship libcurl with the old
 pre-7.16 SONAME. Consider using a libcurl built with `--disable-versioned-symbols`
-to produce more compatible binaries (`libcurl-compat` on Arch Linux).
+to produce more compatible binaries (`libcurl-compat` on Arch Linux for example).
 
     CURLSO=:libcurl.so.3 tup
 
@@ -63,7 +63,7 @@ Install Boost, tup and Xcode Command Line Tools. Using [Homebrew](http://brew.sh
     brew install boost tup
 
 Download the single header version of
-[Catch2](https://github.com/catchorg/Catch2) (catch.hpp) into `vendor/catch`.
+[Catch2](https://github.com/catchorg/Catch2) (catch.hpp) into `vendor/catch2`.
 
 Apply these patches to WDL:
 
