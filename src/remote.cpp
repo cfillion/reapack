@@ -130,13 +130,10 @@ void Remote::setUrl(const string &url)
 
 void Remote::setEnabled(const bool enable)
 {
-  if(m_enabled != enable) {
-    m_enabled = enable;
-    setDirty();
-  }
+  m_enabled = enable;
 }
 
-bool Remote::autoInstall(bool fallback) const
+bool Remote::autoInstall(const bool fallback) const
 {
   if(indeterminate(m_autoInstall))
     return fallback;
@@ -146,9 +143,6 @@ bool Remote::autoInstall(bool fallback) const
 
 void Remote::setAutoInstall(const tribool &autoInstall)
 {
-  if(autoInstall && (!m_autoInstall || indeterminate(m_autoInstall)))
-    setDirty();
-
   m_autoInstall = autoInstall;
 }
 
@@ -186,19 +180,6 @@ bool Remote::fetchIndex(const function<void (const IndexPtr &)> &cb)
   tx->runTasks();
 
   return true;
-}
-
-void Remote::autoSync()
-{
-  if(test(DirtyFlag))
-    m_flags &= ~DirtyFlag;
-  else
-    return;
-
-  if(m_enabled && autoInstall(g_reapack->config()->install.autoInstall)) {
-    if(Transaction *tx = g_reapack->setupTransaction())
-      tx->synchronize(shared_from_this());
-  }
 }
 
 void Remote::about(const bool focus)

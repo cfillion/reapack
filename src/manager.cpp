@@ -597,16 +597,8 @@ bool Manager::apply()
   if(!tx)
     return false;
 
-  if(m_autoInstall) {
+  if(m_autoInstall)
     g_reapack->config()->install.autoInstall = *m_autoInstall;
-
-    if(*m_autoInstall) {
-      for(const RemotePtr &r : g_reapack->config()->remotes.enabled()) {
-        if(!isUninstalled(r))
-          r->setDirty();
-      }
-    }
-  }
 
   if(m_bleedingEdge)
     g_reapack->config()->install.bleedingEdge = *m_bleedingEdge;

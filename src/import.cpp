@@ -168,10 +168,8 @@ try {
 
   RemotePtr remote = g_reapack->config()->remotes.getByName(name);
 
-  if(!remote) {
+  if(!remote)
     remote = make_shared<Remote>(name, dl->url());
-    remote->setDirty();
-  }
 
   if(remote->url() != dl->url()) {
     if(remote->test(Remote::ProtectedFlag)) {

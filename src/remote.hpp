@@ -35,7 +35,6 @@ class Remote : public std::enable_shared_from_this<Remote> {
 public:
   enum Flag {
     ProtectedFlag = 1<<0,
-    DirtyFlag     = 1<<1,
   };
 
   static RemotePtr fromString(const std::string &data);
@@ -46,23 +45,19 @@ public:
   std::string toString() const;
 
   const std::string &name() const { return m_name; }
-
-  void setUrl(const std::string &url);
   const std::string &url() const { return m_url; }
-
   bool isEnabled() const { return m_enabled; }
-  void setEnabled(const bool enabled);
-
   boost::tribool autoInstall() const { return m_autoInstall; }
   bool autoInstall(bool fallback) const;
+
+  void setUrl(const std::string &url);
+  void setEnabled(const bool enabled);
   void setAutoInstall(const boost::tribool &autoInstall);
 
   bool test(Flag f) const { return (m_flags & f) != 0; }
   int flags() const { return m_flags; }
   void protect() { m_flags |= ProtectedFlag; }
-  void setDirty() { m_flags |= DirtyFlag; }
 
-  void autoSync();
   void about(bool focus = true);
 
   IndexPtr loadIndex();

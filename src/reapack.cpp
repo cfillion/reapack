@@ -279,10 +279,6 @@ void ReaPack::teardownTransaction()
 
 void ReaPack::commitConfig(bool refresh)
 {
-  // Auto-synchronize all remotes (not only enabled ones) to clear all dirty flags
-  for(const RemotePtr &remote : m_config.remotes)
-    remote->autoSync();
-
   if(m_tx) {
     if(refresh) {
       m_tx->receipt()->setIndexChanged(); // force browser refresh

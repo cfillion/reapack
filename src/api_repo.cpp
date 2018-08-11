@@ -55,10 +55,8 @@ try {
     if(url && strlen(url) > 0)
       remote->setUrl(url);
   }
-  else {
+  else
     remote = make_shared<Remote>(name, url);
-    remote->setDirty();
-  }
 
   remote->setEnabled(enable);
   remote->setAutoInstall(boost::lexical_cast<boost::tribool>(autoInstall));

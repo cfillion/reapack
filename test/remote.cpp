@@ -131,6 +131,17 @@ TEST_CASE("valid remote urls", M) {
     remote.setUrl("https://google.com/RRR");
 }
 
+TEST_CASE("toggle remote enabled", M) {
+  Remote remote("name");
+  REQUIRE(remote.isEnabled());
+
+  remote.setEnabled(true);
+  REQUIRE(remote.isEnabled());
+
+  remote.setEnabled(false);
+  REQUIRE_FALSE(remote.isEnabled());
+}
+
 TEST_CASE("protect remote", M) {
   Remote remote("name");
   REQUIRE_FALSE(remote.test(Remote::ProtectedFlag));
@@ -241,47 +252,64 @@ TEST_CASE("remove remote", M) {
   list.remove(remote); // no crash
 }
 
-TEST_CASE("unserialize remote", M) {
+TEST_CASE("unserialize remote name and url", M) {
   SECTION("invalid name")
     REQUIRE_FALSE(Remote::fromString("&"));
 
-  SECTION("invalid name")
-    REQUIRE_FALSE(Remote::fromString("name||false"));
+  SECTION("invalid url")
+    REQUIRE_FALSE(Remote::fromString("name||1"));
 
-  SECTION("name & enabled") {
-    RemotePtr remote = Remote::fromString("name|url|1");
+  SECTION("valid name and url") {
+    RemotePtr remote = Remote::fromString("name|url");
     REQUIRE(remote);
 
     REQUIRE(remote->name() == "name");
     REQUIRE(remote->url() == "url");
     REQUIRE(remote->isEnabled());
+    REQUIRE(remote->flags() == 0);
+  }
+}
+
+TEST_CASE("unserialize remote enabled", M) {
+  SECTION("enabled") {
+    RemotePtr remote = Remote::fromString("name|url|1");
+    REQUIRE(remote->isEnabled());
+    REQUIRE(remote->flags() == 0);
   }
 
   SECTION("disabled") {
     RemotePtr remote = Remote::fromString("name|url|0");
-    REQUIRE(remote->name() == "name");
-    REQUIRE(remote->url() == "url");
     REQUIRE_FALSE(remote->isEnabled());
+    REQUIRE(remote->flags() == 0);
   }
 
-  SECTION("missing auto-install (backward compatibility)") {
+  SECTION("invalid") {
+    RemotePtr remote = Remote::fromString("name|url|foobar");
+    REQUIRE(remote->isEnabled());
+  }
+}
+
+TEST_CASE("unserialize remote autoinstall", M) {
+  SECTION("missing (backward compatibility)") {
     RemotePtr remote = Remote::fromString("name|url|1");
     REQUIRE(boost::logic::indeterminate(remote->autoInstall()));
   }
 
-  SECTION("indeterminate auto-install") {
+  SECTION("indeterminate") {
     RemotePtr remote = Remote::fromString("name|url|1|2");
     REQUIRE(boost::logic::indeterminate(remote->autoInstall()));
   }
 
-  SECTION("auto-install enabled") {
+  SECTION("enabled") {
     RemotePtr remote = Remote::fromString("name|url|1|1");
     REQUIRE(remote->autoInstall());
+    REQUIRE(remote->flags() == 0);
   }
 
-  SECTION("auto-install enabled") {
+  SECTION("disabled") {
     RemotePtr remote = Remote::fromString("name|url|1|0");
     REQUIRE(remote->autoInstall() == false);
+    REQUIRE(remote->flags() == 0);
   }
 }
 
