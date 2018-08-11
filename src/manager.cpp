@@ -601,7 +601,7 @@ bool Manager::apply()
     g_reapack->config()->install.autoInstall = *m_autoInstall;
 
     if(*m_autoInstall) {
-      for(const RemotePtr &r : g_reapack->config()->remotes.getEnabled()) {
+      for(const RemotePtr &r : g_reapack->config()->remotes.enabled()) {
         if(!isUninstalled(r))
           r->setDirty();
       }

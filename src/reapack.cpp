@@ -144,7 +144,7 @@ void ReaPack::setupAPI()
 
 void ReaPack::synchronizeAll()
 {
-  const vector<RemotePtr> &remotes = m_config.remotes.getEnabled();
+  const auto &remotes = m_config.remotes.enabled();
 
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
@@ -279,7 +279,8 @@ void ReaPack::teardownTransaction()
 
 void ReaPack::commitConfig(bool refresh)
 {
-  for(const RemotePtr &remote : m_config->remotes.getEnabled())
+  // Auto-synchronize all remotes (not only enabled ones) to clear all dirty flags
+  for(const RemotePtr &remote : m_config.remotes)
     remote->autoSync();
 
   if(m_tx) {

@@ -53,7 +53,7 @@ bool ExportTask::start()
 
   vector<FileCompressor *> jobs;
 
-  for(const RemotePtr &remote : g_reapack->config()->remotes.getEnabled()) {
+  for(const RemotePtr &remote : g_reapack->config()->remotes.enabled()) {
     bool addedRemote = false;
 
     for(const Registry::Entry &entry : tx()->registry()->getEntries(remote->name())) {

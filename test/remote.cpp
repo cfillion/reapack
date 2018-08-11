@@ -185,20 +185,35 @@ TEST_CASE("add remotes to list", M) {
   REQUIRE(list.size() == 1);
 }
 
-TEST_CASE("get enabled remotes only", M) {
+TEST_CASE("get no enabled remote", M) {
   RemotePtr r1 = make_shared<Remote>("hello"),
             r2 = make_shared<Remote>("world");
-
-  r1->setEnabled(false);
-  r2->setEnabled(true);
 
   RemoteList list;
   list.add(r1);
   list.add(r2);
 
-  const vector<RemotePtr> &array = list.getEnabled();
-  REQUIRE(array.size() == 1);
-  REQUIRE(array[0] == r2);
+  r1->setEnabled(false);
+  r2->setEnabled(false);
+
+  const auto &range = list.enabled();
+  REQUIRE(range.empty());
+}
+
+TEST_CASE("get one enabled remote", M) {
+  RemotePtr r1 = make_shared<Remote>("hello"),
+            r2 = make_shared<Remote>("world");
+
+  RemoteList list;
+  list.add(r1);
+  list.add(r2);
+
+  r1->setEnabled(false);
+  r2->setEnabled(true);
+
+  const auto &range = list.enabled();
+  REQUIRE(boost::size(range) == 1);
+  REQUIRE(*range.begin() == r2);
 }
 
 TEST_CASE("get self remote", M) {

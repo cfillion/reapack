@@ -30,8 +30,8 @@
 #include <sstream>
 
 using namespace std;
-using boost::tribool;
 using boost::logic::indeterminate;
+using boost::tribool;
 
 static char DATA_DELIMITER = '|';
 
@@ -80,7 +80,7 @@ RemotePtr Remote::fromString(const string &data)
   getline(stream, autoInstall, DATA_DELIMITER);
 
   if(!validateName(name) || !validateUrl(url))
-    return {};
+    return nullptr;
 
   RemotePtr remote = make_shared<Remote>(name, url);
 
@@ -234,14 +234,6 @@ RemotePtr RemoteList::getByName(const std::string &name) const
     return nullptr;
   else
     return *it;
-}
-
-vector<RemotePtr> RemoteList::getEnabled() const
-{
-  vector<RemotePtr> list;
-  copy_if(m_remotes.begin(), m_remotes.end(), back_inserter(list),
-    [](const RemotePtr &remote) { return remote->isEnabled(); });
-  return list;
 }
 
 void RemoteList::remove(const RemotePtr &remote)

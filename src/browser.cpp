@@ -417,7 +417,7 @@ void Browser::refresh(const bool stale)
     break;
   }
 
-  const vector<RemotePtr> &remotes = g_reapack->config()->remotes.getEnabled();
+  const auto &remotes = g_reapack->config()->remotes.enabled();
 
   if(remotes.empty()) {
     if(!isVisible() || stale) {
@@ -442,7 +442,8 @@ void Browser::refresh(const bool stale)
 
     tx->onFinish >> [=] {
       if(isFirstLoad || isVisible()) {
-        populate(remotes, tx->registry());
+        // TODO: don't copy the range into a temporary vector
+        populate({remotes.begin(), remotes.end()}, tx->registry());
 
         // Ignore the next call to refreshBrowser() if we know we'll be
         // requested to handle the very same transaction.

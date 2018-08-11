@@ -19,6 +19,7 @@
 #define REAPACK_REMOTE_HPP
 
 #include <boost/logic/tribool.hpp>
+#include <boost/range/adaptor/filtered.hpp>
 #include <functional>
 #include <memory>
 #include <string>
@@ -99,7 +100,6 @@ public:
 
   RemotePtr getByName(const std::string &name) const;
   RemotePtr getSelf() const { return getByName("ReaPack"); }
-  std::vector<RemotePtr> getEnabled() const;
 
   bool empty() const { return m_remotes.empty(); }
   size_t size() const { return m_remotes.size(); }
@@ -108,6 +108,12 @@ public:
   auto begin() const { return m_remotes.begin(); }
   auto end() { return m_remotes.end(); }
   auto end() const { return m_remotes.end(); }
+
+  auto enabled() const
+  {
+    const auto filter = std::bind(&Remote::isEnabled, std::placeholders::_1);
+    return m_remotes | boost::adaptors::filtered(filter);
+  }
 
 private:
   std::vector<RemotePtr> m_remotes;
