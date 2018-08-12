@@ -80,6 +80,7 @@ int TabBar::count() const
 void TabBar::clear()
 {
   m_pages.clear();
+  m_lastPage = -1;
 
 #ifdef TabCtrl_DeleteAllItems
   TabCtrl_DeleteAllItems(handle());
