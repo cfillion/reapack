@@ -16,7 +16,7 @@ for:
       - docker run --name arch --rm --privileged -tidv `pwd`:/build -w /build
         -e CURLSO=:libcurl.so.3 archlinux/base
       - docker exec arch
-        pacman -Sy --noconfirm boost catch2 gcc git libcurl-compat php tup wget
+        pacman -Syu --noconfirm boost catch2 gcc git libcurl-compat php tup wget
 
       - if [[ "$PLATFORM" == "x86" ]]; then
           docker exec arch sh -c $'
