@@ -17,8 +17,6 @@
 
 #include "thread.hpp"
 
-#include "download.hpp"
-
 #include <reaper_plugin_functions.h>
 
 using namespace std;
@@ -98,15 +96,9 @@ WorkerThread::~WorkerThread()
 
 void WorkerThread::run()
 {
-  DownloadContext context;
-
   do {
-    while(ThreadTask *task = nextTask()) {
-      if(auto dl = dynamic_cast<Download *>(task))
-        dl->setContext(&context);
-
+    while(ThreadTask *task = nextTask())
       task->exec();
-    }
 
     unique_lock<mutex> lock(m_mutex);
     m_wake.wait(lock);

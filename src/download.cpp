@@ -102,7 +102,7 @@ int Download::UpdateProgress(void *ptr, const double, const double,
 }
 
 Download::Download(const string &url, const NetworkOpts &opts, const int flags)
-  : m_url(url), m_opts(opts), m_flags(flags), m_ctx(nullptr)
+  : m_url(url), m_opts(opts), m_flags(flags)
 {
 }
 
@@ -117,28 +117,30 @@ bool Download::run()
   if(!stream)
     return false;
 
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_URL, m_url.c_str());
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROXY, m_opts.proxy.c_str());
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
+  thread_local DownloadContext ctx;
+
+  curl_easy_setopt(ctx, CURLOPT_URL, m_url.c_str());
+  curl_easy_setopt(ctx, CURLOPT_PROXY, m_opts.proxy.c_str());
+  curl_easy_setopt(ctx, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 #ifdef __APPLE__
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_CAINFO, nullptr);
+  curl_easy_setopt(ctx, CURLOPT_CAINFO, nullptr);
 #endif
 
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_PROGRESSDATA, this);
+  curl_easy_setopt(ctx, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
+  curl_easy_setopt(ctx, CURLOPT_PROGRESSDATA, this);
 
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_WRITEDATA, stream);
+  curl_easy_setopt(ctx, CURLOPT_WRITEFUNCTION, WriteData);
+  curl_easy_setopt(ctx, CURLOPT_WRITEDATA, stream);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers);
 
   char errbuf[CURL_ERROR_SIZE] = "No error message";
-  curl_easy_setopt(m_ctx->m_curl, CURLOPT_ERRORBUFFER, errbuf);
+  curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf);
 
-  const CURLcode res = curl_easy_perform(m_ctx->m_curl);
+  const CURLcode res = curl_easy_perform(ctx);
   curl_slist_free_all(headers);
   closeStream();
 

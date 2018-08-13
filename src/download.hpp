@@ -26,13 +26,17 @@
 #include <fstream>
 #include <sstream>
 
-struct DownloadContext {
+class DownloadContext {
+public:
   static void GlobalInit();
   static void GlobalCleanup();
 
   DownloadContext();
   ~DownloadContext();
 
+  operator CURL*() { return m_curl; }
+
+private:
   CURL *m_curl;
 };
 
@@ -46,7 +50,6 @@ public:
 
   void setName(const std::string &);
   const std::string &url() const { return m_url; }
-  void setContext(DownloadContext *ctx) { m_ctx = ctx; }
 
   bool concurrent() const override { return true; }
   bool run() override;
@@ -63,7 +66,6 @@ private:
   std::string m_url;
   NetworkOpts m_opts;
   int m_flags;
-  DownloadContext *m_ctx;
 };
 
 class MemoryDownload : public Download {
