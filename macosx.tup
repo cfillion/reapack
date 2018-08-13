@@ -6,6 +6,7 @@ CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -Wno-unused-function -Wno-unused-private-field -Wno-missing-braces
 CXXFLAGS += -fdiagnostics-color -fstack-protector-strong -fvisibility=hidden
+CXXFLAGS += -fdata-sections -ffunction-sections
 CXXFLAGS += -pipe -fPIC -O2 -arch @(ARCH) -mmacosx-version-min=10.7
 CXXFLAGS += -Ivendor -Ivendor/WDL -Ivendor/WDL/WDL -Ivendor/WDL/WDL/swell
 CXXFLAGS += -DWDL_NO_DEFINE_MINMAX -DSWELL_APP_PREFIX=SWELL_REAPACK
@@ -23,6 +24,7 @@ WDLSOURCE += $(SWELL)/swell-gdi.mm $(SWELL)/swell-kb.mm $(SWELL)/swell-menu.mm
 WDLSOURCE += $(SWELL)/swell-misc.mm $(SWELL)/swell-dlg.mm $(SWELL)/swell-wnd.mm
 
 LDFLAGS := -framework Cocoa -framework Carbon -lc++ -lcurl -lsqlite3 -lz
+LDFLAGS += -Wl,-dead_strip
 
 SOFLAGS := -dynamiclib
 SOTARGET := bin/$(REAPACK_FILE)
