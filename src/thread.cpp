@@ -85,31 +85,22 @@ void ThreadTask::exec()
   ThreadNotifier::get()->notify({this, state});
 };
 
-WorkerThread::WorkerThread() : m_exit(false)
+WorkerThread::WorkerThread() : m_thread(&WorkerThread::run, this), m_exit(false)
 {
-  m_wake = CreateEvent(nullptr, true, false, nullptr);
-  m_thread = CreateThread(nullptr, 0, [](void *ptr) -> DWORD {
-    static_cast<WorkerThread *>(ptr)->run();
-    return 0;
-  }, static_cast<void *>(this), 0, nullptr);
 }
 
 WorkerThread::~WorkerThread()
 {
   m_exit = true;
-  SetEvent(m_wake);
-
-  WaitForSingleObject(m_thread, INFINITE);
-
-  CloseHandle(m_wake);
-  CloseHandle(m_thread);
+  m_wake.notify_one();
+  m_thread.join();
 }
 
 void WorkerThread::run()
 {
   DownloadContext context;
 
-  while(!m_exit) {
+  do {
     while(ThreadTask *task = nextTask()) {
       if(auto dl = dynamic_cast<Download *>(task))
         dl->setContext(&context);
@@ -117,14 +108,14 @@ void WorkerThread::run()
       task->exec();
     }
 
-    ResetEvent(m_wake);
-    WaitForSingleObject(m_wake, INFINITE);
-  }
+    unique_lock<mutex> lock(m_mutex);
+    m_wake.wait(lock);
+  } while(!m_exit);
 }
 
 ThreadTask *WorkerThread::nextTask()
 {
-  WDL_MutexLock lock(&m_mutex);
+  lock_guard<mutex> guard(m_mutex);
 
   if(m_queue.empty())
     return nullptr;
@@ -136,11 +127,11 @@ ThreadTask *WorkerThread::nextTask()
 
 void WorkerThread::push(ThreadTask *task)
 {
-  WDL_MutexLock lock(&m_mutex);
+  lock_guard<mutex> guard(m_mutex);
 
   task->setState(ThreadTask::Queued);
   m_queue.push(task);
-  SetEvent(m_wake);
+  m_wake.notify_one();
 }
 
 ThreadPool::~ThreadPool()
@@ -204,7 +195,7 @@ void ThreadNotifier::stop()
 
 void ThreadNotifier::notify(const Notification &notif)
 {
-  WDL_MutexLock lock(&m_mutex);
+  lock_guard<mutex> guard(m_mutex);
 
   m_queue.push(notif);
 }
@@ -225,7 +216,7 @@ void ThreadNotifier::tick()
 
 void ThreadNotifier::processQueue()
 {
-  WDL_MutexLock lock(&m_mutex);
+  lock_guard<mutex> guard(m_mutex);
 
   while(!m_queue.empty()) {
     const Notification &notif = m_queue.front();

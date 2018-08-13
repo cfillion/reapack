@@ -22,18 +22,13 @@
 
 #include <array>
 #include <atomic>
+#include <condition_variable>
 #include <functional>
 #include <queue>
+#include <thread>
 #include <unordered_set>
 
 #include <boost/signals2.hpp>
-#include <WDL/mutex.h>
-
-#ifdef _WIN32
-#  include <windows.h>
-#else
-#  include <swell-types.h>
-#endif
 
 class ThreadTask {
 public:
@@ -94,10 +89,10 @@ private:
   void run();
   ThreadTask *nextTask();
 
-  HANDLE m_wake;
-  HANDLE m_thread;
+  std::thread m_thread;
+  std::condition_variable m_wake;
+  std::mutex m_mutex;
   std::atomic_bool m_exit;
-  WDL_Mutex m_mutex;
   std::queue<ThreadTask *> m_queue;
 };
 
@@ -149,7 +144,7 @@ private:
   ~ThreadNotifier() = default;
   void processQueue();
 
-  WDL_Mutex m_mutex;
+  std::mutex m_mutex;
   size_t m_active;
   std::queue<Notification> m_queue;
 };

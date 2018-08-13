@@ -29,16 +29,16 @@ static const int DOWNLOAD_TIMEOUT = 15;
 // the m_pool member in ThreadPool (thread.hpp)
 
 static CURLSH *g_curlShare = nullptr;
-static WDL_Mutex g_curlMutex;
+static mutex g_curlMutex;
 
 static void LockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
 {
-  g_curlMutex.Enter();
+  g_curlMutex.lock();
 }
 
 static void UnlockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
 {
-  g_curlMutex.Leave();
+  g_curlMutex.unlock();
 }
 
 void DownloadContext::GlobalInit()
