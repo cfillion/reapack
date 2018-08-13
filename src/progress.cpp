@@ -88,23 +88,18 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  const string &position = String::format("%s of %s",
-    String::number(min(m_done + 1, m_total)).c_str(),
-    String::number(m_total).c_str()
-  );
+  Win32::setWindowText(m_label, String::format(m_current.c_str(),
+    String::format("%s of %s",
+      String::number(min(m_done + 1, m_total)).c_str(),
+      String::number(m_total).c_str()
+    ).c_str()
+  ).c_str());
 
-  char label[1024];
-  snprintf(label, sizeof(label), m_current.c_str(), position.c_str());
-
-  Win32::setWindowText(m_label, label);
-
-  const double pos = (double)(min(m_done+1, m_total)) / max(2, m_total);
-  const int percent = (int)(pos * 100);
-
-  char title[255];
-  snprintf(title, sizeof(title),
-    "ReaPack: Operation in progress (%d%%)", percent);
+  const double pos = static_cast<double>(min(m_done+1, m_total)) / max(2, m_total);
+  const int percent = static_cast<int>(pos * 100);
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
-  Win32::setWindowText(handle(), title);
+  Win32::setWindowText(handle(), String::format(
+    "ReaPack: Operation in progress (%d%%)", percent
+  ).c_str());
 }

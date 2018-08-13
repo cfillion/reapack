@@ -275,13 +275,10 @@ Transaction *ReaPack::setupTransaction()
     m_tx = new Transaction;
   }
   catch(const reapack_error &e) {
-    char msg[512];
-    snprintf(msg, sizeof(msg),
+    Win32::messageBox(m_mainWindow, String::format(
       "The following error occurred while creating a transaction:\n\n%s",
       e.what()
-    );
-
-    Win32::messageBox(m_mainWindow, msg, "ReaPack", MB_OK);
+    ).c_str(), "ReaPack", MB_OK);
     return nullptr;
   }
 
@@ -365,14 +362,12 @@ void ReaPack::createDirectories()
   if(FS::mkdir(path))
     return;
 
-  char msg[255];
-  snprintf(msg, sizeof(msg),
+  Win32::messageBox(Splash_GetWnd(), String::format(
     "ReaPack could not create %s! "
     "Please investigate or report this issue.\n\n"
     "Error description: %s",
-    path.prependRoot().join().c_str(), FS::lastError());
-
-  Win32::messageBox(Splash_GetWnd(), msg, "ReaPack", MB_OK);
+    path.prependRoot().join().c_str(), FS::lastError()
+  ).c_str(), "ReaPack", MB_OK);
 }
 
 void ReaPack::registerSelf()

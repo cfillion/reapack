@@ -824,13 +824,11 @@ bool Browser::confirm() const
   if(!count)
     return true;
 
-  char msg[255];
-  snprintf(msg, sizeof(msg),
+  return IDYES == Win32::messageBox(handle(), String::format(
     "Are you sure to uninstall %zu package%s?\nThe files and settings will"
     " be permanently deleted from this computer.",
-    count, count == 1 ? "" : "s");
-
-  return IDYES == Win32::messageBox(handle(), msg, "ReaPack Query", MB_YESNO);
+    count, count == 1 ? "" : "s"
+  ).c_str(), "ReaPack Query", MB_YESNO);
 }
 
 bool Browser::apply()

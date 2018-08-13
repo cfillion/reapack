@@ -323,12 +323,11 @@ void AboutIndexDelegate::initInstalledFiles()
     }
   }
   catch(const reapack_error &e) {
-    char msg[255];
-    snprintf(msg, sizeof(msg),
+    Win32::setWindowText(report, String::format(
       "The file list is currently unavailable.\x20"
       "Retry later when all installation task are completed.\r\n"
-      "\r\nError description: %s", e.what());
-    Win32::setWindowText(report, msg);
+      "\r\nError description: %s", e.what()
+    ).c_str());
     return;
   }
 

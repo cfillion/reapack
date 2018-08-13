@@ -139,14 +139,12 @@ void Import::fetch()
         if(!read(dl, index))
           m_pool->abort();
         break;
-      case ThreadTask::Failure: {
-        char msg[1024];
-        snprintf(msg, sizeof(msg), "Download failed: %s\n%s",
-          dl->error().message.c_str(), url.c_str());
-        Win32::messageBox(handle(), msg, TITLE, MB_OK);
+      case ThreadTask::Failure:
+        Win32::messageBox(handle(), String::format(
+          "Download failed: %s\n%s", dl->error().message.c_str(), url.c_str()
+        ).c_str(), TITLE, MB_OK);
         m_pool->abort();
         break;
-      }
       default:
         break;
       }
@@ -163,26 +161,23 @@ void Import::fetch()
 
 bool Import::read(MemoryDownload *dl, const size_t idx)
 try {
-  char msg[1024];
-
   IndexPtr index = Index::load({}, dl->contents().c_str());
   Remote remote = g_reapack->remote(index->name());
   const bool exists = !remote.isNull();
 
   if(exists && remote.url() != dl->url()) {
     if(remote.isProtected()) {
-      snprintf(msg, sizeof(msg),
+      Win32::messageBox(handle(), String::format(
         "The repository %s is protected and cannot be overwritten.",
-        index->name().c_str());
-      Win32::messageBox(handle(), msg, TITLE, MB_OK);
+        index->name().c_str()
+      ).c_str(), TITLE, MB_OK);
       return false;
     }
     else {
-      snprintf(msg, sizeof(msg),
+      const auto answer = Win32::messageBox(handle(), String::format(
         "%s is already configured with a different URL.\n"
-        "Do you want to overwrite it?", index->name().c_str());
-
-      const auto answer = Win32::messageBox(handle(), msg, TITLE, MB_YESNO);
+        "Do you want to overwrite it?", index->name().c_str()
+      ).c_str(), TITLE, MB_YESNO);
 
       if(answer != IDYES)
         return true;
@@ -199,10 +194,9 @@ try {
   return true;
 }
 catch(const reapack_error &e) {
-  char msg[1024];
-  snprintf(msg, sizeof(msg), "The received file is invalid: %s\n%s",
-    e.what(), dl->url().c_str());
-  Win32::messageBox(handle(), msg, TITLE, MB_OK);
+  Win32::messageBox(handle(), String::format(
+    "The received file is invalid: %s\n%s", e.what(), dl->url().c_str()
+  ).c_str(), TITLE, MB_OK);
   return false;
 }
 

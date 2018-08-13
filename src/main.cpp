@@ -48,14 +48,11 @@ static bool loadAPI(void *(*getFunc)(const char *))
     *func.ptr = getFunc(func.name);
 
     if(func.required && *func.ptr == nullptr) {
-      char msg[1024];
-      snprintf(msg, sizeof(msg),
+      Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr, String::format(
         "ReaPack v%s is incompatible with this version of REAPER.\n\n"
         "(Unable to import the following API function: %s)",
-        ReaPack::VERSION, func.name);
-
-      Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
-        msg, "ReaPack: Missing REAPER feature", MB_OK);
+        ReaPack::VERSION, func.name
+      ).c_str(), "ReaPack: Missing REAPER feature", MB_OK);
 
       return false;
     }
@@ -103,16 +100,13 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   if(current == expected)
     return true;
 
-  char msg[4096];
-  snprintf(msg, sizeof(msg),
+  Win32::messageBox(Splash_GetWnd(), String::format(
     "ReaPack was not loaded from the standard extension path"
     " or its filename was altered.\n"
     "Move or rename it to the expected location and retry.\n\n"
     "Current: %s\n\nExpected: %s",
-    current.join().c_str(), expected.join().c_str());
-
-  Win32::messageBox(Splash_GetWnd(), msg,
-    "ReaPack: Installation path mismatch", MB_OK);
+    current.join().c_str(), expected.join().c_str()
+  ).c_str(), "ReaPack: Installation path mismatch", MB_OK);
 
   return false;
 }
