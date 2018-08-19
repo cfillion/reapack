@@ -26,21 +26,18 @@
 
 using namespace std;
 
-ThreadNotifier *ThreadNotifier::s_instance = nullptr;
-
-ThreadTask::ThreadTask()
-  : m_state(Idle), m_abort(false)
+ThreadTask::ThreadTask() : m_state(Idle), m_abort(false)
 {
-  ThreadNotifier::get()->start();
 }
 
 ThreadTask::~ThreadTask()
 {
-  ThreadNotifier::get()->stop();
 }
 
-void ThreadTask::setState(const State state)
+void ThreadTask::eventHandler(const Event event)
 {
+  const State state = static_cast<State>(event);
+
   // The task may have been aborted while the task was running or just before
   // the finish notification got received in the main thread.
   m_state = aborted() ? Aborted : state;
@@ -74,12 +71,12 @@ void ThreadTask::exec()
   State state = Aborted;
 
   if(!aborted()) {
-    ThreadNotifier::get()->notify({this, Running});
+    emit(Running);
     state = run() ? Success : Failure;
   }
 
-  ThreadNotifier::get()->notify({this, state});
-};
+  emit(state);
+}
 
 WorkerThread::WorkerThread() : m_stop(false), m_thread(&WorkerThread::run, this)
 {
@@ -142,7 +139,6 @@ void WorkerThread::push(ThreadTask *task)
 {
   lock_guard<mutex> guard(m_mutex);
 
-  task->setState(ThreadTask::Queued);
   m_queue.push(task);
   m_wake.notify_one();
 }
@@ -185,55 +181,4 @@ void ThreadPool::abort()
     task->abort();
 
   m_onAbort();
-}
-
-ThreadNotifier *ThreadNotifier::get()
-{
-  if(!s_instance)
-    s_instance = new ThreadNotifier;
-
-  return s_instance;
-}
-
-void ThreadNotifier::start()
-{
-  if(!m_active++)
-    plugin_register("timer", (void *)tick);
-}
-
-void ThreadNotifier::stop()
-{
-  --m_active;
-}
-
-void ThreadNotifier::notify(const Notification &notif)
-{
-  lock_guard<mutex> guard(m_mutex);
-
-  m_queue.push(notif);
-}
-
-void ThreadNotifier::tick()
-{
-  ThreadNotifier *instance = ThreadNotifier::get();
-  instance->processQueue();
-
-  // doing this in stop() would cause a use after free of m_mutex in processQueue
-  if(!instance->m_active) {
-    plugin_register("-timer", (void *)tick);
-
-    delete s_instance;
-    s_instance = nullptr;
-  }
-}
-
-void ThreadNotifier::processQueue()
-{
-  lock_guard<mutex> guard(m_mutex);
-
-  while(!m_queue.empty()) {
-    const auto &[task, state] = m_queue.front();
-    task->setState(state);
-    m_queue.pop();
-  }
 }
