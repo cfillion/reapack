@@ -60,13 +60,6 @@ void ThreadTask::setState(const State state)
   }
 }
 
-void ThreadTask::start()
-{
-  WorkerThread *thread = new WorkerThread;
-  thread->push(this);
-  onFinish([thread] { delete thread; });
-}
-
 void ThreadTask::onFinish(const VoidSignal::slot_type &slot)
 {
   // The task has a slot deleting itself at this point, accepting

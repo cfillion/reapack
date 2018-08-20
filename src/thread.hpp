@@ -47,7 +47,6 @@ public:
 
   virtual bool concurrent() const = 0;
 
-  void start(); // start a new thread
   void exec();  // runs in the current thread
   const std::string &summary() const { return m_summary; }
   void setState(State);
