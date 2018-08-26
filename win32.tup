@@ -9,8 +9,7 @@ REAPACK_FILE := reaper_reapack@(SUFFIX)
 
 VCPKG = vendor/vcpkg/installed/@(VCPKG_TRIPLET)
 
-CXXFLAGS := /nologo /W3 /WX /wd4996 /EHsc /MT
-CXXFLAGS += /O2 /Z7 /Zo
+CXXFLAGS := /nologo /std:c++17 /W3 /WX /wd4996 /EHsc /MT /O2 /Z7 /Zo
 CXXFLAGS += /Ivendor /I$(VCPKG)/include /Ivendor/WDL /Ivendor/WDL/WDL
 CXXFLAGS += /DWDL_NO_DEFINE_MINMAX /DCURL_STATICLIB /DUNICODE /DNDEBUG
 CXXFLAGS += /DREAPACK_FILE#\"$(REAPACK_FILE).dll\"

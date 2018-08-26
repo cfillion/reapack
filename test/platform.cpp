@@ -50,7 +50,7 @@ TEST_CASE("platform from string", M) {
 }
 
 TEST_CASE("test platform", M) {
-  const pair<Platform, bool> expected[] = {
+  const pair<Platform, bool> tests[] = {
     {Platform::GenericPlatform, true},
 
 #ifdef __APPLE__
@@ -104,6 +104,6 @@ TEST_CASE("test platform", M) {
 #endif
   };
 
-  for(const auto &it : expected)
-    REQUIRE(it.first.test() == it.second);
+  for(const auto &[platform, expected] : tests)
+    REQUIRE(platform.test() == expected);
 }

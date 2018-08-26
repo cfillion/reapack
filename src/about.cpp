@@ -209,8 +209,8 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
 
   const int shift = (rect.right - rect.left) + 4;
 
-  for(const auto &pair : metadata->links()) {
-    const int control = getLinkControl(pair.first);
+  for(const auto &[type, link] : metadata->links()) {
+    const int control = getLinkControl(type);
 
     if(!m_links.count(control)) {
       HWND handle = getControl(control);
@@ -223,7 +223,7 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
       m_links[control] = {};
     }
 
-    m_links[control].push_back(&pair.second);
+    m_links[control].push_back(&link);
   }
 
   onResize(); // update the position of link buttons
@@ -572,10 +572,10 @@ void AboutPackageDelegate::updateList(const int index)
     if(sections) {
       vector<string> sectionNames;
 
-      for(const auto &pair : sectionMap) {
-        if(sections & pair.first) {
-          sectionNames.push_back(pair.second);
-          sections &= ~pair.first;
+      for(const auto &[section, name] : sectionMap) {
+        if(sections & section) {
+          sectionNames.push_back(name);
+          sections &= ~section;
         }
       }
 

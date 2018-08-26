@@ -333,11 +333,10 @@ void Browser::displayButton()
   if(!m_typeFilter)
     menu.checkRadio(index);
 
-  for(const auto &pair : types) {
-    auto index = menu.addAction(pair.first,
-      pair.second | (ACTION_FILTERTYPE << 8));
+  for(const auto &[name, type] : types) {
+    auto index = menu.addAction(name, type | (ACTION_FILTERTYPE << 8));
 
-    if(m_typeFilter && m_typeFilter == pair.second)
+    if(m_typeFilter && m_typeFilter == type)
       menu.checkRadio(index);
   }
 

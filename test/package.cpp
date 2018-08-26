@@ -24,8 +24,8 @@ TEST_CASE("package type from string", M) {
     {"autoitem", Package::AutomationItemType},
   };
 
-  for(const auto &pair : tests)
-    REQUIRE(Package::getType(pair.first) == pair.second);
+  for(const auto &[typeString, typeId] : tests)
+    REQUIRE(Package::getType(typeString) == typeId);
 }
 
 TEST_CASE("package type to string", M) {
@@ -45,8 +45,8 @@ TEST_CASE("package type to string", M) {
     {static_cast<Package::Type>(-1), "Unknown"},
   };
 
-  for(const auto &pair : tests)
-    REQUIRE(Package::displayType(pair.first) == pair.second);
+  for(const auto &[type, displayName] : tests)
+    REQUIRE(Package::displayType(type) == displayName);
 }
 
 TEST_CASE("invalid package name", M) {

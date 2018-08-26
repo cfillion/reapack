@@ -148,9 +148,9 @@ TEST_CASE("source target path", M) {
   };
 
   Source source("file.name", "url", &ver);
-  for(const auto &pair : tests) {
-    source.setTypeOverride(pair.first);
-    REQUIRE(source.targetPath() == Path(pair.second));
+  for(const auto &[type, path] : tests) {
+    source.setTypeOverride(type);
+    REQUIRE(source.targetPath() == Path(path));
   }
 }
 

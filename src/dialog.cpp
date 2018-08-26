@@ -455,9 +455,7 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 
 void Dialog::onContextMenu(HWND target, const int x, const int y)
 {
-  for(const auto &pair : m_controls) {
-    Control *ctrl = pair.second;
-
+  for(Control *ctrl : m_controls | boost::adaptors::map_values) {
     if(!IsWindowVisible(ctrl->handle()))
       continue;
 

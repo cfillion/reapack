@@ -211,8 +211,8 @@ void ThreadNotifier::processQueue()
   lock_guard<mutex> guard(m_mutex);
 
   while(!m_queue.empty()) {
-    const Notification &notif = m_queue.front();
-    notif.first->setState(notif.second);
+    const auto &[task, state] = m_queue.front();
+    task->setState(state);
     m_queue.pop();
   }
 }

@@ -264,9 +264,9 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 
   vector<int> sections;
 
-  for(const auto &pair : sectionMap) {
-    if(reg.file.sections & pair.first)
-      sections.push_back(pair.second);
+  for(const auto &[flag, id] : sectionMap) {
+    if(reg.file.sections & flag)
+      sections.push_back(id);
   }
 
   assert(!sections.empty()); // is a section missing in sectionMap?
