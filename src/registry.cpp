@@ -128,15 +128,16 @@ void Registry::migrate()
     switch(current.minor) {
     case 1:
       m_db.exec("ALTER TABLE entries ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;");
-      // FALLTHROUGH
+      [[fallthrough]];
     case 2:
       m_db.exec("ALTER TABLE files ADD COLUMN type INTEGER NOT NULL DEFAULT 0;");
-      // FALLTHROUGH
+      [[fallthrough]];
     case 3:
       m_db.exec("ALTER TABLE entries ADD COLUMN desc TEXT NOT NULL DEFAULT '';");
-      // FALLTHROUGH
+      [[fallthrough]];
     case 4:
       convertImplicitSections();
+      break;
     }
 
     m_db.setVersion(version);

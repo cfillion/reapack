@@ -184,6 +184,7 @@ void Browser::onCommand(const int id, const int event)
     }
     else
       break;
+    [[fallthrough]];
   case IDCANCEL:
     if(m_loadState == Loading)
       hide(); // keep ourselves alive

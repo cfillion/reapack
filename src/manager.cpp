@@ -190,7 +190,7 @@ void Manager::onCommand(const int id, int)
       refresh();
       break;
     }
-    // FALLTHRU
+    [[fallthrough]];
   case IDCANCEL:
     close();
     break;
@@ -696,7 +696,7 @@ void NetworkConfig::onCommand(const int id, int)
   switch(id) {
   case IDOK:
     apply();
-    // FALLTHROUGH
+    [[fallthrough]];
   case IDCANCEL:
     close(id);
     break;
