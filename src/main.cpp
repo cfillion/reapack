@@ -75,23 +75,12 @@ static void menuHook(const char *name, HMENU handle, const int f)
     return;
 
   Menu menu = Menu(handle).addMenu("ReaPack");
-
-  menu.addAction("&Synchronize packages",
-    NamedCommandLookup("_REAPACK_SYNC"));
-
-  menu.addAction("&Browse packages...",
-    NamedCommandLookup("_REAPACK_BROWSE"));
-
-  menu.addAction("&Import repositories...",
-    NamedCommandLookup("_REAPACK_IMPORT"));
-
-  menu.addAction("&Manage repositories...",
-    NamedCommandLookup("_REAPACK_MANAGE"));
-
+  menu.addAction("&Synchronize packages",   "_REAPACK_SYNC");
+  menu.addAction("&Browse packages...",     "_REAPACK_BROWSE");
+  menu.addAction("&Import repositories...", "_REAPACK_IMPORT");
+  menu.addAction("&Manage repositories...", "_REAPACK_MANAGE");
   menu.addSeparator();
-
-  menu.addAction(String::format("&About ReaPack v%s", ReaPack::VERSION),
-    NamedCommandLookup("_REAPACK_ABOUT"));
+  menu.addAction(String::format("&About ReaPack v%s", ReaPack::VERSION), "_REAPACK_ABOUT");
 }
 
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
@@ -102,14 +91,13 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   expected.append(REAPACK_FILE);
 
 #ifdef _WIN32
-  Win32::char_type self[MAX_PATH] = {};
-  GetModuleFileName(module, self, static_cast<DWORD>(size(self)));
+  Win32::char_type self[MAX_PATH]{};
+  GetModuleFileName(module, self, static_cast<DWORD>(std::size(self)));
   Path current(Win32::narrow(self));
 #else
   Dl_info info{};
-  dladdr((const void *)checkLocation, &info);
-  const char *self = info.dli_fname;
-  Path current(self);
+  dladdr(reinterpret_cast<const void *>(&checkLocation), &info);
+  Path current(info.dli_fname);
 #endif
 
   if(current == expected)

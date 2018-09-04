@@ -27,7 +27,7 @@
 #  include <swell.h>
 #endif
 
-using namespace std;
+#include <reaper_plugin_functions.h>
 
 Menu::Menu(HMENU handle)
   : m_handle(handle), m_ownership(!handle)
@@ -47,7 +47,7 @@ Menu::~Menu()
     DestroyMenu(m_handle);
 }
 
-UINT Menu::addAction(const string &label, const int commandId)
+UINT Menu::addAction(const std::string &label, const int commandId)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
@@ -60,9 +60,14 @@ UINT Menu::addAction(const string &label, const int commandId)
   mii.fMask |= MIIM_ID;
   mii.wID = commandId;
 
-  const int index = m_size;
+  const UINT index = m_size;
   append(mii);
   return index;
+}
+
+UINT Menu::addAction(const std::string &label, const char *namedCommand)
+{
+  return addAction(label, NamedCommandLookup(namedCommand));
 }
 
 void Menu::addSeparator()
@@ -76,7 +81,7 @@ void Menu::addSeparator()
   append(mii);
 }
 
-Menu Menu::addMenu(const string &label)
+Menu Menu::addMenu(const std::string &label)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);

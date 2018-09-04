@@ -35,6 +35,7 @@ public:
   bool empty() const { return m_size == 0; }
 
   UINT addAction(const std::string &label, int commandId);
+  UINT addAction(const std::string &label, const char *namedCommand);
   void addSeparator();
   Menu addMenu(const std::string &label);
 
