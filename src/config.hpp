@@ -49,9 +49,11 @@ struct NetworkOpts {
 
 class Config {
 public:
-  Config();
+  Config(const Path &);
+  Config(const Config &) = delete;
+  ~Config();
 
-  void read(const Path &);
+  void read();
   void write();
 
   void resetOptions();

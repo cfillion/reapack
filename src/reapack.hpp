@@ -20,6 +20,7 @@
 
 #include "action.hpp"
 #include "api.hpp"
+#include "config.hpp"
 #include "path.hpp"
 
 #include <list>
@@ -28,7 +29,6 @@
 
 class About;
 class Browser;
-class Config;
 class Manager;
 class Progress;
 class Remote;
@@ -67,7 +67,7 @@ public:
 
   Transaction *setupTransaction();
   void commitConfig(bool refresh = true);
-  Config *config() const { return m_config; }
+  Config *config() { return &m_config; }
 
 private:
   static ReaPack *s_instance;
@@ -76,19 +76,19 @@ private:
   void registerSelf();
   void teardownTransaction();
 
+  REAPER_PLUGIN_HINSTANCE m_instance;
+  HWND m_mainWindow;
+
+  UseRootPath m_useRootPath;
+  Config m_config;
   ActionList m_actions;
   std::list<APIDef> m_api;
 
-  Config *m_config;
   Transaction *m_tx;
-  Progress *m_progress;
+  About *m_about;
   Browser *m_browser;
   Manager *m_manager;
-  About *m_about;
-
-  REAPER_PLUGIN_HINSTANCE m_instance;
-  HWND m_mainWindow;
-  UseRootPath m_useRootPath;
+  Progress *m_progress;
 };
 
 #endif

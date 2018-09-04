@@ -57,10 +57,16 @@ inline static string nKey(const char *key, const unsigned int i)
   return key + to_string(i);
 }
 
-Config::Config()
-  : m_isFirstRun(false), m_version(0), m_remotesIniSize(0)
+Config::Config(const Path &path)
+  : m_path(path.join()), m_isFirstRun(false), m_version(0), m_remotesIniSize(0)
 {
   resetOptions();
+  read();
+}
+
+Config::~Config()
+{
+  write();
 }
 
 void Config::resetOptions()
@@ -130,10 +136,8 @@ void Config::migrate()
   write();
 }
 
-void Config::read(const Path &path)
+void Config::read()
 {
-  m_path = path.join();
-
   install.autoInstall = getBool(INSTALL_GRP, AUTOINSTALL_KEY, install.autoInstall);
   install.bleedingEdge = getBool(INSTALL_GRP, PRERELEASES_KEY, install.bleedingEdge);
   install.promptObsolete = getBool(INSTALL_GRP, PROMPTOBSOLETE_KEY, install.promptObsolete);

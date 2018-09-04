@@ -79,23 +79,19 @@ Path ReaPack::resourcePath()
 }
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
-    m_about(nullptr), m_instance(instance), m_useRootPath(resourcePath())
+  : m_instance(instance), m_mainWindow(GetMainHwnd()),
+    m_useRootPath(resourcePath()), m_config(Path::CONFIG.prependRoot()),
+    m_tx{}, m_about{}, m_browser{}, m_manager{}, m_progress{}
 {
   assert(!s_instance);
   s_instance = this;
-
-  m_mainWindow = GetMainHwnd();
 
   DownloadContext::GlobalInit();
   RichEdit::Init();
 
   createDirectories();
 
-  m_config = new Config;
-  m_config->read(Path::CONFIG.prependRoot());
-
-  if(m_config->isFirstRun())
+  if(m_config.isFirstRun())
     manageRemotes();
 
   registerSelf();
@@ -108,10 +104,6 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
 ReaPack::~ReaPack()
 {
   Dialog::DestroyAll();
-
-  m_config->write();
-  delete m_config;
-
   DownloadContext::GlobalCleanup();
 
   s_instance = nullptr;
@@ -119,7 +111,7 @@ ReaPack::~ReaPack()
 
 void ReaPack::synchronizeAll()
 {
-  const vector<Remote> &remotes = m_config->remotes.getEnabled();
+  const vector<Remote> &remotes = m_config.remotes.getEnabled();
 
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
@@ -139,8 +131,8 @@ void ReaPack::synchronizeAll()
 
 void ReaPack::addSetRemote(const Remote &remote)
 {
-  if(remote.isEnabled() && remote.autoInstall(m_config->install.autoInstall)) {
-    const Remote &previous = m_config->remotes.get(remote.name());
+  if(remote.isEnabled() && remote.autoInstall(m_config.install.autoInstall)) {
+    const Remote &previous = m_config.remotes.get(remote.name());
 
     if(!previous || !previous.isEnabled() || previous.url() != remote.url()) {
       if(Transaction *tx = setupTransaction())
@@ -148,7 +140,7 @@ void ReaPack::addSetRemote(const Remote &remote)
     }
   }
 
-  m_config->remotes.add(remote);
+  m_config.remotes.add(remote);
 }
 
 void ReaPack::uninstall(const Remote &remote)
@@ -161,7 +153,7 @@ void ReaPack::uninstall(const Remote &remote)
 
   m_tx->onFinish([=] {
     if(!m_tx->isCancelled())
-      m_config->remotes.remove(remote);
+      config()->remotes.remove(remote);
   });
 }
 
@@ -193,7 +185,7 @@ void ReaPack::manageRemotes()
 
 Remote ReaPack::remote(const string &name) const
 {
-  return m_config->remotes.get(name);
+  return m_config.remotes.get(name);
 }
 
 void ReaPack::about(const Remote &repo, const bool focus)
@@ -296,7 +288,7 @@ Transaction *ReaPack::setupTransaction()
     LockDialog progressLock(m_progress);
 
     return Dialog::Show<ObsoleteQuery>(m_instance, m_mainWindow,
-      &entries, &m_config->install.promptObsolete) == IDOK;
+      &entries, &config()->install.promptObsolete) == IDOK;
   });
 
   m_tx->setCleanupHandler(bind(&ReaPack::teardownTransaction, this));
@@ -324,7 +316,7 @@ void ReaPack::commitConfig(bool refresh)
       m_tx->receipt()->setIndexChanged(); // force browser refresh
       m_tx->onFinish(bind(&ReaPack::refreshManager, this));
     }
-    m_tx->onFinish(bind(&Config::write, m_config));
+    m_tx->onFinish(bind(&Config::write, &m_config));
     m_tx->runTasks();
   }
   else {
@@ -332,7 +324,7 @@ void ReaPack::commitConfig(bool refresh)
       refreshManager();
       refreshBrowser();
     }
-    m_config->write();
+    m_config.write();
   }
 }
 
