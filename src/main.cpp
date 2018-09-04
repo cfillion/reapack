@@ -69,7 +69,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
 
 static bool commandHook(const int id, const int flag)
 {
-  return g_reapack->execActions(id, flag);
+  return g_reapack->actions()->run(id);
 }
 
 static void menuHook(const char *name, HMENU handle, int f)
@@ -134,19 +134,22 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 
 static void setupActions()
 {
-  g_reapack->setupAction("REAPACK_SYNC", "ReaPack: Synchronize packages",
-    &g_reapack->syncAction, bind(&ReaPack::synchronizeAll, g_reapack));
+  ActionList *actions = g_reapack->actions();
 
-  g_reapack->setupAction("REAPACK_BROWSE", "ReaPack: Browse packages...",
-    &g_reapack->browseAction, bind(&ReaPack::browsePackages, g_reapack));
+  actions->add("REAPACK_SYNC", "ReaPack: Synchronize packages",
+    bind(&ReaPack::synchronizeAll, g_reapack));
 
-  g_reapack->setupAction("REAPACK_IMPORT", "ReaPack: Import repositories...",
-    &g_reapack->importAction, bind(&ReaPack::importRemote, g_reapack));
+  actions->add("REAPACK_BROWSE", "ReaPack: Browse packages...",
+    bind(&ReaPack::browsePackages, g_reapack));
 
-  g_reapack->setupAction("REAPACK_MANAGE", "ReaPack: Manage repositories...",
-    &g_reapack->configAction, bind(&ReaPack::manageRemotes, g_reapack));
+  actions->add("REAPACK_IMPORT", "ReaPack: Import repositories...",
+    bind(&ReaPack::importRemote, g_reapack));
 
-  g_reapack->setupAction("REAPACK_ABOUT", bind(&ReaPack::aboutSelf, g_reapack));
+  actions->add("REAPACK_MANAGE", "ReaPack: Manage repositories...",
+    bind(&ReaPack::manageRemotes, g_reapack));
+
+  actions->add("REAPACK_ABOUT", "ReaPack: About...",
+    bind(&ReaPack::aboutSelf, g_reapack));
 }
 
 static void setupAPI()

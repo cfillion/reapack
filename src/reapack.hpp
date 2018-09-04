@@ -18,11 +18,10 @@
 #ifndef REAPACK_REAPACK_HPP
 #define REAPACK_REAPACK_HPP
 
+#include "action.hpp"
 #include "api.hpp"
 #include "path.hpp"
 
-#include <functional>
-#include <map>
 #include <list>
 
 #include <reaper_plugin.h>
@@ -39,27 +38,16 @@ class Transaction;
 
 class ReaPack {
 public:
-  typedef std::function<void ()> ActionCallback;
-
   static const char *VERSION;
   static const char *BUILDTIME;
 
   static ReaPack *instance() { return s_instance; }
   static Path resourcePath();
 
-  gaccel_register_t syncAction;
-  gaccel_register_t browseAction;
-  gaccel_register_t importAction;
-  gaccel_register_t configAction;
-
   ReaPack(REAPER_PLUGIN_HINSTANCE);
   ~ReaPack();
 
-  int setupAction(const char *name, const ActionCallback &);
-  int setupAction(const char *name, const char *desc,
-    gaccel_register_t *action, const ActionCallback &);
-  bool execActions(int id, int);
-
+  ActionList *actions() { return &m_actions; }
   void addAPI(const APIFunc *func) { m_api.emplace_back(func); }
 
   void synchronizeAll();
@@ -88,7 +76,7 @@ private:
   void registerSelf();
   void teardownTransaction();
 
-  std::map<int, ActionCallback> m_actions;
+  ActionList m_actions;
   std::list<APIDef> m_api;
 
   Config *m_config;

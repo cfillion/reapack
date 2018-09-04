@@ -79,8 +79,7 @@ Path ReaPack::resourcePath()
 }
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : syncAction(), browseAction(), importAction(), configAction(),
-    m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
+  : m_tx(nullptr), m_progress(nullptr), m_browser(nullptr), m_manager(nullptr),
     m_about(nullptr), m_instance(instance), m_useRootPath(resourcePath())
 {
   assert(!s_instance);
@@ -116,37 +115,6 @@ ReaPack::~ReaPack()
   DownloadContext::GlobalCleanup();
 
   s_instance = nullptr;
-}
-
-int ReaPack::setupAction(const char *name, const ActionCallback &callback)
-{
-  const int id = plugin_register("command_id", (void *)name);
-  m_actions[id] = callback;
-
-  return id;
-}
-
-int ReaPack::setupAction(const char *name, const char *desc,
-  gaccel_register_t *action, const ActionCallback &callback)
-{
-  const int id = setupAction(name, callback);
-
-  action->desc = desc;
-  action->accel.cmd = id;
-
-  plugin_register("gaccel", action);
-
-  return id;
-}
-
-bool ReaPack::execActions(const int id, const int)
-{
-  if(!m_actions.count(id))
-    return false;
-
-  m_actions.at(id)();
-
-  return true;
 }
 
 void ReaPack::synchronizeAll()
