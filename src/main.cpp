@@ -24,10 +24,8 @@
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
 
-using namespace std;
-
-#define REQUIRED_API(name) {(void **)&name, #name, true}
-#define OPTIONAL_API(name) {(void **)&name, #name, false}
+#define REQUIRED_API(name) {reinterpret_cast<void **>(&name), #name, true}
+#define OPTIONAL_API(name) {reinterpret_cast<void **>(&name), #name, false}
 
 static bool loadAPI(void *(*getFunc)(const char *))
 {
@@ -38,7 +36,6 @@ static bool loadAPI(void *(*getFunc)(const char *))
 
     REQUIRED_API(AddExtensionsMainMenu),
     REQUIRED_API(GetAppVersion),
-    REQUIRED_API(GetMainHwnd),
     REQUIRED_API(GetResourcePath),
     REQUIRED_API(NamedCommandLookup),        // v3.1415
     REQUIRED_API(plugin_register),
@@ -58,7 +55,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
         ReaPack::VERSION, func.name);
 
       Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr,
-        msg, "ReaPack: Fatal Error", MB_OK);
+        msg, "ReaPack: Missing REAPER feature", MB_OK);
 
       return false;
     }
@@ -72,7 +69,7 @@ static bool commandHook(const int id, const int flag)
   return g_reapack->actions()->run(id);
 }
 
-static void menuHook(const char *name, HMENU handle, int f)
+static void menuHook(const char *name, HMENU handle, const int f)
 {
   if(strcmp(name, "Main extensions") || f != 0)
     return;
@@ -132,69 +129,25 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   return false;
 }
 
-static void setupActions()
-{
-  ActionList *actions = g_reapack->actions();
-
-  actions->add("REAPACK_SYNC", "ReaPack: Synchronize packages",
-    bind(&ReaPack::synchronizeAll, g_reapack));
-
-  actions->add("REAPACK_BROWSE", "ReaPack: Browse packages...",
-    bind(&ReaPack::browsePackages, g_reapack));
-
-  actions->add("REAPACK_IMPORT", "ReaPack: Import repositories...",
-    bind(&ReaPack::importRemote, g_reapack));
-
-  actions->add("REAPACK_MANAGE", "ReaPack: Manage repositories...",
-    bind(&ReaPack::manageRemotes, g_reapack));
-
-  actions->add("REAPACK_ABOUT", "ReaPack: About...",
-    bind(&ReaPack::aboutSelf, g_reapack));
-}
-
-static void setupAPI()
-{
-  g_reapack->addAPI(&API::AboutInstalledPackage);
-  g_reapack->addAPI(&API::AboutRepository);
-  g_reapack->addAPI(&API::AddSetRepository);
-  g_reapack->addAPI(&API::BrowsePackages);
-  g_reapack->addAPI(&API::CompareVersions);
-  g_reapack->addAPI(&API::EnumOwnedFiles);
-  g_reapack->addAPI(&API::FreeEntry);
-  g_reapack->addAPI(&API::GetEntryInfo);
-  g_reapack->addAPI(&API::GetOwner);
-  g_reapack->addAPI(&API::GetRepositoryInfo);
-  g_reapack->addAPI(&API::ProcessQueue);
-}
-
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
   REAPER_PLUGIN_HINSTANCE instance, reaper_plugin_info_t *rec)
 {
   if(!rec) {
-    plugin_register("-hookcommand", (void *)commandHook);
-    plugin_register("-hookcustommenu", (void *)menuHook);
+    plugin_register("-hookcommand",    reinterpret_cast<void *>(commandHook));
+    plugin_register("-hookcustommenu", reinterpret_cast<void *>(menuHook));
 
     delete g_reapack;
 
     return 0;
   }
-
-  if(rec->caller_version != REAPER_PLUGIN_VERSION || !rec->GetFunc)
+  else if(rec->caller_version != REAPER_PLUGIN_VERSION
+      || !loadAPI(rec->GetFunc) || !checkLocation(instance))
     return 0;
 
-  if(!loadAPI(rec->GetFunc))
-    return 0;
+  new ReaPack(instance, rec->hwnd_main);
 
-  if(!checkLocation(instance))
-    return 0;
-
-  new ReaPack(instance);
-
-  setupActions();
-  setupAPI();
-
-  plugin_register("hookcommand", (void *)commandHook);
-  plugin_register("hookcustommenu", (void *)menuHook);
+  plugin_register("hookcommand",    reinterpret_cast<void *>(commandHook));
+  plugin_register("hookcustommenu", reinterpret_cast<void *>(menuHook));
 
   AddExtensionsMainMenu();
 

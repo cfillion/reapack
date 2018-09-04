@@ -78,8 +78,8 @@ Path ReaPack::resourcePath()
   return {GetResourcePath()};
 }
 
-ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
-  : m_instance(instance), m_mainWindow(GetMainHwnd()),
+ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance, HWND mainWindow)
+  : m_instance(instance), m_mainWindow(mainWindow),
     m_useRootPath(resourcePath()), m_config(Path::CONFIG.prependRoot()),
     m_tx{}, m_about{}, m_browser{}, m_manager{}, m_progress{}
 {
@@ -90,11 +90,12 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance)
   RichEdit::Init();
 
   createDirectories();
+  registerSelf();
+  setupActions();
+  setupAPI();
 
   if(m_config.isFirstRun())
     manageRemotes();
-
-  registerSelf();
 
 #ifdef _WIN32
   CleanupTempFiles();
@@ -107,6 +108,39 @@ ReaPack::~ReaPack()
   DownloadContext::GlobalCleanup();
 
   s_instance = nullptr;
+}
+
+void ReaPack::setupActions()
+{
+  m_actions.add("REAPACK_SYNC", "ReaPack: Synchronize packages",
+    std::bind(&ReaPack::synchronizeAll, this));
+
+  m_actions.add("REAPACK_BROWSE", "ReaPack: Browse packages...",
+    std::bind(&ReaPack::browsePackages, this));
+
+  m_actions.add("REAPACK_IMPORT", "ReaPack: Import repositories...",
+    std::bind(&ReaPack::importRemote, this));
+
+  m_actions.add("REAPACK_MANAGE", "ReaPack: Manage repositories...",
+    std::bind(&ReaPack::manageRemotes, this));
+
+  m_actions.add("REAPACK_ABOUT", "ReaPack: About...",
+    std::bind(&ReaPack::aboutSelf, this));
+}
+
+void ReaPack::setupAPI()
+{
+  m_api.emplace_back(&API::AboutInstalledPackage);
+  m_api.emplace_back(&API::AboutRepository);
+  m_api.emplace_back(&API::AddSetRepository);
+  m_api.emplace_back(&API::BrowsePackages);
+  m_api.emplace_back(&API::CompareVersions);
+  m_api.emplace_back(&API::EnumOwnedFiles);
+  m_api.emplace_back(&API::FreeEntry);
+  m_api.emplace_back(&API::GetEntryInfo);
+  m_api.emplace_back(&API::GetOwner);
+  m_api.emplace_back(&API::GetRepositoryInfo);
+  m_api.emplace_back(&API::ProcessQueue);
 }
 
 void ReaPack::synchronizeAll()

@@ -44,11 +44,10 @@ public:
   static ReaPack *instance() { return s_instance; }
   static Path resourcePath();
 
-  ReaPack(REAPER_PLUGIN_HINSTANCE);
+  ReaPack(REAPER_PLUGIN_HINSTANCE, HWND mainWindow);
   ~ReaPack();
 
   ActionList *actions() { return &m_actions; }
-  void addAPI(const APIFunc *func) { m_api.emplace_back(func); }
 
   void synchronizeAll();
   void uninstall(const Remote &);
@@ -74,6 +73,8 @@ private:
 
   void createDirectories();
   void registerSelf();
+  void setupActions();
+  void setupAPI();
   void teardownTransaction();
 
   REAPER_PLUGIN_HINSTANCE m_instance;
