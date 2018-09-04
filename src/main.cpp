@@ -151,17 +151,17 @@ static void setupActions()
 
 static void setupAPI()
 {
-  g_reapack->setupAPI(&API::AboutInstalledPackage);
-  g_reapack->setupAPI(&API::AboutRepository);
-  g_reapack->setupAPI(&API::AddSetRepository);
-  g_reapack->setupAPI(&API::BrowsePackages);
-  g_reapack->setupAPI(&API::CompareVersions);
-  g_reapack->setupAPI(&API::EnumOwnedFiles);
-  g_reapack->setupAPI(&API::FreeEntry);
-  g_reapack->setupAPI(&API::GetEntryInfo);
-  g_reapack->setupAPI(&API::GetOwner);
-  g_reapack->setupAPI(&API::GetRepositoryInfo);
-  g_reapack->setupAPI(&API::ProcessQueue);
+  g_reapack->addAPI(&API::AboutInstalledPackage);
+  g_reapack->addAPI(&API::AboutRepository);
+  g_reapack->addAPI(&API::AddSetRepository);
+  g_reapack->addAPI(&API::BrowsePackages);
+  g_reapack->addAPI(&API::CompareVersions);
+  g_reapack->addAPI(&API::EnumOwnedFiles);
+  g_reapack->addAPI(&API::FreeEntry);
+  g_reapack->addAPI(&API::GetEntryInfo);
+  g_reapack->addAPI(&API::GetOwner);
+  g_reapack->addAPI(&API::GetRepositoryInfo);
+  g_reapack->addAPI(&API::ProcessQueue);
 }
 
 extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(

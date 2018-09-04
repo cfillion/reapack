@@ -18,24 +18,22 @@
 #ifndef REAPACK_REAPACK_HPP
 #define REAPACK_REAPACK_HPP
 
+#include "api.hpp"
 #include "path.hpp"
 
 #include <functional>
 #include <map>
-#include <memory>
-#include <vector>
+#include <list>
 
 #include <reaper_plugin.h>
 
 class About;
-class APIDef;
 class Browser;
 class Config;
 class Manager;
 class Progress;
 class Remote;
 class Transaction;
-struct APIFunc;
 
 #define g_reapack (ReaPack::instance())
 
@@ -62,7 +60,7 @@ public:
     gaccel_register_t *action, const ActionCallback &);
   bool execActions(int id, int);
 
-  void setupAPI(const APIFunc *func);
+  void addAPI(const APIFunc *func) { m_api.emplace_back(func); }
 
   void synchronizeAll();
   void uninstall(const Remote &);
@@ -91,7 +89,7 @@ private:
   void teardownTransaction();
 
   std::map<int, ActionCallback> m_actions;
-  std::vector<std::unique_ptr<APIDef> > m_api;
+  std::list<APIDef> m_api;
 
   Config *m_config;
   Transaction *m_tx;

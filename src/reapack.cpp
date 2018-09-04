@@ -149,11 +149,6 @@ bool ReaPack::execActions(const int id, const int)
   return true;
 }
 
-void ReaPack::setupAPI(const APIFunc *func)
-{
-  m_api.push_back(std::make_unique<APIDef>(func));
-}
-
 void ReaPack::synchronizeAll()
 {
   const vector<Remote> &remotes = m_config->remotes.getEnabled();

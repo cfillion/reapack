@@ -32,6 +32,7 @@ struct APIFunc {
 class APIDef {
 public:
   APIDef(const APIFunc *);
+  APIDef(const APIDef &) = delete;
   ~APIDef();
 
 private:
