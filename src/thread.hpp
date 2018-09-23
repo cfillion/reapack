@@ -89,11 +89,12 @@ private:
   void run();
   ThreadTask *nextTask();
 
-  std::thread m_thread;
-  std::condition_variable m_wake;
   std::mutex m_mutex;
   std::atomic_bool m_exit;
+  std::condition_variable m_wake;
   std::queue<ThreadTask *> m_queue;
+
+  std::thread m_thread;
 };
 
 class ThreadPool {

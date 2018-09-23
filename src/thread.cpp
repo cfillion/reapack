@@ -83,7 +83,7 @@ void ThreadTask::exec()
   ThreadNotifier::get()->notify({this, state});
 };
 
-WorkerThread::WorkerThread() : m_thread(&WorkerThread::run, this), m_exit(false)
+WorkerThread::WorkerThread() : m_exit(false), m_thread(&WorkerThread::run, this)
 {
 }
 
