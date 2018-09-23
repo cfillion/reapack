@@ -20,6 +20,8 @@
 
 #include "action.hpp"
 #include "api.hpp"
+#include "browser.hpp"
+#include "browser_entry.hpp"
 #include "config.hpp"
 #include "path.hpp"
 
@@ -86,10 +88,10 @@ private:
   std::list<APIDef> m_api;
 
   Transaction *m_tx;
-  About *m_about;
-  Browser *m_browser;
-  Manager *m_manager;
-  Progress *m_progress;
+  std::unique_ptr<About> m_about;
+  std::unique_ptr<Browser> m_browser;
+  std::unique_ptr<Manager> m_manager;
+  std::unique_ptr<Progress> m_progress;
 };
 
 #endif

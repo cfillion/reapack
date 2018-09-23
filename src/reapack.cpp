@@ -19,7 +19,6 @@
 
 #include "about.hpp"
 #include "api.hpp"
-#include "browser.hpp"
 #include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
@@ -80,8 +79,7 @@ Path ReaPack::resourcePath()
 
 ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance, HWND mainWindow)
   : m_instance(instance), m_mainWindow(mainWindow),
-    m_useRootPath(resourcePath()), m_config(Path::CONFIG.prependRoot()),
-    m_tx{}, m_about{}, m_browser{}, m_manager{}, m_progress{}
+    m_useRootPath(resourcePath()), m_config(Path::CONFIG.prependRoot()), m_tx{}
 {
   assert(!s_instance);
   s_instance = this;
@@ -104,7 +102,6 @@ ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance, HWND mainWindow)
 
 ReaPack::~ReaPack()
 {
-  Dialog::DestroyAll();
   DownloadContext::GlobalCleanup();
 
   s_instance = nullptr;
@@ -210,11 +207,7 @@ void ReaPack::manageRemotes()
 
   m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow);
   m_manager->show();
-
-  m_manager->setCloseHandler([=] (INT_PTR) {
-    Dialog::Destroy(m_manager);
-    m_manager = nullptr;
-  });
+  m_manager->setCloseHandler([=](INT_PTR) { m_manager.reset(); });
 }
 
 Remote ReaPack::remote(const string &name) const
@@ -247,35 +240,27 @@ void ReaPack::aboutSelf()
 About *ReaPack::about(const bool instantiate)
 {
   if(m_about)
-    return m_about;
+    return m_about.get();
   else if(!instantiate)
     return nullptr;
 
   m_about = Dialog::Create<About>(m_instance, m_mainWindow);
+  m_about->setCloseHandler([=](INT_PTR) { m_about.reset(); });
 
-  m_about->setCloseHandler([=] (INT_PTR) {
-    Dialog::Destroy(m_about);
-    m_about = nullptr;
-  });
-
-  return m_about;
+  return m_about.get();
 }
 
 Browser *ReaPack::browsePackages()
 {
-  if(m_browser) {
+  if(m_browser)
     m_browser->setFocus();
-    return m_browser;
+  else {
+    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow);
+    m_browser->refresh();
+    m_browser->setCloseHandler([=](INT_PTR) { m_browser.reset(); });
   }
 
-  m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow);
-  m_browser->refresh();
-  m_browser->setCloseHandler([=] (INT_PTR) {
-    Dialog::Destroy(m_browser);
-    m_browser = nullptr;
-  });
-
-  return m_browser;
+  return m_browser.get();
 }
 
 Transaction *ReaPack::setupTransaction()
@@ -304,22 +289,21 @@ Transaction *ReaPack::setupTransaction()
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow, m_tx->threadPool());
 
   m_tx->onFinish([=] {
-    Dialog::Destroy(m_progress);
-    m_progress = nullptr;
+    m_progress.reset();
 
     if(!m_tx->isCancelled() && !m_tx->receipt()->empty()) {
-      LockDialog managerLock(m_manager);
-      LockDialog browserLock(m_browser);
+      LockDialog managerLock(m_manager.get());
+      LockDialog browserLock(m_browser.get());
 
       Dialog::Show<Report>(m_instance, m_mainWindow, m_tx->receipt());
     }
   });
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
-    LockDialog aboutLock(m_about);
-    LockDialog browserLock(m_browser);
-    LockDialog managerLock(m_manager);
-    LockDialog progressLock(m_progress);
+    LockDialog aboutLock(m_about.get());
+    LockDialog browserLock(m_browser.get());
+    LockDialog managerLock(m_manager.get());
+    LockDialog progressLock(m_progress.get());
 
     return Dialog::Show<ObsoleteQuery>(m_instance, m_mainWindow,
       &entries, &config()->install.promptObsolete) == IDOK;

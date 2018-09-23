@@ -22,6 +22,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -52,26 +53,19 @@ public:
   };
 
   template<class T, class... Args>
-  static T *Create(REAPER_PLUGIN_HINSTANCE instance, HWND parent, Args&&... args)
+  static std::unique_ptr<T> Create(REAPER_PLUGIN_HINSTANCE instance, HWND parent, Args&&... args)
   {
-    Dialog *dlg = new T(args...);
+    auto dlg = std::make_unique<T>(args...);
     dlg->init(instance, parent, Dialog::Modeless);
 
-    return static_cast<T *>(dlg);
+    return dlg;
   }
 
   template<class T, class... Args>
-  static INT_PTR Show(REAPER_PLUGIN_HINSTANCE i, HWND parent, Args&&... args)
+  static INT_PTR Show(REAPER_PLUGIN_HINSTANCE instance, HWND parent, Args&&... args)
   {
-    Dialog *dlg = new T(args...);
-    INT_PTR ret = dlg->init(i, parent, Dialog::Modal);
-    Destroy(dlg);
-
-    return ret;
+    return std::make_unique<T>(args...)->init(instance, parent, Dialog::Modal);
   }
-
-  static void Destroy(Dialog *);
-  static void DestroyAll();
 
   INT_PTR init(REAPER_PLUGIN_HINSTANCE, HWND, const Modality);
 

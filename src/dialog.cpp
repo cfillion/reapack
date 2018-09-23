@@ -166,18 +166,6 @@ INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
   return false; // makes MSVC happy.
 }
 
-void Dialog::Destroy(Dialog *dlg)
-{
-  delete dlg;
-}
-
-void Dialog::DestroyAll()
-{
-  const auto map = s_instances; // make an immutable copy
-  for(Dialog *dlg : map | boost::adaptors::map_values)
-    Destroy(dlg);
-}
-
 void Dialog::setVisible(const bool visible, HWND handle)
 {
   if(!handle)
