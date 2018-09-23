@@ -19,6 +19,11 @@
 
 #include <reaper_plugin_functions.h>
 
+#ifdef _WIN32
+  typedef void (*_tls_callback_type)(HANDLE, DWORD const dwReason, LPVOID);
+  extern "C" extern const _tls_callback_type __dyn_tls_dtor_callback;
+#endif
+
 using namespace std;
 
 ThreadNotifier *ThreadNotifier::s_instance = nullptr;
@@ -103,6 +108,17 @@ void WorkerThread::run()
     unique_lock<mutex> lock(m_mutex);
     m_wake.wait(lock);
   } while(!m_exit);
+
+#ifdef _WIN32
+  // HACK: Destruct thread-local storage objects earlier on Windows to avoid a
+  // possible deadlock when tearing down the cURL context with active HTTPS
+  // connections on some computers [p=2038163]. InitializeSecurityContext would
+  // hang forever waiting for a semaphore for undetermined reasons...
+  //
+  // Note that the destructors are not called a second time when this function
+  // is invoked by the C++ runtime during the normal thread shutdown procedure.
+  __dyn_tls_dtor_callback(nullptr, DLL_THREAD_DETACH, nullptr);
+#endif
 }
 
 ThreadTask *WorkerThread::nextTask()
