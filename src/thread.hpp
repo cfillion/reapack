@@ -21,7 +21,6 @@
 #include "errors.hpp"
 
 #include <array>
-#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <queue>
@@ -89,8 +88,8 @@ private:
   void run();
   ThreadTask *nextTask();
 
+  bool m_stop;
   std::mutex m_mutex;
-  std::atomic_bool m_exit;
   std::condition_variable m_wake;
   std::queue<ThreadTask *> m_queue;
 

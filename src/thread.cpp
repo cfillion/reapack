@@ -88,26 +88,38 @@ void ThreadTask::exec()
   ThreadNotifier::get()->notify({this, state});
 };
 
-WorkerThread::WorkerThread() : m_exit(false), m_thread(&WorkerThread::run, this)
+WorkerThread::WorkerThread() : m_stop(false), m_thread(&WorkerThread::run, this)
 {
 }
 
 WorkerThread::~WorkerThread()
 {
-  m_exit = true;
+  {
+    std::lock_guard lock(m_mutex);
+    m_stop = true;
+  }
+
   m_wake.notify_one();
   m_thread.join();
 }
 
 void WorkerThread::run()
 {
-  do {
-    while(ThreadTask *task = nextTask())
-      task->exec();
+  unique_lock<mutex> lock(m_mutex);
 
-    unique_lock<mutex> lock(m_mutex);
-    m_wake.wait(lock);
-  } while(!m_exit);
+  while(true) {
+    m_wake.wait(lock, [=] { return !m_queue.empty() || m_stop; });
+
+    if(m_stop)
+      break;
+
+    ThreadTask *task = m_queue.front();
+    m_queue.pop();
+
+    lock.unlock();
+    task->exec();
+    lock.lock();
+  }
 
 #ifdef _WIN32
   // HACK: Destruct thread-local storage objects earlier on Windows to avoid a
