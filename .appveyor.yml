@@ -28,7 +28,8 @@ for:
     build_script: docker exec arch sh -c "echo tup $PLATFORM | sh"
     before_test:
       - if [[ "$PLATFORM" == "x86" ]]; then
-          sudo apt-get install libcurl3:i386 -qq;
+          sudo apt-get update -qq;
+          sudo apt-get install libcurl4:i386 -qq;
         fi
     test_script: '$PLATFORM/bin/test'
     artifacts:
