@@ -46,13 +46,15 @@ public:
   template<class... Args> Action *add(Args&&... args) {
     auto action = std::make_unique<Action>(args...);
     m_list.emplace(action->id(), std::move(action));
+
     return action.get();
   }
 
-  Action *find(Action::CommandID id) const;
   bool run(Action::CommandID id) const;
 
 private:
+  Action *find(Action::CommandID id) const;
+
   std::map<Action::CommandID, std::unique_ptr<Action>> m_list;
 };
 
