@@ -20,8 +20,6 @@
 
 #include "action.hpp"
 #include "api.hpp"
-#include "browser.hpp"
-#include "browser_entry.hpp"
 #include "config.hpp"
 #include "path.hpp"
 
@@ -34,6 +32,7 @@ class Browser;
 class Manager;
 class Progress;
 class Remote;
+class Runner;
 class Transaction;
 
 #define g_reapack (ReaPack::instance())
@@ -46,7 +45,7 @@ public:
   static ReaPack *instance() { return s_instance; }
   static Path resourcePath();
 
-  ReaPack(REAPER_PLUGIN_HINSTANCE, HWND mainWindow);
+  ReaPack(HINSTANCE, HWND mainWindow);
   ~ReaPack();
 
   ActionList *actions() { return &m_actions; }
@@ -61,6 +60,7 @@ public:
   void refreshManager();
   void refreshBrowser();
 
+  void run(std::unique_ptr<Transaction> &);
   Transaction *setupTransaction();
   void commitConfig(bool refresh = true);
   Config *config() { return &m_config; }
@@ -72,9 +72,10 @@ private:
   void registerSelf();
   void setupActions();
   void setupAPI();
-  void teardownTransaction();
 
-  REAPER_PLUGIN_HINSTANCE m_instance;
+  void runnerFinished();
+
+  REAPER_PLUGIN_HINSTANCE m_module;
   HWND m_mainWindow;
 
   UseRootPath m_useRootPath;
@@ -82,7 +83,7 @@ private:
   ActionList m_actions;
   std::list<APIDef> m_api;
 
-  Transaction *m_tx;
+  std::unique_ptr<Runner> m_runner;
   std::unique_ptr<About> m_about;
   std::unique_ptr<Browser> m_browser;
   std::unique_ptr<Manager> m_manager;

@@ -17,6 +17,35 @@
 
 #include "transaction.hpp"
 
+#include "reapack.hpp"
+
+void Transaction::synchronize(const RemotePtr &remote,
+  const std::optional<bool> forceAutoInstall)
+{
+  InstallOpts opts = g_reapack->config()->install;
+  // TODO: BUG? remote->autoInstall taking precedence over forceAutoInstall?
+  opts.autoInstall = remote->autoInstall(forceAutoInstall.value_or(opts.autoInstall));
+
+  m_synchronize.emplace_back(remote, opts, this);
+}
+
+void Transaction::run(Registry *reg, ThreadPool *pool)
+{
+  m_registry = reg;
+  m_threadPool = pool;
+
+  printf("hello!\n");
+
+  if(!synchronize())
+    return;
+
+  // remove();
+  // install();
+}
+
+#if 0
+#include "transaction.hpp"
+
 #include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
@@ -267,3 +296,4 @@ void Transaction::promptObsolete()
   for(const auto &entry : selected)
     m_taskQueues.back().push(make_shared<UninstallTask>(entry, this));
 }
+#endif

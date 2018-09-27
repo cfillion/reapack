@@ -304,9 +304,3 @@ UseRootPath::~UseRootPath()
 {
   Path::s_root = move(m_backup);
 }
-
-TempPath::TempPath(const Path &target)
-  : m_target(target), m_temp(target)
-{
-  m_temp[m_temp.size() - 1] += ".part";
-}

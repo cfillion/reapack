@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_TASK_HPP
+#ifdef REAPACK_TASK_HPP
 #define REAPACK_TASK_HPP
 
 #include "config.hpp"

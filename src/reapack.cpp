@@ -19,6 +19,8 @@
 
 #include "about.hpp"
 #include "api.hpp"
+#include "browser.hpp"
+#include "browser_entry.hpp"
 #include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
@@ -29,6 +31,7 @@
 #include "progress.hpp"
 #include "report.hpp"
 #include "richedit.hpp"
+#include "runner.hpp"
 #include "transaction.hpp"
 #include "win32.hpp"
 
@@ -79,9 +82,9 @@ Path ReaPack::resourcePath()
   return {GetResourcePath()};
 }
 
-ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE instance, HWND mainWindow)
-  : m_instance(instance), m_mainWindow(mainWindow),
-    m_useRootPath(resourcePath()), m_config(Path::CONFIG.prependRoot()), m_tx{}
+ReaPack::ReaPack(REAPER_PLUGIN_HINSTANCE module, HWND mainWindow)
+  : m_module(module), m_mainWindow(mainWindow),
+    m_useRootPath(resourcePath()), m_config(Path::CONFIG.prependRoot())
 {
   assert(!s_instance);
   s_instance = this;
@@ -151,15 +154,12 @@ void ReaPack::synchronizeAll()
     return;
   }
 
-  Transaction *tx = setupTransaction();
-
-  if(!tx)
-    return;
+  auto tx = make_unique<Transaction>();
 
   for(const RemotePtr &remote : remotes)
     tx->synchronize(remote);
 
-  tx->runTasks();
+  run(tx);
 }
 
 void ReaPack::importRemote()
@@ -179,7 +179,7 @@ void ReaPack::manageRemotes()
     return;
   }
 
-  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow);
+  m_manager = Dialog::Create<Manager>(m_module, m_mainWindow);
   m_manager->show();
   m_manager->setCloseHandler([=](INT_PTR) { m_manager.reset(); });
 }
@@ -197,7 +197,7 @@ About *ReaPack::about(const bool instantiate)
   else if(!instantiate)
     return nullptr;
 
-  m_about = Dialog::Create<About>(m_instance, m_mainWindow);
+  m_about = Dialog::Create<About>(m_module, m_mainWindow);
   m_about->setCloseHandler([=](INT_PTR) { m_about.reset(); });
 
   return m_about.get();
@@ -205,87 +205,78 @@ About *ReaPack::about(const bool instantiate)
 
 Browser *ReaPack::browsePackages()
 {
-  if(m_browser)
-    m_browser->setFocus();
-  else {
-    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow);
-    m_browser->refresh();
-    m_browser->setCloseHandler([=](INT_PTR) { m_browser.reset(); });
-  }
+  // if(m_browser)
+  //   m_browser->setFocus();
+  // else {
+  //   m_browser = Dialog::Create<Browser>(m_module, m_mainWindow);
+  //   m_browser->refresh();
+  //   m_browser->setCloseHandler([=](INT_PTR) { m_browser.reset(); });
+  // }
 
   return m_browser.get();
 }
 
-Transaction *ReaPack::setupTransaction()
+void ReaPack::run(std::unique_ptr<Transaction> &tx)
 {
-  if(m_progress && m_progress->isVisible())
-    m_progress->setFocus();
+  if(!m_runner) {
+    m_runner = make_unique<Runner>();
+    m_runner->onFinishAsync >> bind(&ReaPack::runnerFinished, this);
 
-  if(m_tx)
-    return m_tx;
+    m_progress = Dialog::Create<Progress>(m_module, m_mainWindow);
+    m_progress->onCancel >> bind(&Runner::abort, m_runner.get());
 
-  try {
-    m_tx = new Transaction;
-  }
-  catch(const reapack_error &e) {
-    Win32::messageBox(m_mainWindow, String::format(
-      "The following error occurred while creating a transaction:\n\n%s",
-      e.what()
-    ).c_str(), "ReaPack", MB_OK);
-    return nullptr;
+    m_runner->onSetCancellableAsync >> bind(&Progress::setCancellable,
+      m_progress.get(), placeholders::_1);
   }
 
-  assert(!m_progress);
-  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow, m_tx->threadPool());
+  tx->onSetStatusAsync >> bind(&Progress::setStatus, m_progress.get(),
+    std::placeholders::_1);
+  tx->onAddStepAsync >> bind(&Progress::addStep, m_progress.get());
+  tx->onStepFinishedAsync >> bind(&Progress::stepFinished, m_progress.get());
 
-  m_tx->onFinish >> [=] {
-    m_progress.reset();
-
-    if(!m_tx->isCancelled() && !m_tx->receipt()->empty()) {
-      LockDialog managerLock(m_manager.get());
-      LockDialog browserLock(m_browser.get());
-
-      Dialog::Show<Report>(m_instance, m_mainWindow, m_tx->receipt());
-    }
-  };
-
-  m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
+  tx->onPromptObsoleteAsync >> [=] (vector<Registry::Entry> *entries) {
+    // TODO: extract to its own method once Registry::Entry can be forward declared
     LockDialog aboutLock(m_about.get());
     LockDialog browserLock(m_browser.get());
     LockDialog managerLock(m_manager.get());
     LockDialog progressLock(m_progress.get());
 
-    return Dialog::Show<ObsoleteQuery>(m_instance, m_mainWindow,
-      &entries, &config()->install.promptObsolete) == IDOK;
-  });
+    return Dialog::Show<ObsoleteQuery>(m_module, m_mainWindow,
+      entries, &config()->install.promptObsolete) == IDOK;
+  };
 
-  m_tx->setCleanupHandler(bind(&ReaPack::teardownTransaction, this));
-
-  return m_tx;
+  m_runner->push(tx);
 }
 
-void ReaPack::teardownTransaction()
+void ReaPack::runnerFinished()
 {
-  const bool needRefresh = m_tx->receipt()->test(Receipt::RefreshBrowser);
+  m_progress.reset();
 
-  delete m_tx;
-  m_tx = nullptr;
+  // if(!m_tx->isCancelled() && !m_tx->receipt()->empty()) {
+  //   LockDialog managerLock(m_manager.get());
+  //   LockDialog browserLock(m_browser.get());
+  //
+  //   Dialog::Show<Report>(m_module, m_mainWindow, m_tx->receipt());
+  // }
+  //
+  // const bool needRefresh = m_runner->receipt()->test(Receipt::RefreshBrowser);
+  m_runner.reset();
 
-  // Update the browser only after the transaction is deleted because
-  // it must be able to start a new one to load the indexes
-  if(needRefresh)
-    refreshBrowser();
+  // // Update the browser only after the transaction is deleted because
+  // // it must be able to start a new one to load the indexes
+  // if(needRefresh)
+  //   refreshBrowser();
 }
 
 void ReaPack::commitConfig(bool refresh)
 {
-  if(m_tx) {
+  if(m_runner) {
     if(refresh) {
-      m_tx->receipt()->setIndexChanged(); // force browser refresh
-      m_tx->onFinish >> bind(&ReaPack::refreshManager, this);
+      // m_runner->receipt()->setIndexChanged(); // force browser refresh
+      m_runner->onFinishAsync >> bind(&ReaPack::refreshManager, this);
     }
-    m_tx->onFinish >> bind(&Config::write, &m_config);
-    m_tx->runTasks();
+    m_runner->onFinishAsync >> bind(&Config::write, &m_config);
+    // m_tx->runTasks();
   }
   else {
     if(refresh) {

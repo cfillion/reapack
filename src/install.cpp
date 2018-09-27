@@ -16,7 +16,7 @@
  */
 
 #include "task.hpp"
-
+#if 0
 #include "archive.hpp"
 #include "config.hpp"
 #include "download.hpp"
@@ -151,3 +151,4 @@ void PinTask::commit()
   tx()->registry()->setPinned(m_entry, m_pin);
   tx()->receipt()->setPackageChanged();
 }
+#endif

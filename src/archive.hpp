@@ -21,8 +21,6 @@
 #include "path.hpp"
 #include "thread.hpp"
 
-class ThreadPool;
-
 typedef void *zipFile;
 
 namespace Archive {
@@ -55,30 +53,30 @@ private:
 
 typedef std::shared_ptr<ArchiveWriter> ArchiveWriterPtr;
 
-class FileExtractor : public ThreadTask {
-public:
-  FileExtractor(const Path &target, const ArchiveReaderPtr &);
-  const TempPath &path() const { return m_path; }
-
-  bool concurrent() const override { return false; }
-  bool run() override;
-
-private:
-  TempPath m_path;
-  ArchiveReaderPtr m_reader;
-};
-
-class FileCompressor : public ThreadTask {
-public:
-  FileCompressor(const Path &target, const ArchiveWriterPtr &);
-  const Path &path() const { return m_path; }
-
-  bool concurrent() const override { return false; }
-  bool run() override;
-
-private:
-  Path m_path;
-  ArchiveWriterPtr m_writer;
-};
+// class FileExtractor : public ThreadTask {
+// public:
+//   FileExtractor(const Path &target, const ArchiveReaderPtr &);
+//   const TempPath &path() const { return m_path; }
+//
+//   bool concurrent() const override { return false; }
+//   bool run() override;
+//
+// private:
+//   TempPath m_path;
+//   ArchiveReaderPtr m_reader;
+// };
+//
+// class FileCompressor : public ThreadTask {
+// public:
+//   FileCompressor(const Path &target, const ArchiveWriterPtr &);
+//   const Path &path() const { return m_path; }
+//
+//   bool concurrent() const override { return false; }
+//   bool run() override;
+//
+// private:
+//   Path m_path;
+//   ArchiveWriterPtr m_writer;
+// };
 
 #endif

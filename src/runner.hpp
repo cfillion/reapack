@@ -15,40 +15,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REAPACK_PROGRESS_HPP
-#define REAPACK_PROGRESS_HPP
-
-#include "dialog.hpp"
+#ifndef REAPACK_RUNNER_HPP
+#define REAPACK_RUNNER_HPP
 
 #include "event.hpp"
+#include "thread.hpp"
 
-class Progress : public Dialog {
+#include <condition_variable>
+#include <queue>
+#include <thread>
+
+class Registry;
+class Transaction;
+
+class Runner {
 public:
-  Progress();
+  Runner();
+  ~Runner();
 
-  void setStatus(const std::string &);
-  void addStep();
-  void stepFinished();
-  void setCancellable(bool);
+  void push(std::unique_ptr<Transaction> &);
+  void abort();
 
-  Event<void()> onCancel;
-
-protected:
-  void onInit() override;
-  void onCommand(int, int) override;
-  void onTimer(int) override;
+  AsyncEvent<void()> onFinishAsync;
+  AsyncEvent<void(bool)> onSetCancellableAsync;
 
 private:
-  void updateProgress();
+  std::unique_ptr<Registry> loadRegistry();
+  void run();
 
-  std::string m_current;
+  std::mutex m_mutex;
+  bool m_start;
+  bool m_stop;
+  std::queue<std::unique_ptr<Transaction>> m_queue;
+  std::condition_variable m_wake;
 
-  HWND m_label;
-  HWND m_progress;
-  HWND m_cancel;
-
-  int m_done;
-  int m_total;
+  ThreadPool m_pool;
+  std::thread m_thread;
 };
 
 #endif

@@ -88,15 +88,6 @@ bool FS::write(const Path &path, const string &contents)
   return true;
 }
 
-bool FS::rename(const TempPath &path)
-{
-#ifdef _WIN32
-  remove(path.target());
-#endif
-
-  return rename(path.temp(), path.target());
-}
-
 bool FS::rename(const Path &from, const Path &to)
 {
 #ifdef _WIN32

@@ -15,91 +15,134 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "task.hpp"
+#include "transaction.hpp"
 
-#include "config.hpp"
 #include "download.hpp"
+#include "errors.hpp"
 #include "filesystem.hpp"
 #include "index.hpp"
 #include "reapack.hpp"
-#include "transaction.hpp"
+#include "registry.hpp"
+#include "thread.hpp"
 
-SynchronizeTask::SynchronizeTask(const RemotePtr &remote, const bool stale,
-    const bool fullSync, const InstallOpts &opts, Transaction *tx)
-  : Task(tx), m_remote(remote),
-    m_opts(opts), m_stale(stale), m_fullSync(fullSync)
+bool Transaction::synchronize()
 {
-}
+  printf("before: %zu\n", m_synchronize.size());
 
-bool SynchronizeTask::start()
-{
-  const Path &indexPath = Index::pathFor(m_remote->name());
-  const auto &netConfig = g_reapack->config()->network;
+  // remove remotes that were removed since the task was queued
+  m_synchronize.remove_if([](Synchronize &sync) { return !sync.lockRemote(); });
 
-  time_t mtime = 0, now = time(nullptr);
-  FS::mtime(indexPath, &mtime);
+  printf("after: %zu\n", m_synchronize.size());
 
-  const time_t threshold = netConfig.staleThreshold;
-  if(!m_stale && mtime && (!threshold || mtime > now - threshold))
-    return true;
+  for(Synchronize &sync : m_synchronize)
+    sync.fetch();
 
-  auto dl = new FileDownload(indexPath, m_remote->url(),
-    netConfig, Download::NoCacheFlag);
-  dl->setName(m_remote->name());
+  printf("waiting\n");
+  if(!m_threadPool->wait())
+    return false;
 
-  dl->onFinishAsync >> [=] {
-    if(dl->save())
-      tx()->receipt()->setIndexChanged();
-  };
+  onSetStatusAsync("Processing the package list");
 
-  tx()->threadPool()->push(dl);
+  std::vector<Registry::Entry> obsolete;
+
+  for(Synchronize &sync : m_synchronize)
+    sync.process(obsolete);
+
+  if(g_reapack->config()->install.promptObsolete && !obsolete.empty()) {
+    if(*onPromptObsoleteAsync(&obsolete).get()) {
+      for(const auto &entry : obsolete)
+        (void)entry;//uninstall(entry);
+    }
+
+    printf("after prompt\n");
+  }
 
   return true;
 }
 
-void SynchronizeTask::commit()
+Transaction::Synchronize::Synchronize(const RemotePtr &remote,
+    const InstallOpts &opts, Transaction *tx)
+  : m_weakRemote(remote), m_opts(opts), m_tx(tx)
 {
+}
+
+bool Transaction::Synchronize::lockRemote()
+{
+  m_remote = m_weakRemote.lock();
+  return m_remote != nullptr;
+}
+
+void Transaction::Synchronize::fetch()
+{
+  // tx->log(String::format("synchronize: fetching index for %s"));
+
+  // TODO: move to Remote
+  const Path &indexPath = Index::pathFor(m_remote->name());
+  const auto &netConfig = g_reapack->config()->network;
+
+  // time_t mtime = 0, now = time(nullptr);
+  // FS::mtime(indexPath, &mtime);
+
+  // bool m_stale = true;
+  // const time_t threshold = netConfig.staleThreshold;
+  // if(!m_stale && mtime && (!threshold || mtime > now - threshold))
+  //   return;
+
+  m_download = std::make_shared<FileDownload>(indexPath, m_remote->url(),
+      netConfig, Download::NoCacheFlag);
+
+  m_download->onStart >> std::bind(std::ref(m_tx->onSetStatusAsync),
+    String::format("Fetching %s", m_remote->name().c_str()));
+
+  m_download->onFinish >> std::ref(m_tx->onStepFinishedAsync);
+
+  m_tx->onAddStepAsync();
+  m_tx->m_threadPool->push(m_download);
+}
+
+void Transaction::Synchronize::process(std::vector<Registry::Entry> &obsolete)
+{
+  printf("dl = %p\n", m_download.get());
+  if(m_download->failed()) {
+    printf("download failed: %s\n", m_download->errorMessage().c_str());
+    return;
+  }
+
+  printf("saving download\n");
+  m_download->save();
+
   const IndexPtr &index = loadIndex();
 
-  if(!index || !m_fullSync)
+  if(!index)
     return;
 
   for(const Package *pkg : index->packages())
     synchronize(pkg);
 
   if(m_opts.promptObsolete && !m_remote->test(Remote::ProtectedFlag)) {
-    for(const auto &entry : tx()->registry()->getEntries(m_remote->name())) {
+    for(const auto &entry : m_tx->m_registry->getEntries(m_remote->name())) {
       if(!entry.pinned && !index->find(entry.category, entry.package))
-        tx()->addObsolete(entry);
+        obsolete.push_back(entry);
     }
   }
 }
 
-IndexPtr SynchronizeTask::loadIndex()
+IndexPtr Transaction::Synchronize::loadIndex()
 {
   try {
-    IndexPtr index;
-
-    if(!m_stale)
-      index = m_remote->index();
-
-    if(!index)
-      index = m_remote->loadIndex();
-
-    tx()->keepAlive(index);
-
-    return index;
+    return m_remote->loadIndex();
   }
-  catch(const reapack_error &e) {
-    tx()->receipt()->addError({
-      String::format("Could not load repository: %s", e.what()), m_remote->name()});
+  catch(const reapack_error &) {
+    printf("could not load repository\n");
+    // tx()->receipt()->addError({
+    //   String::format("Could not load repository: %s", e.what()), m_remote->name()});
     return nullptr;
   }
 }
 
-void SynchronizeTask::synchronize(const Package *pkg)
+void Transaction::Synchronize::synchronize(const Package *pkg)
 {
-  const auto &entry = tx()->registry()->getEntry(pkg);
+  const auto &entry = m_tx->m_registry->getEntry(pkg);
 
   if(!entry && !m_opts.autoInstall)
     return;
@@ -116,5 +159,6 @@ void SynchronizeTask::synchronize(const Package *pkg)
   else if(entry.pinned || latest->name() < entry.version)
     return;
 
-  tx()->install(latest, entry);
+  printf("installing %s\n", latest->name().toString().c_str());
+  // m_tx->install(latest, entry);
 }

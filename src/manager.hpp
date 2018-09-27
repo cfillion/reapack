@@ -86,7 +86,7 @@ private:
 
   void setChange(int);
   bool confirm() const;
-  bool apply();
+  void apply();
   void reset();
 
   HWND m_apply;

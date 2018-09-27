@@ -68,7 +68,7 @@ void Import::onCommand(const int id, int)
     if(m_pool) {
       disable(getControl(IDOK));
       disable(getControl(IDCANCEL));
-      m_pool->abort();
+      // m_pool->abort();
       m_state = Close;
     }
     else
@@ -87,29 +87,29 @@ void Import::onTimer(int)
 
 ThreadPool *Import::setupPool()
 {
-  if(!m_pool) {
-    m_state = OK;
-    m_pool = new ThreadPool;
-
-    m_pool->onAbort >> [=] { if(!m_state) m_state = Aborted; };
-    m_pool->onDone >> [=] {
-      setWaiting(false);
-
-      if(!m_state)
-        processQueue();
-
-      m_queue.clear();
-
-      delete m_pool;
-      m_pool = nullptr;
-
-      if(m_state == Close)
-        close();
-      else
-        SetFocus(m_url);
-    };
-  }
-
+  // if(!m_pool) {
+  //   m_state = OK;
+  //   m_pool = new ThreadPool;
+  //
+  //   m_pool->onAbort >> [=] { if(!m_state) m_state = Aborted; };
+  //   m_pool->onDone >> [=] {
+  //     setWaiting(false);
+  //
+  //     if(!m_state)
+  //       processQueue();
+  //
+  //     m_queue.clear();
+  //
+  //     delete m_pool;
+  //     m_pool = nullptr;
+  //
+  //     if(m_state == Close)
+  //       close();
+  //     else
+  //       SetFocus(m_url);
+  //   };
+  // }
+  //
   return m_pool;
 }
 
@@ -118,9 +118,9 @@ void Import::fetch()
   if(m_pool) // ignore repeated presses on OK
     return;
 
-  const auto &opts = g_reapack->config()->network;
+  // const auto &opts = g_reapack->config()->network;
 
-  size_t index = 0;
+  // size_t index = 0;
   stringstream stream(Win32::getWindowText(m_url));
   string url;
   while(getline(stream, url)) {
@@ -129,28 +129,28 @@ void Import::fetch()
     if(url.empty())
       continue;
 
-    MemoryDownload *dl = new MemoryDownload(url, opts);
-    ++index;
-
-    dl->onFinishAsync >> [=] {
-      switch(dl->state()) {
-      case ThreadTask::Success:
-        // copy for later use, as `dl` won't be around after this callback
-        if(!read(dl, index))
-          m_pool->abort();
-        break;
-      case ThreadTask::Failure:
-        Win32::messageBox(handle(), String::format(
-          "Download failed: %s\n%s", dl->error().message.c_str(), url.c_str()
-        ).c_str(), TITLE, MB_OK);
-        m_pool->abort();
-        break;
-      default:
-        break;
-      }
-    };
-
-    setupPool()->push(dl);
+    // MemoryDownload *dl = new MemoryDownload(url, opts);
+    // ++index;
+    //
+    // dl->onFinishAsync >> [=] {
+    //   switch(dl->state()) {
+    //   case ThreadTask::Success:
+    //     // copy for later use, as `dl` won't be around after this callback
+    //     if(!read(dl, index))
+    //       m_pool->abort();
+    //     break;
+    //   case ThreadTask::Failure:
+    //     Win32::messageBox(handle(), String::format(
+    //       "Download failed: %s\n%s", dl->error().message.c_str(), url.c_str()
+    //     ).c_str(), TITLE, MB_OK);
+    //     m_pool->abort();
+    //     break;
+    //   default:
+    //     break;
+    //   }
+    // };
+    //
+    // setupPool()->push(dl);
   }
 
   if(m_pool)

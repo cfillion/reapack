@@ -427,7 +427,7 @@ void AboutIndexDelegate::findInBrowser()
 
   ostringstream stream;
   stream << '^' << quoted(pkg->displayName()) << "$ ^" << quoted(remote->name()) << '$';
-  browser->setFilter(stream.str());
+  // browser->setFilter(stream.str());
 }
 
 void AboutIndexDelegate::aboutPackage()
@@ -497,8 +497,8 @@ void AboutIndexDelegate::install()
   if(!remote->isEnabled())
     remote->setEnabled(true);
 
-  if(Transaction *tx = g_reapack->setupTransaction())
-    tx->synchronize(remote, choice == INSTALL_ALL);
+  // if(Transaction *tx = g_reapack->setupTransaction())
+  //   tx->synchronize(remote, choice == INSTALL_ALL);
 
   g_reapack->commitConfig();
 }

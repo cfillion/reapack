@@ -19,10 +19,13 @@
 
 #include "filesystem.hpp"
 #include "reapack.hpp"
+#include "string.hpp"
 
 #include <cassert>
 
 #include <reaper_plugin_functions.h>
+
+#include <curl/curl.h>
 
 using namespace std;
 
@@ -88,7 +91,7 @@ DownloadContext::~DownloadContext()
   curl_easy_cleanup(m_curl);
 }
 
-size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
+static size_t WriteFunction(char *data, size_t rawsize, size_t nmemb, void *ptr)
 {
   const size_t size = rawsize * nmemb;
 
@@ -97,7 +100,7 @@ size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
   return size;
 }
 
-int Download::UpdateProgress(void *ptr, const double, const double,
+static int ProgressFunction(void *ptr, const double, const double,
     const double, const double)
 {
   return static_cast<Download *>(ptr)->aborted();
@@ -108,14 +111,9 @@ Download::Download(const string &url, const NetworkOpts &opts, const int flags)
 {
 }
 
-void Download::setName(const string &name)
-{
-  setSummary("Downloading %s: " + name);
-}
-
 bool Download::run()
 {
-  ostream *stream = openStream();
+  ostream &stream = openStream();
   if(!stream)
     return false;
 
@@ -128,11 +126,11 @@ bool Download::run()
   curl_easy_setopt(ctx, CURLOPT_CAINFO, nullptr);
 #endif
 
-  curl_easy_setopt(ctx, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
+  curl_easy_setopt(ctx, CURLOPT_PROGRESSFUNCTION, ProgressFunction);
   curl_easy_setopt(ctx, CURLOPT_PROGRESSDATA, this);
 
-  curl_easy_setopt(ctx, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(ctx, CURLOPT_WRITEDATA, stream);
+  curl_easy_setopt(ctx, CURLOPT_WRITEFUNCTION, WriteFunction);
+  curl_easy_setopt(ctx, CURLOPT_WRITEDATA, &stream);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
@@ -147,9 +145,7 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    const string &err = String::format(
-      "%s (%d): %s", curl_easy_strerror(res), res, errbuf);
-    setError({err, m_url});
+    m_error = String::format("%s (%d): %s", curl_easy_strerror(res), res, errbuf);
     return false;
   }
 
@@ -159,35 +155,23 @@ bool Download::run()
 MemoryDownload::MemoryDownload(const string &url, const NetworkOpts &opts, int flags)
   : Download(url, opts, flags)
 {
-  setName(url);
 }
 
 FileDownload::FileDownload(const Path &target, const string &url,
     const NetworkOpts &opts, int flags)
-  : Download(url, opts, flags), m_path(target)
+  : Download(url, opts, flags), m_file(target)
 {
-  setName(target.join());
 }
 
-bool FileDownload::save()
+ostream &FileDownload::openStream()
 {
-  if(state() == Success)
-    return FS::rename(m_path);
-  else
-    return FS::remove(m_path.temp());
-}
+  if(!m_file.open())
+    m_error = FS::lastError();
 
-ostream *FileDownload::openStream()
-{
-  if(FS::open(m_stream, m_path.temp()))
-    return &m_stream;
-  else {
-    setError({FS::lastError(), m_path.temp().join()});
-    return nullptr;
-  }
+  return m_file;
 }
 
 void FileDownload::closeStream()
 {
-  m_stream.close();
+  m_file.close();
 }

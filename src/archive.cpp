@@ -84,36 +84,36 @@ void Archive::import(const string &path)
       "Cannot locate the table of contents (%d)", err));
 
   // starting import, do not abort process (eg. by throwing) at this point
-  if(!(state.m_tx = g_reapack->setupTransaction()))
-    return;
-
-  string line;
-  while(getline(toc, line)) {
-    if(line.size() <= 5) // 5 is the length of the line type prefix
-      continue;
-
-    const string &data = line.substr(5);
-
-    try {
-      switch(line[0]) {
-      case 'R':
-        state.importRemote(data);
-        break;
-      case 'P':
-        state.importPackage(data);
-        break;
-      default:
-        throw reapack_error(String::format("Unknown token '%s' (skipping)",
-          line.substr(0, 4).c_str()));
-      }
-    }
-    catch(const reapack_error &e) {
-      state.m_tx->receipt()->addError({e.what(), path});
-    }
-  }
-
-  g_reapack->config()->write();
-  state.m_tx->runTasks();
+  // if(!(state.m_tx = g_reapack->setupTransaction()))
+  //   return;
+  //
+  // string line;
+  // while(getline(toc, line)) {
+  //   if(line.size() <= 5) // 5 is the length of the line type prefix
+  //     continue;
+  //
+  //   const string &data = line.substr(5);
+  //
+  //   try {
+  //     switch(line[0]) {
+  //     case 'R':
+  //       state.importRemote(data);
+  //       break;
+  //     case 'P':
+  //       state.importPackage(data);
+  //       break;
+  //     default:
+  //       throw reapack_error(String::format("Unknown token '%s' (skipping)",
+  //         line.substr(0, 4).c_str()));
+  //     }
+  //   }
+  //   catch(const reapack_error &e) {
+  //     state.m_tx->receipt()->addError({e.what(), path});
+  //   }
+  // }
+  //
+  // g_reapack->config()->write();
+  // state.m_tx->runTasks();
 }
 
 void ImportArchive::importRemote(const string &data)
@@ -159,7 +159,7 @@ void ImportArchive::importPackage(const string &data)
       packageName.c_str(), versionName.c_str()));
   }
 
-  m_tx->install(ver, pinned, m_reader);
+  // m_tx->install(ver, pinned, m_reader);
 }
 
 ArchiveReader::ArchiveReader(const Path &path)
@@ -219,31 +219,31 @@ int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
   return unzCloseCurrentFile(m_zip);
 }
 
-FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
-  : m_path(target), m_reader(reader)
-{
-  setSummary("Extracting %s: " + target.join());
-}
-
-bool FileExtractor::run()
-{
-  ofstream stream;
-  if(!FS::open(stream, m_path.temp())) {
-    setError({FS::lastError(), m_path.temp().join()});
-    return false;
-  }
-
-  const int error = m_reader->extractFile(m_path.target(), stream);
-  stream.close();
-
-  if(error) {
-    setError({String::format("Failed to extract file (%d)", error),
-      m_path.target().join()});
-    return false;
-  }
-
-  return true;
-}
+// FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
+//   : m_path(target), m_reader(reader)
+// {
+//   setSummary("Extracting %s: " + target.join());
+// }
+//
+// bool FileExtractor::run()
+// {
+//   ofstream stream;
+//   if(!FS::open(stream, m_path.temp())) {
+//     setError({FS::lastError(), m_path.temp().join()});
+//     return false;
+//   }
+//
+//   const int error = m_reader->extractFile(m_path.target(), stream);
+//   stream.close();
+//
+//   if(error) {
+//     setError({String::format("Failed to extract file (%d)", error),
+//       m_path.target().join()});
+//     return false;
+//   }
+//
+//   return true;
+// }
 
 ArchiveWriter::ArchiveWriter(const Path &path)
 {
@@ -301,29 +301,29 @@ int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
   return zipCloseFileInZip(m_zip);
 }
 
-FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &writer)
-  : m_path(target), m_writer(writer)
-{
-  setSummary("Compressing %s: " + target.join());
-}
-
-bool FileCompressor::run()
-{
-  ifstream stream;
-  if(!FS::open(stream, m_path)) {
-    setError({
-      String::format("Could not open file for export (%s)", FS::lastError()),
-      m_path.join()});
-    return false;
-  }
-
-  const int error = m_writer->addFile(m_path, stream);
-  stream.close();
-
-  if(error) {
-    setError({String::format("Failed to compress file (%d)", error), m_path.join()});
-    return false;
-  }
-
-  return true;
-}
+// FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &writer)
+//   : m_path(target), m_writer(writer)
+// {
+//   setSummary("Compressing %s: " + target.join());
+// }
+//
+// bool FileCompressor::run()
+// {
+//   ifstream stream;
+//   if(!FS::open(stream, m_path)) {
+//     setError({
+//       String::format("Could not open file for export (%s)", FS::lastError()),
+//       m_path.join()});
+//     return false;
+//   }
+//
+//   const int error = m_writer->addFile(m_path, stream);
+//   stream.close();
+//
+//   if(error) {
+//     setError({String::format("Failed to compress file (%d)", error), m_path.join()});
+//     return false;
+//   }
+//
+//   return true;
+// }

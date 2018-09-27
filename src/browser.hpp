@@ -111,7 +111,7 @@ private:
   View currentView() const;
   void copy();
   bool confirm() const;
-  bool apply();
+  void apply();
 
   // Only call the following functions using currentDo or selectionDo (listDo)
   // (so that the display label is updated and the list sorted and filtered as

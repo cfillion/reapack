@@ -26,8 +26,8 @@ using namespace std;
 DEFINE_API(void, BrowsePackages, ((const char*, filter)),
 R"(Opens the package browser with the given filter string.)",
 {
-  if(Browser *browser = g_reapack->browsePackages())
-    browser->setFilter(filter);
+  // if(Browser *browser = g_reapack->browsePackages())
+  //   browser->setFilter(filter);
 });
 
 DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))

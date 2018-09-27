@@ -165,19 +165,19 @@ bool Remote::fetchIndex(const function<void (const IndexPtr &)> &cb)
     return true;
   }
 
-  Transaction *tx = g_reapack->setupTransaction();
-
-  if(!tx)
-    return false;
-
-  tx->fetchIndex(shared_from_this());
-
-  tx->onFinish >> [=] {
-    if(const IndexPtr &index = this->index())
-      cb(index);
-  };
-
-  tx->runTasks();
+  // Transaction *tx = g_reapack->setupTransaction();
+  //
+  // if(!tx)
+  //   return false;
+  //
+  // tx->fetchIndex(shared_from_this());
+  //
+  // tx->onFinish >> [=] {
+  //   if(const IndexPtr &index = this->index())
+  //     cb(index);
+  // };
+  //
+  // tx->runTasks();
 
   return true;
 }

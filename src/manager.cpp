@@ -182,7 +182,9 @@ void Manager::onCommand(const int id, int)
   case IDOK:
   case IDAPPLY:
     if(confirm()) {
-      if(apply() && id == IDOK)
+      apply();
+
+      if(id == IDOK)
         close();
     }
     else {
@@ -427,12 +429,12 @@ void Manager::refreshIndex()
   if(!m_list->hasSelection())
     return;
 
-  if(Transaction *tx = g_reapack->setupTransaction()) {
-    for(const int i : m_list->selection())
-      tx->fetchIndex(getRemote(i), true);
+  auto tx = make_unique<Transaction>();
 
-    tx->runTasks();
-  }
+  // for(const int i : m_list->selection())
+  //   tx->fetchIndex(getRemote(i), true);
+
+  g_reapack->run(tx);
 }
 
 void Manager::toggle(optional<bool> &setting, const bool current)
@@ -519,10 +521,9 @@ void Manager::exportArchive()
     "Export offline archive", Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(!path.empty()) {
-    if(Transaction *tx = g_reapack->setupTransaction()) {
-      tx->exportArchive(path);
-      tx->runTasks();
-    }
+    auto tx = make_unique<Transaction>();
+    // tx->exportArchive(path);
+    g_reapack->run(tx);
   }
 }
 
@@ -587,15 +588,12 @@ bool Manager::confirm() const
   ).c_str(), "ReaPack Query", MB_YESNO);
 }
 
-bool Manager::apply()
+void Manager::apply()
 {
   if(!m_changes)
-    return true;
+    return;
 
-  Transaction *tx = g_reapack->setupTransaction();
-
-  if(!tx)
-    return false;
+  auto tx = make_unique<Transaction>();
 
   if(m_autoInstall)
     g_reapack->config()->install.autoInstall = *m_autoInstall;
@@ -608,7 +606,7 @@ bool Manager::apply()
 
   for(const RemoteMods &mods : m_mods) {
     if(mods.uninstall) {
-      tx->uninstall(mods.remote);
+      // tx->uninstall(mods.remote);
       continue;
     }
 
@@ -621,9 +619,8 @@ bool Manager::apply()
 
   reset();
 
-  g_reapack->commitConfig();
-
-  return true;
+  g_reapack->run(tx);
+  g_reapack->commitConfig(); // TODO: remove this and save config directly?
 }
 
 void Manager::reset()

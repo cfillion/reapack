@@ -180,7 +180,9 @@ void Browser::onCommand(const int id, const int event)
   case IDOK:
   case IDAPPLY:
     if(confirm()) {
-      if(!apply() || id == IDAPPLY)
+      apply();
+
+      if(id == IDAPPLY)
         break;
     }
     else
@@ -433,32 +435,32 @@ void Browser::refresh(const bool stale)
     return;
   }
 
-  if(Transaction *tx = g_reapack->setupTransaction()) {
-    const bool isFirstLoad = m_loadState == Init;
-    m_loadState = Loading;
-
-    for(const RemotePtr &remote : remotes)
-      tx->fetchIndex(remote, stale);
-
-    tx->onFinish >> [=] {
-      if(isFirstLoad || isVisible()) {
-        // TODO: don't copy the range into a temporary vector
-        populate({remotes.begin(), remotes.end()}, tx->registry());
-
-        // Ignore the next call to refreshBrowser() if we know we'll be
-        // requested to handle the very same transaction.
-        m_loadState = tx->receipt()->test(Receipt::RefreshBrowser) ?
-          DeferredLoaded : Loaded;
-      }
-      else {
-        // User manually asked to refresh the browser but closed the window
-        // before it could finished fetching the up to date indexes.
-        close();
-      }
-    };
-
-    tx->runTasks();
-  }
+  // if(Transaction *tx = g_reapack->setupTransaction()) {
+  //   const bool isFirstLoad = m_loadState == Init;
+  //   m_loadState = Loading;
+  //
+  //   for(const RemotePtr &remote : remotes)
+  //     tx->fetchIndex(remote, stale);
+  //
+  //   tx->onFinish >> [=] {
+  //     if(isFirstLoad || isVisible()) {
+  //       // TODO: don't copy the range into a temporary vector
+  //       populate({remotes.begin(), remotes.end()}, tx->registry());
+  //
+  //       // Ignore the next call to refreshBrowser() if we know we'll be
+  //       // requested to handle the very same transaction.
+  //       m_loadState = tx->receipt()->test(Receipt::RefreshBrowser) ?
+  //         DeferredLoaded : Loaded;
+  //     }
+  //     else {
+  //       // User manually asked to refresh the browser but closed the window
+  //       // before it could finished fetching the up to date indexes.
+  //       close();
+  //     }
+  //   };
+  //
+  //   tx->runTasks();
+  // }
 }
 
 void Browser::populate(const vector<RemotePtr> &remotes, const Registry *reg)
@@ -840,50 +842,47 @@ bool Browser::confirm() const
   ).c_str(), "ReaPack Query", MB_YESNO);
 }
 
-bool Browser::apply()
+void Browser::apply()
 {
   if(m_actions.empty())
-    return true;
+    return;
 
-  Transaction *tx = g_reapack->setupTransaction();
-
-  if(!tx)
-    return false;
+  auto tx = make_unique<Transaction>();
 
   for(Entry *entry : m_actions) {
     if(entry->target) {
       const Version *target = *entry->target;
 
       if(target)
-        tx->install(target, entry->pin.value_or(false));
+        ;//tx->install(target, entry->pin.value_or(false));
       else
-        tx->uninstall(entry->regEntry);
+        ;//tx->uninstall(entry->regEntry);
 
       entry->target = nullopt;
     }
     else if(entry->pin) {
-      tx->setPinned(entry->regEntry, *entry->pin);
+      // tx->setPinned(entry->regEntry, *entry->pin);
       entry->pin = nullopt;
     }
   }
 
+  g_reapack->run(tx);
+
   m_actions.clear();
   disable(m_applyBtn);
 
-  if(!tx->runTasks()) {
-    // This is an asynchronous transaction.
-    // Updating the state column of all rows (not just visible ones since the
-    // hidden rows can be filtered into view again by user at any time) right away
-    // to give visual feedback.
-    ListView::BeginEdit edit(m_list);
+  // The transaction is run asynchronously.
+  // Updating the state column of all rows (not just visible ones since the
+  // hidden rows can be filtered into view again by user at any time) right away
+  // to give visual feedback.
+  ListView::BeginEdit edit(m_list);
 
-    if(currentView() == QueuedView)
-      m_list->clear();
-    else {
-      for(int i = 0, count = m_list->rowCount(); i < count; ++i)
-        m_list->row(i)->setCell(0, getEntry(i)->displayState());
-    }
+  if(currentView() == QueuedView)
+    m_list->clear();
+  else {
+    for(int i = 0, count = m_list->rowCount(); i < count; ++i)
+      m_list->row(i)->setCell(0, getEntry(i)->displayState());
   }
 
-  return true;
+  return;
 }

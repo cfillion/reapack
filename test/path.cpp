@@ -327,13 +327,6 @@ TEST_CASE("append full paths", M) {
   REQUIRE(a == Path("a/b/c/d/e/f"));
 }
 
-TEST_CASE("temporary path", M) {
-  TempPath a(Path("hello/world"));
-
-  REQUIRE(a.target() == Path("hello/world"));
-  REQUIRE(a.temp() == Path("hello/world.part"));
-}
-
 TEST_CASE("path starts with", M) {
   const Path ref("a/b");
 

@@ -1,111 +1,77 @@
-/* ReaPack: Package manager for REAPER
- * Copyright (C) 2015-2018  Christian Fillion
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #ifndef REAPACK_THREAD_HPP
 #define REAPACK_THREAD_HPP
 
-#include "errors.hpp"
 #include "event.hpp"
 
 #include <array>
+#include <atomic>
 #include <condition_variable>
-#include <functional>
+#include <memory>
 #include <queue>
 #include <thread>
-#include <unordered_set>
 
-class ThreadTask {
+class ThreadPool;
+
+class WorkUnit {
 public:
-  enum State {
-    Idle,
-    Queued,
-    Running,
-    Success,
-    Failure,
-    Aborted,
-  };
+  WorkUnit() : m_aborted(false) {}
+  virtual ~WorkUnit() = default;
 
-  ThreadTask();
-  virtual ~ThreadTask();
+  Event<void()> onStart, onFinish;
 
-  virtual bool concurrent() const = 0;
-
-  void exec();  // runs in the current thread
-  const std::string &summary() const { return m_summary; }
-  State state() const { return m_state; }
-  void setError(const ErrorInfo &err) { m_error = err; }
-  const ErrorInfo &error() { return m_error; }
-
-  bool aborted() const { return m_abort; }
-  void abort() { m_abort = true; }
-
-  AsyncEvent<void()> onStartAsync;
-  AsyncEvent<void()> onFinishAsync;
-
-protected:
   virtual bool run() = 0;
 
-  void setSummary(const std::string &s) { m_summary = s; }
+  void abort() { m_aborted = true; }
+  bool aborted() { return m_aborted; }
 
 private:
-  std::string m_summary;
-  State m_state;
-  ErrorInfo m_error;
-  std::atomic_bool m_abort;
+  std::atomic_bool m_aborted;
 };
 
 class WorkerThread {
 public:
-  WorkerThread();
+
+  WorkerThread(ThreadPool *);
   ~WorkerThread();
 
-  void push(ThreadTask *);
-  void clear();
+  void push(const std::shared_ptr<WorkUnit> &);
+  void abort();
+  bool idling();
 
 private:
   void run();
-  ThreadTask *nextTask();
 
-  bool m_stop;
+  ThreadPool *m_pool;
+
   std::mutex m_mutex;
+  bool m_stop;
+  WorkUnit *m_current;
   std::condition_variable m_wake;
-  std::queue<ThreadTask *> m_queue;
+  std::queue<std::shared_ptr<WorkUnit>> m_queue;
 
   std::thread m_thread;
 };
 
 class ThreadPool {
 public:
-  ThreadPool() {}
+  ThreadPool();
   ThreadPool(const ThreadPool &) = delete;
-  ~ThreadPool();
 
-  void push(ThreadTask *);
+  void push(const std::shared_ptr<WorkUnit> &);
+
+  bool wait();
   void abort();
 
-  bool idle() const { return m_running.empty(); }
+  void threadIdle(WorkerThread *);
 
-  Event<void(ThreadTask *)> onPush;
-  Event<void()> onAbort;
-  Event<void()> onDone;
+  Event<void(bool)> onCancellableChanged;
 
 private:
-  std::array<std::unique_ptr<WorkerThread>, 3> m_pool;
-  std::unordered_set<ThreadTask *> m_running;
+  size_t m_nextThread;
+  std::atomic_bool m_aborted;
+  std::mutex m_mutex;
+  std::condition_variable m_cv;
+  std::array<std::unique_ptr<WorkerThread>, 3> m_workers;
 };
 
 #endif

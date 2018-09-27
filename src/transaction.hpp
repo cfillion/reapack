@@ -18,7 +18,61 @@
 #ifndef REAPACK_TRANSACTION_HPP
 #define REAPACK_TRANSACTION_HPP
 
+#include "config.hpp"
 #include "event.hpp"
+#include "registry.hpp"
+
+#include <list>
+#include <optional>
+
+class FileDownload;
+class Index;
+class Package;
+class Remote;
+class ThreadPool;
+
+class Transaction {
+public:
+  void synchronize(const RemotePtr &,
+    const std::optional<bool> forceAutoInstall = std::nullopt);
+  void run(Registry *, ThreadPool *);
+
+  AsyncEvent<void(std::string)> onSetStatusAsync;
+  AsyncEvent<void()> onAddStepAsync;
+  AsyncEvent<void()> onStepFinishedAsync;
+  AsyncEvent<bool(std::vector<Registry::Entry> *)> onPromptObsoleteAsync;
+
+private:
+  class Synchronize {
+  public:
+    Synchronize(const std::shared_ptr<Remote> &, const InstallOpts &, Transaction *);
+
+    bool lockRemote();
+    void fetch();
+    void process(std::vector<Registry::Entry> &obsolete);
+
+  private:
+    std::shared_ptr<const Index> loadIndex();
+    void synchronize(const Package *);
+
+    std::weak_ptr<Remote> m_weakRemote;
+    InstallOpts m_opts;
+    std::shared_ptr<Remote> m_remote;
+    std::shared_ptr<FileDownload> m_download;
+
+    Transaction *m_tx;
+  };
+
+  bool synchronize();
+
+  std::list<Synchronize> m_synchronize;
+
+  // EventSink *m_notify;
+  Registry *m_registry;
+  ThreadPool *m_threadPool;
+};
+
+#if 1 == 0
 #include "receipt.hpp"
 #include "registry.hpp"
 #include "task.hpp"
@@ -117,5 +171,6 @@ private:
   CleanupHandler m_cleanupHandler;
   ObsoleteHandler m_promptObsolete;
 };
+#endif
 
 #endif

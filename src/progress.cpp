@@ -17,20 +17,18 @@
 
 #include "progress.hpp"
 
-#include "thread.hpp"
+// #include "thread.hpp"
 #include "resource.hpp"
+#include "string.hpp"
 #include "win32.hpp"
 
 #include <sstream>
 
 using namespace std;
 
-Progress::Progress(ThreadPool *pool)
-  : Dialog(IDD_PROGRESS_DIALOG),
-    m_pool(pool), m_label(nullptr), m_progress(nullptr),
-    m_done(0), m_total(0)
+Progress::Progress()
+  : Dialog(IDD_PROGRESS_DIALOG), m_done(0), m_total(0)
 {
-  m_pool->onPush >> bind(&Progress::addTask, this, placeholders::_1);
 }
 
 void Progress::onInit()
@@ -39,19 +37,23 @@ void Progress::onInit()
 
   m_label = getControl(IDC_LABEL);
   m_progress = getControl(IDC_PROGRESS);
+  m_cancel = getControl(IDCANCEL);
 
   Win32::setWindowText(m_label, "Initializing...");
+
+  disable(m_cancel);
+  startTimer(100);
 }
 
 void Progress::onCommand(const int id, int)
 {
   switch(id) {
   case IDCANCEL:
-    m_pool->abort();
+    onCancel();
 
     // don't wait until the current downloads are finished
     // before getting out of the user way
-    hide();
+    // hide();
     break;
   }
 }
@@ -67,33 +69,32 @@ void Progress::onTimer(const int id)
   stopTimer(id);
 }
 
-void Progress::addTask(ThreadTask *task)
+void Progress::setStatus(const std::string &status)
+{
+  m_current = status;
+  updateProgress();
+}
+
+void Progress::addStep()
 {
   m_total++;
   updateProgress();
+}
 
-  if(!isVisible())
-    startTimer(100);
+void Progress::stepFinished()
+{
+  m_done++;
+  updateProgress();
+}
 
-  task->onStartAsync >> [=] {
-    m_current = task->summary();
-    updateProgress();
-  };
-
-  task->onFinishAsync >> [=] {
-    m_done++;
-    updateProgress();
-  };
+void Progress::setCancellable(const bool cancellable)
+{
+  setEnabled(cancellable, m_cancel);
 }
 
 void Progress::updateProgress()
 {
-  Win32::setWindowText(m_label, String::format(m_current.c_str(),
-    String::format("%s of %s",
-      String::number(min(m_done + 1, m_total)).c_str(),
-      String::number(m_total).c_str()
-    ).c_str()
-  ).c_str());
+  Win32::setWindowText(m_label, m_current.c_str());
 
   const double pos = static_cast<double>(min(m_done+1, m_total)) / max(2, m_total);
   const int percent = static_cast<int>(pos * 100);

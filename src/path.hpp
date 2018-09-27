@@ -90,16 +90,4 @@ private:
   Path m_backup;
 };
 
-class TempPath {
-public:
-  TempPath(const Path &target);
-
-  const Path &target() const { return m_target; }
-  const Path &temp() const { return m_temp; }
-
-private:
-  Path m_target;
-  Path m_temp;
-};
-
 #endif

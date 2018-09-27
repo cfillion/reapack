@@ -26,7 +26,7 @@
 #include "filesystem.hpp"
 
 using namespace std;
-
+#if 0
 UninstallTask::UninstallTask(const Registry::Entry &re, Transaction *tx)
   : Task(tx), m_entry(move(re))
 {
@@ -79,3 +79,4 @@ void UninstallRemoteTask::commit()
   FS::remove(Index::pathFor(m_remote->name()));
   g_reapack->config()->remotes.remove(m_remote);
 }
+#endif
