@@ -21,8 +21,8 @@
 #include "dialog.hpp"
 
 #include <boost/logic/tribool.hpp>
-#include <boost/optional.hpp>
 #include <map>
+#include <optional>
 
 class ListView;
 class Menu;
@@ -47,8 +47,8 @@ protected:
 
 private:
   struct RemoteMods {
-    boost::optional<bool> enable;
-    boost::optional<tribool> autoInstall;
+    std::optional<bool> enable;
+    std::optional<tribool> autoInstall;
     operator bool() const { return enable || autoInstall; }
   };
 
@@ -62,7 +62,7 @@ private:
   void setRemoteAutoInstall(const tribool &);
   tribool remoteAutoInstall(const Remote &) const;
   void uninstall();
-  void toggle(boost::optional<bool> &, bool current);
+  void toggle(std::optional<bool> &, bool current);
   void refreshIndex();
   void copyUrl();
   void launchBrowser();
@@ -86,9 +86,9 @@ private:
 
   std::map<Remote, RemoteMods> m_mods;
   std::set<Remote> m_uninstall;
-  boost::optional<bool> m_autoInstall;
-  boost::optional<bool> m_bleedingEdge;
-  boost::optional<bool> m_promptObsolete;
+  std::optional<bool> m_autoInstall;
+  std::optional<bool> m_bleedingEdge;
+  std::optional<bool> m_promptObsolete;
 
   Serializer m_serializer;
 };

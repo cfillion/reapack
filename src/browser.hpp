@@ -22,10 +22,10 @@
 
 #include "package.hpp"
 
-#include <boost/optional.hpp>
 #include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -133,7 +133,7 @@ private:
   LoadState m_loadState;
   int m_currentIndex;
 
-  boost::optional<Package::Type> m_typeFilter;
+  std::optional<Package::Type> m_typeFilter;
   std::vector<Entry> m_entries;
   std::list<Entry *> m_actions;
 

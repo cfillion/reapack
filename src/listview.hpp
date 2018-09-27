@@ -23,9 +23,9 @@
 #include "filter.hpp"
 #include "serializer.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
+#include <optional>
 #include <vector>
 
 class Menu;
@@ -201,8 +201,8 @@ private:
   bool m_customizable;
   std::vector<Column> m_cols;
   std::vector<RowPtr> m_rows;
-  boost::optional<Sort> m_sort;
-  boost::optional<Sort> m_defaultSort;
+  std::optional<Sort> m_sort;
+  std::optional<Sort> m_defaultSort;
 
   VoidSignal m_onSelect;
   VoidSignal m_onIconClick;

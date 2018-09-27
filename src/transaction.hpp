@@ -23,10 +23,10 @@
 #include "task.hpp"
 #include "thread.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <set>
 #include <unordered_set>
 
@@ -56,7 +56,7 @@ public:
   void fetchIndexes(const std::vector<Remote> &, bool stale = false);
   std::vector<IndexPtr> getIndexes(const std::vector<Remote> &) const;
   void synchronize(const Remote &,
-    boost::optional<bool> forceAutoInstall = boost::none);
+    const std::optional<bool> &forceAutoInstall = std::nullopt);
   void install(const Version *, bool pin = false, const ArchiveReaderPtr & = nullptr);
   void install(const Version *, const Registry::Entry &oldEntry,
     bool pin = false, const ArchiveReaderPtr & = nullptr);

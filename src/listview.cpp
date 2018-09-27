@@ -337,8 +337,8 @@ void ListView::reset()
   m_cols.clear();
 
   m_customizable = false;
-  m_sort = boost::none;
-  m_defaultSort = boost::none;
+  m_sort = nullopt;
+  m_defaultSort = nullopt;
 }
 
 void ListView::setSelected(const int index, const bool select)

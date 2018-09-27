@@ -22,8 +22,8 @@
 #include "listview.hpp"
 #include "registry.hpp"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 class Index;
 class Menu;
@@ -53,8 +53,8 @@ public:
   Entry(const Package *, const Registry::Entry &, const IndexPtr &);
   Entry(const Registry::Entry &, const IndexPtr &);
 
-  boost::optional<const Version *> target;
-  boost::optional<bool> pin;
+  std::optional<const Version *> target;
+  std::optional<bool> pin;
 
   std::string displayState() const;
   const std::string &indexName() const;

@@ -353,7 +353,7 @@ void Manager::toggleEnabled()
     const bool enable = !mods->enable.value_or(remote.isEnabled());
 
     if(remote.isEnabled() == enable)
-      mods->enable = boost::none;
+      mods->enable = nullopt;
     else
       mods->enable = enable;
 
@@ -378,7 +378,7 @@ void Manager::setRemoteAutoInstall(const tribool &enabled)
       || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
 
     if(same)
-      mods->autoInstall = boost::none;
+      mods->autoInstall = nullopt;
     else
       mods->autoInstall = enabled;
   });
@@ -430,7 +430,7 @@ void Manager::uninstall()
   }
 }
 
-void Manager::toggle(boost::optional<bool> &setting, const bool current)
+void Manager::toggle(optional<bool> &setting, const bool current)
 {
   setting = !setting.value_or(current);
   setChange(*setting == current ? -1 : 1);
@@ -655,9 +655,9 @@ void Manager::reset()
 {
   m_mods.clear();
   m_uninstall.clear();
-  m_autoInstall = boost::none;
-  m_bleedingEdge = boost::none;
-  m_promptObsolete = boost::none;
+  m_autoInstall = nullopt;
+  m_bleedingEdge = nullopt;
+  m_promptObsolete = nullopt;
 
   m_changes = 0;
   disable(m_apply);

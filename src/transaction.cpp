@@ -50,7 +50,7 @@ Transaction::Transaction()
 }
 
 void Transaction::synchronize(const Remote &remote,
-  const boost::optional<bool> forceAutoInstall)
+  const std::optional<bool> &forceAutoInstall)
 {
   if(m_syncedRemotes.count(remote.name()))
     return;

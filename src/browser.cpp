@@ -173,7 +173,7 @@ void Browser::onCommand(const int id, const int event)
     g_reapack->manageRemotes();
     break;
   case ACTION_FILTERTYPE:
-    m_typeFilter = boost::none;
+    m_typeFilter = nullopt;
     fillList();
     break;
   case IDOK:
@@ -697,7 +697,7 @@ void Browser::togglePin(const int index)
   const bool newVal = !entry->pin.value_or(entry->regEntry.pinned);
 
   if(newVal == entry->regEntry.pinned)
-    entry->pin = boost::none;
+    entry->pin = nullopt;
   else
     entry->pin = newVal;
 
@@ -714,7 +714,7 @@ void Browser::toggleTarget(const int index, const Version *target)
   Entry *entry = getEntry(index);
 
   if(entry->target && *entry->target == target)
-    entry->target = boost::none;
+    entry->target = nullopt;
   else
     entry->target = target;
 
@@ -726,7 +726,7 @@ void Browser::resetTarget(const int index)
   Entry *entry = getEntry(index);
 
   if(entry->target) {
-    entry->target = boost::none;
+    entry->target = nullopt;
     updateAction(index);
   }
 }
@@ -736,9 +736,9 @@ void Browser::resetActions(const int index)
   Entry *entry = getEntry(index);
 
   if(entry->target)
-    entry->target = boost::none;
+    entry->target = nullopt;
   if(entry->pin)
-    entry->pin = boost::none;
+    entry->pin = nullopt;
 
   updateAction(index);
 }
@@ -852,11 +852,11 @@ bool Browser::apply()
       else
         tx->uninstall(entry->regEntry);
 
-      entry->target = boost::none;
+      entry->target = nullopt;
     }
     else if(entry->pin) {
       tx->setPinned(entry->regEntry, *entry->pin);
-      entry->pin = boost::none;
+      entry->pin = nullopt;
     }
   }
 
