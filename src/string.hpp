@@ -18,9 +18,14 @@
 #ifndef REAPACK_STRING_HPP
 #define REAPACK_STRING_HPP
 
+#include <sstream>
 #include <string>
 
 namespace String {
+  namespace ImplDetail {
+    void imbueStream(std::ostream &);
+  };
+
 #ifdef __GNUC__
   __attribute__((format(printf, 1, 2)))
 #endif
@@ -28,7 +33,13 @@ namespace String {
 
   std::string indent(const std::string &);
 
-  void imbueStream(std::ostream &);
+  template<typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
+  std::string number(const T v) {
+    std::ostringstream stream;
+    ImplDetail::imbueStream(stream);
+    stream << v;
+    return stream.str();
+  };
 }
 
 #endif

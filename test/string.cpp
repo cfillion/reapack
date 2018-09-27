@@ -23,3 +23,7 @@ TEST_CASE("indent string", M) {
 
   REQUIRE(actual == "  line1\r\n  line2");
 }
+
+TEST_CASE("pretty-print numbers", M) {
+  REQUIRE(String::number(42'000'000) == "42,000,000");
+}

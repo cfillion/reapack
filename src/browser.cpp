@@ -298,17 +298,10 @@ void Browser::fillSelectionMenu(Menu &menu)
 
 void Browser::updateDisplayLabel()
 {
-  ostringstream label;
-  String::imbueStream(label);
-
-  label << m_list->visibleRowCount() << '/' << m_entries.size() << " package";
-
-  if(m_entries.size() != 1)
-    label << 's';
-
-  label << "...";
-
-  Win32::setWindowText(m_displayBtn, label.str().c_str());
+  Win32::setWindowText(m_displayBtn, String::format("%s/%s package%s...",
+    String::number(m_list->visibleRowCount()).c_str(),
+    String::number(m_entries.size()).c_str(), m_entries.size() == 1 ? "" : "s"
+  ).c_str());
 }
 
 void Browser::displayButton()

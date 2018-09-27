@@ -88,12 +88,13 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  ostringstream position;
-  String::imbueStream(position);
-  position << min(m_done + 1, m_total) << " of " << m_total;
+  const string &position = String::format("%s of %s",
+    String::number(min(m_done + 1, m_total)).c_str(),
+    String::number(m_total).c_str()
+  );
 
   char label[1024];
-  snprintf(label, sizeof(label), m_current.c_str(), position.str().c_str());
+  snprintf(label, sizeof(label), m_current.c_str(), position.c_str());
 
   Win32::setWindowText(m_label, label);
 

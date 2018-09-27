@@ -88,13 +88,7 @@ ReceiptPage Receipt::errorPage() const
 
 void ReceiptPage::setTitle(const char *title)
 {
-  ostringstream stream;
-
-  // enable number formatting (ie. "1,234" instead of "1234")
-  String::imbueStream(stream);
-
-  stream << title << " (" << m_size << ')';
-  m_title = stream.str();
+  m_title = String::format("%s (%s)", title, String::number(m_size).c_str());
 }
 
 InstallTicket::InstallTicket(const Version *ver, const Registry::Entry &previous)

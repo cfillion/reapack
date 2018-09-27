@@ -65,7 +65,7 @@ string String::indent(const string &text)
   return output;
 }
 
-void String::imbueStream(ostream &stream)
+void String::ImplDetail::imbueStream(ostream &stream)
 {
   class NumPunct : public std::numpunct<char>
   {
