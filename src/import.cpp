@@ -162,49 +162,48 @@ void Import::fetch()
 }
 
 bool Import::read(MemoryDownload *dl, const size_t idx)
-{
+try {
   char msg[1024];
 
-  try {
-    IndexPtr index = Index::load({}, dl->contents().c_str());
-    Remote remote = g_reapack->remote(index->name());
-    const bool exists = !remote.isNull();
+  IndexPtr index = Index::load({}, dl->contents().c_str());
+  Remote remote = g_reapack->remote(index->name());
+  const bool exists = !remote.isNull();
 
-    if(exists && remote.url() != dl->url()) {
-      if(remote.isProtected()) {
-        snprintf(msg, sizeof(msg),
-          "The repository %s is protected and cannot be overwritten.",
-          index->name().c_str());
-        Win32::messageBox(handle(), msg, TITLE, MB_OK);
-        return false;
-      }
-      else {
-        snprintf(msg, sizeof(msg),
-          "%s is already configured with a different URL.\n"
-          "Do you want to overwrite it?", index->name().c_str());
-
-        const auto answer = Win32::messageBox(handle(), msg, TITLE, MB_YESNO);
-
-        if(answer != IDYES)
-          return true;
-      }
+  if(exists && remote.url() != dl->url()) {
+    if(remote.isProtected()) {
+      snprintf(msg, sizeof(msg),
+        "The repository %s is protected and cannot be overwritten.",
+        index->name().c_str());
+      Win32::messageBox(handle(), msg, TITLE, MB_OK);
+      return false;
     }
-    else if(exists && remote.isEnabled()) // url is also the same
-      return true; // nothing to do
+    else {
+      snprintf(msg, sizeof(msg),
+        "%s is already configured with a different URL.\n"
+        "Do you want to overwrite it?", index->name().c_str());
 
-    remote.setEnabled(true);
-    remote.setName(index->name());
-    remote.setUrl(dl->url());
-    m_queue.push_back({idx, remote, dl->contents()});
+      const auto answer = Win32::messageBox(handle(), msg, TITLE, MB_YESNO);
 
-    return true;
+      if(answer != IDYES)
+        return true;
+    }
   }
-  catch(const reapack_error &e) {
-    snprintf(msg, sizeof(msg), "The received file is invalid: %s\n%s",
-      e.what(), dl->url().c_str());
-    Win32::messageBox(handle(), msg, TITLE, MB_OK);
-    return false;
-  }
+  else if(exists && remote.isEnabled()) // url is also the same
+    return true; // nothing to do
+
+  remote.setEnabled(true);
+  remote.setName(index->name());
+  remote.setUrl(dl->url());
+  m_queue.push_back({idx, remote, dl->contents()});
+
+  return true;
+}
+catch(const reapack_error &e) {
+  char msg[1024];
+  snprintf(msg, sizeof(msg), "The received file is invalid: %s\n%s",
+    e.what(), dl->url().c_str());
+  Win32::messageBox(handle(), msg, TITLE, MB_OK);
+  return false;
 }
 
 void Import::processQueue()
