@@ -20,10 +20,10 @@
 
 #include "time.hpp"
 
-#include <boost/variant.hpp>
 #include <cstdint>
 #include <map>
 #include <set>
+#include <variant>
 #include <vector>
 
 class Package;
@@ -53,7 +53,7 @@ public:
 
 private:
   typedef uint16_t Numeric;
-  typedef boost::variant<Numeric, std::string> Segment;
+  typedef std::variant<Numeric, std::string> Segment;
 
   Segment segment(size_t i) const;
 

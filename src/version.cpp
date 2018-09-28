@@ -177,12 +177,12 @@ int VersionName::compare(const VersionName &o) const
 
   for(size_t i = 0; i < biggest; i++) {
     const Segment &lseg = segment(i);
-    const Numeric *lnum = boost::get<Numeric>(&lseg);
-    const string *lstr = boost::get<string>(&lseg);
+    const Numeric *lnum = get_if<Numeric>(&lseg);
+    const string *lstr = get_if<string>(&lseg);
 
     const Segment &rseg = o.segment(i);
-    const Numeric *rnum = boost::get<Numeric>(&rseg);
-    const string *rstr = boost::get<string>(&rseg);
+    const Numeric *rnum = get_if<Numeric>(&rseg);
+    const string *rstr = get_if<string>(&rseg);
 
     if(lnum && rnum) {
       if(*lnum < *rnum)
