@@ -56,7 +56,7 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
   const vector<Remote> repos = {repo};
 
   tx->fetchIndexes(repos);
-  tx->onFinish([=] {
+  tx->onFinish >> [=] {
     const auto &indexes = tx->getIndexes(repos);
     if(indexes.empty())
       return;
@@ -64,7 +64,7 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
     const Package *pkg = indexes.front()->find(entryCopy.category, entryCopy.package);
     if(pkg)
       g_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
-  });
+  };
   tx->runTasks();
 
   return true;

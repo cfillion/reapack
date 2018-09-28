@@ -18,42 +18,122 @@
 #ifndef REAPACK_EVENT_HPP
 #define REAPACK_EVENT_HPP
 
+#include <functional>
+#include <future>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
+#include <vector>
 
-typedef intptr_t Event;
-class EventEmitter;
+template<class T>
+class Event;
 
-class EventLoop {
+template<class R, class... Args>
+class Event<R(Args...)> {
 public:
-  EventLoop();
-  ~EventLoop();
+  typedef std::function<R(Args...)> Handler;
+  typedef typename std::conditional<
+    std::is_void<R>::value, void, std::optional<R>>::type ReturnType;
 
-  void push(EventEmitter *, Event);
-  void forget(EventEmitter *);
+  Event() = default;
+  Event(const Event &) = delete;
+
+  operator bool() const { return !m_handlers.empty(); }
+  void reset() { m_handlers.clear(); }
+
+  Event<R(Args...)> &operator>>(const Handler &func)
+  {
+    m_handlers.push_back(func);
+    return *this;
+  }
+
+  ReturnType operator()(Args... args) const
+  {
+    if constexpr (std::is_void<R>::value) {
+      for(const auto &func : m_handlers)
+        func(std::forward<Args>(args)...);
+    }
+    else {
+      ReturnType ret;
+      for(const auto &func : m_handlers)
+        ret = func(std::forward<Args>(args)...);
+      return ret;
+    }
+  }
 
 private:
-  static void mainThreadTimer();
-  void processQueue();
-
-  std::mutex m_mutex;
-  std::multimap<EventEmitter *, Event> m_queue;
+  std::vector<Handler> m_handlers;
 };
 
-class EventEmitter {
+namespace AsyncEventImpl {
+  typedef std::function<void ()> MainThreadFunc;
+
+  class Loop {
+  public:
+    Loop();
+    ~Loop();
+
+    void push(const MainThreadFunc &, const void *source = nullptr);
+    void forget(const void *source);
+
+  private:
+    static void mainThreadTimer();
+    void processQueue();
+
+    std::mutex m_mutex;
+    std::multimap<const void *, MainThreadFunc> m_queue;
+  };
+
+  class Emitter {
+  public:
+    Emitter();
+    ~Emitter();
+
+    void runInMainThread(const MainThreadFunc &) const;
+
+  private:
+    std::shared_ptr<Loop> m_loop;
+  };
+};
+
+template<class T>
+class AsyncEvent;
+
+template<class R, class... Args>
+class AsyncEvent<R(Args...)> : public Event<R(Args...)> {
 public:
-  EventEmitter();
-  virtual ~EventEmitter();
+  using typename Event<R(Args...)>::ReturnType;
 
-  void emit(Event);
+  std::future<ReturnType> operator()(Args... args) const
+  {
+    auto promise = std::make_shared<std::promise<ReturnType>>();
 
-protected:
-  friend EventLoop;
-  virtual void eventHandler(Event) = 0;
+    // don't wait until the next timer tick to return nothing if there are no
+    // handlers currently subscribed to the event
+    if(!*this) {
+      if constexpr (std::is_void<R>::value)
+        promise->set_value();
+      else
+        promise->set_value(std::nullopt);
+
+      return promise->get_future();
+    }
+
+    m_emitter.runInMainThread([=] {
+      if constexpr (std::is_void<R>::value) {
+        Event<R(Args...)>::operator()(args...);
+        promise->set_value();
+      }
+      else
+        promise->set_value(Event<R(Args...)>::operator()(args...));
+    });
+
+    return promise->get_future();
+  }
 
 private:
-  std::shared_ptr<EventLoop> m_loop;
+  AsyncEventImpl::Emitter m_emitter;
 };
 
 #endif

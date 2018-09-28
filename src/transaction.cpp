@@ -26,6 +26,8 @@
 #include "remote.hpp"
 #include "task.hpp"
 
+#include <cassert>
+
 #include <reaper_plugin_functions.h>
 
 using namespace std;
@@ -33,20 +35,20 @@ using namespace std;
 Transaction::Transaction()
   : m_isCancelled(false), m_registry(Path::REGISTRY.prependRoot())
 {
-  m_threadPool.onPush([this] (ThreadTask *task) {
-    task->onFinish([=] {
+  m_threadPool.onPush >> [this] (ThreadTask *task) {
+    task->onFinishAsync >> [=] {
       if(task->state() == ThreadTask::Failure)
         m_receipt.addError(task->error());
-    });
-  });
+    };
+  };
 
-  m_threadPool.onAbort([this] {
+  m_threadPool.onAbort >> [this] {
     m_isCancelled = true;
     queue<HostTicket>().swap(m_regQueue);
-  });
+  };
 
   // run the next task queue when the current one is done
-  m_threadPool.onDone(bind(&Transaction::runTasks, this));
+  m_threadPool.onDone >> bind(&Transaction::runTasks, this);
 }
 
 void Transaction::synchronize(const Remote &remote,
@@ -213,7 +215,7 @@ void Transaction::finish()
   m_registry.commit();
   registerQueued();
 
-  m_onFinish();
+  onFinish();
   m_cleanupHandler();
 }
 

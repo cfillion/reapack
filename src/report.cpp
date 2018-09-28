@@ -34,9 +34,9 @@ void Report::onInit()
   Dialog::onInit();
 
   m_tabbar = createControl<TabBar>(IDC_TABS, this);
-  m_tabbar->onTabChange([=] (const int i) {
+  m_tabbar->onTabChange >> [=] (const int i) {
     Win32::setWindowText(getControl(IDC_REPORT), m_pages[i].c_str());
-  });
+  };
 
   const ReceiptPage pages[] = {
     m_receipt->installedPage(),

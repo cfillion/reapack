@@ -83,13 +83,13 @@ bool InstallTask::start()
 
 void InstallTask::push(ThreadTask *job, const TempPath &path)
 {
-  job->onStart([=] { m_newFiles.push_back(path); });
-  job->onFinish([=] {
+  job->onStartAsync >> [=] { m_newFiles.push_back(path); };
+  job->onFinishAsync >> [=] {
     m_waiting.erase(job);
 
     if(job->state() != ThreadTask::Success)
       rollback();
-  });
+  };
 
   m_waiting.insert(job);
   tx()->threadPool()->push(job);

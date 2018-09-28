@@ -58,11 +58,11 @@ void About::onInit()
   m_desc = createControl<RichEdit>(IDC_ABOUT);
 
   m_menu = createControl<ListView>(IDC_MENU);
-  m_menu->onSelect(bind(&About::updateList, this));
+  m_menu->onSelect >> bind(&About::updateList, this);
 
   m_list = createControl<ListView>(IDC_LIST);
-  m_list->onContextMenu([=] (Menu &m, int i) { return m_delegate->fillContextMenu(m, i); });
-  m_list->onActivate([=] { m_delegate->itemActivated(); });
+  m_list->onFillContextMenu >> [=] (Menu &m, int i) { return m_delegate->fillContextMenu(m, i); };
+  m_list->onActivate >> [=] { m_delegate->itemActivated(); };
 
   setMinimumSize({560, 300});
   setAnchor(m_tabs->handle(), AnchorRight | AnchorBottom);

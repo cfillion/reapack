@@ -1,1 +1,1 @@
-boost-algorithm boost-core boost-logic boost-mpl boost-preprocessor boost-range boost-signals2 catch2 curl sqlite3
+boost-algorithm boost-core boost-logic boost-mpl boost-preprocessor boost-range catch2 curl sqlite3

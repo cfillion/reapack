@@ -30,7 +30,7 @@ Progress::Progress(ThreadPool *pool)
     m_pool(pool), m_label(nullptr), m_progress(nullptr),
     m_done(0), m_total(0)
 {
-  m_pool->onPush(bind(&Progress::addTask, this, _1));
+  m_pool->onPush >> bind(&Progress::addTask, this, placeholders::_1);
 }
 
 void Progress::onInit()
@@ -75,15 +75,15 @@ void Progress::addTask(ThreadTask *task)
   if(!isVisible())
     startTimer(100);
 
-  task->onStart([=] {
+  task->onStartAsync >> [=] {
     m_current = task->summary();
     updateProgress();
-  });
+  };
 
-  task->onFinish([=] {
+  task->onFinishAsync >> [=] {
     m_done++;
     updateProgress();
-  });
+  };
 }
 
 void Progress::updateProgress()

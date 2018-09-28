@@ -69,9 +69,10 @@ void Browser::onInit()
     {"Last Update", 105, 0, ListView::TimeType},
   });
 
-  m_list->onActivate([=] { aboutPackage(m_list->itemUnderMouse()); });
-  m_list->onSelect(bind(&Browser::onSelection, this));
-  m_list->onContextMenu(bind(&Browser::fillContextMenu, this, _1, _2));
+  m_list->onActivate >> [=] { aboutPackage(m_list->itemUnderMouse()); };
+  m_list->onSelect >> bind(&Browser::onSelection, this);
+  m_list->onFillContextMenu >> bind(&Browser::fillContextMenu, this,
+    placeholders::_1, placeholders::_2);
   m_list->sortByColumn(1);
 
   Dialog::onInit();
@@ -134,25 +135,25 @@ void Browser::onCommand(const int id, const int event)
     actionsButton();
     break;
   case ACTION_LATEST:
-    currentDo(bind(&Browser::installLatest, this, _1, true));
+    currentDo(bind(&Browser::installLatest, this, placeholders::_1, true));
     break;
   case ACTION_LATEST_ALL:
     installLatestAll();
     break;
   case ACTION_REINSTALL:
-    currentDo(bind(&Browser::reinstall, this, _1, true));
+    currentDo(bind(&Browser::reinstall, this, placeholders::_1, true));
     break;
   case ACTION_REINSTALL_ALL:
-    selectionDo(bind(&Browser::reinstall, this, _1, false));
+    selectionDo(bind(&Browser::reinstall, this, placeholders::_1, false));
     break;
   case ACTION_UNINSTALL:
-    currentDo(bind(&Browser::uninstall, this, _1, true));
+    currentDo(bind(&Browser::uninstall, this, placeholders::_1, true));
     break;
   case ACTION_UNINSTALL_ALL:
-    selectionDo(bind(&Browser::uninstall, this, _1, false));
+    selectionDo(bind(&Browser::uninstall, this, placeholders::_1, false));
     break;
   case ACTION_PIN:
-    currentDo(bind(&Browser::togglePin, this, _1));
+    currentDo(bind(&Browser::togglePin, this, placeholders::_1));
     break;
   case ACTION_ABOUT_PKG:
     aboutPackage(m_currentIndex);
@@ -161,7 +162,7 @@ void Browser::onCommand(const int id, const int event)
     aboutRemote(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
-    selectionDo(bind(&Browser::resetActions, this, _1));
+    selectionDo(bind(&Browser::resetActions, this, placeholders::_1));
     break;
   case ACTION_COPY:
     copy();
@@ -193,7 +194,7 @@ void Browser::onCommand(const int id, const int event)
     break;
   default:
     if(id >> 8 == ACTION_VERSION)
-      currentDo(bind(&Browser::installVersion, this, _1, id & 0xff));
+      currentDo(bind(&Browser::installVersion, this, placeholders::_1, id & 0xff));
     else if(id >> 8 == ACTION_FILTERTYPE) {
       m_typeFilter = static_cast<Package::Type>(id & 0xff);
       fillList();
@@ -437,7 +438,7 @@ void Browser::refresh(const bool stale)
     m_loadState = Loading;
 
     tx->fetchIndexes(remotes, stale);
-    tx->onFinish([=] {
+    tx->onFinish >> [=] {
       if(isFirstLoad || isVisible()) {
         populate(tx->getIndexes(remotes), tx->registry());
 
@@ -451,7 +452,7 @@ void Browser::refresh(const bool stale)
         // before it could finished fetching the up to date indexes.
         close();
       }
-    });
+    };
 
     tx->runTasks();
   }
@@ -642,7 +643,7 @@ void Browser::installLatestAll()
     }
   }
 
-  selectionDo(bind(&Browser::installLatest, this, _1, false));
+  selectionDo(bind(&Browser::installLatest, this, placeholders::_1, false));
 }
 
 void Browser::installLatest(const int index, const bool toggle)

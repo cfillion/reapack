@@ -34,48 +34,20 @@ ThreadTask::~ThreadTask()
 {
 }
 
-void ThreadTask::eventHandler(const Event event)
-{
-  const State state = static_cast<State>(event);
-
-  // The task may have been aborted while the task was running or just before
-  // the finish notification got received in the main thread.
-  m_state = aborted() ? Aborted : state;
-
-  switch(state) {
-  case Idle:
-  case Queued:
-    break;
-  case Running:
-    m_onStart();
-    break;
-  case Success:
-  case Failure:
-  case Aborted:
-    m_onFinish();
-    break;
-  }
-}
-
-void ThreadTask::onFinish(const VoidSignal::slot_type &slot)
-{
-  // The task has a slot deleting itself at this point, accepting
-  // any more slots at this point is a very bad idea.
-  assert(m_state < Queued);
-
-  m_onFinish.connect(slot);
-}
-
 void ThreadTask::exec()
 {
-  State state = Aborted;
+  State state = Idle;
 
   if(!aborted()) {
-    emit(Running);
+    onStartAsync();
     state = run() ? Success : Failure;
   }
 
-  emit(state);
+  if(aborted()) // may have changed while the task was running
+    state = Aborted;
+
+  m_state = state;
+  onFinishAsync();
 }
 
 WorkerThread::WorkerThread() : m_stop(false), m_thread(&WorkerThread::run, this)
@@ -147,25 +119,25 @@ ThreadPool::~ThreadPool()
 {
   // don't emit ThreadPool::onAbort from the destructor
   // which is most likely to cause a crash
-  m_onAbort.disconnect_all_slots();
+  onAbort.reset();
 
   abort();
 }
 
 void ThreadPool::push(ThreadTask *task)
 {
-  m_onPush(task);
+  onPush(task);
   m_running.insert(task);
 
-  task->onFinish([=] {
+  task->onFinishAsync >> [=] {
     m_running.erase(task);
 
     delete task;
 
     // call m_onDone() only after every onFinish slots ran
     if(m_running.empty())
-      m_onDone();
-  });
+      onDone();
+  };
 
   const size_t nextThread = m_running.size() % m_pool.size();
   auto &thread = task->concurrent() ? m_pool[nextThread] : m_pool.front();
@@ -180,5 +152,5 @@ void ThreadPool::abort()
   for(ThreadTask *task : m_running)
     task->abort();
 
-  m_onAbort();
+  onAbort();
 }

@@ -91,8 +91,8 @@ ThreadPool *Import::setupPool()
     m_state = OK;
     m_pool = new ThreadPool;
 
-    m_pool->onAbort([=] { if(!m_state) m_state = Aborted; });
-    m_pool->onDone([=] {
+    m_pool->onAbort >> [=] { if(!m_state) m_state = Aborted; };
+    m_pool->onDone >> [=] {
       setWaiting(false);
 
       if(!m_state)
@@ -107,7 +107,7 @@ ThreadPool *Import::setupPool()
         close();
       else
         SetFocus(m_url);
-    });
+    };
   }
 
   return m_pool;
@@ -132,7 +132,7 @@ void Import::fetch()
     MemoryDownload *dl = new MemoryDownload(url, opts);
     ++index;
 
-    dl->onFinish([=] {
+    dl->onFinishAsync >> [=] {
       switch(dl->state()) {
       case ThreadTask::Success:
         // copy for later use, as `dl` won't be around after this callback
@@ -148,7 +148,7 @@ void Import::fetch()
       default:
         break;
       }
-    });
+    };
 
     setupPool()->push(dl);
   }

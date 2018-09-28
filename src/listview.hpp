@@ -20,10 +20,10 @@
 
 #include "control.hpp"
 
+#include "event.hpp"
 #include "filter.hpp"
 #include "serializer.hpp"
 
-#include <boost/signals2.hpp>
 #include <functional>
 #include <optional>
 #include <vector>
@@ -106,9 +106,6 @@ public:
 
   typedef std::vector<Column> Columns;
 
-  typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef boost::signals2::signal<bool (Menu &, int index)> MenuSignal;
-
   ListView(HWND handle, const Columns & = {});
 
   void reserveRows(size_t count) { m_rows.reserve(count); }
@@ -153,10 +150,10 @@ public:
   void saveState(Serializer::Data &) const;
   void resetColumns();
 
-  void onSelect(const VoidSignal::slot_type &slot) { m_onSelect.connect(slot); }
-  void onIconClick(const VoidSignal::slot_type &slot) { m_onIconClick.connect(slot); }
-  void onActivate(const VoidSignal::slot_type &slot) { m_onActivate.connect(slot); }
-  void onContextMenu(const MenuSignal::slot_type &slot) { m_onContextMenu.connect(slot); }
+  Event<void()> onSelect;
+  Event<void()> onIconClick;
+  Event<void()> onActivate;
+  Event<bool(Menu &, int index)> onFillContextMenu;
 
 protected:
   friend Row;
@@ -203,11 +200,6 @@ private:
   std::vector<RowPtr> m_rows;
   std::optional<Sort> m_sort;
   std::optional<Sort> m_defaultSort;
-
-  VoidSignal m_onSelect;
-  VoidSignal m_onIconClick;
-  VoidSignal m_onActivate;
-  MenuSignal m_onContextMenu;
 };
 
 #endif

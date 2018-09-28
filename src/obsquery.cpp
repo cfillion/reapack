@@ -44,12 +44,12 @@ void ObsoleteQuery::onInit()
     {"Package", 550}
   });
 
-  m_list->onSelect([=] { setEnabled(m_list->hasSelection(), m_okBtn); });
-  m_list->onContextMenu([=] (Menu &menu, int) {
+  m_list->onSelect >> [=] { setEnabled(m_list->hasSelection(), m_okBtn); };
+  m_list->onFillContextMenu >> [=] (Menu &menu, int) {
     menu.addAction("Select &all", ACTION_SELECT_ALL);
     menu.addAction("&Unselect all", ACTION_UNSELECT_ALL);
     return true;
-  });
+  };
 
   m_list->reserveRows(m_entries->size());
 

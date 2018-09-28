@@ -24,6 +24,7 @@
 #include "win32.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
+#include <cassert>
 
 using namespace std;
 
@@ -491,7 +492,7 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 
   Menu menu;
 
-  if(!m_onContextMenu(menu, index).value_or(false))
+  if(!onFillContextMenu(menu, index).value_or(false))
     return false;
 
   menu.show(x, y, dialog);
@@ -506,7 +507,7 @@ void ListView::onItemChanged(const LPARAM lParam)
 
   if(info->uChanged & LVIF_STATE)
 #endif
-    m_onSelect();
+    onSelect();
 }
 
 void ListView::onClick(const bool dbclick)
@@ -515,9 +516,9 @@ void ListView::onClick(const bool dbclick)
 
   if(itemUnderMouse(&overIcon) > -1 && currentIndex() > -1) {
     if(dbclick)
-      m_onActivate();
+      onActivate();
     else if(overIcon)
-      m_onIconClick();
+      onIconClick();
   }
 }
 

@@ -32,6 +32,8 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
+#include <cassert>
+
 #include <reaper_plugin_functions.h>
 
 using namespace std;
@@ -182,10 +184,10 @@ void ReaPack::uninstall(const Remote &remote)
   assert(m_tx);
   m_tx->uninstall(remote);
 
-  m_tx->onFinish([=] {
+  m_tx->onFinish >> [=] {
     if(!m_tx->isCancelled())
       config()->remotes.remove(remote);
-  });
+  };
 }
 
 void ReaPack::importRemote()
@@ -224,11 +226,11 @@ void ReaPack::about(const Remote &repo, const bool focus)
   const vector<Remote> repos = {repo};
 
   tx->fetchIndexes(repos);
-  tx->onFinish([=] {
+  tx->onFinish >> [=] {
     const auto &indexes = tx->getIndexes(repos);
     if(!indexes.empty())
       about()->setDelegate(make_shared<AboutIndexDelegate>(indexes.front()), focus);
-  });
+  };
   tx->runTasks();
 }
 
@@ -285,7 +287,7 @@ Transaction *ReaPack::setupTransaction()
   assert(!m_progress);
   m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow, m_tx->threadPool());
 
-  m_tx->onFinish([=] {
+  m_tx->onFinish >> [=] {
     m_progress.reset();
 
     if(!m_tx->isCancelled() && !m_tx->receipt()->empty()) {
@@ -294,7 +296,7 @@ Transaction *ReaPack::setupTransaction()
 
       Dialog::Show<Report>(m_instance, m_mainWindow, m_tx->receipt());
     }
-  });
+  };
 
   m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
     LockDialog aboutLock(m_about.get());
@@ -329,9 +331,9 @@ void ReaPack::commitConfig(bool refresh)
   if(m_tx) {
     if(refresh) {
       m_tx->receipt()->setIndexChanged(); // force browser refresh
-      m_tx->onFinish(bind(&ReaPack::refreshManager, this));
+      m_tx->onFinish >> bind(&ReaPack::refreshManager, this);
     }
-    m_tx->onFinish(bind(&Config::write, &m_config));
+    m_tx->onFinish >> bind(&Config::write, &m_config);
     m_tx->runTasks();
   }
   else {

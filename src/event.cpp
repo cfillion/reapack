@@ -19,36 +19,36 @@
 
 #include <reaper_plugin_functions.h>
 
-static std::weak_ptr<EventLoop> s_loop;
+static std::weak_ptr<AsyncEventImpl::Loop> s_loop;
 
-EventLoop::EventLoop()
+AsyncEventImpl::Loop::Loop()
 {
   plugin_register("timer", reinterpret_cast<void *>(&mainThreadTimer));
 }
 
-EventLoop::~EventLoop()
+AsyncEventImpl::Loop::~Loop()
 {
   plugin_register("-timer", reinterpret_cast<void *>(&mainThreadTimer));
 }
 
-void EventLoop::mainThreadTimer()
+void AsyncEventImpl::Loop::mainThreadTimer()
 {
   s_loop.lock()->processQueue();
 }
 
-void EventLoop::push(EventEmitter *emitter, const Event event)
+void AsyncEventImpl::Loop::push(const MainThreadFunc &event, const void *source)
 {
   std::lock_guard<std::mutex> guard(m_mutex);
-  m_queue.insert({emitter, event});
+  m_queue.insert({source, event});
 }
 
-void EventLoop::forget(EventEmitter *emitter)
+void AsyncEventImpl::Loop::forget(const void *source)
 {
   std::lock_guard<std::mutex> guard(m_mutex);
-  m_queue.erase(emitter);
+  m_queue.erase(source);
 }
 
-void EventLoop::processQueue()
+void AsyncEventImpl::Loop::processQueue()
 {
   decltype(m_queue) events;
 
@@ -57,25 +57,25 @@ void EventLoop::processQueue()
     std::swap(events, m_queue);
   }
 
-  for(const auto &[emitter, event] : events)
-    emitter->eventHandler(event);
+  for(const auto &[emitter, func] : events)
+    func();
 }
 
-EventEmitter::EventEmitter()
+AsyncEventImpl::Emitter::Emitter()
 {
   if(s_loop.expired())
-    s_loop = m_loop = std::make_shared<EventLoop>();
+    s_loop = m_loop = std::make_shared<Loop>();
   else
     m_loop = s_loop.lock();
 }
 
-EventEmitter::~EventEmitter()
+AsyncEventImpl::Emitter::~Emitter()
 {
   if(s_loop.use_count() > 1)
     m_loop->forget(this);
 }
 
-void EventEmitter::emit(const Event event)
+void AsyncEventImpl::Emitter::runInMainThread(const MainThreadFunc &event) const
 {
-  m_loop->push(this, event);
+  m_loop->push(event, this);
 }

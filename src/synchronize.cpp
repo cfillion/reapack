@@ -46,10 +46,10 @@ bool SynchronizeTask::start()
     netConfig, Download::NoCacheFlag);
   dl->setName(m_remote.name());
 
-  dl->onFinish([=] {
+  dl->onFinishAsync >> [=] {
     if(dl->save())
       tx()->receipt()->setIndexChanged();
-  });
+  };
 
   tx()->threadPool()->push(dl);
   return true;

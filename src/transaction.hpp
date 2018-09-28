@@ -18,12 +18,12 @@
 #ifndef REAPACK_TRANSACTION_HPP
 #define REAPACK_TRANSACTION_HPP
 
+#include "event.hpp"
 #include "receipt.hpp"
 #include "registry.hpp"
 #include "task.hpp"
 #include "thread.hpp"
 
-#include <boost/signals2.hpp>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -43,13 +43,11 @@ struct HostTicket { bool add; Registry::Entry entry; Registry::File file; };
 
 class Transaction {
 public:
-  typedef boost::signals2::signal<void ()> VoidSignal;
   typedef std::function<void()> CleanupHandler;
   typedef std::function<bool(std::vector<Registry::Entry> &)> ObsoleteHandler;
 
   Transaction();
 
-  void onFinish(const VoidSignal::slot_type &slot) { m_onFinish.connect(slot); }
   void setCleanupHandler(const CleanupHandler &cb) { m_cleanupHandler = cb; }
   void setObsoleteHandler(const ObsoleteHandler &cb) { m_promptObsolete = cb; }
 
@@ -71,6 +69,8 @@ public:
   Receipt *receipt() { return &m_receipt; }
   Registry *registry() { return &m_registry; }
   ThreadPool *threadPool() { return &m_threadPool; }
+
+  Event<void()> onFinish;
 
 protected:
   friend SynchronizeTask;
@@ -117,7 +117,6 @@ private:
   std::queue<TaskPtr> m_runningTasks;
   std::queue<HostTicket> m_regQueue;
 
-  VoidSignal m_onFinish;
   CleanupHandler m_cleanupHandler;
   ObsoleteHandler m_promptObsolete;
 };

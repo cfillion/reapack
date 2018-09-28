@@ -72,10 +72,11 @@ void Manager::onInit()
   });
 
   m_list->enableIcons();
-  m_list->onSelect(bind(&Dialog::startTimer, this, 100, TIMER_ABOUT, true));
-  m_list->onIconClick(bind(&Manager::toggleEnabled, this));
-  m_list->onActivate(bind(&Manager::aboutRepo, this, true));
-  m_list->onContextMenu(bind(&Manager::fillContextMenu, this, _1, _2));
+  m_list->onSelect >> bind(&Dialog::startTimer, this, 100, TIMER_ABOUT, true);
+  m_list->onIconClick >> bind(&Manager::toggleEnabled, this);
+  m_list->onActivate >> bind(&Manager::aboutRepo, this, true);
+  m_list->onFillContextMenu >> bind(&Manager::fillContextMenu, this,
+    placeholders::_1, placeholders::_2);
 
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_IMPORT), AnchorTop | AnchorBottom);

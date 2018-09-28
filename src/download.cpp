@@ -20,6 +20,8 @@
 #include "filesystem.hpp"
 #include "reapack.hpp"
 
+#include <cassert>
+
 #include <reaper_plugin_functions.h>
 
 using namespace std;

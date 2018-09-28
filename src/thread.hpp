@@ -28,9 +28,7 @@
 #include <thread>
 #include <unordered_set>
 
-#include <boost/signals2.hpp>
-
-class ThreadTask : public EventEmitter {
+class ThreadTask {
 public:
   enum State {
     Idle,
@@ -40,8 +38,6 @@ public:
     Failure,
     Aborted,
   };
-
-  typedef boost::signals2::signal<void ()> VoidSignal;
 
   ThreadTask();
   virtual ~ThreadTask();
@@ -54,15 +50,14 @@ public:
   void setError(const ErrorInfo &err) { m_error = err; }
   const ErrorInfo &error() { return m_error; }
 
-  void onStart(const VoidSignal::slot_type &slot) { m_onStart.connect(slot); }
-  void onFinish(const VoidSignal::slot_type &slot);
-
   bool aborted() const { return m_abort; }
   void abort() { m_abort = true; }
 
+  AsyncEvent<void()> onStartAsync;
+  AsyncEvent<void()> onFinishAsync;
+
 protected:
   virtual bool run() = 0;
-  void eventHandler(Event) override;
 
   void setSummary(const std::string &s) { m_summary = s; }
 
@@ -71,9 +66,6 @@ private:
   State m_state;
   ErrorInfo m_error;
   std::atomic_bool m_abort;
-
-  VoidSignal m_onStart;
-  VoidSignal m_onFinish;
 };
 
 class WorkerThread {
@@ -98,9 +90,6 @@ private:
 
 class ThreadPool {
 public:
-  typedef boost::signals2::signal<void ()> VoidSignal;
-  typedef boost::signals2::signal<void (ThreadTask *)> TaskSignal;
-
   ThreadPool() {}
   ThreadPool(const ThreadPool &) = delete;
   ~ThreadPool();
@@ -110,17 +99,13 @@ public:
 
   bool idle() const { return m_running.empty(); }
 
-  void onPush(const TaskSignal::slot_type &slot) { m_onPush.connect(slot); }
-  void onAbort(const VoidSignal::slot_type &slot) { m_onAbort.connect(slot); }
-  void onDone(const VoidSignal::slot_type &slot) { m_onDone.connect(slot); }
+  Event<void(ThreadTask *)> onPush;
+  Event<void()> onAbort;
+  Event<void()> onDone;
 
 private:
   std::array<std::unique_ptr<WorkerThread>, 3> m_pool;
   std::unordered_set<ThreadTask *> m_running;
-
-  TaskSignal m_onPush;
-  VoidSignal m_onAbort;
-  VoidSignal m_onDone;
 };
 
 #endif
