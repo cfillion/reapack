@@ -491,7 +491,7 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 
   Menu menu;
 
-  if(!m_onContextMenu(menu, index))
+  if(!m_onContextMenu(menu, index).value_or(false))
     return false;
 
   menu.show(x, y, dialog);
