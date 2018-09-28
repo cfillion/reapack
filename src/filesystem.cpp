@@ -34,22 +34,25 @@
 
 using namespace std;
 
+static auto nativePath(const Path &path)
+{
+  return Win32::widen(path.prependRoot().join());
+}
+
 static bool stat(const Path &path, struct stat *out)
 {
-  const auto &&fullPath = Win32::widen(path.prependRoot().join());
-
 #ifdef _WIN32
   constexpr auto func = &_wstat;
 #else
   constexpr int(*func)(const char *, struct stat *) = &::stat;
 #endif
 
-  return !func(fullPath.c_str(), out);
+  return !func(nativePath(path).c_str(), out);
 }
 
 FILE *FS::open(const Path &path)
 {
-  const auto &&fullPath = Win32::widen(path.prependRoot().join());
+  const auto &fullPath = nativePath(path);
 
 #ifdef _WIN32
   FILE *file = nullptr;
@@ -62,8 +65,7 @@ FILE *FS::open(const Path &path)
 
 bool FS::open(ifstream &stream, const Path &path)
 {
-  const auto &&fullPath = Win32::widen(path.prependRoot().join());
-  stream.open(fullPath, ios_base::binary);
+  stream.open(nativePath(path), ios_base::binary);
   return stream.good();
 }
 
@@ -72,8 +74,7 @@ bool FS::open(ofstream &stream, const Path &path)
   if(!mkdir(path.dirname()))
     return false;
 
-  const auto &&fullPath = Win32::widen(path.prependRoot().join());
-  stream.open(fullPath, ios_base::binary);
+  stream.open(nativePath(path), ios_base::binary);
   return stream.good();
 }
 
@@ -100,21 +101,18 @@ bool FS::rename(const TempPath &path)
 
 bool FS::rename(const Path &from, const Path &to)
 {
-  const auto &&fullFrom = Win32::widen(from.prependRoot().join());
-  const auto &&fullTo = Win32::widen(to.prependRoot().join());
-
 #ifdef _WIN32
   const auto func = &_wrename;
 #else
   const auto func = &::rename;
 #endif
 
-  return !func(fullFrom.c_str(), fullTo.c_str());
+  return !func(nativePath(from).c_str(), nativePath(to).c_str());
 }
 
 bool FS::remove(const Path &path)
 {
-  const auto &&fullPath = Win32::widen(path.prependRoot().join());
+  const auto &fullPath = nativePath(path);
 
 #ifdef _WIN32
   if(GetFileAttributes(fullPath.c_str()) == INVALID_FILE_ATTRIBUTES
@@ -199,7 +197,7 @@ bool FS::mkdir(const Path &path)
   for(const string &dir : path) {
     fullPath.append(dir);
 
-    const auto &&joined = Win32::widen(fullPath.join());
+    const auto &joined = Win32::widen(fullPath.join());
 
 #ifdef _WIN32
     if(!CreateDirectory(joined.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS)
