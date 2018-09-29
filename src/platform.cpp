@@ -18,37 +18,39 @@
 #include "platform.hpp"
 
 #include <cstring>
+#include <utility>
 
 auto Platform::parse(const char *platform) -> Enum
 {
-  if(!strcmp(platform, "all"))
-    return GenericPlatform;
-  else if(!strcmp(platform, "windows"))
-    return WindowsPlatform;
-  else if(!strcmp(platform, "win32"))
-    return Win32Platform;
-  else if(!strcmp(platform, "win64"))
-    return Win64Platform;
-  else if(!strcmp(platform, "darwin"))
-    return DarwinPlatform;
-  else if(!strcmp(platform, "darwin32"))
-    return Darwin32Platform;
-  else if(!strcmp(platform, "darwin64"))
-    return Darwin64Platform;
-  else if(!strcmp(platform, "linux"))
-    return LinuxPlatform;
-  else if(!strcmp(platform, "linux32"))
-    return Linux32Platform;
-  else if(!strcmp(platform, "linux64"))
-    return Linux64Platform;
-  else
-    return UnknownPlatform;
+  const std::pair<const char *, Enum> map[]{
+    {"all",      GenericPlatform},
+
+    {"windows",  WindowsPlatform},
+    {"win32",    Win32Platform},
+    {"win64",    Win64Platform},
+
+    {"darwin",   DarwinPlatform},
+    {"darwin32", Darwin32Platform},
+    {"darwin64", Darwin64Platform},
+
+    {"linux",    LinuxPlatform},
+    {"linux32",  Linux32Platform},
+    {"linux64",  Linux64Platform},
+  };
+
+  for(auto &[key, value] : map) {
+    if(!strcmp(platform, key))
+      return value;
+  }
+
+  return UnknownPlatform;
 }
 
 bool Platform::test() const
 {
   switch(m_value) {
   case GenericPlatform:
+
 #ifdef __APPLE__
   case DarwinPlatform:
 #  ifdef __x86_64__
@@ -56,6 +58,7 @@ bool Platform::test() const
 #  else
   case Darwin32Platform:
 #  endif
+
 #elif __linux__
   case LinuxPlatform:
 #  ifdef __x86_64__
@@ -63,6 +66,7 @@ bool Platform::test() const
 #  else
   case Linux32Platform:
 #  endif
+
 #elif _WIN32
   case WindowsPlatform:
 #  ifdef _WIN64

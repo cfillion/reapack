@@ -27,30 +27,26 @@ using namespace std;
 
 Package::Type Package::getType(const char *type)
 {
-  if(!strcmp(type, "script"))
-    return ScriptType;
-  else if(!strcmp(type, "extension"))
-    return ExtensionType;
-  else if(!strcmp(type, "effect"))
-    return EffectType;
-  else if(!strcmp(type, "data"))
-    return DataType;
-  else if(!strcmp(type, "theme"))
-    return ThemeType;
-  else if(!strcmp(type, "langpack"))
-    return LangPackType;
-  else if(!strcmp(type, "webinterface"))
-    return WebInterfaceType;
-  else if(!strcmp(type, "projecttpl"))
-    return ProjectTemplateType;
-  else if(!strcmp(type, "tracktpl"))
-    return TrackTemplateType;
-  else if(!strcmp(type, "midinotenames"))
-    return MIDINoteNamesType;
-  else if(!strcmp(type, "autoitem"))
-    return AutomationItemType;
-  else
-    return UnknownType;
+  const std::pair<const char *, Type> map[]{
+    {"script",        ScriptType},
+    {"extension",     ExtensionType},
+    {"effect",        EffectType},
+    {"data",          DataType},
+    {"theme",         ThemeType},
+    {"langpack",      LangPackType},
+    {"webinterface",  WebInterfaceType},
+    {"projecttpl",    ProjectTemplateType},
+    {"tracktpl",      TrackTemplateType},
+    {"midinotenames", MIDINoteNamesType},
+    {"autoitem",      AutomationItemType},
+  };
+
+  for(auto &[key, value] : map) {
+    if(!strcmp(type, key))
+      return value;
+  }
+
+  return UnknownType;
 }
 
 string Package::displayType(const Type type)

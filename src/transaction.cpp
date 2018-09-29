@@ -266,7 +266,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 
   vector<int> sections;
 
-  for(const auto &[flag, id] : sectionMap) {
+  for(auto &[flag, id] : sectionMap) {
     if(reg.file.sections & flag)
       sections.push_back(id);
   }

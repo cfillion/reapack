@@ -26,20 +26,21 @@ using namespace std;
 
 auto Source::getSection(const char *name) -> Section
 {
-  if(!strcmp(name, "main"))
-    return MainSection;
-  else if(!strcmp(name, "midi_editor"))
-    return MIDIEditorSection;
-  else if(!strcmp(name, "midi_inlineeditor"))
-    return MIDIInlineEditorSection;
-  else if(!strcmp(name, "midi_eventlisteditor"))
-    return MIDIEventListEditorSection;
-  else if(!strcmp(name, "mediaexplorer"))
-    return MediaExplorerSection;
-  else if(!strcmp(name, "true"))
-    return ImplicitSection;
-  else
-    return UnknownSection;
+  const std::pair<const char *, Section> map[]{
+    {"main",                 MainSection},
+    {"midi_editor",          MIDIEditorSection},
+    {"midi_inlineeditor",    MIDIInlineEditorSection},
+    {"midi_eventlisteditor", MIDIEventListEditorSection},
+    {"mediaexplorer",        MediaExplorerSection},
+    {"true",                 ImplicitSection},
+  };
+
+  for(auto &[key, value] : map) {
+    if(!strcmp(name, key))
+      return value;
+  }
+
+  return UnknownSection;
 }
 
 auto Source::detectSection(const Path &category) -> Section
