@@ -15,6 +15,13 @@ install:
   - wget -nv https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -P vendor
   - wget -nv https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -P vendor
   - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
+
+  # SWELL: optimize ListView_SetItemText on macOS
+  - curl -fsSL https://github.com/cfillion/WDL/commit/a6d7f802762e5e9d9833829bab83696e0db50de6.patch | git -C vendor/WDL am
+  # SWELL: always redraw the dialogs after a resize event
+  - curl -fsSL https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch | git -C vendor/WDL am
+  # SWELL: disable rich text in multiline textboxes on macOS
+  - curl -fsSL https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch | git -C vendor/WDL am
 script: tup $PLATFORM && $PLATFORM/bin/test
 deploy:
   provider: releases
