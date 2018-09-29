@@ -70,7 +70,6 @@ Apply these patches to WDL:
 - [optimize-listview-setitemtext](https://github.com/cfillion/WDL/commit/a6d7f802762e5e9d9833829bab83696e0db50de6.patch)
 - [resize-redraw-fix](https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch)
 - [richtext-off](https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch)
-- [shellexecute-https](https://github.com/cfillion/WDL/commit/0424a87047470aefbeef98526622e5af5f919ac9.patch)
 
 ### Windows
 
