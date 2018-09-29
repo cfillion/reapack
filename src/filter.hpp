@@ -56,8 +56,6 @@ private:
     int m_flags;
   };
 
-  typedef std::shared_ptr<Node> NodePtr;
-
   class Group : public Node {
   public:
     enum Type {
@@ -72,12 +70,12 @@ private:
     bool match(const std::vector<std::string> &) const override;
 
   private:
-    void push(const NodePtr &);
+    Group *addSubGroup(Type, int flags);
 
     Group *m_parent;
     Type m_type;
     bool m_open;
-    std::vector<NodePtr> m_nodes;
+    std::vector<std::unique_ptr<Node>> m_nodes;
   };
 
   class Token : public Node {

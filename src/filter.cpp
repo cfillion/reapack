@@ -17,24 +17,22 @@
 
 #include "filter.hpp"
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
-using namespace std;
-
-Filter::Filter(const string &input)
+Filter::Filter(const std::string &input)
   : m_root(Group::MatchAll)
 {
   set(input);
 }
 
-void Filter::set(const string &input)
+void Filter::set(const std::string &input)
 {
   enum State { Default, DoubleQuote, SingleQuote };
 
   m_input = input;
   m_root.clear();
 
-  string buf;
+  std::string buf;
   int flags = 0;
   State state = Default;
   Group *group = &m_root;
@@ -66,9 +64,11 @@ void Filter::set(const string &input)
   group->push(buf, &flags);
 }
 
-bool Filter::match(vector<string> rows) const
+bool Filter::match(std::vector<std::string> rows) const
 {
-  for_each(rows.begin(), rows.end(), [](string &str) { boost::to_lower(str); });
+  for(std::string &str : rows)
+    boost::algorithm::to_lower(str);
+
   return m_root.match(rows);
 }
 
@@ -77,7 +77,7 @@ Filter::Group::Group(Type type, int flags, Group *parent)
 {
 }
 
-Filter::Group *Filter::Group::push(string buf, int *flags)
+Filter::Group *Filter::Group::push(std::string buf, int *flags)
 {
   if(buf.empty())
     return this;
@@ -95,20 +95,17 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
         return this;
       }
 
-      NodePtr prev = m_nodes.back();
+      auto prev = std::move(m_nodes.back());
       m_nodes.pop_back();
 
-      auto newGroup = make_shared<Group>(MatchAny, 0, this);
-      newGroup->m_nodes.push_back(prev);
-      m_nodes.push_back(newGroup);
-
-      return newGroup.get();
+      Group *newGroup = addSubGroup(MatchAny, 0);
+      newGroup->m_nodes.push_back(std::move(prev));
+      return newGroup;
     }
     else if(buf == "(") {
-      auto newGroup = make_shared<Group>(MatchAll, *flags, this);
-      m_nodes.push_back(newGroup);
+      Group *newGroup = addSubGroup(MatchAll, *flags);
       *flags = 0;
-      return newGroup.get();
+      return newGroup;
     }
     else if(buf == ")") {
       for(Group *parent = this; parent->m_parent; parent = parent->m_parent) {
@@ -130,24 +127,27 @@ Filter::Group *Filter::Group::push(string buf, int *flags)
   }
 
   Group *group = m_open ? this : m_parent;
-
-  group->push(make_shared<Token>(buf, *flags));
+  group->m_nodes.push_back(std::make_unique<Token>(buf, *flags));
   *flags = 0;
+
+  if(group->m_type == MatchAny)
+    group->m_open = false;
 
   return group;
 }
 
-void Filter::Group::push(const NodePtr &node)
+Filter::Group *Filter::Group::addSubGroup(const Type type, const int flags)
 {
-  m_nodes.push_back(node);
+  auto newGroup = std::make_unique<Group>(type, flags, this);
+  Group *ptr = newGroup.get();
+  m_nodes.push_back(std::move(newGroup));
 
-  if(m_type == MatchAny)
-    m_open = false;
+  return ptr;
 }
 
-bool Filter::Group::match(const vector<string> &rows) const
+bool Filter::Group::match(const std::vector<std::string> &rows) const
 {
-  for(const NodePtr &node : m_nodes) {
+  for(const auto &node : m_nodes) {
     if(node->match(rows)) {
       if(m_type == MatchAny)
         return true;
@@ -159,18 +159,18 @@ bool Filter::Group::match(const vector<string> &rows) const
   return m_type == MatchAll && !test(NotFlag);
 }
 
-Filter::Token::Token(const string &buf, int flags)
+Filter::Token::Token(const std::string &buf, int flags)
   : Node(flags), m_buf(buf)
 {
-  boost::to_lower(m_buf);
+  boost::algorithm::to_lower(m_buf);
 }
 
-bool Filter::Token::match(const vector<string> &rows) const
+bool Filter::Token::match(const std::vector<std::string> &rows) const
 {
   const bool isNot = test(NotFlag);
   bool match = false;
 
-  for(const string &row : rows) {
+  for(const std::string &row : rows) {
     if(matchRow(row) ^ isNot)
       match = true;
     else if(isNot)
@@ -180,11 +180,11 @@ bool Filter::Token::match(const vector<string> &rows) const
   return match;
 }
 
-bool Filter::Token::matchRow(const string &str) const
+bool Filter::Token::matchRow(const std::string &str) const
 {
   const size_t pos = str.find(m_buf);
 
-  if(pos == string::npos)
+  if(pos == std::string::npos)
     return false;
 
   const bool isStart = pos == 0, isEnd = pos + m_buf.size() == str.size();
