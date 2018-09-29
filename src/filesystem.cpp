@@ -25,8 +25,6 @@
 #include <fstream>
 #include <sys/stat.h>
 
-#include <reaper_plugin_functions.h>
-
 #ifdef _WIN32
 #  include <windows.h>
 #  define stat _stat
@@ -175,16 +173,6 @@ bool FS::exists(const Path &path, const bool dir)
     return (bool)(st.st_mode & S_IFDIR) == dir;
   else
     return false;
-}
-
-bool FS::allFilesExists(const set<Path> &paths)
-{
-  for(const Path &path : paths) {
-    if(!exists(path))
-      return false;
-  }
-
-  return true;
 }
 
 bool FS::mkdir(const Path &path)

@@ -88,7 +88,7 @@ void SynchronizeTask::synchronize(const Package *pkg)
     return;
 
   if(entry.version == latest->name()) {
-    if(FS::allFilesExists(latest->files()))
+    if(FS::allExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
   else if(entry.pinned || latest->name() < entry.version)

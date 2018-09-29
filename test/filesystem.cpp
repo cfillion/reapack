@@ -42,17 +42,18 @@ TEST_CASE("file exists", M) {
 TEST_CASE("all files exists", M) {
   UseRootPath root(RIPATH);
 
-  REQUIRE(FS::allFilesExists({}));
+  REQUIRE(FS::allExists(std::vector<Path>{}));
 
-  REQUIRE(FS::allFilesExists({
+  REQUIRE(FS::allExists(std::set<Path>{
     Index::pathFor("future_version"),
     Index::pathFor("broken"),
   }));
 
-  REQUIRE_FALSE(FS::allFilesExists({
+  REQUIRE_FALSE(FS::allExists(std::list<Path>{
     Index::pathFor("future_version"),
     Index::pathFor("not_found"),
   }));
 
-  REQUIRE_FALSE(FS::allFilesExists({Path("ReaPack")})); // directory
+  REQUIRE_FALSE(FS::allExists(std::vector<std::string>{"ReaPack"})); // directory
+  REQUIRE(FS::allExists(std::vector<std::string>{"ReaPack"}, true));
 }
