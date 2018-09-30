@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="36497e178cda6cc0fa9ada1dfe854ca957b668ce" name="ReaPack">
+<index version="1" commit="d5907b98c94d5d800762612fc0d1e45545f10a92" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -635,6 +635,25 @@ Changed:
         <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2.1/reaper_reapack32.so</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2.1/reaper_reapack64.so</source>
       </version>
+      <version name="1.2.2rc" author="cfillion" time="2018-09-30T00:41:45Z">
+        <changelog><![CDATA[Fixed:
+• Fix a possible crash when changing the about dialog contents
+• Fix a possible crash when closing some windows [p=2037784]
+• Fix empty context menus being displayed on Linux instead of being discarded
+• Prevent erroneous SSL certificate verification failure on some macOS installs [p=1956940]
+• Remove scripts from the Action List even if the files do not exist when uninstalling [t=209330]
+
+Changed:
+• Automate the build system using continuous integration services
+• Use system-provided zlib on Linux and macOS
+• Replace ReaPack's own repository URL to point to reapack.com instead of GitHub]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.2rc/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.2rc/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2.2rc/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.2rc/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2.2rc/reaper_reapack32.so</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2.2rc/reaper_reapack64.so</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -644,7 +663,7 @@ Changed:
 
 {\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack: Package Manager for REAPER\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} built on [[REAPACK_BUILDTIME]]\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2017  Christian Fillion\line
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2018  Christian Fillion\line
 \line
 This program is free software: you can redistribute it and/or modify\line
 it under the terms of the GNU Lesser General Public License as published by\line
