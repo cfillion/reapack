@@ -104,6 +104,9 @@ void Config::restoreDefaultRemotes()
       "https://github.com/ReaTeam/Themes/raw/master/index.xml"},
     {"ReaTeam LangPacks",
       "https://github.com/ReaTeam/LangPacks/raw/master/index.xml"},
+    {"ReaTeam Extensions",
+      "https://github.com/ReaTeam/Extensions/raw/master/index.xml"},
+
     {"MPL Scripts",
       "https://github.com/MichaelPilyavskiy/ReaScripts/raw/master/index.xml"},
     {"X-Raym Scripts",
@@ -122,6 +125,7 @@ void Config::migrate()
   case 0: // v1.0
   case 1: // v1.1rc3
   case 2: // v1.1
+  case 3: // v1.2rc2: added ReaTeam/Extensions
     m_isFirstRun = true;
     restoreDefaultRemotes();
     break;
@@ -132,7 +136,7 @@ void Config::migrate()
     return;
   };
 
-  m_version = 3;
+  m_version = 4;
   write();
 }
 
