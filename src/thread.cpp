@@ -20,7 +20,7 @@
 #include <reaper_plugin_functions.h>
 
 #ifdef _WIN32
-  typedef void (*_tls_callback_type)(HANDLE, DWORD const dwReason, LPVOID);
+  typedef void (__stdcall *_tls_callback_type)(HANDLE, DWORD const dwReason, LPVOID);
   extern "C" extern const _tls_callback_type __dyn_tls_dtor_callback;
 #endif
 
