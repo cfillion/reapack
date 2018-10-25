@@ -132,11 +132,13 @@ void ThreadPool::push(ThreadTask *task)
   task->onFinishAsync >> [=] {
     m_running.erase(task);
 
+    // 'this' (captured variable) isn't valid after the delete below
+    ThreadPool *self = this;
     delete task;
 
     // call m_onDone() only after every onFinish slots ran
-    if(m_running.empty())
-      onDone();
+    if(self->m_running.empty())
+      self->onDone();
   };
 
   const size_t nextThread = m_running.size() % m_pool.size();
