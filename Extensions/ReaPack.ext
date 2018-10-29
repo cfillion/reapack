@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.2rc
+@version 1.2.2rc2
 @author cfillion
 @donation https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER
 @provides
@@ -10,14 +10,5 @@
   [linux32]  reaper_reapack32.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
   [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  Fixed:
-  • Fix a possible crash when changing the about dialog contents
-  • Fix a possible crash when closing some windows [p=2037784]
-  • Fix empty context menus being displayed on Linux instead of being discarded
-  • Prevent erroneous SSL certificate verification failure on some macOS installs [p=1956940]
-  • Remove scripts from the Action List even if the files do not exist when uninstalling [t=209330]
-
-  Changed:
-  • Automate the build system using continuous integration services
-  • Use system-provided zlib on Linux and macOS
-  • Replace ReaPack's own repository URL to point to reapack.com instead of GitHub
+  • Add the public ReaTeam/Extensions repository to the default configuration
+  • Fix a memory corruption bug from v1.2.2rc when an operation completes on Windows 32-bit
