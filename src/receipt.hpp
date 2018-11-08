@@ -120,6 +120,7 @@ public:
   InstallTicket(const Version *ver, const Registry::Entry &previousEntry);
 
   bool operator<(const InstallTicket &) const;
+  bool versionChanged() const { return (m_type & 2) != 0; }
 
 private:
   friend std::ostream &operator<<(std::ostream &, const InstallTicket &);

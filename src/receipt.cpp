@@ -117,7 +117,7 @@ bool InstallTicket::operator<(const InstallTicket &o) const
   boost::algorithm::to_lower(l);
   boost::algorithm::to_lower(r);
 
-  return l < r;
+  return versionChanged() < o.versionChanged() || l < r;
 }
 
 ostream &operator<<(ostream &os, const InstallTicket &t)
