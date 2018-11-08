@@ -36,7 +36,7 @@ static const char *TITLE = "Import repositories";
 static const char *DISCOVER_URL = "https://reapack.com/repos";
 
 Import::Import()
-  : Dialog(IDD_IMPORT_DIALOG), m_pool(nullptr), m_state(OK)
+  : Dialog(IDD_IMPORT_DIALOG), m_state(OK)
 {
 }
 
@@ -89,7 +89,7 @@ ThreadPool *Import::setupPool()
 {
   if(!m_pool) {
     m_state = OK;
-    m_pool = new ThreadPool;
+    m_pool = make_unique<ThreadPool>();
 
     m_pool->onAbort >> [=] { if(!m_state) m_state = Aborted; };
     m_pool->onDone >> [=] {
@@ -100,17 +100,16 @@ ThreadPool *Import::setupPool()
 
       m_queue.clear();
 
-      delete m_pool;
-      m_pool = nullptr;
-
       if(m_state == Close)
         close();
       else
         SetFocus(m_url);
+
+      m_pool.reset();
     };
   }
 
-  return m_pool;
+  return m_pool.get();
 }
 
 void Import::fetch()

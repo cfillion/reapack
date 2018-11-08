@@ -60,7 +60,7 @@ private:
   bool import(const ImportData &);
   void setWaiting(bool);
 
-  ThreadPool *m_pool;
+  std::unique_ptr<ThreadPool> m_pool;
   State m_state;
   std::deque<ImportData> m_queue;
   short m_fakePos;
