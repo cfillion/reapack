@@ -179,23 +179,30 @@ TEST_CASE("format install ticket", M) {
 
   SECTION("installed from scratch") {
     stream << InstallTicket{v2, {}};
-    REQUIRE_THAT(stream.str(),
-      !Contains("v1.0") && Contains("v2.0") && !Contains("v3.0"));
+    REQUIRE_THAT(stream.str(), Contains("[new]") &&
+      !Contains("v1.0\r\n") && Contains("v2.0\r\n") && !Contains("v3.0\r\n"));
+  }
+
+  SECTION("reinstalled") {
+    entry.version = VersionName("2.0");
+    stream << InstallTicket{v2, entry};
+    REQUIRE_THAT(stream.str(), Contains("[reinstalled]") &&
+      !Contains("v1.0\r\n") && Contains("v2.0\r\n") && !Contains("v3.0\r\n"));
   }
 
   SECTION("update") {
     entry.version = VersionName("1.0");
     stream << InstallTicket{v3, entry};
-    REQUIRE_THAT(stream.str(),
-      !Contains("v1.0") && Contains("\r\nv3.0\r\n  No changelog\r\nv2.0"));
+    REQUIRE_THAT(stream.str(), Contains("[v1.0 -> v3.0]") &&
+      !Contains("v1.0\r\n") && Contains("\r\nv3.0\r\n  No changelog\r\nv2.0"));
     REQUIRE_THAT(stream.str(), !EndsWith("\r\n"));
   }
 
   SECTION("downgrade") {
     entry.version = VersionName("3.0");
     stream << InstallTicket{v1, entry};
-    REQUIRE_THAT(stream.str(),
-      Contains("v1.0") && !Contains("v2.0") && !Contains("v3.0"));
+    REQUIRE_THAT(stream.str(), Contains("[v3.0 -> v1.0]") &&
+      Contains("v1.0\r\n") && !Contains("v2.0\r\n") && !Contains("v3.0\r\n"));
   }
 }
 

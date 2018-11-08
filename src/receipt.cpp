@@ -92,10 +92,21 @@ void ReceiptPage::setTitle(const char *title)
 }
 
 InstallTicket::InstallTicket(const Version *ver, const Registry::Entry &previous)
-  : m_version(ver), m_previous(previous.version)
+  : m_version(ver), m_previous(previous.version), m_type(deduceType(previous))
 {
-  m_isUpdate = previous && previous.version < ver->name();
   m_index = ver->package()->category()->index()->shared_from_this();
+}
+
+InstallTicket::Type InstallTicket::deduceType(const Registry::Entry &previous) const
+{
+  if(!previous)
+    return Install;
+  else if(previous.version < m_version->name())
+    return Update;
+  else if(previous.version > m_version->name())
+    return Downgrade;
+  else
+    return Reinstall;
 }
 
 bool InstallTicket::operator<(const InstallTicket &o) const
@@ -116,7 +127,20 @@ ostream &operator<<(ostream &os, const InstallTicket &t)
 
   os << t.m_version->package()->fullName();
 
-  if(t.m_isUpdate) {
+  switch(t.m_type) {
+  case InstallTicket::Install:
+    os << " [new]";
+    break;
+  case InstallTicket::Reinstall:
+    os << " [reinstalled]";
+    break;
+  case InstallTicket::Update:
+  case InstallTicket::Downgrade:
+    os << " [v" << t.m_previous.toString() << " -> v" << t.m_version->name().toString() << ']';
+    break;
+  }
+
+  if(t.m_type == InstallTicket::Update) {
     const auto &versions = t.m_version->package()->versions();
 
     for(const Version *ver : versions | boost::adaptors::reversed) {

@@ -110,16 +110,24 @@ private:
 
 class InstallTicket {
 public:
+  enum Type {
+    Install,
+    Reinstall,
+    Update,
+    Downgrade,
+  };
+
   InstallTicket(const Version *ver, const Registry::Entry &previousEntry);
 
   bool operator<(const InstallTicket &) const;
 
 private:
   friend std::ostream &operator<<(std::ostream &, const InstallTicket &);
+  Type deduceType(const Registry::Entry &) const;
 
   const Version *m_version;
   VersionName m_previous;
-  bool m_isUpdate;
+  Type m_type;
 
   IndexPtr m_index; // to keep it alive long enough
 };
