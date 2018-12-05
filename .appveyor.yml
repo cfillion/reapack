@@ -13,6 +13,7 @@ before_build:
 for:
   - matrix: { only: [ image: *linux ] }
     install:
+      - sudo service docker start
       - docker run --name arch --rm --privileged -tidv `pwd`:/build -w /build
         -e CURLSO=:libcurl.so.3 archlinux/base
       - docker exec arch
@@ -45,9 +46,7 @@ for:
       - set PATH=C:\Tools\tup;%PATH%
 
       - mklink /J vendor\vcpkg C:\Tools\vcpkg > NUL
-      - git -C vendor\vcpkg pull
       - git apply --directory=vendor vendor\0001-vcpkg-curl-use-winssl.patch
-      - vcpkg upgrade --no-dry-run
       - set /p vcpkg-deps=<vendor\vcpkg-deps.txt
       - vcpkg install --triplet %PLATFORM%-windows-static %vcpkg-deps%
     build_script: tup %PLATFORM%
