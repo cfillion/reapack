@@ -19,10 +19,11 @@ private:
   public:
     virtual ~Context() = default;
     virtual size_t hashSize() const = 0;
-    virtual void addData(const char *data, const size_t len) = 0;
+    virtual void addData(const char *data, size_t len) = 0;
     virtual void getHash(unsigned char *out) = 0;
   };
 
+  class CNGContext;
   class SHA256Context;
 
   Algorithm m_algo;
