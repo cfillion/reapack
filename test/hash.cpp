@@ -27,3 +27,9 @@ TEST_CASE("sha256 hashes", M) {
       "1220dbd318c1c462aee872f41109a4dfd3048871a03dedd0fe0e757ced57dad6f2d7");
   }
 }
+
+TEST_CASE("invalid algorithm", M) {
+  Hash hash(static_cast<Hash::Algorithm>(0));
+  hash.write("foo bar", 7);
+  REQUIRE(hash.digest() == "");
+}
