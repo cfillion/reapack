@@ -1,53 +1,61 @@
 #include "hash.hpp"
 
 #include <cstdio>
+#include <vector>
+
+#ifdef __APPLE__
+#  include <CommonCrypto/CommonDigest.h>
+#  define CC(s) CC_##s
+#else
+#  include <openssl/sha.h>
+#  define CC(s) s
+#endif
+
+class Hash::SHA256Context : public Hash::Context {
+public:
+  SHA256Context() { CC(SHA256_Init)(&m_context); }
+  size_t hashSize() const { return CC(SHA256_DIGEST_LENGTH); }
+  void addData(const char *data, const size_t len) {
+    CC(SHA256_Update)(&m_context, data, len);
+  }
+  void getHash(unsigned char *out) { CC(SHA256_Final)(out, &m_context); }
+
+private:
+  CC(SHA256_CTX) m_context;
+};
 
 Hash::Hash(const Algorithm algo)
   : m_algo(algo)
 {
   switch(algo) {
   case SHA256:
-#ifdef __APPLE__
-    CC_SHA256_Init(&m_sha256Context);
-#endif
+    m_context = std::make_unique<SHA256Context>();
     break;
   }
 }
 
 void Hash::write(const char *data, const size_t len)
 {
-  switch(m_algo) {
-  case SHA256:
-#ifdef __APPLE__
-    CC_SHA256_Update(&m_sha256Context, data, len);
-#endif
-    break;
-  }
+  if(m_context)
+    m_context->addData(data, len);
 }
 
 const std::string &Hash::digest()
 {
-  if(!m_value.empty())
+  if(!m_context || !m_value.empty())
     return m_value;
 
-  switch(m_algo) {
-  case SHA256:
-#ifdef __APPLE__
-    unsigned char hash[2 + CC_SHA256_DIGEST_LENGTH] =
-      {SHA256, CC_SHA256_DIGEST_LENGTH};
-    CC_SHA256_Final(&hash[2], &m_sha256Context);
-    setValue(hash, sizeof(hash));
-#endif
-    break;
-  }
+  const size_t hashSize = m_context->hashSize();
+
+  std::vector<unsigned char> multihash(2 + hashSize);
+  multihash[0] = m_algo;
+  multihash[1] = hashSize;
+  m_context->getHash(&multihash[2]);
+
+  m_value.resize(multihash.size() * 2);
+
+  for(size_t i = 0; i < multihash.size(); ++i)
+    sprintf(&m_value[i * 2], "%02x", multihash[i]);
 
   return m_value;
-}
-
-void Hash::setValue(const unsigned char *hash, size_t len)
-{
-  m_value.resize(len * 2);
-
-  for(size_t i = 0; i < len; ++i)
-    sprintf(&m_value[i * 2], "%02x", hash[i]);
 }

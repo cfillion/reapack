@@ -1,11 +1,8 @@
 #ifndef REAPACK_HASH_HPP
 #define REAPACK_HASH_HPP
 
+#include <memory>
 #include <string>
-
-#ifdef __APPLE__
-#  include <CommonCrypto/CommonDigest.h>
-#endif
 
 class Hash {
 public:
@@ -18,14 +15,19 @@ public:
   const std::string &digest();
 
 private:
-  void setValue(const unsigned char *hash, size_t len);
+  class Context {
+  public:
+    virtual ~Context() = default;
+    virtual size_t hashSize() const = 0;
+    virtual void addData(const char *data, const size_t len) = 0;
+    virtual void getHash(unsigned char *out) = 0;
+  };
+
+  class SHA256Context;
 
   Algorithm m_algo;
   std::string m_value;
-
-#ifdef __APPLE__
-  CC_SHA256_CTX m_sha256Context;
-#endif
+  std::unique_ptr<Context> m_context;
 };
 
 #endif
