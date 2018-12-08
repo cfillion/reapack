@@ -10,7 +10,11 @@ public:
     SHA256 = 0x12,
   };
 
+  static bool getAlgorithm(const std::string &hash, Algorithm *out);
+
   Hash(Algorithm);
+  Hash(const Hash &) = delete;
+
   void write(const char *data, size_t len);
   const std::string &digest();
 

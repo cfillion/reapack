@@ -33,3 +33,21 @@ TEST_CASE("invalid algorithm", M) {
   hash.write("foo bar", 7);
   REQUIRE(hash.digest() == "");
 }
+
+TEST_CASE("get hash algorithm", M) {
+  Hash::Algorithm algo;
+
+  SECTION("empty string")
+    REQUIRE_FALSE(Hash::getAlgorithm("", &algo));
+
+  SECTION("only sha-256 ID")
+    REQUIRE_FALSE(Hash::getAlgorithm("12", &algo));
+
+  SECTION("unexpected size")
+    REQUIRE_FALSE(Hash::getAlgorithm("1204ab", &algo));
+
+  SECTION("seemingly good (but not actually) sha-256") {
+    REQUIRE(Hash::getAlgorithm("1204abcd", &algo));
+    REQUIRE(algo == Hash::SHA256);
+  }
+}

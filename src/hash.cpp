@@ -173,3 +173,21 @@ const std::string &Hash::digest()
 
   return m_value;
 }
+
+bool Hash::getAlgorithm(const std::string &hash, Algorithm *out)
+{
+  unsigned int algo, size;
+  if(sscanf(hash.c_str(), "%2x%2x", &algo, &size) != 2)
+    return false;
+
+  if(hash.size() != size + 4)
+    return false;
+
+  switch(algo) {
+  case SHA256:
+    *out = static_cast<Algorithm>(algo);
+    return true;
+  default:
+    return false;
+  };
+}
