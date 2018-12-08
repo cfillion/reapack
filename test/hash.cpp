@@ -44,10 +44,10 @@ TEST_CASE("get hash algorithm", M) {
     REQUIRE_FALSE(Hash::getAlgorithm("12", &algo));
 
   SECTION("unexpected size")
-    REQUIRE_FALSE(Hash::getAlgorithm("1204ab", &algo));
+    REQUIRE_FALSE(Hash::getAlgorithm("1202ab", &algo));
 
   SECTION("seemingly good (but not actually) sha-256") {
-    REQUIRE(Hash::getAlgorithm("1204abcd", &algo));
+    REQUIRE(Hash::getAlgorithm("1202abcd", &algo));
     REQUIRE(algo == Hash::SHA256);
   }
 }

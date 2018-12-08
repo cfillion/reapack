@@ -180,7 +180,7 @@ bool Hash::getAlgorithm(const std::string &hash, Algorithm *out)
   if(sscanf(hash.c_str(), "%2x%2x", &algo, &size) != 2)
     return false;
 
-  if(hash.size() != size + 4)
+  if(hash.size() != (size * 2) + 4)
     return false;
 
   switch(algo) {
