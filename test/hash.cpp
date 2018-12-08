@@ -7,10 +7,12 @@ static const char *M = "[hash]";
 TEST_CASE("sha256 hashes", M) {
   Hash hash(Hash::SHA256);
 
-  SECTION("empty") {
+  SECTION("empty")
     REQUIRE(hash.digest() ==
       "1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
-  }
+
+  SECTION("digest twice")
+    REQUIRE(hash.digest() == hash.digest());
 
   SECTION("single chunk") {
     hash.addData("hello world", 11);
