@@ -13,15 +13,15 @@ TEST_CASE("sha256 hashes", M) {
   }
 
   SECTION("single chunk") {
-    hash.write("hello world", 11);
+    hash.addData("hello world", 11);
 
     REQUIRE(hash.digest() ==
       "1220b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
   }
 
   SECTION("split chunks") {
-    hash.write("foo bar", 7);
-    hash.write(" bazqux", 4);
+    hash.addData("foo bar", 7);
+    hash.addData(" bazqux", 4);
 
     REQUIRE(hash.digest() ==
       "1220dbd318c1c462aee872f41109a4dfd3048871a03dedd0fe0e757ced57dad6f2d7");
@@ -30,7 +30,7 @@ TEST_CASE("sha256 hashes", M) {
 
 TEST_CASE("invalid algorithm", M) {
   Hash hash(static_cast<Hash::Algorithm>(0));
-  hash.write("foo bar", 7);
+  hash.addData("foo bar", 7);
   REQUIRE(hash.digest() == "");
 }
 

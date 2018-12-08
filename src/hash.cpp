@@ -146,7 +146,7 @@ Hash::Hash(const Algorithm algo)
 #endif
 }
 
-void Hash::write(const char *data, const size_t len)
+void Hash::addData(const char *data, const size_t len)
 {
   if(m_context)
     m_context->addData(data, len);

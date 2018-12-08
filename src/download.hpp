@@ -24,7 +24,10 @@
 
 #include <curl/curl.h>
 #include <fstream>
+#include <memory>
 #include <sstream>
+
+class Hash;
 
 class DownloadContext {
 public:
@@ -49,6 +52,9 @@ public:
   Download(const std::string &url, const NetworkOpts &, int flags = 0);
 
   void setName(const std::string &);
+  void setExpectedChecksum(const std::string &checksum) {
+    m_expectedChecksum = checksum;
+  }
   const std::string &url() const { return m_url; }
 
   bool concurrent() const override { return true; }
@@ -59,11 +65,20 @@ protected:
   virtual void closeStream() {}
 
 private:
+  struct WriteContext {
+    std::ostream *stream;
+    std::unique_ptr<Hash> hash;
+
+    void write(const char *data, size_t len);
+    bool checkChecksum(const std::string &expected) const;
+  };
+
   bool has(Flag f) const { return (m_flags & f) != 0; }
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
   std::string m_url;
+  std::string m_expectedChecksum;
   NetworkOpts m_opts;
   int m_flags;
 };

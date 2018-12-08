@@ -18,6 +18,7 @@
 #include "download.hpp"
 
 #include "filesystem.hpp"
+#include "hash.hpp"
 #include "reapack.hpp"
 
 #include <cassert>
@@ -92,7 +93,7 @@ size_t Download::WriteData(char *data, size_t rawsize, size_t nmemb, void *ptr)
 {
   const size_t size = rawsize * nmemb;
 
-  static_cast<ostream *>(ptr)->write(data, size);
+  static_cast<WriteContext *>(ptr)->write(data, size);
 
   return size;
 }
@@ -115,8 +116,21 @@ void Download::setName(const string &name)
 
 bool Download::run()
 {
-  ostream *stream = openStream();
-  if(!stream)
+  WriteContext write;
+
+  Hash::Algorithm algo;
+  if(!m_expectedChecksum.empty()) {
+    if(Hash::getAlgorithm(m_expectedChecksum, &algo))
+      write.hash = make_unique<Hash>(algo);
+    else {
+      const string &error = String::format(
+        "Unsupported checksum: %s", m_expectedChecksum.c_str());
+      setError({error, m_url});
+      return false;
+    }
+  }
+
+  if(!(write.stream = openStream()))
     return false;
 
   thread_local DownloadContext ctx;
@@ -132,7 +146,7 @@ bool Download::run()
   curl_easy_setopt(ctx, CURLOPT_PROGRESSDATA, this);
 
   curl_easy_setopt(ctx, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(ctx, CURLOPT_WRITEDATA, stream);
+  curl_easy_setopt(ctx, CURLOPT_WRITEDATA, &write);
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
@@ -152,8 +166,24 @@ bool Download::run()
     setError({err, m_url});
     return false;
   }
+  else if(write.hash && write.hash->digest() != m_expectedChecksum) {
+    const string &err = String::format(
+      "Checksum mismatch.\nExpected: %s\nActual: %s",
+      m_expectedChecksum.c_str(), write.hash->digest().c_str()
+    );
+    setError({err, m_url});
+    return false;
+  }
 
   return true;
+}
+
+void Download::WriteContext::write(const char *data, const size_t len)
+{
+  stream->write(data, len);
+
+  if(hash)
+    hash->addData(data, len);
 }
 
 MemoryDownload::MemoryDownload(const string &url, const NetworkOpts &opts, int flags)

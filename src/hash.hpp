@@ -15,7 +15,7 @@ public:
   Hash(Algorithm);
   Hash(const Hash &) = delete;
 
-  void write(const char *data, size_t len);
+  void addData(const char *data, size_t len);
   const std::string &digest();
 
 private:
