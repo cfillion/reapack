@@ -204,3 +204,13 @@ TEST_CASE("directory traversal in category name", M) {
 
   REQUIRE(src.targetPath() == expected);
 }
+
+TEST_CASE("source checksum", M) {
+  MAKE_VERSION;
+
+  Source src({}, "url", &ver);
+  REQUIRE(src.checksum().empty());
+
+  src.setChecksum("hello world");
+  REQUIRE(src.checksum() == "hello world");
+}

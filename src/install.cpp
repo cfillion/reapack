@@ -74,6 +74,7 @@ bool InstallTask::start()
     else {
       const NetworkOpts &opts = g_reapack->config()->network;
       FileDownload *dl = new FileDownload(targetPath, src->url(), opts);
+      dl->setExpectedChecksum(src->checksum());
       push(dl, dl->path());
     }
   }

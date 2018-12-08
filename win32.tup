@@ -15,7 +15,7 @@ CXXFLAGS += /DWDL_NO_DEFINE_MINMAX /DCURL_STATICLIB /DUNICODE /DNDEBUG
 CXXFLAGS += /DREAPACK_FILE#\"$(REAPACK_FILE).dll\"
 
 LD := $(WRAP) link
-LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib Comdlg32.lib Comctl32.lib
+LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib Comdlg32.lib Comctl32.lib Bcrypt.lib
 LDFLAGS += $(VCPKG)/lib/libcurl.lib Ws2_32.lib Crypt32.lib Advapi32.lib
 LDFLAGS += $(VCPKG)/lib/sqlite3.lib $(VCPKG)/lib/zlib.lib
 LDFLAGS += $(TUP_VARIANTDIR)/src/resource.res

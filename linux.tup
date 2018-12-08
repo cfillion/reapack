@@ -20,7 +20,7 @@ SWELL := $(WDL)/swell
 WDLSOURCE += $(SWELL)/swell-modstub-generic.cpp
 
 export CURLSO
-LDFLAGS := -lstdc++ -lpthread -ldl -l${CURLSO:-curl} -lsqlite3 -lz
+LDFLAGS := -lstdc++ -lpthread -ldl -lcrypto -l${CURLSO:-curl} -lsqlite3 -lz
 LDFLAGS += -Wl,--gc-sections
 
 SOFLAGS := -shared

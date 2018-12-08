@@ -42,25 +42,31 @@ public:
   static Section detectSection(const Path &category);
 
   Source(const std::string &file, const std::string &url, const Version *);
-  const Version *version() const { return m_version; }
 
-  void setPlatform(Platform p) { m_platform = p; }
-  Platform platform() const { return m_platform; }
-  void setTypeOverride(Package::Type t) { m_type = t; }
-  Package::Type typeOverride() const { return m_type; }
+  const Version *version() const { return m_version; }
   Package::Type type() const;
   const std::string &file() const;
   const std::string &url() const { return m_url; }
+  Path targetPath() const;
+
+  void setChecksum(const std::string &checksum) { m_checksum = checksum; }
+  const std::string &checksum() const { return m_checksum; }
+
+  void setPlatform(Platform p) { m_platform = p; }
+  Platform platform() const { return m_platform; }
+
+  void setTypeOverride(Package::Type t) { m_type = t; }
+  Package::Type typeOverride() const { return m_type; }
+
   void setSections(int);
   int sections() const { return m_sections; }
-
-  Path targetPath() const;
 
 private:
   Platform m_platform;
   Package::Type m_type;
   std::string m_file;
   std::string m_url;
+  std::string m_checksum;
   int m_sections;
   Path m_targetPath;
   const Version *m_version;
