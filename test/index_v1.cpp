@@ -302,3 +302,22 @@ TEST_CASE("read multiple sections", M) {
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->sections()
     == (Source::MainSection | Source::MIDIEditorSection));
 }
+
+TEST_CASE("read sha256 checksum", M) {
+  IndexPtr ri = Index::load({}, R"(
+<index version="1">
+  <category name="catname">
+    <reapack name="packname" type="script">
+      <version name="1.0" author="John Doe">
+        <source checksum="12206037d8b51b33934348a2b26e04f0eb7227315b87bb5688ceb6dccb0468b14cce">https://google.com/</source>
+      </version>
+    </reapack>
+  </category>
+</index>
+  )");
+
+  REQUIRE(ri->packages().size() == 1);
+
+  REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->checksum()
+    == "12206037d8b51b33934348a2b26e04f0eb7227315b87bb5688ceb6dccb0468b14cce");
+}

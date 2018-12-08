@@ -176,6 +176,9 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   const char *file = node->Attribute("file");
   if(!file) file = "";
 
+  const char *checksum = node->Attribute("checksum");
+  if(!checksum) checksum = "";
+
   const char *main = node->Attribute("main");
   if(!main) main = "";
 
@@ -185,6 +188,7 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   Source *src = new Source(file, url, ver);
   unique_ptr<Source> ptr(src);
 
+  src->setChecksum(checksum);
   src->setPlatform(platform);
   src->setTypeOverride(Package::getType(type));
 
