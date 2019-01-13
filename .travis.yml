@@ -6,6 +6,7 @@ env:
   - PLATFORM=x64
   - PLATFORM=x86
 install:
+  - brew update
   - brew cask install osxfuse
   - brew install llvm tup
   - export PATH="/usr/local/opt/llvm/bin:$PATH"
