@@ -54,6 +54,7 @@ public:
   void synchronizeAll();
   void uninstall(const Remote &);
 
+  void uploadPackage();
   void importRemote();
   void manageRemotes();
   void aboutSelf();

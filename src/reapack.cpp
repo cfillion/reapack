@@ -117,6 +117,9 @@ void ReaPack::setupActions()
   m_actions.add("REAPACK_BROWSE", "ReaPack: Browse packages...",
     std::bind(&ReaPack::browsePackages, this));
 
+  m_actions.add("REAPACK_UPLOAD", "ReaPack: Upload packages...",
+    std::bind(&ReaPack::uploadPackage, this));
+
   m_actions.add("REAPACK_IMPORT", "ReaPack: Import repositories...",
     std::bind(&ReaPack::importRemote, this));
 
@@ -188,6 +191,11 @@ void ReaPack::uninstall(const Remote &remote)
     if(!m_tx->isCancelled())
       config()->remotes.remove(remote);
   };
+}
+
+void ReaPack::uploadPackage()
+{
+  Win32::shellExecute("https://reapack.com/upload");
 }
 
 void ReaPack::importRemote()
