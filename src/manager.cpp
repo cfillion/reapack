@@ -375,10 +375,8 @@ bool Manager::isRemoteEnabled(const Remote &remote) const
 void Manager::setRemoteAutoInstall(const tribool &enabled)
 {
   setMods([=](const Remote &remote, int, RemoteMods *mods) {
-    const bool same = remote.autoInstall() == enabled
-      || (indeterminate(remote.autoInstall()) && indeterminate(enabled));
-
-    if(same)
+    if(remote.autoInstall() == enabled
+        || (indeterminate(remote.autoInstall()) && indeterminate(enabled)))
       mods->autoInstall = nullopt;
     else
       mods->autoInstall = enabled;

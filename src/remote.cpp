@@ -125,7 +125,7 @@ bool Remote::autoInstall(bool fallback) const
   if(boost::logic::indeterminate(m_autoInstall))
     return fallback;
   else
-    return m_autoInstall;
+    return bool{m_autoInstall};
 }
 
 string Remote::toString() const

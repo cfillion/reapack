@@ -266,7 +266,7 @@ TEST_CASE("unserialize remote", M) {
 
   SECTION("auto-install enabled") {
     Remote remote = Remote::fromString("name|url|1|0");
-    REQUIRE(remote.autoInstall() == false);
+    REQUIRE(bool{remote.autoInstall() == false});
   }
 }
 
