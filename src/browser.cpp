@@ -167,6 +167,9 @@ void Browser::onCommand(const int id, const int event)
   case ACTION_COPY:
     copy();
     break;
+  case ACTION_SYNCHRONIZE:
+    g_reapack->synchronizeAll();
+    break;
   case ACTION_REFRESH:
     refresh(true);
     break;
@@ -337,6 +340,7 @@ void Browser::displayButton()
 
   menu.addSeparator();
 
+  menu.addAction("&Synchronize packages", ACTION_SYNCHRONIZE);
   menu.addAction("&Refresh repositories", ACTION_REFRESH);
   menu.addAction("&Manage repositories...", ACTION_MANAGE);
 
