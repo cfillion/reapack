@@ -173,6 +173,9 @@ void Browser::onCommand(const int id, const int event)
   case ACTION_REFRESH:
     refresh(true);
     break;
+  case ACTION_UPLOAD:
+    g_reapack->uploadPackage();
+    break;
   case ACTION_MANAGE:
     g_reapack->manageRemotes();
     break;
@@ -342,6 +345,7 @@ void Browser::displayButton()
 
   menu.addAction("&Synchronize packages", ACTION_SYNCHRONIZE);
   menu.addAction("&Refresh repositories", ACTION_REFRESH);
+  menu.addAction("&Upload packages", ACTION_UPLOAD);
   menu.addAction("&Manage repositories...", ACTION_MANAGE);
 
   menu.show(m_displayBtn, handle());

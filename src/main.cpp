@@ -74,7 +74,6 @@ static void menuHook(const char *name, HMENU handle, const int f)
   Menu menu = Menu(handle).addMenu("ReaPack");
   menu.addAction("&Synchronize packages",   "_REAPACK_SYNC");
   menu.addAction("&Browse packages...",     "_REAPACK_BROWSE");
-  menu.addAction("&Upload packages...",     "_REAPACK_UPLOAD");
   menu.addAction("&Import repositories...", "_REAPACK_IMPORT");
   menu.addAction("&Manage repositories...", "_REAPACK_MANAGE");
   menu.addSeparator();
