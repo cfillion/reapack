@@ -309,7 +309,7 @@ TEST_CASE("read sha256 checksum", M) {
   <category name="catname">
     <reapack name="packname" type="script">
       <version name="1.0" author="John Doe">
-        <source checksum="12206037d8b51b33934348a2b26e04f0eb7227315b87bb5688ceb6dccb0468b14cce">https://google.com/</source>
+        <source hash="12206037d8b51b33934348a2b26e04f0eb7227315b87bb5688ceb6dccb0468b14cce">https://google.com/</source>
       </version>
     </reapack>
   </category>

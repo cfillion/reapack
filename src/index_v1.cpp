@@ -176,7 +176,7 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   const char *file = node->Attribute("file");
   if(!file) file = "";
 
-  const char *checksum = node->Attribute("checksum");
+  const char *checksum = node->Attribute("hash");
   if(!checksum) checksum = "";
 
   const char *main = node->Attribute("main");
