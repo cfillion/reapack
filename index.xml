@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="d8fbd2de4ebb0dd4e69788943cce3ba0e2ee1316" name="ReaPack">
+<index version="1" commit="7d14b918f8d53929f5f98c971cb66f1ccac678df" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -664,6 +664,22 @@ Changed:
         <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2.2rc2/reaper_reapack32.so</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2.2rc2/reaper_reapack64.so</source>
       </version>
+      <version name="1.2.2rc3" author="cfillion" time="2019-02-15T05:44:22Z">
+        <changelog><![CDATA[Added:
+• implement SHA-256 checksum verification for downloaded files
+• browser: add "Synchronize packages" to the menu [p=2084579]
+• browser: add "Upload packages" action to the menu opening https://reapack.com/upload
+• receipt: annotate installation type and previous version
+
+Fixed:
+• import: fix possible crash after downloading indexes]]></changelog>
+        <source platform="darwin32" file="reaper_reapack32.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.2rc3/reaper_reapack32.dylib</source>
+        <source platform="darwin64" file="reaper_reapack64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.2rc3/reaper_reapack64.dylib</source>
+        <source platform="win32" file="reaper_reapack32.dll">https://github.com/cfillion/reapack/releases/download/v1.2.2rc3/reaper_reapack32.dll</source>
+        <source platform="win64" file="reaper_reapack64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.2rc3/reaper_reapack64.dll</source>
+        <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2.2rc3/reaper_reapack32.so</source>
+        <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2.2rc3/reaper_reapack64.so</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -673,7 +689,7 @@ Changed:
 
 {\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack: Package Manager for REAPER\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} built on [[REAPACK_BUILDTIME]]\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2018  Christian Fillion\line
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2019  Christian Fillion\line
 \line
 This program is free software: you can redistribute it and/or modify\line
 it under the terms of the GNU Lesser General Public License as published by\line
