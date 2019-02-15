@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.2rc2
+@version 1.2.2rc3
 @author cfillion
 @donation https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER
 @provides
@@ -10,5 +10,11 @@
   [linux32]  reaper_reapack32.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
   [linux64]  reaper_reapack64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Add the public ReaTeam/Extensions repository to the default configuration
-  • Fix a memory corruption bug from v1.2.2rc when an operation completes on Windows 32-bit
+  Added:
+  • implement SHA-256 checksum verification for downloaded files
+  • browser: add "Synchronize packages" to the menu [p=2084579]
+  • browser: add "Upload packages" action to the menu opening https://reapack.com/upload
+  • receipt: annotate installation type and previous version
+
+  Fixed:
+  • import: fix possible crash after downloading indexes
