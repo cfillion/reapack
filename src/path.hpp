@@ -19,6 +19,7 @@
 #define REAPACK_PATH_HPP
 
 #include <list>
+#include <ostream>
 #include <string>
 
 class UseRootPath;
