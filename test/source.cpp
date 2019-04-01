@@ -130,7 +130,7 @@ TEST_CASE("empty source url", M) {
 TEST_CASE("source target path", M) {
   MAKE_VERSION;
 
-  const std::pair<Package::Type, std::string> tests[] = {
+  constexpr std::pair<Package::Type, const char *> tests[] {
     {Package::ScriptType,          "Scripts/Index Name/Category Name/file.name"},
     {Package::EffectType,          "Effects/Index Name/Category Name/file.name"},
     {Package::ExtensionType,       "UserPlugins/file.name"},

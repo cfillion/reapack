@@ -25,7 +25,7 @@
 
 Package::Type Package::getType(const char *type)
 {
-  const std::pair<const char *, Type> map[]{
+  constexpr std::pair<const char *, Type> map[] {
     {"script",        ScriptType},
     {"extension",     ExtensionType},
     {"effect",        EffectType},

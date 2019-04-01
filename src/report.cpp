@@ -36,7 +36,7 @@ void Report::onInit()
     Win32::setWindowText(getControl(IDC_REPORT), m_pages[i].c_str());
   };
 
-  const ReceiptPage pages[] = {
+  const ReceiptPage pages[] {
     m_receipt->installedPage(),
     m_receipt->removedPage(),
     m_receipt->exportedPage(),

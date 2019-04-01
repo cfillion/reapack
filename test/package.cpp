@@ -7,7 +7,7 @@
 static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
-  const std::pair<const char *, Package::Type> tests[] = {
+  constexpr std::pair<const char *, Package::Type> tests[] {
     {"yoyo", Package::UnknownType},
     {"script", Package::ScriptType},
     {"extension", Package::ExtensionType},
@@ -27,7 +27,7 @@ TEST_CASE("package type from string", M) {
 }
 
 TEST_CASE("package type to string", M) {
-  const std::pair<Package::Type, std::string> tests[] = {
+  constexpr std::pair<Package::Type, const char *> tests[] {
     {Package::UnknownType,           "Unknown"},
     {Package::ScriptType,            "Script"},
     {Package::ExtensionType,         "Extension"},

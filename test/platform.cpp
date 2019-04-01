@@ -48,7 +48,7 @@ TEST_CASE("platform from string", M) {
 }
 
 TEST_CASE("test platform", M) {
-  const std::pair<Platform, bool> tests[] = {
+  const std::pair<Platform, bool> tests[] {
     {Platform::GenericPlatform, true},
 
 #ifdef __APPLE__

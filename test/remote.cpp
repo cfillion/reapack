@@ -15,7 +15,7 @@ TEST_CASE("construct remote", M) {
 
 TEST_CASE("remote name validation", M) {
   SECTION("invalid") {
-    const std::string invalidNames[] = {
+    const std::string invalidNames[] {
       "",
       "ab/cd",
       "ab\\cd",
@@ -47,7 +47,7 @@ TEST_CASE("remote name validation", M) {
   }
 
   SECTION("valid") {
-    const std::string validNames[] = {
+    const std::string validNames[] {
       "1234",
       "hello world",
       "hello_world",
@@ -69,7 +69,7 @@ TEST_CASE("remote name validation", M) {
 
 TEST_CASE("remote url validation", M) {
   SECTION("invalid") {
-    const std::string invalidUrls[] = {
+    const std::string invalidUrls[] {
       "",
       "hello world", // space should be %20
     };

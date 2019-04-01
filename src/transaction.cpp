@@ -249,7 +249,7 @@ void Transaction::registerQueued()
 
 void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 {
-  const std::pair<Source::Section, int> sectionMap[] = {
+  constexpr std::pair<Source::Section, int> sectionMap[] {
     {Source::MainSection,                0},
     {Source::MIDIEditorSection,          32060},
     {Source::MIDIEventListEditorSection, 32061},

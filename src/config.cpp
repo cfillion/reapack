@@ -95,7 +95,7 @@ void Config::restoreDefaultRemotes()
   self.setEnabled(true);
   remotes.add(self);
 
-  const Remote repos[] = {
+  const Remote repos[] {
     {"ReaTeam Scripts",
       "https://github.com/ReaTeam/ReaScripts/raw/master/index.xml"},
     {"ReaTeam JSFX",

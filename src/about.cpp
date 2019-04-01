@@ -135,7 +135,7 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
   m_delegate = nullptr;
   m_links.clear();
 
-  const int controls[] = {
+  constexpr int controls[] {
     IDC_ABOUT,
     IDC_MENU,
     IDC_LIST,
@@ -544,7 +544,7 @@ void AboutPackageDelegate::init(About *dialog)
 
 void AboutPackageDelegate::updateList(const int index)
 {
-  const std::pair<Source::Section, const char *> sectionMap[] = {
+  constexpr std::pair<Source::Section, const char *> sectionMap[] {
     {Source::MainSection,                "Main"},
     {Source::MIDIEditorSection,          "MIDI Editor"},
     {Source::MIDIInlineEditorSection,    "MIDI Inline Editor"},

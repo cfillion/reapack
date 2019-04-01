@@ -24,7 +24,7 @@
 
 auto Source::getSection(const char *name) -> Section
 {
-  const std::pair<const char *, Section> map[]{
+  constexpr std::pair<const char *, Section> map[] {
     {"main",                 MainSection},
     {"midi_editor",          MIDIEditorSection},
     {"midi_inlineeditor",    MIDIInlineEditorSection},

@@ -313,7 +313,7 @@ void Browser::updateDisplayLabel()
 
 void Browser::displayButton()
 {
-  static std::pair<const char *, Package::Type> types[]{
+  constexpr std::pair<const char *, Package::Type> types[] {
     {"&Automation Items",  Package::AutomationItemType},
     {"&Effects",           Package::EffectType},
     {"E&xtensions",        Package::ExtensionType},

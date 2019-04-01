@@ -31,7 +31,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
 {
   struct ApiFunc { void **ptr; const char *name; bool required; };
 
-  const ApiFunc funcs[] = {
+  const ApiFunc funcs[] {
     REQUIRED_API(Splash_GetWnd),             // v4.7
 
     REQUIRED_API(AddExtensionsMainMenu),

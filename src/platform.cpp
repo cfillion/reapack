@@ -22,7 +22,7 @@
 
 auto Platform::parse(const char *platform) -> Enum
 {
-  const std::pair<const char *, Enum> map[]{
+  constexpr std::pair<const char *, Enum> map[] {
     {"all",      GenericPlatform},
 
     {"windows",  WindowsPlatform},
