@@ -21,8 +21,6 @@
 #include "browser.hpp"
 #include "reapack.hpp"
 
-using namespace std;
-
 DEFINE_API(void, BrowsePackages, ((const char*, filter)),
 R"(Opens the package browser with the given filter string.)",
 {
@@ -35,7 +33,7 @@ DEFINE_API(int, CompareVersions, ((const char*, ver1))((const char*, ver2))
 R"(Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.)",
 {
   VersionName a, b;
-  string error;
+  std::string error;
 
   b.tryParse(ver2, &error);
   a.tryParse(ver1, &error);

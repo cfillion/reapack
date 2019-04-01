@@ -17,9 +17,7 @@
 
 #include "control.hpp"
 
-using namespace std;
-
-map<HWND, InhibitControl *> InhibitControl::s_lock;
+std::map<HWND, InhibitControl *> InhibitControl::s_lock;
 
 void InhibitControl::inhibitRedraw(const bool inhibit)
 {

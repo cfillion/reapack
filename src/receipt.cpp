@@ -23,8 +23,6 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
-using namespace std;
-
 Receipt::Receipt()
   : m_flags(NoFlag)
 {
@@ -111,7 +109,7 @@ InstallTicket::Type InstallTicket::deduceType(const Registry::Entry &previous) c
 
 bool InstallTicket::operator<(const InstallTicket &o) const
 {
-  string l = m_version->package()->displayName(),
+  std::string l = m_version->package()->displayName(),
     r = o.m_version->package()->displayName();
 
   boost::algorithm::to_lower(l);
@@ -120,7 +118,7 @@ bool InstallTicket::operator<(const InstallTicket &o) const
   return l < r;
 }
 
-ostream &operator<<(ostream &os, const InstallTicket &t)
+std::ostream &operator<<(std::ostream &os, const InstallTicket &t)
 {
   if(os.tellp() > 0)
     os << "\r\n";

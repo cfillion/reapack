@@ -6,8 +6,6 @@
 
 #include <errors.hpp>
 
-using namespace std;
-
 static const char *M = "[source]";
 
 #define MAKE_VERSION \
@@ -121,19 +119,18 @@ TEST_CASE("implicit section detection from source (v1.0 compatibility)") {
 TEST_CASE("empty source url", M) {
   MAKE_VERSION;
 
-  try {
+  auto test = [ver] {
     const Source source("filename", {}, &ver);
-    FAIL();
-  }
-  catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty source url");
-  }
+  };
+
+  CHECK_THROWS_AS(test(), reapack_error);
+  REQUIRE_THROWS_WITH(test(), "empty source url");
 }
 
 TEST_CASE("source target path", M) {
   MAKE_VERSION;
 
-  const pair<Package::Type, string> tests[] = {
+  const std::pair<Package::Type, std::string> tests[] = {
     {Package::ScriptType,          "Scripts/Index Name/Category Name/file.name"},
     {Package::EffectType,          "Effects/Index Name/Category Name/file.name"},
     {Package::ExtensionType,       "UserPlugins/file.name"},

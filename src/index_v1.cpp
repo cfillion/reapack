@@ -22,8 +22,6 @@
 #include <sstream>
 #include <WDL/tinyxml/tinyxml.h>
 
-using namespace std;
-
 static void LoadMetadataV1(TiXmlElement *, Metadata *);
 static void LoadCategoryV1(TiXmlElement *, Index *);
 static void LoadPackageV1(TiXmlElement *, Category *);
@@ -86,7 +84,7 @@ void LoadCategoryV1(TiXmlElement *catNode, Index *ri)
   if(!name) name = "";
 
   Category *cat = new Category(name, ri);
-  unique_ptr<Category> ptr(cat);
+  std::unique_ptr<Category> ptr(cat);
 
   TiXmlElement *packNode = catNode->FirstChildElement("reapack");
 
@@ -112,7 +110,7 @@ void LoadPackageV1(TiXmlElement *packNode, Category *cat)
   if(!desc) desc = "";
 
   Package *pack = new Package(Package::getType(type), name, cat);
-  unique_ptr<Package> ptr(pack);
+  std::unique_ptr<Package> ptr(pack);
 
   pack->setDescription(desc);
 
@@ -139,7 +137,7 @@ void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
   if(!name) name = "";
 
   Version *ver = new Version(name, pkg);
-  unique_ptr<Version> ptr(ver);
+  std::unique_ptr<Version> ptr(ver);
 
   const char *author = verNode->Attribute("author");
   if(author) ver->setAuthor(author);
@@ -186,16 +184,16 @@ void LoadSourceV1(TiXmlElement *node, Version *ver)
   if(!url) url = "";
 
   Source *src = new Source(file, url, ver);
-  unique_ptr<Source> ptr(src);
+  std::unique_ptr<Source> ptr(src);
 
   src->setChecksum(checksum);
   src->setPlatform(platform);
   src->setTypeOverride(Package::getType(type));
 
   int sections = 0;
-  string section;
-  istringstream mainStream(main);
-  while(getline(mainStream, section, '\x20'))
+  std::string section;
+  std::istringstream mainStream(main);
+  while(std::getline(mainStream, section, '\x20'))
     sections |= Source::getSection(section.c_str());
   src->setSections(sections);
 

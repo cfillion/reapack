@@ -2,18 +2,16 @@
 
 #include <string.hpp>
 
-static constexpr const char *M = "[string]";
-
-using namespace std;
+static const char *M = "[string]";
 
 TEST_CASE("string format", M) {
-  const string &formatted = String::format("%d%% Hello %s!", 100, "World");
+  const std::string &formatted = String::format("%d%% Hello %s!", 100, "World");
   CHECK(formatted.size() == 17);
   REQUIRE(formatted == "100% Hello World!");
 }
 
 TEST_CASE("indent string", M) {
-  string actual;
+  std::string actual;
 
   SECTION("simple")
     actual = String::indent("line1\nline2");

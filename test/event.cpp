@@ -4,7 +4,7 @@
 
 #include <reaper_plugin_functions.h>
 
-constexpr const char *M = "[event]";
+static const char *M = "[event]";
 
 TEST_CASE("check whether an event has handlers subscribed to it", M) {
   Event<void()> e;

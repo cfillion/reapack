@@ -4,12 +4,10 @@
 #include <index.hpp>
 #include <package.hpp>
 
-using namespace std;
-
 static const char *M = "[package]";
 
 TEST_CASE("package type from string", M) {
-  const pair<const char *, Package::Type> tests[] = {
+  const std::pair<const char *, Package::Type> tests[] = {
     {"yoyo", Package::UnknownType},
     {"script", Package::ScriptType},
     {"extension", Package::ExtensionType},
@@ -29,7 +27,7 @@ TEST_CASE("package type from string", M) {
 }
 
 TEST_CASE("package type to string", M) {
-  const pair<Package::Type, string> tests[] = {
+  const std::pair<Package::Type, std::string> tests[] = {
     {Package::UnknownType,           "Unknown"},
     {Package::ScriptType,            "Script"},
     {Package::ExtensionType,         "Extension"},
@@ -56,7 +54,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "empty package name");
+      REQUIRE(std::string{e.what()} == "empty package name");
     }
   }
 
@@ -66,7 +64,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid package name 'hello/world'");
+      REQUIRE(std::string{e.what()} == "invalid package name 'hello/world'");
     }
   }
 
@@ -76,7 +74,7 @@ TEST_CASE("invalid package name", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid package name 'hello\\world'");
+      REQUIRE(std::string{e.what()} == "invalid package name 'hello\\world'");
     }
   }
 }
@@ -187,7 +185,7 @@ TEST_CASE("add owned version", M) {
   }
   catch(const reapack_error &e) {
     delete ver;
-    REQUIRE(string(e.what()) == "version belongs to another package");
+    REQUIRE(std::string{e.what()} == "version belongs to another package");
   }
 }
 
@@ -205,7 +203,7 @@ TEST_CASE("add duplicate version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "duplicate version 'r/c/p v1'");
+    REQUIRE(std::string{e.what()} == "duplicate version 'r/c/p v1'");
   }
 }
 

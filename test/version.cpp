@@ -8,8 +8,6 @@
 
 #include <sstream>
 
-using namespace std;
-
 #define MAKE_PACKAGE \
   Index ri("Index Name"); \
   Category cat("Category Name", &ri); \
@@ -54,7 +52,7 @@ TEST_CASE("parse valid versions", M) {
 
 TEST_CASE("parse invalid versions", M) {
   VersionName ver;
-  string name;
+  std::string name;
 
   SECTION("only letters")
     name = "hello";
@@ -70,7 +68,7 @@ TEST_CASE("parse invalid versions", M) {
     FAIL("'" + name + "' was accepted");
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version name '" + name + "'");
+    REQUIRE(std::string{e.what()} == "invalid version name '" + name + "'");
   }
 
   REQUIRE(ver.toString().empty());
@@ -90,7 +88,7 @@ TEST_CASE("parse version failsafe", M) {
   SECTION("invalid") {
     REQUIRE_FALSE(ver.tryParse("hello"));
 
-    string error;
+    std::string error;
     REQUIRE_FALSE(ver.tryParse("world", &error));
 
     REQUIRE(ver.toString().empty());
@@ -118,7 +116,7 @@ TEST_CASE("version segment overflow", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "version segment overflow in '9999999999999999999999'");
+    REQUIRE(std::string{e.what()} == "version segment overflow in '9999999999999999999999'");
   }
 }
 
@@ -230,7 +228,7 @@ TEST_CASE("add owned source", M) {
   }
   catch(const reapack_error &e) {
     delete src;
-    REQUIRE(string(e.what()) == "source belongs to another version");
+    REQUIRE(std::string{e.what()} == "source belongs to another version");
   }
 }
 
@@ -259,7 +257,7 @@ TEST_CASE("list files", M) {
   path1.append("Category Name");
   path1.append("file");
 
-  const set<Path> expected{path1};
+  const std::set<Path> expected{path1};
   REQUIRE(ver.files() == expected);
 }
 
@@ -296,7 +294,7 @@ TEST_CASE("version date", M) {
 }
 
 TEST_CASE("output version", M) {
-  ostringstream stream;
+  std::ostringstream stream;
   Version ver("1.2.3", nullptr);
 
   SECTION("empty version") {

@@ -2,8 +2,6 @@
 
 #include <win32.hpp>
 
-using namespace std;
-
 static const char *M = "[win32]";
 
 TEST_CASE("widen string", M) {

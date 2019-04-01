@@ -23,8 +23,6 @@
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
 
-using namespace std;
-
 Package::Type Package::getType(const char *type)
 {
   const std::pair<const char *, Type> map[]{
@@ -49,7 +47,7 @@ Package::Type Package::getType(const char *type)
   return UnknownType;
 }
 
-string Package::displayType(const Type type)
+const char *Package::displayType(const Type type)
 {
   switch(type) {
   case UnknownType:
@@ -81,17 +79,17 @@ string Package::displayType(const Type type)
   return "Unknown";
 }
 
-const string &Package::displayName(const string &name, const string &desc)
+const std::string &Package::displayName(const std::string &name, const std::string &desc)
 {
   return desc.empty() ? name : desc;
 }
 
-Package::Package(const Type type, const string &name, const Category *cat)
+Package::Package(const Type type, const std::string &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");
-  else if(m_name.find_first_of("/\\") != string::npos) {
+  else if(m_name.find_first_of("/\\") != std::string::npos) {
     throw reapack_error(
       String::format("invalid package name '%s'", m_name.c_str()));
   }
@@ -103,7 +101,7 @@ Package::~Package()
     delete ver;
 }
 
-string Package::fullName() const
+std::string Package::fullName() const
 {
   return m_category ? m_category->fullName() + "/" + displayName() : displayName();
 }

@@ -22,8 +22,6 @@
 // Starting here and onward is the Linux implementation of RichEdit
 // See also richedit.mm and richedit-win32.cpp
 
-using namespace std;
-
 void RichEdit::Init()
 {
 }
@@ -41,12 +39,12 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-void RichEdit::setPlainText(const string &text)
+void RichEdit::setPlainText(const std::string &text)
 {
   SetWindowText(handle(), text.c_str());
 }
 
-bool RichEdit::setRichText(const string &)
+bool RichEdit::setRichText(const std::string &)
 {
   return false;
 }

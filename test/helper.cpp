@@ -4,9 +4,7 @@
 #include <path.hpp>
 #include <version.hpp>
 
-using namespace std;
-
-ostream &operator<<(ostream &os, const set<Path> &list)
+std::ostream &operator<<(std::ostream &os, const std::set<Path> &list)
 {
   os << '{';
 

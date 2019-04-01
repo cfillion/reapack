@@ -24,30 +24,28 @@ static const unsigned short VERSION = 1;
 static const char FIELD_END = '\x20';
 static const char RECORD_END = ',';
 
-using namespace std;
-
-auto Serializer::read(const string &input, const int userVersion) -> Data
+auto Serializer::read(const std::string &input, const int userVersion) -> Data
 {
   m_userVersion = userVersion;
 
   bool first = true;
-  istringstream stream(input);
+  std::istringstream stream(input);
 
   Data out;
 
   while(!stream.eof()) {
-    string line;
-    getline(stream, line, RECORD_END);
+    std::string line;
+    std::getline(stream, line, RECORD_END);
 
-    istringstream lineStream(line);
+    std::istringstream lineStream(line);
 
     Record rec;
     for(size_t i = 0; i < rec.size(); i++) {
       if(lineStream.eof())
         return out;
 
-      string field;
-      getline(lineStream, field, FIELD_END);
+      std::string field;
+      std::getline(lineStream, field, FIELD_END);
 
       int value;
 
@@ -74,12 +72,12 @@ auto Serializer::read(const string &input, const int userVersion) -> Data
   return out;
 }
 
-string Serializer::write(const Data &data) const
+std::string Serializer::write(const Data &data) const
 {
   if(!m_userVersion)
     return {};
 
-  ostringstream stream;
+  std::ostringstream stream;
 
   stream
     << m_userVersion << FIELD_END

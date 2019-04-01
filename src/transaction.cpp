@@ -30,8 +30,6 @@
 
 #include <reaper_plugin_functions.h>
 
-using namespace std;
-
 Transaction::Transaction()
   : m_isCancelled(false), m_registry(Path::REGISTRY.prependRoot())
 {
@@ -44,11 +42,11 @@ Transaction::Transaction()
 
   m_threadPool.onAbort >> [this] {
     m_isCancelled = true;
-    queue<HostTicket>().swap(m_regQueue);
+    std::queue<HostTicket>().swap(m_regQueue);
   };
 
   // run the next task queue when the current one is done
-  m_threadPool.onDone >> bind(&Transaction::runTasks, this);
+  m_threadPool.onDone >> std::bind(&Transaction::runTasks, this);
 }
 
 void Transaction::synchronize(const Remote &remote,
@@ -62,18 +60,18 @@ void Transaction::synchronize(const Remote &remote,
   InstallOpts opts = g_reapack->config()->install;
   opts.autoInstall = remote.autoInstall(forceAutoInstall.value_or(opts.autoInstall));
 
-  m_nextQueue.push(make_shared<SynchronizeTask>(remote, true, true, opts, this));
+  m_nextQueue.push(std::make_shared<SynchronizeTask>(remote, true, true, opts, this));
 }
 
-void Transaction::fetchIndexes(const vector<Remote> &remotes, const bool stale)
+void Transaction::fetchIndexes(const std::vector<Remote> &remotes, const bool stale)
 {
   for(const Remote &remote : remotes)
-    m_nextQueue.push(make_shared<SynchronizeTask>(remote, stale, false, InstallOpts{}, this));
+    m_nextQueue.push(std::make_shared<SynchronizeTask>(remote, stale, false, InstallOpts{}, this));
 }
 
-vector<IndexPtr> Transaction::getIndexes(const vector<Remote> &remotes) const
+std::vector<IndexPtr> Transaction::getIndexes(const std::vector<Remote> &remotes) const
 {
-  vector<IndexPtr> indexes;
+  std::vector<IndexPtr> indexes;
 
   for(const Remote &remote : remotes) {
     const auto &it = m_indexes.find(remote.name());
@@ -111,12 +109,12 @@ void Transaction::install(const Version *ver, const bool pin,
 void Transaction::install(const Version *ver, const Registry::Entry &oldEntry,
   const bool pin, const ArchiveReaderPtr &reader)
 {
-  m_nextQueue.push(make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
+  m_nextQueue.push(std::make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
 }
 
 void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
 {
-  m_nextQueue.push(make_shared<PinTask>(entry, pinned, this));
+  m_nextQueue.push(std::make_shared<PinTask>(entry, pinned, this));
 }
 
 void Transaction::uninstall(const Remote &remote)
@@ -136,12 +134,12 @@ void Transaction::uninstall(const Remote &remote)
 
 void Transaction::uninstall(const Registry::Entry &entry)
 {
-  m_nextQueue.push(make_shared<UninstallTask>(entry, this));
+  m_nextQueue.push(std::make_shared<UninstallTask>(entry, this));
 }
 
-void Transaction::exportArchive(const string &path)
+void Transaction::exportArchive(const std::string &path)
 {
-  m_nextQueue.push(make_shared<ExportTask>(path, this));
+  m_nextQueue.push(std::make_shared<ExportTask>(path, this));
 }
 
 bool Transaction::runTasks()
@@ -251,7 +249,7 @@ void Transaction::registerQueued()
 
 void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 {
-  const pair<Source::Section, int> sectionMap[] = {
+  const std::pair<Source::Section, int> sectionMap[] = {
     {Source::MainSection,                0},
     {Source::MIDIEditorSection,          32060},
     {Source::MIDIEventListEditorSection, 32061},
@@ -262,9 +260,9 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
   if(!AddRemoveReaScript || !reg.file.sections)
     return; // do nothing if REAPER < v5.12 and skip non-main files
 
-  const string &fullPath = reg.file.path.prependRoot().join();
+  const std::string &fullPath = reg.file.path.prependRoot().join();
 
-  vector<int> sections;
+  std::vector<int> sections;
 
   for(auto &[flag, id] : sectionMap) {
     if(reg.file.sections & flag)
@@ -312,7 +310,7 @@ void Transaction::promptObsolete()
   if(!g_reapack->config()->install.promptObsolete || m_obsolete.empty())
     return;
 
-  vector<Registry::Entry> selected;
+  std::vector<Registry::Entry> selected;
   selected.insert(selected.end(), m_obsolete.begin(), m_obsolete.end());
   m_obsolete.clear();
 
@@ -323,5 +321,5 @@ void Transaction::promptObsolete()
     m_taskQueues.push(TaskQueue());
 
   for(const auto &entry : selected)
-    m_taskQueues.back().push(make_shared<UninstallTask>(entry, this));
+    m_taskQueues.back().push(std::make_shared<UninstallTask>(entry, this));
 }

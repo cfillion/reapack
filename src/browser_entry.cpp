@@ -25,8 +25,6 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-using namespace std;
-
 Browser::Entry::Entry(const Package *pkg, const Registry::Entry &re, const IndexPtr &i)
   : m_flags(0), regEntry(re), package(pkg), index(i), current(nullptr)
 {
@@ -58,9 +56,9 @@ Browser::Entry::Entry(const Registry::Entry &re, const IndexPtr &i)
   index(i), current(nullptr), latest(nullptr)
 {}
 
-string Browser::Entry::displayState() const
+std::string Browser::Entry::displayState() const
 {
-  string state;
+  std::string state;
 
   if(test(ObsoleteFlag))
     state += 'o';
@@ -82,22 +80,22 @@ string Browser::Entry::displayState() const
   return state;
 }
 
-const string &Browser::Entry::indexName() const
+const std::string &Browser::Entry::indexName() const
 {
   return package ? package->category()->index()->name() : regEntry.remote;
 }
 
-const string &Browser::Entry::categoryName() const
+const std::string &Browser::Entry::categoryName() const
 {
   return package ? package->category()->name() : regEntry.category;
 }
 
-const string &Browser::Entry::packageName() const
+const std::string &Browser::Entry::packageName() const
 {
   return package ? package->name() : regEntry.package;
 }
 
-string Browser::Entry::displayName() const
+std::string Browser::Entry::displayName() const
 {
   if(package)
     return package->displayName();
@@ -110,14 +108,14 @@ Package::Type Browser::Entry::type() const
   return latest ? package->type() : regEntry.type;
 }
 
-string Browser::Entry::displayType() const
+std::string Browser::Entry::displayType() const
 {
   return package ? package->displayType() : Package::displayType(regEntry.type);
 }
 
-string Browser::Entry::displayVersion() const
+std::string Browser::Entry::displayVersion() const
 {
-  string display;
+  std::string display;
 
   if(test(InstalledFlag))
     display = regEntry.version.toString();
@@ -140,7 +138,7 @@ const VersionName *Browser::Entry::sortVersion() const
     return &latest->name();
 }
 
-string Browser::Entry::displayAuthor() const
+std::string Browser::Entry::displayAuthor() const
 {
   return latest ? latest->displayAuthor() : Version::displayAuthor(regEntry.author);
 }
@@ -150,19 +148,19 @@ const Time *Browser::Entry::lastUpdate() const
   return latest ? &latest->time() : nullptr;
 }
 
-void Browser::Entry::updateRow(const ListView::RowPtr &row) const
+void Browser::Entry::updateRow(ListView::Row *row) const
 {
   int c = 0;
-  const Time *time = lastUpdate();
+  Time *time = const_cast<Time *>(lastUpdate());
 
   row->setCell(c++, displayState());
   row->setCell(c++, displayName());
   row->setCell(c++, categoryName());
-  row->setCell(c++, displayVersion(), (void *)sortVersion());
+  row->setCell(c++, displayVersion(), const_cast<VersionName *>(sortVersion()));
   row->setCell(c++, displayAuthor());
   row->setCell(c++, displayType());
   row->setCell(c++, indexName());
-  row->setCell(c++, time ? time->toString() : string(), (void *)time);
+  row->setCell(c++, time ? time->toString() : std::string{}, time);
 }
 
 void Browser::Entry::fillMenu(Menu &menu) const

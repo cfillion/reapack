@@ -22,9 +22,7 @@
 #include <cinttypes>
 #include <sqlite3.h>
 
-using namespace std;
-
-Database::Database(const string &fn)
+Database::Database(const std::string &fn)
   : m_savePoint(0)
 {
   if(sqlite3_open(fn.empty() ? ":memory:" : fn.c_str(), &m_db)) {
@@ -145,7 +143,7 @@ Statement::~Statement()
   sqlite3_finalize(m_stmt);
 }
 
-void Statement::bind(const int index, const string &text)
+void Statement::bind(const int index, const std::string &text)
 {
   if(sqlite3_bind_text(m_stmt, index, text.c_str(), -1, SQLITE_TRANSIENT))
     throw m_db->lastError();
@@ -187,12 +185,12 @@ int64_t Statement::intColumn(const int index) const
   return sqlite3_column_int64(m_stmt, index);
 }
 
-string Statement::stringColumn(const int index) const
+std::string Statement::stringColumn(const int index) const
 {
-  char *col = (char *)sqlite3_column_text(m_stmt, index);
+  const unsigned char *col = sqlite3_column_text(m_stmt, index);
 
   if(col)
-    return col;
+    return reinterpret_cast<const char *>(col);
   else
     return {};
 }

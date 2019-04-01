@@ -21,17 +21,15 @@
 #include <iomanip>
 #include <sstream>
 
-using namespace std;
-
 Time::Time(const char *iso8601) : m_tm()
 {
   tm time = {};
 
-  istringstream stream(iso8601);
+  std::istringstream stream(iso8601);
   stream >> std::get_time(&time, "%Y-%m-%dT%H:%M:%S");
 
   if(stream.good())
-    swap(m_tm, time);
+    std::swap(m_tm, time);
 }
 
 Time::Time(int year, int month, int day, int hour, int minute, int second)
@@ -46,7 +44,7 @@ Time::Time(int year, int month, int day, int hour, int minute, int second)
   m_tm.tm_sec = second;
 }
 
-string Time::toString() const
+std::string Time::toString() const
 {
   if(!isValid())
     return {};
@@ -58,8 +56,8 @@ string Time::toString() const
 
 int Time::compare(const Time &o) const
 {
-  const array<int, 6> l{year(), month(), day(), hour(), minute(), second()};
-  const array<int, 6> r{o.year(), o.month(), o.day(), o.hour(), o.minute(), o.second()};
+  const std::array<int, 6> l{year(), month(), day(), hour(), minute(), second()};
+  const std::array<int, 6> r{o.year(), o.month(), o.day(), o.hour(), o.minute(), o.second()};
 
   if(l < r)
     return -1;
@@ -69,7 +67,7 @@ int Time::compare(const Time &o) const
   return 0;
 }
 
-ostream &operator<<(ostream &os, const Time &time)
+std::ostream &operator<<(std::ostream &os, const Time &time)
 {
   os << time.toString();
   return os;

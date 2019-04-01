@@ -24,53 +24,51 @@
 #include <regex>
 #include <sstream>
 
-using namespace std;
-
 static char DATA_DELIMITER = '|';
 
-static bool validateName(const string &name)
+static bool validateName(const std::string &name)
 {
   using namespace std::regex_constants;
 
   // see https://en.wikipedia.org/wiki/Filename#Reserved%5Fcharacters%5Fand%5Fwords
-  static const regex validPattern("[^*\\\\:<>?/|\"[:cntrl:]]+");
-  static const regex invalidPattern(
+  static const std::regex validPattern("[^*\\\\:<>?/|\"[:cntrl:]]+");
+  static const std::regex invalidPattern(
     "[\\.\x20].*|.+[\\.\x20]|CLOCK\\$|COM\\d|LPT\\d", icase);
 
-  smatch valid, invalid;
-  regex_match(name, valid, validPattern);
-  regex_match(name, invalid, invalidPattern);
+  std::smatch valid, invalid;
+  std::regex_match(name, valid, validPattern);
+  std::regex_match(name, invalid, invalidPattern);
 
   return !valid.empty() && invalid.empty();
 }
 
-static bool validateUrl(const string &url)
+static bool validateUrl(const std::string &url)
 {
   // see http://tools.ietf.org/html/rfc3986#section-2
-  static const regex pattern(
+  static const std::regex pattern(
     "(?:[a-zA-Z0-9._~:/?#[\\]@!$&'()*+,;=-]|%[a-f0-9]{2})+");
 
-  smatch match;
-  regex_match(url, match, pattern);
+  std::smatch match;
+  std::regex_match(url, match, pattern);
 
   return !match.empty();
 }
 
-Remote Remote::fromString(const string &data)
+Remote Remote::fromString(const std::string &data)
 {
-  istringstream stream(data);
+  std::istringstream stream(data);
 
-  string name;
-  getline(stream, name, DATA_DELIMITER);
+  std::string name;
+  std::getline(stream, name, DATA_DELIMITER);
 
-  string url;
-  getline(stream, url, DATA_DELIMITER);
+  std::string url;
+  std::getline(stream, url, DATA_DELIMITER);
 
-  string enabled;
-  getline(stream, enabled, DATA_DELIMITER);
+  std::string enabled;
+  std::getline(stream, enabled, DATA_DELIMITER);
 
-  string autoInstall;
-  getline(stream, autoInstall, DATA_DELIMITER);
+  std::string autoInstall;
+  std::getline(stream, autoInstall, DATA_DELIMITER);
 
   if(!validateName(name) || !validateUrl(url))
     return {};
@@ -95,14 +93,15 @@ Remote::Remote()
 {
 }
 
-Remote::Remote(const string &name, const string &url, const bool enabled, const tribool &autoInstall)
+Remote::Remote(const std::string &name, const std::string &url,
+    const bool enabled, const tribool &autoInstall)
   : m_enabled(enabled), m_protected(false), m_autoInstall(autoInstall)
 {
   setName(name);
   setUrl(url);
 }
 
-void Remote::setName(const string &name)
+void Remote::setName(const std::string &name)
 {
   if(!validateName(name))
     throw reapack_error("invalid name");
@@ -110,7 +109,7 @@ void Remote::setName(const string &name)
     m_name = name;
 }
 
-void Remote::setUrl(const string &url)
+void Remote::setUrl(const std::string &url)
 {
   if(!validateUrl(url))
     throw reapack_error("invalid url");
@@ -128,9 +127,9 @@ bool Remote::autoInstall(bool fallback) const
     return bool{m_autoInstall};
 }
 
-string Remote::toString() const
+std::string Remote::toString() const
 {
-  ostringstream out;
+  std::ostringstream out;
   out << m_name << DATA_DELIMITER;
   out << m_url << DATA_DELIMITER;
   out << m_enabled << DATA_DELIMITER;
@@ -161,7 +160,7 @@ void RemoteList::add(const Remote &remote)
   m_map[remote.name()] = index;
 }
 
-void RemoteList::remove(const string &name)
+void RemoteList::remove(const std::string &name)
 {
   const auto &it = m_map.find(name);
 
@@ -178,7 +177,7 @@ void RemoteList::remove(const string &name)
   m_map.erase(it);
 }
 
-Remote RemoteList::get(const string &name) const
+Remote RemoteList::get(const std::string &name) const
 {
   const auto &it = m_map.find(name);
 
@@ -188,9 +187,9 @@ Remote RemoteList::get(const string &name) const
     return m_remotes[it->second];
 }
 
-vector<Remote> RemoteList::getEnabled() const
+std::vector<Remote> RemoteList::getEnabled() const
 {
-  vector<Remote> list;
+  std::vector<Remote> list;
 
   for(const Remote &remote : m_remotes) {
     if(remote.isEnabled())

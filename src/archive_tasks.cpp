@@ -23,35 +23,36 @@
 #include "index.hpp"
 #include "reapack.hpp"
 #include "remote.hpp"
+#include "string.hpp"
 #include "transaction.hpp"
 
 #include <iomanip>
 #include <sstream>
 
-using namespace std;
-
 static const Path ARCHIVE_TOC("toc");
 
-ExportTask::ExportTask(const string &path, Transaction *tx)
+ExportTask::ExportTask(const std::string &path, Transaction *tx)
   : Task(tx), m_path(path)
 {
 }
 
 bool ExportTask::start()
 {
-  stringstream toc;
+  std::stringstream toc;
   ArchiveWriterPtr writer;
 
   try {
-    writer = make_shared<ArchiveWriter>(m_path.temp());
+    writer = std::make_shared<ArchiveWriter>(m_path.temp());
   }
   catch(const reapack_error &e) {
-    tx()->receipt()->addError({string("Could not open archive for writing: ") +
-      e.what(), m_path.temp().join()});
+    tx()->receipt()->addError({
+      String::format("Could not open archive for writing: %s", e.what()),
+      m_path.temp().join()
+    });
     return false;
   }
 
-  vector<FileCompressor *> jobs;
+  std::vector<FileCompressor *> jobs;
 
   for(const Remote &remote : g_reapack->config()->remotes.getEnabled()) {
     bool addedRemote = false;
@@ -95,8 +96,10 @@ bool ExportTask::start()
 void ExportTask::commit()
 {
   if(!FS::rename(m_path)) {
-    tx()->receipt()->addError({string("Could not move to permanent location: ") +
-      FS::lastError(), m_path.target().prependRoot().join()});
+    tx()->receipt()->addError({
+      String::format("Could not move to permanent location: %s", FS::lastError()),
+      m_path.target().prependRoot().join()
+    });
   }
 }
 

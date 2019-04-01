@@ -27,8 +27,6 @@
 
 #include <sqlite3.h>
 
-using namespace std;
-
 Registry::Registry(const Path &path)
   : m_db(path.join())
 {
@@ -145,7 +143,7 @@ void Registry::migrate()
   }
 }
 
-auto Registry::push(const Version *ver, vector<Path> *conflicts) -> Entry
+auto Registry::push(const Version *ver, std::vector<Path> *conflicts) -> Entry
 {
   m_db.savepoint();
 
@@ -245,9 +243,9 @@ auto Registry::getEntry(const Package *pkg) const -> Entry
   return entry;
 }
 
-auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
+auto Registry::getEntries(const std::string &remoteName) const -> std::vector<Entry>
 {
-  vector<Registry::Entry> list;
+  std::vector<Registry::Entry> list;
 
   m_allEntries->bind(1, remoteName);
   m_allEntries->exec([&] {
@@ -261,12 +259,12 @@ auto Registry::getEntries(const string &remoteName) const -> vector<Entry>
   return list;
 }
 
-auto Registry::getFiles(const Entry &entry) const -> vector<File>
+auto Registry::getFiles(const Entry &entry) const -> std::vector<File>
 {
   if(!entry) // skip processing for new packages
     return {};
 
-  vector<File> files;
+  std::vector<File> files;
 
   m_getFiles->bind(1, entry.id);
   m_getFiles->exec([&] {
@@ -288,16 +286,16 @@ auto Registry::getFiles(const Entry &entry) const -> vector<File>
   return files;
 }
 
-auto Registry::getMainFiles(const Entry &entry) const -> vector<File>
+auto Registry::getMainFiles(const Entry &entry) const -> std::vector<File>
 {
   if(!entry)
     return {};
 
-  const vector<File> &allFiles = getFiles(entry);
+  const std::vector<File> &allFiles = getFiles(entry);
 
-  vector<File> mainFiles;
-  copy_if(allFiles.begin(), allFiles.end(),
-    back_inserter(mainFiles), [&](const File &f) { return f.sections; });
+  std::vector<File> mainFiles;
+  std::copy_if(allFiles.begin(), allFiles.end(),
+    std::back_inserter(mainFiles), [&](const File &f) { return f.sections; });
 
   return mainFiles;
 }
@@ -332,7 +330,7 @@ void Registry::convertImplicitSections()
   Statement entries("SELECT id, category FROM entries", &m_db);
   entries.exec([&] {
     const auto id = entries.intColumn(0);
-    const string &category = entries.stringColumn(1);
+    const std::string &category = entries.stringColumn(1);
     const auto section = Source::detectSection(category);
 
     Statement update("UPDATE files SET main = ? WHERE entry = ? AND main != 0", &m_db);

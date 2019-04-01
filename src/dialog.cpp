@@ -29,8 +29,6 @@
 #  include <windowsx.h>
 #endif
 
-using namespace std;
-
 std::map<HWND, Dialog *> Dialog::s_instances;
 
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -131,7 +129,7 @@ Dialog::~Dialog()
 {
   plugin_register("-accelerator", &m_accel);
 
-  const set<int> timers = m_timers; // make an immutable copy
+  const std::set<int> timers = m_timers; // make an immutable copy
   for(const int id : timers)
     stopTimer(id);
 
@@ -194,6 +192,8 @@ void Dialog::close(const INT_PTR result)
 
 void Dialog::center()
 {
+  using std::min, std::max;
+
   RECT dialogRect, parentRect;
 
   GetWindowRect(m_handle, &dialogRect);
@@ -238,6 +238,8 @@ void Dialog::center()
 
 void Dialog::boundedMove(int x, int y)
 {
+  using std::min, std::max, std::abs;
+
   RECT rect;
   GetWindowRect(m_handle, &rect);
 
@@ -317,7 +319,7 @@ void Dialog::stopTimer(int id)
   m_timers.erase(id);
 }
 
-void Dialog::setClipboard(const string &text)
+void Dialog::setClipboard(const std::string &text)
 {
   const HANDLE mem = Win32::globalCopy(text);
 
@@ -331,7 +333,7 @@ void Dialog::setClipboard(const string &text)
   CloseClipboard();
 }
 
-void Dialog::setClipboard(const vector<string> &values)
+void Dialog::setClipboard(const std::vector<std::string> &values)
 {
 #ifdef _WIN32
   constexpr const char *nl = "\r\n";
@@ -350,12 +352,11 @@ HWND Dialog::getControl(const int idc)
 
 void Dialog::setAnchor(HWND handle, const int flags)
 {
-  const float left = (float)min(1, flags & AnchorLeft);
-  const float top = (float)min(1, flags & AnchorTop);
-  const float right = (float)min(1, flags & AnchorRight);
-  const float bottom = (float)min(1, flags & AnchorBottom);
-
-  m_resizer.init_itemhwnd(handle, left, top, right, bottom);
+  m_resizer.init_itemhwnd(handle,
+    static_cast<float>(flags & AnchorLeft),
+    static_cast<float>(flags & AnchorTop),
+    static_cast<float>(flags & AnchorRight),
+    static_cast<float>(flags & AnchorBottom));
 }
 
 void Dialog::setAnchorPos(HWND handle,
@@ -455,7 +456,7 @@ void Dialog::onContextMenu(HWND target, const int x, const int y)
 
 #ifndef _WIN32
     // special treatment for SWELL
-    swap(rect.top, rect.bottom);
+    std::swap(rect.top, rect.bottom);
 #endif
 
     const POINT point{x, y};

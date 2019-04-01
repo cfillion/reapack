@@ -25,9 +25,7 @@
 #include <cctype>
 #include <regex>
 
-using namespace std;
-
-string Version::displayAuthor(const string &author)
+std::string Version::displayAuthor(const std::string &author)
 {
   if(author.empty())
     return "Unknown";
@@ -35,7 +33,7 @@ string Version::displayAuthor(const string &author)
     return author;
 }
 
-Version::Version(const string &str, const Package *pkg)
+Version::Version(const std::string &str, const Package *pkg)
   : m_name(str), m_time(), m_package(pkg)
 {
 }
@@ -46,9 +44,9 @@ Version::~Version()
     delete source;
 }
 
-string Version::fullName() const
+std::string Version::fullName() const
 {
-  string name = m_package->fullName();
+  std::string name = m_package->fullName();
   name += " v";
   name += m_name.toString();
 
@@ -73,7 +71,7 @@ bool Version::addSource(const Source *source)
   return true;
 }
 
-ostream &operator<<(ostream &os, const Version &ver)
+std::ostream &operator<<(std::ostream &os, const Version &ver)
 {
   os << 'v' << ver.name().toString();
 
@@ -85,7 +83,7 @@ ostream &operator<<(ostream &os, const Version &ver)
 
   os << "\r\n";
 
-  const string &changelog = ver.changelog();
+  const std::string &changelog = ver.changelog();
   os << String::indent(changelog.empty() ? "No changelog" : changelog);
 
   return os;
@@ -94,7 +92,7 @@ ostream &operator<<(ostream &os, const Version &ver)
 VersionName::VersionName() : m_stable(true)
 {}
 
-VersionName::VersionName(const string &str)
+VersionName::VersionName(const std::string &str)
 {
   parse(str);
 }
@@ -104,18 +102,18 @@ VersionName::VersionName(const VersionName &o)
 {
 }
 
-void VersionName::parse(const string &str)
+void VersionName::parse(const std::string &str)
 {
-  static const regex pattern("\\d+|[a-zA-Z]+");
+  static const std::regex pattern("\\d+|[a-zA-Z]+");
 
-  const auto &begin = sregex_iterator(str.begin(), str.end(), pattern);
-  const sregex_iterator end;
+  const auto &begin = std::sregex_iterator(str.begin(), str.end(), pattern);
+  const std::sregex_iterator end;
 
   size_t letters = 0;
-  vector<Segment> segments;
+  std::vector<Segment> segments;
 
-  for(sregex_iterator it = begin; it != end; it++) {
-    const string &match = it->str(0);
+  for(std::sregex_iterator it = begin; it != end; it++) {
+    const std::string &match = it->str(0);
 
     if(isalpha(match[0])) {
       if(segments.empty()) // got leading letters
@@ -142,7 +140,7 @@ void VersionName::parse(const string &str)
   m_stable = letters < 1;
 }
 
-bool VersionName::tryParse(const string &str, string *errorOut)
+bool VersionName::tryParse(const std::string &str, std::string *errorOut)
 {
   try {
     parse(str);
@@ -166,7 +164,7 @@ auto VersionName::segment(const size_t index) const -> Segment
 
 int VersionName::compare(const VersionName &o) const
 {
-  const size_t biggest = max(size(), o.size());
+  const size_t biggest = std::max(size(), o.size());
 
   switch(m_segments.empty() + o.m_segments.empty()) {
   case 1:
@@ -177,12 +175,12 @@ int VersionName::compare(const VersionName &o) const
 
   for(size_t i = 0; i < biggest; i++) {
     const Segment &lseg = segment(i);
-    const Numeric *lnum = get_if<Numeric>(&lseg);
-    const string *lstr = get_if<string>(&lseg);
+    const Numeric *lnum = std::get_if<Numeric>(&lseg);
+    const std::string *lstr = std::get_if<std::string>(&lseg);
 
     const Segment &rseg = o.segment(i);
-    const Numeric *rnum = get_if<Numeric>(&rseg);
-    const string *rstr = get_if<string>(&rseg);
+    const Numeric *rnum = std::get_if<Numeric>(&rseg);
+    const std::string *rstr = std::get_if<std::string>(&rseg);
 
     if(lnum && rnum) {
       if(*lnum < *rnum)

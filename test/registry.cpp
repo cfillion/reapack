@@ -7,8 +7,6 @@
 #include <package.hpp>
 #include <remote.hpp>
 
-using namespace std;
-
 static const char *M = "[registry]";
 
 #define MAKE_PACKAGE \
@@ -87,7 +85,7 @@ TEST_CASE("get file list", M) {
 
   reg.push(&ver);
 
-  const vector<Registry::File> &files = reg.getFiles(reg.getEntry(&pkg));
+  const std::vector<Registry::File> &files = reg.getFiles(reg.getEntry(&pkg));
   REQUIRE(files.size() == 1);
   REQUIRE(files[0].path == src->targetPath());
   REQUIRE(files[0].sections == 0);
@@ -97,14 +95,14 @@ TEST_CASE("get file list", M) {
 TEST_CASE("query all packages", M) {
   MAKE_PACKAGE
 
-  const string remote = "Remote Name";
+  const std::string remote = "Remote Name";
 
   Registry reg;
   REQUIRE(reg.getEntries(remote).empty());
 
   reg.push(&ver);
 
-  const vector<Registry::Entry> &entries = reg.getEntries(remote);
+  const std::vector<Registry::Entry> &entries = reg.getEntries(remote);
   REQUIRE(entries.size() == 1);
   REQUIRE(entries[0].id == 1);
   REQUIRE(entries[0].remote == "Remote Name");
@@ -152,7 +150,7 @@ TEST_CASE("file conflicts", M) {
 
   CHECK(reg.getEntry(&pkg).id == 0); // still uninstalled
 
-  vector<Path> conflicts;
+  std::vector<Path> conflicts;
   const auto &pushResult = reg.push(&ver, &conflicts);
   CHECK(pushResult.id == 0);
 
@@ -180,7 +178,7 @@ TEST_CASE("get main files", M) {
 
   const Registry::Entry &entry = reg.push(&ver);
 
-  const vector<Registry::File> &current = reg.getMainFiles(entry);
+  const std::vector<Registry::File> &current = reg.getMainFiles(entry);
   REQUIRE(current.size() == 1);
   REQUIRE(current[0].path == main1->targetPath());
   REQUIRE(current[0].sections == Source::MIDIEditorSection);

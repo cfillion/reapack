@@ -29,8 +29,6 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
-using namespace std;
-
 enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser()
@@ -70,9 +68,9 @@ void Browser::onInit()
   });
 
   m_list->onActivate >> [=] { aboutPackage(m_list->itemUnderMouse()); };
-  m_list->onSelect >> bind(&Browser::onSelection, this);
-  m_list->onFillContextMenu >> bind(&Browser::fillContextMenu, this,
-    placeholders::_1, placeholders::_2);
+  m_list->onSelect >> std::bind(&Browser::onSelection, this);
+  m_list->onFillContextMenu >> std::bind(&Browser::fillContextMenu, this,
+    std::placeholders::_1, std::placeholders::_2);
   m_list->sortByColumn(1);
 
   Dialog::onInit();
@@ -108,6 +106,8 @@ void Browser::onClose()
 
 void Browser::onCommand(const int id, const int event)
 {
+  using namespace std::placeholders;
+
   switch(id) {
   case IDC_TABS:
     if(event == CBN_SELCHANGE)
@@ -135,25 +135,25 @@ void Browser::onCommand(const int id, const int event)
     actionsButton();
     break;
   case ACTION_LATEST:
-    currentDo(bind(&Browser::installLatest, this, placeholders::_1, true));
+    currentDo(std::bind(&Browser::installLatest, this, _1, true));
     break;
   case ACTION_LATEST_ALL:
     installLatestAll();
     break;
   case ACTION_REINSTALL:
-    currentDo(bind(&Browser::reinstall, this, placeholders::_1, true));
+    currentDo(std::bind(&Browser::reinstall, this, _1, true));
     break;
   case ACTION_REINSTALL_ALL:
-    selectionDo(bind(&Browser::reinstall, this, placeholders::_1, false));
+    selectionDo(std::bind(&Browser::reinstall, this, _1, false));
     break;
   case ACTION_UNINSTALL:
-    currentDo(bind(&Browser::uninstall, this, placeholders::_1, true));
+    currentDo(std::bind(&Browser::uninstall, this, _1, true));
     break;
   case ACTION_UNINSTALL_ALL:
-    selectionDo(bind(&Browser::uninstall, this, placeholders::_1, false));
+    selectionDo(std::bind(&Browser::uninstall, this, _1, false));
     break;
   case ACTION_PIN:
-    currentDo(bind(&Browser::togglePin, this, placeholders::_1));
+    currentDo(std::bind(&Browser::togglePin, this, _1));
     break;
   case ACTION_ABOUT_PKG:
     aboutPackage(m_currentIndex);
@@ -162,7 +162,7 @@ void Browser::onCommand(const int id, const int event)
     aboutRemote(m_currentIndex);
     break;
   case ACTION_RESET_ALL:
-    selectionDo(bind(&Browser::resetActions, this, placeholders::_1));
+    selectionDo(std::bind(&Browser::resetActions, this, _1));
     break;
   case ACTION_COPY:
     copy();
@@ -180,7 +180,7 @@ void Browser::onCommand(const int id, const int event)
     g_reapack->manageRemotes();
     break;
   case ACTION_FILTERTYPE:
-    m_typeFilter = nullopt;
+    m_typeFilter = std::nullopt;
     fillList();
     break;
   case IDOK:
@@ -200,7 +200,7 @@ void Browser::onCommand(const int id, const int event)
     break;
   default:
     if(id >> 8 == ACTION_VERSION)
-      currentDo(bind(&Browser::installVersion, this, placeholders::_1, id & 0xff));
+      currentDo(std::bind(&Browser::installVersion, this, _1, id & 0xff));
     else if(id >> 8 == ACTION_FILTERTYPE) {
       m_typeFilter = static_cast<Package::Type>(id & 0xff);
       fillList();
@@ -313,7 +313,7 @@ void Browser::updateDisplayLabel()
 
 void Browser::displayButton()
 {
-  static map<const char *, Package::Type> types = {
+  static std::pair<const char *, Package::Type> types[]{
     {"&Automation Items",  Package::AutomationItemType},
     {"&Effects",           Package::EffectType},
     {"E&xtensions",        Package::ExtensionType},
@@ -425,7 +425,7 @@ void Browser::refresh(const bool stale)
     break;
   }
 
-  const vector<Remote> &remotes = g_reapack->config()->remotes.getEnabled();
+  const std::vector<Remote> &remotes = g_reapack->config()->remotes.getEnabled();
 
   if(remotes.empty()) {
     if(!isVisible() || stale) {
@@ -466,11 +466,11 @@ void Browser::refresh(const bool stale)
   }
 }
 
-void Browser::populate(const vector<IndexPtr> &indexes, const Registry *reg)
+void Browser::populate(const std::vector<IndexPtr> &indexes, const Registry *reg)
 {
   // keep previous entries in memory a bit longer for #transferActions
-  vector<Entry> oldEntries;
-  swap(m_entries, oldEntries);
+  std::vector<Entry> oldEntries;
+  std::swap(m_entries, oldEntries);
 
   m_currentIndex = -1;
 
@@ -492,7 +492,7 @@ void Browser::populate(const vector<IndexPtr> &indexes, const Registry *reg)
     show();
 }
 
-void Browser::setFilter(const string &newFilter)
+void Browser::setFilter(const std::string &newFilter)
 {
   Win32::setWindowText(m_filter, newFilter.c_str());
   updateFilter(); // don't wait for the timer, update now!
@@ -501,8 +501,8 @@ void Browser::setFilter(const string &newFilter)
 
 void Browser::transferActions()
 {
-  list<Entry *> oldActions;
-  swap(m_actions, oldActions);
+  std::list<Entry *> oldActions;
+  std::swap(m_actions, oldActions);
 
   for(Entry *oldEntry : oldActions) {
     const auto &entryIt = find(m_entries.begin(), m_entries.end(), *oldEntry);
@@ -537,8 +537,8 @@ void Browser::fillList()
 
   const int scroll = m_list->scroll();
 
-  vector<int> selectIndexes = m_list->selection();
-  vector<const Entry *> oldSelection(selectIndexes.size());
+  std::vector<int> selectIndexes = m_list->selection();
+  std::vector<const Entry *> oldSelection(selectIndexes.size());
   for(size_t i = 0; i < selectIndexes.size(); i++)
     oldSelection[i] = static_cast<Entry *>(m_list->row(selectIndexes[i])->userData);
   selectIndexes.clear(); // will put new indexes below
@@ -617,7 +617,7 @@ void Browser::aboutPackage(const int index, const bool focus)
   const Entry *entry = getEntry(index);
 
   if(entry && entry->package) {
-    g_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(
+    g_reapack->about()->setDelegate(std::make_shared<AboutPackageDelegate>(
       entry->package, entry->regEntry.version), focus);
   }
 }
@@ -626,7 +626,7 @@ void Browser::aboutRemote(const int index, const bool focus)
 {
   if(const Entry *entry = getEntry(index)) {
     g_reapack->about()->setDelegate(
-      make_shared<AboutIndexDelegate>(entry->index), focus);
+      std::make_shared<AboutIndexDelegate>(entry->index), focus);
   }
 }
 
@@ -651,7 +651,7 @@ void Browser::installLatestAll()
     }
   }
 
-  selectionDo(bind(&Browser::installLatest, this, placeholders::_1, false));
+  selectionDo(std::bind(&Browser::installLatest, this, std::placeholders::_1, false));
 }
 
 void Browser::installLatest(const int index, const bool toggle)
@@ -706,7 +706,7 @@ void Browser::togglePin(const int index)
   const bool newVal = !entry->pin.value_or(entry->regEntry.pinned);
 
   if(newVal == entry->regEntry.pinned)
-    entry->pin = nullopt;
+    entry->pin = std::nullopt;
   else
     entry->pin = newVal;
 
@@ -723,7 +723,7 @@ void Browser::toggleTarget(const int index, const Version *target)
   Entry *entry = getEntry(index);
 
   if(entry->target && *entry->target == target)
-    entry->target = nullopt;
+    entry->target = std::nullopt;
   else
     entry->target = target;
 
@@ -735,7 +735,7 @@ void Browser::resetTarget(const int index)
   Entry *entry = getEntry(index);
 
   if(entry->target) {
-    entry->target = nullopt;
+    entry->target = std::nullopt;
     updateAction(index);
   }
 }
@@ -745,9 +745,9 @@ void Browser::resetActions(const int index)
   Entry *entry = getEntry(index);
 
   if(entry->target)
-    entry->target = nullopt;
+    entry->target = std::nullopt;
   if(entry->pin)
-    entry->pin = nullopt;
+    entry->pin = std::nullopt;
 
   updateAction(index);
 }
@@ -772,7 +772,7 @@ void Browser::updateAction(const int index)
     m_list->row(index)->setCell(0, entry->displayState());
 }
 
-void Browser::listDo(const function<void (int)> &func, const vector<int> &indexes)
+void Browser::listDo(const std::function<void (int)> &func, const std::vector<int> &indexes)
 {
   ListView::BeginEdit edit(m_list);
 
@@ -799,24 +799,24 @@ void Browser::listDo(const function<void (int)> &func, const vector<int> &indexe
     enable(m_applyBtn);
 }
 
-void Browser::currentDo(const function<void (int)> &func)
+void Browser::currentDo(const std::function<void (int)> &func)
 {
   listDo(func, {m_currentIndex});
 }
 
-void Browser::selectionDo(const function<void (int)> &func)
+void Browser::selectionDo(const std::function<void (int)> &func)
 {
   listDo(func, m_list->selection());
 }
 
 auto Browser::currentView() const -> View
 {
-  return (View)SendMessage(m_view, CB_GETCURSEL, 0, 0);
+  return static_cast<View>(SendMessage(m_view, CB_GETCURSEL, 0, 0));
 }
 
 void Browser::copy()
 {
-  vector<string> values;
+  std::vector<std::string> values;
 
   for(const int index : m_list->selection(false))
     values.push_back(getEntry(index)->displayName());
@@ -859,11 +859,11 @@ bool Browser::apply()
       else
         tx->uninstall(entry->regEntry);
 
-      entry->target = nullopt;
+      entry->target = std::nullopt;
     }
     else if(entry->pin) {
       tx->setPinned(entry->regEntry, *entry->pin);
-      entry->pin = nullopt;
+      entry->pin = std::nullopt;
     }
   }
 

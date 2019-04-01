@@ -25,14 +25,12 @@
 
 #include <reaper_plugin_functions.h>
 
-using namespace std;
-
 static const int DOWNLOAD_TIMEOUT = 15;
 // to set the amount of concurrent downloads, change the size of
 // the m_pool member in ThreadPool (thread.hpp)
 
 static CURLSH *g_curlShare = nullptr;
-static mutex g_curlMutex;
+static std::mutex g_curlMutex;
 
 static void LockCurlMutex(CURL *, curl_lock_data, curl_lock_access, void *)
 {
@@ -104,12 +102,12 @@ int Download::UpdateProgress(void *ptr, const double, const double,
   return static_cast<Download *>(ptr)->aborted();
 }
 
-Download::Download(const string &url, const NetworkOpts &opts, const int flags)
+Download::Download(const std::string &url, const NetworkOpts &opts, const int flags)
   : m_url(url), m_opts(opts), m_flags(flags)
 {
 }
 
-void Download::setName(const string &name)
+void Download::setName(const std::string &name)
 {
   setSummary("Downloading %s: " + name);
 }
@@ -121,9 +119,9 @@ bool Download::run()
   Hash::Algorithm algo;
   if(!m_expectedChecksum.empty()) {
     if(Hash::getAlgorithm(m_expectedChecksum, &algo))
-      write.hash = make_unique<Hash>(algo);
+      write.hash = std::make_unique<Hash>(algo);
     else {
-      const string &error = String::format(
+      const std::string &error = String::format(
         "Unsupported checksum: %s", m_expectedChecksum.c_str());
       setError({error, m_url});
       return false;
@@ -161,13 +159,13 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
-    const string &err = String::format(
+    const std::string &err = String::format(
       "%s (%d): %s", curl_easy_strerror(res), res, errbuf);
     setError({err, m_url});
     return false;
   }
   else if(write.hash && write.hash->digest() != m_expectedChecksum) {
-    const string &err = String::format(
+    const std::string &err = String::format(
       "Checksum mismatch.\nExpected: %s\nActual: %s",
       m_expectedChecksum.c_str(), write.hash->digest().c_str()
     );
@@ -186,13 +184,13 @@ void Download::WriteContext::write(const char *data, const size_t len)
     hash->addData(data, len);
 }
 
-MemoryDownload::MemoryDownload(const string &url, const NetworkOpts &opts, int flags)
+MemoryDownload::MemoryDownload(const std::string &url, const NetworkOpts &opts, int flags)
   : Download(url, opts, flags)
 {
   setName(url);
 }
 
-FileDownload::FileDownload(const Path &target, const string &url,
+FileDownload::FileDownload(const Path &target, const std::string &url,
     const NetworkOpts &opts, int flags)
   : Download(url, opts, flags), m_path(target)
 {
@@ -207,7 +205,7 @@ bool FileDownload::save()
     return FS::remove(m_path.temp());
 }
 
-ostream *FileDownload::openStream()
+std::ostream *FileDownload::openStream()
 {
   if(FS::open(m_stream, m_path.temp()))
     return &m_stream;

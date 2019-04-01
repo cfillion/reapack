@@ -33,8 +33,6 @@ static constexpr char NATIVE_SEPARATOR = '\\';
 static constexpr const char *DOT = ".";
 static constexpr const char *DOTDOT = "..";
 
-using namespace std;
-
 const Path Path::DATA("ReaPack");
 const Path Path::CACHE = Path::DATA + "cache";
 const Path Path::CONFIG("reapack.ini");
@@ -42,11 +40,11 @@ const Path Path::REGISTRY = Path::DATA + "registry.db";
 
 Path Path::s_root;
 
-static vector<string> Split(const string &input, bool *absolute)
+static std::vector<std::string> Split(const std::string &input, bool *absolute)
 {
-  vector<string> list;
+  std::vector<std::string> list;
 
-  const auto append = [&list, absolute] (const string &part) {
+  const auto append = [&list, absolute] (const std::string &part) {
     if(part.empty() || part == DOT)
       return;
 
@@ -65,7 +63,7 @@ static vector<string> Split(const string &input, bool *absolute)
   while(last < size) {
     const size_t pos = input.find_first_of("\\/", last);
 
-    if(pos == string::npos) {
+    if(pos == std::string::npos) {
       append(input.substr(last));
       break;
     }
@@ -85,12 +83,12 @@ static vector<string> Split(const string &input, bool *absolute)
   return list;
 }
 
-Path::Path(const string &path) : m_absolute(false)
+Path::Path(const std::string &path) : m_absolute(false)
 {
   append(path);
 }
 
-void Path::append(const string &input, const bool traversal)
+void Path::append(const std::string &input, const bool traversal)
 {
   if(input.empty())
     return;
@@ -101,7 +99,7 @@ void Path::append(const string &input, const bool traversal)
   if(m_parts.empty() && absolute)
     m_absolute = true;
 
-  for(const string &part : parts) {
+  for(const std::string &part : parts) {
     if(part == DOTDOT) {
       if(traversal)
         removeLast();
@@ -132,10 +130,10 @@ void Path::remove(const size_t pos, size_t count)
     count = size() - pos;
 
   auto begin = m_parts.begin();
-  advance(begin, pos);
+  std::advance(begin, pos);
 
   auto end = begin;
-  advance(end, count);
+  std::advance(end, count);
 
   m_parts.erase(begin, end);
 
@@ -149,7 +147,7 @@ void Path::removeLast()
     m_parts.pop_back();
 }
 
-string Path::front() const
+std::string Path::front() const
 {
   if(empty())
     return {};
@@ -157,7 +155,7 @@ string Path::front() const
   return m_parts.front();
 }
 
-string Path::basename() const
+std::string Path::basename() const
 {
   if(empty())
     return {};
@@ -175,7 +173,7 @@ Path Path::dirname() const
   return dir;
 }
 
-string Path::join(const bool nativeSeparator) const
+std::string Path::join(const bool nativeSeparator) const
 {
   const char sep = nativeSeparator ? NATIVE_SEPARATOR : UNIX_SEPARATOR;
 
@@ -185,9 +183,9 @@ string Path::join(const bool nativeSeparator) const
   const bool absoluteSlash = m_absolute;
 #endif
 
-  string path;
+  std::string path;
 
-  for(const string &part : m_parts) {
+  for(const std::string &part : m_parts) {
     if(!path.empty() || absoluteSlash)
       path += sep;
 
@@ -248,7 +246,7 @@ bool Path::operator<(const Path &o) const
   return m_parts < o.m_parts;
 }
 
-Path Path::operator+(const string &part) const
+Path Path::operator+(const std::string &part) const
 {
   Path path(*this);
   path.append(part);
@@ -264,7 +262,7 @@ Path Path::operator+(const Path &o) const
   return path;
 }
 
-const Path &Path::operator+=(const string &parts)
+const Path &Path::operator+=(const std::string &parts)
 {
   append(parts);
   return *this;
@@ -276,7 +274,7 @@ const Path &Path::operator+=(const Path &o)
   return *this;
 }
 
-const string &Path::at(const size_t index) const
+const std::string &Path::at(const size_t index) const
 {
   auto it = m_parts.begin();
   advance(it, index);
@@ -284,25 +282,25 @@ const string &Path::at(const size_t index) const
   return *it;
 }
 
-string &Path::operator[](const size_t index)
+std::string &Path::operator[](const size_t index)
 {
-  return const_cast<string &>(at(index));
+  return const_cast<std::string &>(at(index));
 }
 
-const string &Path::operator[](const size_t index) const
+const std::string &Path::operator[](const size_t index) const
 {
   return at(index);
 }
 
 UseRootPath::UseRootPath(const Path &path)
-  : m_backup(move(Path::s_root))
+  : m_backup(std::move(Path::s_root))
 {
   Path::s_root = path;
 }
 
 UseRootPath::~UseRootPath()
 {
-  Path::s_root = move(m_backup);
+  Path::s_root = std::move(m_backup);
 }
 
 TempPath::TempPath(const Path &target)

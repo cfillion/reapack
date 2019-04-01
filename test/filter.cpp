@@ -2,8 +2,6 @@
 
 #include <filter.hpp>
 
-using namespace std;
-
 static const char *M = "[filter]";
 
 TEST_CASE("basic matching", M) {

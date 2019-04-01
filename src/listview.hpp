@@ -80,8 +80,6 @@ public:
     Cell *m_cells;
   };
 
-  typedef std::shared_ptr<Row> RowPtr;
-
   struct Column {
     std::string label;
     int width;
@@ -109,8 +107,8 @@ public:
   ListView(HWND handle, const Columns & = {});
 
   void reserveRows(size_t count) { m_rows.reserve(count); }
-  RowPtr createRow(void *data = nullptr);
-  const RowPtr &row(size_t index) const { return m_rows[index]; }
+  Row *createRow(void *data = nullptr);
+  Row *row(size_t index) const { return m_rows[index].get(); }
   void removeRow(int index);
   int rowCount() const { return (int)m_rows.size(); }
   int visibleRowCount() const;
@@ -197,7 +195,7 @@ private:
 
   bool m_customizable;
   std::vector<Column> m_cols;
-  std::vector<RowPtr> m_rows;
+  std::vector<std::unique_ptr<Row>> m_rows;
   std::optional<Sort> m_sort;
   std::optional<Sort> m_defaultSort;
 };

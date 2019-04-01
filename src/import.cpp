@@ -30,8 +30,6 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-using namespace std;
-
 static const char *TITLE = "Import repositories";
 static const char *DISCOVER_URL = "https://reapack.com/repos";
 
@@ -89,7 +87,7 @@ ThreadPool *Import::setupPool()
 {
   if(!m_pool) {
     m_state = OK;
-    m_pool = make_unique<ThreadPool>();
+    m_pool = std::make_unique<ThreadPool>();
 
     m_pool->onAbort >> [=] { if(!m_state) m_state = Aborted; };
     m_pool->onDone >> [=] {
@@ -120,8 +118,8 @@ void Import::fetch()
   const auto &opts = g_reapack->config()->network;
 
   size_t index = 0;
-  stringstream stream(Win32::getWindowText(m_url));
-  string url;
+  std::stringstream stream(Win32::getWindowText(m_url));
+  std::string url;
   while(getline(stream, url)) {
     boost::algorithm::trim(url);
 

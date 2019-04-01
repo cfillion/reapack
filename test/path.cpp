@@ -4,8 +4,6 @@
 
 using Catch::Matchers::StartsWith;
 
-using namespace std;
-
 static const char *M = "[path]";
 
 TEST_CASE("compare paths", M) {
@@ -24,7 +22,7 @@ TEST_CASE("append path segments", M) {
   REQUIRE(path.empty());
   REQUIRE(path.size() == 0);
 
-  path.append(string());
+  path.append(std::string{});
   REQUIRE(path.empty());
   REQUIRE(path.size() == 0);
 
@@ -215,16 +213,16 @@ TEST_CASE("append absolute path to empty path", M) {
 TEST_CASE("extended absolute paths", M) {
 #ifdef _WIN32
   Path abs("C:\\");
-  abs.append(string(260, 'a'));
+  abs.append(std::string(260, 'a'));
 
   CHECK(abs.absolute());
   REQUIRE_THAT(abs.join(), StartsWith("\\\\?\\"));
 
-  const Path path(string(500, 'a'));
+  const Path path(std::string(500, 'a'));
   CHECK_FALSE(path.absolute());
 #else
   Path path("/hello");
-  path.append(string(260, 'a'));
+  path.append(std::string(260, 'a'));
 #endif
 
   REQUIRE_THAT(path.join(), !StartsWith("\\\\?\\"));

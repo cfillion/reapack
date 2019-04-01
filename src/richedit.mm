@@ -19,8 +19,6 @@
 
 #include <Cocoa/Cocoa.h>
 
-using namespace std;
-
 void RichEdit::Init()
 {
 }
@@ -43,7 +41,7 @@ void RichEdit::onNotify(LPNMHDR, LPARAM)
 {
 }
 
-void RichEdit::setPlainText(const string &text)
+void RichEdit::setPlainText(const std::string &text)
 {
   NSString *str = [NSString
     stringWithCString: text.c_str()
@@ -57,7 +55,7 @@ void RichEdit::setPlainText(const string &text)
   [attrStr release];
 }
 
-bool RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const std::string &rtf)
 {
   NSString *str = [NSString
     stringWithCString: rtf.c_str()

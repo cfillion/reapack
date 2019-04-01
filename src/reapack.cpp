@@ -36,8 +36,6 @@
 
 #include <reaper_plugin_functions.h>
 
-using namespace std;
-
 const char *ReaPack::VERSION = "1.2.2";
 const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
 
@@ -50,7 +48,7 @@ ReaPack *ReaPack::s_instance = nullptr;
 static void CleanupTempFiles()
 {
   const Path &path = (Path::DATA + "*.tmp").prependRoot();
-  const wstring &pattern = Win32::widen(path.join());
+  const std::wstring &pattern = Win32::widen(path.join());
 
   WIN32_FIND_DATA fd = {};
   HANDLE handle = FindFirstFile(pattern.c_str(), &fd);
@@ -59,7 +57,7 @@ static void CleanupTempFiles()
     return;
 
   do {
-    wstring file = pattern;
+    std::wstring file = pattern;
     file.replace(file.size() - 5, 5, fd.cFileName); // 5 == strlen("*.tmp")
     DeleteFile(file.c_str());
   } while(FindNextFile(handle, &fd));
@@ -147,7 +145,7 @@ void ReaPack::setupAPI()
 
 void ReaPack::synchronizeAll()
 {
-  const vector<Remote> &remotes = m_config.remotes.getEnabled();
+  const std::vector<Remote> &remotes = m_config.remotes.getEnabled();
 
   if(remotes.empty()) {
     ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
@@ -220,7 +218,7 @@ void ReaPack::manageRemotes()
   m_manager->setCloseHandler([=](INT_PTR) { m_manager.reset(); });
 }
 
-Remote ReaPack::remote(const string &name) const
+Remote ReaPack::remote(const std::string &name) const
 {
   return m_config.remotes.get(name);
 }
@@ -231,13 +229,13 @@ void ReaPack::about(const Remote &repo, const bool focus)
   if(!tx)
     return;
 
-  const vector<Remote> repos = {repo};
+  const std::vector<Remote> repos{repo};
 
   tx->fetchIndexes(repos);
   tx->onFinish >> [=] {
     const auto &indexes = tx->getIndexes(repos);
     if(!indexes.empty())
-      about()->setDelegate(make_shared<AboutIndexDelegate>(indexes.front()), focus);
+      about()->setDelegate(std::make_shared<AboutIndexDelegate>(indexes.front()), focus);
   };
   tx->runTasks();
 }
@@ -306,7 +304,7 @@ Transaction *ReaPack::setupTransaction()
     }
   };
 
-  m_tx->setObsoleteHandler([=] (vector<Registry::Entry> &entries) {
+  m_tx->setObsoleteHandler([=] (std::vector<Registry::Entry> &entries) {
     LockDialog aboutLock(m_about.get());
     LockDialog browserLock(m_browser.get());
     LockDialog managerLock(m_manager.get());
@@ -316,7 +314,7 @@ Transaction *ReaPack::setupTransaction()
       &entries, &config()->install.promptObsolete) == IDOK;
   });
 
-  m_tx->setCleanupHandler(bind(&ReaPack::teardownTransaction, this));
+  m_tx->setCleanupHandler(std::bind(&ReaPack::teardownTransaction, this));
 
   return m_tx;
 }
@@ -339,9 +337,9 @@ void ReaPack::commitConfig(bool refresh)
   if(m_tx) {
     if(refresh) {
       m_tx->receipt()->setIndexChanged(); // force browser refresh
-      m_tx->onFinish >> bind(&ReaPack::refreshManager, this);
+      m_tx->onFinish >> std::bind(&ReaPack::refreshManager, this);
     }
-    m_tx->onFinish >> bind(&Config::write, &m_config);
+    m_tx->onFinish >> std::bind(&Config::write, &m_config);
     m_tx->runTasks();
   }
   else {

@@ -11,8 +11,8 @@ VCPKG = vendor/vcpkg/installed/@(VCPKG_TRIPLET)
 
 CXXFLAGS := /nologo /std:c++17 /W3 /WX /wd4996 /EHsc /MT /O2 /Z7 /Zo
 CXXFLAGS += /Ivendor /I$(VCPKG)/include /Ivendor/WDL /Ivendor/WDL/WDL
-CXXFLAGS += /DWDL_NO_DEFINE_MINMAX /DCURL_STATICLIB /DUNICODE /DNDEBUG
-CXXFLAGS += /DREAPACK_FILE#\"$(REAPACK_FILE).dll\"
+CXXFLAGS += /DNOMINMAX /DWDL_NO_DEFINE_MINMAX /DCURL_STATICLIB /DUNICODE
+CXXFLAGS += /DNDEBUG /DREAPACK_FILE#\"$(REAPACK_FILE).dll\"
 
 LD := $(WRAP) link
 LDFLAGS := /nologo User32.lib Shell32.lib Gdi32.lib Comdlg32.lib Comctl32.lib Bcrypt.lib

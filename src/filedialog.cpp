@@ -24,10 +24,8 @@
 #  include <swell.h>
 #endif
 
-using namespace std;
-
 #ifdef _WIN32
-static string getFileName(BOOL(__stdcall *func)(LPOPENFILENAME),
+static std::string getFileName(BOOL(__stdcall *func)(LPOPENFILENAME),
   HWND parent, HINSTANCE instance, const char *title, const Path &initialDir,
   const Win32::char_type *filters, const Win32::char_type *defaultExt)
 {
@@ -39,17 +37,17 @@ static string getFileName(BOOL(__stdcall *func)(LPOPENFILENAME),
   OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
   of.lpstrFilter = filters;
   of.lpstrFile = pathBuffer;
-  of.nMaxFile = static_cast<DWORD>(size(pathBuffer));
+  of.nMaxFile = static_cast<DWORD>(std::size(pathBuffer));
   of.lpstrInitialDir = wideInitialDir.c_str();
   of.lpstrTitle = wideTitle.c_str();
   of.Flags = OFN_HIDEREADONLY | OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
   of.lpstrDefExt = defaultExt;
 
-  return func(&of) ? Win32::narrow(pathBuffer) : string();
+  return func(&of) ? Win32::narrow(pathBuffer) : std::string{};
 }
 #endif
 
-string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
+std::string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
   const char *title, const Path &initialDir,
   const Win32::char_type *filters, const Win32::char_type *defaultExt)
 {
@@ -59,11 +57,11 @@ string FileDialog::getOpenFileName(HWND parent, HINSTANCE instance,
 #else
   const char *path = BrowseForFiles(title, initialDir.join().c_str(),
     nullptr, false, filters);
-  return path ? path : string();
+  return path ? path : std::string{};
 #endif
 }
 
-string FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
+std::string FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
   const char *title, const Path &initialDir,
   const Win32::char_type *filters, const Win32::char_type *defaultExt)
 {
@@ -71,7 +69,7 @@ string FileDialog::getSaveFileName(HWND parent, HINSTANCE instance,
   return getFileName(&GetSaveFileName, parent, instance,
     title, initialDir, filters, defaultExt);
 #else
-  char path[4096] = {};
+  char path[4096]{};
 
   if(BrowseForSaveFile(title, initialDir.join().c_str(),
       nullptr, filters, path, sizeof(path)))

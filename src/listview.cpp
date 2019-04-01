@@ -26,8 +26,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <cassert>
 
-using namespace std;
-
 bool ListView_GetScroll(HWND, POINT *); // undocumented macOS SWELL function
 
 static int adjustWidth(const int points)
@@ -92,15 +90,12 @@ int ListView::addColumn(const Column &col)
   return index;
 }
 
-auto ListView::createRow(void *data) -> RowPtr
+ListView::Row *ListView::createRow(void *data)
 {
   const int index = rowCount();
   insertItem(index, index);
 
-  RowPtr row = make_shared<Row>(data, this);
-  m_rows.push_back(row);
-
-  return row;
+  return m_rows.emplace_back(std::make_unique<Row>(data, this)).get();
 }
 
 void ListView::insertItem(const int viewIndex, const int rowIndex)
@@ -254,10 +249,10 @@ void ListView::setSortArrow(const bool set)
 
 void ListView::filter()
 {
-  vector<int> hide;
+  std::vector<int> hide;
 
   for(int ri = 0; ri < rowCount(); ++ri) {
-    RowPtr &row = m_rows[ri];
+    const auto &row = m_rows[ri];
 
     if(m_filter.match(row->filterValues())) {
       if(row->viewIndex == -1) {
@@ -285,7 +280,7 @@ void ListView::filter()
   m_dirty &= ~NeedFilterFlag;
 }
 
-void ListView::setFilter(const string &newFilter)
+void ListView::setFilter(const std::string &newFilter)
 {
   if(m_filter != newFilter) {
     ListView::BeginEdit edit(this);
@@ -338,8 +333,8 @@ void ListView::reset()
   m_cols.clear();
 
   m_customizable = false;
-  m_sort = nullopt;
-  m_defaultSort = nullopt;
+  m_sort = std::nullopt;
+  m_defaultSort = std::nullopt;
 }
 
 void ListView::setSelected(const int index, const bool select)
@@ -363,10 +358,10 @@ int ListView::currentIndex() const
     return translateBack(internalIndex);
 }
 
-vector<int> ListView::selection(const bool sort) const
+std::vector<int> ListView::selection(const bool sort) const
 {
   int index = -1;
-  vector<int> selectedIndexes;
+  std::vector<int> selectedIndexes;
 
   while((index = ListView_GetNextItem(handle(), index, LVNI_SELECTED)) != -1)
     selectedIndexes.push_back(translateBack(index));
@@ -479,14 +474,14 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 
     // find the location of the current item or of the first item
     POINT itemPos{};
-    ListView_GetItemPosition(handle(), translate(max(0, index)), &itemPos);
+    ListView_GetItemPosition(handle(), translate(std::max(0, index)), &itemPos);
     ClientToScreen(handle(), &itemPos);
 
     RECT controlRect;
     GetWindowRect(handle(), &controlRect);
 
-    x = max(controlRect.left, min(itemPos.x, controlRect.right));
-    y = max(controlRect.top, min(itemPos.y, controlRect.bottom));
+    x = std::max(controlRect.left, std::min(itemPos.x, controlRect.right));
+    y = std::max(controlRect.top, std::min(itemPos.y, controlRect.bottom));
   }
 #endif
 
@@ -594,7 +589,7 @@ void ListView::headerMenu(const int x, const int y)
 
 void ListView::resetColumns()
 {
-  vector<int> order(columnCount());
+  std::vector<int> order(columnCount());
 
   for(int i = 0; i < columnCount(); i++) {
     order[i] = i;
@@ -624,7 +619,7 @@ void ListView::restoreState(Serializer::Data &data)
     return;
 
   int col = -1;
-  vector<int> order(columnCount());
+  std::vector<int> order(columnCount());
 
   while(!data.empty()) {
     const auto &rec = data.front();
@@ -660,7 +655,7 @@ void ListView::restoreState(Serializer::Data &data)
 void ListView::saveState(Serializer::Data &data) const
 {
   const Sort &sort = m_sort.value_or(Sort{});
-  vector<int> order(columnCount());
+  std::vector<int> order(columnCount());
   ListView_GetColumnOrderArray(handle(), columnCount(), &order[0]);
 
   data.push_back({sort.column, sort.order});
@@ -680,7 +675,7 @@ int ListView::Column::compare(const ListView::Cell &cl, const ListView::Cell &cr
 
   switch(dataType) {
   case UserType: { // arbitrary data or no data: sort by visible text
-    string l = cl.value, r = cr.value;
+    std::string l = cl.value, r = cr.value;
 
     boost::algorithm::to_lower(l);
     boost::algorithm::to_lower(r);
@@ -704,7 +699,7 @@ ListView::Row::Row(void *data, ListView *list)
 {
 }
 
-void ListView::Row::setCell(const int i, const string &val, void *data)
+void ListView::Row::setCell(const int i, const std::string &val, void *data)
 {
   Cell &cell = m_cells[i];
   cell.value = val;
@@ -718,9 +713,9 @@ void ListView::Row::setChecked(bool checked)
   m_list->setRowIcon(userIndex, checked);
 }
 
-vector<string> ListView::Row::filterValues() const
+std::vector<std::string> ListView::Row::filterValues() const
 {
-  vector<string> values;
+  std::vector<std::string> values;
 
   for(int ci = 0; ci < m_list->columnCount(); ++ci) {
     if(m_list->column(ci).test(FilterFlag))

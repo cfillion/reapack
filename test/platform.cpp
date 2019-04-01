@@ -4,8 +4,6 @@
 
 #include <utility>
 
-using namespace std;
-
 static const char *M = "[platform]";
 
 TEST_CASE("default platform", M) {
@@ -50,7 +48,7 @@ TEST_CASE("platform from string", M) {
 }
 
 TEST_CASE("test platform", M) {
-  const pair<Platform, bool> tests[] = {
+  const std::pair<Platform, bool> tests[] = {
     {Platform::GenericPlatform, true},
 
 #ifdef __APPLE__

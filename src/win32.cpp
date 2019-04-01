@@ -24,25 +24,23 @@
 #  define widen_cstr(cstr) cstr
 #endif
 
-using namespace std;
-
 #ifdef _WIN32
-wstring Win32::widen(const char *input, const UINT codepage)
+std::wstring Win32::widen(const char *input, const UINT codepage)
 {
   const int size = MultiByteToWideChar(codepage, 0, input, -1, nullptr, 0) - 1;
 
-  wstring output(size, 0);
+  std::wstring output(size, 0);
   MultiByteToWideChar(codepage, 0, input, -1, &output[0], size);
 
   return output;
 }
 
-string Win32::narrow(const wchar_t *input)
+std::string Win32::narrow(const wchar_t *input)
 {
   const int size = WideCharToMultiByte(CP_UTF8, 0,
     input, -1, nullptr, 0, nullptr, nullptr) - 1;
 
-  string output(size, 0);
+  std::string output(size, 0);
   WideCharToMultiByte(CP_UTF8, 0, input, -1, &output[0], size, nullptr, nullptr);
 
   return output;
@@ -55,10 +53,10 @@ int Win32::messageBox(const HWND handle, const char *text,
   return MessageBox(handle, widen_cstr(text), widen_cstr(title), buttons);
 }
 
-string Win32::getWindowText(const HWND handle)
+std::string Win32::getWindowText(const HWND handle)
 {
   char_type buffer[4096];
-  GetWindowText(handle, buffer, static_cast<int>(size(buffer)));
+  GetWindowText(handle, buffer, static_cast<int>(std::size(buffer)));
 
   return narrow(buffer);
 }
@@ -74,7 +72,7 @@ void Win32::shellExecute(const char *what, const char *arg)
     arg ? widen_cstr(arg) : nullptr, nullptr, SW_SHOW);
 }
 
-HANDLE Win32::globalCopy(const string &text)
+HANDLE Win32::globalCopy(const std::string &text)
 {
   // calculate the size in bytes including the null terminator
   const size_t size = (text.size() + 1) * sizeof(char_type);
@@ -94,12 +92,12 @@ bool Win32::writePrivateProfileString(const char *group, const char *key,
     value ? widen_cstr(value) : nullptr, widen_cstr(path));
 }
 
-string Win32::getPrivateProfileString(const char *group, const char *key,
+std::string Win32::getPrivateProfileString(const char *group, const char *key,
   const char *fallback, const char *path)
 {
   char_type buffer[4096];
   GetPrivateProfileString(widen_cstr(group), widen_cstr(key), widen_cstr(fallback),
-    buffer, static_cast<DWORD>(size(buffer)), widen_cstr(path));
+    buffer, static_cast<DWORD>(std::size(buffer)), widen_cstr(path));
 
   return narrow(buffer);
 }

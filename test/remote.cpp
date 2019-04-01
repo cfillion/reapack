@@ -3,8 +3,6 @@
 #include <errors.hpp>
 #include <remote.hpp>
 
-using namespace std;
-
 static const char *M = "[remote]";
 
 TEST_CASE("construct remote", M) {
@@ -17,7 +15,7 @@ TEST_CASE("construct remote", M) {
 
 TEST_CASE("remote name validation", M) {
   SECTION("invalid") {
-    const string invalidNames[] = {
+    const std::string invalidNames[] = {
       "",
       "ab/cd",
       "ab\\cd",
@@ -37,19 +35,19 @@ TEST_CASE("remote name validation", M) {
       "lpt1",
     };
 
-    for(const string &name : invalidNames) {
+    for(const std::string &name : invalidNames) {
       try {
         Remote remote(name, "url");
         FAIL("'" + name + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(string(e.what()) == "invalid name");
+        REQUIRE(std::string{e.what()} == "invalid name");
       }
     }
   }
 
   SECTION("valid") {
-    const string validNames[] = {
+    const std::string validNames[] = {
       "1234",
       "hello world",
       "hello_world",
@@ -58,7 +56,7 @@ TEST_CASE("remote name validation", M) {
       "Repository #1",
     };
 
-    for(const string &name : validNames) {
+    for(const std::string &name : validNames) {
       try {
         Remote remote(name, "url");
       }
@@ -71,18 +69,18 @@ TEST_CASE("remote name validation", M) {
 
 TEST_CASE("remote url validation", M) {
   SECTION("invalid") {
-    const string invalidUrls[] = {
+    const std::string invalidUrls[] = {
       "",
       "hello world", // space should be %20
     };
 
-    for(const string &url : invalidUrls) {
+    for(const std::string &url : invalidUrls) {
       try {
         Remote remote("hello", url);
         FAIL("'" + url + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(string(e.what()) == "invalid url");
+        REQUIRE(std::string{e.what()} == "invalid url");
       }
     }
   }
@@ -97,7 +95,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid name");
+      REQUIRE(std::string{e.what()} == "invalid name");
     }
   }
 
@@ -107,7 +105,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(string(e.what()) == "invalid url");
+      REQUIRE(std::string{e.what()} == "invalid url");
     }
   }
 }
@@ -164,7 +162,8 @@ TEST_CASE("protect remote", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "cannot change the URL of a protected repository");
+    REQUIRE(std::string{e.what()} ==
+      "cannot change the URL of a protected repository");
   }
 
   remote.setUrl(remote.url()); // this should work for AddSetRepository API
@@ -286,7 +285,7 @@ TEST_CASE("get enabled remotes", M) {
   list.add({"hello", "url1", true});
   list.add({"world", "url2", false});
 
-  const vector<Remote> array = list.getEnabled();
+  const std::vector<Remote> array = list.getEnabled();
 
   REQUIRE(array.size() == 1);
   REQUIRE(array[0].name() == "hello");

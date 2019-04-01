@@ -7,16 +7,14 @@
 using Catch::Matchers::Contains;
 using Catch::Matchers::EndsWith;
 
-using namespace std;
-
-static constexpr const char *M = "[receipt]";
+static const char *M = "[receipt]";
 
 TEST_CASE("non-empty receipt", M) {
   Receipt r;
   REQUIRE(r.empty());
 
   SECTION("install") {
-    IndexPtr ri = make_shared<Index>("Index Name");
+    IndexPtr ri = std::make_shared<Index>("Index Name");
     Category cat("Category Name", ri.get());
     Package pkg(Package::ScriptType, "Package Name", &cat);
     Version ver("1.0", &pkg);
@@ -41,7 +39,7 @@ TEST_CASE("set receipt flags", M) {
   Receipt::Flag expected;
 
   SECTION("install") {
-    IndexPtr ri = make_shared<Index>("Index Name");
+    IndexPtr ri = std::make_shared<Index>("Index Name");
     Category cat("Category Name", ri.get());
     Package pkg(Package::ScriptType, "Package Name", &cat);
     Version ver("1.0", &pkg);
@@ -77,7 +75,7 @@ TEST_CASE("set receipt flags", M) {
 }
 
 TEST_CASE("set restart needed flag", M) {
-  IndexPtr ri = make_shared<Index>("Index Name");
+  IndexPtr ri = std::make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
   Package script(Package::ScriptType, "Package Name", &cat);
   Package ext(Package::ExtensionType, "Package Name", &cat);
@@ -116,38 +114,38 @@ TEST_CASE("set package changed flag", M) {
 
 TEST_CASE("format receipt page title", M) {
   SECTION("singular") {
-    ReceiptPage page{vector<int>{1}, "Singular", "Plural"};
+    ReceiptPage page{std::vector<int>{1}, "Singular", "Plural"};
     REQUIRE(page.title() == "Singular (1)");
   }
 
   SECTION("plural") {
-    ReceiptPage page{vector<int>{1, 2, 3}, "Singular", "Plural"};
+    ReceiptPage page{std::vector<int>{1, 2, 3}, "Singular", "Plural"};
     REQUIRE(page.title() == "Plural (3)");
   }
 
   SECTION("zero is plural") {
-    ReceiptPage page{vector<int>{}, "Singular", "Plural"};
+    ReceiptPage page{std::vector<int>{}, "Singular", "Plural"};
     REQUIRE(page.title() == "Plural (0)");
   }
 
   SECTION("no plural") {
-    ReceiptPage page{vector<int>{1, 2, 3}, "Fallback"};
+    ReceiptPage page{std::vector<int>{1, 2, 3}, "Fallback"};
     REQUIRE(page.title() == "Fallback (3)");
   }
 
   SECTION("thousand divider") {
-    ReceiptPage page{vector<int>(42'000, 42), "Singular", "Plural"};
+    ReceiptPage page{std::vector<int>(42'000, 42), "Singular", "Plural"};
     REQUIRE(page.title() == "Plural (42,000)");
   }
 }
 
 TEST_CASE("format receipt page contents", M) {
-  ReceiptPage page{vector<int>{1, 2, 3}, "", ""};
+  ReceiptPage page{std::vector<int>{1, 2, 3}, "", ""};
   REQUIRE(page.contents() == "1\r\n2\r\n3");
 }
 
 TEST_CASE("format install ticket", M) {
-  IndexPtr ri = make_shared<Index>("Index Name");
+  IndexPtr ri = std::make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
   Package pkg(Package::ScriptType, "Package Name", &cat);
 
@@ -163,7 +161,7 @@ TEST_CASE("format install ticket", M) {
   v3->addSource(new Source({}, "https://google.com", v3));
   pkg.addVersion(v3);
 
-  ostringstream stream;
+  std::ostringstream stream;
   Registry::Entry entry{1};
 
   SECTION("contains fullname") {
@@ -207,7 +205,7 @@ TEST_CASE("format install ticket", M) {
 }
 
 TEST_CASE("sort InstallTickets (case insensitive)", M) {
-  IndexPtr ri = make_shared<Index>("Index Name");
+  IndexPtr ri = std::make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
   Package pkg1(Package::ScriptType, "a test", &cat);
   Version ver1("1.0", &pkg1);
@@ -229,7 +227,7 @@ TEST_CASE("sort InstallTickets (case insensitive)", M) {
   r.addInstall(&ver3, {}); // z is the last letter
   r.addInstall(&ver1, {}); // a test (duplicate)
   r.addInstall(&ver2, {}); // Uppercase Name
-  const string page = r.installedPage().contents();
+  const std::string page = r.installedPage().contents();
   REQUIRE(page.find(pkg1.name()) < page.find(pkg2.name()));
   REQUIRE(page.find(pkg2.name()) < page.find(pkg3.name()));
 

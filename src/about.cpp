@@ -38,8 +38,6 @@
 #include <iomanip>
 #include <sstream>
 
-using namespace std;
-
 enum {
   ACTION_ABOUT_PKG = 300, ACTION_FIND_IN_BROWSER,
   ACTION_COPY_URL, ACTION_LOCATE
@@ -58,7 +56,7 @@ void About::onInit()
   m_desc = createControl<RichEdit>(IDC_ABOUT);
 
   m_menu = createControl<ListView>(IDC_MENU);
-  m_menu->onSelect >> bind(&About::updateList, this);
+  m_menu->onSelect >> std::bind(&About::updateList, this);
 
   m_list = createControl<ListView>(IDC_LIST);
   m_list->onFillContextMenu >> [=] (Menu &m, int i) { return m_delegate->fillContextMenu(m, i); };
@@ -168,14 +166,14 @@ void About::setDelegate(const DelegatePtr &delegate, const bool focus)
   }
 }
 
-void About::setTitle(const string &what)
+void About::setTitle(const std::string &what)
 {
   Win32::setWindowText(handle(), what.c_str());
 }
 
 void About::setMetadata(const Metadata *metadata, const bool substitution)
 {
-  string aboutText(metadata->about());
+  std::string aboutText(metadata->about());
 
   if(substitution) {
     boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
@@ -229,7 +227,7 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   onResize(); // update the position of link buttons
 }
 
-void About::setAction(const string &label)
+void About::setAction(const std::string &label)
 {
   HWND btn = getControl(IDC_ACTION);
   Win32::setWindowText(btn, label.c_str());
@@ -251,7 +249,7 @@ void About::selectLink(const int ctrl)
   Menu menu;
 
   for(int i = 0; i < count; i++) {
-    const string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
+    const std::string &name = boost::replace_all_copy(links[i]->name, "&", "&&");
     menu.addAction(name.c_str(), i | (ctrl << 8));
   }
 
@@ -313,12 +311,12 @@ void AboutIndexDelegate::initInstalledFiles()
 {
   const HWND report = m_dialog->getControl(IDC_REPORT);
 
-  set<Registry::File> allFiles;
+  std::set<Registry::File> allFiles;
 
   try {
     Registry reg(Path::REGISTRY.prependRoot());
     for(const Registry::Entry &entry : reg.getEntries(m_index->name())) {
-      const vector<Registry::File> &files = reg.getFiles(entry);
+      const std::vector<Registry::File> &files = reg.getFiles(entry);
       allFiles.insert(files.begin(), files.end());
     }
   }
@@ -339,7 +337,7 @@ void AboutIndexDelegate::initInstalledFiles()
       "any package compatible with your system.");
   }
   else {
-    stringstream stream;
+    std::stringstream stream;
 
     for(const Registry::File &file : allFiles) {
       stream << file.path.join();
@@ -357,7 +355,7 @@ void AboutIndexDelegate::updateList(const int index)
   // -1: all packages, >0 selected category
   const int catIndex = index - 1;
 
-  const vector<const Package *> *packages;
+  const std::vector<const Package *> *packages;
 
   if(catIndex < 0)
     packages = &m_index->packages();
@@ -421,7 +419,7 @@ void AboutIndexDelegate::findInBrowser()
 
   const Package *pkg = currentPackage();
 
-  ostringstream stream;
+  std::ostringstream stream;
   stream << '^' << quoted(pkg->displayName()) << "$ ^" << quoted(m_index->name()) << '$';
   browser->setFilter(stream.str());
 }
@@ -438,7 +436,7 @@ void AboutIndexDelegate::aboutPackage()
   }
   catch(const reapack_error &) {}
 
-  m_dialog->setDelegate(make_shared<AboutPackageDelegate>(pkg, current));
+  m_dialog->setDelegate(std::make_shared<AboutPackageDelegate>(pkg, current));
 }
 
 void AboutIndexDelegate::itemCopy()
@@ -546,7 +544,7 @@ void AboutPackageDelegate::init(About *dialog)
 
 void AboutPackageDelegate::updateList(const int index)
 {
-  const pair<Source::Section, const char *> sectionMap[] = {
+  const std::pair<Source::Section, const char *> sectionMap[] = {
     {Source::MainSection,                "Main"},
     {Source::MIDIEditorSection,          "MIDI Editor"},
     {Source::MIDIInlineEditorSection,    "MIDI Inline Editor"},
@@ -558,7 +556,7 @@ void AboutPackageDelegate::updateList(const int index)
     return;
 
   const Version *ver = m_package->version(index);
-  ostringstream stream;
+  std::ostringstream stream;
   stream << *ver;
   Win32::setWindowText(m_dialog->getControl(IDC_CHANGELOG), stream.str().c_str());
 
@@ -566,10 +564,10 @@ void AboutPackageDelegate::updateList(const int index)
 
   for(const Source *src : ver->sources()) {
     int sections = src->sections();
-    string actionList;
+    std::string actionList;
 
     if(sections) {
-      vector<string> sectionNames;
+      std::vector<std::string> sectionNames;
 
       for(const auto &[section, name] : sectionMap) {
         if(sections & section) {
@@ -614,7 +612,7 @@ void AboutPackageDelegate::onCommand(const int id)
 {
   switch(id) {
   case IDC_ACTION:
-    m_dialog->setDelegate(make_shared<AboutIndexDelegate>(m_index));
+    m_dialog->setDelegate(std::make_shared<AboutIndexDelegate>(m_index));
     break;
   case ACTION_COPY_URL:
     copySourceUrl();
@@ -649,7 +647,7 @@ void AboutPackageDelegate::locate()
     if(!FS::exists(path))
       return;
 
-    const string &arg = String::format(R"(/select,"%s")",
+    const std::string &arg = String::format(R"(/select,"%s")",
       path.prependRoot().join().c_str());
 
     Win32::shellExecute("explorer.exe", arg.c_str());

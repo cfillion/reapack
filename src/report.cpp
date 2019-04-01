@@ -22,8 +22,6 @@
 #include "tabbar.hpp"
 #include "win32.hpp"
 
-using namespace std;
-
 Report::Report(const Receipt *receipt)
   : Dialog(IDD_REPORT_DIALOG), m_receipt(receipt), m_empty(true)
 {

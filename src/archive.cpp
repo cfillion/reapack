@@ -34,8 +34,6 @@
 #include <zlib/unzip.h>
 #include <zlib/ioapi.h>
 
-using namespace std;
-
 static const Path ARCHIVE_TOC("toc");
 static const size_t BUFFER_SIZE = 4096;
 
@@ -63,8 +61,8 @@ static void *wide_fopen(voidpf, const void *filename, int mode)
 #endif
 
 struct ImportArchive {
-  void importRemote(const string &);
-  void importPackage(const string &);
+  void importRemote(const std::string &);
+  void importPackage(const std::string &);
 
   ArchiveReaderPtr m_reader;
   RemoteList *m_remotes;
@@ -72,12 +70,12 @@ struct ImportArchive {
   IndexPtr m_lastIndex;
 };
 
-void Archive::import(const string &path)
+void Archive::import(const std::string &path)
 {
-  ImportArchive state{make_shared<ArchiveReader>(path),
+  ImportArchive state{std::make_shared<ArchiveReader>(path),
     &g_reapack->config()->remotes};
 
-  stringstream toc;
+  std::stringstream toc;
   if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
     throw reapack_error(String::format(
       "Cannot locate the table of contents (%d)", err));
@@ -86,12 +84,12 @@ void Archive::import(const string &path)
   if(!(state.m_tx = g_reapack->setupTransaction()))
     return;
 
-  string line;
-  while(getline(toc, line)) {
+  std::string line;
+  while(std::getline(toc, line)) {
     if(line.size() <= 5) // 5 is the length of the line type prefix
       continue;
 
-    const string &data = line.substr(5);
+    const std::string &data = line.substr(5);
 
     try {
       switch(line[0]) {
@@ -115,7 +113,7 @@ void Archive::import(const string &path)
   state.m_tx->runTasks();
 }
 
-void ImportArchive::importRemote(const string &data)
+void ImportArchive::importRemote(const std::string &data)
 {
   m_lastIndex = nullptr; // clear the previous repository
   Remote remote = Remote::fromString(data);
@@ -135,17 +133,17 @@ void ImportArchive::importRemote(const string &data)
   m_lastIndex = Index::load(remote.name());
 }
 
-void ImportArchive::importPackage(const string &data)
+void ImportArchive::importPackage(const std::string &data)
 {
   // don't report an error if the index isn't loaded assuming we already
   // did when failing to import the repository above
   if(!m_lastIndex)
     return;
 
-  string categoryName, packageName, versionName;
+  std::string categoryName, packageName, versionName;
   bool pinned;
 
-  istringstream stream(data);
+  std::istringstream stream(data);
   stream
     >> quoted(categoryName) >> quoted(packageName) >> quoted(versionName)
     >> pinned;
@@ -184,7 +182,7 @@ ArchiveReader::~ArchiveReader()
 
 int ArchiveReader::extractFile(const Path &path)
 {
-  ofstream stream;
+  std::ofstream stream;
 
   if(FS::open(stream, path))
     return extractFile(path, stream);
@@ -194,7 +192,7 @@ int ArchiveReader::extractFile(const Path &path)
   }
 }
 
-int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
+int ArchiveReader::extractFile(const Path &path, std::ostream &stream) noexcept
 {
   int status = unzLocateFile(m_zip, path.join(false).c_str(), false);
   if(status != UNZ_OK)
@@ -204,7 +202,7 @@ int ArchiveReader::extractFile(const Path &path, ostream &stream) noexcept
   if(status != UNZ_OK)
     return status;
 
-  string buffer(BUFFER_SIZE, 0);
+  std::string buffer(BUFFER_SIZE, 0);
 
   const auto readChunk = [&] {
     return unzReadCurrentFile(m_zip, &buffer[0], (int)buffer.size());
@@ -228,7 +226,7 @@ FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
 
 bool FileExtractor::run()
 {
-  ofstream stream;
+  std::ofstream stream;
   if(!FS::open(stream, m_path.temp())) {
     setError({FS::lastError(), m_path.temp().join()});
     return false;
@@ -267,7 +265,7 @@ ArchiveWriter::~ArchiveWriter()
 
 int ArchiveWriter::addFile(const Path &path)
 {
-  ifstream stream;
+  std::ifstream stream;
 
   if(FS::open(stream, path))
     return addFile(path, stream);
@@ -277,7 +275,7 @@ int ArchiveWriter::addFile(const Path &path)
   }
 }
 
-int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
+int ArchiveWriter::addFile(const Path &path, std::istream &stream) noexcept
 {
   const int status = zipOpenNewFileInZip(m_zip, path.join(false).c_str(), nullptr,
     nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
@@ -285,7 +283,7 @@ int ArchiveWriter::addFile(const Path &path, istream &stream) noexcept
   if(status != ZIP_OK)
     return status;
 
-  string buffer(BUFFER_SIZE, 0);
+  std::string buffer(BUFFER_SIZE, 0);
 
   const auto readChunk = [&] {
     stream.read(&buffer[0], buffer.size());
@@ -310,7 +308,7 @@ FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &write
 
 bool FileCompressor::run()
 {
-  ifstream stream;
+  std::ifstream stream;
   if(!FS::open(stream, m_path)) {
     setError({
       String::format("Could not open file for export (%s)", FS::lastError()),

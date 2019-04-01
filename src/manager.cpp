@@ -36,8 +36,6 @@ static const Win32::char_type *ARCHIVE_FILTER =
   L("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
 static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
 
-using namespace std;
-
 enum {
   ACTION_UNINSTALL = 80, ACTION_ABOUT, ACTION_REFRESH, ACTION_COPYURL,
   ACTION_SELECT, ACTION_UNSELECT, ACTION_AUTOINSTALL_GLOBAL,
@@ -72,11 +70,11 @@ void Manager::onInit()
   });
 
   m_list->enableIcons();
-  m_list->onSelect >> bind(&Dialog::startTimer, this, 100, TIMER_ABOUT, true);
-  m_list->onIconClick >> bind(&Manager::toggleEnabled, this);
-  m_list->onActivate >> bind(&Manager::aboutRepo, this, true);
-  m_list->onFillContextMenu >> bind(&Manager::fillContextMenu, this,
-    placeholders::_1, placeholders::_2);
+  m_list->onSelect >> std::bind(&Dialog::startTimer, this, 100, TIMER_ABOUT, true);
+  m_list->onIconClick >> std::bind(&Manager::toggleEnabled, this);
+  m_list->onActivate >> std::bind(&Manager::aboutRepo, this, true);
+  m_list->onFillContextMenu >> std::bind(&Manager::fillContextMenu, this,
+    std::placeholders::_1, std::placeholders::_2);
 
   setAnchor(m_list->handle(), AnchorRight | AnchorBottom);
   setAnchor(getControl(IDC_IMPORT), AnchorTop | AnchorBottom);
@@ -292,8 +290,8 @@ void Manager::refresh()
 {
   ListView::BeginEdit edit(m_list);
 
-  const vector<int> selection = m_list->selection();
-  vector<string> selected(selection.size());
+  const std::vector<int> selection = m_list->selection();
+  std::vector<std::string> selected(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
     selected[i] = m_list->row(selection[i])->cell(0).value; // TODO: use data ptr to Remote
 
@@ -354,7 +352,7 @@ void Manager::toggleEnabled()
     const bool enable = !mods->enable.value_or(remote.isEnabled());
 
     if(remote.isEnabled() == enable)
-      mods->enable = nullopt;
+      mods->enable = std::nullopt;
     else
       mods->enable = enable;
 
@@ -377,7 +375,7 @@ void Manager::setRemoteAutoInstall(const tribool &enabled)
   setMods([=](const Remote &remote, int, RemoteMods *mods) {
     if(remote.autoInstall() == enabled
         || (indeterminate(remote.autoInstall()) && indeterminate(enabled)))
-      mods->autoInstall = nullopt;
+      mods->autoInstall = std::nullopt;
     else
       mods->autoInstall = enabled;
   });
@@ -398,8 +396,8 @@ void Manager::refreshIndex()
   if(!m_list->hasSelection())
     return;
 
-  const vector<int> selection = m_list->selection();
-  vector<Remote> remotes(selection.size());
+  const std::vector<int> selection = m_list->selection();
+  std::vector<Remote> remotes(selection.size());
   for(size_t i = 0; i < selection.size(); i++)
     remotes[i] = getRemote(selection[i]);
 
@@ -429,7 +427,7 @@ void Manager::uninstall()
   }
 }
 
-void Manager::toggle(optional<bool> &setting, const bool current)
+void Manager::toggle(std::optional<bool> &setting, const bool current)
 {
   setting = !setting.value_or(current);
   setChange(*setting == current ? -1 : 1);
@@ -450,7 +448,7 @@ void Manager::setChange(const int increment)
 
 void Manager::copyUrl()
 {
-  vector<string> values;
+  std::vector<std::string> values;
 
   for(const int index : m_list->selection(false))
     values.push_back(getRemote(index).url());
@@ -491,7 +489,7 @@ void Manager::importArchive()
 {
   const char *title = "Import offline archive";
 
-  const string &path = FileDialog::getOpenFileName(handle(), instance(),
+  const std::string &path = FileDialog::getOpenFileName(handle(), instance(),
     title, Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(path.empty())
@@ -509,7 +507,7 @@ void Manager::importArchive()
 
 void Manager::exportArchive()
 {
-  const string &path = FileDialog::getSaveFileName(handle(), instance(),
+  const std::string &path = FileDialog::getSaveFileName(handle(), instance(),
     "Export offline archive", Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(!path.empty()) {
@@ -592,7 +590,7 @@ bool Manager::apply()
 
   // syncList is the list of repos to synchronize for autoinstall
   // (global or local setting)
-  set<Remote> syncList;
+  std::set<Remote> syncList;
 
   if(m_autoInstall) {
     g_reapack->config()->install.autoInstall = *m_autoInstall;
@@ -652,9 +650,9 @@ void Manager::reset()
 {
   m_mods.clear();
   m_uninstall.clear();
-  m_autoInstall = nullopt;
-  m_bleedingEdge = nullopt;
-  m_promptObsolete = nullopt;
+  m_autoInstall = std::nullopt;
+  m_bleedingEdge = std::nullopt;
+  m_promptObsolete = std::nullopt;
 
   m_changes = 0;
   disable(m_apply);
@@ -665,7 +663,7 @@ Remote Manager::getRemote(const int index) const
   if(index < 0 || index > m_list->rowCount() - 1)
     return {};
 
-  const string &remoteName = m_list->row(index)->cell(0).value;
+  const std::string &remoteName = m_list->row(index)->cell(0).value;
   return g_reapack->config()->remotes.get(remoteName);
 }
 

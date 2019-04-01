@@ -3,8 +3,6 @@
 #include <index.hpp>
 #include <errors.hpp>
 
-using namespace std;
-
 static const char *M = "[reapack_v1]";
 static const Path RIPATH("test/indexes/v1");
 
@@ -16,7 +14,7 @@ TEST_CASE("unnamed category", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty category name");
+    REQUIRE(std::string{e.what()} == "empty category name");
   }
 }
 
@@ -44,7 +42,7 @@ TEST_CASE("null package name", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty package name");
+    REQUIRE(std::string{e.what()} == "empty package name");
   }
 }
 
@@ -102,7 +100,7 @@ TEST_CASE("null package version", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "invalid version name ''");
+    REQUIRE(std::string{e.what()} == "invalid version name ''");
   }
 }
 
@@ -114,7 +112,7 @@ TEST_CASE("null source url", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "empty source url");
+    REQUIRE(std::string{e.what()} == "empty source url");
   }
 }
 

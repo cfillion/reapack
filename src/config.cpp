@@ -20,13 +20,13 @@
 #include "path.hpp"
 #include "win32.hpp"
 
+#include <algorithm>
+
 #ifdef _WIN32
 #  include <windows.h>
 #else
 #  include <swell/swell.h>
 #endif
-
-using namespace std;
 
 static const char *GENERAL_GRP = "general";
 static const char *VERSION_KEY = "version";
@@ -52,9 +52,9 @@ static const char *SIZE_KEY = "size";
 static const char *REMOTES_GRP = "remotes";
 static const char *REMOTE_KEY  = "remote";
 
-inline static string nKey(const char *key, const unsigned int i)
+static std::string nKey(const char *key, const unsigned int i)
 {
-  return key + to_string(i);
+  return key + std::to_string(i);
 }
 
 Config::Config(const Path &path)
@@ -78,8 +78,8 @@ void Config::resetOptions()
 
 void Config::restoreSelfRemote()
 {
-  const string name = "ReaPack";
-  const string url = "https://reapack.com/index.xml";
+  const std::string name = "ReaPack";
+  const std::string url = "https://reapack.com/index.xml";
 
   Remote remote = remotes.get(name);
   remote.setName(name);
@@ -185,7 +185,7 @@ void Config::readRemotes()
   m_remotesIniSize = getUInt(REMOTES_GRP, SIZE_KEY);
 
   for(unsigned int i = 0; i < m_remotesIniSize; i++) {
-    const string data = getString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str());
+    const std::string data = getString(REMOTES_GRP, nKey(REMOTE_KEY, i).c_str());
 
     remotes.add(Remote::fromString(data));
   }
@@ -193,7 +193,7 @@ void Config::readRemotes()
 
 void Config::writeRemotes()
 {
-  m_remotesIniSize = max((unsigned int)remotes.size(), m_remotesIniSize);
+  m_remotesIniSize = std::max(static_cast<unsigned int>(remotes.size()), m_remotesIniSize);
 
   unsigned int i = 0;
   for(auto it = remotes.begin(); it != remotes.end(); it++, i++)
@@ -204,12 +204,12 @@ void Config::writeRemotes()
   setUInt(REMOTES_GRP, SIZE_KEY, m_remotesIniSize = i);
 }
 
-string Config::getString(const char *group, const char *key, const string &fallback) const
+std::string Config::getString(const char *group, const char *key, const std::string &fallback) const
 {
   return Win32::getPrivateProfileString(group, key, fallback.c_str(), m_path.c_str());
 }
 
-void Config::setString(const char *group, const char *key, const string &val) const
+void Config::setString(const char *group, const char *key, const std::string &val) const
 {
   Win32::writePrivateProfileString(group, key, val.c_str(), m_path.c_str());
 }
@@ -227,7 +227,7 @@ bool Config::getBool(const char *group, const char *key, const bool fallback) co
 
 void Config::setUInt(const char *group, const char *key, const unsigned int val) const
 {
-  setString(group, key, to_string(val));
+  setString(group, key, std::to_string(val));
 }
 
 void Config::deleteKey(const char *group, const char *key) const

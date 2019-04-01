@@ -25,8 +25,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/logic/tribool_io.hpp> // required to get correct tribool casts
 
-using namespace std;
-
 DEFINE_API(bool, AboutRepository, ((const char*, repoName)),
 R"(Show the about dialog of the given repository. Returns true if the repository exists in the user configuration.
 The repository index is downloaded asynchronously if the cached copy doesn't exist or is older than one week.)",

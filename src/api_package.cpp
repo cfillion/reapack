@@ -26,14 +26,12 @@
 #include "remote.hpp"
 #include "transaction.hpp"
 
-using namespace std;
-
 struct PackageEntry {
   Registry::Entry regEntry;
-  vector<Registry::File> files;
+  std::vector<Registry::File> files;
 };
 
-static set<PackageEntry *> s_entries;
+static std::set<PackageEntry *> s_entries;
 
 DEFINE_API(bool, AboutInstalledPackage, ((PackageEntry*, entry)),
 R"(Show the about dialog of the given package entry.
@@ -53,7 +51,7 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
   if(!tx)
     return false;
 
-  const vector<Remote> repos = {repo};
+  const std::vector<Remote> repos{repo};
 
   tx->fetchIndexes(repos);
   tx->onFinish >> [=] {
@@ -63,7 +61,8 @@ The repository index is downloaded asynchronously if the cached copy doesn't exi
 
     const Package *pkg = indexes.front()->find(entryCopy.category, entryCopy.package);
     if(pkg)
-      g_reapack->about()->setDelegate(make_shared<AboutPackageDelegate>(pkg, entryCopy.version));
+      g_reapack->about()->setDelegate(std::make_shared<AboutPackageDelegate>(
+        pkg, entryCopy.version));
   };
   tx->runTasks();
 

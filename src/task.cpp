@@ -26,10 +26,8 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 
-using namespace std;
-
 UninstallTask::UninstallTask(const Registry::Entry &re, Transaction *tx)
-  : Task(tx), m_entry(move(re))
+  : Task(tx), m_entry(std::move(re))
 {
 }
 
@@ -58,7 +56,7 @@ void UninstallTask::commit()
 }
 
 PinTask::PinTask(const Registry::Entry &re, const bool pin, Transaction *tx)
-  : Task(tx), m_entry(move(re)), m_pin(pin)
+  : Task(tx), m_entry(std::move(re)), m_pin(pin)
 {
 }
 

@@ -4,8 +4,6 @@
 
 #include <api.hpp>
 
-using namespace std;
-
 static const char *M = "[api]";
 
 TEST_CASE("CompareVersions", M) {

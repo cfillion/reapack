@@ -21,9 +21,7 @@
 #include <cstdarg>
 #include <sstream>
 
-using namespace std;
-
-string String::format(const char *fmt, ...)
+std::string String::format(const char *fmt, ...)
 {
   va_list args;
 
@@ -31,7 +29,7 @@ string String::format(const char *fmt, ...)
   const int size = vsnprintf(nullptr, 0, fmt, args);
   va_end(args);
 
-  string buf(size, 0);
+  std::string buf(size, 0);
 
   va_start(args, fmt);
   vsnprintf(&buf[0], size + 1, fmt, args);
@@ -40,11 +38,11 @@ string String::format(const char *fmt, ...)
   return buf;
 }
 
-string String::indent(const string &text)
+std::string String::indent(const std::string &text)
 {
-  string output;
-  istringstream input(text);
-  string line;
+  std::string output;
+  std::istringstream input(text);
+  std::string line;
   bool first = true;
 
   while(getline(input, line, '\n')) {
@@ -65,7 +63,7 @@ string String::indent(const string &text)
   return output;
 }
 
-void String::ImplDetail::imbueStream(ostream &stream)
+void String::ImplDetail::imbueStream(std::ostream &stream)
 {
   class NumPunct : public std::numpunct<char>
   {
@@ -74,5 +72,5 @@ void String::ImplDetail::imbueStream(ostream &stream)
     std::string do_grouping() const override { return "\3"; }
   };
 
-  stream.imbue(locale(locale::classic(), new NumPunct));
+  stream.imbue(std::locale(std::locale::classic(), new NumPunct));
 }

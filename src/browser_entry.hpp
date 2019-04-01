@@ -68,7 +68,7 @@ public:
   std::string displayAuthor() const;
   const Time *lastUpdate() const;
 
-  void updateRow(const ListView::RowPtr &) const;
+  void updateRow(ListView::Row *) const;
   void fillMenu(Menu &) const;
 
   int possibleActions(bool allowToggle) const;

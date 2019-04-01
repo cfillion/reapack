@@ -24,8 +24,6 @@
   extern "C" extern const _tls_callback_type __dyn_tls_dtor_callback;
 #endif
 
-using namespace std;
-
 ThreadTask::ThreadTask() : m_state(Idle), m_abort(false)
 {
 }
@@ -67,7 +65,7 @@ WorkerThread::~WorkerThread()
 
 void WorkerThread::run()
 {
-  unique_lock<mutex> lock(m_mutex);
+  std::unique_lock<std::mutex> lock(m_mutex);
 
   while(true) {
     m_wake.wait(lock, [=] { return !m_queue.empty() || m_stop; });
@@ -97,7 +95,7 @@ void WorkerThread::run()
 
 ThreadTask *WorkerThread::nextTask()
 {
-  lock_guard<mutex> guard(m_mutex);
+  std::lock_guard<std::mutex> guard(m_mutex);
 
   if(m_queue.empty())
     return nullptr;
@@ -109,7 +107,7 @@ ThreadTask *WorkerThread::nextTask()
 
 void WorkerThread::push(ThreadTask *task)
 {
-  lock_guard<mutex> guard(m_mutex);
+  std::lock_guard<std::mutex> guard(m_mutex);
 
   m_queue.push(task);
   m_wake.notify_one();
@@ -144,7 +142,7 @@ void ThreadPool::push(ThreadTask *task)
   const size_t nextThread = m_running.size() % m_pool.size();
   auto &thread = task->concurrent() ? m_pool[nextThread] : m_pool.front();
   if(!thread)
-    thread = make_unique<WorkerThread>();
+    thread = std::make_unique<WorkerThread>();
 
   thread->push(task);
 }

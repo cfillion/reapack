@@ -23,14 +23,12 @@
 
 #include <sstream>
 
-using namespace std;
-
 Progress::Progress(ThreadPool *pool)
   : Dialog(IDD_PROGRESS_DIALOG),
     m_pool(pool), m_label(nullptr), m_progress(nullptr),
     m_done(0), m_total(0)
 {
-  m_pool->onPush >> bind(&Progress::addTask, this, placeholders::_1);
+  m_pool->onPush >> std::bind(&Progress::addTask, this, std::placeholders::_1);
 }
 
 void Progress::onInit()
@@ -90,12 +88,13 @@ void Progress::updateProgress()
 {
   Win32::setWindowText(m_label, String::format(m_current.c_str(),
     String::format("%s of %s",
-      String::number(min(m_done + 1, m_total)).c_str(),
+      String::number(std::min(m_done + 1, m_total)).c_str(),
       String::number(m_total).c_str()
     ).c_str()
   ).c_str());
 
-  const double pos = static_cast<double>(min(m_done+1, m_total)) / max(2, m_total);
+  const double pos = static_cast<double>(
+    std::min(m_done + 1, m_total)) / std::max(2, m_total);
   const int percent = static_cast<int>(pos * 100);
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);

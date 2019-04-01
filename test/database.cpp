@@ -6,8 +6,6 @@
 
 #include <sqlite3.h>
 
-using namespace std;
-
 static const char *M = "[database]";
 
 TEST_CASE("open bad sqlite file path", M) {
@@ -16,7 +14,7 @@ TEST_CASE("open bad sqlite file path", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "unable to open database file");
+    REQUIRE(std::string{e.what()} == "unable to open database file");
   }
 }
 
@@ -28,7 +26,7 @@ TEST_CASE("execute invalid sql", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "near \"WHERE\": syntax error");
+    REQUIRE(std::string{e.what()} == "near \"WHERE\": syntax error");
   }
 }
 
@@ -40,7 +38,7 @@ TEST_CASE("prepare invalid sql", M) {
     FAIL();
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "near \"WHERE\": syntax error");
+    REQUIRE(std::string{e.what()} == "near \"WHERE\": syntax error");
   }
 }
 
@@ -52,7 +50,7 @@ TEST_CASE("get rows from prepared statement", M) {
     "INSERT INTO test VALUES (\"世界\");"
   );
 
-  vector<string> values;
+  std::vector<std::string> values;
 
   Statement *stmt = db.prepare("SELECT value FROM test");
 
@@ -91,7 +89,7 @@ TEST_CASE("bind values and clear", M) {
     FAIL("bindings not cleared");
   }
   catch(const reapack_error &e) {
-    REQUIRE(string(e.what()) == "NOT NULL constraint failed: test.value");
+    REQUIRE(std::string{e.what()} == "NOT NULL constraint failed: test.value");
   }
 }
 
@@ -161,13 +159,13 @@ TEST_CASE("bind temporary strings", M) {
 
   Statement *insert = db.prepare("INSERT INTO a VALUES(?)");
 
-  string str("hello");
+  std::string str("hello");
   insert->bind(1, str);
   str = "world";
 
   insert->exec();
 
-  string got;
+  std::string got;
   Statement *select = db.prepare("SELECT text FROM a LIMIT 1");
   select->exec([&] {
     got = select->stringColumn(0);
@@ -188,7 +186,7 @@ TEST_CASE("get integers from sqlite", M) {
   insert->bind(1, 4294967295);
   insert->exec();
 
-  vector<sqlite3_int64> signedVals;
+  std::vector<sqlite3_int64> signedVals;
   Statement *select = db.prepare("SELECT test FROM a");
   select->exec([&] {
     signedVals.push_back(select->intColumn(0));

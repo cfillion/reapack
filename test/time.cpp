@@ -2,8 +2,6 @@
 
 #include <time.hpp>
 
-using namespace std;
-
 static const char *M = "[time]";
 
 TEST_CASE("valid time", M) {
@@ -24,7 +22,7 @@ TEST_CASE("garbage time string", M) {
   REQUIRE_FALSE(time.isValid());
   REQUIRE_FALSE(time);
   REQUIRE(time == Time());
-  REQUIRE(time.toString() == string());
+  REQUIRE(time.toString() == "");
 }
 
 TEST_CASE("out of range time string", M) {
@@ -32,7 +30,7 @@ TEST_CASE("out of range time string", M) {
   REQUIRE_FALSE(time.isValid());
   REQUIRE_FALSE(time);
   REQUIRE(time == Time());
-  REQUIRE(time.toString() == string());
+  REQUIRE(time.toString() == "");
 }
 
 TEST_CASE("compare times", M) {

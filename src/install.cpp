@@ -25,11 +25,9 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 
-using namespace std;
-
 InstallTask::InstallTask(const Version *ver, const bool pin,
     const Registry::Entry &re, const ArchiveReaderPtr &reader, Transaction *tx)
-  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(move(re)), m_reader(reader),
+  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(std::move(re)), m_reader(reader),
     m_fail(false), m_index(ver->package()->category()->index()->shared_from_this())
 {
 }
@@ -41,7 +39,7 @@ bool InstallTask::start()
 
   // prevent file conflicts (don't worry, the registry push is reverted)
   try {
-    vector<Path> conflicts;
+    std::vector<Path> conflicts;
     tx()->registry()->push(m_version, &conflicts);
 
     if(!conflicts.empty()) {

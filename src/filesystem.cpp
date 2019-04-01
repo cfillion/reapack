@@ -30,8 +30,6 @@
 #  define stat _stat
 #endif
 
-using namespace std;
-
 static auto nativePath(const Path &path)
 {
   return Win32::widen(path.prependRoot().join());
@@ -61,24 +59,24 @@ FILE *FS::open(const Path &path)
 #endif
 }
 
-bool FS::open(ifstream &stream, const Path &path)
+bool FS::open(std::ifstream &stream, const Path &path)
 {
-  stream.open(nativePath(path), ios_base::binary);
+  stream.open(nativePath(path), std::ios_base::binary);
   return stream.good();
 }
 
-bool FS::open(ofstream &stream, const Path &path)
+bool FS::open(std::ofstream &stream, const Path &path)
 {
   if(!mkdir(path.dirname()))
     return false;
 
-  stream.open(nativePath(path), ios_base::binary);
+  stream.open(nativePath(path), std::ios_base::binary);
   return stream.good();
 }
 
-bool FS::write(const Path &path, const string &contents)
+bool FS::write(const Path &path, const std::string &contents)
 {
-  ofstream file;
+  std::ofstream file;
   if(!open(file, path))
     return false;
 
@@ -182,7 +180,7 @@ bool FS::mkdir(const Path &path)
 
   Path fullPath = Path::root();
 
-  for(const string &dir : path) {
+  for(const std::string &dir : path) {
     fullPath.append(dir);
 
     const auto &joined = Win32::widen(fullPath.join());

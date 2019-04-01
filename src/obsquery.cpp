@@ -24,11 +24,9 @@
 
 #include <sstream>
 
-using namespace std;
-
 enum { ACTION_SELECT_ALL = 300, ACTION_UNSELECT_ALL };
 
-ObsoleteQuery::ObsoleteQuery(vector<Registry::Entry> *entries, bool *enable)
+ObsoleteQuery::ObsoleteQuery(std::vector<Registry::Entry> *entries, bool *enable)
   : Dialog(IDD_OBSQUERY_DIALOG), m_entries(entries), m_enable(enable)
 {
 }
@@ -54,7 +52,7 @@ void ObsoleteQuery::onInit()
   m_list->reserveRows(m_entries->size());
 
   for(const Registry::Entry &entry : *m_entries) {
-    ostringstream stream;
+    std::ostringstream stream;
     stream << entry.remote << '/' << entry.category << '/'
       << Package::displayName(entry.package, entry.description);
     m_list->createRow()->setCell(0, stream.str());
@@ -89,7 +87,7 @@ void ObsoleteQuery::onCommand(const int id, int event)
 
 void ObsoleteQuery::prepare()
 {
-  vector<Registry::Entry> selected;
+  std::vector<Registry::Entry> selected;
 
   for(int index : m_list->selection())
     selected.emplace_back(m_entries->at(index));

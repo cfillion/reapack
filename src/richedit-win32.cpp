@@ -28,20 +28,17 @@
 #include <richedit.h>
 #include <sstream>
 
-using namespace std;
-
 static void HandleLink(ENLINK *info, HWND handle)
 {
   const CHARRANGE &range = info->chrg;
 
-  wchar_t *url = new wchar_t[(range.cpMax - range.cpMin) + 1]();
-  unique_ptr<wchar_t[]> ptr(url);
+  std::wstring url(range.cpMax - range.cpMin, 0);
 
-  TEXTRANGE tr{range, url};
+  TEXTRANGE tr{range, url.data()};
   SendMessage(handle, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
   if(info->msg == WM_LBUTTONUP)
-    ShellExecute(nullptr, L"open", url, nullptr, nullptr, SW_SHOW);
+    ShellExecute(nullptr, L"open", url.c_str(), nullptr, nullptr, SW_SHOW);
 }
 
 void RichEdit::Init()
@@ -71,19 +68,19 @@ void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
   };
 }
 
-void RichEdit::setPlainText(const string &text)
+void RichEdit::setPlainText(const std::string &text)
 {
   Win32::setWindowText(handle(), text.c_str());
 }
 
-bool RichEdit::setRichText(const string &rtf)
+bool RichEdit::setRichText(const std::string &rtf)
 {
-  stringstream stream(rtf);
+  std::stringstream stream(rtf);
 
   EDITSTREAM es{};
   es.dwCookie = (DWORD_PTR)&stream;
   es.pfnCallback = [](DWORD_PTR cookie, LPBYTE buf, LONG size, LONG *pcb) -> DWORD {
-    stringstream *stream = reinterpret_cast<stringstream *>(cookie);
+    std::stringstream *stream = reinterpret_cast<std::stringstream *>(cookie);
     *pcb = (LONG)stream->readsome((char *)buf, size);
     return 0;
   };

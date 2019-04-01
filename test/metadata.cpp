@@ -2,8 +2,6 @@
 
 #include <metadata.hpp>
 
-using namespace std;
-
 static const char *M = "[metadata]";
 
 TEST_CASE("repository links", M) {

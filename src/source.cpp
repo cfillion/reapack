@@ -22,8 +22,6 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-using namespace std;
-
 auto Source::getSection(const char *name) -> Section
 {
   const std::pair<const char *, Section> map[]{
@@ -47,7 +45,7 @@ auto Source::detectSection(const Path &category) -> Section
 {
   // this is for compatibility with indexes made for v1.0
 
-  string topcategory = category.front();
+  std::string topcategory = category.front();
   boost::algorithm::to_lower(topcategory);
 
   if(topcategory == "midi editor")
@@ -56,7 +54,7 @@ auto Source::detectSection(const Path &category) -> Section
     return MainSection;
 }
 
-Source::Source(const string &file, const string &url, const Version *ver)
+Source::Source(const std::string &file, const std::string &url, const Version *ver)
   : m_type(Package::UnknownType), m_file(file), m_url(url), m_sections(0),
     m_version(ver)
 {
@@ -72,7 +70,7 @@ Package::Type Source::type() const
     return m_version->package()->type();
 }
 
-const string &Source::file() const
+const std::string &Source::file() const
 {
   if(!m_file.empty())
     return m_file;
