@@ -33,8 +33,9 @@ namespace String {
 
   std::string indent(const std::string &);
 
-  template<typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-  std::string number(const T v) {
+  template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+  std::string number(const T v)
+  {
     std::ostringstream stream;
     ImplDetail::imbueStream(stream);
     stream << v;

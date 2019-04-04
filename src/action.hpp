@@ -43,7 +43,8 @@ private:
 
 class ActionList {
 public:
-  template<class... Args> Action *add(Args&&... args) {
+  template<typename... Args> Action *add(Args&&... args)
+  {
     auto action = std::make_unique<Action>(args...);
     m_list.emplace(action->id(), std::move(action));
 

@@ -18,48 +18,69 @@
 #ifndef REAPACK_API_HELPER_HPP
 #define REAPACK_API_HELPER_HPP
 
-#include <boost/mpl/aux_/preprocessor/token_equal.hpp>
+#include <tuple>
+
 #include <boost/preprocessor.hpp>
 
-#define API_PREFIX "ReaPack_"
+template<typename T>
+struct ReaScriptAPI;
 
-#define BOOST_MPL_PP_TOKEN_EQUAL_void(x) x
-#define BOOST_MPL_PP_TOKEN_EQUAL_bool(x) x
-#define BOOST_MPL_PP_TOKEN_EQUAL_int(x) x
-#define IS_VOID(type) BOOST_MPL_PP_TOKEN_EQUAL(type, void)
-#define IS_BOOL(type) BOOST_MPL_PP_TOKEN_EQUAL(type, bool)
-#define IS_INT(type)  BOOST_MPL_PP_TOKEN_EQUAL(type, int)
+template<typename R, typename... Args>
+struct ReaScriptAPI<R(*)(Args...)>
+{
+  static void *applyVarArg(R(*fn)(Args...), void **argv, int argc)
+  {
+    if(static_cast<size_t>(argc) < sizeof...(Args))
+      return nullptr;
+
+    const auto &voidArgs = makeTuple(argv, std::index_sequence_for<Args...>{});
+    const auto &args = *reinterpret_cast<const std::tuple<Args...> *>(&voidArgs);
+
+    if constexpr (std::is_void_v<R>) {
+      std::apply(fn, args);
+      return nullptr;
+    }
+    else {
+      // cast integers to have the same size as a pointer to avoid warnings
+      using IntPtrR = std::conditional_t<std::is_integral_v<R>, intptr_t, R>;
+      const auto value = static_cast<IntPtrR>(std::apply(fn, args));
+      return reinterpret_cast<void *>(value);
+    }
+  }
+
+private:
+  template<size_t... I>
+  static auto makeTuple(void **argv, std::index_sequence<I...>)
+  {
+    return std::make_tuple(argv[I]...);
+  }
+};
+
+template<auto fn>
+void *InvokeReaScriptAPI(void **argv, int argc)
+{
+  return ReaScriptAPI<decltype(fn)>::applyVarArg(fn, argv, argc);
+}
 
 #define ARG_TYPE(arg) BOOST_PP_TUPLE_ELEM(2, 0, arg)
 #define ARG_NAME(arg) BOOST_PP_TUPLE_ELEM(2, 1, arg)
 
-// produce an appropriate conversion from void* to any type
-#define VOIDP_TO(type, val) \
-  BOOST_PP_IF(IS_BOOL(type), val != 0, \
-    (type) BOOST_PP_EXPR_IF(IS_INT(type), (intptr_t)) val)
-
 #define DEFARGS(r, data, i, arg) BOOST_PP_COMMA_IF(i) ARG_TYPE(arg) ARG_NAME(arg)
-#define CALLARGS(r, data, i, arg) \
-  BOOST_PP_COMMA_IF(i) VOIDP_TO(ARG_TYPE(arg), argv[i])
 #define DOCARGS(r, macro, i, arg) \
   BOOST_PP_EXPR_IF(i, ",") BOOST_PP_STRINGIZE(macro(arg))
 
-#define DEFINE_API(type, name, args, help, ...) \
-  namespace API_##name { \
-    static type cImpl(BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, _, args)) __VA_ARGS__ \
-    static void *reascriptImpl(void **argv, int argc) { \
-      BOOST_PP_EXPR_IF(BOOST_PP_NOT(IS_VOID(type)), return (void *)(intptr_t)) \
-      cImpl(BOOST_PP_SEQ_FOR_EACH_I(CALLARGS, _, args)); \
-      BOOST_PP_EXPR_IF(IS_VOID(type), return nullptr;) \
-    } \
-    static const char *definition = #type "\0" \
-      BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_TYPE, args) "\0" \
-      BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_NAME, args) "\0" help; \
-  }; \
-  APIFunc API::name = {\
-    "API_" API_PREFIX #name, (void *)&API_##name::cImpl, \
-    "APIvararg_" API_PREFIX #name, (void *)&API_##name::reascriptImpl, \
-    "APIdef_" API_PREFIX #name, (void *)API_##name::definition, \
+#define DEFINE_API(type, name, args, help, ...)                                 \
+  static type API_##name(BOOST_PP_SEQ_FOR_EACH_I(DEFARGS, _, args)) __VA_ARGS__ \
+                                                                                \
+  APIFunc API::name { #name,                                                    \
+    reinterpret_cast<void *>(&API_##name),                                      \
+    reinterpret_cast<void *>(&InvokeReaScriptAPI<API_##name>),                  \
+    reinterpret_cast<void *>(const_cast<char *>(                                \
+      #type "\0"                                                                \
+      BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_TYPE, args) "\0"                     \
+      BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_NAME, args) "\0"                     \
+      help                                                                      \
+    ))                                                                          \
   }
 
 #endif

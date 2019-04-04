@@ -17,28 +17,33 @@
 
 #include "api.hpp"
 
-#include <cstdio>
+#include <string>
  
 #include <reaper_plugin_functions.h>
 
-APIDef::APIDef(const APIFunc *func)
-  : m_func(func)
+using namespace std::string_literals;
+
+#define KEY(prefix) (prefix "_ReaPack_"s + m_func->name)
+
+APIReg::APIReg(const APIFunc *func)
+  : m_func(func),
+    m_impl(KEY("API")), m_vararg(KEY("APIvararg")), m_help(KEY("APIdef"))
 {
-  plugin_register(m_func->cKey, m_func->cImpl);
-  plugin_register(m_func->reascriptKey, m_func->reascriptImpl);
-  plugin_register(m_func->definitionKey, m_func->definition);
+  registerFunc();
 }
 
-APIDef::~APIDef()
+APIReg::~APIReg()
 {
-  unregister(m_func->cKey, m_func->cImpl);
-  unregister(m_func->reascriptKey, m_func->reascriptImpl);
-  unregister(m_func->definitionKey, m_func->definition);
+  m_impl.insert(m_impl.begin(), '-');
+  m_vararg.insert(m_vararg.begin(), '-');
+  m_help.insert(m_help.begin(), '-');
+
+  registerFunc();
 }
 
-void APIDef::unregister(const char *key, void *ptr)
+void APIReg::registerFunc() const
 {
-  char buf[255];
-  snprintf(buf, sizeof(buf), "-%s", key);
-  plugin_register(buf, ptr);
+  plugin_register(m_impl.c_str(), m_func->cImpl);
+  plugin_register(m_vararg.c_str(), m_func->reascriptImpl);
+  plugin_register(m_help.c_str(), m_func->definition);
 }

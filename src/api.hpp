@@ -18,27 +18,30 @@
 #ifndef REAPACK_API_HPP
 #define REAPACK_API_HPP
 
+#include <string>
+
 struct APIFunc {
-  const char *cKey;
+  const char *name;
   void *cImpl;
-
-  const char *reascriptKey;
   void *reascriptImpl;
-
-  const char *definitionKey;
   void *definition;
 };
 
-class APIDef {
+class APIReg {
 public:
-  APIDef(const APIFunc *);
-  APIDef(const APIDef &) = delete;
-  ~APIDef();
+  APIReg(const APIFunc *);
+  APIReg(const APIReg &) = delete;
+  ~APIReg();
 
 private:
-  void unregister(const char *key, void *ptr);
+  void registerFunc() const;
 
   const APIFunc *m_func;
+
+  // plugin_register requires these to not be temporaries
+  std::string m_impl;
+  std::string m_vararg;
+  std::string m_help;
 };
 
 namespace API {

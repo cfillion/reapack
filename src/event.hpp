@@ -26,15 +26,16 @@
 #include <optional>
 #include <vector>
 
-template<class T>
+template<typename T>
 class Event;
 
-template<class R, class... Args>
+template<typename R, typename... Args>
 class Event<R(Args...)> {
 public:
-  typedef std::function<R(Args...)> Handler;
-  typedef typename std::conditional<
-    std::is_void<R>::value, void, std::optional<R>>::type ReturnType;
+  using Handler = std::function<R(Args...)>;
+  using ReturnType = std::conditional_t<
+    std::is_void_v<R>, void, std::optional<R>
+  >;
 
   Event() = default;
   Event(const Event &) = delete;
@@ -50,7 +51,7 @@ public:
 
   ReturnType operator()(Args... args) const
   {
-    if constexpr (std::is_void<R>::value) {
+    if constexpr (std::is_void_v<R>) {
       for(const auto &func : m_handlers)
         func(std::forward<Args>(args)...);
     }
@@ -67,7 +68,7 @@ private:
 };
 
 namespace AsyncEventImpl {
-  typedef std::function<void ()> MainThreadFunc;
+  using MainThreadFunc = std::function<void ()>;
 
   class Loop {
   public:
@@ -97,10 +98,10 @@ namespace AsyncEventImpl {
   };
 };
 
-template<class T>
+template<typename T>
 class AsyncEvent;
 
-template<class R, class... Args>
+template<typename R, typename... Args>
 class AsyncEvent<R(Args...)> : public Event<R(Args...)> {
 public:
   using typename Event<R(Args...)>::ReturnType;
@@ -112,7 +113,7 @@ public:
     // don't wait until the next timer tick to return nothing if there are no
     // handlers currently subscribed to the event
     if(!*this) {
-      if constexpr (std::is_void<R>::value)
+      if constexpr (std::is_void_v<R>)
         promise->set_value();
       else
         promise->set_value(std::nullopt);
@@ -121,7 +122,7 @@ public:
     }
 
     m_emitter.runInMainThread([=] {
-      if constexpr (std::is_void<R>::value) {
+      if constexpr (std::is_void_v<R>) {
         Event<R(Args...)>::operator()(args...);
         promise->set_value();
       }

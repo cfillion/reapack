@@ -86,7 +86,7 @@ private:
   UseRootPath m_useRootPath;
   Config m_config;
   ActionList m_actions;
-  std::list<APIDef> m_api;
+  std::list<APIReg> m_api;
 
   Transaction *m_tx;
   std::unique_ptr<About> m_about;
