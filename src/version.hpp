@@ -36,6 +36,8 @@ public:
   VersionName(const std::string &);
   VersionName(const VersionName &);
 
+  VersionName &operator=(const VersionName &) = default;
+
   void parse(const std::string &);
   bool tryParse(const std::string &, std::string *errorOut = nullptr);
 
@@ -44,12 +46,13 @@ public:
   const std::string &toString() const { return m_string; }
 
   int compare(const VersionName &) const;
-  bool operator<(const VersionName &o) const { return compare(o) < 0; }
-  bool operator<=(const VersionName &o) const { return compare(o) <= 0; }
-  bool operator>(const VersionName &o) const { return compare(o) > 0; }
-  bool operator>=(const VersionName &o) const { return compare(o) >= 0; }
-  bool operator==(const VersionName &o) const { return compare(o) == 0; }
-  bool operator!=(const VersionName &o) const { return compare(o) != 0; }
+
+#define COMPOP(op) \
+  bool operator op (const VersionName &o) const { return compare(o) op 0; }
+
+  COMPOP(<) COMPOP(<=) COMPOP(>) COMPOP(>=) COMPOP(==) COMPOP(!=)
+
+#undef COMPOP
 
 private:
   typedef uint16_t Numeric;
