@@ -27,7 +27,7 @@ TEST_CASE("package type from string", M) {
 }
 
 TEST_CASE("package type to string", M) {
-  constexpr std::pair<Package::Type, const char *> tests[] {
+  const std::pair<Package::Type, std::string> tests[] {
     {Package::UnknownType,           "Unknown"},
     {Package::ScriptType,            "Script"},
     {Package::ExtensionType,         "Extension"},
