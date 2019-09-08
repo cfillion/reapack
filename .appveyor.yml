@@ -39,14 +39,13 @@ for:
 
   - matrix: { only: [ image: *windows ] }
     cache:
-      - C:\Tools\vcpkg\installed\
+      - C:\Tools\vcpkg\installed -> vendor\vcpkg-deps.txt
     install:
       - curl -fsSL http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip -o C:\Tools\tup.zip
       - 7z x C:\Tools\tup.zip -oC:\Tools\tup > NUL
       - set PATH=C:\Tools\tup;%PATH%
 
       - mklink /J vendor\vcpkg C:\Tools\vcpkg > NUL
-      - git apply --directory=vendor vendor\0001-vcpkg-curl-use-winssl.patch
       - set /p vcpkg-deps=<vendor\vcpkg-deps.txt
       - vcpkg install --triplet %PLATFORM%-windows-static %vcpkg-deps%
     build_script: tup %PLATFORM%

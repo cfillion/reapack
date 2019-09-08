@@ -81,7 +81,6 @@ Clone [vcpkg](https://github.com/Microsoft/vcpkg) into `vendor` and install
 the build dependencies:
 
     git clone https://github.com/Microsoft/vcpkg.git vendor\vcpkg
-    git apply --directory=vendor vendor\0001-vcpkg-curl-use-winssl.patch
     vendor\vcpkg\bootstrap-vcpkg.bat
 
     set /p vcpkg-deps=<vendor\vcpkg-deps.txt
