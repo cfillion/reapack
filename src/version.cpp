@@ -159,7 +159,7 @@ auto VersionName::segment(const size_t index) const -> Segment
   if(index < size())
     return m_segments[index];
   else
-    return 0;
+    return {};
 }
 
 int VersionName::compare(const VersionName &o) const

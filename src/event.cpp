@@ -58,7 +58,7 @@ void AsyncEventImpl::Loop::processQueue()
   }
 
   for(const auto &[emitter, func] : events)
-    func();
+    func(), (void)emitter;
 }
 
 AsyncEventImpl::Emitter::Emitter()
