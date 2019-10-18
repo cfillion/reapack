@@ -17,9 +17,7 @@
 
 #include "richedit.hpp"
 
-#ifdef _WIN32
-
-// Starting here and onward is the Win32 implementation of RichEdit
+// This is the Win32 implementation of RichEdit
 // The macOS implementation is in richedit.mm, Linux is in richedit-gtk.cpp
 
 #include "win32.hpp"
@@ -101,4 +99,3 @@ bool RichEdit::setRichText(const std::string &rtf)
 
   return true;
 }
-#endif

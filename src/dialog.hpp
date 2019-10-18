@@ -27,8 +27,8 @@
 #include <vector>
 
 #include <reaper_plugin.h>
-#include <wdltypes.h>
-#include <wingui/wndsize.h>
+#include <WDL/wdltypes.h>
+#include <WDL/wingui/wndsize.h>
 
 class Control;
 

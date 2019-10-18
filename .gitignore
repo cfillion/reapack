@@ -1,9 +1,2 @@
-/.tup/
-
-bin/
-build/
-resource.rc_mac*
-resource.res
-
-/vendor/*/
-/vendor/reaper_plugin*.h
+/build/
+/vendor

@@ -1,59 +1,67 @@
 ---
 version: "{build}-{branch}"
-image:
-  - &linux   Ubuntu1804
-  - &windows Visual Studio 2017
-platform:
-  - x64
-  - x86
+
 before_build:
   - curl -fsSL https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -o vendor/reaper_plugin.h
   - curl -fsSL https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -o vendor/reaper_plugin_functions.h
   - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
+
 for:
-  - matrix: { only: [ image: *linux ] }
+  - matrix: { only: [ APPVEYOR_BUILD_WORKER_IMAGE: &linux Ubuntu1804 ] }
     install:
-      - sudo service docker start
-      - docker run --name arch --rm --privileged -tidv `pwd`:/build -w /build
-        -e CURLSO=:libcurl.so.3 archlinux/base
-      - docker exec arch
-        pacman -Syu --noconfirm boost catch2 gcc git libcurl-compat php tup wget
+      - if [[ "$ARCH" == "i686" ]]; then
+          export CFLAGS=-m32 CXXFLAGS=-m32;
+        fi
 
-      - if [[ "$PLATFORM" == "x86" ]]; then
-          docker exec arch sh -c $'
+      - docker run --name arch --rm -tid -v `pwd`:/src -w /src
+        -e CFLAGS -e CXXFLAGS -e CLICOLOR_FORCE=1 archlinux/base
+      - export RUN="docker exec arch setarch $ARCH"
+
+      - $RUN
+        pacman -Syu --noconfirm base-devel boost catch2 cmake gcc git php wget
+
+      - |-
+        if [[ "$ARCH" == "i686" ]]; then
+          $RUN sh -c $'
             echo "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf' &&
-          docker exec arch
-            pacman -Sy --noconfirm lib32-libcurl-compat lib32-gcc-libs lib32-sqlite;
+          $RUN \
+            pacman -Sy --noconfirm lib32-libcurl lib32-gcc-libs lib32-sqlite
         fi
-    # HACK: tup needs a parent process to do setpgid successfully
-    build_script: docker exec arch sh -c "echo tup $PLATFORM | sh"
-    before_test:
-      - if [[ "$PLATFORM" == "x86" ]]; then
-          sudo apt-get update -qq;
-          sudo apt-get install libcurl4:i386 -qq;
-        fi
-    test_script: '$PLATFORM/bin/test'
+    build_script:
+      - $RUN cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - $RUN cmake --build build
+    test_script:
+      - $RUN cmake --build build --target test
     artifacts:
-      - path: $(PLATFORM)/bin/reaper_reapack*.so
-      - path: $(PLATFORM)/bin/test
+      - path: build/reaper_reapack*.so
 
-  - matrix: { only: [ image: *windows ] }
+  - matrix: { only: [ APPVEYOR_BUILD_WORKER_IMAGE: &windows Visual Studio 2019 ] }
     cache:
       - C:\Tools\vcpkg\installed -> vendor\vcpkg-deps.txt
     install:
-      - curl -fsSL http://gittup.org/tup/win32/tup-explicit-variant-v0.7.3-45-gcf6a829.zip -o C:\Tools\tup.zip
-      - 7z x C:\Tools\tup.zip -oC:\Tools\tup > NUL
-      - set PATH=C:\Tools\tup;%PATH%
+      - set VCPKG_ROOT=C:\Tools\vcpkg
+      - set VCPKG_DEFAULT_TRIPLET=%ARCH%-windows-static
+      - set /p reapack-deps=<vendor\vcpkg-deps.txt
+      - vcpkg install %reapack-deps%
 
-      - mklink /J vendor\vcpkg C:\Tools\vcpkg > NUL
-      - set /p vcpkg-deps=<vendor\vcpkg-deps.txt
-      - vcpkg install --triplet %PLATFORM%-windows-static %vcpkg-deps%
-    build_script: tup %PLATFORM%
-    test_script: '%PLATFORM%\bin\test'
+      - if "%ARCH%" == "x64" call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+      - if "%ARCH%" == "x86" call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+    build_script:
+      - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - cmake --build build
+    test_script:
+      - cmake --build build --target test
     artifacts:
-      - path: $(PLATFORM)\bin\reaper_reapack*.dll
-      - path: $(PLATFORM)\bin\reaper_reapack*.pdb
-      - path: $(PLATFORM)\bin\test.exe
+      - path: build\reaper_reapack*.dll
+      - path: build\reaper_reapack*.pdb
+
+environment:
+  matrix:
+    - { APPVEYOR_BUILD_WORKER_IMAGE: *windows, ARCH: x64     }
+    - { APPVEYOR_BUILD_WORKER_IMAGE: *windows, ARCH: x86     }
+    - { APPVEYOR_BUILD_WORKER_IMAGE: *linux,   ARCH: x86_64  }
+    - { APPVEYOR_BUILD_WORKER_IMAGE: *linux,   ARCH: i686    }
+
 deploy:
   provider: GitHub
   draft: true

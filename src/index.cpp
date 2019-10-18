@@ -22,7 +22,7 @@
 #include "path.hpp"
 #include "remote.hpp"
 
-#include <WDL/tinyxml/tinyxml.h>
+#include <tinyxml.h>
 
 Path Index::pathFor(const std::string &name)
 {
