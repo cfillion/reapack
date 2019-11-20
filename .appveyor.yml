@@ -6,32 +6,64 @@ before_build:
   - curl -fsSL https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -o vendor/reaper_plugin_functions.h
   - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
 
+test_script:
+  - cmake --build build --target test
+
 for:
   - matrix: { only: [ APPVEYOR_BUILD_WORKER_IMAGE: &linux Ubuntu1804 ] }
     install:
-      - if [[ "$ARCH" == "i686" ]]; then
-          export CFLAGS=-m32 CXXFLAGS=-m32;
-        fi
-
-      - docker run --name arch --rm -tid -v `pwd`:/src -w /src
-        -e CFLAGS -e CXXFLAGS -e CLICOLOR_FORCE=1 archlinux/base
-      - export RUN="docker exec arch setarch $ARCH"
-
-      - $RUN
-        pacman -Syu --noconfirm base-devel boost catch2 cmake gcc git php wget
+      - sudo sed -i '/arch=/! s/^deb/deb [arch=amd64,i386]/' /etc/apt/sources.list
+      - |-
+        awk '
+        $3 !~ /ubuntu\.com/ { next }
+        $1 == "deb" {
+          $2 = "[arch=armhf,arm64]";
+          $3 = "http://ports.ubuntu.com/ubuntu-ports/"
+        } 1' /etc/apt/sources.list | sudo dd of=/etc/apt/sources.list.d/ports.list
 
       - |-
-        if [[ "$ARCH" == "i686" ]]; then
-          $RUN sh -c $'
-            echo "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf' &&
-          $RUN \
-            pacman -Sy --noconfirm lib32-libcurl lib32-gcc-libs lib32-sqlite
-        fi
+        install-libs() {
+          local arch="$1"; shift
+          local packages=(
+            libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev zlib1g-dev
+          )
+
+          sudo dpkg --add-architecture $arch && sudo apt-get update -qq &&
+          sudo apt-get install -qq --no-install-recommends "$@" ${packages[@]/%/:$arch}
+        }
+
+      - |-
+        case $ARCH in
+        x86_64)
+          install-libs amd64
+          ;;
+        i686)
+          install-libs i386 g++-multilib &&
+          export TOOLCHAIN=cmake/linux-cross.cmake \
+                 TOOLCHAIN_PREFIX=i386-linux-gnu
+          ;;
+        armv7l)
+          install-libs armhf g++-arm-linux-gnueabihf &&
+          export TOOLCHAIN=cmake/linux-cross.cmake \
+                 TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+          ;;
+        aarch64)
+          install-libs arm64 g++-aarch64-linux-gnu &&
+          export TOOLCHAIN=cmake/linux-cross.cmake \
+                 TOOLCHAIN_PREFIX=aarch64-linux-gnu
+          ;;
+        esac
+
+      - sudo apt-get install -qq --no-install-recommends php qemu-user-binfmt
+
+      - git clone --depth 1 --branch v2.11.0 -c advice.detachedHead=false
+        https://github.com/catchorg/Catch2.git
+      - cmake Catch2 -B Catch2/build -DBUILD_TESTING=OFF
+      - sudo cmake --build Catch2/build --target install > /dev/null
     build_script:
-      - $RUN cmake -B build -DCMAKE_BUILD_TYPE=Release
-      - $RUN cmake --build build
-    test_script:
-      - $RUN cmake --build build --target test
+      - cmake -B build
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN
+      - cmake --build build
     artifacts:
       - path: build/reaper_reapack*.so
 
@@ -49,8 +81,6 @@ for:
     build_script:
       - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - cmake --build build
-    test_script:
-      - cmake --build build --target test
     artifacts:
       - path: build\reaper_reapack*.dll
       - path: build\reaper_reapack*.pdb
@@ -61,6 +91,8 @@ environment:
     - { APPVEYOR_BUILD_WORKER_IMAGE: *windows, ARCH: x86     }
     - { APPVEYOR_BUILD_WORKER_IMAGE: *linux,   ARCH: x86_64  }
     - { APPVEYOR_BUILD_WORKER_IMAGE: *linux,   ARCH: i686    }
+    - { APPVEYOR_BUILD_WORKER_IMAGE: *linux,   ARCH: armv7l  }
+    - { APPVEYOR_BUILD_WORKER_IMAGE: *linux,   ARCH: aarch64 }
 
 deploy:
   provider: GitHub
