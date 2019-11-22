@@ -31,6 +31,7 @@ if(APPLE)
   )
 
   target_compile_definitions(swell PRIVATE SWELL_APP_PREFIX=SWELL_REAPACK)
+  set_target_properties(swell PROPERTIES CXX_STANDARD 98)
 
   find_library(COCOA Cocoa)
   find_library(CARBON Carbon)
