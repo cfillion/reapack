@@ -34,7 +34,15 @@ if(APPLE)
 
   find_library(COCOA Cocoa)
   find_library(CARBON Carbon)
+  find_library(METAL Metal)
+  mark_as_advanced(COCOA CARBON METAL)
   target_link_libraries(swell PUBLIC ${COCOA} ${CARBON})
+
+  if(METAL)
+    target_link_libraries(swell PUBLIC ${METAL})
+  else()
+    target_compile_definitions(swell PRIVATE SWELL_NO_METAL)
+  endif()
 else()
   add_library(swell ${SWELL_DIR}/swell-modstub-generic.cpp)
 
