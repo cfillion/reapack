@@ -80,11 +80,6 @@ else()
     -Wno-unused-parameter -Wno-missing-field-initializers
     -Wno-unused-function -Wno-missing-braces
   )
-
-  if(APPLE)
-    target_compile_options(reapack PUBLIC -stdlib=libc++)
-    target_link_libraries(reapack c++)
-  endif()
 endif()
 
 find_package(Boost 1.56 REQUIRED)
