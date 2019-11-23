@@ -85,15 +85,23 @@ endif()
 find_package(Boost 1.56 REQUIRED)
 find_package(CURL REQUIRED)
 find_package(MiniZip REQUIRED)
-find_package(SQLite3 REQUIRED)
 find_package(Threads REQUIRED)
 find_package(TinyXML REQUIRED)
 find_package(WDL REQUIRED)
 
 target_link_libraries(reapack
-  ${CMAKE_DL_LIBS} Boost::headers CURL::libcurl MiniZip::MiniZip SQLite::SQLite3
+  ${CMAKE_DL_LIBS} Boost::headers CURL::libcurl MiniZip::MiniZip
   Threads::Threads TinyXML::TinyXML WDL::WDL
 )
+
+if(VCPKG_TOOLCHAIN)
+  # for selecting the right debug or release version
+  find_package(SQLite3 CONFIG REQUIRED)
+  target_link_libraries(reapack sqlite3)
+else()
+  find_package(SQLite3 REQUIRED)
+  target_link_libraries(reapack SQLite::SQLite3)
+endif()
 
 if(NOT APPLE AND NOT WIN32)
   find_package(OpenSSL REQUIRED COMPONENTS Crypto)
