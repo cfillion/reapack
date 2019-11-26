@@ -40,50 +40,54 @@ const Path Path::REGISTRY = Path::DATA + "registry.db";
 
 Path Path::s_root;
 
-static std::vector<std::string> Split(const std::string &input, bool *absolute)
+static std::vector<std::string> Split(const std::string &input, int *attributes)
 {
   std::vector<std::string> list;
+  *attributes = 0;
 
-  const auto append = [&list, absolute] (const std::string &part) {
-    if(part.empty() || part == DOT)
-      return;
+  size_t last = 0;
 
-#ifdef _WIN32
-    if(list.empty() && part.size() == 2 && isalpha(part[0]) && part[1] == ':')
-      *absolute = true;
-#else
-    (void)absolute;
-#endif
-
-    list.push_back(part);
-  };
-
-  size_t last = 0, size = input.size();
-
-  while(last < size) {
+  while(last < input.size()) {
     const size_t pos = input.find_first_of("\\/", last);
 
-    if(pos == std::string::npos) {
-      append(input.substr(last));
-      break;
-    }
-    else if(last + pos == 0) {
+    if(last + pos == 0) {
 #ifndef _WIN32
-      *absolute = true;
+      *attributes |= Path::Absolute;
+#endif
+      last++;
+      continue;
+    }
+    else if(last == pos) {
+#ifdef _WIN32
+      if(pos == 1)
+        *attributes |= Path::UNC | Path::Absolute;
 #endif
       last++;
       continue;
     }
 
-    append(input.substr(last, pos - last));
+    std::string part;
 
-    last = pos + 1;
+    if(pos == std::string::npos)
+      part = input.substr(last);
+    else
+      part = input.substr(last, pos - last);
+
+#ifdef _WIN32
+    if(list.empty() && part.size() == 2 && part[1] == ':' && isalpha(part[0]))
+      *attributes |= Path::Absolute;
+#endif
+
+    if(part != DOT)
+      list.push_back(part);
+
+    last += part.size() + 1;
   }
 
   return list;
 }
 
-Path::Path(const std::string &path) : m_absolute(false)
+Path::Path(const std::string &path) : m_attributes{}
 {
   append(path);
 }
@@ -93,11 +97,11 @@ void Path::append(const std::string &input, const bool traversal)
   if(input.empty())
     return;
 
-  bool absolute = false;
-  const auto &parts = Split(input, &absolute);
+  int attributes;
+  const auto &parts = Split(input, &attributes);
 
-  if(m_parts.empty() && absolute)
-    m_absolute = true;
+  if(m_parts.empty() && attributes)
+    m_attributes = attributes;
 
   for(const std::string &part : parts) {
     if(part == DOTDOT) {
@@ -111,8 +115,8 @@ void Path::append(const std::string &input, const bool traversal)
 
 void Path::append(const Path &o)
 {
-  if(m_parts.empty() && o.absolute())
-    m_absolute = true;
+  if(m_parts.empty())
+    m_attributes = o.attributes();
 
   m_parts.insert(m_parts.end(), o.m_parts.begin(), o.m_parts.end());
 }
@@ -137,8 +141,8 @@ void Path::remove(const size_t pos, size_t count)
 
   m_parts.erase(begin, end);
 
-  if(!pos && m_absolute)
-    m_absolute = false;
+  if(!pos)
+    m_attributes = 0;
 }
 
 void Path::removeLast()
@@ -177,27 +181,33 @@ std::string Path::join(const bool nativeSeparator) const
 {
   const char sep = nativeSeparator ? NATIVE_SEPARATOR : UNIX_SEPARATOR;
 
-#ifdef _WIN32
-  constexpr bool absoluteSlash = false;
-#else
-  const bool absoluteSlash = m_absolute;
-#endif
-
   std::string path;
 
+#ifndef _WIN32
+  if(test(Absolute))
+    path += sep;
+#endif
+
   for(const std::string &part : m_parts) {
-    if(!path.empty() || absoluteSlash)
+#ifdef _WIN32
+    if(!path.empty())
+#else
+    if(path.size() > test(Absolute))
+#endif
       path += sep;
 
     path += part;
   }
 
-  if(m_parts.empty() && absoluteSlash)
-    path += sep;
-
 #ifdef _WIN32
-  if(m_absolute && path.size() > MAX_PATH)
+  if(test(Absolute) && path.size() > MAX_PATH) {
     path.insert(0, "\\\\?\\");
+
+    if(test(UNC))
+      path.insert(4, "UNC\\");
+  }
+  else if(test(UNC))
+    path.insert(0, "\\\\");
 #endif
 
   return path;
@@ -205,7 +215,7 @@ std::string Path::join(const bool nativeSeparator) const
 
 bool Path::startsWith(const Path &o) const
 {
-  if(size() < o.size() || absolute() != o.absolute())
+  if(m_parts.size() < o.size() || m_attributes != o.attributes())
     return false;
 
   for(size_t i = 0; i < o.size(); i++) {
@@ -218,7 +228,7 @@ bool Path::startsWith(const Path &o) const
 
 Path Path::prependRoot() const
 {
-  return m_absolute ? *this : s_root + *this;
+  return m_attributes & Absolute ? *this : s_root + *this;
 }
 
 Path Path::removeRoot() const
@@ -233,7 +243,7 @@ Path Path::removeRoot() const
 
 bool Path::operator==(const Path &o) const
 {
-  return m_absolute == o.absolute() && m_parts == o.m_parts;
+  return m_attributes == o.attributes() && m_parts == o.m_parts;
 }
 
 bool Path::operator!=(const Path &o) const

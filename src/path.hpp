@@ -26,6 +26,11 @@ class UseRootPath;
 
 class Path {
 public:
+  enum Attribute {
+    Absolute = 1<<0,
+    UNC      = 1<<1,
+  };
+
   static const Path DATA;
   static const Path CACHE;
   static const Path CONFIG;
@@ -43,7 +48,8 @@ public:
 
   bool empty() const { return m_parts.empty(); }
   size_t size() const { return m_parts.size(); }
-  bool absolute() const { return m_absolute; }
+  int attributes() const { return m_attributes; }
+  bool test(Attribute f) const { return (m_attributes & f) != 0; }
 
   Path dirname() const;
   std::string front() const;
@@ -74,7 +80,7 @@ private:
   const std::string &at(size_t) const;
 
   std::list<std::string> m_parts;
-  bool m_absolute;
+  int m_attributes;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const Path &p)

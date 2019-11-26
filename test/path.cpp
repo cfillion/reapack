@@ -157,7 +157,7 @@ TEST_CASE("split input", M) {
 }
 
 TEST_CASE("absolute path", M) {
-  CHECK_FALSE(Path("a/b").absolute());
+  CHECK_FALSE(Path("a/b").test(Path::Absolute));
 
 #ifdef _WIN32
   const Path a("C:\\Windows\\System32");
@@ -165,7 +165,7 @@ TEST_CASE("absolute path", M) {
   const Path a("/usr/bin/zsh");
 #endif
 
-  REQUIRE(a.absolute());
+  REQUIRE(a.test(Path::Absolute));
   CHECK(a.size() == 3);
 
 #ifdef _WIN32
@@ -184,7 +184,7 @@ TEST_CASE("absolute path (root only)", M) {
   const Path a("/");
 #endif
 
-  REQUIRE(a.absolute());
+  REQUIRE(a.test(Path::Absolute));
 
 #ifdef _WIN32
   CHECK(a.size() == 1);
@@ -207,7 +207,7 @@ TEST_CASE("append absolute path to empty path", M) {
   path += abs;
 
   CHECK(path == abs);
-  REQUIRE(path.absolute());
+  REQUIRE(path.test(Path::Absolute));
 }
 
 TEST_CASE("extended absolute paths", M) {
@@ -215,11 +215,11 @@ TEST_CASE("extended absolute paths", M) {
   Path abs("C:\\");
   abs.append(std::string(260, 'a'));
 
-  CHECK(abs.absolute());
+  CHECK(abs.test(Path::Absolute));
   REQUIRE_THAT(abs.join(), StartsWith("\\\\?\\"));
 
   const Path path(std::string(500, 'a'));
-  CHECK_FALSE(path.absolute());
+  CHECK_FALSE(path.test(Path::Absolute));
 #else
   Path path("/hello");
   path.append(std::string(260, 'a'));
@@ -228,7 +228,26 @@ TEST_CASE("extended absolute paths", M) {
   REQUIRE_THAT(path.join(), !StartsWith("\\\\?\\"));
 }
 
-#ifndef _WIN32
+#ifdef _WIN32
+TEST_CASE("UNC path", M) {
+  const Path unc("\\\\FOO\\bar");
+  REQUIRE(unc.test(Path::Absolute));
+  REQUIRE(unc.test(Path::UNC));
+  CHECK(unc.size() == 2);
+
+  CHECK(unc[0] == "FOO");
+  CHECK(unc.join() == "\\\\FOO\\bar");
+}
+
+TEST_CASE("UNC path extended", M) {
+  Path unc("\\\\FOO");
+  unc.append(std::string(260, 'a'));
+
+  CHECK(unc.test(Path::Absolute));
+  CHECK(unc.test(Path::UNC));
+  REQUIRE_THAT(unc.join(), StartsWith("\\\\?\\UNC\\FOO"));
+}
+#else
 TEST_CASE("compare absolute to relative path (unix)", M) {
   REQUIRE(Path("/a/b") != Path("a/b"));
 }
@@ -350,14 +369,14 @@ TEST_CASE("remove path segments", M) {
   SECTION("remove from start") {
     path.remove(0, 1);
     REQUIRE(path == Path("b/c/d/e"));
-    REQUIRE_FALSE(path.absolute());
+    REQUIRE_FALSE(path.test(Path::Absolute));
   }
 
   SECTION("remove from middle") {
     path.remove(1, 2);
     REQUIRE(path == Path("/a/d/e"));
 #ifndef _WIN32
-    REQUIRE(path.absolute());
+    REQUIRE(path.test(Path::Absolute));
 #endif
   }
 
