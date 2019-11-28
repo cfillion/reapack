@@ -25,8 +25,7 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <cassert>
-
-bool ListView_GetScroll(HWND, POINT *); // undocumented macOS SWELL function
+#include <reaper_plugin_secrets.h>
 
 static int adjustWidth(const int points)
 {
@@ -384,22 +383,20 @@ bool ListView::headerHitTest(const int x, const int y) const
   GetWindowRect(ListView_GetHeader(handle()), &rect);
 
   const int headerHeight = rect.bottom - rect.top;
-#elif __APPLE__
-  // On macOS the ListView's zero client y coordinate is the first item's
-  // position including its scroll offset.
-  // ListView_GetScroll is not available in REAPER-provided SWELL
-  POINT scroll;
-  ListView_GetScroll(handle(), &scroll);
-
-  const int headerHeight = scroll.y;
-#else
+#elif !defined(__APPLE__)
   const int headerHeight = SWELL_GetListViewHeaderHeight(handle());
 #endif
 
   POINT point{x, y};
   ScreenToClient(handle(), &point);
 
+#ifdef __APPLE__
+  // This was broken on Linux and used a hard-coded header height on Windows
+  // Fixed in REAPER v6.03
+  return ListView_HeaderHitTest(handle(), point);
+#else
   return point.y <= headerHeight;
+#endif
 }
 
 int ListView::itemUnder(const int x, const int y, bool *overIcon) const

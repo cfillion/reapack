@@ -43,11 +43,6 @@ them separately):
 Install Boost and Catch2 using [Homebrew](https://brew.sh) (recommended).
 The build tools can be installed using `xcode-select --install` or the Xcode IDE.
 
-Apply these patches to WDL:
-
-- [optimize-listview-setitemtext](https://github.com/cfillion/WDL/commit/e2ec43b91a02cbea0494105e68eba57ffe27ca42.patch)
-- [richtext-off](https://github.com/cfillion/WDL/commit/c27fca07aa59525f45d9a2d7766ba51d6f5a34fc.patch)
-
 #### Windows
 
 MSVC can be installed with the [Build Tools for Visual Studio](
@@ -138,7 +133,7 @@ macOS 10.14 or older, Xcode 9 and the latest Clang (`brew install llvm`) are
 required for producing 32-bit builds.
 
     cmake -B build \
-      -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+      -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_OSX_ARCHITECTURES=i386 \
       -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 \
       -DCMAKE_TOOLCHAIN_FILE=cmake/brew-llvm.cmake

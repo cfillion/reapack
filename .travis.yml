@@ -9,14 +9,9 @@ install:
   - wget -nv https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -P vendor
   - wget -nv https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -P vendor
   - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
-
-  # SWELL: optimize ListView_SetItemText on macOS
-  - curl -fsSL https://github.com/cfillion/WDL/commit/e2ec43b91a02cbea0494105e68eba57ffe27ca42.patch | git -C vendor/WDL am
-  # SWELL: disable rich text in multiline textboxes on macOS
-  - curl -fsSL https://github.com/cfillion/WDL/commit/c27fca07aa59525f45d9a2d7766ba51d6f5a34fc.patch | git -C vendor/WDL am
 script:
   - cmake -B build
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_OSX_ARCHITECTURES="$ARCH"
     -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
     -DCMAKE_TOOLCHAIN_FILE=cmake/brew-llvm.cmake

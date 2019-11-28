@@ -24,6 +24,7 @@
 
 #define REAPERAPI_IMPLEMENT
 #include <reaper_plugin_functions.h>
+#include <reaper_plugin_secrets.h>
 
 #define REQUIRED_API(name) {reinterpret_cast<void **>(&name), #name, true}
 #define OPTIONAL_API(name) {reinterpret_cast<void **>(&name), #name, false}
@@ -43,6 +44,10 @@ static bool loadAPI(void *(*getFunc)(const char *))
     REQUIRED_API(ShowMessageBox),
 
     OPTIONAL_API(AddRemoveReaScript),        // v5.12
+
+#ifdef __APPLE__
+    REQUIRED_API(ListView_HeaderHitTest),    // v5.1, undocumented
+#endif
   };
 
   for(const ApiFunc &func : funcs) {
