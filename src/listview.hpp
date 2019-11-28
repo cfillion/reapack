@@ -110,7 +110,7 @@ public:
   Row *createRow(void *data = nullptr);
   Row *row(size_t index) const { return m_rows[index].get(); }
   void removeRow(int index);
-  int rowCount() const { return (int)m_rows.size(); }
+  int rowCount() const { return static_cast<int>(m_rows.size()); }
   int visibleRowCount() const;
   bool empty() const { return m_rows.empty(); }
 
@@ -138,7 +138,7 @@ public:
   const Column &column(int index) const { return m_cols[index]; }
   void resizeColumn(int index, int width);
   int columnWidth(int index) const;
-  int columnCount() const { return (int)m_cols.size(); }
+  int columnCount() const { return static_cast<int>(m_cols.size()); }
 
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setFilter(const std::string &);

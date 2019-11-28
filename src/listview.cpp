@@ -33,8 +33,8 @@ static int adjustWidth(const int points)
 #ifdef _WIN32
   if(points < 1)
     return points;
-  else
-    return (int)ceil(points * 0.863); // magic number to make pretty sizes...
+  else // magic number to make pretty sizes...
+    return static_cast<int>(std::ceil(points * 0.863));
 #else
   return points;
 #endif
@@ -179,7 +179,7 @@ void ListView::sort()
 {
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)
   {
-    const int indexDiff = (int)(aRow - bRow);
+    const int indexDiff = static_cast<int>(aRow - bRow);
 
     ListView *view = reinterpret_cast<ListView *>(param);
 
@@ -198,7 +198,7 @@ void ListView::sort()
     return ret ? ret : indexDiff;
   };
 
-  ListView_SortItems(handle(), compare, (LPARAM)this);
+  ListView_SortItems(handle(), compare, reinterpret_cast<LPARAM>(this));
 
   m_dirty = (m_dirty | NeedReindexFlag) & ~NeedSortFlag;
 }
@@ -272,7 +272,7 @@ void ListView::filter()
   }
 
   std::sort(hide.begin(), hide.end());
-  for(int i = 0; i < (int)hide.size(); ++i) {
+  for(int i = 0; i < static_cast<int>(hide.size()); ++i) {
     ListView_DeleteItem(handle(), hide[i] - i);
     m_dirty |= NeedReindexFlag;
   }
@@ -556,7 +556,7 @@ int ListView::translateBack(const int internalIndex) const
   item.mask |= LVIF_PARAM;
 
   if(ListView_GetItem(handle(), &item))
-    return (int)item.lParam;
+    return static_cast<int>(item.lParam);
   else
     return -1;
 }
