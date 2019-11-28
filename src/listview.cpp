@@ -377,20 +377,51 @@ int ListView::selectionSize() const
   return ListView_GetSelectedCount(handle());
 }
 
-int ListView::itemUnderMouse(bool *overIcon) const
+bool ListView::headerHitTest(const int x, const int y) const
 {
-  LVHITTESTINFO info{};
-  GetCursorPos(&info.pt);
-  ScreenToClient(handle(), &info.pt);
-  ListView_SubItemHitTest(handle(), &info);
+#ifdef _WIN32
+  RECT rect;
+  GetWindowRect(ListView_GetHeader(handle()), &rect);
+
+  const int headerHeight = rect.bottom - rect.top;
+#elif __APPLE__
+  // On macOS the ListView's zero client y coordinate is the first item's
+  // position including its scroll offset.
+  // ListView_GetScroll is not available in REAPER-provided SWELL
+  POINT scroll;
+  ListView_GetScroll(handle(), &scroll);
+
+  const int headerHeight = scroll.y;
+#else
+  const int headerHeight = SWELL_GetListViewHeaderHeight(handle());
+#endif
+
+  POINT point{x, y};
+  ScreenToClient(handle(), &point);
+
+  return point.y <= headerHeight;
+}
+
+int ListView::itemUnder(const int x, const int y, bool *overIcon) const
+{
+  LVHITTESTINFO test{{x, y}};
+  ScreenToClient(handle(), &test.pt);
+  ListView_SubItemHitTest(handle(), &test);
 
   if(overIcon) {
-    *overIcon = info.iSubItem == 0 &&
-      (info.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON)) != 0 &&
-      (info.flags & LVHT_ONITEMLABEL) == 0;
+    *overIcon = test.iSubItem == 0 &&
+      (test.flags & (LVHT_ONITEMICON | LVHT_ONITEMSTATEICON)) != 0 &&
+      (test.flags & LVHT_ONITEMLABEL) == 0;
   }
 
-  return translateBack(info.iItem);
+  return translateBack(test.iItem);
+}
+
+int ListView::itemUnderMouse(bool *overIcon) const
+{
+  POINT point;
+  GetCursorPos(&point);
+  return itemUnder(point.x, point.y, overIcon);
 }
 
 int ListView::scroll() const
@@ -440,36 +471,19 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 {
   SetFocus(handle());
 
-  POINT point{x, y};
-  ScreenToClient(handle(), &point);
+  const bool keyboardTrigger = x < 0;
 
-#ifdef _WIN32
-  HWND header = ListView_GetHeader(handle());
-  RECT rect;
-  GetWindowRect(header, &rect);
-  const int headerHeight = rect.bottom - rect.top;
-#else
-  // point.y is negative on macOS when hovering the header
-  constexpr int headerHeight = 0;
-
-  #ifdef __APPLE__
-    POINT scroll;
-    ListView_GetScroll(handle(), &scroll);
-    point.y -= scroll.y;
-  #endif
-#endif
-
-  if(point.y < headerHeight && x != -1) {
+  if(!keyboardTrigger && headerHitTest(x, y)) {
     if(m_customizable) // show menu only if header is customizable
       headerMenu(x, y);
     return true;
   }
 
-  int index = itemUnderMouse();
-
 #ifdef ListView_GetItemPosition // unsuported by SWELL
+  int index;
+
   // adjust the context menu's position when using Shift+F10 on Windows
-  if(x == -1) {
+  if(keyboardTrigger) {
     index = currentIndex();
 
     // find the location of the current item or of the first item
@@ -483,6 +497,10 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
     x = std::max(controlRect.left, std::min(itemPos.x, controlRect.right));
     y = std::max(controlRect.top, std::min(itemPos.y, controlRect.bottom));
   }
+  else
+    index = itemUnder(x, y);
+#else
+  const int index = itemUnder(x, y);
 #endif
 
   Menu menu;

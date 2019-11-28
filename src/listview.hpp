@@ -120,6 +120,8 @@ public:
   void enableIcons();
 
   int currentIndex() const;
+  bool headerHitTest(int x, int y) const;
+  int itemUnder(int x, int y, bool *overIcon = nullptr) const;
   int itemUnderMouse(bool *overIcon = nullptr) const;
 
   int scroll() const;
