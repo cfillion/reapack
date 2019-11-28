@@ -26,7 +26,7 @@
 #  include <windows.h>
 #  include <commctrl.h>
 #else
-#  include <swell.h>
+#  include <swell/swell.h>
 #endif
 
 class IconList {

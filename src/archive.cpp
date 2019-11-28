@@ -30,9 +30,9 @@
 #include <iomanip>
 #include <sstream>
 
-#include <zlib/zip.h>
-#include <zlib/unzip.h>
-#include <zlib/ioapi.h>
+#include <zip.h>
+#include <unzip.h>
+#include <ioapi.h>
 
 static const Path ARCHIVE_TOC("toc");
 static const size_t BUFFER_SIZE = 4096;

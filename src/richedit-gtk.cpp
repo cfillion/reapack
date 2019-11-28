@@ -17,9 +17,7 @@
 
 #include "richedit.hpp"
 
-#ifdef SWELL_TARGET_GDK
-
-// Starting here and onward is the Linux implementation of RichEdit
+// This is the Linux implementation of RichEdit
 // See also richedit.mm and richedit-win32.cpp
 
 void RichEdit::Init()
@@ -48,5 +46,3 @@ bool RichEdit::setRichText(const std::string &)
 {
   return false;
 }
-
-#endif

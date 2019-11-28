@@ -21,7 +21,7 @@
 #include "win32.hpp"
 
 #ifndef _WIN32
-#  include <swell.h>
+#  include <swell/swell.h>
 #endif
 
 #ifdef _WIN32

@@ -1,18 +1,11 @@
 ---
-language: c++
+language: cpp
 os: osx
-osx_image: xcode9.2 # 10.12 with custom kext loading allowed (for osxfuse)
+osx_image: xcode9.4 # macOS 10.13
 env:
-  - PLATFORM=x64
-  - PLATFORM=x86
+  - ARCH=x86_64
+  - ARCH=i386
 install:
-  - brew update
-  - brew cask install osxfuse
-  - brew install llvm tup
-  - export PATH="/usr/local/opt/llvm/bin:$PATH"
-
-  - wget -nv https://github.com/catchorg/Catch2/raw/master/single_include/catch2/catch.hpp -P vendor/catch2
-
   - wget -nv https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -P vendor
   - wget -nv https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -P vendor
   - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
@@ -23,7 +16,20 @@ install:
   - curl -fsSL https://github.com/cfillion/WDL/commit/45ca4c819d4aaaed98540b8e5125085c05044786.patch | git -C vendor/WDL am
   # SWELL: disable rich text in multiline textboxes on macOS
   - curl -fsSL https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch | git -C vendor/WDL am
-script: tup $PLATFORM && $PLATFORM/bin/test
+script:
+  - cmake -B build
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    -DCMAKE_OSX_ARCHITECTURES="$ARCH"
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
+    -DCMAKE_TOOLCHAIN_FILE=cmake/brew-llvm.cmake
+  - cmake --build build --target all test
+addons:
+  homebrew:
+    packages:
+      - catch2
+      - cmake
+      - llvm
+    update: true
 deploy:
   provider: releases
   name: $TRAVIS_TAG
@@ -34,7 +40,7 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: O7kvtWqx0hsVzWev3qzNxf9CuctG76I7dXmn4IG10AFkKmot+QT9V1OARqLhOLj/QSuPWQY7X/hSPuSLqcRTweADWfOl7uKvBd38KKfEXSVfRNRgDzCTOKYmCUAzL3WFB5wGTWIP47/4GPAiqhtLriejbbMCcF6b4diZ3rD4rZN/4BI85wXh3mID0fD4i2cSzAx2ONn4I3xIAiRhigJQ0VRp3v4wMGB0hGPM3fRDMzDuGEMo3CAgyhO/ldh9QPOS4F5LNOM3prBSYmFaARQO46vmhF4hI+ydRZrntGhL5NryEtsZVqONv+Pq6z8TnCOH7uPYE9uHiU3K/s4XpYRdSMbrZfRylmTEo8p66KLjfDvMlMBmwmvsTIE8z/w9XuUskhSSq7eNYyX1QxaIiBh+o0ho/FIbLuEZK56dFCO/6yUY9LC23/+iMdPluMdQNzTPjvVqI1AnZQeBqQ2hZG9jp96Rblptz3lJFMDo3hoGNbPHE6iiCW7S0RvncGIRt5JL8BuQwyowIKqBg4eEx+74aYX7JvVLQpfzw9btr6f56k9N7OFP2tU2eNEnOWTjmkqsicU3nAp1Zji66+ncOhfJTJSIc5xNJGmVfRBSIAMYcjfo+1sxoM0NYyODXrwVt5rMUGdmuIutC7K8IcuCIOBTG924exXpBAcCYUaXd2iewss=
-  file: 'x*/bin/reaper_reapack*.dylib'
+  file: build/reaper_reapack*.dylib
   file_glob: true
   on:
     tags: true

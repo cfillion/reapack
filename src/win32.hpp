@@ -27,7 +27,7 @@
 #  include <windows.h>
 #else
 #  define L(str) str
-#  include <swell-types.h>
+#  include <swell/swell-types.h>
 #endif
 
 namespace Win32 {

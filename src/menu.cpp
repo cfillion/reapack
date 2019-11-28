@@ -24,7 +24,7 @@
 #endif
 
 #ifndef _WIN32
-#  include <swell.h>
+#  include <swell/swell.h>
 #endif
 
 #include <reaper_plugin_functions.h>

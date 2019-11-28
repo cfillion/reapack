@@ -20,7 +20,7 @@
 #include "errors.hpp"
 
 #include <sstream>
-#include <WDL/tinyxml/tinyxml.h>
+#include <tinyxml.h>
 
 static void LoadMetadataV1(TiXmlElement *, Metadata *);
 static void LoadCategoryV1(TiXmlElement *, Index *);

@@ -23,7 +23,7 @@
 #ifdef _WIN32
 #  include <windows.h>
 #else
-#  include <swell-types.h>
+#  include <swell/swell-types.h>
 #endif
 
 class Menu {
