@@ -475,6 +475,13 @@ bool Dialog::onKeyDown(int, int)
 void Dialog::onResize()
 {
   m_resizer.onResize();
+
+#ifdef __APPLE__
+  // Fix for wrong control positions after a sudden change of window size
+  // SWELL has code to do this when some mysterious isOpaque property is set.
+  // See https://forum.cockos.com/showthread.php?t=187585.
+  InvalidateRect(m_handle, nullptr, false);
+#endif
 }
 
 void Dialog::onClose()
