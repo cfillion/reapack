@@ -584,23 +584,24 @@ void ListView::headerMenu(const int x, const int y)
   enum { ACTION_RESTORE = 800 };
 
   Menu menu;
+  menu.disable(menu.addAction("Visible columns:", 0));
 
   for(int i = 0; i < columnCount(); i++) {
     const auto id = menu.addAction(m_cols[i].label.c_str(), i | (1 << 8));
 
-    if(columnWidth(id))
+    if(columnWidth(i))
       menu.check(id);
   }
 
   menu.addSeparator();
   menu.addAction("Reset columns", ACTION_RESTORE);
 
-  const int id = menu.show(x, y, handle());
+  const int cmd = menu.show(x, y, handle());
 
-  if(id == ACTION_RESTORE)
+  if(cmd == ACTION_RESTORE)
     resetColumns();
-  else if(id >> 8 == 1) {
-    const int col = id & 0xff;
+  else if(cmd >> 8 == 1) {
+    const int col = cmd & 0xff;
     resizeColumn(col, columnWidth(col) ? 0 : m_cols[col].width);
   }
 }
