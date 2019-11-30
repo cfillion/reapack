@@ -138,11 +138,11 @@ void Menu::setEnabled(const bool enabled, const UINT index)
 {
   MENUITEMINFO mii{};
   mii.cbSize = sizeof(MENUITEMINFO);
+  mii.fMask |= MIIM_STATE;
 
   if(!GetMenuItemInfo(m_handle, index, true, &mii))
     return;
 
-  mii.fMask |= MIIM_STATE;
   mii.fState |= enabled ? MFS_ENABLED : MFS_DISABLED;
 
   SetMenuItemInfo(m_handle, index, true, &mii);
