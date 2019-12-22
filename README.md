@@ -19,8 +19,7 @@ Software requirements:
 
 Put the REAPER extension SDK into the `vendor` directory:
 
-- reaper_plugin.h from
-  [reaper-oss/sws](https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h)
+- [reaper_plugin.h](https://landoleet.org/dev/reaper_plugin.h)
 - reaper_plugin_functions.h from the REAPER action
   "[developer] Write C++ API functions header"
 

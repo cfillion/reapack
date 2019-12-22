@@ -40,9 +40,8 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/reaper_plugin.h")
   message(FATAL_ERROR
     "reaper_plugin.h cannot be found in ${CMAKE_CURRENT_SOURCE_DIR}/vendor.\n"
 
-    "The latest version can be downloaded from the SWS repository rather than "
-    "the REAPER SDK."
-    "https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h"
+    "The latest version can be downloaded from Landoleet: "
+    "https://landoleet.org/dev/reaper_plugin.h"
   )
 endif()
 
