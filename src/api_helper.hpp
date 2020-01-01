@@ -74,7 +74,7 @@ void *InvokeReaScriptAPI(void **argv, int argc)
                                                                                 \
   APIFunc API::name { #name,                                                    \
     reinterpret_cast<void *>(&API_##name),                                      \
-    reinterpret_cast<void *>(&InvokeReaScriptAPI<API_##name>),                  \
+    reinterpret_cast<void *>(&InvokeReaScriptAPI<&API_##name>),                 \
     reinterpret_cast<void *>(const_cast<char *>(                                \
       #type "\0"                                                                \
       BOOST_PP_SEQ_FOR_EACH_I(DOCARGS, ARG_TYPE, args) "\0"                     \
