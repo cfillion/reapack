@@ -13,7 +13,7 @@ install:
   # SWELL: optimize ListView_SetItemText on macOS
   - curl -fsSL https://github.com/cfillion/WDL/commit/a6d7f802762e5e9d9833829bab83696e0db50de6.patch | git -C vendor/WDL am
   # SWELL: disable rich text in multiline textboxes on macOS
-  - curl -fsSL https://github.com/cfillion/WDL/commit/af9df173570edbb1d022045a7036d8d3296977b6.patch | git -C vendor/WDL am
+  - curl -fsSL https://github.com/cfillion/WDL/commit/0812a52d9d7fbb4b6e4dc267466f1a6844e3d069.patch | git -C vendor/WDL am
 script:
   - cmake -B build
     -DCMAKE_BUILD_TYPE=RelWithDebInfo
