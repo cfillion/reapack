@@ -33,6 +33,7 @@ them separately):
 - [Boost](https://www.boost.org/) (1.56 or later)
 - [Catch2](https://github.com/catchorg/Catch2)
 - [libcurl](https://curl.haxx.se/libcurl/)
+- [libxml2](http://www.xmlsoft.org/)
 - [OpenSSL](https://www.openssl.org/) or compatible
 - [SQLite](https://www.sqlite.org/)
 - [zlib](https://www.zlib.net/)

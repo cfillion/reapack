@@ -31,7 +31,7 @@
 class Index;
 class Path;
 class Remote;
-class TiXmlElement;
+class XmlNode;
 struct NetworkOpts;
 
 typedef std::shared_ptr<const Index> IndexPtr;
@@ -59,7 +59,7 @@ public:
   const std::vector<const Package *> &packages() const { return m_packages; }
 
 private:
-  static void loadV1(TiXmlElement *, Index *);
+  static void loadV1(XmlNode, Index *);
 
   std::string m_name;
   Metadata m_metadata;

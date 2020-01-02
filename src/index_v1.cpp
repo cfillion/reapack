@@ -18,181 +18,140 @@
 #include "index.hpp"
 
 #include "errors.hpp"
+#include "xml.hpp"
 
 #include <sstream>
-#include <tinyxml.h>
 
-static void LoadMetadataV1(TiXmlElement *, Metadata *);
-static void LoadCategoryV1(TiXmlElement *, Index *);
-static void LoadPackageV1(TiXmlElement *, Category *);
-static void LoadVersionV1(TiXmlElement *, Package *);
-static void LoadSourceV1(TiXmlElement *, Version *);
+static void LoadMetadataV1(XmlNode , Metadata *);
+static void LoadCategoryV1(XmlNode , Index *);
+static void LoadPackageV1(XmlNode , Category *);
+static void LoadVersionV1(XmlNode , Package *);
+static void LoadSourceV1(XmlNode , Version *);
 
-void Index::loadV1(TiXmlElement *root, Index *ri)
+void Index::loadV1(XmlNode root, Index *ri)
 {
   if(ri->name().empty()) {
-    if(const char *name = root->Attribute("name"))
-      ri->setName(name);
+    if(const XmlString &name = root.attribute("name"))
+      ri->setName(*name);
   }
 
-  TiXmlElement *node = root->FirstChildElement("category");
-
-  while(node) {
+  for(XmlNode node = root.firstChild("category");
+      node; node = node.nextSibling("category"))
     LoadCategoryV1(node, ri);
 
-    node = node->NextSiblingElement("category");
-  }
-
-  node = root->FirstChildElement("metadata");
-
-  if(node)
+  if(XmlNode node = root.firstChild("metadata"))
     LoadMetadataV1(node, ri->metadata());
 }
 
-void LoadMetadataV1(TiXmlElement *meta, Metadata *md)
+void LoadMetadataV1(XmlNode meta, Metadata *md)
 {
-  TiXmlElement *node = meta->FirstChildElement("description");
+  XmlNode node = meta.firstChild("description");
 
   if(node) {
-    if(const char *rtf = node->GetText())
-      md->setAbout(rtf);
+    if(const XmlString &rtf = node.text())
+      md->setAbout(*rtf);
   }
 
-  node = meta->FirstChildElement("link");
+  node = meta.firstChild("link");
 
-  while(node) {
-    const char *rel = node->Attribute("rel");
-    const char *url = node->Attribute("href");
-    const char *name = node->GetText();
+  for(node = meta.firstChild("link"); node; node = node.nextSibling("link")) {
+    const XmlString &rel  = node.attribute("rel"),
+                    &url  = node.attribute("href"),
+                    &name = node.text();
 
-    if(!rel) rel = "";
-    if(!name) {
-      if(!url) url = "";
-      name = url;
-    }
-    else if(!url) url = name;
+    std::string effectiveName{name ? *name : url.value_or("")};
 
-    md->addLink(Metadata::getLinkType(rel), {name, url});
-
-    node = node->NextSiblingElement("link");
+    md->addLink(Metadata::getLinkType(rel.value_or("")),
+      {effectiveName, url.value_or(effectiveName.c_str())});
   }
 }
 
-void LoadCategoryV1(TiXmlElement *catNode, Index *ri)
+void LoadCategoryV1(XmlNode catNode, Index *ri)
 {
-  const char *name = catNode->Attribute("name");
-  if(!name) name = "";
+  const XmlString &name = catNode.attribute("name");
 
-  Category *cat = new Category(name, ri);
+  Category *cat = new Category(name.value_or(""), ri);
   std::unique_ptr<Category> ptr(cat);
 
-  TiXmlElement *packNode = catNode->FirstChildElement("reapack");
-
-  while(packNode) {
+  for(XmlNode packNode = catNode.firstChild("reapack");
+      packNode; packNode = packNode.nextSibling("reapack"))
     LoadPackageV1(packNode, cat);
-
-    packNode = packNode->NextSiblingElement("reapack");
-  }
 
   if(ri->addCategory(cat))
     ptr.release();
 }
 
-void LoadPackageV1(TiXmlElement *packNode, Category *cat)
+void LoadPackageV1(XmlNode packNode, Category *cat)
 {
-  const char *type = packNode->Attribute("type");
-  if(!type) type = "";
+  const XmlString &type = packNode.attribute("type"),
+                  &name = packNode.attribute("name");
 
-  const char *name = packNode->Attribute("name");
-  if(!name) name = "";
-
-  const char *desc = packNode->Attribute("desc");
-  if(!desc) desc = "";
-
-  Package *pack = new Package(Package::getType(type), name, cat);
+  Package *pack = new Package(Package::getType(type.value_or("")), name.value_or(""), cat);
   std::unique_ptr<Package> ptr(pack);
 
-  pack->setDescription(desc);
+  if(const XmlString &desc = packNode.attribute("desc"))
+    pack->setDescription(*desc);
 
-  TiXmlElement *node = packNode->FirstChildElement("version");
-
-  while(node) {
+  for(XmlNode node = packNode.firstChild("version");
+      node; node = node.nextSibling("version"))
     LoadVersionV1(node, pack);
 
-    node = node->NextSiblingElement("version");
-  }
-
-  node = packNode->FirstChildElement("metadata");
-
-  if(node)
+  if(XmlNode node = packNode.firstChild("metadata"))
     LoadMetadataV1(node, pack->metadata());
 
   if(cat->addPackage(pack))
     ptr.release();
 }
 
-void LoadVersionV1(TiXmlElement *verNode, Package *pkg)
+void LoadVersionV1(XmlNode verNode, Package *pkg)
 {
-  const char *name = verNode->Attribute("name");
-  if(!name) name = "";
-
-  Version *ver = new Version(name, pkg);
+  const XmlString &name = verNode.attribute("name");
+  Version *ver = new Version(name.value_or(""), pkg);
   std::unique_ptr<Version> ptr(ver);
 
-  const char *author = verNode->Attribute("author");
-  if(author) ver->setAuthor(author);
+  if(const XmlString &author = verNode.attribute("author"))
+    ver->setAuthor(*author);
 
-  const char *time = verNode->Attribute("time");
-  if(time) ver->setTime(time);
+  if(const XmlString &time = verNode.attribute("time"))
+    ver->setTime(*time);
 
-  TiXmlElement *node = verNode->FirstChildElement("source");
+  XmlNode node = verNode.firstChild("source");
 
   while(node) {
     LoadSourceV1(node, ver);
-    node = node->NextSiblingElement("source");
+    node = node.nextSibling("source");
   }
 
-  node = verNode->FirstChildElement("changelog");
+  node = verNode.firstChild("changelog");
 
   if(node) {
-    if(const char *changelog = node->GetText())
-      ver->setChangelog(changelog);
+    if(const XmlString &changelog = node.text())
+      ver->setChangelog(*changelog);
   }
 
   if(pkg->addVersion(ver))
     ptr.release();
 }
 
-void LoadSourceV1(TiXmlElement *node, Version *ver)
+void LoadSourceV1(XmlNode node, Version *ver)
 {
-  const char *platform = node->Attribute("platform");
-  if(!platform) platform = "all";
+  const XmlString &platform = node.attribute("platform"),
+                  &type     = node.attribute("type"),
+                  &file     = node.attribute("file"),
+                  &checksum = node.attribute("hash"),
+                  &main     = node.attribute("main"),
+                  &url      = node.text();
 
-  const char *type = node->Attribute("type");
-  if(!type) type = "";
-
-  const char *file = node->Attribute("file");
-  if(!file) file = "";
-
-  const char *checksum = node->Attribute("hash");
-  if(!checksum) checksum = "";
-
-  const char *main = node->Attribute("main");
-  if(!main) main = "";
-
-  const char *url = node->GetText();
-  if(!url) url = "";
-
-  Source *src = new Source(file, url, ver);
+  Source *src = new Source(file.value_or(""), url.value_or(""), ver);
   std::unique_ptr<Source> ptr(src);
 
-  src->setChecksum(checksum);
-  src->setPlatform(platform);
-  src->setTypeOverride(Package::getType(type));
+  src->setChecksum(checksum.value_or(""));
+  src->setPlatform(platform.value_or("all"));
+  src->setTypeOverride(Package::getType(type.value_or("")));
 
   int sections = 0;
   std::string section;
-  std::istringstream mainStream(main);
+  std::istringstream mainStream(main.value_or(""));
   while(std::getline(mainStream, section, '\x20'))
     sections |= Source::getSection(section.c_str());
   src->setSections(sections);

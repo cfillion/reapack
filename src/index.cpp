@@ -21,8 +21,10 @@
 #include "filesystem.hpp"
 #include "path.hpp"
 #include "remote.hpp"
+#include "xml.hpp"
 
-#include <tinyxml.h>
+#include <cstring>
+#include <fstream>
 
 Path Index::pathFor(const std::string &name)
 {
@@ -31,31 +33,28 @@ Path Index::pathFor(const std::string &name)
 
 IndexPtr Index::load(const std::string &name, const char *data)
 {
-  TiXmlDocument doc;
+  std::unique_ptr<std::istream> stream;
 
   if(data)
-    doc.Parse(data);
+    stream = std::make_unique<std::istringstream>(data);
   else {
-    FILE *file = FS::open(pathFor(name));
-
-    if(!file)
+    stream = std::make_unique<std::ifstream>();
+    if(!FS::open(*dynamic_cast<std::ifstream *>(stream.get()), pathFor(name)))
       throw reapack_error(FS::lastError());
-
-    doc.LoadFile(file);
-    fclose(file);
   }
 
-  if(doc.ErrorId())
-    throw reapack_error(doc.ErrorDesc());
+  XmlDocument doc(*stream);
 
-  TiXmlHandle docHandle(&doc);
-  TiXmlElement *root = doc.RootElement();
+  if(!doc)
+    throw reapack_error(doc.error());
 
-  if(!root || strcmp(root->Value(), "index"))
+  const XmlNode &root = doc.root();
+
+  if(!root || strcmp(root.name(), "index"))
     throw reapack_error("invalid index");
 
   int version = 0;
-  root->Attribute("version", &version);
+  root.attribute("version", &version);
 
   if(!version)
     throw reapack_error("index version not found");

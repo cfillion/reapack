@@ -28,9 +28,7 @@ TEST_CASE("load index from raw data", M) {
       Index::load({}, "<index>\n");
       FAIL();
     }
-    catch(const reapack_error &e) {
-      REQUIRE(std::string{e.what()} == "Error reading end tag.");
-    }
+    catch(const reapack_error &) {}
   }
 }
 
@@ -49,9 +47,7 @@ TEST_CASE("broken index", M) {
     IndexPtr ri = Index::load("broken");
     FAIL();
   }
-  catch(const reapack_error &e) {
-    REQUIRE(std::string{e.what()} == "Error reading end tag.");
-  }
+  catch(const reapack_error &) {}
 }
 
 TEST_CASE("wrong root tag name", M) {

@@ -25,7 +25,7 @@ for:
         install-libs() {
           local arch="$1"; shift
           local packages=(
-            libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev zlib1g-dev
+            libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev libxml2-dev zlib1g-dev
           )
 
           sudo dpkg --add-architecture $arch && sudo apt-get update -qq &&

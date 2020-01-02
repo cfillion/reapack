@@ -27,6 +27,7 @@ add_executable(tests EXCLUDE_FROM_ALL
   time.cpp
   version.cpp
   win32.cpp
+  xml.cpp
 )
 
 # std::uncaught_exceptions is unavailable prior to macOS 10.12
