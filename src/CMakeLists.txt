@@ -1,6 +1,5 @@
 find_package(Boost 1.56 REQUIRED)
 find_package(CURL       REQUIRED)
-find_package(LibXML2    REQUIRED)
 find_package(MiniZip    REQUIRED)
 find_package(Threads    REQUIRED)
 find_package(WDL        REQUIRED)
@@ -14,20 +13,14 @@ if(NOT WIN32)
 endif()
 
 if(VCPKG_TOOLCHAIN)
-  # vcpkg does not setup a usable target for libxml2
-  set_target_properties(LibXml2::LibXml2 PROPERTIES
-    IMPORTED_LOCATION "${LIBXML2_LIBRARY}"
-    MAP_IMPORTED_CONFIG_RELWITHDEBINFO ""
-    MAP_IMPORTED_CONFIG_MINSIZEREL ""
-    INTERFACE_INCLUDE_DIRECTORIES "${LIBXML2_INCLUDE_DIR}"
-  )
-  target_link_libraries(LibXml2::LibXml2 INTERFACE ${LIBXML2_LIBRARIES})
-
   # required for selecting the right debug or release version
   find_package(SQLite3 CONFIG REQUIRED)
   add_library(SQLite::SQLite3 INTERFACE IMPORTED)
   target_link_libraries(SQLite::SQLite3 INTERFACE sqlite3)
+
+  find_package(tinyxml2 CONFIG REQUIRED)
 else()
+  find_package(LibXml2 REQUIRED)
   find_package(SQLite3 REQUIRED)
 endif()
 
@@ -85,7 +78,7 @@ add_library(reapack OBJECT
   transaction.cpp
   version.cpp
   win32.cpp
-  xml.cpp
+  xml_$<IF:$<BOOL:${LIBXML2_FOUND}>,libxml2,tinyxml2>.cpp
 )
 
 target_compile_features(reapack PUBLIC cxx_std_17)
@@ -106,8 +99,9 @@ else()
 endif()
 
 target_link_libraries(reapack
-  ${CMAKE_DL_LIBS} Boost::headers CURL::libcurl LibXml2::LibXml2
-  MiniZip::MiniZip SQLite::SQLite3 Threads::Threads WDL::WDL
+  ${CMAKE_DL_LIBS} Boost::headers CURL::libcurl MiniZip::MiniZip
+  SQLite::SQLite3 Threads::Threads WDL::WDL
+  $<IF:$<BOOL:${LIBXML2_FOUND}>,LibXml2::LibXml2,tinyxml2::tinyxml2>
 )
 
 if(OPENSSL_FOUND)

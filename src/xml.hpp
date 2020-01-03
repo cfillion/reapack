@@ -19,17 +19,15 @@
 #define REAPACK_XML_HPP
 
 #include <istream>
+#include <memory>
 
 class XmlNode;
 class XmlString;
 
-struct _xmlDoc;
-using xmlDoc = _xmlDoc;
-struct _xmlNode;
-using xmlNode = _xmlNode;
-using xmlChar = unsigned char;
-
 class XmlDocument {
+  struct Impl;
+  using ImplPtr = std::unique_ptr<Impl>;
+
 public:
   XmlDocument(std::istream &);
   XmlDocument(const XmlDocument &) = delete;
@@ -42,17 +40,21 @@ public:
   XmlNode root() const;
 
 private:
-  xmlDoc *m_doc;
+  ImplPtr m_impl;
 };
 
 class XmlNode {
+  friend XmlDocument;
+  struct Impl;
+  using ImplPtr = std::unique_ptr<Impl>;
+
 public:
-  XmlNode(xmlNode *);
+  XmlNode(void *);
   XmlNode(const XmlNode &);
   ~XmlNode();
 
-  operator bool() const;
   XmlNode &operator=(const XmlNode &);
+  operator bool() const;
 
   const char *name() const;
   XmlString attribute(const char *name) const;
@@ -63,22 +65,22 @@ public:
   XmlNode nextSibling(const char *element = nullptr) const;
 
 private:
-  xmlNode *m_node;
+  ImplPtr m_impl;
 };
 
 class XmlString {
 public:
-  XmlString(xmlChar *);
+  XmlString(const void *);
   XmlString(const XmlString &) = delete;
   XmlString(XmlString &&) = default;
   ~XmlString();
 
-  operator bool() const;
-  const char *operator *() const;
-  const char *value_or(const char *fallback) const;
+  operator bool() const { return m_str != nullptr; }
+  const char *operator *() const { return reinterpret_cast<const char *>(m_str); }
+  const char *value_or(const char *fallback) const { return m_str ? **this : fallback; }
 
 private:
-  xmlChar *m_str;
+  const void *m_str;
 };
 
 #endif

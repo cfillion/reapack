@@ -19,12 +19,14 @@
 
 #include <cstdio>
 #include <cstring>
-#include <fstream>
 
 #include <libxml/parser.h>
 
 constexpr int LIBXML2_OPTIONS =
   XML_PARSE_NOBLANKS | XML_PARSE_NOERROR | XML_PARSE_NOWARNING;
+
+struct XmlDocument::Impl { xmlDoc *doc;   };
+struct XmlNode::Impl     { xmlNode *node; };
 
 static int readCallback(void *context, char *buffer, const int size)
 {
@@ -33,11 +35,11 @@ static int readCallback(void *context, char *buffer, const int size)
   return static_cast<int>(bytes);
 }
 
-XmlDocument::XmlDocument(std::istream &stream)
+XmlDocument::XmlDocument(std::istream &stream) : m_impl{new Impl}
 {
   xmlResetLastError();
 
-  m_doc =
+  m_impl->doc =
     xmlReadIO(&readCallback, nullptr, static_cast<void *>(&stream),
       nullptr, nullptr, LIBXML2_OPTIONS);
 }
@@ -46,13 +48,13 @@ XmlDocument::XmlDocument(XmlDocument &&) = default;
 
 XmlDocument::~XmlDocument()
 {
-  if(m_doc)
-    xmlFreeDoc(m_doc);
+  if(m_impl->doc)
+    xmlFreeDoc(m_impl->doc);
 }
 
 XmlDocument::operator bool() const
 {
-  return m_doc && xmlGetLastError() == nullptr;
+  return m_impl->doc && xmlGetLastError() == nullptr;
 }
 
 const char *XmlDocument::error() const
@@ -74,28 +76,32 @@ const char *XmlDocument::error() const
 
 XmlNode XmlDocument::root() const
 {
-  return xmlDocGetRootElement(m_doc);
+  return xmlDocGetRootElement(m_impl->doc);
 }
 
-XmlNode::XmlNode(xmlNode *node) : m_node(node) {}
-XmlNode::XmlNode(const XmlNode &) = default;
+XmlNode::XmlNode(void *node) : m_impl(new Impl{static_cast<xmlNode *>(node)}) {}
+XmlNode::XmlNode(const XmlNode &copy) { *this = copy; }
 XmlNode::~XmlNode() = default;
+
+XmlNode &XmlNode::operator=(const XmlNode &other)
+{
+  m_impl.reset(new Impl(*other.m_impl));
+  return *this;
+}
 
 XmlNode::operator bool() const
 {
-  return m_node != nullptr;
+  return m_impl->node != nullptr;
 }
-
-XmlNode &XmlNode::operator=(const XmlNode &) = default;
 
 const char *XmlNode::name() const
 {
-  return reinterpret_cast<const char *>(m_node->name);
+  return reinterpret_cast<const char *>(m_impl->node->name);
 }
 
 XmlString XmlNode::attribute(const char *name) const
 {
-  return xmlGetProp(m_node, reinterpret_cast<const xmlChar *>(name));
+  return xmlGetProp(m_impl->node, reinterpret_cast<const xmlChar *>(name));
 }
 
 bool XmlNode::attribute(const char *name, int *output) const
@@ -109,12 +115,12 @@ bool XmlNode::attribute(const char *name, int *output) const
 
 XmlString XmlNode::text() const
 {
-  return m_node->children ? xmlNodeGetContent(m_node) : nullptr;
+  return m_impl->node->children ? xmlNodeGetContent(m_impl->node) : nullptr;
 }
 
 XmlNode XmlNode::firstChild(const char *element) const
 {
-  for(xmlNode *node = m_node->children; node; node = node->next) {
+  for(xmlNode *node = m_impl->node->children; node; node = node->next) {
     if(node->type == XML_ELEMENT_NODE && (!element ||
         !xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>(element))))
       return node;
@@ -125,7 +131,7 @@ XmlNode XmlNode::firstChild(const char *element) const
 
 XmlNode XmlNode::nextSibling(const char *element) const
 {
-  for(xmlNode *node = m_node->next; node; node = node->next) {
+  for(xmlNode *node = m_impl->node->next; node; node = node->next) {
     if(node->type == XML_ELEMENT_NODE && (!element ||
         !xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>(element))))
       return node;
@@ -134,24 +140,5 @@ XmlNode XmlNode::nextSibling(const char *element) const
   return nullptr;
 }
 
-XmlString::XmlString(xmlChar *str) : m_str(str) {}
-
-XmlString::~XmlString()
-{
-  xmlFree(m_str);
-}
-
-XmlString::operator bool() const
-{
-  return m_str != nullptr;
-}
-
-const char *XmlString::operator *() const
-{
-  return reinterpret_cast<const char *>(m_str);
-}
-
-const char *XmlString::value_or(const char *fallback) const
-{
-  return m_str ? **this : fallback;
-}
+XmlString::XmlString(const void *str) : m_str(str) {}
+XmlString::~XmlString() { xmlFree(const_cast<void *>(m_str)); }
