@@ -51,7 +51,7 @@ IndexPtr Index::load(const std::string &name, const char *data)
   TiXmlHandle docHandle(&doc);
   TiXmlElement *root = doc.RootElement();
 
-  if(strcmp(root->Value(), "index"))
+  if(!root || strcmp(root->Value(), "index"))
     throw reapack_error("invalid index");
 
   int version = 0;

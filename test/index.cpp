@@ -34,6 +34,14 @@ TEST_CASE("load index from raw data", M) {
   }
 }
 
+TEST_CASE("no root node", M) {
+  try {
+    Index::load({}, R"(<?xml verison="1.0 encoding="utf-8"?>)");
+    FAIL();
+  }
+  catch(const reapack_error &) {}
+}
+
 TEST_CASE("broken index", M) {
   UseRootPath root(RIPATH);
 
