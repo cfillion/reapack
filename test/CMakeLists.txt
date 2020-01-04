@@ -1,3 +1,6 @@
+find_package(Catch2 REQUIRED)
+mark_as_advanced(Catch2_DIR)
+
 add_executable(tests EXCLUDE_FROM_ALL
   action.cpp
   api.cpp
@@ -28,12 +31,6 @@ add_executable(tests EXCLUDE_FROM_ALL
 
 # std::uncaught_exceptions is unavailable prior to macOS 10.12
 target_compile_definitions(tests PRIVATE CATCH_CONFIG_NO_CPP17_UNCAUGHT_EXCEPTIONS)
-
 target_include_directories(tests PRIVATE
-  ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/vendor
-)
-
-find_package(Catch2 REQUIRED)
-mark_as_advanced(Catch2_DIR)
-
+  ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/vendor)
 target_link_libraries(tests Catch2::Catch2 reapack)

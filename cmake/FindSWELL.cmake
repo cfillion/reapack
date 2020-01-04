@@ -1,4 +1,4 @@
-if(WIN32 OR SWELL_FOUND)
+if(SWELL_FOUND)
   return()
 endif()
 

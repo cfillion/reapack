@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-      CACHE STRING "")
+    CACHE STRING "")
 endif()
 
 if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
@@ -123,27 +123,22 @@ if(RUBY_FOUND)
 endif()
 
 add_library(reaper_reapack SHARED)
-
 set_target_properties(reaper_reapack PROPERTIES
   PREFIX "" # disable the "lib" prefix
   OUTPUT_NAME "reaper_reapack-${ARCH_NAME}"
 )
-
 add_subdirectory(src)
-add_subdirectory(test)
-
 target_link_libraries(reaper_reapack reapack)
 
+add_subdirectory(test)
 add_custom_target(test
   COMMAND $<TARGET_FILE:tests>
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   USES_TERMINAL
 )
-
 add_dependencies(test tests)
 
 set(REAPER_USER_PLUGINS "UserPlugins")
-
 install(TARGETS reaper_reapack
   COMPONENT ReaPack
   RUNTIME DESTINATION "${REAPER_USER_PLUGINS}" # Windows .dll
