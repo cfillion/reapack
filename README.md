@@ -44,8 +44,8 @@ The build tools can be installed using `xcode-select --install` or the Xcode IDE
 
 Apply these patches to WDL:
 
-- [optimize-listview-setitemtext](https://github.com/cfillion/WDL/commit/a6d7f802762e5e9d9833829bab83696e0db50de6.patch)
-- [richtext-off](https://github.com/cfillion/WDL/commit/0812a52d9d7fbb4b6e4dc267466f1a6844e3d069.patch)
+- [optimize-listview-setitemtext](https://github.com/cfillion/WDL/commit/e2ec43b91a02cbea0494105e68eba57ffe27ca42.patch)
+- [richtext-off](https://github.com/cfillion/WDL/commit/c27fca07aa59525f45d9a2d7766ba51d6f5a34fc.patch)
 
 #### Windows
 
