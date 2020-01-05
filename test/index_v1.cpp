@@ -133,7 +133,7 @@ TEST_CASE("default source platform", M) {
 
   CHECK(ri->packages().size() == 1);
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()
-    == Platform::GenericPlatform);
+    == Platform::Generic);
 }
 
 TEST_CASE("version changelog", M) {
@@ -167,13 +167,13 @@ TEST_CASE("full index", M) {
 
   REQUIRE(ver->sources().size() == 2);
   const Source *source1 = ver->source(0);
-  REQUIRE(source1->platform() == Platform::GenericPlatform);
+  REQUIRE(source1->platform() == Platform::Generic);
   REQUIRE(source1->file() == "test.lua");
   REQUIRE(source1->sections() == Source::MainSection);
   REQUIRE(source1->url() == "https://google.com/");
 
   const Source *source2 = ver->source(1);
-  REQUIRE(source2->platform() == Platform::GenericPlatform);
+  REQUIRE(source2->platform() == Platform::Generic);
   REQUIRE(source2->file() == "background.png");
   REQUIRE_FALSE(source2->sections() == Source::MainSection);
   REQUIRE(source2->url() == "http://cfillion.tk/");
@@ -261,11 +261,11 @@ TEST_CASE("read source platform", M) {
   REQUIRE(ri->packages().size() == 1);
 
 #ifdef __APPLE__
-  const auto expected = Platform::DarwinPlatform;
+  const auto expected = Platform::Darwin_Any;
 #elif _WIN32
-  const auto expected = Platform::WindowsPlatform;
+  const auto expected = Platform::Windows_Any;
 #elif __linux__
-  const auto expected = Platform::LinuxPlatform;
+  const auto expected = Platform::Linux_Any;
 #endif
 
   REQUIRE(ri->category(0)->package(0)->version(0)->source(0)->platform()

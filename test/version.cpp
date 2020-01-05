@@ -265,7 +265,7 @@ TEST_CASE("drop sources for unknown platforms", M) {
   MAKE_PACKAGE;
   Version ver("1.0", &pkg);
   Source src("a", "b", &ver);
-  src.setPlatform(Platform::UnknownPlatform);
+  src.setPlatform(Platform::Unknown);
   REQUIRE_FALSE(ver.addSource(&src));
   REQUIRE(ver.sources().size() == 0);
 }

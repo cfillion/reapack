@@ -20,22 +20,56 @@
 #include <cstring>
 #include <utility>
 
+const Platform::Enum Platform::Current = Platform::
+#ifdef __APPLE__
+#  ifdef __x86_64__
+  Darwin_x86_64
+#  elif  __i386__
+  Darwin_i386
+#  else
+  Unknown
+#  endif
+
+#elif __linux__
+#  ifdef __x86_64__
+  Linux_x86_64
+#  elif  __i686__
+  Linux_i686
+#  else
+  Unknown
+#  endif
+
+#elif _WIN32
+#  ifdef _WIN64
+  Windows_x64
+#  else
+  Windows_x86
+#  endif
+
+#else
+  Unknown
+#endif
+;
+
+static_assert(Platform::Current != Platform::Unknown,
+  "The current operating system or architecture is not supported.");
+
 auto Platform::parse(const char *platform) -> Enum
 {
   constexpr std::pair<const char *, Enum> map[] {
-    {"all",      GenericPlatform},
+    { "all",           Generic       },
 
-    {"windows",  WindowsPlatform},
-    {"win32",    Win32Platform},
-    {"win64",    Win64Platform},
+    { "darwin",        Darwin_Any    },
+    { "darwin32",      Darwin_i386   },
+    { "darwin64",      Darwin_x86_64 },
 
-    {"darwin",   DarwinPlatform},
-    {"darwin32", Darwin32Platform},
-    {"darwin64", Darwin64Platform},
+    { "linux",         Linux_Any     },
+    { "linux32",       Linux_i686    },
+    { "linux64",       Linux_x86_64  },
 
-    {"linux",    LinuxPlatform},
-    {"linux32",  Linux32Platform},
-    {"linux64",  Linux64Platform},
+    { "windows",       Windows_Any   },
+    { "win32",         Windows_x86   },
+    { "win64",         Windows_x64   },
   };
 
   for(auto &[key, value] : map) {
@@ -43,40 +77,10 @@ auto Platform::parse(const char *platform) -> Enum
       return value;
   }
 
-  return UnknownPlatform;
+  return Unknown;
 }
 
 bool Platform::test() const
 {
-  switch(m_value) {
-  case GenericPlatform:
-
-#ifdef __APPLE__
-  case DarwinPlatform:
-#  ifdef __x86_64__
-  case Darwin64Platform:
-#  else
-  case Darwin32Platform:
-#  endif
-
-#elif __linux__
-  case LinuxPlatform:
-#  ifdef __x86_64__
-  case Linux64Platform:
-#  else
-  case Linux32Platform:
-#  endif
-
-#elif _WIN32
-  case WindowsPlatform:
-#  ifdef _WIN64
-  case Win64Platform:
-#  else
-  case Win32Platform:
-#  endif
-#endif
-    return true;
-  default:
-    return false;
-  }
+  return (m_value & Current) != Unknown;
 }

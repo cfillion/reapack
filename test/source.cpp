@@ -18,13 +18,13 @@ TEST_CASE("source platform", M) {
   MAKE_VERSION;
 
   Source src({}, "url", &ver);
-  REQUIRE(src.platform() == Platform::GenericPlatform);
+  REQUIRE(src.platform() == Platform::Generic);
 
-  src.setPlatform(Platform::UnknownPlatform);
-  REQUIRE(src.platform() == Platform::UnknownPlatform);
+  src.setPlatform(Platform::Unknown);
+  REQUIRE(src.platform() == Platform::Unknown);
 
-  src.setPlatform(Platform::WindowsPlatform);
-  REQUIRE(src.platform() == Platform::WindowsPlatform);
+  src.setPlatform(Platform::Windows_Any);
+  REQUIRE(src.platform() == Platform::Windows_Any);
 }
 
 TEST_CASE("source type override", M) {

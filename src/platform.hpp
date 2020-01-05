@@ -21,23 +21,26 @@
 class Platform {
 public:
   enum Enum {
-    UnknownPlatform,
-    GenericPlatform,
+    Unknown,
 
-    WindowsPlatform,
-    Win32Platform,
-    Win64Platform,
+    Darwin_i386   = 1<<0,
+    Darwin_x86_64 = 1<<1,
+    Darwin_Any    = Darwin_i386 | Darwin_x86_64,
 
-    DarwinPlatform,
-    Darwin32Platform,
-    Darwin64Platform,
+    Linux_i686    = 1<<2,
+    Linux_x86_64  = 1<<3,
+    Linux_Any     = Linux_i686 | Linux_x86_64,
 
-    LinuxPlatform,
-    Linux32Platform,
-    Linux64Platform,
+    Windows_x86   = 1<<4,
+    Windows_x64   = 1<<5,
+    Windows_Any   = Windows_x86 | Windows_x64,
+
+    Generic       = Darwin_Any | Linux_Any | Windows_Any,
   };
 
-  Platform() : m_value(GenericPlatform) {}
+  static const Enum Current;
+
+  Platform() : m_value(Generic) {}
   Platform(Enum val) : m_value(val) {}
   Platform(const char *str) : m_value(parse(str)) {}
 
