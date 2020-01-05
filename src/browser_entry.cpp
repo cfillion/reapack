@@ -200,12 +200,11 @@ void Browser::Entry::fillMenu(Menu &menu) const
       const UINT actionIndex = versionMenu.addAction(
         ver->name().toString().c_str(), --verIndex | (ACTION_VERSION << 8));
 
-      if(target ? *target == ver : ver == current) {
-        if(target && ver != latest)
-          menu.check(versionMenuIndex);
+      if(target && *target == ver && ver != latest && ver != current)
+        menu.check(versionMenuIndex);
 
+      if(target ? *target == ver : ver == current)
         versionMenu.checkRadio(actionIndex);
-      }
     }
   }
 
