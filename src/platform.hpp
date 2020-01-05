@@ -29,10 +29,12 @@ public:
 
     Linux_i686    = 1<<2,
     Linux_x86_64  = 1<<3,
-    Linux_Any     = Linux_i686 | Linux_x86_64,
+    Linux_armv7l  = 1<<4,
+    Linux_aarch64 = 1<<5,
+    Linux_Any     = Linux_i686 | Linux_x86_64 | Linux_armv7l | Linux_aarch64,
 
-    Windows_x86   = 1<<4,
-    Windows_x64   = 1<<5,
+    Windows_x86   = 1<<6,
+    Windows_x64   = 1<<7,
     Windows_Any   = Windows_x86 | Windows_x64,
 
     Generic       = Darwin_Any | Linux_Any | Windows_Any,

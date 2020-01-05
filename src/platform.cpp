@@ -35,6 +35,10 @@ const Platform::Enum Platform::Current = Platform::
   Linux_x86_64
 #  elif  __i686__
   Linux_i686
+#  elif  __ARM_ARCH_7A__
+  Linux_armv7l
+#  elif  __aarch64__
+  Linux_aarch64
 #  else
   Unknown
 #  endif
@@ -66,6 +70,8 @@ auto Platform::parse(const char *platform) -> Enum
     { "linux",         Linux_Any     },
     { "linux32",       Linux_i686    },
     { "linux64",       Linux_x86_64  },
+    { "linux-armv7l",  Linux_armv7l  },
+    { "linux-aarch64", Linux_aarch64 },
 
     { "windows",       Windows_Any   },
     { "win32",         Windows_x86   },

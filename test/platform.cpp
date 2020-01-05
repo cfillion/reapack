@@ -35,6 +35,8 @@ TEST_CASE("platform from string", M) {
     REQUIRE(Platform("linux")         == Platform::Linux_Any);
     REQUIRE(Platform("linux32")       == Platform::Linux_i686);
     REQUIRE(Platform("linux64")       == Platform::Linux_x86_64);
+    REQUIRE(Platform("linux-armv7l")  == Platform::Linux_armv7l);
+    REQUIRE(Platform("linux-aarch64") == Platform::Linux_aarch64);
   }
 }
 
@@ -47,6 +49,8 @@ TEST_CASE("test platform", M) {
     {Platform::Linux_Any,     false},
     {Platform::Linux_x86_64,  false},
     {Platform::Linux_i686,    false},
+    {Platform::Linux_armv7l,  false},
+    {Platform::Linux_aarch64, false},
     {Platform::Windows_Any,   false},
     {Platform::Windows_x64,   false},
     {Platform::Windows_x86,   false},
@@ -74,9 +78,23 @@ TEST_CASE("test platform", M) {
 #  ifdef __x86_64__
     {Platform::Linux_i686,    false},
     {Platform::Linux_x86_64,  true },
+    {Platform::Linux_armv7l,  false},
+    {Platform::Linux_aarch64, false},
 #  elif __i686__
     {Platform::Linux_i686,    true },
     {Platform::Linux_x86_64,  false},
+    {Platform::Linux_armv7l,  false},
+    {Platform::Linux_aarch64, false},
+#  elif __ARM_ARCH_7A__
+    {Platform::Linux_i686,    false},
+    {Platform::Linux_x86_64,  false},
+    {Platform::Linux_armv7l,  true },
+    {Platform::Linux_aarch64, false},
+#  elif __aarch64__
+    {Platform::Linux_i686,    false},
+    {Platform::Linux_x86_64,  false},
+    {Platform::Linux_armv7l,  false},
+    {Platform::Linux_aarch64, true },
 #  else
 #    error Untested architecture
 #  endif
@@ -88,6 +106,8 @@ TEST_CASE("test platform", M) {
     {Platform::Linux_Any,     false},
     {Platform::Linux_x86_64,  false},
     {Platform::Linux_i686,    false},
+    {Platform::Linux_armv7l,  false},
+    {Platform::Linux_aarch64, false},
 
     {Platform::Windows_Any,   true },
 #  ifdef _WIN64
