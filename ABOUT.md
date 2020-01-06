@@ -1,6 +1,6 @@
 # ReaPack: Package Manager for REAPER
 
-This is **ReaPack v[[REAPACK_VERSION]]** built on [[REAPACK_BUILDTIME]]
+This is **ReaPack v[[REAPACK_VERSION]]** [[REAPACK_REVISION]] built on [[REAPACK_BUILDTIME]]
 
 ```
 Copyright (C) 2015-2020  Christian Fillion

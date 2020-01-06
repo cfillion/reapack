@@ -40,9 +40,6 @@ class Transaction;
 
 class ReaPack {
 public:
-  static const char *VERSION;
-  static const char *BUILDTIME;
-
   static ReaPack *instance() { return s_instance; }
   static Path resourcePath();
 

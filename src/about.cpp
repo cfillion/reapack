@@ -176,8 +176,14 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   std::string aboutText(metadata->about());
 
   if(substitution) {
-    boost::replace_all(aboutText, "[[REAPACK_VERSION]]", ReaPack::VERSION);
-    boost::replace_all(aboutText, "[[REAPACK_BUILDTIME]]", ReaPack::BUILDTIME);
+    constexpr std::pair<const char *, const char *> replacements[] {
+      { "[[REAPACK_VERSION]]",   REAPACK_VERSION       },
+      { "[[REAPACK_REVISION]]",  REAPACK_REVISION      },
+      { "[[REAPACK_BUILDTIME]]", __DATE__ " " __TIME__ },
+    };
+
+    for(const auto &replacement : replacements)
+      boost::replace_all(aboutText, replacement.first, replacement.second);
   }
 
   if(aboutText.empty())

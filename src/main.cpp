@@ -51,7 +51,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
       Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr, String::format(
         "ReaPack v%s is incompatible with this version of REAPER.\n\n"
         "(Unable to import the following API function: %s)",
-        ReaPack::VERSION, func.name
+        REAPACK_VERSION, func.name
       ).c_str(), "ReaPack: Missing REAPER feature", MB_OK);
 
       return false;
@@ -77,7 +77,7 @@ static void menuHook(const char *name, HMENU handle, const int f)
   menu.addAction("&Import repositories...", "_REAPACK_IMPORT");
   menu.addAction("&Manage repositories...", "_REAPACK_MANAGE");
   menu.addSeparator();
-  menu.addAction(String::format("&About ReaPack v%s", ReaPack::VERSION), "_REAPACK_ABOUT");
+  menu.addAction(String::format("&About ReaPack v%s", REAPACK_VERSION), "_REAPACK_ABOUT");
 }
 
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)

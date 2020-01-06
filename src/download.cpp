@@ -68,7 +68,7 @@ DownloadContext::DownloadContext()
 
   char userAgent[64];
   snprintf(userAgent, sizeof(userAgent), "ReaPack/%s REAPER/%s",
-    ReaPack::VERSION, GetAppVersion());
+    REAPACK_VERSION, GetAppVersion());
 
   curl_easy_setopt(m_curl, CURLOPT_USERAGENT, userAgent);
   curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1);

@@ -36,9 +36,6 @@
 
 #include <reaper_plugin_functions.h>
 
-const char *ReaPack::VERSION = "1.2.2";
-const char *ReaPack::BUILDTIME = __DATE__ " " __TIME__;
-
 ReaPack *ReaPack::s_instance = nullptr;
 
 #ifdef _WIN32
@@ -384,7 +381,7 @@ void ReaPack::registerSelf()
   Index ri("ReaPack");
   Category cat("Extensions", &ri);
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
-  Version ver(VERSION, &pkg);
+  Version ver(REAPACK_VERSION, &pkg);
   ver.setAuthor("cfillion");
   ver.addSource(new Source(REAPACK_FILE, "dummy url", &ver));
 

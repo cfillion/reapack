@@ -24,6 +24,20 @@ else()
   find_package(SQLite3 REQUIRED)
 endif()
 
+file(STRINGS ../Extensions/ReaPack.ext VERSION REGEX "^@version")
+string(SUBSTRING ${VERSION} 9 -1 VERSION)
+
+find_package(Git)
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+    OUTPUT_VARIABLE GIT_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+else()
+  set(GIT_COMMIT "nogit")
+endif()
+
 add_library(reapack OBJECT
   about.cpp
   action.cpp
@@ -83,7 +97,10 @@ add_library(reapack OBJECT
 
 target_compile_features(reapack PUBLIC cxx_std_17)
 target_compile_definitions(reapack PRIVATE
-  REAPACK_FILE="$<TARGET_FILE_NAME:reaper_reapack>")
+  REAPACK_FILE="$<TARGET_FILE_NAME:reaper_reapack>"
+  REAPACK_VERSION="${VERSION}"
+  REAPACK_REVISION="${GIT_COMMIT}"
+)
 target_include_directories(reapack PRIVATE
   ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_CURRENT_BINARY_DIR})
 
