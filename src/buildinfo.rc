@@ -1,0 +1,34 @@
+#include "buildinfo.hpp"
+
+#include <winver.h>
+
+#define VERSION_ARRAY \
+  REAPACK_VERSION_MAJOR, REAPACK_VERSION_MINOR, REAPACK_VERSION_PATCH
+
+// https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION    VERSION_ARRAY
+  PRODUCTVERSION VERSION_ARRAY
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "ProductName",     "ReaPack"
+      VALUE "CompanyName",     "https://reapack.com"
+      VALUE "FileDescription", "REAPER plug-in extension"
+      VALUE "FileVersion",      REAPACK_VERSION "-" REAPACK_REVISION
+      VALUE "ProductVersion",   REAPACK_VERSION
+      VALUE "OriginalFilename", REAPACK_FILENAME
+      VALUE "InternalName",     REAPACK_BASENAME
+      VALUE "LegalCopyright",   REAPACK_COPYRIGHT
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    // Links to the block in the StringFileInfo structure above
+    VALUE "Translation", 0x0409, 0x04B0
+  END
+END

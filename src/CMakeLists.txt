@@ -40,8 +40,14 @@ set(REAPACK_FILENAME "${REAPACK_BASENAME}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 file(STRINGS ../Extensions/ReaPack.ext REAPACK_VERSION REGEX "^@version")
 string(SUBSTRING ${REAPACK_VERSION} 9 -1 REAPACK_VERSION)
+string(REGEX REPLACE "[^0-9]+" ";" VERSION_LIST ${REAPACK_VERSION})
+list(TRANSFORM VERSION_LIST REPLACE "[^0-9]" "")
+list(GET VERSION_LIST 0 REAPACK_VERSION_MAJOR)
+list(GET VERSION_LIST 1 REAPACK_VERSION_MINOR)
+list(GET VERSION_LIST 2 REAPACK_VERSION_PATCH)
 
 string(TIMESTAMP REAPACK_BUILDTIME "%b %d %Y %H:%M:%S" UTC)
+file(STRINGS ../ABOUT.md REAPACK_COPYRIGHT REGEX "^Copyright")
 
 configure_file(buildinfo.hpp.in buildinfo.hpp)
 
@@ -107,6 +113,7 @@ target_include_directories(reapack PRIVATE
   ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_CURRENT_BINARY_DIR})
 
 if(WIN32)
+  target_sources(reapack PRIVATE buildinfo.rc)
   target_compile_options(reapack PUBLIC /W3 /WX /wd4996)
   target_link_libraries(reapack Bcrypt Comctl32 Comdlg32 Gdi32 Shell32 User32)
 else()
