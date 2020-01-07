@@ -17,6 +17,7 @@
 
 #include "download.hpp"
 
+#include "buildinfo.hpp"
 #include "filesystem.hpp"
 #include "hash.hpp"
 #include "reapack.hpp"

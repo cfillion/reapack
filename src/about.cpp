@@ -18,6 +18,7 @@
 #include "about.hpp"
 
 #include "browser.hpp"
+#include "buildinfo.hpp"
 #include "config.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
@@ -177,9 +178,9 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
 
   if(substitution) {
     constexpr std::pair<const char *, const char *> replacements[] {
-      { "[[REAPACK_VERSION]]",   REAPACK_VERSION       },
-      { "[[REAPACK_REVISION]]",  REAPACK_REVISION      },
-      { "[[REAPACK_BUILDTIME]]", __DATE__ " " __TIME__ },
+      { "[[REAPACK_VERSION]]",   REAPACK_VERSION   },
+      { "[[REAPACK_REVISION]]",  REAPACK_REVISION  },
+      { "[[REAPACK_BUILDTIME]]", REAPACK_BUILDTIME },
     };
 
     for(const auto &replacement : replacements)

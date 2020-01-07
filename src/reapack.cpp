@@ -19,6 +19,7 @@
 
 #include "about.hpp"
 #include "api.hpp"
+#include "buildinfo.hpp"
 #include "config.hpp"
 #include "download.hpp"
 #include "errors.hpp"
@@ -383,7 +384,7 @@ void ReaPack::registerSelf()
   Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
   Version ver(REAPACK_VERSION, &pkg);
   ver.setAuthor("cfillion");
-  ver.addSource(new Source(REAPACK_FILE, "dummy url", &ver));
+  ver.addSource(new Source(REAPACK_FILENAME, "dummy url", &ver));
 
   try {
     Registry reg(Path::REGISTRY.prependRoot());

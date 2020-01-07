@@ -16,6 +16,7 @@
  */
 
 #include "api.hpp"
+#include "buildinfo.hpp"
 #include "errors.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
@@ -85,7 +86,7 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   Path expected;
   expected.append(ReaPack::resourcePath());
   expected.append("UserPlugins");
-  expected.append(REAPACK_FILE);
+  expected.append(REAPACK_FILENAME);
 
 #ifdef _WIN32
   Win32::char_type self[MAX_PATH]{};
