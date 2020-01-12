@@ -17,13 +17,8 @@ Software requirements:
 - C++17 compiler (MSVC on Windows)
 - PHP (Linux and macOS only)
 
-Put the REAPER extension SDK into the `vendor` directory:
-
-- [reaper_plugin.h](https://landoleet.org/dev/reaper_plugin.h)
-- reaper_plugin_functions.h from the REAPER action
-  "[developer] Write C++ API functions header"
-
-Clone [WDL](http://www.cockos.com/wdl/): `git clone https://github.com/justinfrankel/WDL.git vendor/WDL`
+Clone the repository and submodules:
+`git clone --recursive https://github.com/cfillion/reapack.git`.
 
 #### Linux
 

@@ -2,9 +2,7 @@
 version: "{build}-{branch}"
 
 before_build:
-  - curl -fsSL https://github.com/reaper-oss/sws/raw/master/reaper/reaper_plugin.h -o vendor/reaper_plugin.h
-  - curl -fsSL https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h -o vendor/reaper_plugin_functions.h
-  - git clone -q --depth 1 https://github.com/justinfrankel/WDL.git vendor/WDL
+  - git submodule update --init
 
 test_script:
   - cmake --build build --target test
