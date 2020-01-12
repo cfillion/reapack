@@ -30,6 +30,12 @@
 
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+  // On Windows WM_DESTROY is emitted in place of WM_INITDIALOG
+  // if the dialog resource is invalid (eg. because of an unloaded dll).
+  //
+  // When this happens neither lParam nor GWLP_USERDATA will contain
+  // a pointer to the Dialog instance, so there is nothing we can do.
+
   Dialog *dlg = reinterpret_cast<Dialog *>(
     msg == WM_INITDIALOG ? lParam : GetWindowLongPtr(handle, GWLP_USERDATA)
   );
@@ -67,11 +73,6 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
       dlg->onResize();
     break;
   case WM_DESTROY:
-    // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG
-    // if the dialog resource is invalid (eg. because of an unloaded dll).
-    //
-    // When this happens, neither lParam nor GWLP_USERDATA will contain
-    // a pointer to the Dialog instance, so there is nothing we can do.
     dlg->onClose();
     break;
   };
@@ -167,7 +168,8 @@ void Dialog::close(const INT_PTR result)
     break;
   case Modeless:
     onClose();
-    m_closeHandler(result);
+    if(m_closeHandler)
+      m_closeHandler(result);
     break;
   }
 }

@@ -53,9 +53,11 @@ public:
   };
 
   template<class T, class... Args>
-  static std::unique_ptr<T> Create(REAPER_PLUGIN_HINSTANCE instance, HWND parent, Args&&... args)
+  static std::unique_ptr<T> Create(REAPER_PLUGIN_HINSTANCE instance,
+    HWND parent, const CloseHandler &closeHandler, Args&&... args)
   {
     auto dlg = std::make_unique<T>(args...);
+    dlg->m_closeHandler = closeHandler;
     dlg->init(instance, parent, Dialog::Modeless);
 
     return dlg;
@@ -105,8 +107,6 @@ public:
 
   void restoreState(Serializer::Data &);
   void saveState(Serializer::Data &) const;
-
-  void setCloseHandler(const CloseHandler &cb) { m_closeHandler = cb; }
 
 protected:
   enum Modifiers {

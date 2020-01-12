@@ -211,9 +211,9 @@ void ReaPack::manageRemotes()
     return;
   }
 
-  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow);
+  m_manager = Dialog::Create<Manager>(m_instance, m_mainWindow,
+    [=](INT_PTR) { m_manager.reset(); });
   m_manager->show();
-  m_manager->setCloseHandler([=](INT_PTR) { m_manager.reset(); });
 }
 
 Remote ReaPack::remote(const std::string &name) const
@@ -250,8 +250,8 @@ About *ReaPack::about(const bool instantiate)
   else if(!instantiate)
     return nullptr;
 
-  m_about = Dialog::Create<About>(m_instance, m_mainWindow);
-  m_about->setCloseHandler([=](INT_PTR) { m_about.reset(); });
+  m_about = Dialog::Create<About>(m_instance, m_mainWindow,
+    [=](INT_PTR) { m_about.reset(); });
 
   return m_about.get();
 }
@@ -261,9 +261,9 @@ Browser *ReaPack::browsePackages()
   if(m_browser)
     m_browser->setFocus();
   else {
-    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow);
+    m_browser = Dialog::Create<Browser>(m_instance, m_mainWindow,
+      [=](INT_PTR) { m_browser.reset(); });
     m_browser->refresh();
-    m_browser->setCloseHandler([=](INT_PTR) { m_browser.reset(); });
   }
 
   return m_browser.get();
@@ -289,7 +289,8 @@ Transaction *ReaPack::setupTransaction()
   }
 
   assert(!m_progress);
-  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow, m_tx->threadPool());
+  m_progress = Dialog::Create<Progress>(m_instance, m_mainWindow,
+    nullptr, m_tx->threadPool());
 
   m_tx->onFinish >> [=] {
     m_progress.reset();
