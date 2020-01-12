@@ -124,10 +124,8 @@ protected:
     if(m_controls.count(id))
       return nullptr;
 
-    HWND handle = getControl(id);
-
-    T *ctrl = new T(handle, args...);
-    m_controls[id] = ctrl;
+    T *ctrl = new T(getControl(id), args...);
+    m_controls.emplace(id, ctrl);
 
     return ctrl;
   }
@@ -154,7 +152,8 @@ private:
   HWND m_parent;
   HWND m_handle;
 
-  std::map<int, Control *> m_controls;
+  using ControlPtr = std::unique_ptr<Control>;
+  std::map<int, ControlPtr> m_controls;
   std::set<int> m_timers;
 
   CloseHandler m_closeHandler;

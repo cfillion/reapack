@@ -21,7 +21,6 @@
 #include "win32.hpp"
 
 #include <algorithm>
-#include <boost/range/adaptor/map.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <reaper_plugin_functions.h>
 
@@ -117,12 +116,8 @@ Dialog::~Dialog()
 {
   plugin_register("-accelerator", &m_accel);
 
-  const std::set<int> timers = m_timers; // make an immutable copy
-  for(const int id : timers)
-    stopTimer(id);
-
-  for(Control *control : m_controls | boost::adaptors::map_values)
-    delete control;
+  for(const int id : m_timers)
+    KillTimer(m_handle, id); // not using stopTimer to avoid modifying m_timers
 
   // Unregistering the instance right now before DestroyWindow prevents WM_DESTROY
   // from calling the default implementation of onClose (because we're in the
@@ -429,7 +424,9 @@ void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 
 void Dialog::onContextMenu(HWND target, const int x, const int y)
 {
-  for(Control *ctrl : m_controls | boost::adaptors::map_values) {
+  for(const auto &[id, ctrl] : m_controls) {
+    (void)id;
+
     if(!IsWindowVisible(ctrl->handle()))
       continue;
 
