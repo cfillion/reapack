@@ -119,13 +119,15 @@ Dialog::~Dialog()
   for(const int id : m_timers)
     KillTimer(m_handle, id); // not using stopTimer to avoid modifying m_timers
 
-  // Unregistering the instance right now before DestroyWindow prevents WM_DESTROY
-  // from calling the default implementation of onClose (because we're in the
-  // destructor – no polymorphism here). Instead, the right onClose is called
-  // directly by close() for modeless dialogs, or by the OS/SWELL for modal dialogs.
-  SetWindowLongPtr(m_handle, GWLP_USERDATA, 0);
-
-  DestroyWindow(m_handle);
+  if(m_mode == Modeless) {
+    // Unregistering the instance pointer right now before DestroyWindow
+    // prevents WM_DESTROY from calling the default implementation of onClose
+    // (because we're in the destructor – no polymorphism allowed here).
+    // Instead, the right onClose has been called directly by close() for
+    // modeless dialogs, or by the OS/SWELL for modal dialogs.
+    SetWindowLongPtr(m_handle, GWLP_USERDATA, 0);
+    DestroyWindow(m_handle);
+  }
 }
 
 INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
