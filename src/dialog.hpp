@@ -144,7 +144,6 @@ protected:
 private:
   static WDL_DLGRET Proc(HWND, UINT, WPARAM, LPARAM);
   static int HandleKey(MSG *, accelerator_register_t *);
-  static std::map<HWND, Dialog *> s_instances;
 
   const int m_template;
   POINT m_minimumSize;

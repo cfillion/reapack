@@ -29,46 +29,36 @@
 #  include <windowsx.h>
 #endif
 
-std::map<HWND, Dialog *> Dialog::s_instances;
-
 WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-  Dialog *dlg;
+  Dialog *dlg = reinterpret_cast<Dialog *>(
+    msg == WM_INITDIALOG ? lParam : GetWindowLongPtr(handle, GWLP_USERDATA)
+  );
 
-  if(msg == WM_INITDIALOG)
-    dlg = reinterpret_cast<Dialog *>(lParam);
-  else {
-    const auto &it = Dialog::s_instances.find(handle);
-    if(it == Dialog::s_instances.end())
-      return false;
-    else
-      dlg = it->second;
-  }
+  if(!dlg)
+    return false;
 
   switch(msg) {
   case WM_INITDIALOG:
+    SetWindowLongPtr(handle, GWLP_USERDATA, lParam);
     dlg->m_handle = handle;
-
-    // necessary if something in onInit triggers another event
-    // otherwhise dlg would be null then
-    Dialog::s_instances[handle] = dlg;
-
     dlg->onInit();
     break;
   case WM_TIMER:
-    dlg->onTimer((int)wParam);
+    dlg->onTimer(static_cast<int>(wParam));
     break;
   case WM_COMMAND:
     dlg->onCommand(LOWORD(wParam), HIWORD(wParam));
     break;
   case WM_NOTIFY:
-    dlg->onNotify((LPNMHDR)lParam, lParam);
+    dlg->onNotify(reinterpret_cast<LPNMHDR>(lParam), lParam);
     break;
   case WM_CONTEXTMENU:
-    dlg->onContextMenu((HWND)wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+    dlg->onContextMenu(reinterpret_cast<HWND>(wParam),
+      GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
     break;
   case WM_GETMINMAXINFO: {
-    MINMAXINFO *mmi = (MINMAXINFO *)lParam;
+    MINMAXINFO *mmi = reinterpret_cast<MINMAXINFO *>(lParam);
     mmi->ptMinTrackSize.x = dlg->m_minimumSize.x;
     mmi->ptMinTrackSize.y = dlg->m_minimumSize.y;
     break;
@@ -81,11 +71,9 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     // On Windows, WM_DESTROY is emitted in place of WM_INITDIALOG
     // if the dialog resource is invalid (eg. because of an unloaded dll).
     //
-    // When this happens, neither lParam nor s_instances will contain
+    // When this happens, neither lParam nor GWLP_USERDATA will contain
     // a pointer to the Dialog instance, so there is nothing we can do.
-    // At least, let's try to not crash.
-    if(dlg)
-      dlg->onClose();
+    dlg->onClose();
     break;
   };
 
@@ -140,7 +128,7 @@ Dialog::~Dialog()
   // from calling the default implementation of onClose (because we're in the
   // destructor – no polymorphism here). Instead, the right onClose is called
   // directly by close() for modeless dialogs, or by the OS/SWELL for modal dialogs.
-  s_instances.erase(m_handle);
+  SetWindowLongPtr(m_handle, GWLP_USERDATA, 0);
 
   DestroyWindow(m_handle);
 }
@@ -154,11 +142,11 @@ INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
   switch(mode) {
   case Modeless:
     CreateDialogParam(inst, MAKEINTRESOURCE(m_template),
-      m_parent, Proc, (LPARAM)this);
+      m_parent, Proc, reinterpret_cast<LPARAM>(this));
     return true;
   case Modal:
     return DialogBoxParam(inst, MAKEINTRESOURCE(m_template),
-      m_parent, Proc, (LPARAM)this);
+      m_parent, Proc, reinterpret_cast<LPARAM>(this));
   }
 
   return false; // makes MSVC happy.
@@ -166,15 +154,12 @@ INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 
 void Dialog::setVisible(const bool visible, HWND handle)
 {
-  if(!handle)
-    handle = m_handle;
-
-  ShowWindow(handle, visible ? SW_SHOW : SW_HIDE);
+  ShowWindow(handle ? handle : m_handle, visible ? SW_SHOW : SW_HIDE);
 }
 
 bool Dialog::isVisible() const
 {
-  return IsWindowVisible(m_handle) != 0;
+  return IsWindowVisible(m_handle);
 }
 
 void Dialog::close(const INT_PTR result)
@@ -277,7 +262,7 @@ bool Dialog::hasFocus() const
 
 void Dialog::setFocus()
 {
-  show(); // hack to unminimize the window on OS X
+  show(); // hack to unminimize the window on macOS
   SetFocus(m_handle);
 }
 
@@ -436,7 +421,7 @@ void Dialog::onCommand(const int id, int)
 
 void Dialog::onNotify(LPNMHDR info, LPARAM lParam)
 {
-  const auto &it = m_controls.find((int)info->idFrom);
+  const auto &it = m_controls.find(static_cast<int>(info->idFrom));
 
   if(it != m_controls.end())
     it->second->onNotify(info, lParam);
@@ -449,13 +434,13 @@ void Dialog::onContextMenu(HWND target, const int x, const int y)
       continue;
 
     // target HWND is not always accurate:
-    // on OS X it does not match the listview when hovering the column header
+    // on macOS it does not match the listview when hovering the column header
 
     RECT rect;
     GetWindowRect(ctrl->handle(), &rect);
 
-#ifndef _WIN32
-    // special treatment for SWELL
+#ifdef __APPLE__
+    // special treatment for SWELL on macOS
     std::swap(rect.top, rect.bottom);
 #endif
 
