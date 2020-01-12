@@ -42,7 +42,7 @@ void IconList::loadIcon(const Win32::char_type *name)
   ImageList_AddIcon(m_list, icon);
 #else
   HICON icon = LoadNamedImage(name, true);
-  ImageList_Add(m_list, icon, 0);
+  ImageList_Add(m_list, icon, 0); // v5.20
 #endif
   DestroyIcon(icon);
 }
