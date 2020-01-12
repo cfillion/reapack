@@ -48,9 +48,14 @@ void RichEdit::setPlainText(const std::string &text)
     encoding: NSUTF8StringEncoding
   ];
 
-  NSTextView *textView = (NSTextView *)handle();
+  NSDictionary *darkMode = [NSDictionary
+    dictionaryWithObject: NSColor.textColor
+                  forKey: NSForegroundColorAttributeName];
 
-  NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString: str];
+  NSAttributedString *attrStr = [[NSAttributedString alloc]
+   initWithString: str attributes: darkMode];
+
+  auto textView = static_cast<NSTextView *>(handle());
   [[textView textStorage] setAttributedString: attrStr];
   [attrStr release];
 }
@@ -62,8 +67,6 @@ bool RichEdit::setRichText(const std::string &rtf)
     encoding: NSUTF8StringEncoding
   ];
 
-  NSTextView *textView = (NSTextView *)handle();
-
   NSAttributedString *attrStr = [[NSAttributedString alloc]
     initWithRTF: [str dataUsingEncoding: NSUTF8StringEncoding]
     documentAttributes: nullptr];
@@ -71,7 +74,9 @@ bool RichEdit::setRichText(const std::string &rtf)
   if(!attrStr)
     return false;
 
+  auto textView = static_cast<NSTextView *>(handle());
   [[textView textStorage] setAttributedString: attrStr];
+  [textView setTextColor: NSColor.textColor]; // dark mode support
   [attrStr release];
 
   // auto-detect links, equivalent to Windows' EM_AUTOURLDETECT message
