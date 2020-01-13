@@ -9,6 +9,10 @@ the user guide or the package upload tool.
 
 ## Building from source
 
+Clone the repository and submodules:
+
+    git clone --recursive https://github.com/cfillion/reapack.git
+
 ### Prerequisites
 
 Software requirements:
@@ -16,9 +20,6 @@ Software requirements:
 - [CMake](https://cmake.org/) 3.15 or newer
 - C++17 compiler (MSVC on Windows)
 - PHP (Linux and macOS only)
-
-Clone the repository and submodules:
-`git clone --recursive https://github.com/cfillion/reapack.git`.
 
 #### Linux
 
