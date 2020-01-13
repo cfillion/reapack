@@ -163,11 +163,8 @@ protected:
 
 private:
   struct Sort {
-    Sort(int c = -1, SortOrder o = AscendingOrder)
-      : column(c), order(o) {}
-
-    int column;
-    SortOrder order;
+    int column = -1;
+    SortOrder order = AscendingOrder;
   };
 
   enum DirtyFlag {

@@ -207,7 +207,7 @@ void ListView::sortByColumn(const int index, const SortOrder order, const bool u
   if(m_sort)
     setSortArrow(false);
 
-  const Sort settings(index, order);
+  const Sort settings{index, order};
 
   if(!user)
     m_defaultSort = settings;
