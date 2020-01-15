@@ -200,7 +200,7 @@ std::string Path::join(const bool nativeSeparator) const
   }
 
 #ifdef _WIN32
-  if(test(Absolute) && path.size() > MAX_PATH) {
+  if(test(Absolute) && path.size() >= MAX_PATH - (8+1+3)) {
     path.insert(0, "\\\\?\\");
 
     if(test(UNC))

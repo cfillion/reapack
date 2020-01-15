@@ -213,7 +213,7 @@ TEST_CASE("append absolute path to empty path", M) {
 TEST_CASE("extended absolute paths", M) {
 #ifdef _WIN32
   Path abs("C:\\");
-  abs.append(std::string(260, 'a'));
+  abs.append(std::string(245, 'a'));
 
   CHECK(abs.test(Path::Absolute));
   REQUIRE_THAT(abs.join(), StartsWith("\\\\?\\"));
