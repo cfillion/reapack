@@ -564,7 +564,8 @@ void Browser::fillList()
 
   // restore selection only after having sorted the table
   // in order to get the same scroll position as before if possible
-  m_list->select(selectIndexes);
+  for(const int index : selectIndexes)
+    m_list->select(index);
 
   m_list->endEdit(); // filter before calling updateDisplayLabel
   updateDisplayLabel();

@@ -128,11 +128,10 @@ public:
   void setScroll(int);
 
   void setSelected(int index, bool select);
-  void setSelected(const std::vector<int> &indexes, bool select);
-  template<typename T> void select(T index) { setSelected(index, true); }
-  template<typename T> void unselect(T index) { setSelected(index, false); }
-  void selectAll();
-  void unselectAll();
+  void select(int index) { setSelected(index, true); }
+  void unselect(int index) { setSelected(index, false); }
+  void selectAll() { select(-1); }
+  void unselectAll() { unselect(-1); }
   int selectionSize() const;
   bool hasSelection() const { return selectionSize() > 0; }
   std::vector<int> selection(bool sort = true) const;

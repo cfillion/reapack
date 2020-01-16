@@ -342,18 +342,6 @@ void ListView::setSelected(const int index, const bool select)
     select ? LVIS_SELECTED : 0, LVIS_SELECTED);
 }
 
-#ifndef __APPLE__
-// optimized macOS implementations in listview.mm
-void ListView::setSelected(const std::vector<int> &indexes, const bool select)
-{
-  for(const int index : indexes)
-    setSelected(index, select);
-}
-
-void ListView::selectAll() { select(-1); }
-void ListView::unselectAll() { unselect(-1); }
-#endif
-
 int ListView::visibleRowCount() const
 {
   return ListView_GetItemCount(handle());

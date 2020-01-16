@@ -77,7 +77,7 @@ add_library(reapack OBJECT
   index.cpp
   index_v1.cpp
   install.cpp
-  listview.cpp $<IF:$<BOOL:${APPLE}>,listview.mm,>
+  listview.cpp
   main.cpp
   manager.cpp
   menu.cpp
