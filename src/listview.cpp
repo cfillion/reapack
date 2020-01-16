@@ -342,6 +342,18 @@ void ListView::setSelected(const int index, const bool select)
     select ? LVIS_SELECTED : 0, LVIS_SELECTED);
 }
 
+void ListView::selectAll()
+{
+  InhibitControl inhibit(this);
+  select(-1);
+}
+
+void ListView::unselectAll()
+{
+  InhibitControl inhibit(this);
+  unselect(-1);
+}
+
 int ListView::visibleRowCount() const
 {
   return ListView_GetItemCount(handle());

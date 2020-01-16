@@ -130,8 +130,8 @@ public:
   void setSelected(int index, bool select);
   void select(int index) { setSelected(index, true); }
   void unselect(int index) { setSelected(index, false); }
-  void selectAll() { select(-1); }
-  void unselectAll() { unselect(-1); }
+  void selectAll();
+  void unselectAll();
   int selectionSize() const;
   bool hasSelection() const { return selectionSize() > 0; }
   std::vector<int> selection(bool sort = true) const;

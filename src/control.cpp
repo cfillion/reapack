@@ -17,13 +17,16 @@
 
 #include "control.hpp"
 
-std::map<HWND, InhibitControl *> InhibitControl::s_lock;
+#include <map>
 
-void InhibitControl::inhibitRedraw(const bool inhibit)
+void InhibitControl::setRedraw(const bool inhibit)
 {
-#ifdef _WIN32
-  if(s_lock.count(m_handle)) {
-    if(inhibit || s_lock[m_handle] != this)
+  static std::map<HWND, InhibitControl *> s_lock;
+
+  auto owner = s_lock.find(m_handle);
+
+  if(owner != s_lock.end()) {
+    if(inhibit || owner->second != this)
       return;
   }
   else if(!inhibit)
@@ -34,9 +37,10 @@ void InhibitControl::inhibitRedraw(const bool inhibit)
   if(inhibit)
     s_lock.insert({m_handle, this});
   else {
-    s_lock.erase(m_handle);
+    s_lock.erase(owner);
+#ifdef _WIN32
     RedrawWindow(m_handle, nullptr, nullptr,
       RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
-  }
 #endif
+  }
 }

@@ -18,8 +18,6 @@
 #ifndef REAPACK_CONTROL_HPP
 #define REAPACK_CONTROL_HPP
 
-#include <map>
-
 #ifdef _WIN32
 #  include <windows.h>
 #else
@@ -47,26 +45,12 @@ private:
 
 class InhibitControl {
 public:
-  InhibitControl(Control *ctrl) : m_handle(ctrl->handle())
-  {
-    inhibitRedraw(true);
-  }
-
-  InhibitControl(HWND handle)
-    : m_handle(handle)
-  {
-    inhibitRedraw(true);
-  }
-
-  ~InhibitControl()
-  {
-    inhibitRedraw(false);
-  }
+  InhibitControl(Control *ctrl) : InhibitControl(ctrl->handle()) {}
+  InhibitControl(HWND handle) : m_handle(handle) { setRedraw(true); }
+  ~InhibitControl() { setRedraw(false); }
 
 private:
-  static std::map<HWND, InhibitControl *> s_lock;
-
-  void inhibitRedraw(const bool inhibit);
+  void setRedraw(const bool inhibit);
 
   HWND m_handle;
 };
