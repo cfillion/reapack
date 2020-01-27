@@ -41,7 +41,7 @@ void Filter::set(const std::string &input)
     const bool isStart = buf.empty(),
                isEnd = i+1 == input.size() || input[i+1] == '\x20';
 
-    if((c == '"' || c == '\'') && ((!quote && isStart) || (quote == c))) {
+    if((c == '"' || c == '\'') && ((!quote && isStart) || quote == c)) {
       if(quote)
         quote = 0;
       else {
@@ -67,6 +67,12 @@ void Filter::set(const std::string &input)
       else if(c == '$' && isEnd) {
         flags |= Node::EndAnchorFlag;
         continue;
+      }
+      else if(flags & Node::LiteralFlag) {
+        // force-close the token after having parsed a closing quote
+        // and only after having parsed all trailing anchors
+        group = group->push(buf, &flags);
+        buf.clear();
       }
     }
 

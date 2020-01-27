@@ -94,6 +94,15 @@ TEST_CASE("late opening quote", M) {
   REQUIRE_FALSE(f.match({"foo bar"}));
 }
 
+TEST_CASE("early closing quote", M) {
+  Filter f;
+  f.set("'foo'bar");
+
+  REQUIRE(f.match({"foo bar"}));
+  REQUIRE_FALSE(f.match({"foobar"}));
+  REQUIRE_FALSE(f.match({"foo ar"}));
+}
+
 TEST_CASE("mixing quotes", M) {
   Filter f;
 
