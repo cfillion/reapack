@@ -35,7 +35,9 @@ void Filter::set(const std::string &input)
   int flags = 0;
   Group *group = &m_root;
 
-  for(const char c : input) {
+  for(size_t i = 0; i < input.size(); ++i) {
+    const char c = input[i];
+
     if((c == '"' || c == '\'') && (!quote || quote == c)) {
       if(quote)
         quote = 0;
@@ -51,6 +53,16 @@ void Filter::set(const std::string &input)
       else {
         group = group->push(buf, &flags);
         buf.clear();
+        continue;
+      }
+    }
+    else if(!quote) {
+      if(c == '^' && buf.empty()) {
+        flags |= Node::StartAnchorFlag;
+        continue;
+      }
+      else if(c == '$' && (i+1 == input.size() || input[i+1] == '\x20')) {
+        flags |= Node::EndAnchorFlag;
         continue;
       }
     }
@@ -74,7 +86,7 @@ Filter::Group::Group(Type type, int flags, Group *parent)
 {
 }
 
-Filter::Group *Filter::Group::push(std::string buf, int *flags)
+Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
 {
   if(buf.empty())
     return this;
@@ -112,15 +124,6 @@ Filter::Group *Filter::Group::push(std::string buf, int *flags)
 
       return this;
     }
-  }
-
-  if(buf.size() > 1 && buf.front() == '^') {
-    *flags |= Node::StartAnchorFlag;
-    buf.erase(0, 1); // we need to recheck the size below, for '$'
-  }
-  if(buf.size() > 1 && buf.back() == '$') {
-    *flags |= Node::EndAnchorFlag;
-    buf.pop_back();
   }
 
   Group *group = m_open ? this : m_parent;

@@ -123,17 +123,16 @@ TEST_CASE("start of string", M) {
 
   SECTION("single") {
     f.set("^");
-    REQUIRE(f.match({"hel^lo world"}));
-    REQUIRE_FALSE(f.match({"hello world"}));
+    REQUIRE(f.match({"hello world"}));
   }
 
-  SECTION("quote before") {
+  SECTION("literal ^") {
     f.set("'^hello'");
-    REQUIRE(f.match({"hello world"}));
+    REQUIRE(f.match({"^hello world"}));
     REQUIRE_FALSE(f.match({"world hello"}));
   }
 
-  SECTION("quote after") {
+  SECTION("full word") {
     f.set("^'hello");
     REQUIRE(f.match({"hello world"}));
     REQUIRE_FALSE(f.match({"world hello"}));
@@ -159,19 +158,18 @@ TEST_CASE("end of string", M) {
 
   SECTION("single") {
     f.set("$");
-    REQUIRE(f.match({"hel$lo world"}));
-    REQUIRE_FALSE(f.match({"hello world"}));
+    REQUIRE(f.match({"hello world"}));
   }
 
-  SECTION("quote before") {
+  SECTION("full word") {
     f.set("'hello'$");
     REQUIRE(f.match({"hello"}));
     REQUIRE_FALSE(f.match({"hello world"}));
   }
 
-  SECTION("quote after") {
+  SECTION("literal $") {
     f.set("'hello$'");
-    REQUIRE(f.match({"hello"}));
+    REQUIRE(f.match({"hello$"}));
     REQUIRE_FALSE(f.match({"hello world"}));
   }
 }

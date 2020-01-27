@@ -65,7 +65,7 @@ private:
 
     Group(Type type, int flags = 0, Group *parent = nullptr);
     void clear() { m_nodes.clear(); }
-    Group *push(std::string, int *flags);
+    Group *push(const std::string &, int *flags);
 
     bool match(const std::vector<std::string> &) const override;
 
