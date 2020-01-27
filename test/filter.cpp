@@ -61,29 +61,29 @@ TEST_CASE("quote phrase matching", M) {
   Filter f;
 
   SECTION("double quotes")
-    f.set("\"hello world\"");
+    f.set("\"foo bar\" baz");
   SECTION("single quotes")
-    f.set("'hello world'");
+    f.set("'foo bar' baz");
 
-  REQUIRE(f.match({"hello world"}));
-  REQUIRE(f.match({"BEFOREhello worldAFTER"}));
-  REQUIRE_FALSE(f.match({"helloworld"}));
-  REQUIRE_FALSE(f.match({"hello test world"}));
+  REQUIRE(f.match({"baz foo bar"}));
+  REQUIRE(f.match({"BEFOREfoo barAFTER baz"}));
+  REQUIRE_FALSE(f.match({"foobarbaz"}));
+  REQUIRE_FALSE(f.match({"foo test bar baz"}));
 }
 
 TEST_CASE("quote word matching", M) {
   Filter f;
 
   SECTION("double quotes")
-    f.set("\"word\"");
+    f.set("\"hello\" world");
   SECTION("single quotes")
-    f.set("'word'");
+    f.set("'hello' world");
 
-  REQUIRE(f.match({"BEFORE word AFTER"}));
-  REQUIRE(f.match({"_word_"}));
-  REQUIRE_FALSE(f.match({"BEFOREword"}));
-  REQUIRE_FALSE(f.match({"wordAFTER"}));
-  REQUIRE_FALSE(f.match({"BEFOREwordAFTER"}));
+  REQUIRE(f.match({"BEFORE hello AFTER world"}));
+  REQUIRE(f.match({"_hello_ world"}));
+  REQUIRE_FALSE(f.match({"BEFOREhello world"}));
+  REQUIRE_FALSE(f.match({"helloAFTER world"}));
+  REQUIRE_FALSE(f.match({"BEFOREhelloAFTER world"}));
 }
 
 TEST_CASE("mixing quotes", M) {
