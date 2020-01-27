@@ -71,7 +71,7 @@ TEST_CASE("quote phrase matching", M) {
   REQUIRE_FALSE(f.match({"foo test bar baz"}));
 }
 
-TEST_CASE("quote word matching", M) {
+TEST_CASE("full word matching", M) {
   Filter f;
 
   SECTION("double quotes")
@@ -84,6 +84,14 @@ TEST_CASE("quote word matching", M) {
   REQUIRE_FALSE(f.match({"BEFOREhello world"}));
   REQUIRE_FALSE(f.match({"helloAFTER world"}));
   REQUIRE_FALSE(f.match({"BEFOREhelloAFTER world"}));
+}
+
+TEST_CASE("late opening quote", M) {
+  Filter f;
+  f.set("foo'bar'");
+
+  REQUIRE(f.match({"foo'bar'"}));
+  REQUIRE_FALSE(f.match({"foo bar"}));
 }
 
 TEST_CASE("mixing quotes", M) {

@@ -38,7 +38,10 @@ void Filter::set(const std::string &input)
   for(size_t i = 0; i < input.size(); ++i) {
     const char c = input[i];
 
-    if((c == '"' || c == '\'') && (!quote || quote == c)) {
+    const bool isStart = buf.empty(),
+               isEnd = i+1 == input.size() || input[i+1] == '\x20';
+
+    if((c == '"' || c == '\'') && ((!quote && isStart) || (quote == c))) {
       if(quote)
         quote = 0;
       else {
@@ -57,11 +60,11 @@ void Filter::set(const std::string &input)
       }
     }
     else if(!quote) {
-      if(c == '^' && buf.empty()) {
+      if(c == '^' && isStart) {
         flags |= Node::StartAnchorFlag;
         continue;
       }
-      else if(c == '$' && (i+1 == input.size() || input[i+1] == '\x20')) {
+      else if(c == '$' && isEnd) {
         flags |= Node::EndAnchorFlag;
         continue;
       }
