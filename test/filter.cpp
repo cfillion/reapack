@@ -214,13 +214,6 @@ TEST_CASE("OR operator", M) {
     REQUIRE(f.match({"bacon"}));
   }
 
-  SECTION("quoted") {
-    f.set("hello 'OR' bacon");
-
-    REQUIRE_FALSE(f.match({"hello world"}));
-    REQUIRE(f.match({"hello OR bacon"}));
-  }
-
   SECTION("reset") {
     f.set("hello OR bacon world");
 
@@ -232,6 +225,12 @@ TEST_CASE("OR operator", M) {
   SECTION("single") {
     f.set("OR");
     REQUIRE(f.match({"anything"}));
+  }
+
+  SECTION("literal OR") {
+    f.set("'OR'");
+    REQUIRE(f.match({"OR"}));
+    REQUIRE_FALSE(f.match({"foo"}));
   }
 }
 
@@ -265,7 +264,7 @@ TEST_CASE("NOT operator", M) {
     REQUIRE(f.match({"hello", "bacon"}));
   }
 
-  SECTION("quote word matching") {
+  SECTION("full word matching") {
     f.set("NOT 'hello'");
     REQUIRE(f.match({"hellobacon"}));
   }
@@ -274,6 +273,12 @@ TEST_CASE("NOT operator", M) {
     f.set("NOT NOT hello");
     REQUIRE(f.match({"hello"}));
     REQUIRE_FALSE(f.match({"world"}));
+  }
+
+  SECTION("literal NOT") {
+    f.set("'NOT'");
+    REQUIRE(f.match({"NOT"}));
+    REQUIRE_FALSE(f.match({"foo"}));
   }
 }
 
@@ -319,5 +324,11 @@ TEST_CASE("AND grouping", M) {
     REQUIRE(f.match({"test"}));
     REQUIRE_FALSE(f.match({"apple bacon"}));
     REQUIRE_FALSE(f.match({"bacon"}));
+  }
+
+  SECTION("literal parentheses") {
+    f.set("'('");
+    REQUIRE(f.match({"("}));
+    REQUIRE_FALSE(f.match({"foo"}));
   }
 }
