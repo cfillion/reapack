@@ -41,9 +41,9 @@ private:
     enum Flag {
       StartAnchorFlag = 1<<0,
       EndAnchorFlag   = 1<<1,
-      QuotedFlag      = 1<<2,
+      LiteralFlag     = 1<<2,
       NotFlag         = 1<<3,
-      PhraseFlag      = 1<<4,
+      FullWordFlag    = 1<<4,
     };
 
     Node(int flags) : m_flags(flags) {}
