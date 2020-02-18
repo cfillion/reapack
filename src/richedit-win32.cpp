@@ -53,9 +53,7 @@ RichEdit::RichEdit(HWND handle)
     SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
 }
 
-RichEdit::~RichEdit()
-{
-}
+RichEdit::~RichEdit() = default;
 
 void RichEdit::onNotify(LPNMHDR info, LPARAM lParam)
 {

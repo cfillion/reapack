@@ -29,9 +29,7 @@ RichEdit::RichEdit(HWND handle)
 {
 }
 
-RichEdit::~RichEdit()
-{
-}
+RichEdit::~RichEdit() = default;
 
 void RichEdit::onNotify(LPNMHDR, LPARAM)
 {

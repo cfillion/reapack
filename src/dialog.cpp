@@ -72,6 +72,12 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     if(wParam != SIZE_MINIMIZED)
       dlg->onResize();
     break;
+#ifdef __APPLE__
+  // This stops SWELL_SendMouseMessageImpl from continuously resetting the
+  // mouse cursor allowing NSTextViews to change it on mouse hover.
+  case WM_SETCURSOR:
+    return dlg->isTextEditUnderMouse();
+#endif
   case WM_DESTROY:
     dlg->onClose();
     break;

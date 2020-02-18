@@ -17,7 +17,9 @@
 
 #include "richedit.hpp"
 
-#include <Cocoa/Cocoa.h>
+#include <AppKit/NSAttributedString.h>
+#include <AppKit/NSColor.h>
+#include <AppKit/NSTextView.h>
 
 void RichEdit::Init()
 {
@@ -26,16 +28,9 @@ void RichEdit::Init()
 RichEdit::RichEdit(HWND handle)
   : Control(handle)
 {
-  // hack: restore NSTextView's default mouse cursors (eg. hover links)
-  // this is an incomplete fix for the hyperlink's shy tooltips
-  SetCapture(handle);
 }
 
-RichEdit::~RichEdit()
-{
-  if(GetCapture() == handle())
-    ReleaseCapture();
-}
+RichEdit::~RichEdit() = default;
 
 void RichEdit::onNotify(LPNMHDR, LPARAM)
 {

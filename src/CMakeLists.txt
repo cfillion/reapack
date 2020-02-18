@@ -65,7 +65,7 @@ add_library(reapack OBJECT
   config.cpp
   control.cpp
   database.cpp
-  dialog.cpp
+  dialog.cpp $<IF:$<BOOL:${APPLE}>,dialog.mm,>
   download.cpp
   event.cpp
   filedialog.cpp
