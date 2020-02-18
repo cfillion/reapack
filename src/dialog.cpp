@@ -86,7 +86,7 @@ int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
   if(!dialog || !dialog->hasFocus())
     return 0; // not our window
 
-  const int key = (int)msg->wParam;
+  const int key = static_cast<int>(msg->wParam);
   int modifiers = 0;
 
   if(GetAsyncKeyState(VK_MENU) & 0x8000)
@@ -212,7 +212,7 @@ void Dialog::center()
   const double verticalBias = (top - parentRect.top) * 0.3;
 
 #ifdef _WIN32
-  top -= (int)verticalBias;
+  top -= static_cast<int>(verticalBias);
 #else
   top += verticalBias; // according to SWELL, top means bottom.
 #endif
