@@ -21,6 +21,7 @@
 #include "filesystem.hpp"
 #include "hash.hpp"
 #include "reapack.hpp"
+#include "win32.hpp"
 
 #include <cassert>
 
@@ -152,16 +153,21 @@ bool Download::run()
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
   curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers);
 
-  char errbuf[CURL_ERROR_SIZE] = "No error message";
-  curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf);
+  std::string errbuf = "No error message";
+  errbuf.resize(CURL_ERROR_SIZE - 1, '\0');
+  curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf.data());
 
   const CURLcode res = curl_easy_perform(ctx);
   curl_slist_free_all(headers);
   closeStream();
 
   if(res != CURLE_OK) {
+#ifdef _WIN32
+    errbuf = Win32::ansi2utf8(errbuf);
+#endif
+
     const std::string &err = String::format(
-      "%s (%d): %s", curl_easy_strerror(res), res, errbuf);
+      "%s (%d): %s", curl_easy_strerror(res), res, errbuf.c_str());
     setError({err, m_url});
     return false;
   }

@@ -35,10 +35,14 @@ namespace Win32 {
   typedef wchar_t char_type;
 
   std::wstring widen(const char *, UINT codepage = CP_UTF8);
-  inline std::wstring widen(const std::string &str) { return widen(str.c_str(), CP_UTF8); }
+  inline std::wstring widen(const std::string &str, UINT codepage = CP_UTF8)
+  { return widen(str.c_str(), codepage); }
 
   std::string narrow(const wchar_t *);
   inline std::string narrow(const std::wstring &str) { return narrow(str.c_str()); }
+
+  inline std::string ansi2utf8(const char *str) { return narrow(widen(str, CP_ACP)); }
+  inline std::string ansi2utf8(const std::string &str) { return ansi2utf8(str.c_str()); }
 #else
   typedef char char_type;
 

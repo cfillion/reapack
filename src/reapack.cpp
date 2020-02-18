@@ -69,7 +69,7 @@ Path ReaPack::resourcePath()
 #ifdef _WIN32
   // convert from the current system codepage to UTF-8
   if(atof(GetAppVersion()) < 5.70)
-    return Win32::narrow(Win32::widen(GetResourcePath(), CP_ACP));
+    return Win32::ansi2utf8(GetResourcePath());
 #endif
 
   return {GetResourcePath()};
