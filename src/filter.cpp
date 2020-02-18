@@ -27,35 +27,53 @@ Filter::Filter(const std::string &input)
 
 void Filter::set(const std::string &input)
 {
-  enum State { Default, DoubleQuote, SingleQuote };
-
   m_input = input;
   m_root.clear();
 
   std::string buf;
+  char quote = 0;
   int flags = 0;
-  State state = Default;
   Group *group = &m_root;
 
-  for(const char c : input) {
-    if(c == '"' && state != SingleQuote) {
-      state = state == Default ? DoubleQuote : Default;
-      flags |= Node::QuotedFlag;
-      continue;
-    }
-    else if(c == '\'' && state != DoubleQuote) {
-      state = state == Default ? SingleQuote : Default;
-      flags |= Node::QuotedFlag;
+  for(size_t i = 0; i < input.size(); ++i) {
+    const char c = input[i];
+
+    const bool isStart = buf.empty(),
+               isEnd = i+1 == input.size() || input[i+1] == '\x20';
+
+    if((c == '"' || c == '\'') && ((!quote && isStart) || quote == c)) {
+      if(quote)
+        quote = 0;
+      else {
+        flags |= Node::LiteralFlag | Node::FullWordFlag;
+        quote = c;
+      }
       continue;
     }
     else if(c == '\x20') {
-      if(state == Default) {
+      if(quote)
+        flags &= ~Node::FullWordFlag;
+      else {
         group = group->push(buf, &flags);
         buf.clear();
         continue;
       }
-      else
-        flags |= Node::PhraseFlag;
+    }
+    else if(!quote) {
+      if(c == '^' && isStart) {
+        flags |= Node::StartAnchorFlag;
+        continue;
+      }
+      else if(c == '$' && isEnd) {
+        flags |= Node::EndAnchorFlag;
+        continue;
+      }
+      else if(flags & Node::LiteralFlag) {
+        // force-close the token after having parsed a closing quote
+        // and only after having parsed all trailing anchors
+        group = group->push(buf, &flags);
+        buf.clear();
+      }
     }
 
     buf += c;
@@ -77,12 +95,12 @@ Filter::Group::Group(Type type, int flags, Group *parent)
 {
 }
 
-Filter::Group *Filter::Group::push(std::string buf, int *flags)
+Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
 {
   if(buf.empty())
     return this;
 
-  if((*flags & QuotedFlag) == 0) {
+  if(!(*flags & LiteralFlag)) {
     if(buf == "NOT") {
       *flags ^= Token::NotFlag;
       return this;
@@ -115,15 +133,6 @@ Filter::Group *Filter::Group::push(std::string buf, int *flags)
 
       return this;
     }
-  }
-
-  if(buf.size() > 1 && buf.front() == '^') {
-    *flags |= Node::StartAnchorFlag;
-    buf.erase(0, 1); // we need to recheck the size() below, for '$'
-  }
-  if(buf.size() > 1 && buf.back() == '$') {
-    *flags |= Node::EndAnchorFlag;
-    buf.pop_back();
   }
 
   Group *group = m_open ? this : m_parent;
@@ -193,7 +202,7 @@ bool Filter::Token::matchRow(const std::string &str) const
     return false;
   if(test(EndAnchorFlag) && !isEnd)
     return false;
-  if(test(QuotedFlag) && !test(PhraseFlag)) {
+  if(test(FullWordFlag)) {
     return
       (isStart || !isalnum(str[pos - 1])) &&
       (isEnd || !isalnum(str[pos + m_buf.size()]));

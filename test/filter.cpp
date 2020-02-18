@@ -61,29 +61,46 @@ TEST_CASE("quote phrase matching", M) {
   Filter f;
 
   SECTION("double quotes")
-    f.set("\"hello world\"");
+    f.set("\"foo bar\" baz");
   SECTION("single quotes")
-    f.set("'hello world'");
+    f.set("'foo bar' baz");
 
-  REQUIRE(f.match({"hello world"}));
-  REQUIRE(f.match({"BEFOREhello worldAFTER"}));
-  REQUIRE_FALSE(f.match({"helloworld"}));
-  REQUIRE_FALSE(f.match({"hello test world"}));
+  REQUIRE(f.match({"baz foo bar"}));
+  REQUIRE(f.match({"BEFOREfoo barAFTER baz"}));
+  REQUIRE_FALSE(f.match({"foobarbaz"}));
+  REQUIRE_FALSE(f.match({"foo test bar baz"}));
 }
 
-TEST_CASE("quote word matching", M) {
+TEST_CASE("full word matching", M) {
   Filter f;
 
   SECTION("double quotes")
-    f.set("\"word\"");
+    f.set("\"hello\" world");
   SECTION("single quotes")
-    f.set("'word'");
+    f.set("'hello' world");
 
-  REQUIRE(f.match({"BEFORE word AFTER"}));
-  REQUIRE(f.match({"_word_"}));
-  REQUIRE_FALSE(f.match({"BEFOREword"}));
-  REQUIRE_FALSE(f.match({"wordAFTER"}));
-  REQUIRE_FALSE(f.match({"BEFOREwordAFTER"}));
+  REQUIRE(f.match({"BEFORE hello AFTER world"}));
+  REQUIRE(f.match({"_hello_ world"}));
+  REQUIRE_FALSE(f.match({"BEFOREhello world"}));
+  REQUIRE_FALSE(f.match({"helloAFTER world"}));
+  REQUIRE_FALSE(f.match({"BEFOREhelloAFTER world"}));
+}
+
+TEST_CASE("late opening quote", M) {
+  Filter f;
+  f.set("foo'bar'");
+
+  REQUIRE(f.match({"foo'bar'"}));
+  REQUIRE_FALSE(f.match({"foo bar"}));
+}
+
+TEST_CASE("early closing quote", M) {
+  Filter f;
+  f.set("'foo'bar");
+
+  REQUIRE(f.match({"foo bar"}));
+  REQUIRE_FALSE(f.match({"foobar"}));
+  REQUIRE_FALSE(f.match({"foo ar"}));
 }
 
 TEST_CASE("mixing quotes", M) {
@@ -123,17 +140,16 @@ TEST_CASE("start of string", M) {
 
   SECTION("single") {
     f.set("^");
-    REQUIRE(f.match({"hel^lo world"}));
-    REQUIRE_FALSE(f.match({"hello world"}));
+    REQUIRE(f.match({"hello world"}));
   }
 
-  SECTION("quote before") {
+  SECTION("literal ^") {
     f.set("'^hello'");
-    REQUIRE(f.match({"hello world"}));
+    REQUIRE(f.match({"^hello world"}));
     REQUIRE_FALSE(f.match({"world hello"}));
   }
 
-  SECTION("quote after") {
+  SECTION("full word") {
     f.set("^'hello");
     REQUIRE(f.match({"hello world"}));
     REQUIRE_FALSE(f.match({"world hello"}));
@@ -159,19 +175,18 @@ TEST_CASE("end of string", M) {
 
   SECTION("single") {
     f.set("$");
-    REQUIRE(f.match({"hel$lo world"}));
-    REQUIRE_FALSE(f.match({"hello world"}));
+    REQUIRE(f.match({"hello world"}));
   }
 
-  SECTION("quote before") {
+  SECTION("full word") {
     f.set("'hello'$");
     REQUIRE(f.match({"hello"}));
     REQUIRE_FALSE(f.match({"hello world"}));
   }
 
-  SECTION("quote after") {
+  SECTION("literal $") {
     f.set("'hello$'");
-    REQUIRE(f.match({"hello"}));
+    REQUIRE(f.match({"hello$"}));
     REQUIRE_FALSE(f.match({"hello world"}));
   }
 }
@@ -214,13 +229,6 @@ TEST_CASE("OR operator", M) {
     REQUIRE(f.match({"bacon"}));
   }
 
-  SECTION("quoted") {
-    f.set("hello 'OR' bacon");
-
-    REQUIRE_FALSE(f.match({"hello world"}));
-    REQUIRE(f.match({"hello OR bacon"}));
-  }
-
   SECTION("reset") {
     f.set("hello OR bacon world");
 
@@ -232,6 +240,12 @@ TEST_CASE("OR operator", M) {
   SECTION("single") {
     f.set("OR");
     REQUIRE(f.match({"anything"}));
+  }
+
+  SECTION("literal OR") {
+    f.set("'OR'");
+    REQUIRE(f.match({"OR"}));
+    REQUIRE_FALSE(f.match({"foo"}));
   }
 }
 
@@ -265,7 +279,7 @@ TEST_CASE("NOT operator", M) {
     REQUIRE(f.match({"hello", "bacon"}));
   }
 
-  SECTION("quote word matching") {
+  SECTION("full word matching") {
     f.set("NOT 'hello'");
     REQUIRE(f.match({"hellobacon"}));
   }
@@ -274,6 +288,12 @@ TEST_CASE("NOT operator", M) {
     f.set("NOT NOT hello");
     REQUIRE(f.match({"hello"}));
     REQUIRE_FALSE(f.match({"world"}));
+  }
+
+  SECTION("literal NOT") {
+    f.set("'NOT'");
+    REQUIRE(f.match({"NOT"}));
+    REQUIRE_FALSE(f.match({"foo"}));
   }
 }
 
@@ -319,5 +339,11 @@ TEST_CASE("AND grouping", M) {
     REQUIRE(f.match({"test"}));
     REQUIRE_FALSE(f.match({"apple bacon"}));
     REQUIRE_FALSE(f.match({"bacon"}));
+  }
+
+  SECTION("literal parentheses") {
+    f.set("'('");
+    REQUIRE(f.match({"("}));
+    REQUIRE_FALSE(f.match({"foo"}));
   }
 }

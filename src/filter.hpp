@@ -41,9 +41,9 @@ private:
     enum Flag {
       StartAnchorFlag = 1<<0,
       EndAnchorFlag   = 1<<1,
-      QuotedFlag      = 1<<2,
+      LiteralFlag     = 1<<2,
       NotFlag         = 1<<3,
-      PhraseFlag      = 1<<4,
+      FullWordFlag    = 1<<4,
     };
 
     Node(int flags) : m_flags(flags) {}
@@ -65,7 +65,7 @@ private:
 
     Group(Type type, int flags = 0, Group *parent = nullptr);
     void clear() { m_nodes.clear(); }
-    Group *push(std::string, int *flags);
+    Group *push(const std::string &, int *flags);
 
     bool match(const std::vector<std::string> &) const override;
 
