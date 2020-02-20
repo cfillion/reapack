@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="798361ce1b5ae066627b219e495ccf4df422b9e8" name="ReaPack">
+<index version="1" commit="ddaacf0aa3cfb14c48e92fedc89e86f570e91dda" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -688,6 +688,43 @@ Fixed:
         <source platform="linux32" file="reaper_reapack32.so">https://github.com/cfillion/reapack/releases/download/v1.2.2/reaper_reapack32.so</source>
         <source platform="linux64" file="reaper_reapack64.so">https://github.com/cfillion/reapack/releases/download/v1.2.2/reaper_reapack64.so</source>
       </version>
+      <version name="1.2.3rc1" author="cfillion" time="2020-02-20T01:36:31Z">
+        <changelog><![CDATA[Added:
+• Add a "Visible columns:" label to the top of the list column header context menu
+• Add support for ARM 32-bit (armv7l) and ARM 64-bit (aarch64) on Linux
+• Add support for UNC paths on Windows [p=2207357]
+• Fill the Details tab of the DLL's properties in Windows Explorer
+
+Fixed:
+• Adjust the text color to be readable in the About dialog when macOS dark mode is enabled
+• Correctly display download error messages containing non-English characters on Windows [#26]
+• Don't put a check mark on the Versions menu when reinstalling the current version in the package browser
+• Fix a crash when reading repository indexes without a root element
+• Fix creating directories with paths longer than 248 characters on Windows
+• Fix flickering I-beam cursor when hovering text edit fields on macOS
+• Fix the list column header customization context menu on Linux
+• Re-enable the file URI scheme on Windows [p=2142236]
+
+Changed:
+• Improve the search filter syntax (making it more similar to REAPER's implementation):
+  - Allow matching literal leading ^ and trailing $ when quoted
+  - Interpret opening quotes in the middle of a word literally
+  - Treat closing quotes as the end of a word
+• Optimize filtering and selecting all packages in the package browser on macOS
+• Produce the Linux binaries on Ubuntu 18.04 for better compatibility across various distributions
+
+Removed:
+• Drop support for macOS 10.7 and 10.8 due to their lack of modern SSL protocols [t=222487]
+• Drop support for REAPER 5.04 and older on macOS (use 6.04 or later for best results)]]></changelog>
+        <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-i386.dylib</source>
+        <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-x86_64.dylib</source>
+        <source platform="linux32" file="reaper_reapack-i686.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-i686.so</source>
+        <source platform="linux64" file="reaper_reapack-x86_64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_reapack-armv7l.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-aarch64.so</source>
+        <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-x86.dll</source>
+        <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-x64.dll</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -696,7 +733,7 @@ Fixed:
 \widowctrl\hyphauto
 
 {\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack: Package Manager for REAPER\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} built on [[REAPACK_BUILDTIME]]\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} [[REAPACK_REVISION]] built on [[REAPACK_BUILDTIME]]\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2020  Christian Fillion\line
 \line
 This program is free software: you can redistribute it and/or modify\line
