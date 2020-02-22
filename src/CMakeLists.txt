@@ -93,7 +93,7 @@ add_library(reapack OBJECT
   remote.cpp
   report.cpp
   resource.rc
-  richedit$<IF:$<BOOL:${APPLE}>,.mm,$<IF:$<BOOL:${WIN32}>,-win32,-gtk>.cpp>
+  richedit$<IF:$<BOOL:${APPLE}>,.mm,$<IF:$<BOOL:${WIN32}>,-win32,-generic>.cpp>
   serializer.cpp
   source.cpp
   string.cpp

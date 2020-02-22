@@ -40,7 +40,8 @@ void RichEdit::setPlainText(const std::string &text)
   SetWindowText(handle(), text.c_str());
 }
 
-bool RichEdit::setRichText(const std::string &)
+bool RichEdit::setRichText(const std::string &rtf)
 {
+  (void)rtf;
   return false;
 }

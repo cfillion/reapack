@@ -18,7 +18,7 @@
 #include "richedit.hpp"
 
 // This is the Win32 implementation of RichEdit
-// The macOS implementation is in richedit.mm, Linux is in richedit-gtk.cpp
+// The macOS implementation is in richedit.mm, Linux is in richedit-generic.cpp
 
 #include "win32.hpp"
 
