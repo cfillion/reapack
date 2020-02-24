@@ -649,7 +649,7 @@ void ListView::restoreState(Serializer::Data &data)
   int col = -1;
   std::vector<int> order(columnCount());
 
-  while(!data.empty()) {
+  while(col < columnCount() && !data.empty()) {
     const auto &[left, right] = data.front();
 
     switch(col) {
@@ -664,15 +664,16 @@ void ListView::restoreState(Serializer::Data &data)
       break;
     }
 
-    data.pop_front();
-
-    if(++col >= columnCount())
-      break;
+    data.pop_front(); // deletes rec
+    ++col;
   }
 
-  // finish filling for other columns
-  for(col++; col < columnCount(); col++)
+  // fill default values for any columns whose state wasn't saved
+  // (col can't be -1 at this point, the loop above is always run at least once)
+  while(col < columnCount()) {
     order[col] = col;
+    ++col;
+  }
 
   ListView_SetColumnOrderArray(handle(), columnCount(), order.data());
 }
