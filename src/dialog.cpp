@@ -375,15 +375,14 @@ void Dialog::restoreState(Serializer::Data &data)
     return;
 
   auto it = data.begin();
-
-  const auto &pos = *it++;
-  const auto &size = *it++;
+  const auto &[x, y] = *it++;
+  const auto &[width, height] = *it++;
 
   SetWindowPos(m_handle, nullptr, 0, 0,
-    size[0], size[1], SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+    width, height, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
   onResize();
 
-  boundedMove(pos[0], pos[1]);
+  boundedMove(x, y);
 
   data.erase(data.begin(), it);
 }

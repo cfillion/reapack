@@ -650,10 +650,7 @@ void ListView::restoreState(Serializer::Data &data)
   std::vector<int> order(columnCount());
 
   while(!data.empty()) {
-    const Serializer::Record &rec = data.front();
-
-    const int left = rec[0];
-    const int right = rec[1];
+    const auto &[left, right] = data.front();
 
     switch(col) {
     case -1: // sort
