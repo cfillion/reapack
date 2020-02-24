@@ -626,7 +626,7 @@ void ListView::resetColumns()
     resizeColumn(i, col.test(CollapseFlag) ? 0 : col.width);
   }
 
-  ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
+  ListView_SetColumnOrderArray(handle(), columnCount(), order.data());
 
   if(m_sort) {
     setSortArrow(false);
@@ -650,7 +650,7 @@ void ListView::restoreState(Serializer::Data &data)
   std::vector<int> order(columnCount());
 
   while(!data.empty()) {
-    const auto &rec = data.front();
+    const Serializer::Record &rec = data.front();
 
     const int left = rec[0];
     const int right = rec[1];
@@ -677,14 +677,14 @@ void ListView::restoreState(Serializer::Data &data)
   for(col++; col < columnCount(); col++)
     order[col] = col;
 
-  ListView_SetColumnOrderArray(handle(), columnCount(), &order[0]);
+  ListView_SetColumnOrderArray(handle(), columnCount(), order.data());
 }
 
 void ListView::saveState(Serializer::Data &data) const
 {
   const Sort &sort = m_sort.value_or(Sort{});
   std::vector<int> order(columnCount());
-  ListView_GetColumnOrderArray(handle(), columnCount(), &order[0]);
+  ListView_GetColumnOrderArray(handle(), columnCount(), order.data());
 
   data.push_back({sort.column, sort.order});
 
