@@ -191,7 +191,7 @@ void Dialog::center()
 
 #ifdef _WIN32
   HMONITOR monitor = MonitorFromWindow(m_parent, MONITOR_DEFAULTTONEAREST);
-  MONITORINFO minfo{sizeof(MONITORINFO)};
+  MONITORINFO minfo{sizeof(minfo)};
   GetMonitorInfo(monitor, &minfo);
   RECT &screenRect = minfo.rcWork;
 #else

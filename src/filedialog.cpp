@@ -34,7 +34,7 @@ static std::string getFileName(BOOL(__stdcall *func)(LPOPENFILENAME),
 
   wchar_t pathBuffer[4096] = {};
 
-  OPENFILENAME of{sizeof(OPENFILENAME), parent, instance};
+  OPENFILENAME of{sizeof(of), parent, instance};
   of.lpstrFilter = filters;
   of.lpstrFile = pathBuffer;
   of.nMaxFile = static_cast<DWORD>(std::size(pathBuffer));

@@ -50,7 +50,7 @@ Menu::~Menu()
 UINT Menu::addAction(const std::string &label, const int commandId)
 {
   MENUITEMINFO mii{};
-  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.cbSize = sizeof(mii);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
@@ -73,7 +73,7 @@ UINT Menu::addAction(const std::string &label, const char *namedCommand)
 void Menu::addSeparator()
 {
   MENUITEMINFO mii{};
-  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.cbSize = sizeof(mii);
 
   mii.fMask = MIIM_TYPE;
   mii.fType = MFT_SEPARATOR;
@@ -84,7 +84,7 @@ void Menu::addSeparator()
 Menu Menu::addMenu(const std::string &label)
 {
   MENUITEMINFO mii{};
-  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.cbSize = sizeof(mii);
 
   mii.fMask |= MIIM_TYPE;
   mii.fType = MFT_STRING;
@@ -137,7 +137,7 @@ void Menu::enable(const UINT index)
 void Menu::setEnabled(const bool enabled, const UINT index)
 {
   MENUITEMINFO mii{};
-  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.cbSize = sizeof(mii);
   mii.fMask |= MIIM_STATE;
 
   if(!GetMenuItemInfo(m_handle, index, true, &mii))
@@ -151,7 +151,7 @@ void Menu::setEnabled(const bool enabled, const UINT index)
 void Menu::check(const UINT index)
 {
   MENUITEMINFO mii{};
-  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.cbSize = sizeof(mii);
   mii.fMask |= MIIM_STATE;
 
   if(!GetMenuItemInfo(m_handle, index, true, &mii))
@@ -165,7 +165,7 @@ void Menu::check(const UINT index)
 void Menu::checkRadio(const UINT index)
 {
   MENUITEMINFO mii{};
-  mii.cbSize = sizeof(MENUITEMINFO);
+  mii.cbSize = sizeof(mii);
   mii.fMask |= MIIM_FTYPE;
   mii.fMask |= MIIM_STATE;
 
