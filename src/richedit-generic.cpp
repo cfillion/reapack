@@ -17,6 +17,8 @@
 
 #include "richedit.hpp"
 
+#include "string.hpp"
+
 // This is the Linux implementation of RichEdit
 // See also richedit.mm and richedit-win32.cpp
 
@@ -42,6 +44,6 @@ void RichEdit::setPlainText(const std::string &text)
 
 bool RichEdit::setRichText(const std::string &rtf)
 {
-  (void)rtf;
-  return false;
+  setPlainText(String::stripRtf(rtf));
+  return true;
 }

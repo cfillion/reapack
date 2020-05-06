@@ -32,6 +32,7 @@ namespace String {
   std::string format(const char *fmt, ...);
 
   std::string indent(const std::string &);
+  std::string stripRtf(const std::string &);
 
   template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
   std::string number(const T v)

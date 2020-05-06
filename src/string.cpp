@@ -17,8 +17,10 @@
 
 #include "string.hpp"
 
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <cstdarg>
+#include <regex>
 #include <sstream>
 
 std::string String::format(const char *fmt, ...)
@@ -61,6 +63,34 @@ std::string String::indent(const std::string &text)
   }
 
   return output;
+}
+
+std::string String::stripRtf(const std::string &rtf)
+{
+  static const std::regex rtfRules(
+    // passthrough for later replacement to \n
+    R"((\\line |\\par\}))" "|"
+    R"(\\line(\n)\s*)" "|"
+
+    // preserve literal braces
+    R"(\\([\{\}]))" "|"
+
+    // hidden groups (strip contents)
+    R"(\{\\(?:f\d+|fonttbl|colortbl)[^\{\}]+\})" "|"
+
+    // formatting tags and groups (keep contents)
+    R"(\\\w+\s?|\{|\})" "|"
+
+    // newlines and indentation
+    R"(\s*\n\s*)"
+  );
+
+  std::string text = std::regex_replace(rtf, rtfRules, "$1$2$3");
+  boost::algorithm::replace_all(text, "\\line ", "\n");
+  boost::algorithm::replace_all(text, "\\par}", "\n\n");
+  boost::algorithm::trim(text);
+
+  return text;
 }
 
 void String::ImplDetail::imbueStream(std::ostream &stream)
