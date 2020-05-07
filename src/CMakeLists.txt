@@ -115,6 +115,7 @@ target_include_directories(reapack PRIVATE
 if(WIN32)
   target_sources(reapack PRIVATE buildinfo.rc)
   target_compile_options(reapack PUBLIC /W3 /WX /wd4996)
+  target_compile_definitions(reapack PUBLIC NOMINMAX UNICODE)
   target_link_libraries(reapack Bcrypt Comctl32 Comdlg32 Gdi32 Shell32 User32)
 else()
   target_compile_options(reapack PUBLIC
