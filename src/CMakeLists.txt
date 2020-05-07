@@ -123,6 +123,12 @@ else()
     -Wno-unused-parameter -Wno-missing-field-initializers
     -Wno-unused-function -Wno-missing-braces
   )
+
+  if(APPLE)
+    # macOS 10.7–10.8 defaults to libstdc++
+    target_compile_options(reapack PUBLIC -stdlib=libc++)
+    target_link_libraries(reapack c++)
+  endif()
 endif()
 
 target_link_libraries(reapack
