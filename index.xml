@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="ddaacf0aa3cfb14c48e92fedc89e86f570e91dda" name="ReaPack">
+<index version="1" commit="7daf3b79d99515351287c6094b0bb8b82f32de69" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -724,6 +724,22 @@ Removed:
         <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-aarch64.so</source>
         <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-x86.dll</source>
         <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3rc1/reaper_reapack-x64.dll</source>
+      </version>
+      <version name="1.2.3rc2" author="cfillion" time="2020-05-07T22:40:58Z">
+        <changelog><![CDATA[Added:
+• Enable the documentation viewer on Linux (without rich text formatting) [p=2247988]
+• Support the multimonitor aware v2 HiDPI mode (REAPER 6.04+) [p=2220836]
+
+Changed:
+• Deprecate macOS 10.7 and 10.8 support instead of completely removing it]]></changelog>
+        <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-i386.dylib</source>
+        <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-x86_64.dylib</source>
+        <source platform="linux32" file="reaper_reapack-i686.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-i686.so</source>
+        <source platform="linux64" file="reaper_reapack-x86_64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_reapack-armv7l.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-aarch64.so</source>
+        <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-x86.dll</source>
+        <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3rc2/reaper_reapack-x64.dll</source>
       </version>
     </reapack>
   </category>
