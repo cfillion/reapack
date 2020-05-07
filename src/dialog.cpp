@@ -378,8 +378,16 @@ void Dialog::restoreState(Serializer::Data &data)
   const auto &[x, y] = *it++;
   const auto &[width, height] = *it++;
 
-  SetWindowPos(m_handle, nullptr, 0, 0,
-    width, height, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+#ifdef _WIN32
+  // Move to the target screen first so the new size is applied with the
+  // correct DPI in Per-Monitor v2 mode.
+  // Then boundedMove will correct the position if necessary.
+  SetWindowPos(m_handle, nullptr, x, y, 0, 0,
+    SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+#endif
+
+  SetWindowPos(m_handle, nullptr, 0, 0, width, height,
+    SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
   onResize();
 
   boundedMove(x, y);
