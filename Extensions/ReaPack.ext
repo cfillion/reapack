@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.3rc2
+@version 1.2.3
 @author cfillion
 @donation https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER
 @provides
@@ -11,10 +11,4 @@
   [linux-aarch64] reaper_reapack-aarch64.so   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
-@changelog
-  Added:
-  • Enable the documentation viewer on Linux (without rich text formatting) [p=2247988]
-  • Support the multimonitor aware v2 HiDPI mode (REAPER 6.04+) [p=2220836]
-
-  Changed:
-  • Deprecate macOS 10.7 and 10.8 support instead of completely removing it
+@changelog The curated list of changes between ReaPack v1.2.2 and v1.2.3 is available at <https://reapack.com/release-notes/v1.2#v1-2-3>
