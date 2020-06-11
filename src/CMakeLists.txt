@@ -150,7 +150,7 @@ if(SWELL_FOUND)
     OUTPUT  resource.rc_mac_dlg resource.rc_mac_menu
     COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/resource.rc ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${PHP_EXECUTABLE} ${SWELL_RESGEN} resource.rc
+    COMMAND ${PHP_EXECUTABLE} ${SWELL_RESGEN} --quiet resource.rc
     DEPENDS ${SWELL_RESGEN}
     MAIN_DEPENDENCY resource.rc
   )
