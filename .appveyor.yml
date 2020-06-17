@@ -27,7 +27,7 @@ for:
           )
 
           sudo dpkg --add-architecture $arch && sudo apt-get update -qq &&
-          sudo apt-get install -qq --no-install-recommends "$@" ${packages[@]/%/:$arch}
+          sudo apt install -y --no-install-recommends "$@" ${packages[@]/%/:$arch} > /dev/null
         }
 
       - |-
@@ -52,12 +52,8 @@ for:
           ;;
         esac
 
-      - sudo apt-get install -qq --no-install-recommends php qemu-user-binfmt
-
-      - git clone --depth 1 --branch v2.11.0 -c advice.detachedHead=false
-        https://github.com/catchorg/Catch2.git
-      - cmake Catch2 -B Catch2/build -DBUILD_TESTING=OFF
-      - sudo cmake --build Catch2/build --target install > /dev/null
+      - wget -q https://mirrors.kernel.org/ubuntu/pool/universe/c/catch2/catch2_2.12.1-1_all.deb
+      - sudo apt install -y --no-install-recommends ./catch2*.deb php qemu-user-binfmt > /dev/null
     build_script:
       - cmake -B build
         -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN
