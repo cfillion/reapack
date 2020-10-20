@@ -346,4 +346,20 @@ TEST_CASE("AND grouping", M) {
     REQUIRE(f.match({"("}));
     REQUIRE_FALSE(f.match({"foo"}));
   }
+
+  SECTION("closing a subgroup rewinds to the AND parent") {
+    f.set("a OR ( b ) c");
+
+    REQUIRE_FALSE(f.match({"c"}));
+    REQUIRE(f.match({"a c"}));
+    REQUIRE(f.match({"b c"}));
+  }
+
+  SECTION("closing a subgroup doesn't rewind too far") {
+    f.set("NOT ( a OR ( b ) c ) OR d");
+
+    REQUIRE_FALSE(f.match({"a c"}));
+    REQUIRE(f.match({"a z"}));
+    REQUIRE(f.match({"d"}));
+  }
 }

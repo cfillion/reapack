@@ -91,7 +91,7 @@ bool Filter::match(std::vector<std::string> rows) const
 }
 
 Filter::Group::Group(Type type, int flags, Group *parent)
-  : Node(flags), m_parent(parent), m_type(type), m_open(true)
+  : Node(flags), m_parent(parent), m_type(type)
 {
 }
 
@@ -107,11 +107,11 @@ Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
     }
     else if(buf == "OR") {
       if(m_nodes.empty())
-        return this;
-      else if(m_type == MatchAny) {
-        m_open = true;
-        return this;
-      }
+        return this; // no previous token, ignore
+
+      Group *currentOr = dynamic_cast<Group *>(m_nodes.back().get());
+      if(currentOr && currentOr->m_type == MatchAny)
+        return currentOr;
 
       auto prev = std::move(m_nodes.back());
       m_nodes.pop_back();
@@ -126,22 +126,21 @@ Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
       return newGroup;
     }
     else if(buf == ")") {
-      for(Group *parent = this; parent->m_parent; parent = parent->m_parent) {
+      for(Group *parent = m_parent; parent; parent = parent->m_parent) {
         if(parent->m_type == MatchAll)
-          return parent->m_parent;
+          return parent;
       }
 
       return this;
     }
   }
 
-  Group *group = m_open ? this : m_parent;
-  group->m_nodes.push_back(std::make_unique<Token>(buf, *flags));
+  m_nodes.push_back(std::make_unique<Token>(buf, *flags));
   *flags = 0;
 
-  if(group->m_type == MatchAny)
-    group->m_open = false;
-
+  Group *group = this;
+  while(group->m_type != MatchAll && group->m_parent)
+    group = group->m_parent;
   return group;
 }
 

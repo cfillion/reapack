@@ -74,7 +74,6 @@ private:
 
     Group *m_parent;
     Type m_type;
-    bool m_open;
     std::vector<std::unique_ptr<Node>> m_nodes;
   };
 
