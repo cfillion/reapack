@@ -1,3 +1,5 @@
+include(CheckCXXCompilerFlag)
+
 find_package(Boost 1.56 REQUIRED)
 find_package(CURL       REQUIRED)
 find_package(MiniZip    REQUIRED)
@@ -123,6 +125,12 @@ else()
     -Wno-unused-parameter -Wno-missing-field-initializers
     -Wno-unused-function -Wno-missing-braces
   )
+
+  # Clang 11
+  check_cxx_compiler_flag(-Wnon-c-typedef-for-linkage HAVE_NON_C_TYPEDEF_FOR_LINKAGE)
+  if(HAVE_NON_C_TYPEDEF_FOR_LINKAGE)
+    target_compile_options(reapack PUBLIC -Wno-non-c-typedef-for-linkage)
+  endif()
 
   if(APPLE)
     # macOS 10.7–10.8 defaults to libstdc++
