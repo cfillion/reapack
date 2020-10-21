@@ -52,7 +52,7 @@ for:
           ;;
         esac
 
-      - wget -q https://mirrors.kernel.org/ubuntu/pool/universe/c/catch2/catch2_2.12.1-1_all.deb
+      - wget -q https://mirrors.edge.kernel.org/ubuntu/pool/universe/c/catch2/catch2_2.13.0-1_all.deb
       - sudo apt install -y --no-install-recommends ./catch2*.deb php qemu-user-binfmt > /dev/null
     build_script:
       - cmake -B build
