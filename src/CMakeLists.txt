@@ -16,9 +16,9 @@ endif()
 
 if(VCPKG_TOOLCHAIN)
   # required for selecting the right debug or release version
-  find_package(SQLite3 CONFIG REQUIRED)
+  find_package(unofficial-sqlite3 CONFIG REQUIRED)
   add_library(SQLite::SQLite3 INTERFACE IMPORTED)
-  target_link_libraries(SQLite::SQLite3 INTERFACE sqlite3)
+  target_link_libraries(SQLite::SQLite3 INTERFACE unofficial::sqlite3::sqlite3)
 
   find_package(tinyxml2 CONFIG REQUIRED)
 else()
