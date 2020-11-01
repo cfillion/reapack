@@ -251,6 +251,11 @@ TEST_CASE("UNC path extended", M) {
 TEST_CASE("compare absolute to relative path (unix)", M) {
   REQUIRE(Path("/a/b") != Path("a/b"));
 }
+
+TEST_CASE("top-level unix absolute path (p=2359736)", M) {
+  Path p("/foo");
+  REQUIRE(p[0] == "foo");
+}
 #endif
 
 TEST_CASE("remove last segment of path", M) {

@@ -50,7 +50,11 @@ static std::vector<std::string> Split(const std::string &input, int *attributes)
   while(last < input.size()) {
     const size_t pos = input.find_first_of("\\/", last);
 
-    if(last + pos == 0) {
+    std::string part;
+
+    if(pos == std::string::npos)
+      part = input.substr(last);
+    else if(last + pos == 0) {
 #ifndef _WIN32
       *attributes |= Path::Absolute;
 #endif
@@ -65,11 +69,6 @@ static std::vector<std::string> Split(const std::string &input, int *attributes)
       last++;
       continue;
     }
-
-    std::string part;
-
-    if(pos == std::string::npos)
-      part = input.substr(last);
     else
       part = input.substr(last, pos - last);
 
