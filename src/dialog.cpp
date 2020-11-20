@@ -318,7 +318,10 @@ void Dialog::setClipboard(const std::string &text)
 #ifdef _WIN32
   SetClipboardData(CF_UNICODETEXT, mem);
 #else
-  SetClipboardData(CF_TEXT, mem);
+  // using RegisterClipboardFormat instead of CF_TEXT for compatibility with REAPER v5
+  // (prior to WDL commit 0f77b72adf1cdbe98fd56feb41eb097a8fac5681)
+  const unsigned int fmt = RegisterClipboardFormat("SWELL__CF_TEXT");
+  SetClipboardData(fmt, mem);
 #endif
   CloseClipboard();
 }

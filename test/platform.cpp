@@ -26,9 +26,10 @@ TEST_CASE("platform from string", M) {
   }
 
   SECTION("macOS") {
-    REQUIRE(Platform("darwin")   == Platform::Darwin_Any);
-    REQUIRE(Platform("darwin32") == Platform::Darwin_i386);
-    REQUIRE(Platform("darwin64") == Platform::Darwin_x86_64);
+    REQUIRE(Platform("darwin")       == Platform::Darwin_Any);
+    REQUIRE(Platform("darwin32")     == Platform::Darwin_i386);
+    REQUIRE(Platform("darwin64")     == Platform::Darwin_x86_64);
+    REQUIRE(Platform("darwin-arm64") == Platform::Darwin_arm64);
   }
 
   SECTION("linux") {
@@ -59,9 +60,15 @@ TEST_CASE("test platform", M) {
 #  ifdef __x86_64__
     {Platform::Darwin_i386,   false},
     {Platform::Darwin_x86_64, true },
+    {Platform::Darwin_arm64,  false},
 #  elif __i386__
     {Platform::Darwin_i386,   true },
     {Platform::Darwin_x86_64, false},
+    {Platform::Darwin_arm64,  false},
+#  elif __arm64__
+    {Platform::Darwin_i386,   false},
+    {Platform::Darwin_x86_64, false},
+    {Platform::Darwin_arm64,  true },
 #  else
 #    error Untested architecture
 #  endif
@@ -70,6 +77,7 @@ TEST_CASE("test platform", M) {
     {Platform::Darwin_Any,    false},
     {Platform::Darwin_i386,   false},
     {Platform::Darwin_x86_64, false},
+    {Platform::Darwin_arm64,  false},
     {Platform::Windows_Any,   false},
     {Platform::Windows_x86,   false},
     {Platform::Windows_x64,   false},
@@ -103,6 +111,7 @@ TEST_CASE("test platform", M) {
     {Platform::Darwin_Any,    false},
     {Platform::Darwin_i386,   false},
     {Platform::Darwin_x86_64, false},
+    {Platform::Darwin_arm64,  false},
     {Platform::Linux_Any,     false},
     {Platform::Linux_x86_64,  false},
     {Platform::Linux_i686,    false},

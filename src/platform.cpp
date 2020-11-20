@@ -26,6 +26,8 @@ const Platform::Enum Platform::Current = Platform::
   Darwin_x86_64
 #  elif  __i386__
   Darwin_i386
+#  elif  __arm64__
+  Darwin_arm64
 #  else
   Unknown
 #  endif
@@ -66,6 +68,7 @@ auto Platform::parse(const char *platform) -> Enum
     { "darwin",        Darwin_Any    },
     { "darwin32",      Darwin_i386   },
     { "darwin64",      Darwin_x86_64 },
+    { "darwin-arm64",  Darwin_arm64  },
 
     { "linux",         Linux_Any     },
     { "linux32",       Linux_i686    },
