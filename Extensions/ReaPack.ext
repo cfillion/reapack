@@ -1,14 +1,18 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.3
+@version 1.2.3.1
 @author cfillion
-@donation https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&cmd=_donations&currency_code=CAD&item_name=ReaPack%3A+Package+manager+for+REAPER
+@donation https://reapack.com/donate
 @provides
   [darwin32     ] reaper_reapack-i386.dylib   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [darwin64     ] reaper_reapack-x86_64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [darwin-arm64 ] reaper_reapack-arm64.dylib  https://github.com/cfillion/reapack/releases/download/v$version/$path
   [linux32      ] reaper_reapack-i686.so      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [linux64      ] reaper_reapack-x86_64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
   [linux-armv7l ] reaper_reapack-armv7l.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
   [linux-aarch64] reaper_reapack-aarch64.so   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
-@changelog The curated list of changes between ReaPack v1.2.2 and v1.2.3 is available at <https://reapack.com/release-notes/v1.2#v1-2-3>
+@changelog
+  • Add macOS ARM64 build
+  • Fix filter keywords following an AND subgroup in a OR group being added to the OR group
+  • Fix truncated first character of top-level absolute paths on Linux and macOS [p=2359736]
