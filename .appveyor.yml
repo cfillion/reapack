@@ -76,7 +76,7 @@ for:
           sudo installer -pkg '/Volumes/Command Line Developer Tools/Command Line Tools.pkg' -target /
           ;;
         *)
-          DEPLOY_TARGET=10.7
+          DEPLOY_TARGET=10.9
           export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX10.10.sdk
           curl -fsSLO https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.10.sdk.tar.xz
           echo 608a89db8b4be150a945871230b5ba5d4767a8500bc5fe76ddf10f5cec5ef513 MacOSX10.10.sdk.tar.xz | sha256sum -c

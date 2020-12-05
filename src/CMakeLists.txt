@@ -131,12 +131,6 @@ else()
   if(HAVE_NON_C_TYPEDEF_FOR_LINKAGE)
     target_compile_options(reapack PUBLIC -Wno-non-c-typedef-for-linkage)
   endif()
-
-  if(APPLE)
-    # macOS 10.7–10.8 defaults to libstdc++
-    target_compile_options(reapack PUBLIC -stdlib=libc++)
-    target_link_libraries(reapack c++)
-  endif()
 endif()
 
 target_link_libraries(reapack
