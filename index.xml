@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="abf9cfb2b8add26d03ee5c738e448f183f8f2f16" name="ReaPack">
+<index version="1" commit="51551d942fa620301cc95485e954d0c8a0a3d7d5" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
-        <link rel="donation">https://www.paypal.com/cgi-bin/webscr?business=T3DEWBQJAV7WL&amp;cmd=_donations&amp;currency_code=CAD&amp;item_name=ReaPack%3A+Package+manager+for+REAPER</link>
+        <link rel="donation">https://reapack.com/donate</link>
       </metadata>
       <version name="0.8-beta" author="cfillion" time="2016-02-16T03:26:28Z">
         <changelog><![CDATA[Bug fixes:
@@ -751,6 +751,20 @@ Changed:
         <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3/reaper_reapack-aarch64.so</source>
         <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3/reaper_reapack-x86.dll</source>
         <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3/reaper_reapack-x64.dll</source>
+      </version>
+      <version name="1.2.3.1" author="cfillion" time="2020-12-05T13:02:17Z">
+        <changelog><![CDATA[• Add macOS ARM64 build
+• Fix filter keywords following an AND subgroup in a OR group being added to the OR group
+• Fix truncated first character of top-level absolute paths on Linux and macOS [p=2359736]]]></changelog>
+        <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-i386.dylib</source>
+        <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-x86_64.dylib</source>
+        <source platform="darwin-arm64" file="reaper_reapack-arm64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-arm64.dylib</source>
+        <source platform="linux32" file="reaper_reapack-i686.so">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-i686.so</source>
+        <source platform="linux64" file="reaper_reapack-x86_64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_reapack-armv7l.so">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-aarch64.so</source>
+        <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-x86.dll</source>
+        <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-x64.dll</source>
       </version>
     </reapack>
   </category>
