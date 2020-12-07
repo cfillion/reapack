@@ -14,79 +14,83 @@ test_script:
 
 for:
   - matrix: { only: [ appveyor_build_worker_image: &linux Ubuntu1804 ] }
-    install:
-      - sudo sed -i '/arch=/! s/^deb/deb [arch=amd64,i386]/' /etc/apt/sources.list
-      - |-
-        awk '
-        $3 !~ /ubuntu\.com/ { next }
-        $1 == "deb" {
-          $2 = "[arch=armhf,arm64]";
-          $3 = "http://ports.ubuntu.com/ubuntu-ports/"
-        } 1' /etc/apt/sources.list | sudo dd of=/etc/apt/sources.list.d/ports.list
+    install: |-
+      set -e
 
-      - |-
-        install-libs() {
-          local arch="$1"; shift
-          local packages=(
-            libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev libxml2-dev zlib1g-dev
-          )
+      sudo sed -i '/arch=/! s/^deb/deb [arch=amd64,i386]/' /etc/apt/sources.list
+      awk '
+      $3 !~ /ubuntu\.com/ { next }
+      $1 == "deb" {
+        $2 = "[arch=armhf,arm64]";
+        $3 = "http://ports.ubuntu.com/ubuntu-ports/"
+      } 1' /etc/apt/sources.list | sudo dd of=/etc/apt/sources.list.d/ports.list
+      sudo rm /etc/apt/sources.list.d/microsoft-prod.list
 
-          sudo dpkg --add-architecture $arch && sudo apt-get update -qq &&
-          sudo apt install -y --no-install-recommends "$@" ${packages[@]/%/:$arch} > /dev/null
-        }
+      wget -q https://mirrors.edge.kernel.org/ubuntu/pool/universe/c/catch2/catch2_2.13.0-1_all.deb
 
-      - |-
-        case $ARCH in
-        x86_64)
-          install-libs amd64
-          ;;
-        i686)
-          install-libs i386 g++-multilib &&
-          export TOOLCHAIN=cmake/linux-cross.cmake \
-                 TOOLCHAIN_PREFIX=i386-linux-gnu
-          ;;
-        armv7l)
-          install-libs armhf g++-arm-linux-gnueabihf &&
-          export TOOLCHAIN=cmake/linux-cross.cmake \
-                 TOOLCHAIN_PREFIX=arm-linux-gnueabihf
-          ;;
-        aarch64)
-          install-libs arm64 g++-aarch64-linux-gnu &&
-          export TOOLCHAIN=cmake/linux-cross.cmake \
-                 TOOLCHAIN_PREFIX=aarch64-linux-gnu
-          ;;
-        esac
+      install-deps() {
+        local arch="$1"; shift
+        local native=("$@" ./catch2*.deb php-cli qemu-user-binfmt)
+        local target=(
+          libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev
+          libxml2-dev zlib1g-dev
+        )
 
-      - wget -q https://mirrors.edge.kernel.org/ubuntu/pool/universe/c/catch2/catch2_2.13.0-1_all.deb
-      - sudo apt install -y --no-install-recommends ./catch2*.deb php qemu-user-binfmt > /dev/null
+        sudo dpkg --add-architecture $arch
+        sudo apt-get update -qq
+        sudo apt install -y --no-install-recommends ${native[@]} ${target[@]/%/:$arch} > /dev/null
+      }
+
+      case $ARCH in
+      x86_64)
+        install-deps amd64
+        ;;
+      i686)
+        install-deps i386 g++-multilib
+        export TOOLCHAIN=cmake/linux-cross.cmake \
+               TOOLCHAIN_PREFIX=i386-linux-gnu
+        ;;
+      armv7l)
+        install-deps armhf g++-arm-linux-gnueabihf
+        export TOOLCHAIN=cmake/linux-cross.cmake \
+               TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+        ;;
+      aarch64)
+        install-deps arm64 g++-aarch64-linux-gnu
+        export TOOLCHAIN=cmake/linux-cross.cmake \
+               TOOLCHAIN_PREFIX=aarch64-linux-gnu
+        ;;
+      esac
     artifacts:
       - path: build/reaper_reapack*.so
 
   - matrix: { only: [ appveyor_build_worker_image: macos, appveyor_build_worker_image: macos-mojave ] }
-    install:
-      - brew install boost catch2 > /dev/null
+    install: |-
+      set -e
 
-      - |-
-        case $ARCH in
-        arm64)
-          DEPLOY_TARGET=11.0
-          curl -fsSLO https://cfillion.ca/files/.xcode/Command_Line_Tools_for_Xcode_12.2.dmg
-          echo 3911b66247e030c7210940cde4230319058bc5c55a81627b8853dab644092c40 Command_Line_Tools_for_Xcode_12.2.dmg | sha256sum -c
-          hdiutil attach Command_Line_Tools_for_Xcode_12.2.dmg > /dev/null
-          sudo installer -pkg '/Volumes/Command Line Developer Tools/Command Line Tools.pkg' -target /
-          ;;
-        *)
-          DEPLOY_TARGET=10.9
-          export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX10.10.sdk
-          curl -fsSLO https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.10.sdk.tar.xz
-          echo 608a89db8b4be150a945871230b5ba5d4767a8500bc5fe76ddf10f5cec5ef513 MacOSX10.10.sdk.tar.xz | sha256sum -c
-          sudo tar xf MacOSX10.10.sdk.tar.xz -C /Library/Developer/CommandLineTools/SDKs
-          ;;
-        esac
-      - sudo xcode-select -s /Library/Developer/CommandLineTools
+      brew install boost catch2 > /dev/null
+
+      case $ARCH in
+      arm64)
+        DEPLOY_TARGET=11.0
+        curl -fsSLO https://cfillion.ca/files/.xcode/Command_Line_Tools_for_Xcode_12.2.dmg
+        echo 3911b66247e030c7210940cde4230319058bc5c55a81627b8853dab644092c40 Command_Line_Tools_for_Xcode_12.2.dmg | sha256sum -c
+        hdiutil attach Command_Line_Tools_for_Xcode_12.2.dmg > /dev/null
+        sudo installer -pkg '/Volumes/Command Line Developer Tools/Command Line Tools.pkg' -target /
+        ;;
+      *)
+        DEPLOY_TARGET=10.9
+        export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX10.10.sdk
+        curl -fsSLO https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.10.sdk.tar.xz
+        echo 608a89db8b4be150a945871230b5ba5d4767a8500bc5fe76ddf10f5cec5ef513 MacOSX10.10.sdk.tar.xz | sha256sum -c
+        sudo tar xf MacOSX10.10.sdk.tar.xz -C /Library/Developer/CommandLineTools/SDKs
+        ;;
+      esac
+
+      sudo xcode-select -s /Library/Developer/CommandLineTools
 
       # don't use LibXml2/SQLite3 from Mono
-      - sudo rm -r /Library/Frameworks/Mono.framework
+      sudo rm -r /Library/Frameworks/Mono.framework
     artifacts:
       - path: build/reaper_reapack*.dylib
 
