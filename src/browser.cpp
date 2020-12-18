@@ -345,7 +345,7 @@ void Browser::displayButton()
 
   menu.addAction("&Synchronize packages", ACTION_SYNCHRONIZE);
   menu.addAction("&Refresh repositories", ACTION_REFRESH);
-  menu.addAction("&Upload packages", ACTION_UPLOAD);
+  menu.addAction("Package &editor", ACTION_UPLOAD);
   menu.addAction("&Manage repositories...", ACTION_MANAGE);
 
   menu.show(m_displayBtn, handle());
