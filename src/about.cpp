@@ -454,10 +454,11 @@ void AboutIndexDelegate::itemCopy()
 
 void AboutIndexDelegate::install()
 {
-  enum { INSTALL_ALL = 80, UPDATE_ONLY };
+  enum { INSTALL_ALL = 80, UPDATE_ONLY, OPEN_BROWSER };
 
   Menu menu;
   menu.addAction("Install all packages in this repository", INSTALL_ALL);
+  menu.addAction("Install individual packages in this repository", OPEN_BROWSER);
   menu.addAction("Update installed packages only", UPDATE_ONLY);
 
   const int choice = menu.show(m_dialog->getControl(IDC_ACTION), m_dialog->handle());
@@ -472,6 +473,16 @@ void AboutIndexDelegate::install()
     Win32::messageBox(m_dialog->handle(),
       "This repository cannot be found in your current configuration.",
       "ReaPack", MB_OK);
+    return;
+  }
+
+  if(choice == OPEN_BROWSER) {
+    if(Browser *browser = g_reapack->browsePackages()) {
+      std::ostringstream stream;
+      stream << '^' << quoted(m_index->name()) << '$';
+      browser->setFilter(stream.str());
+    }
+
     return;
   }
 
