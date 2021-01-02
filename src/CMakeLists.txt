@@ -112,7 +112,9 @@ add_library(reapack OBJECT
 
 target_compile_features(reapack PUBLIC cxx_std_17)
 target_include_directories(reapack PRIVATE
-  ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_CURRENT_BINARY_DIR})
+  ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_SOURCE_DIR}/vendor/reaper-sdk/sdk
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 if(WIN32)
   target_sources(reapack PRIVATE buildinfo.rc)

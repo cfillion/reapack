@@ -33,5 +33,7 @@ add_executable(tests EXCLUDE_FROM_ALL
 # std::uncaught_exceptions is unavailable prior to macOS 10.12
 target_compile_definitions(tests PRIVATE CATCH_CONFIG_NO_CPP17_UNCAUGHT_EXCEPTIONS)
 target_include_directories(tests PRIVATE
-  ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/vendor)
+  ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_SOURCE_DIR}/vendor/reaper-sdk/sdk
+)
 target_link_libraries(tests Catch2::Catch2 reapack)

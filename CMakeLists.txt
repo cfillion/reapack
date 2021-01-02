@@ -36,30 +36,6 @@ endif()
 
 STRING(TOLOWER "${ARCH_NAME}" ARCH_NAME)
 
-function(fetch fn url alt)
-  set(path "${CMAKE_CURRENT_SOURCE_DIR}/${fn}")
-
-  if(EXISTS "${path}")
-    return()
-  endif()
-
-  message(STATUS "Downloading ${fn} from ${url} into vendor...")
-  file(DOWNLOAD ${url} "${path}" STATUS status LOG log)
-  list(GET status 0 status_code)
-
-  if(NOT status_code EQUAL 0)
-    file(REMOVE "${path}")
-    message(SEND_ERROR "Failed to download ${fn}.\n${alt}")
-  endif()
-endfunction()
-
-fetch(vendor/reaper_plugin.h https://landoleet.org/dev/reaper_plugin.h
-  "Download the latest version from Landoleet manually.")
-fetch(vendor/reaper_plugin_functions.h
-  https://gist.github.com/cfillion/da355e8278048de08ae065d6fe6031c1/raw/reaper_plugin_functions.h
-  "Generate it using this REAPER action: [developer] Write C++ API functions header."
-)
-
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
