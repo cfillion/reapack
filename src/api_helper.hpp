@@ -33,8 +33,7 @@ struct ReaScriptAPI<R(*)(Args...)>
     if(static_cast<size_t>(argc) < sizeof...(Args))
       return nullptr;
 
-    const auto &voidArgs = makeTuple(argv, std::index_sequence_for<Args...>{});
-    const auto &args = *reinterpret_cast<const std::tuple<Args...> *>(&voidArgs);
+    const auto &args = makeTuple(argv, std::index_sequence_for<Args...>{});
 
     if constexpr (std::is_void_v<R>) {
       std::apply(fn, args);
@@ -49,10 +48,13 @@ struct ReaScriptAPI<R(*)(Args...)>
   }
 
 private:
+  template<size_t I>
+  using NthType = typename std::tuple_element<I, std::tuple<Args...>>::type;
+
   template<size_t... I>
   static auto makeTuple(void **argv, std::index_sequence<I...>)
   {
-    return std::make_tuple(argv[I]...);
+    return std::make_tuple((NthType<I>)reinterpret_cast<intptr_t>(argv[I])...);
   }
 };
 
