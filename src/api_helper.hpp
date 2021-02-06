@@ -39,9 +39,15 @@ struct ReaScriptAPI<R(*)(Args...)>
       std::apply(fn, args);
       return nullptr;
     }
+    else if constexpr (std::is_floating_point_v<R>) {
+      const auto value { std::apply(fn, args) };
+      void *storage { argv[argc - 1] };
+      *static_cast<double *>(storage) = value;
+      return storage;
+    }
     else {
-      // cast integers to have the same size as a pointer to avoid warnings
-      using IntPtrR = std::conditional_t<std::is_integral_v<R>, intptr_t, R>;
+      // cast numbers to have the same size as a pointer to avoid warnings
+      using IntPtrR = std::conditional_t<std::is_pointer_v<R>, R, intptr_t>;
       const auto value = static_cast<IntPtrR>(std::apply(fn, args));
       return reinterpret_cast<void *>(value);
     }
