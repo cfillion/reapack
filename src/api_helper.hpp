@@ -33,7 +33,7 @@ struct ReaScriptAPI<R(*)(Args...)>
     if(static_cast<size_t>(argc) < sizeof...(Args))
       return nullptr;
 
-    const auto &args = makeTuple(argv, std::index_sequence_for<Args...>{});
+    const auto &args { makeTuple(argv, std::index_sequence_for<Args...>{}) };
 
     if constexpr (std::is_void_v<R>) {
       std::apply(fn, args);
@@ -48,7 +48,7 @@ struct ReaScriptAPI<R(*)(Args...)>
     else {
       // cast numbers to have the same size as a pointer to avoid warnings
       using IntPtrR = std::conditional_t<std::is_pointer_v<R>, R, intptr_t>;
-      const auto value = static_cast<IntPtrR>(std::apply(fn, args));
+      const auto value { static_cast<IntPtrR>(std::apply(fn, args)) };
       return reinterpret_cast<void *>(value);
     }
   }
@@ -60,7 +60,13 @@ private:
   template<size_t... I>
   static auto makeTuple(void **argv, std::index_sequence<I...>)
   {
-    return std::make_tuple((NthType<I>)reinterpret_cast<intptr_t>(argv[I])...);
+    // C++17 is amazing
+    return std::make_tuple(
+      std::is_floating_point_v<NthType<I>> ?
+        *reinterpret_cast<NthType<I>*>(argv[I]) :
+        (NthType<I>)reinterpret_cast<intptr_t>(argv[I])
+      ...
+    );
   }
 };
 
