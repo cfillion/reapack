@@ -36,6 +36,7 @@ namespace FS {
   bool mtime(const Path &, time_t *);
   bool exists(const Path &, bool dir = false);
   bool mkdir(const Path &);
+  Path canonical(const Path &);
 
   const char *lastError();
 

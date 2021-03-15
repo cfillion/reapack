@@ -197,6 +197,18 @@ bool FS::mkdir(const Path &path)
   return true;
 }
 
+Path FS::canonical(const Path &path)
+{
+#ifdef _WIN32
+  return path;
+#else
+  char *resolved = realpath(path.join().c_str(), nullptr);
+  Path out(resolved);
+  free(resolved);
+  return out;
+#endif
+}
+
 const char *FS::lastError()
 {
   return strerror(errno);

@@ -18,6 +18,7 @@
 #include "api.hpp"
 #include "buildinfo.hpp"
 #include "errors.hpp"
+#include "filesystem.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "win32.hpp"
@@ -88,19 +89,22 @@ static void menuHook(const char *name, HMENU handle, const int f)
 
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
 {
+  // using FS::canonical is required on macOS Catalina and newer,
+  // whose dladdr automatically resolves symbolic links from the module's path
+
   Path expected;
-  expected.append(ReaPack::resourcePath());
+  expected.append(FS::canonical(ReaPack::resourcePath()));
   expected.append("UserPlugins");
   expected.append(REAPACK_FILENAME);
 
 #ifdef _WIN32
   Win32::char_type self[MAX_PATH]{};
   GetModuleFileName(module, self, static_cast<DWORD>(std::size(self)));
-  Path current(Win32::narrow(self));
+  const Path current(Win32::narrow(self));
 #else
   Dl_info info{};
   dladdr(reinterpret_cast<const void *>(&checkLocation), &info);
-  Path current(info.dli_fname);
+  const Path &current = FS::canonical({info.dli_fname});
 #endif
 
   if(current == expected)
