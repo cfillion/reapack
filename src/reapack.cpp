@@ -389,6 +389,9 @@ void ReaPack::registerSelf()
 
   try {
     Registry reg(Path::REGISTRY.prependRoot());
+    const Registry::Entry &entry = reg.getEntry(&pkg);
+    if(entry && entry.version == ver.name())
+      return; // avoid modifying the database file at every startup
     reg.push(&ver);
     reg.commit();
   }
