@@ -5,7 +5,10 @@ before_build:
   - git submodule update --init --depth 1
 
 build_script:
-  - cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN
+  - export VCPKG_OVERLAY_TRIPLETS=cmake/vcpkg-triplets
+  - cmake -B build -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake
+    -DVCPKG_TARGET_TRIPLET=arch-env -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$TOOLCHAIN
     -DCMAKE_OSX_ARCHITECTURES=$ARCH -DCMAKE_OSX_DEPLOYMENT_TARGET=$DEPLOY_TARGET
   - cmake --build build
 
@@ -14,6 +17,8 @@ test_script:
 
 for:
   - matrix: { only: [ appveyor_build_worker_image: &linux Ubuntu1804 ] }
+    cache:
+      - build/vcpkg_installed -> vcpkg.json, cmake/vcpkg-triplets/arch-env.cmake
     install: |-
       set -e
 
@@ -41,28 +46,23 @@ for:
 
       sudo update-alternatives --set gcc /usr/bin/gcc-7
 
-      git clone --depth 1 --branch v2.13.8 -c advice.detachedHead=false \
-        https://github.com/catchorg/Catch2.git
-      cmake Catch2 -B Catch2/build -DBUILD_TESTING=OFF
-      sudo cmake --build Catch2/build --target install > /dev/null
-
       case $ARCH in
       x86_64)
         install-deps amd64
         ;;
       i686)
         install-deps i386 g++-multilib
-        export TOOLCHAIN=cmake/linux-cross.cmake \
+        export TOOLCHAIN=$(pwd)/cmake/linux-cross.cmake \
                TOOLCHAIN_PREFIX=i386-linux-gnu
         ;;
       armv7l)
         install-deps armhf g++-arm-linux-gnueabihf
-        export TOOLCHAIN=cmake/linux-cross.cmake \
+        export TOOLCHAIN=$(pwd)/cmake/linux-cross.cmake \
                TOOLCHAIN_PREFIX=arm-linux-gnueabihf
         ;;
       aarch64)
         install-deps arm64 g++-aarch64-linux-gnu
-        export TOOLCHAIN=cmake/linux-cross.cmake \
+        export TOOLCHAIN=$(pwd)/cmake/linux-cross.cmake \
                TOOLCHAIN_PREFIX=aarch64-linux-gnu
         ;;
       esac
@@ -70,9 +70,9 @@ for:
       - path: build/reaper_reapack*.so
 
   - matrix: { only: [ appveyor_build_worker_image: macos, appveyor_build_worker_image: macos-mojave ] }
+    cache:
+      - build/vcpkg_installed -> vcpkg.json, cmake/vcpkg-triplets/arch-env.cmake
     install:
-      - brew install boost catch2 > /dev/null
-
       - |-
         case $ARCH in
         arm64)
@@ -91,22 +91,23 @@ for:
 
       # don't use LibXml2/SQLite3 from Mono
       - sudo rm -r /Library/Frameworks/Mono.framework
+
+      # backport vcpkg bugfixes (TODO: remove after future image updates)
+      - git -C ~/vcpkg fetch
+      - git -C ~/vcpkg restore -s 38d6712d5644ede4ff597e889549f5d540dcf8ff ports/catch2
     artifacts:
       - path: build/reaper_reapack*.dylib
 
   - matrix: { only: [ appveyor_build_worker_image: &windows Visual Studio 2022 ] }
     cache:
-      - C:\Tools\vcpkg\installed -> vendor\vcpkg-deps.txt
+      - build\vcpkg_installed -> vcpkg.json
     install:
-      - set VCPKG_ROOT=C:\Tools\vcpkg
-      - set VCPKG_DEFAULT_TRIPLET=%ARCH%-windows-static
-      - set /p reapack-deps=<vendor\vcpkg-deps.txt
-      - vcpkg install %reapack-deps%
-
       - if "%ARCH%" == "x64" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
       - if "%ARCH%" == "x86" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
     build_script:
       - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        -DVCPKG_TARGET_TRIPLET=%ARCH%-windows-static
+        -DCMAKE_TOOLCHAIN_FILE=C:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
       - cmake --build build
     artifacts:
       - path: build\reaper_reapack*.dll

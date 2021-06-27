@@ -1,1 +1,0 @@
-boost-algorithm boost-core boost-lexical-cast boost-logic boost-math boost-preprocessor boost-range catch2 curl[non-http] sqlite3 tinyxml2

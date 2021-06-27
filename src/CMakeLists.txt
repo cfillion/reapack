@@ -6,15 +6,7 @@ find_package(MiniZip    REQUIRED)
 find_package(Threads    REQUIRED)
 find_package(WDL        REQUIRED)
 
-if(NOT APPLE AND NOT WIN32)
-  find_package(OpenSSL REQUIRED COMPONENTS Crypto)
-endif()
-
-if(NOT WIN32)
-  find_package(SWELL REQUIRED)
-endif()
-
-if(VCPKG_TOOLCHAIN)
+if(WIN32)
   # required for selecting the right debug or release version
   find_package(unofficial-sqlite3 CONFIG REQUIRED)
   add_library(SQLite::SQLite3 INTERFACE IMPORTED)
@@ -22,8 +14,13 @@ if(VCPKG_TOOLCHAIN)
 
   find_package(tinyxml2 CONFIG REQUIRED)
 else()
+  find_package(SWELL REQUIRED)
   find_package(LibXml2 REQUIRED)
   find_package(SQLite3 REQUIRED)
+
+  if(NOT APPLE)
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+  endif()
 endif()
 
 find_package(Git)

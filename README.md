@@ -10,7 +10,7 @@ the user guide or the package upload tool.
 
 Clone the repository and submodules:
 
-    git clone --recursive https://github.com/cfillion/reapack.git
+    git clone --recursive --shallow-submodules https://github.com/cfillion/reapack.git
 
 ### Prerequisites
 
@@ -50,18 +50,12 @@ architecture when configuring or building ReaPack.
 Install [vcpkg](https://docs.microsoft.com/cpp/build/vcpkg) in any directory:
 
     git clone https://github.com/Microsoft/vcpkg.git C:\path\to\vcpkg
-    C:\path\to\vcpkg\bootstrap-vcpkg.bat
 
-Set the `VCPKG_ROOT` and `VCPKG_DEFAULT_TRIPLET` environment variables
-(only required when running `vcpkg install` or creating a new build tree):
+Set `VCPKG_TARGET_TRIPLET` and `CMAKE_TOOLCHAIN_FILE` when creating the build
+tree:
 
-    set VCPKG_ROOT=C:\path\to\vcpkg
-    set VCPKG_DEFAULT_TRIPLET=%PLATFORM%-windows-static
-
-Install ReaPack's build dependencies:
-
-    set /p reapack-deps=<vendor\vcpkg-deps.txt
-    %VCPKG_ROOT%\vcpkg install %reapack-deps%
+    -DVCPKG_TARGET_TRIPLET=%PLATFORM%-windows-static
+    -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
 
 ### Build configuration
 
@@ -70,7 +64,7 @@ Create and configure a new build tree inside of the `build` directory.
     cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
 Using the [Ninja](https://ninja-build.org/) generator is recommended for
-best performances:
+best performance:
 
     cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 
@@ -80,10 +74,6 @@ Alternatively, multiple build trees can be created if desired:
     cmake -B build/release  -DCMAKE_BUILD_TYPE=Release
     cmake -B build/portable -DCMAKE_BUILD_TYPE=RelWithDebInfo \
       -DCMAKE_INSTALL_PREFIX=/path/to/reaper/portable/install
-
-The vcpkg install is automatically detected and configured from the `VCPKG_ROOT`
-and `VCPKG_DEFAULT_TRIPLET` environment variables when creating a build tree on
-Windows.
 
 ### Compile and install
 
