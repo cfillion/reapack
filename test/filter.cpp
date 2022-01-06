@@ -363,3 +363,45 @@ TEST_CASE("AND grouping", M) {
     REQUIRE(f.match({"d"}));
   }
 }
+
+TEST_CASE("synonymous words", M) {
+  Filter f;
+
+  SECTION("basic") {
+    f.set("open");
+    REQUIRE(f.match({"open"}));
+    REQUIRE(f.match({"display"}));
+    REQUIRE_FALSE(f.match({"door"}));
+  }
+
+  SECTION("case-insensitive") {
+    f.set("OPEN");
+    REQUIRE(f.match({"display"}));
+  }
+
+  SECTION("full-word synonyms") {
+    f.set("unselect");
+    REQUIRE(f.match({"unselect"}));
+    REQUIRE(f.match({"unselected"}));
+    REQUIRE(f.match({"deselect"}));
+    REQUIRE_FALSE(f.match({"deselected"}));
+  }
+
+  SECTION("preserve anchor flags") {
+    f.set("^insert");
+    REQUIRE(f.match({"add"}));
+    REQUIRE_FALSE(f.match({"don't add"}));
+    REQUIRE_FALSE(f.match({"not inserting things"}));
+  }
+
+  SECTION("NOT applies to all synonyms") {
+    f.set("NOT open");
+    REQUIRE(f.match({"foo bar"}));
+    REQUIRE_FALSE(f.match({"open display"}));
+  }
+
+  SECTION("clear flags for the next token") {
+    f.set("^open bar");
+    REQUIRE(f.match({"open bar"}));
+  }
+}

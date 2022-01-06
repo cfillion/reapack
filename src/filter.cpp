@@ -17,7 +17,7 @@
 
 #include "filter.hpp"
 
-#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string.hpp>
 
 Filter::Filter(const std::string &input)
   : m_root(Group::MatchAll)
@@ -102,7 +102,7 @@ Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
 
   if(!(*flags & LiteralFlag)) {
     if(buf == "NOT") {
-      *flags ^= Token::NotFlag;
+      *flags ^= NotFlag;
       return this;
     }
     else if(buf == "OR") {
@@ -133,6 +133,8 @@ Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
 
       return this;
     }
+    else if(pushSynonyms(buf, flags))
+      return this;
   }
 
   m_nodes.push_back(std::make_unique<Token>(buf, *flags));
@@ -151,6 +153,46 @@ Filter::Group *Filter::Group::addSubGroup(const Type type, const int flags)
   m_nodes.push_back(std::move(newGroup));
 
   return ptr;
+}
+
+bool Filter::Group::pushSynonyms(const std::string &buf, int *flags)
+{
+  static const std::vector<std::string> synonyms[] {
+    { "open", "display", "view", "show", "hide" },
+    { "delete", "clear", "remove", "erase" },
+    { "insert", "add" },
+    { "deselect", "unselect" },
+  };
+
+  auto *match = [&]() -> decltype(&*synonyms) {
+    for(const auto &synonym : synonyms) {
+      for(const auto &word : synonym) {
+        if(boost::iequals(buf, word))
+          return &synonym;
+      }
+    }
+    return nullptr;
+  }();
+
+  if(!match)
+    return false;
+
+  Group *notGroup;
+  if(*flags & NotFlag) {
+    notGroup = addSubGroup(MatchAll, NotFlag);
+    *flags ^= NotFlag;
+  }
+  else
+    notGroup = this;
+
+  Group *orGroup = notGroup->addSubGroup(MatchAny, 0);
+  if(!(*flags & FullWordFlag))
+    orGroup->m_nodes.push_back(std::make_unique<Token>(buf, *flags));
+  for(const auto &word : *match)
+    orGroup->m_nodes.push_back(std::make_unique<Token>(word, *flags | FullWordFlag));
+
+  *flags = 0;
+  return true;
 }
 
 bool Filter::Group::match(const std::vector<std::string> &rows) const

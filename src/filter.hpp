@@ -71,6 +71,7 @@ private:
 
   private:
     Group *addSubGroup(Type, int flags);
+    bool pushSynonyms(const std::string &, int *flags);
 
     Group *m_parent;
     Type m_type;
