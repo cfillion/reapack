@@ -2,7 +2,7 @@
 version: "{build}-{branch}"
 
 before_build:
-  - git submodule update --init
+  - git submodule update --init --depth 1
 
 build_script:
   - cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN
@@ -23,14 +23,11 @@ for:
       $1 == "deb" {
         $2 = "[arch=armhf,arm64]";
         $3 = "http://ports.ubuntu.com/ubuntu-ports/"
-      } 1' /etc/apt/sources.list | sudo dd of=/etc/apt/sources.list.d/ports.list
-      sudo rm /etc/apt/sources.list.d/microsoft-prod.list
-
-      wget -q https://mirrors.edge.kernel.org/ubuntu/pool/universe/c/catch2/catch2_2.13.0-1_all.deb
+      } 1' /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/ports.list > /dev/null
 
       install-deps() {
         local arch="$1"; shift
-        local native=("$@" ./catch2*.deb php-cli qemu-user-binfmt)
+        local native=("$@" php-cli qemu-user-binfmt)
         local target=(
           libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev
           libxml2-dev zlib1g-dev
@@ -38,8 +35,11 @@ for:
 
         sudo dpkg --add-architecture $arch
         sudo apt-get update -qq
-        sudo apt install -y --no-install-recommends ${native[@]} ${target[@]/%/:$arch} > /dev/null
+        sudo apt-get install -qq aptitude > /dev/null
+        sudo aptitude install -yR ${native[@]} ${target[@]/%/:$arch} > /dev/null
       }
+
+      sudo update-alternatives --set gcc /usr/bin/gcc-7
 
       case $ARCH in
       x86_64)
