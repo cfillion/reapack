@@ -94,7 +94,7 @@ for:
     artifacts:
       - path: build/reaper_reapack*.dylib
 
-  - matrix: { only: [ appveyor_build_worker_image: &windows Visual Studio 2019 ] }
+  - matrix: { only: [ appveyor_build_worker_image: &windows Visual Studio 2022 ] }
     cache:
       - C:\Tools\vcpkg\installed -> vendor\vcpkg-deps.txt
     install:
@@ -103,8 +103,8 @@ for:
       - set /p reapack-deps=<vendor\vcpkg-deps.txt
       - vcpkg install %reapack-deps%
 
-      - if "%ARCH%" == "x64" call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-      - if "%ARCH%" == "x86" call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+      - if "%ARCH%" == "x64" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+      - if "%ARCH%" == "x86" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
     build_script:
       - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - cmake --build build
