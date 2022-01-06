@@ -41,6 +41,11 @@ for:
 
       sudo update-alternatives --set gcc /usr/bin/gcc-7
 
+      git clone --depth 1 --branch v2.13.8 -c advice.detachedHead=false \
+        https://github.com/catchorg/Catch2.git
+      cmake Catch2 -B Catch2/build -DBUILD_TESTING=OFF
+      sudo cmake --build Catch2/build --target install > /dev/null
+
       case $ARCH in
       x86_64)
         install-deps amd64
