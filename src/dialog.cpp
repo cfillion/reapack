@@ -48,30 +48,30 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
     SetWindowLongPtr(handle, GWLP_USERDATA, lParam);
     dlg->m_handle = handle;
     dlg->onInit();
-    break;
+    return 1;
   case WM_TIMER:
     dlg->onTimer(static_cast<int>(wParam));
-    break;
+    return 0;
   case WM_COMMAND:
     dlg->onCommand(LOWORD(wParam), HIWORD(wParam));
-    break;
+    return 0;
   case WM_NOTIFY:
     dlg->onNotify(reinterpret_cast<LPNMHDR>(lParam), lParam);
-    break;
+    return 0;
   case WM_CONTEXTMENU:
     dlg->onContextMenu(reinterpret_cast<HWND>(wParam),
       GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-    break;
+    return 0;
   case WM_GETMINMAXINFO: {
     MINMAXINFO *mmi = reinterpret_cast<MINMAXINFO *>(lParam);
     mmi->ptMinTrackSize.x = dlg->m_minimumSize.x;
     mmi->ptMinTrackSize.y = dlg->m_minimumSize.y;
-    break;
+    return 0;
   }
   case WM_SIZE:
     if(wParam != SIZE_MINIMIZED)
       dlg->onResize();
-    break;
+    return 0;
 #ifdef __APPLE__
   // This stops SWELL_SendMouseMessageImpl from continuously resetting the
   // mouse cursor allowing NSTextViews to change it on mouse hover.
@@ -80,10 +80,10 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 #endif
   case WM_DESTROY:
     dlg->onClose();
-    break;
+    return 0;
+  default:
+    return 0;
   };
-
-  return false;
 }
 
 int Dialog::HandleKey(MSG *msg, accelerator_register_t *accel)
