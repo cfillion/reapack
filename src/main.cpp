@@ -93,9 +93,10 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
   // whose dladdr automatically resolves symbolic links from the module's path
 
   Path expected;
-  expected.append(FS::canonical(ReaPack::resourcePath()));
+  expected.append(ReaPack::resourcePath());
   expected.append("UserPlugins");
   expected.append(REAPACK_FILENAME);
+  expected = FS::canonical(expected);
 
 #ifdef _WIN32
   Win32::char_type self[MAX_PATH]{};
