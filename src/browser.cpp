@@ -488,8 +488,12 @@ void Browser::populate(const std::vector<IndexPtr> &indexes, const Registry *reg
   transferActions();
   fillList();
 
-  if(!isVisible())
+  if(!isVisible()) {
     show();
+    // required on REAPER v6/macOS (for some reason the progress dialog
+    // stops the first control from being focused)
+    SetFocus(m_filter);
+  }
 }
 
 void Browser::setFilter(const std::string &newFilter)
