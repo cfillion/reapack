@@ -199,11 +199,13 @@ void Dialog::center()
   SWELL_GetViewPort(&screenRect, &dialogRect, false);
 #endif
 
+#ifndef __linux__ // SWELL_GetViewPort only gives the default monitor
   // limit the centering to the monitor containing most of the parent window
   parentRect.left = max(parentRect.left, screenRect.left);
   parentRect.top = max(parentRect.top, screenRect.top);
   parentRect.right = min(parentRect.right, screenRect.right);
   parentRect.bottom = min(parentRect.bottom, screenRect.bottom);
+#endif
 
   const int parentWidth = parentRect.right - parentRect.left;
   const int dialogWidth = dialogRect.right - dialogRect.left;
@@ -217,10 +219,10 @@ void Dialog::center()
 
   const double verticalBias = (top - parentRect.top) * 0.3;
 
-#ifdef _WIN32
-  top -= static_cast<int>(verticalBias);
+#ifdef __APPLE__
+  top += verticalBias; // y starts from the bottom on macOS
 #else
-  top += verticalBias; // according to SWELL, top means bottom.
+  top -= static_cast<int>(verticalBias);
 #endif
 
   boundedMove(left, top);
@@ -228,32 +230,9 @@ void Dialog::center()
 
 void Dialog::boundedMove(int x, int y)
 {
-  using std::min, std::max, std::abs;
-
   RECT rect;
   GetWindowRect(m_handle, &rect);
-
-  const int width = rect.right - rect.left, height = rect.bottom - rect.top;
-
-#ifdef SM_XVIRTUALSCREEN
-  // virtual screen = all screens combined
-  const int viewportX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-  const int viewportWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-  const int viewportY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-  const int viewportHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-#else
-  // SWELL_GetViewPort only gives the rect of the current screen
-  RECT viewport;
-  SWELL_GetViewPort(&viewport, &rect, false);
-
-  const int viewportX = viewport.left;
-  const int viewportWidth = viewport.right - viewportX;
-  const int viewportY = viewport.top;
-  const int viewportHeight = viewport.bottom - viewportY;
-#endif
-
-  x = min(max(viewportX, x), viewportWidth - width - abs(viewportX));
-  y = min(max(viewportY, y), viewportHeight - height - abs(viewportY));
+  EnsureNotCompletelyOffscreen(&rect);
 
   SetWindowPos(m_handle, nullptr, x, y,
     0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);

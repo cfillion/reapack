@@ -38,6 +38,7 @@ static bool loadAPI(void *(*getFunc)(const char *))
     REQUIRED_API(Splash_GetWnd),             // v4.7
 
     REQUIRED_API(AddExtensionsMainMenu),
+    REQUIRED_API(EnsureNotCompletelyOffscreen),
     REQUIRED_API(GetAppVersion),
     REQUIRED_API(GetResourcePath),
     REQUIRED_API(NamedCommandLookup),        // v3.1415
