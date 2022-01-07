@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="51551d942fa620301cc95485e954d0c8a0a3d7d5" name="ReaPack">
+<index version="1" commit="71fc2410359e2bb976e8edf77cb7928785505b82" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -766,16 +766,41 @@ Changed:
         <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-x86.dll</source>
         <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.3.1/reaper_reapack-x64.dll</source>
       </version>
+      <version name="1.2.4rc1" author="cfillion" time="2022-01-07T03:26:39Z">
+        <changelog><![CDATA[Added:
+• Add an option to browse packages in each repository's install/update menu
+• Match synonymous words when filtering packages (Options > Search for synonyms of common words) [p=2512900]
+
+Fixed:
+• Fix loading from a symlinked resource path on macOS Catalina and newer [#34]
+• Fix the browser's filter text box not being auto-focused on macOS REAPER v6
+• Fix typing parentheses in the browser's filter box
+• Improve window positionning on Linux in multimonitor setups
+
+Changed:
+• Allow ReaPack to be installed as a symbolic link in UserPlugins on Linux and macOS
+• Don't modify the database at every startup
+• Rename "Upload packages" to "Package editor" in the browser's menu]]></changelog>
+        <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-i386.dylib</source>
+        <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-x86_64.dylib</source>
+        <source platform="darwin-arm64" file="reaper_reapack-arm64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-arm64.dylib</source>
+        <source platform="linux32" file="reaper_reapack-i686.so">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-i686.so</source>
+        <source platform="linux64" file="reaper_reapack-x86_64.so">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_reapack-armv7l.so">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-aarch64.so</source>
+        <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-x86.dll</source>
+        <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.4rc1/reaper_reapack-x64.dll</source>
+      </version>
     </reapack>
   </category>
   <metadata>
-    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack: Package Manager for REAPER\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel0 \b \fs36 ReaPack: Package Manager for REAPER\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} [[REAPACK_REVISION]] built on [[REAPACK_BUILDTIME]]\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2020  Christian Fillion\line
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2022  Christian Fillion\line
 \line
 This program is free software: you can redistribute it and/or modify\line
 it under the terms of the GNU Lesser General Public License as published by\line
