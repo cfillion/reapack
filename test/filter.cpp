@@ -10,41 +10,9 @@ TEST_CASE("basic matching", M) {
   REQUIRE(f.match({"world"}));
 
   f.set("hello");
-
   REQUIRE(f.match({"hello"}));
   REQUIRE(f.match({"HELLO"}));
   REQUIRE_FALSE(f.match({"world"}));
-}
-
-TEST_CASE("get/set filter", M) {
-  Filter f;
-  REQUIRE(f.get().empty());
-
-  f.set("hello");
-  REQUIRE(f.get() == "hello");
-  REQUIRE(f.match({"hello"}));
-
-  f.set("world");
-  REQUIRE(f.get() == "world");
-  REQUIRE(f.match({"world"}));
-}
-
-TEST_CASE("filter operators", M) {
-  SECTION("assignment") {
-    Filter f;
-    f = "hello";
-    REQUIRE(f.get() == "hello");
-  }
-
-  SECTION("equal") {
-    REQUIRE(Filter("hello") == "hello");
-    REQUIRE_FALSE(Filter("hello") == "world");
-  }
-
-  SECTION("not equal") {
-    REQUIRE_FALSE(Filter("hello") != "hello");
-    REQUIRE(Filter("hello") != "world");
-  }
 }
 
 TEST_CASE("word matching", M) {
@@ -376,6 +344,7 @@ TEST_CASE("synonymous words", M) {
 
   SECTION("case-insensitive") {
     f.set("OPEN");
+    REQUIRE(f.match({"opening"}));
     REQUIRE(f.match({"display"}));
   }
 

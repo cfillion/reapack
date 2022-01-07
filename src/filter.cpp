@@ -33,16 +33,16 @@ void Filter::set(const std::string &input)
   m_input = input;
   m_root.clear();
 
-  std::string buf;
+  std::string_view buf;
   char quote = 0;
   int flags = 0;
   Group *group = &m_root;
 
-  for(size_t i = 0; i < input.size(); ++i) {
-    const char c = input[i];
+  for(size_t i = 0; i < m_input.size(); ++i) {
+    const char &c = m_input[i];
 
     const bool isStart = buf.empty(),
-               isEnd = i+1 == input.size() || input[i+1] == '\x20';
+               isEnd = i+1 == m_input.size() || m_input[i+1] == '\x20';
 
     if((c == '"' || c == '\'') && ((!quote && isStart) || quote == c)) {
       if(quote)
@@ -58,7 +58,7 @@ void Filter::set(const std::string &input)
         flags &= ~Node::FullWordFlag;
       else {
         group = group->push(buf, &flags);
-        buf.clear();
+        buf = {};
         continue;
       }
     }
@@ -75,11 +75,14 @@ void Filter::set(const std::string &input)
         // force-close the token after having parsed a closing quote
         // and only after having parsed all trailing anchors
         group = group->push(buf, &flags);
-        buf.clear();
+        buf = {};
       }
     }
 
-    buf += c;
+    if(buf.empty())
+      buf = { &c, 1 };
+    else
+      buf = { buf.data(), buf.size() + 1 };
   }
 
   group->push(buf, &flags);
@@ -93,12 +96,19 @@ bool Filter::match(std::vector<std::string> rows) const
   return m_root.match(rows);
 }
 
+static void convertToLower(const std::string_view &buf)
+{
+  char *data = const_cast<char *>(buf.data());
+  std::transform(data, data + buf.size(), data,
+    [](unsigned char c){ return std::tolower(c); });
+}
+
 Filter::Group::Group(Type type, int flags, Group *parent)
   : Node(flags), m_parent(parent), m_type(type)
 {
 }
 
-Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
+Filter::Group *Filter::Group::push(const std::string_view &buf, int *flags)
 {
   if(buf.empty())
     return this;
@@ -141,6 +151,7 @@ Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
       return this;
   }
 
+  convertToLower(buf);
   m_nodes.push_back(std::make_unique<Token>(buf, *flags));
   *flags = 0;
 
@@ -159,9 +170,9 @@ Filter::Group *Filter::Group::addSubGroup(const Type type, const int flags)
   return ptr;
 }
 
-bool Filter::Group::pushSynonyms(const std::string &buf, int *flags)
+bool Filter::Group::pushSynonyms(const std::string_view &buf, int *flags)
 {
-  static const std::vector<std::string> synonyms[] {
+  static const std::vector<std::string_view> synonyms[] {
     { "open", "display", "view", "show", "hide" },
     { "delete", "clear", "remove", "erase" },
     { "insert", "add" },
@@ -190,8 +201,10 @@ bool Filter::Group::pushSynonyms(const std::string &buf, int *flags)
     notGroup = this;
 
   Group *orGroup = notGroup->addSubGroup(MatchAny, 0);
-  if(!(*flags & FullWordFlag))
+  if(!(*flags & FullWordFlag)) {
+    convertToLower(buf);
     orGroup->m_nodes.push_back(std::make_unique<Token>(buf, *flags));
+  }
   for(const auto &word : *match)
     orGroup->m_nodes.push_back(std::make_unique<Token>(word, *flags | FullWordFlag));
 
@@ -213,10 +226,9 @@ bool Filter::Group::match(const std::vector<std::string> &rows) const
   return m_type == MatchAll && !test(NotFlag);
 }
 
-Filter::Token::Token(const std::string &buf, int flags)
+Filter::Token::Token(const std::string_view &buf, int flags)
   : Node(flags), m_buf(buf)
 {
-  boost::algorithm::to_lower(m_buf);
 }
 
 bool Filter::Token::match(const std::vector<std::string> &rows) const

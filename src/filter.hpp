@@ -20,20 +20,16 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 class Filter {
 public:
   Filter(const std::string & = {});
-
-  const std::string get() const { return m_input; }
   void set(const std::string &);
+  Filter &operator=(const std::string &f) { set(f); return *this; }
 
   bool match(std::vector<std::string> rows) const;
-
-  Filter &operator=(const std::string &f) { set(f); return *this; }
-  bool operator==(const std::string &f) const { return m_input == f; }
-  bool operator!=(const std::string &f) const { return !(*this == f); }
 
 private:
   class Node {
@@ -65,13 +61,13 @@ private:
 
     Group(Type type, int flags = 0, Group *parent = nullptr);
     void clear() { m_nodes.clear(); }
-    Group *push(const std::string &, int *flags);
+    Group *push(const std::string_view &, int *flags);
 
     bool match(const std::vector<std::string> &) const override;
 
   private:
     Group *addSubGroup(Type, int flags);
-    bool pushSynonyms(const std::string &, int *flags);
+    bool pushSynonyms(const std::string_view &, int *flags);
 
     Group *m_parent;
     Type m_type;
@@ -80,12 +76,12 @@ private:
 
   class Token : public Node {
   public:
-    Token(const std::string &buf, int flags);
+    Token(const std::string_view &buf, int flags);
     bool match(const std::vector<std::string> &) const override;
     bool matchRow(const std::string &) const;
 
   private:
-    std::string m_buf;
+    std::string_view m_buf;
   };
 
   std::string m_input;
