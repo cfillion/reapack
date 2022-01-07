@@ -281,11 +281,8 @@ void ListView::filter()
 
 void ListView::setFilter(const std::string &newFilter)
 {
-  if(m_filter != newFilter) {
-    ListView::BeginEdit edit(this);
-    m_filter = newFilter;
-    m_dirty |= NeedFilterFlag;
-  }
+  m_filter = newFilter;
+  m_dirty |= NeedFilterFlag;
 }
 
 void ListView::reindexVisible()

@@ -47,6 +47,10 @@ struct NetworkOpts {
   time_t staleThreshold;
 };
 
+struct FilterOpts {
+  bool expandSynonyms;
+};
+
 class Config {
 public:
   Config(const Path &);
@@ -63,6 +67,7 @@ public:
 
   InstallOpts install;
   NetworkOpts network;
+  FilterOpts  filter;
   WindowState windowState;
 
   RemoteList remotes;

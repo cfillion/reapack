@@ -40,7 +40,7 @@ enum {
   ACTION_UNINSTALL = 80, ACTION_ABOUT, ACTION_REFRESH, ACTION_COPYURL,
   ACTION_SELECT, ACTION_UNSELECT, ACTION_AUTOINSTALL_GLOBAL,
   ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON, ACTION_AUTOINSTALL,
-  ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE, ACTION_NETCONFIG,
+  ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE, ACTION_SYNONYMS, ACTION_NETCONFIG,
   ACTION_RESETCONFIG, ACTION_IMPORT_REPO, ACTION_IMPORT_ARCHIVE,
   ACTION_EXPORT_ARCHIVE,
 };
@@ -158,6 +158,9 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_PROMPTOBSOLETE:
     toggle(m_promptObsolete, g_reapack->config()->install.promptObsolete);
+    break;
+  case ACTION_SYNONYMS:
+    toggle(m_expandSynonyms, g_reapack->config()->filter.expandSynonyms);
     break;
   case ACTION_NETCONFIG:
     setupNetwork();
@@ -549,6 +552,11 @@ void Manager::options()
   if(m_promptObsolete.value_or(g_reapack->config()->install.promptObsolete))
     menu.check(index);
 
+  index = menu.addAction(
+    "Search for synonyms of common words", ACTION_SYNONYMS);
+  if(m_expandSynonyms.value_or(g_reapack->config()->filter.expandSynonyms))
+    menu.check(index);
+
   menu.addAction("&Network settings...", ACTION_NETCONFIG);
 
   menu.addSeparator();
@@ -607,6 +615,9 @@ bool Manager::apply()
   if(m_promptObsolete)
     g_reapack->config()->install.promptObsolete = *m_promptObsolete;
 
+  if(m_expandSynonyms)
+    g_reapack->config()->filter.expandSynonyms = *m_expandSynonyms;
+
   for(const auto &pair : m_mods) {
     Remote remote = pair.first;
     const RemoteMods &mods = pair.second;
@@ -650,9 +661,8 @@ void Manager::reset()
 {
   m_mods.clear();
   m_uninstall.clear();
-  m_autoInstall = std::nullopt;
-  m_bleedingEdge = std::nullopt;
-  m_promptObsolete = std::nullopt;
+  m_autoInstall = m_bleedingEdge = m_promptObsolete =
+                  m_expandSynonyms = std::nullopt;
 
   m_changes = 0;
   disable(m_apply);

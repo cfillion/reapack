@@ -17,6 +17,9 @@
 
 #include "filter.hpp"
 
+#include "config.hpp"
+#include "reapack.hpp"
+
 #include <boost/algorithm/string.hpp>
 
 Filter::Filter(const std::string &input)
@@ -133,7 +136,8 @@ Filter::Group *Filter::Group::push(const std::string &buf, int *flags)
 
       return this;
     }
-    else if(pushSynonyms(buf, flags))
+    else if((!g_reapack || g_reapack->config()->filter.expandSynonyms) &&
+            pushSynonyms(buf, flags))
       return this;
   }
 

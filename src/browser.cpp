@@ -390,7 +390,10 @@ void Browser::updateFilter()
 {
   stopTimer(TIMER_FILTER);
 
-  m_list->setFilter(Win32::getWindowText(m_filter));
+  {
+    ListView::BeginEdit edit(m_list);
+    m_list->setFilter(Win32::getWindowText(m_filter));
+  }
   updateDisplayLabel();
 }
 
@@ -549,6 +552,7 @@ void Browser::fillList()
 
   m_list->clear();
   m_list->reserveRows(m_entries.size());
+  m_list->setFilter(Win32::getWindowText(m_filter)); // in case filter settings changed
 
   for(const Entry &entry : m_entries) {
     if(!match(entry))

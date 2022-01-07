@@ -86,9 +86,8 @@ private:
 
   std::map<Remote, RemoteMods> m_mods;
   std::set<Remote> m_uninstall;
-  std::optional<bool> m_autoInstall;
-  std::optional<bool> m_bleedingEdge;
-  std::optional<bool> m_promptObsolete;
+  std::optional<bool> m_autoInstall, m_bleedingEdge,
+                      m_promptObsolete, m_expandSynonyms;
 
   Serializer m_serializer;
 };

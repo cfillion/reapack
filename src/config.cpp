@@ -41,6 +41,7 @@ static const char *MANAGER_GRP = "manager";
 
 static const char *BROWSER_GRP = "browser";
 static const char *STATE_KEY = "state";
+static const char *SYNONYMS_KEY = "synonyms";
 
 static const char *NETWORK_GRP = "network";
 static const char *PROXY_KEY = "proxy";
@@ -73,6 +74,7 @@ void Config::resetOptions()
 {
   install = {false, false, true};
   network = {"", true, NetworkOpts::OneWeekThreshold};
+  filter  = {true};
   windowState = {};
 }
 
@@ -151,6 +153,8 @@ void Config::read()
   network.staleThreshold = (time_t)getUInt(NETWORK_GRP,
     STALETHRSH_KEY, (unsigned int)network.staleThreshold);
 
+  filter.expandSynonyms = getBool(BROWSER_GRP, SYNONYMS_KEY, filter.expandSynonyms);
+
   windowState.about = getString(ABOUT_GRP, STATE_KEY, windowState.about);
   windowState.browser = getString(BROWSER_GRP, STATE_KEY, windowState.browser);
   windowState.manager = getString(MANAGER_GRP, STATE_KEY, windowState.manager);
@@ -170,12 +174,13 @@ void Config::write()
 
   setString(NETWORK_GRP, PROXY_KEY, network.proxy);
   setUInt(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
-  setUInt(NETWORK_GRP, STALETHRSH_KEY, (unsigned int)network.staleThreshold);
+  setUInt(NETWORK_GRP, STALETHRSH_KEY, static_cast<unsigned int>(network.staleThreshold));
+
+  setUInt(BROWSER_GRP, SYNONYMS_KEY, filter.expandSynonyms);
 
   setString(ABOUT_GRP, STATE_KEY, windowState.about);
   setString(BROWSER_GRP, STATE_KEY, windowState.browser);
   setString(MANAGER_GRP, STATE_KEY, windowState.manager);
-
 
   writeRemotes();
 }
