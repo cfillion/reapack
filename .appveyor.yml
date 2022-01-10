@@ -115,33 +115,33 @@ for:
 
 environment:
   matrix:
-    - job_name: Windows 64-bit
-      appveyor_build_worker_image: *windows
-      ARCH: x64
-    - job_name: Windows 32-bit
-      appveyor_build_worker_image: *windows
-      ARCH: x86
+    # - job_name: Windows 64-bit
+    #   appveyor_build_worker_image: *windows
+    #   ARCH: x64
+    # - job_name: Windows 32-bit
+    #   appveyor_build_worker_image: *windows
+    #   ARCH: x86
     - job_name: macOS x86 64-bit
       appveyor_build_worker_image: macos-mojave
       ARCH: x86_64
-    - job_name: macOS x86 32-bit
-      appveyor_build_worker_image: macos-mojave
-      ARCH: i386
-    - job_name: macOS ARM 64-bit
-      appveyor_build_worker_image: macos
-      ARCH: arm64
-    - job_name: Linux x86 64-bit
-      appveyor_build_worker_image: *linux
-      ARCH: x86_64
-    - job_name: Linux x86 32-bit
-      appveyor_build_worker_image: *linux
-      ARCH: i686
-    - job_name: Linux ARM 64-bit
-      appveyor_build_worker_image: *linux
-      ARCH: aarch64
-    - job_name: Linux ARM 32-bit
-      appveyor_build_worker_image: *linux
-      ARCH: armv7l
+    # - job_name: macOS x86 32-bit
+    #   appveyor_build_worker_image: macos-mojave
+    #   ARCH: i386
+    # - job_name: macOS ARM 64-bit
+    #   appveyor_build_worker_image: macos
+    #   ARCH: arm64
+    # - job_name: Linux x86 64-bit
+    #   appveyor_build_worker_image: *linux
+    #   ARCH: x86_64
+    # - job_name: Linux x86 32-bit
+    #   appveyor_build_worker_image: *linux
+    #   ARCH: i686
+    # - job_name: Linux ARM 64-bit
+    #   appveyor_build_worker_image: *linux
+    #   ARCH: aarch64
+    # - job_name: Linux ARM 32-bit
+    #   appveyor_build_worker_image: *linux
+    #   ARCH: armv7l
 
 deploy:
   provider: GitHub

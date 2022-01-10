@@ -9,7 +9,7 @@
     { "name": "boost-preprocessor", "platform": "!linux" },
     { "name": "boost-range",        "platform": "!linux" },
     "catch2",
-    { "name": "curl",     "platform": "windows", "features": [ "non-http" ] },
+    { "name": "curl",     "platform": "!linux", "features": [ "non-http" ] },
     { "name": "sqlite3",  "platform": "windows" },
     { "name": "tinyxml2", "platform": "windows" }
   ]
