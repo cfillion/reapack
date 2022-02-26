@@ -641,7 +641,7 @@ void Browser::aboutRemote(const int index, const bool focus)
 void Browser::installLatestAll()
 {
   InstallOpts &installOpts = g_reapack->config()->install;
-  const bool isEverything = (size_t)m_list->selectionSize() == m_entries.size();
+  const bool isEverything = static_cast<size_t>(m_list->selectionSize()) == m_entries.size();
 
   if(isEverything && !installOpts.autoInstall) {
     const int btn = Win32::messageBox(handle(), "Do you want ReaPack to install"

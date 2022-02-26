@@ -111,7 +111,7 @@ void TabBar::switchPage()
   const int index = currentIndex();
   onTabChange(index);
 
-  if(index < 0 || (size_t)index >= m_pages.size()) {
+  if(index < 0 || static_cast<size_t>(index) >= m_pages.size()) {
     m_lastPage = -1;
     return;
   }

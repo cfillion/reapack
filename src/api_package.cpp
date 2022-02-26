@@ -87,7 +87,7 @@ type: see <a href="#ReaPack_GetEntryInfo">ReaPack_GetEntryInfo</a>.)",
   if(sectionsOut)
     *sectionsOut = file.sections;
   if(typeOut)
-    *typeOut = (int)file.type;
+    *typeOut = static_cast<int>(file.type);
 
   return entry->files.size() > i + 1;
 });
@@ -127,7 +127,7 @@ type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterfa
   if(descOut)
     snprintf(descOut, descOut_sz, "%s", regEntry.description.c_str());
   if(typeOut)
-    *typeOut = (int)regEntry.type;
+    *typeOut = static_cast<int>(regEntry.type);
   if(verOut)
     snprintf(verOut, verOut_sz, "%s", regEntry.version.toString().c_str());
   if(authorOut)
@@ -135,7 +135,7 @@ type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterfa
   if(pinnedOut)
     *pinnedOut = regEntry.pinned;
   if(fileCountOut)
-    *fileCountOut = (int)entry->files.size();
+    *fileCountOut = static_cast<int>(entry->files.size());
 
   return true;
 });

@@ -150,8 +150,8 @@ void Config::read()
 
   network.proxy = getString(NETWORK_GRP, PROXY_KEY, network.proxy);
   network.verifyPeer = getBool(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
-  network.staleThreshold = (time_t)getUInt(NETWORK_GRP,
-    STALETHRSH_KEY, (unsigned int)network.staleThreshold);
+  network.staleThreshold = static_cast<time_t>(getUInt(NETWORK_GRP,
+    STALETHRSH_KEY, static_cast<unsigned int>(network.staleThreshold)));
 
   filter.expandSynonyms = getBool(BROWSER_GRP, SYNONYMS_KEY, filter.expandSynonyms);
 

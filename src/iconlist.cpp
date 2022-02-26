@@ -28,7 +28,8 @@ DEFINE_ICON(UncheckedIcon, 142, "unchecke");
 
 IconList::IconList(const std::initializer_list<const Win32::char_type *> &icons)
 {
-  m_list = ImageList_Create(16, 16, 1, (int)icons.size(), (int)icons.size());
+  m_list = ImageList_Create(16, 16, 1,
+    static_cast<int>(icons.size()), static_cast<int>(icons.size()));
 
   for(const auto *icon : icons)
     loadIcon(icon);

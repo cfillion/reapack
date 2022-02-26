@@ -244,7 +244,7 @@ void About::setAction(const std::string &label)
 void About::selectLink(const int ctrl)
 {
   const auto &links = m_links[ctrl];
-  const int count = (int)links.size();
+  const int count = static_cast<int>(links.size());
 
   m_tabs->setFocus();
 

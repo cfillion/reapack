@@ -205,7 +205,7 @@ int ArchiveReader::extractFile(const Path &path, std::ostream &stream) noexcept
   std::string buffer(BUFFER_SIZE, 0);
 
   const auto readChunk = [&] {
-    return unzReadCurrentFile(m_zip, &buffer[0], (int)buffer.size());
+    return unzReadCurrentFile(m_zip, &buffer[0], static_cast<int>(buffer.size()));
   };
 
   while(const int len = readChunk()) {
@@ -287,7 +287,7 @@ int ArchiveWriter::addFile(const Path &path, std::istream &stream) noexcept
 
   const auto readChunk = [&] {
     stream.read(&buffer[0], buffer.size());
-    return (int)stream.gcount();
+    return static_cast<int>(stream.gcount());
   };
 
   while(const int len = readChunk()) {

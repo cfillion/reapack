@@ -195,7 +195,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
     menu.disable(versionMenuIndex);
   else {
     const auto &versions = package->versions();
-    int verIndex = (int)versions.size();
+    int verIndex = static_cast<int>(versions.size());
     for(const Version *ver : versions | boost::adaptors::reversed) {
       const UINT actionIndex = versionMenu.addAction(
         ver->name().toString().c_str(), --verIndex | (ACTION_VERSION << 8));
