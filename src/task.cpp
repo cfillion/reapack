@@ -55,13 +55,13 @@ void UninstallTask::commit()
   tx()->registry()->forget(m_entry);
 }
 
-PinTask::PinTask(const Registry::Entry &re, const bool pin, Transaction *tx)
-  : Task(tx), m_entry(std::move(re)), m_pin(pin)
+FlagsTask::FlagsTask(const Registry::Entry &re, const int flags, Transaction *tx)
+  : Task(tx), m_entry(std::move(re)), m_flags(flags)
 {
 }
 
-void PinTask::commit()
+void FlagsTask::commit()
 {
-  tx()->registry()->setPinned(m_entry, m_pin);
+  tx()->registry()->setFlags(m_entry, m_flags);
   tx()->receipt()->setPackageChanged();
 }

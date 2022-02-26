@@ -141,12 +141,12 @@ void ImportArchive::importPackage(const std::string &data)
     return;
 
   std::string categoryName, packageName, versionName;
-  bool pinned;
+  int flags;
 
   std::istringstream stream(data);
   stream
     >> quoted(categoryName) >> quoted(packageName) >> quoted(versionName)
-    >> pinned;
+    >> flags;
 
   const Package *pkg = m_lastIndex->find(categoryName, packageName);
   const Version *ver = pkg ? pkg->findVersion(versionName) : nullptr;
@@ -158,7 +158,7 @@ void ImportArchive::importPackage(const std::string &data)
       packageName.c_str(), versionName.c_str()));
   }
 
-  m_tx->install(ver, pinned, m_reader);
+  m_tx->install(ver, flags, m_reader);
 }
 
 ArchiveReader::ArchiveReader(const Path &path)

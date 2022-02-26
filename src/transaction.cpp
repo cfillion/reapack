@@ -100,21 +100,21 @@ IndexPtr Transaction::loadIndex(const Remote &remote)
   }
 }
 
-void Transaction::install(const Version *ver, const bool pin,
+void Transaction::install(const Version *ver, const int flags,
   const ArchiveReaderPtr &reader)
 {
-  install(ver, m_registry.getEntry(ver->package()), pin, reader);
+  install(ver, m_registry.getEntry(ver->package()), flags, reader);
 }
 
 void Transaction::install(const Version *ver, const Registry::Entry &oldEntry,
-  const bool pin, const ArchiveReaderPtr &reader)
+  const int flags, const ArchiveReaderPtr &reader)
 {
-  m_nextQueue.push(std::make_shared<InstallTask>(ver, pin, oldEntry, reader, this));
+  m_nextQueue.push(std::make_shared<InstallTask>(ver, flags, oldEntry, reader, this));
 }
 
-void Transaction::setPinned(const Registry::Entry &entry, const bool pinned)
+void Transaction::setFlags(const Registry::Entry &entry, const int flags)
 {
-  m_nextQueue.push(std::make_shared<PinTask>(entry, pinned, this));
+  m_nextQueue.push(std::make_shared<FlagsTask>(entry, flags, this));
 }
 
 void Transaction::uninstall(const Remote &remote)

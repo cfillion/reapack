@@ -29,6 +29,11 @@
 class Registry {
 public:
   struct Entry {
+    enum Flag {
+      PinnedFlag       = 1<<0,
+      BleedingEdgeFlag = 1<<1,
+    };
+
     typedef int64_t id_t;
 
     id_t id;
@@ -39,10 +44,11 @@ public:
     Package::Type type;
     VersionName version;
     std::string author;
-    bool pinned;
+    int flags;
 
     operator bool() const { return id > 0; }
     bool operator==(const Entry &o) const { return id == o.id; }
+    bool test(Flag f) const { return (flags & f) == f; }
   };
 
   struct File {
@@ -61,7 +67,7 @@ public:
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
   Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
-  void setPinned(const Entry &, bool pinned);
+  void setFlags(const Entry &, int flags);
   void forget(const Entry &);
 
   void savepoint() { m_db.savepoint(); }
@@ -76,7 +82,7 @@ private:
   Database m_db;
   Statement *m_insertEntry;
   Statement *m_updateEntry;
-  Statement *m_setPinned;
+  Statement *m_setFlags;
   Statement *m_findEntry;
   Statement *m_allEntries;
   Statement *m_forgetEntry;

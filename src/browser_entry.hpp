@@ -47,14 +47,14 @@ public:
     CanUninstall     = 1<<2,
     CanClearQueued   = 1<<3,
 
-    CanTogglePin     = 1<<10,
+    CanToggleFlags   = 1<<10,
   };
 
   Entry(const Package *, const Registry::Entry &, const IndexPtr &);
   Entry(const Registry::Entry &, const IndexPtr &);
 
   std::optional<const Version *> target;
-  std::optional<bool> pin;
+  std::optional<int> flags;
 
   std::string displayState() const;
   const std::string &indexName() const;

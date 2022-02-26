@@ -43,22 +43,22 @@ Registry::Registry(const Path &path)
     "SET desc = ?, type = ?, version = ?, author = ? WHERE id = ?"
   );
 
-  m_setPinned = m_db.prepare("UPDATE entries SET pinned = ? WHERE id = ?");
+  m_setFlags = m_db.prepare("UPDATE entries SET flags = ? WHERE id = ?");
 
   m_findEntry = m_db.prepare(
-    "SELECT id, remote, category, package, desc, type, version, author, pinned "
+    "SELECT id, remote, category, package, desc, type, version, author, flags "
     "FROM entries WHERE remote = ? AND category = ? AND package = ? LIMIT 1"
   );
 
   m_allEntries = m_db.prepare(
-    "SELECT id, remote, category, package, desc, type, version, author, pinned "
+    "SELECT id, remote, category, package, desc, type, version, author, flags "
     "FROM entries WHERE remote = ?"
   );
   m_forgetEntry = m_db.prepare("DELETE FROM entries WHERE id = ?");
 
   // file queries
   m_getOwner = m_db.prepare(
-    "SELECT e.id, remote, category, package, desc, e.type, version, author, pinned "
+    "SELECT e.id, remote, category, package, desc, e.type, version, author, flags "
     "FROM entries e JOIN files f ON f.entry = e.id WHERE f.path = ? LIMIT 1"
   );
   m_getFiles = m_db.prepare(
@@ -78,7 +78,7 @@ Registry::Registry(const Path &path)
 
 void Registry::migrate()
 {
-  const Database::Version version{0, 5};
+  const Database::Version version{0, 6};
   const Database::Version &current = m_db.version();
 
   if(!current) {
@@ -93,7 +93,7 @@ void Registry::migrate()
       "  type INTEGER NOT NULL,"
       "  version TEXT NOT NULL,"
       "  author TEXT NOT NULL,"
-      "  pinned INTEGER DEFAULT 0,"
+      "  flags INTEGER DEFAULT 0,"
       "  UNIQUE(remote, category, package)"
       ");"
 
@@ -135,6 +135,9 @@ void Registry::migrate()
       [[fallthrough]];
     case 4:
       convertImplicitSections();
+      [[fallthrough]];
+    case 5:
+      m_db.exec("ALTER TABLE entries RENAME COLUMN pinned TO flags;");
       break;
     }
 
@@ -217,11 +220,11 @@ auto Registry::push(const Version *ver, std::vector<Path> *conflicts) -> Entry
   }
 }
 
-void Registry::setPinned(const Entry &entry, const bool pinned)
+void Registry::setFlags(const Entry &entry, const int flags)
 {
-  m_setPinned->bind(1, pinned);
-  m_setPinned->bind(2, entry.id);
-  m_setPinned->exec();
+  m_setFlags->bind(1, flags);
+  m_setFlags->bind(2, entry.id);
+  m_setFlags->exec();
 }
 
 auto Registry::getEntry(const Package *pkg) const -> Entry
@@ -354,5 +357,5 @@ void Registry::fillEntry(const Statement *stmt, Entry *entry) const
   entry->type = static_cast<Package::Type>(stmt->intColumn(col++));
   entry->version.tryParse(stmt->stringColumn(col++));
   entry->author = stmt->stringColumn(col++);
-  entry->pinned = stmt->boolColumn(col++);
+  entry->flags = static_cast<int>(stmt->intColumn(col++));
 }

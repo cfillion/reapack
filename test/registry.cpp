@@ -185,21 +185,21 @@ TEST_CASE("get main files", M) {
   REQUIRE(current[0].type == Package::EffectType);
 }
 
-TEST_CASE("pin registry entry", M) {
+TEST_CASE("registry entry flags", M) {
   MAKE_PACKAGE
 
   Registry reg;
   reg.push(&ver);
 
   const Registry::Entry &entry = reg.getEntry(&pkg);
-  REQUIRE_FALSE(entry.pinned);
+  REQUIRE(entry.flags == 0);
 
-  reg.setPinned(entry, true);
-  REQUIRE(reg.getEntry(&pkg).pinned);
-  REQUIRE(reg.getEntries(ri.name())[0].pinned);
+  reg.setFlags(entry, 2);
+  REQUIRE(reg.getEntry(&pkg).flags == 2);
+  REQUIRE(reg.getEntries(ri.name())[0].flags == 2);
 
-  reg.setPinned(entry, false);
-  REQUIRE_FALSE(reg.getEntry(&pkg).pinned);
+  reg.setFlags(entry, 0);
+  REQUIRE(reg.getEntry(&pkg).flags == 0);
 }
 
 TEST_CASE("get file owner", M) {

@@ -25,9 +25,9 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 
-InstallTask::InstallTask(const Version *ver, const bool pin,
+InstallTask::InstallTask(const Version *ver, const int flags,
     const Registry::Entry &re, const ArchiveReaderPtr &reader, Transaction *tx)
-  : Task(tx), m_version(ver), m_pin(pin), m_oldEntry(std::move(re)), m_reader(reader),
+  : Task(tx), m_version(ver), m_flags(flags), m_oldEntry(std::move(re)), m_reader(reader),
     m_fail(false), m_index(ver->package()->category()->index()->shared_from_this())
 {
 }
@@ -123,8 +123,8 @@ void InstallTask::commit()
 
   const Registry::Entry newEntry = tx()->registry()->push(m_version);
 
-  if(m_pin)
-    tx()->registry()->setPinned(newEntry, true);
+  if(m_flags)
+    tx()->registry()->setFlags(newEntry, m_flags);
 
   tx()->registerAll(true, newEntry);
 }

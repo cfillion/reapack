@@ -108,8 +108,8 @@ DEFINE_API(bool, GetEntryInfo, ((PackageEntry*, entry))
   ((char*, pkgOut))((int, pkgOut_sz))((char*, descOut))((int, descOut_sz))
   ((int*, typeOut))((char*, verOut))((int, verOut_sz))
   ((char*, authorOut))((int, authorOut_sz))
-  ((bool*, pinnedOut))((int*, fileCountOut)),
-R"(Get the repository name, category, package name, package description, package type, the currently installed version, author name, pinned status and how many files are owned by the given package entry.
+  ((int*, flagsOut))((int*, fileCountOut)),
+R"(Get the repository name, category, package name, package description, package type, the currently installed version, author name, flags (&1=Pinned, &2=BleedingEdge) and how many files are owned by the given package entry.
 
 type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface)",
 {
@@ -132,8 +132,8 @@ type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterfa
     snprintf(verOut, verOut_sz, "%s", regEntry.version.toString().c_str());
   if(authorOut)
     snprintf(authorOut, authorOut_sz, "%s", regEntry.author.c_str());
-  if(pinnedOut)
-    *pinnedOut = regEntry.pinned;
+  if(flagsOut)
+    *flagsOut = regEntry.flags;
   if(fileCountOut)
     *fileCountOut = static_cast<int>(entry->files.size());
 

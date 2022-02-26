@@ -153,7 +153,12 @@ void Browser::onCommand(const int id, const int event)
     selectionDo(std::bind(&Browser::uninstall, this, _1, false));
     break;
   case ACTION_PIN:
-    currentDo(std::bind(&Browser::togglePin, this, _1));
+    currentDo(std::bind(&Browser::toggleFlag, this,
+      _1, Registry::Entry::PinnedFlag));
+    break;
+  case ACTION_BLEEDINGEDGE:
+    currentDo(std::bind(&Browser::toggleFlag, this,
+      _1, Registry::Entry::BleedingEdgeFlag));
     break;
   case ACTION_ABOUT_PKG:
     aboutPackage(m_currentIndex);
@@ -528,8 +533,8 @@ void Browser::transferActions()
       entryIt->target = target;
     }
 
-    if(oldEntry->pin)
-      entryIt->pin = *oldEntry->pin;
+    if(oldEntry->flags)
+      entryIt->flags = *oldEntry->flags;
 
     m_actions.push_back(&*entryIt);
   }
@@ -705,18 +710,18 @@ void Browser::uninstall(const int index, const bool toggle)
     toggleTarget(index, nullptr);
 }
 
-void Browser::togglePin(const int index)
+void Browser::toggleFlag(const int index, const int mask)
 {
   Entry *entry = getEntry(index);
-  if(!entry || !entry->test(Entry::CanTogglePin))
+  if(!entry || !entry->test(Entry::CanToggleFlags))
     return;
 
-  const bool newVal = !entry->pin.value_or(entry->regEntry.pinned);
+  const int newVal = mask ^ entry->flags.value_or(entry->regEntry.flags);
 
-  if(newVal == entry->regEntry.pinned)
-    entry->pin = std::nullopt;
+  if(newVal == entry->regEntry.flags)
+    entry->flags = std::nullopt;
   else
-    entry->pin = newVal;
+    entry->flags = newVal;
 
   updateAction(index);
 }
@@ -754,8 +759,8 @@ void Browser::resetActions(const int index)
 
   if(entry->target)
     entry->target = std::nullopt;
-  if(entry->pin)
-    entry->pin = std::nullopt;
+  if(entry->flags)
+    entry->flags = std::nullopt;
 
   updateAction(index);
 }
@@ -767,7 +772,7 @@ void Browser::updateAction(const int index)
     return;
 
   const auto &it = find(m_actions.begin(), m_actions.end(), entry);
-  if(!entry->target && (!entry->pin || !entry->test(Entry::CanTogglePin))) {
+  if(!entry->target && (!entry->flags || !entry->test(Entry::CanToggleFlags))) {
     if(it != m_actions.end())
       m_actions.erase(it);
   }
@@ -863,15 +868,15 @@ bool Browser::apply()
       const Version *target = *entry->target;
 
       if(target)
-        tx->install(target, entry->pin.value_or(false));
+        tx->install(target, entry->flags.value_or(0));
       else
         tx->uninstall(entry->regEntry);
 
       entry->target = std::nullopt;
     }
-    else if(entry->pin) {
-      tx->setPinned(entry->regEntry, *entry->pin);
-      entry->pin = std::nullopt;
+    else if(entry->flags) {
+      tx->setFlags(entry->regEntry, *entry->flags);
+      entry->flags = std::nullopt;
     }
   }
 

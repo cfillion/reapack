@@ -49,6 +49,7 @@ public:
     ACTION_UNINSTALL,
     ACTION_UNINSTALL_ALL,
     ACTION_PIN,
+    ACTION_BLEEDINGEDGE,
     ACTION_ABOUT_PKG,
     ACTION_ABOUT_REMOTE,
     ACTION_RESET_ALL,
@@ -126,7 +127,7 @@ private:
   void reinstall(int index, bool toggle);
   void installVersion(int index, size_t verIndex);
   void uninstall(int index, bool toggle);
-  void togglePin(int index);
+  void toggleFlag(int index, int mask);
 
   // these can be called directly because they don't use updateAction()
   void aboutRemote(int index, bool focus = true);

@@ -80,7 +80,7 @@ private:
 
 class InstallTask : public Task {
 public:
-  InstallTask(const Version *ver, bool pin, const Registry::Entry &,
+  InstallTask(const Version *ver, int flags, const Registry::Entry &,
     const ArchiveReaderPtr &, Transaction *);
 
   bool start() override;
@@ -91,7 +91,7 @@ private:
   void push(ThreadTask *, const TempPath &);
 
   const Version *m_version;
-  bool m_pin;
+  int m_flags;
   Registry::Entry m_oldEntry;
   ArchiveReaderPtr m_reader;
 
@@ -117,16 +117,16 @@ private:
   std::set<Path> m_removedFiles;
 };
 
-class PinTask : public Task {
+class FlagsTask : public Task {
 public:
-  PinTask(const Registry::Entry &, bool pin, Transaction *);
+  FlagsTask(const Registry::Entry &, int flags, Transaction *);
 
 protected:
   void commit() override;
 
 private:
   Registry::Entry m_entry;
-  bool m_pin;
+  int m_flags;
 };
 
 class ExportTask : public Task {

@@ -55,10 +55,10 @@ public:
   std::vector<IndexPtr> getIndexes(const std::vector<Remote> &) const;
   void synchronize(const Remote &,
     const std::optional<bool> &forceAutoInstall = std::nullopt);
-  void install(const Version *, bool pin = false, const ArchiveReaderPtr & = nullptr);
+  void install(const Version *, int flags = 0, const ArchiveReaderPtr & = nullptr);
   void install(const Version *, const Registry::Entry &oldEntry,
-    bool pin = false, const ArchiveReaderPtr & = nullptr);
-  void setPinned(const Registry::Entry &, bool pinned);
+    int flags = false, const ArchiveReaderPtr & = nullptr);
+  void setFlags(const Registry::Entry &, int flags);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void exportArchive(const std::string &path);

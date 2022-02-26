@@ -29,7 +29,8 @@ Browser::Entry::Entry(const Package *pkg, const Registry::Entry &re, const Index
   : m_flags(0), regEntry(re), package(pkg), index(i), current(nullptr)
 {
   const auto &instOpts = g_reapack->config()->install;
-  latest = pkg->lastVersion(instOpts.bleedingEdge, regEntry.version);
+  const bool pres = instOpts.bleedingEdge || re.test(Registry::Entry::BleedingEdgeFlag);
+  latest = pkg->lastVersion(pres, regEntry.version);
 
   if(regEntry) {
     m_flags |= InstalledFlag;
@@ -69,13 +70,21 @@ std::string Browser::Entry::displayState() const
   else
     state += '\x20';
 
-  if(regEntry.pinned)
+  if(regEntry.test(Registry::Entry::PinnedFlag))
     state += 'p';
+  if(regEntry.test(Registry::Entry::BleedingEdgeFlag))
+    state += 'b';
 
   if(target)
     state += *target == nullptr ? 'R' : 'I';
-  if(pin && test(CanTogglePin))
-    state += 'P';
+
+  if(test(CanToggleFlags) && flags) {
+    const int flagsDiff = regEntry.flags ^ *flags;
+    if(flagsDiff & Registry::Entry::PinnedFlag)
+      state += 'P';
+    if(flagsDiff & Registry::Entry::BleedingEdgeFlag)
+      state += 'B';
+  }
 
   return state;
 }
@@ -209,10 +218,16 @@ void Browser::Entry::fillMenu(Menu &menu) const
   }
 
   const UINT pinIndex = menu.addAction("&Pin current version", ACTION_PIN);
-  if(!test(CanTogglePin))
+  if(!test(CanToggleFlags))
     menu.disable(pinIndex);
-  if(pin.value_or(regEntry.pinned))
+  if(flags.value_or(regEntry.flags) & Registry::Entry::PinnedFlag)
     menu.check(pinIndex);
+
+  const UINT presIndex = menu.addAction("Enable pre-releases (&bleeding-edge)", ACTION_BLEEDINGEDGE);
+  if(!test(CanToggleFlags))
+    menu.disable(presIndex);
+  if(flags.value_or(regEntry.flags) & Registry::Entry::BleedingEdgeFlag)
+    menu.check(presIndex);
 
   const UINT uninstallIndex = menu.addAction("&Uninstall", ACTION_UNINSTALL);
   if(!test(InstalledFlag) || test(ProtectedFlag))
@@ -243,8 +258,8 @@ int Browser::Entry::possibleActions(bool allowToggle) const
   if(test(InstalledFlag) && !test(ProtectedFlag) && canSetTarget(nullptr))
     flags |= CanUninstall;
   if(target ? *target != nullptr : test(InstalledFlag))
-    flags |= CanTogglePin;
-  if(target || pin)
+    flags |= CanToggleFlags;
+  if(target || flags)
     flags |= CanClearQueued;
 
   return flags;

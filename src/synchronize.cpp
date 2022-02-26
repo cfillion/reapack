@@ -69,7 +69,8 @@ void SynchronizeTask::commit()
 
   if(m_opts.promptObsolete && !m_remote.isProtected()) {
     for(const auto &entry : tx()->registry()->getEntries(m_remote.name())) {
-      if(!entry.pinned && !index->find(entry.category, entry.package))
+      if(!entry.test(Registry::Entry::PinnedFlag) &&
+          !index->find(entry.category, entry.package))
         tx()->addObsolete(entry);
     }
   }
@@ -82,7 +83,8 @@ void SynchronizeTask::synchronize(const Package *pkg)
   if(!entry && !m_opts.autoInstall)
     return;
 
-  const Version *latest = pkg->lastVersion(m_opts.bleedingEdge, entry.version);
+  const bool pres = m_opts.bleedingEdge || entry.test(Registry::Entry::BleedingEdgeFlag);
+  const Version *latest = pkg->lastVersion(pres, entry.version);
 
   if(!latest)
     return;
@@ -91,7 +93,7 @@ void SynchronizeTask::synchronize(const Package *pkg)
     if(FS::allExists(latest->files()))
       return; // latest version is really installed, nothing to do here!
   }
-  else if(entry.pinned || latest->name() < entry.version)
+  else if(entry.test(Registry::Entry::PinnedFlag) || latest->name() < entry.version)
     return;
 
   tx()->install(latest, entry);

@@ -68,7 +68,7 @@ bool ExportTask::start()
         << quoted(entry.category) << '\x20'
         << quoted(entry.package) << '\x20'
         << quoted(entry.version.toString()) << '\x20'
-        << entry.pinned << '\n'
+        << entry.flags << '\n'
       ;
 
       for(const Registry::File &file : tx()->registry()->getFiles(entry))
