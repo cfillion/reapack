@@ -66,7 +66,7 @@ public:
   std::vector<Entry> getEntries(const std::string &) const;
   std::vector<File> getFiles(const Entry &) const;
   std::vector<File> getMainFiles(const Entry &) const;
-  Entry push(const Version *, std::vector<Path> *conflicts = nullptr);
+  Entry push(const Version *, int flags = 0, std::vector<Path> *conflicts = nullptr);
   void setFlags(const Entry &, int flags);
   void forget(const Entry &);
 

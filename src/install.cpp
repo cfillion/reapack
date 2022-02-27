@@ -40,7 +40,7 @@ bool InstallTask::start()
   // prevent file conflicts (don't worry, the registry push is reverted)
   try {
     std::vector<Path> conflicts;
-    tx()->registry()->push(m_version, &conflicts);
+    tx()->registry()->push(m_version, m_flags, &conflicts);
 
     if(!conflicts.empty()) {
       for(const Path &path : conflicts) {
@@ -121,11 +121,7 @@ void InstallTask::commit()
 
   tx()->receipt()->addInstall(m_version, m_oldEntry);
 
-  const Registry::Entry newEntry = tx()->registry()->push(m_version);
-
-  if(m_flags)
-    tx()->registry()->setFlags(newEntry, m_flags);
-
+  const Registry::Entry &newEntry = tx()->registry()->push(m_version, m_flags);
   tx()->registerAll(true, newEntry);
 }
 

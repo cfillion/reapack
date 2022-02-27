@@ -868,7 +868,7 @@ bool Browser::apply()
       const Version *target = *entry->target;
 
       if(target)
-        tx->install(target, entry->flags.value_or(0));
+        tx->install(target, entry->flags.value_or(entry->regEntry.flags));
       else
         tx->uninstall(entry->regEntry);
 

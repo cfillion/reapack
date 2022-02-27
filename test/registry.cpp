@@ -35,7 +35,7 @@ TEST_CASE("query installed package", M) {
 
   Registry reg;
 
-  const Registry::Entry &entry = reg.push(&ver);
+  const Registry::Entry &entry = reg.push(&ver, 2);
   REQUIRE(entry);
   REQUIRE(entry.id == 1);
   REQUIRE(entry.remote == "Remote Name");
@@ -44,6 +44,7 @@ TEST_CASE("query installed package", M) {
   REQUIRE(entry.type == Package::ScriptType);
   REQUIRE(entry.version.toString() == "1.0");
   REQUIRE(entry.author == "John Doe");
+  REQUIRE(entry.flags == 2);
 
   const Registry::Entry &selectEntry = reg.getEntry(&pkg);
   REQUIRE(selectEntry.id == entry.id);
@@ -54,6 +55,7 @@ TEST_CASE("query installed package", M) {
   REQUIRE(selectEntry.type == entry.type);
   REQUIRE(selectEntry.version == entry.version);
   REQUIRE(selectEntry.author == entry.author);
+  REQUIRE(selectEntry.flags == entry.flags);
 }
 
 TEST_CASE("bump version", M) {
@@ -63,16 +65,18 @@ TEST_CASE("bump version", M) {
   ver2.addSource(new Source("file", "url", &ver2));
 
   Registry reg;
-  reg.push(&ver);
+  reg.push(&ver, 1);
 
   const Registry::Entry &entry1 = reg.getEntry(&pkg);
   REQUIRE(entry1.version.toString() == "1.0");
   CHECK(entry1.author == "John Doe");
+  CHECK(entry1.flags == 1);
 
-  reg.push(&ver2);
+  reg.push(&ver2, 2);
   const Registry::Entry &entry2 = reg.getEntry(&pkg);
   REQUIRE(entry2.version.toString() == "2.0");
   CHECK(entry2.author == "");
+  REQUIRE(entry2.flags == 2);
   
   REQUIRE(entry2.id == entry1.id);
 }
@@ -151,7 +155,7 @@ TEST_CASE("file conflicts", M) {
   CHECK(reg.getEntry(&pkg).id == 0); // still uninstalled
 
   std::vector<Path> conflicts;
-  const auto &pushResult = reg.push(&ver, &conflicts);
+  const auto &pushResult = reg.push(&ver, 0, &conflicts);
   CHECK(pushResult.id == 0);
 
   REQUIRE(conflicts.size() == 1);

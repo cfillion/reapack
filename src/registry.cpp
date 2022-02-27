@@ -34,13 +34,13 @@ Registry::Registry(const Path &path)
 
   // entry queries
   m_insertEntry = m_db.prepare(
-    "INSERT INTO entries(remote, category, package, desc, type, version, author)"
-    "VALUES(?, ?, ?, ?, ?, ?, ?);"
+    "INSERT INTO entries(remote, category, package, desc, type, version, author, flags)"
+    "VALUES(?, ?, ?, ?, ?, ?, ?, ?);"
   );
 
   m_updateEntry = m_db.prepare(
     "UPDATE entries "
-    "SET desc = ?, type = ?, version = ?, author = ? WHERE id = ?"
+    "SET desc = ?, type = ?, version = ?, author = ?, flags = ? WHERE id = ?"
   );
 
   m_setFlags = m_db.prepare("UPDATE entries SET flags = ? WHERE id = ?");
@@ -146,7 +146,8 @@ void Registry::migrate()
   }
 }
 
-auto Registry::push(const Version *ver, std::vector<Path> *conflicts) -> Entry
+auto Registry::push(const Version *ver, const int flags,
+  std::vector<Path> *conflicts) -> Entry
 {
   m_db.savepoint();
 
@@ -165,21 +166,25 @@ auto Registry::push(const Version *ver, std::vector<Path> *conflicts) -> Entry
 
   // register or update package and version
   if(entryId) {
-    m_updateEntry->bind(1, pkg->description());
-    m_updateEntry->bind(2, pkg->type());
-    m_updateEntry->bind(3, ver->name().toString());
-    m_updateEntry->bind(4, ver->author());
-    m_updateEntry->bind(5, entryId);
+    int col = 1;
+    m_updateEntry->bind(col++, pkg->description());
+    m_updateEntry->bind(col++, pkg->type());
+    m_updateEntry->bind(col++, ver->name().toString());
+    m_updateEntry->bind(col++, ver->author());
+    m_updateEntry->bind(col++, flags);
+    m_updateEntry->bind(col++, entryId);
     m_updateEntry->exec();
   }
   else {
-    m_insertEntry->bind(1, ri->name());
-    m_insertEntry->bind(2, cat->name());
-    m_insertEntry->bind(3, pkg->name());
-    m_insertEntry->bind(4, pkg->description());
-    m_insertEntry->bind(5, pkg->type());
-    m_insertEntry->bind(6, ver->name().toString());
-    m_insertEntry->bind(7, ver->author());
+    int col = 1;
+    m_insertEntry->bind(col++, ri->name());
+    m_insertEntry->bind(col++, cat->name());
+    m_insertEntry->bind(col++, pkg->name());
+    m_insertEntry->bind(col++, pkg->description());
+    m_insertEntry->bind(col++, pkg->type());
+    m_insertEntry->bind(col++, ver->name().toString());
+    m_insertEntry->bind(col++, ver->author());
+    m_insertEntry->bind(col++, flags);
     m_insertEntry->exec();
 
     entryId = m_db.lastInsertId();
@@ -189,10 +194,11 @@ auto Registry::push(const Version *ver, std::vector<Path> *conflicts) -> Entry
   for(const Source *src : ver->sources()) {
     const Path &path = src->targetPath();
 
-    m_insertFile->bind(1, entryId);
-    m_insertFile->bind(2, path.join(false));
-    m_insertFile->bind(3, src->sections());
-    m_insertFile->bind(4, src->typeOverride());
+    int col = 1;
+    m_insertFile->bind(col++, entryId);
+    m_insertFile->bind(col++, path.join(false));
+    m_insertFile->bind(col++, src->sections());
+    m_insertFile->bind(col++, src->typeOverride());
 
     try {
       m_insertFile->exec();
@@ -215,8 +221,10 @@ auto Registry::push(const Version *ver, std::vector<Path> *conflicts) -> Entry
   }
   else {
     m_db.release();
-    return {entryId, ri->name(), cat->name(),
-      pkg->name(), pkg->description(), pkg->type(), ver->name(), ver->author()};
+    return {
+      entryId, ri->name(), cat->name(), pkg->name(), pkg->description(),
+      pkg->type(), ver->name(), ver->author(), flags
+    };
   }
 }
 
