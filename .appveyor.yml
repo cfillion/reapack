@@ -92,6 +92,9 @@ for:
       # don't use LibXml2/SQLite3 from Mono
       - sudo rm -r /Library/Frameworks/Mono.framework
 
+      # https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/
+      - sudo curl -k https://curl.se/ca/cacert.pem -o /etc/ssl/cert.pem
+
       # backport vcpkg bugfixes (TODO: remove after future image updates)
       - git -C ~/vcpkg fetch
       - git -C ~/vcpkg restore -s 38d6712d5644ede4ff597e889549f5d540dcf8ff ports/catch2
