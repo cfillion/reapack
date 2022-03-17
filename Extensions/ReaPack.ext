@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4rc1
+@version 1.2.4rc2
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -14,16 +14,5 @@
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
   Added:
-  • Add an option to browse packages in each repository's install/update menu
-  • Match synonymous words when filtering packages (Options > Search for synonyms of common words) [p=2512900]
-
-  Fixed:
-  • Fix loading from a symlinked resource path on macOS Catalina and newer [#34]
-  • Fix the browser's filter text box not being auto-focused on macOS REAPER v6
-  • Fix typing parentheses in the browser's filter box
-  • Improve window positionning on Linux in multimonitor setups
-
-  Changed:
-  • Allow ReaPack to be installed as a symbolic link in UserPlugins on Linux and macOS
-  • Don't modify the database at every startup
-  • Rename "Upload packages" to "Package editor" in the browser's menu
+  • Add an option in the browser to enable pre-releases per installed package [#46]
+  • Fix unsetting version pin at the same time as installing or updating
