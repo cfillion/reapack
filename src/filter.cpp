@@ -172,11 +172,21 @@ Filter::Group *Filter::Group::addSubGroup(const Type type, const int flags)
 
 bool Filter::Group::pushSynonyms(const std::string_view &buf, int *flags)
 {
+  // from the [actionlist_synonyms] section in REAPER's langpack
   static const std::vector<std::string_view> synonyms[] {
     { "open", "display", "view", "show", "hide" },
     { "delete", "clear", "remove", "erase" },
     { "insert", "add" },
     { "deselect", "unselect" },
+    { "color", "colour" },
+    { "colors", "colours" },
+    { "normalize", "normalise" },
+    { "normalized", "normalised" },
+    { "customize", "customise" },
+    { "synchronize", "synchronise" },
+    { "optimize", "optimise" },
+    { "optimized", "optimised" },
+    { "center", "centre" },
   };
 
   auto *match = [&]() -> decltype(&*synonyms) {
