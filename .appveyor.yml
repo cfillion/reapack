@@ -111,6 +111,11 @@ for:
       - if "%ARCH%" == "x64" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
       - if "%ARCH%" == "x86" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
     build_script:
+      # fix vcpkg toolchain reverting CMake policies to v3.7.2
+      # (TODO: remove on the next image update)
+      - git -C C:\Tools\vcpkg fetch
+      - git -C C:\Tools\vcpkg restore -s 5cf60186a241e84e8232641ee973395d4fde90e1 scripts\buildsystems\vcpkg.cmake
+
       - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
         -DVCPKG_TARGET_TRIPLET=%ARCH%-windows-static
         -DCMAKE_TOOLCHAIN_FILE=C:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
