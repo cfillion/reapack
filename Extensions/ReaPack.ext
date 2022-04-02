@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4rc2
+@version 1.2.4
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -12,7 +12,4 @@
   [linux-aarch64] reaper_reapack-aarch64.so   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
-@changelog
-  Added:
-  • Add an option in the browser to enable pre-releases per installed package [#46]
-  • Fix unsetting version pin at the same time as installing or updating
+@changelog https://reapack.com/release-notes/v1.2#v1-2-4
