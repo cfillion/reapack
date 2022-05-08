@@ -139,7 +139,11 @@ target_link_libraries(reapack
 )
 
 if(OPENSSL_FOUND)
-  target_link_libraries(reapack OpenSSL::Crypto)
+  if(RUNTIME_OPENSSL)
+    target_compile_definitions(reapack PRIVATE RUNTIME_OPENSSL)
+  else()
+    target_link_libraries(reapack OpenSSL::Crypto)
+  endif()
 endif()
 
 if(SWELL_FOUND)

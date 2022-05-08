@@ -46,6 +46,7 @@ private:
 
   class CNGContext;
   class SHA256Context;
+  class EVPContext;
 
   Algorithm m_algo;
   std::string m_value;

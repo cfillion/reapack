@@ -111,14 +111,9 @@ private:
   unsigned long m_hashLength;
 };
 
-#else // Unix systems
-
-#  ifdef __APPLE__
-#    define COMMON_DIGEST_FOR_OPENSSL
-#    include <CommonCrypto/CommonDigest.h>
-#  else
-#    include <openssl/sha.h>
-#  endif
+#elif __APPLE__
+#  define COMMON_DIGEST_FOR_OPENSSL
+#  include <CommonCrypto/CommonDigest.h>
 
 class Hash::SHA256Context : public Hash::Context {
 public:
@@ -146,6 +141,120 @@ private:
   SHA256_CTX m_context;
 };
 
+#else
+#  include <openssl/evp.h>
+
+#  ifdef RUNTIME_OPENSSL
+#    include <dlfcn.h>
+
+static struct OpenSSL {
+  OpenSSL()
+    : m_loaded { true }
+  {
+    constexpr const char *names[] { "libcrypto.so.3", "libcrypto.so.1.1" };
+
+    for(const char *name : names) {
+      if((m_so = dlopen(name, RTLD_LAZY)))
+        return;
+    }
+
+    m_loaded = false;
+  }
+
+  ~OpenSSL()
+  {
+    if(m_so)
+      dlclose(m_so);
+  }
+
+  bool isLoaded() const { return m_loaded; }
+
+  template<typename T> T get(const char *name)
+  {
+    const T func { m_so ? reinterpret_cast<T>(dlsym(m_so, name)) : nullptr };
+    if(!func)
+      m_loaded = false;
+    return func;
+  }
+
+private:
+  void *m_so;
+  bool m_loaded;
+} g_openssl;
+
+#    define IMPORT_OPENSSL(func) \
+       static auto _##func { g_openssl.get<decltype(&func)>(#func) };
+
+IMPORT_OPENSSL(EVP_DigestFinal_ex);
+#    define EVP_DigestFinal_ex _EVP_DigestFinal_ex
+IMPORT_OPENSSL(EVP_DigestInit_ex);
+#    define EVP_DigestInit_ex _EVP_DigestInit_ex
+IMPORT_OPENSSL(EVP_DigestUpdate);
+#    define EVP_DigestUpdate _EVP_DigestUpdate
+IMPORT_OPENSSL(EVP_MD_CTX_new);
+#    define EVP_MD_CTX_new _EVP_MD_CTX_new
+IMPORT_OPENSSL(EVP_MD_CTX_free);
+#    define EVP_MD_CTX_free _EVP_MD_CTX_free
+#    ifdef EVP_MD_size // OpenSSL 3
+IMPORT_OPENSSL(EVP_MD_get_size);
+#      undef  EVP_MD_size
+#      define EVP_MD_size _EVP_MD_get_size
+#    else
+IMPORT_OPENSSL(EVP_MD_size);
+#      define EVP_MD_size _EVP_MD_size
+#    endif
+IMPORT_OPENSSL(EVP_sha256);
+#    define EVP_sha256 _EVP_sha256
+#  endif
+
+class Hash::EVPContext : public Hash::Context {
+public:
+  static const EVP_MD *getAlgo(const Algorithm algo)
+  {
+#ifdef RUNTIME_OPENSSL
+    if(!g_openssl.isLoaded())
+      return nullptr;
+#endif
+
+    switch(algo) {
+    case SHA256:
+      return EVP_sha256();
+    default:
+      return nullptr;
+    }
+  }
+
+  EVPContext(const EVP_MD *md)
+    : m_md { md }
+  {
+    m_ctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(m_ctx, m_md, nullptr);
+  }
+
+  ~EVPContext()
+  {
+    EVP_MD_CTX_free(m_ctx);
+  }
+
+  size_t hashSize() const override
+  {
+    return EVP_MD_size(m_md);
+  }
+
+  void addData(const char *data, const size_t len) override
+  {
+    EVP_DigestUpdate(m_ctx, data, len);
+  }
+
+  void getHash(unsigned char *out) override
+  {
+    EVP_DigestFinal_ex(m_ctx, out, nullptr);
+  }
+
+private:
+  EVP_MD_CTX *m_ctx;
+  const EVP_MD *m_md;
+};
 #endif
 
 Hash::Hash(const Algorithm algo)
@@ -154,12 +263,15 @@ Hash::Hash(const Algorithm algo)
 #ifdef _WIN32
   if(const auto &algoProvider = CNGAlgorithmProvider::get(algo))
     m_context = std::make_unique<CNGContext>(algoProvider);
-#else
+#elif __APPLE__
   switch(algo) {
   case SHA256:
     m_context = std::make_unique<SHA256Context>();
     break;
   }
+#else
+  if(const auto &algoDesc = EVPContext::getAlgo(algo))
+    m_context = std::make_unique<EVPContext>(algoDesc);
 #endif
 }
 
