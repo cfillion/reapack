@@ -115,21 +115,14 @@ target_include_directories(reapack PRIVATE
 
 if(WIN32)
   target_sources(reapack PRIVATE buildinfo.rc)
-  target_compile_options(reapack PUBLIC /W3 /WX /wd4996 /wd5208)
+  target_compile_options(reapack PUBLIC /W3 /WX /wd4996)
   target_compile_definitions(reapack PUBLIC NOMINMAX UNICODE)
   target_link_libraries(reapack Bcrypt Comctl32 Comdlg32 Gdi32 Shell32 User32)
 else()
   target_compile_options(reapack PUBLIC
     -Wall -Wextra -Werror
     -Wno-unused-parameter -Wno-missing-field-initializers
-    -Wno-unused-function -Wno-missing-braces
   )
-
-  # Clang 11
-  check_cxx_compiler_flag(-Wnon-c-typedef-for-linkage HAVE_NON_C_TYPEDEF_FOR_LINKAGE)
-  if(HAVE_NON_C_TYPEDEF_FOR_LINKAGE)
-    target_compile_options(reapack PUBLIC -Wno-non-c-typedef-for-linkage)
-  endif()
 endif()
 
 target_link_libraries(reapack
