@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4
+@version 1.2.4.1
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -12,4 +12,6 @@
   [linux-aarch64] reaper_reapack-aarch64.so   https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
-@changelog https://reapack.com/release-notes/v1.2#v1-2-4
+@changelog
+  • Add support for Linux systems shipping with OpenSSL 3 [#47]
+  • Rename "Upload packages" action to "Package editor"
