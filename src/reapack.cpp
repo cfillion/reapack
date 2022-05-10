@@ -113,7 +113,7 @@ void ReaPack::setupActions()
   m_actions.add("REAPACK_BROWSE", "ReaPack: Browse packages...",
     std::bind(&ReaPack::browsePackages, this));
 
-  m_actions.add("REAPACK_UPLOAD", "ReaPack: Upload packages",
+  m_actions.add("REAPACK_UPLOAD", "ReaPack: Package editor",
     std::bind(&ReaPack::uploadPackage, this));
 
   m_actions.add("REAPACK_IMPORT", "ReaPack: Import repositories...",
