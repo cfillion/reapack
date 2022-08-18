@@ -34,11 +34,9 @@ public:
   ~APIReg();
 
 private:
-  void registerFunc() const;
-
   const APIFunc *m_func;
 
-  // plugin_register requires these to not be temporaries
+  // REAPER < 6.67 requires these strings to remain valid after registering
   std::string m_impl;
   std::string m_vararg;
   std::string m_help;

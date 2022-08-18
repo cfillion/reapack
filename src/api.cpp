@@ -29,21 +29,14 @@ APIReg::APIReg(const APIFunc *func)
   : m_func(func),
     m_impl(KEY("API")), m_vararg(KEY("APIvararg")), m_help(KEY("APIdef"))
 {
-  registerFunc();
+  plugin_register(m_impl.c_str(), m_func->cImpl);
+  plugin_register(m_vararg.c_str(), m_func->reascriptImpl);
+  plugin_register(m_help.c_str(), m_func->definition);
 }
 
 APIReg::~APIReg()
 {
-  m_impl.insert(m_impl.begin(), '-');
-  m_vararg.insert(m_vararg.begin(), '-');
-  m_help.insert(m_help.begin(), '-');
-
-  registerFunc();
-}
-
-void APIReg::registerFunc() const
-{
-  plugin_register(m_impl.c_str(), m_func->cImpl);
-  plugin_register(m_vararg.c_str(), m_func->reascriptImpl);
-  plugin_register(m_help.c_str(), m_func->definition);
+  plugin_register(("-" + m_impl).c_str(), m_func->cImpl);
+  plugin_register(("-" + m_vararg).c_str(), m_func->reascriptImpl);
+  plugin_register(("-" + m_help).c_str(), m_func->definition);
 }
