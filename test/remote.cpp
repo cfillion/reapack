@@ -171,17 +171,17 @@ TEST_CASE("protect remote", M) {
 
 TEST_CASE("autoinstall remote", M) {
   Remote remote;
-  REQUIRE_FALSE(remote.autoInstall());
+  REQUIRE_FALSE(bool{remote.autoInstall()});
   REQUIRE(remote.autoInstall(true));
   REQUIRE_FALSE(remote.autoInstall(false));
 
   remote.setAutoInstall(true);
-  REQUIRE(remote.autoInstall());
+  REQUIRE(bool{remote.autoInstall()});
   REQUIRE(remote.autoInstall(true));
   REQUIRE(remote.autoInstall(false));
 
   remote.setAutoInstall(false);
-  REQUIRE_FALSE(remote.autoInstall());
+  REQUIRE_FALSE(bool{remote.autoInstall()});
   REQUIRE_FALSE(remote.autoInstall(true));
   REQUIRE_FALSE(remote.autoInstall(false));
 }
@@ -260,7 +260,7 @@ TEST_CASE("unserialize remote", M) {
 
   SECTION("auto-install enabled") {
     Remote remote = Remote::fromString("name|url|1|1");
-    REQUIRE(remote.autoInstall());
+    REQUIRE(bool{remote.autoInstall()});
   }
 
   SECTION("auto-install enabled") {

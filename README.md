@@ -26,7 +26,7 @@ Install the following libraries (and development headers if your system provides
 them separately):
 
 - [Boost](https://www.boost.org/) (1.56 or later)
-- [Catch2](https://github.com/catchorg/Catch2)
+- [Catch2](https://github.com/catchorg/Catch2) (3.0 or later)
 - [libcurl](https://curl.haxx.se/libcurl/)
 - [libxml2](http://www.xmlsoft.org/)
 - [OpenSSL](https://www.openssl.org/) or compatible

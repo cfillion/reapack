@@ -4,7 +4,7 @@
 
 #include <index.hpp>
 
-using Catch::Matchers::Contains;
+using Catch::Matchers::ContainsSubstring;
 using Catch::Matchers::EndsWith;
 
 static const char *M = "[receipt]";
@@ -166,41 +166,41 @@ TEST_CASE("format install ticket", M) {
 
   SECTION("contains fullname") {
     stream << InstallTicket{v3, {}};
-    REQUIRE_THAT(stream.str(), Contains(pkg.fullName()));
+    REQUIRE_THAT(stream.str(), ContainsSubstring(pkg.fullName()));
   }
 
   SECTION("prepend newline if stream nonempty") {
     stream << "something";
     stream << InstallTicket{v3, {}};
-    REQUIRE_THAT(stream.str(), Contains("something\r\n"));
+    REQUIRE_THAT(stream.str(), ContainsSubstring("something\r\n"));
   }
 
   SECTION("installed from scratch") {
     stream << InstallTicket{v2, {}};
-    REQUIRE_THAT(stream.str(), Contains("[new]") &&
-      !Contains("v1.0\r\n") && Contains("v2.0\r\n") && !Contains("v3.0\r\n"));
+    REQUIRE_THAT(stream.str(), ContainsSubstring("[new]") &&
+      !ContainsSubstring("v1.0\r\n") && ContainsSubstring("v2.0\r\n") && !ContainsSubstring("v3.0\r\n"));
   }
 
   SECTION("reinstalled") {
     entry.version = VersionName("2.0");
     stream << InstallTicket{v2, entry};
-    REQUIRE_THAT(stream.str(), Contains("[reinstalled]") &&
-      !Contains("v1.0\r\n") && Contains("v2.0\r\n") && !Contains("v3.0\r\n"));
+    REQUIRE_THAT(stream.str(), ContainsSubstring("[reinstalled]") &&
+      !ContainsSubstring("v1.0\r\n") && ContainsSubstring("v2.0\r\n") && !ContainsSubstring("v3.0\r\n"));
   }
 
   SECTION("update") {
     entry.version = VersionName("1.0");
     stream << InstallTicket{v3, entry};
-    REQUIRE_THAT(stream.str(), Contains("[v1.0 -> v3.0]") &&
-      !Contains("v1.0\r\n") && Contains("\r\nv3.0\r\n  No changelog\r\nv2.0"));
+    REQUIRE_THAT(stream.str(), ContainsSubstring("[v1.0 -> v3.0]") &&
+      !ContainsSubstring("v1.0\r\n") && ContainsSubstring("\r\nv3.0\r\n  No changelog\r\nv2.0"));
     REQUIRE_THAT(stream.str(), !EndsWith("\r\n"));
   }
 
   SECTION("downgrade") {
     entry.version = VersionName("3.0");
     stream << InstallTicket{v1, entry};
-    REQUIRE_THAT(stream.str(), Contains("[v3.0 -> v1.0]") &&
-      Contains("v1.0\r\n") && !Contains("v2.0\r\n") && !Contains("v3.0\r\n"));
+    REQUIRE_THAT(stream.str(), ContainsSubstring("[v3.0 -> v1.0]") &&
+      ContainsSubstring("v1.0\r\n") && !ContainsSubstring("v2.0\r\n") && !ContainsSubstring("v3.0\r\n"));
   }
 }
 

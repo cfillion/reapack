@@ -13,7 +13,6 @@ add_executable(tests EXCLUDE_FROM_ALL
   helper.hpp
   index.cpp
   index_v1.cpp
-  main.cpp
   metadata.cpp
   package.cpp
   path.cpp
@@ -36,4 +35,4 @@ target_include_directories(tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src
   ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_SOURCE_DIR}/vendor/reaper-sdk/sdk
 )
-target_link_libraries(tests Catch2::Catch2 reapack)
+target_link_libraries(tests Catch2::Catch2WithMain reapack)

@@ -98,9 +98,9 @@ for:
           # https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/
           - sudo curl -k https://curl.se/ca/cacert.pem -o /etc/ssl/cert.pem
 
-          # backport vcpkg bugfixes
+          # update to Catch2 v3
           git -C ~/vcpkg fetch
-          git -C ~/vcpkg restore -s 38d6712d5644ede4ff597e889549f5d540dcf8ff ports/catch2
+          git -C ~/vcpkg restore -s 50fe35a3c3ca43ffe3b436380cf563100406459a ports/catch2
         fi
     artifacts:
       - path: build/reaper_reapack*.dylib
