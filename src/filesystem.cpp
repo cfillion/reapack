@@ -203,6 +203,8 @@ Path FS::canonical(const Path &path)
   return path;
 #else
   char *resolved = realpath(path.join().c_str(), nullptr);
+  if(!resolved)
+    return path;
   Path out(resolved);
   free(resolved);
   return out;
