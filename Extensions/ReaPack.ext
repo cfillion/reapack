@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4.1
+@version 1.2.4.2
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -13,5 +13,6 @@
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Add support for Linux systems shipping with OpenSSL 3 [#47]
-  • Rename "Upload packages" action to "Package editor"
+  • Fix potential crash on exit in REAPER < 6.67 due to API registration keys being invalidated [#56]
+  • macOS: fix a crash on startup if ReaPack's filename was renamed [#51]
+  • Windows: fix clamping of window positions to visible area (was broken in v1.2.4) [#49]
