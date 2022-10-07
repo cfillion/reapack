@@ -228,13 +228,21 @@ void Dialog::center()
   boundedMove(left, top);
 }
 
-void Dialog::boundedMove(int x, int y)
+void Dialog::boundedMove(const int x, const int y)
 {
   RECT rect;
   GetWindowRect(m_handle, &rect);
+
+  const int deltaX = x - rect.left,
+            deltaY = y - rect.top;
+  rect.left   += deltaX;
+  rect.top    += deltaY;
+  rect.right  += deltaX;
+  rect.bottom += deltaY;
+
   EnsureNotCompletelyOffscreen(&rect);
 
-  SetWindowPos(m_handle, nullptr, x, y,
+  SetWindowPos(m_handle, nullptr, rect.left, rect.top,
     0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 
