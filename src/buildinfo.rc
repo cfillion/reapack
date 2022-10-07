@@ -3,7 +3,8 @@
 #include <winver.h>
 
 #define VERSION_ARRAY \
-  REAPACK_VERSION_MAJOR, REAPACK_VERSION_MINOR, REAPACK_VERSION_PATCH
+  REAPACK_VERSION_MAJOR, REAPACK_VERSION_MINOR, REAPACK_VERSION_PATCH, \
+  REAPACK_VERSION_TWEAK
 
 // https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
 
