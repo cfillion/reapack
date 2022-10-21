@@ -12,7 +12,7 @@ static const char *M = "[registry]";
 #define MAKE_PACKAGE \
   Index ri("Remote Name"); \
   Category cat("Category Name", &ri); \
-  Package pkg(Package::ScriptType, "Hello", &cat); \
+  Package pkg(Package::ScriptType, "Hello", &cat, "remote"); \
   pkg.setDescription("Hello World"); \
   Version ver("1.0", &pkg); \
   ver.setAuthor("John Doe"); \
@@ -77,7 +77,7 @@ TEST_CASE("bump version", M) {
   REQUIRE(entry2.version.toString() == "2.0");
   CHECK(entry2.author == "");
   REQUIRE(entry2.flags == 2);
-  
+
   REQUIRE(entry2.id == entry1.id);
 }
 
@@ -137,7 +137,7 @@ TEST_CASE("file conflicts", M) {
 
   Index ri("Remote Name");
   Category cat("Category Name", &ri);
-  Package pkg(Package::ScriptType, "Duplicate Package", &cat);
+  Package pkg(Package::ScriptType, "Duplicate Package", &cat, "remote");
   Version ver("1.0", &pkg);
   Source *src1 = new Source("file", "url", &ver);
   ver.addSource(src1);

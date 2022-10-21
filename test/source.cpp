@@ -11,7 +11,7 @@ static const char *M = "[source]";
 #define MAKE_VERSION \
   Index ri("Index Name"); \
   Category cat("Category Name", &ri); \
-  Package pkg(Package::DataType, "Package Name", &cat); \
+  Package pkg(Package::DataType, "Package Name", &cat, "remote"); \
   Version ver("1.0", &pkg);
 
 TEST_CASE("source platform", M) {
@@ -97,7 +97,7 @@ TEST_CASE("implicit section detection from source (v1.0 compatibility)") {
 
   SECTION("main") {
     Category cat("Category Name", &ri);
-    Package pack(Package::ScriptType, "package name", &cat);
+    Package pack(Package::ScriptType, "package name", &cat, "remote");
     Version ver("1.0", &pack);
 
     Source source("filename", "url", &ver);
@@ -107,7 +107,7 @@ TEST_CASE("implicit section detection from source (v1.0 compatibility)") {
 
   SECTION("midi editor") {
     Category cat("MIDI Editor", &ri);
-    Package pack(Package::ScriptType, "package name", &cat);
+    Package pack(Package::ScriptType, "package name", &cat, "remote");
     Version ver("1.0", &pack);
 
     Source source("filename", "url", &ver);
@@ -154,7 +154,7 @@ TEST_CASE("source target path", M) {
 TEST_CASE("target path with parent directory traversal", M) {
   Index ri("Index Name");
   Category cat("Category Name", &ri);
-  Package pack(Package::ScriptType, "package name", &cat);
+  Package pack(Package::ScriptType, "package name", &cat, "remote");
   Version ver("1.0", &pack);
   Source source("../../../file.name", "url", &ver);
 
@@ -180,7 +180,7 @@ TEST_CASE("target path with parent directory traversal", M) {
 TEST_CASE("target path for unknown package type", M) {
   Index ri("name");
   Category cat("name", &ri);
-  Package pack(Package::UnknownType, "a", &cat);
+  Package pack(Package::UnknownType, "a", &cat, "remote");
   Version ver("1.0", &pack);
   Source src({}, "url", &ver);
 
@@ -190,7 +190,7 @@ TEST_CASE("target path for unknown package type", M) {
 TEST_CASE("directory traversal in category name", M) {
   Index ri("Remote Name");
   Category cat("../..", &ri);
-  Package pack(Package::ScriptType, "file.name", &cat);
+  Package pack(Package::ScriptType, "file.name", &cat, "remote");
   Version ver("1.0", &pack);
   Source src({}, "url", &ver);
 
