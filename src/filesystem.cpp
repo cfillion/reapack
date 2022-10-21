@@ -106,6 +106,20 @@ bool FS::rename(const Path &from, const Path &to)
   return !func(nativePath(from).c_str(), nativePath(to).c_str());
 }
 
+bool FS::symlink(const Path &target, const Path &link)
+{
+  mkdir(link.dirname());
+
+  const auto &nativeTarget = nativePath(target);
+  const auto &nativeLink = nativePath(link);
+
+#ifdef _WIN32
+  return CreateSymbolicLink(nativeLink.c_str(), nativeTarget.c_str(), 0x0);
+#else
+  return !::symlink(nativeTarget.c_str(), nativeLink.c_str());
+#endif
+}
+
 bool FS::remove(const Path &path)
 {
   const auto &fullPath = nativePath(path);

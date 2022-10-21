@@ -31,6 +31,7 @@ namespace FS {
   bool write(const Path &, const std::string &);
   bool rename(const TempPath &);
   bool rename(const Path &, const Path &);
+  bool symlink(const Path &, const Path &);
   bool remove(const Path &);
   bool removeRecursive(const Path &);
   bool mtime(const Path &, time_t *);
