@@ -131,6 +131,7 @@ target_link_libraries(reapack
   SQLite::SQLite3 Threads::Threads WDL::WDL
   $<IF:$<BOOL:${LIBXML2_FOUND}>,LibXml2::LibXml2,tinyxml2::tinyxml2>
 )
+target_compile_definitions(reapack PRIVATE CURL_DISABLE_DEPRECATION)
 
 if(OPENSSL_FOUND)
   if(RUNTIME_OPENSSL)
