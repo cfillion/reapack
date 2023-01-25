@@ -16,11 +16,10 @@
  */
 
 #include "receipt.hpp"
-
+#include "util/reverse_range.hpp"
 #include "index.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
 Receipt::Receipt()
@@ -141,7 +140,7 @@ std::ostream &operator<<(std::ostream &os, const InstallTicket &t)
   if(t.m_type == InstallTicket::Update) {
     const auto &versions = t.m_version->package()->versions();
 
-    for(const Version *ver : versions | boost::adaptors::reversed) {
+    for(const Version *ver : reverse_range(versions)) {
       if(ver->name() <= t.m_previous)
         break;
       else if(ver->name() <= t.m_version->name())

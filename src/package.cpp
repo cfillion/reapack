@@ -19,9 +19,10 @@
 
 #include "errors.hpp"
 #include "index.hpp"
+#include "util/reverse_range.hpp"
 
 #include <algorithm>
-#include <boost/range/adaptor/reversed.hpp>
+#include <cstring>
 
 Package::Type Package::getType(const char *type)
 {
@@ -135,7 +136,7 @@ const Version *Package::lastVersion(const bool pres, const VersionName &from) co
   if(m_versions.empty())
     return nullptr;
 
-  for(const Version *ver : m_versions | boost::adaptors::reversed) {
+  for(const Version *ver : reverse_range(m_versions)) {
     if(ver->name() < from)
       break;
     else if(ver->name().isStable() || pres)

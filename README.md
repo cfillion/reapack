@@ -6,52 +6,35 @@
 Visit the [ReaPack website](https://reapack.com/) for ready-to-use binaries,
 the user guide or the package upload tool.
 
-## Building from source
+## Building
 
-Clone the repository and submodules:
+Prerequisites:
 
+- [vcpkg](https://vcpkg.io/en/index.html)
+- [CMake](https://cmake.org/) 3.15 or newer
+- C++17 compiler
+- PHP (Linux and macOS)
+
+    # 1. Clone repository with submodules
     git clone --recursive --shallow-submodules https://github.com/cfillion/reapack.git
 
-### Prerequisites
+    # 2. Create build directory
+    mkdir build; cd build
 
-Software requirements:
+    # 3. Install dependencies and prepare files for build system
+    VCPKG_ROOT=path\to\vcpcg cmake -DCMAKE_BUILD_TYPE=Release ..
 
-- [CMake](https://cmake.org/) 3.15 or newer
-- C++17 compiler (MSVC on Windows)
-- PHP (Linux and macOS only)
+    # 4. Build
+    make
 
-#### Linux
-
-Install the following libraries (and development headers if your system provides
-them separately):
-
-- [Boost](https://www.boost.org/) (1.56 or later)
-- [Catch2](https://github.com/catchorg/Catch2) (3.0 or later)
-- [libcurl](https://curl.haxx.se/libcurl/)
-- [libxml2](http://www.xmlsoft.org/)
-- [OpenSSL](https://www.openssl.org/) or compatible
-- [SQLite](https://www.sqlite.org/)
-- [zlib](https://www.zlib.net/)
+    # 5. Install ReaPack into your REAPER installation
+    cmake --target install
 
 #### macOS
 
-Install Boost and Catch2 using [Homebrew](https://brew.sh) (recommended).
 The build tools can be installed using `xcode-select --install` or the Xcode IDE.
 
-#### Windows
-
-MSVC can be installed with the [Build Tools for Visual Studio](
-https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools)
-or the Visual Studio IDE.
-
-Use the x64 or x86 Native Tools Command Prompt for VS 20XX matching the target
-architecture when configuring or building ReaPack.
-
-Install [vcpkg](https://docs.microsoft.com/cpp/build/vcpkg) in any directory:
-
-    git clone https://github.com/Microsoft/vcpkg.git C:\path\to\vcpkg
-
-Set `VCPKG_TARGET_TRIPLET` and `CMAKE_TOOLCHAIN_FILE` when creating the build
+Set `VCPKG_TARGET_TRIPLET` and `VCPKG_ROOT` when creating the build
 tree:
 
     -DVCPKG_TARGET_TRIPLET=%PLATFORM%-windows-static
@@ -80,10 +63,6 @@ Alternatively, multiple build trees can be created if desired:
 To compile a build tree:
 
     cmake --build build
-
-To install ReaPack into your REAPER installation after building:
-
-    cmake --build build --target install
 
 The following targets are available:
 

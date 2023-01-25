@@ -4,19 +4,14 @@ find_package(Boost 1.56 REQUIRED)
 find_package(CURL       REQUIRED)
 find_package(MiniZip    REQUIRED)
 find_package(Threads    REQUIRED)
+find_package(unofficial-sqlite3 REQUIRED)
 find_package(WDL        REQUIRED)
 
 if(WIN32)
-  # required for selecting the right debug or release version
-  find_package(unofficial-sqlite3 CONFIG REQUIRED)
-  add_library(SQLite::SQLite3 INTERFACE IMPORTED)
-  target_link_libraries(SQLite::SQLite3 INTERFACE unofficial::sqlite3::sqlite3)
-
   find_package(tinyxml2 CONFIG REQUIRED)
 else()
   find_package(SWELL REQUIRED)
   find_package(LibXml2 REQUIRED)
-  find_package(SQLite3 REQUIRED)
 
   if(NOT APPLE)
     find_package(OpenSSL REQUIRED COMPONENTS Crypto)
@@ -128,7 +123,7 @@ endif()
 
 target_link_libraries(reapack
   ${CMAKE_DL_LIBS} Boost::headers CURL::libcurl MiniZip::MiniZip
-  SQLite::SQLite3 Threads::Threads WDL::WDL
+  unofficial::sqlite3::sqlite3 Threads::Threads WDL::WDL
   $<IF:$<BOOL:${LIBXML2_FOUND}>,LibXml2::LibXml2,tinyxml2::tinyxml2>
 )
 target_compile_definitions(reapack PRIVATE CURL_DISABLE_DEPRECATION)

@@ -22,8 +22,7 @@
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "string.hpp"
-
-#include <boost/range/adaptor/reversed.hpp>
+#include "util/reverse_range.hpp"
 
 Browser::Entry::Entry(const Package *pkg, const Registry::Entry &re, const IndexPtr &i)
   : m_flags(0), regEntry(re), package(pkg), index(i), current(nullptr)
@@ -205,7 +204,7 @@ void Browser::Entry::fillMenu(Menu &menu) const
   else {
     const auto &versions = package->versions();
     int verIndex = static_cast<int>(versions.size());
-    for(const Version *ver : versions | boost::adaptors::reversed) {
+    for(const Version *ver : reverse_range(versions)) {
       const UINT actionIndex = versionMenu.addAction(
         ver->name().toString().c_str(), --verIndex | (ACTION_VERSION << 8));
 

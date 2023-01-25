@@ -2,15 +2,15 @@
   "name": "reapack",
   "version-string": "current",
   "dependencies": [
-    { "name": "boost-algorithm",    "platform": "!linux" },
-    { "name": "boost-lexical-cast", "platform": "!linux" },
-    { "name": "boost-logic",        "platform": "!linux" },
-    { "name": "boost-math",         "platform": "!linux" },
-    { "name": "boost-preprocessor", "platform": "!linux" },
-    { "name": "boost-range",        "platform": "!linux" },
-    "catch2",
-    { "name": "curl",     "platform": "windows", "features": [ "non-http" ] },
+    "boost-algorithm",
+    "boost-lexical-cast",
+    "boost-logic",
+    "boost-preprocessor",
     "sqlite3",
-    { "name": "tinyxml2", "platform": "windows" }
+    "catch2",
+    { "name": "curl", "features": [ "non-http" ] },
+
+    { "name": "tinyxml2", "platform": "windows" },
+    { "name": "libxml2", "platform": "!windows" }
   ]
 }

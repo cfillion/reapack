@@ -34,15 +34,11 @@ for:
       install-deps() {
         local arch="$1"; shift
         local native=("$@" php-cli qemu-user-binfmt)
-        local target=(
-          libboost-dev libcurl4-openssl-dev libsqlite3-dev libssl-dev
-          libxml2-dev zlib1g-dev
-        )
 
         sudo dpkg --add-architecture $arch
         sudo apt-get update -qq
         sudo apt-get install -qq aptitude > /dev/null
-        sudo aptitude install -yR ${native[@]} ${target[@]/%/:$arch} > /dev/null
+        sudo aptitude install -yR ${native[@]} > /dev/null
       }
 
       sudo update-alternatives --set gcc /usr/bin/gcc-7

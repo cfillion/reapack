@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(RUNTIME_OPENSSL
   "Load OpenSSL at runtime instead of linking against a specific version" OFF)

@@ -18,7 +18,6 @@
 #include "path.hpp"
 
 #include <algorithm>
-#include <boost/range/adaptor/reversed.hpp>
 #include <vector>
 
 static constexpr char UNIX_SEPARATOR = '/';
