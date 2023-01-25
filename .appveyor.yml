@@ -96,7 +96,7 @@ for:
       - |-
         if [ "$appveyor_build_worker_image" = "macos-mojave" ]; then
           # https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/
-          - sudo curl -k https://curl.se/ca/cacert.pem -o /etc/ssl/cert.pem
+          sudo curl -k https://curl.se/ca/cacert.pem -o /etc/ssl/cert.pem
 
           # update to Catch2 v3
           git -C ~/vcpkg fetch
