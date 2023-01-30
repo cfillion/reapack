@@ -103,8 +103,10 @@ Remote::Remote(const std::string &name, const std::string &url,
 
 void Remote::setName(const std::string &name)
 {
+  if (name.empty())
+    throw reapack_error("Empty repository name");
   if(!validateName(name))
-    throw reapack_error("invalid name");
+    throw reapack_error("invalid name \"" + name + "\"");
   else
     m_name = name;
 }

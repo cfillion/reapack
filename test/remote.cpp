@@ -15,8 +15,15 @@ TEST_CASE("construct remote", M) {
 
 TEST_CASE("remote name validation", M) {
   SECTION("invalid") {
+    try {
+      Remote remote("", "url");
+      FAIL("Empty name was allowed");
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(std::string{e.what()} == "Empty repository name");
+    }
+
     const std::string invalidNames[] {
-      "",
       "ab/cd",
       "ab\\cd",
       "..",
@@ -41,7 +48,7 @@ TEST_CASE("remote name validation", M) {
         FAIL("'" + name + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(std::string{e.what()} == "invalid name");
+        REQUIRE(std::string{e.what()} == "invalid name \"" + name + "\"");
       }
     }
   }
@@ -95,7 +102,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(std::string{e.what()} == "invalid name");
+        REQUIRE(std::string{e.what()} == "invalid name \"/\"");
     }
   }
 
