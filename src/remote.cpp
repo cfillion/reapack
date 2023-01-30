@@ -103,10 +103,12 @@ Remote::Remote(const std::string &name, const std::string &url,
 
 void Remote::setName(const std::string &name)
 {
-  if(!validateName(name))
-    throw reapack_error("invalid name");
-  else
-    m_name = name;
+  if(name.empty())
+    throw reapack_error("empty repository name");
+  if(!validateName(name)) // also checks for emptyness
+    throw reapack_error(String::format("invalid repository name '%s'", name.c_str()));
+
+  m_name = name;
 }
 
 void Remote::setUrl(const std::string &url)
@@ -115,8 +117,8 @@ void Remote::setUrl(const std::string &url)
     throw reapack_error("invalid url");
   else if(m_protected && url != m_url)
     throw reapack_error("cannot change the URL of a protected repository");
-  else
-    m_url = url;
+
+  m_url = url;
 }
 
 bool Remote::autoInstall(bool fallback) const

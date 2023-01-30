@@ -14,9 +14,18 @@ TEST_CASE("construct remote", M) {
 }
 
 TEST_CASE("remote name validation", M) {
+  SECTION("empty") {
+    try {
+      Remote remote("", "url");
+      FAIL("empty name was allowed");
+    }
+    catch(const reapack_error &e) {
+      REQUIRE(std::string{e.what()} == "empty repository name");
+    }
+  }
+
   SECTION("invalid") {
     const std::string invalidNames[] {
-      "",
       "ab/cd",
       "ab\\cd",
       "..",
@@ -41,7 +50,7 @@ TEST_CASE("remote name validation", M) {
         FAIL("'" + name + "' was allowed");
       }
       catch(const reapack_error &e) {
-        REQUIRE(std::string{e.what()} == "invalid name");
+        REQUIRE(std::string{e.what()} == "invalid repository name '" + name + "'");
       }
     }
   }
@@ -95,7 +104,7 @@ TEST_CASE("set invalid values", M) {
       FAIL();
     }
     catch(const reapack_error &e) {
-      REQUIRE(std::string{e.what()} == "invalid name");
+      REQUIRE(std::string{e.what()} == "invalid repository name '/'");
     }
   }
 
@@ -226,10 +235,16 @@ TEST_CASE("get remote by name", M) {
 }
 
 TEST_CASE("unserialize remote", M) {
-  SECTION("invalid name")
-    REQUIRE_FALSE(Remote::fromString("&"));
+  SECTION("incomplete")
+    REQUIRE_FALSE(Remote::fromString("foo"));
+
+  SECTION("empty name")
+    REQUIRE_FALSE(Remote::fromString("|url|1"));
 
   SECTION("invalid name")
+    REQUIRE_FALSE(Remote::fromString("/|url|1"));
+
+  SECTION("invalid url")
     REQUIRE_FALSE(Remote::fromString("name||false"));
 
   SECTION("enabled") {
