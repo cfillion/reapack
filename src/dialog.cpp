@@ -80,6 +80,8 @@ WDL_DLGRET Dialog::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 #endif
   case WM_DESTROY:
     dlg->onClose();
+    // Disabling processing after the dialog instance has been destroyed
+    SetWindowLongPtr(handle, GWLP_USERDATA, 0);
     return 0;
   default:
     return 0;
