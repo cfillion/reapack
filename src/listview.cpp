@@ -477,7 +477,7 @@ bool ListView::onContextMenu(HWND dialog, int x, int y)
 {
   SetFocus(handle());
 
-  const bool keyboardTrigger = x < 0;
+  const bool keyboardTrigger = x == -1 && y == -1;
 
   if(!keyboardTrigger && headerHitTest(x, y)) {
     if(m_customizable) // show menu only if header is customizable
