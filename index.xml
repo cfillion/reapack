@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="f554a856853c904ed20ee6f1c113b59a4f968220" name="ReaPack">
+<index version="1" commit="065f8b3e6ef7b0052f68abdc34915e09d2b90d63" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -843,6 +843,20 @@ Changed:
         <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.4.2/reaper_reapack-aarch64.so</source>
         <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.4.2/reaper_reapack-x86.dll</source>
         <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.4.2/reaper_reapack-x64.dll</source>
+      </version>
+      <version name="1.2.4.3" author="cfillion" time="2023-03-03T16:03:10Z">
+        <changelog><![CDATA[• Add during/while and join/heal to the filter synonyms
+• Fix displaying the list column customization context menu when on the left of the primary monitor
+• macOS: fix a crash sometimes occuring when closing the obsolete package removal prompt [p=2617421][#65]]]></changelog>
+        <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-i386.dylib</source>
+        <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-x86_64.dylib</source>
+        <source platform="darwin-arm64" file="reaper_reapack-arm64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-arm64.dylib</source>
+        <source platform="linux32" file="reaper_reapack-i686.so">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-i686.so</source>
+        <source platform="linux64" file="reaper_reapack-x86_64.so">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_reapack-armv7l.so">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-aarch64.so</source>
+        <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-x86.dll</source>
+        <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.4.3/reaper_reapack-x64.dll</source>
       </version>
     </reapack>
   </category>
