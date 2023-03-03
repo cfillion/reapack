@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4.2
+@version 1.2.4.3
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -13,6 +13,6 @@
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Fix potential crash on exit in REAPER < 6.67 due to API registration keys being invalidated [#56]
-  • macOS: fix a crash on startup if ReaPack's filename was renamed [#51]
-  • Windows: fix clamping of window positions to visible area (was broken in v1.2.4) [#49]
+  • Add during/while and join/heal to the filter synonyms
+  • Fix displaying the list column customization context menu when on the left of the primary monitor
+  • macOS: fix a crash sometimes occuring when closing the obsolete package removal prompt [p=2617421][#65]
