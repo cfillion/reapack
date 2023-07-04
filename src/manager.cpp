@@ -32,9 +32,15 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
+#include <fstream>
+#include <iomanip>
+
 static const Win32::char_type *ARCHIVE_FILTER =
   L("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
 static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
+static const Win32::char_type *INDEX_FILTER =
+  L("ReaPack Index (*.txt)\0*.txt\0");
+static const Win32::char_type *INDEX_EXT = L("txt");
 
 enum {
   ACTION_UNINSTALL = 80, ACTION_ABOUT, ACTION_REFRESH, ACTION_COPYURL,
@@ -42,7 +48,7 @@ enum {
   ACTION_AUTOINSTALL_OFF, ACTION_AUTOINSTALL_ON, ACTION_AUTOINSTALL,
   ACTION_BLEEDINGEDGE, ACTION_PROMPTOBSOLETE, ACTION_SYNONYMS, ACTION_NETCONFIG,
   ACTION_RESETCONFIG, ACTION_IMPORT_REPO, ACTION_IMPORT_ARCHIVE,
-  ACTION_EXPORT_ARCHIVE,
+  ACTION_EXPORT_ARCHIVE, ACTION_IMPORT_INDEX, ACTION_EXPORT_INDEX
 };
 
 enum { TIMER_ABOUT = 1, };
@@ -149,6 +155,13 @@ void Manager::onCommand(const int id, int)
     break;
   case ACTION_EXPORT_ARCHIVE:
     exportArchive();
+    break;
+  case ACTION_IMPORT_INDEX:
+    importIndex();
+    refresh();
+    break;
+  case ACTION_EXPORT_INDEX:
+    exportIndex();
     break;
   case ACTION_AUTOINSTALL:
     toggle(m_autoInstall, g_reapack->config()->install.autoInstall);
@@ -470,6 +483,9 @@ void Manager::importExport()
   Menu menu;
   menu.addAction("Import &repositories...", ACTION_IMPORT_REPO);
   menu.addSeparator();
+  menu.addAction("Import index", ACTION_IMPORT_INDEX);
+  menu.addAction("Export index", ACTION_EXPORT_INDEX);
+  menu.addSeparator();
   menu.addAction("Import offline archive...", ACTION_IMPORT_ARCHIVE);
   menu.addAction("&Export offline archive...", ACTION_EXPORT_ARCHIVE);
 
@@ -492,7 +508,7 @@ void Manager::importArchive()
 {
   const char *title = "Import offline archive";
 
-  const std::string &path = FileDialog::getOpenFileName(handle(), instance(),
+  const std::string path = FileDialog::getOpenFileName(handle(), instance(),
     title, Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(path.empty())
@@ -510,7 +526,7 @@ void Manager::importArchive()
 
 void Manager::exportArchive()
 {
-  const std::string &path = FileDialog::getSaveFileName(handle(), instance(),
+  const std::string path = FileDialog::getSaveFileName(handle(), instance(),
     "Export offline archive", Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(!path.empty()) {
@@ -518,6 +534,67 @@ void Manager::exportArchive()
       tx->exportArchive(path);
       tx->runTasks();
     }
+  }
+}
+
+void Manager::importIndex()
+{
+  Transaction * const tx = g_reapack->setupTransaction();
+  if(!tx) return;
+  Receipt * const receipt = tx->receipt();
+
+  const std::string path = FileDialog::getOpenFileName(handle(), instance(),
+    "Import index", Path::root(), INDEX_FILTER, INDEX_EXT);
+
+  std::ifstream index{path};
+  if(!index.good()) {
+    receipt->addError({"Error opening index file", path});
+    tx->runTasks();
+    return;
+  }
+
+  Remote remote;
+  std::string line;
+  std::vector<PackageFromIndex> packages;
+
+  while(std::getline(index, line)) {
+   switch(line[0]) {
+   case 'R':
+     if(remote = Remote::fromString(line.substr(5)); remote.isNull())
+       receipt->addError({"Error adding remote", remote.toString()});
+     else {
+       g_reapack->addSetRemote(remote);
+       // strange but above function doesn't fetch index files despite issuing same SynchronizeTask
+       tx->fetchIndexes({remote}, true);
+     }
+     break;
+   case 'P': {
+     auto& ref = packages.emplace_back(PackageFromIndex{remote});
+     std::istringstream{line.substr(5)}
+       >> quoted(ref.category) >> quoted(ref.name) >> quoted(ref.version)
+       >> ref.flags;
+     break;
+   }
+   default:
+     receipt->addError({line, "Invalid index entry"});
+   }
+  }
+
+  g_reapack->commitConfig(true); // runs tx
+
+  for(PackageFromIndex& pkg : packages)
+    tx->installFromIndex(std::move(pkg));
+  tx->runTasks();
+}
+
+void Manager::exportIndex()
+{
+  const std::string path = FileDialog::getSaveFileName(handle(), instance(),
+    "Export index", Path::root(), INDEX_FILTER, INDEX_EXT);
+
+  if(Transaction *tx = g_reapack->setupTransaction()) {
+    tx->exportIndex(path);
+    tx->runTasks();
   }
 }
 

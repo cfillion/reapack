@@ -102,6 +102,24 @@ private:
   std::unordered_set<ThreadTask *> m_waiting;
 };
 
+struct PackageFromIndex {
+  Remote remote;
+  std::string name, category, version;
+  int flags;
+};
+
+class InstallFromIndexTask : public Task {
+public:
+  InstallFromIndexTask(PackageFromIndex &&, Transaction *);
+
+  bool start() override;
+  void commit() override;
+
+private:
+  PackageFromIndex pkg;
+  const Version * version = nullptr;
+};
+
 class UninstallTask : public Task {
 public:
   UninstallTask(const Registry::Entry &, Transaction *);
@@ -140,6 +158,15 @@ protected:
 
 private:
   TempPath m_path;
+};
+
+class ExportIndexTask : public Task {
+public:
+  inline ExportIndexTask(std::string_view path, Transaction *tx): Task(tx), m_path(path) {}
+
+protected:
+  void commit() final;
+  std::string m_path;
 };
 
 #endif

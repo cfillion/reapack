@@ -112,6 +112,11 @@ void Transaction::install(const Version *ver, const Registry::Entry &oldEntry,
   m_nextQueue.push(std::make_shared<InstallTask>(ver, flags, oldEntry, reader, this));
 }
 
+void Transaction::installFromIndex(PackageFromIndex&& pkg)
+{
+  m_nextQueue.push(std::make_shared<InstallFromIndexTask>(std::move(pkg), this));
+}
+
 void Transaction::setFlags(const Registry::Entry &entry, const int flags)
 {
   m_nextQueue.push(std::make_shared<FlagsTask>(entry, flags, this));
@@ -140,6 +145,11 @@ void Transaction::uninstall(const Registry::Entry &entry)
 void Transaction::exportArchive(const std::string &path)
 {
   m_nextQueue.push(std::make_shared<ExportTask>(path, this));
+}
+
+void Transaction::exportIndex(std::string_view path)
+{
+  m_nextQueue.push(std::make_shared<ExportIndexTask>(path, this));
 }
 
 bool Transaction::runTasks()

@@ -71,6 +71,8 @@ private:
   void setupNetwork();
   void importArchive();
   void exportArchive();
+  void importIndex();
+  void exportIndex();
   void aboutRepo(bool focus = true);
 
   void setChange(int);
