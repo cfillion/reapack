@@ -108,6 +108,7 @@ add_library(reapack OBJECT
   xml_$<IF:$<BOOL:${LIBXML2_FOUND}>,libxml2,tinyxml2>.cpp
 )
 
+target_compile_features(reapack PUBLIC cxx_std_17)
 target_include_directories(reapack PRIVATE
   ${CMAKE_SOURCE_DIR}/vendor ${CMAKE_SOURCE_DIR}/vendor/reaper-sdk/sdk
   ${CMAKE_CURRENT_BINARY_DIR}
