@@ -19,6 +19,7 @@
 #define REAPACK_API_HELPER_HPP
 
 #include <tuple>
+#include <cstdint>
 
 #include <boost/preprocessor.hpp>
 
