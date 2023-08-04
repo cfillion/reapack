@@ -18,6 +18,7 @@
 #ifndef REAPACK_API_HELPER_HPP
 #define REAPACK_API_HELPER_HPP
 
+#include <cstdint>
 #include <tuple>
 
 #include <boost/preprocessor.hpp>
