@@ -46,7 +46,9 @@ const Platform::Enum Platform::Current = Platform::
 #  endif
 
 #elif _WIN32
-#  ifdef _WIN64
+#  ifdef _M_ARM64EC
+  Windows_arm64ec
+#  elif _M_X64
   Windows_x64
 #  else
   Windows_x86
@@ -76,9 +78,10 @@ auto Platform::parse(const char *platform) -> Enum
     { "linux-armv7l",  Linux_armv7l  },
     { "linux-aarch64", Linux_aarch64 },
 
-    { "windows",       Windows_Any   },
-    { "win32",         Windows_x86   },
-    { "win64",         Windows_x64   },
+    { "windows",         Windows_Any     },
+    { "win32",           Windows_x86     },
+    { "win64",           Windows_x64     },
+    { "windows-arm64ec", Windows_arm64ec },
   };
 
   for(auto &[key, value] : map) {

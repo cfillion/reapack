@@ -34,11 +34,12 @@ public:
     Linux_aarch64 = 1<<6,
     Linux_Any     = Linux_i686 | Linux_x86_64 | Linux_armv7l | Linux_aarch64,
 
-    Windows_x86   = 1<<7,
-    Windows_x64   = 1<<8,
-    Windows_Any   = Windows_x86 | Windows_x64,
+    Windows_x86     = 1<<7,
+    Windows_x64     = 1<<8,
+    Windows_arm64ec = 1<<9,
+    Windows_Any     = Windows_x86 | Windows_x64 | Windows_arm64ec,
 
-    Generic       = Darwin_Any | Linux_Any | Windows_Any,
+    Generic = Darwin_Any | Linux_Any | Windows_Any,
   };
 
   static const Enum Current;
