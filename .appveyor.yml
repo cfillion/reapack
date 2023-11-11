@@ -14,7 +14,7 @@ build_script:
   - cmake --build build
 
 test_script:
-  - '[ "$ARCH" = "arm64" ] || cmake --build build --target test'
+  - '[[ "$ARCH" = arm64* ]] || cmake --build build --target test'
 
 for:
   - matrix: { only: [ appveyor_build_worker_image: &linux Ubuntu1804 ] }
@@ -107,11 +107,14 @@ for:
 
   - matrix: { only: [ appveyor_build_worker_image: &windows Visual Studio 2022 ] }
     cache:
-      - build\vcpkg_installed -> vcpkg.json
+      - build\vcpkg_installed -> vcpkg.json, cmake/vcpkg-triplets/arm64ec-windows-static.cmake
     install:
-      - if "%ARCH%" == "x64" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-      - if "%ARCH%" == "x86" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
+      - if "%ARCH%" == "x64"     call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+      - if "%ARCH%" == "x86"     call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
+      - if "%ARCH%" == "arm64ec" call "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsamd64_arm64.bat"
+      - if "%ARCH%" == "arm64ec" set CFLAGS=-arm64EC & set CXXFLAGS=-arm64EC
     build_script:
+      - set VCPKG_OVERLAY_TRIPLETS=cmake/vcpkg-triplets
       - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
         -DVCPKG_TARGET_TRIPLET=%ARCH%-windows-static
         -DCMAKE_TOOLCHAIN_FILE=C:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
@@ -122,6 +125,9 @@ for:
 
 environment:
   matrix:
+    - job_name: Windows ARM 64-bit (Emulation Compatible)
+      appveyor_build_worker_image: *windows
+      ARCH: arm64ec
     - job_name: Windows 64-bit
       appveyor_build_worker_image: *windows
       ARCH: x64
