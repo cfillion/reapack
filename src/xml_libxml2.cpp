@@ -59,7 +59,7 @@ XmlDocument::operator bool() const
 
 const char *XmlDocument::error() const
 {
-  if(xmlError *error = xmlGetLastError()) {
+  if(const xmlError *error = xmlGetLastError()) {
     const size_t length = strlen(error->message);
     if(length > 1) {
       // remove trailing newline
