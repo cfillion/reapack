@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4.3
+@version 1.2.4.4
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -13,6 +13,5 @@
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Add during/while and join/heal to the filter synonyms
-  • Fix displaying the list column customization context menu when on the left of the primary monitor
-  • macOS: fix a crash sometimes occuring when closing the obsolete package removal prompt [p=2617421][#65]
+  • Add 2nd/second, unpool/un-pool and spacer/separator to the filter synonyms to match REAPER v7.09
+  • Fix a crash when downloading or extracting filenames containing '%'
