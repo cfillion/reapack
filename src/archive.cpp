@@ -221,7 +221,7 @@ int ArchiveReader::extractFile(const Path &path, std::ostream &stream) noexcept
 FileExtractor::FileExtractor(const Path &target, const ArchiveReaderPtr &reader)
   : m_path(target), m_reader(reader)
 {
-  setSummary("Extracting %s: " + target.join());
+  setSummary({ "Extracting", target.join() });
 }
 
 bool FileExtractor::run()
@@ -303,7 +303,7 @@ int ArchiveWriter::addFile(const Path &path, std::istream &stream) noexcept
 FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &writer)
   : m_path(target), m_writer(writer)
 {
-  setSummary("Compressing %s: " + target.join());
+  setSummary({ "Compressing", target.join() });
 }
 
 bool FileCompressor::run()

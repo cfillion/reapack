@@ -111,7 +111,7 @@ Download::Download(const std::string &url, const NetworkOpts &opts, const int fl
 
 void Download::setName(const std::string &name)
 {
-  setSummary("Downloading %s: " + name);
+  setSummary({ "Downloading", name });
 }
 
 bool Download::run()

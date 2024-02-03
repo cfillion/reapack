@@ -20,8 +20,7 @@
 
 #include "dialog.hpp"
 
-class ThreadPool;
-class ThreadTask;
+#include "thread.hpp"
 
 class Progress : public Dialog {
 public:
@@ -37,7 +36,7 @@ private:
   void updateProgress();
 
   ThreadPool *m_pool;
-  std::string m_current;
+  ThreadSummary m_current;
 
   HWND m_label;
   HWND m_progress;

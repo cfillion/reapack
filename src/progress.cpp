@@ -17,7 +17,6 @@
 
 #include "progress.hpp"
 
-#include "thread.hpp"
 #include "resource.hpp"
 #include "win32.hpp"
 
@@ -25,7 +24,7 @@
 
 Progress::Progress(ThreadPool *pool)
   : Dialog(IDD_PROGRESS_DIALOG),
-    m_pool(pool), m_label(nullptr), m_progress(nullptr),
+    m_pool(pool), m_current(), m_label(nullptr), m_progress(nullptr),
     m_done(0), m_total(0)
 {
   m_pool->onPush >> std::bind(&Progress::addTask, this, std::placeholders::_1);
@@ -68,7 +67,8 @@ void Progress::onTimer(const int id)
 void Progress::addTask(ThreadTask *task)
 {
   m_total++;
-  updateProgress();
+  if(m_current.step)
+    updateProgress();
 
   if(!isVisible())
     startTimer(100);
@@ -86,11 +86,11 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  Win32::setWindowText(m_label, String::format(m_current.c_str(),
-    String::format("%s of %s",
-      String::number(std::min(m_done + 1, m_total)).c_str(),
-      String::number(m_total).c_str()
-    ).c_str()
+  Win32::setWindowText(m_label, String::format("%s %s of %s: %s",
+    m_current.step,
+    String::number(std::min(m_done + 1, m_total)).c_str(),
+    String::number(m_total).c_str(),
+    m_current.item.c_str()
   ).c_str());
 
   const double pos = static_cast<double>(

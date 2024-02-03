@@ -28,6 +28,11 @@
 #include <thread>
 #include <unordered_set>
 
+struct ThreadSummary {
+  const char *step;
+  std::string item;
+};
+
 class ThreadTask {
 public:
   enum State {
@@ -45,7 +50,7 @@ public:
   virtual bool concurrent() const = 0;
 
   void exec();  // runs in the current thread
-  const std::string &summary() const { return m_summary; }
+  const ThreadSummary &summary() const { return m_summary; }
   State state() const { return m_state; }
   void setError(const ErrorInfo &err) { m_error = err; }
   const ErrorInfo &error() { return m_error; }
@@ -59,10 +64,10 @@ public:
 protected:
   virtual bool run() = 0;
 
-  void setSummary(const std::string &s) { m_summary = s; }
+  void setSummary(const ThreadSummary &s) { m_summary = s; }
 
 private:
-  std::string m_summary;
+  ThreadSummary m_summary;
   State m_state;
   ErrorInfo m_error;
   std::atomic_bool m_abort;
