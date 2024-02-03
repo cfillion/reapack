@@ -32,6 +32,10 @@ for:
       } 1' /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/ports.list > /dev/null
       sudo sed -i 's/apt.postgresql.org/apt-archive.postgresql.org/' /etc/apt/sources.list
 
+      # downgrade Catch2 to 3.3.1 for successfully compiling with GCC 7
+      git -C ~/vcpkg fetch origin b28cddc45f5832fb46afaab11d61c9ccce50470a
+      git -C ~/vcpkg restore -s b28cddc45f5832fb46afaab11d61c9ccce50470a ports/catch2
+
       install-deps() {
         local arch="$1"; shift
         local native=("$@" php-cli qemu-user-binfmt)
@@ -100,7 +104,7 @@ for:
           sudo curl -k https://curl.se/ca/cacert.pem -o /etc/ssl/cert.pem
 
           # update to Catch2 v3
-          git -C ~/vcpkg fetch
+          git -C ~/vcpkg fetch origin 50fe35a3c3ca43ffe3b436380cf563100406459a
           git -C ~/vcpkg restore -s 50fe35a3c3ca43ffe3b436380cf563100406459a ports/catch2
         fi
     artifacts:
