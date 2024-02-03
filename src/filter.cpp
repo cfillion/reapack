@@ -189,6 +189,9 @@ bool Filter::Group::pushSynonyms(const std::string_view &buf, int *flags)
     { "center", "centre" },
     { "join", "heal" },
     { "during", "while" },
+    { "2nd", "second" },
+    { "unpool", "un-pool" },
+    { "spacer", "separator" },
   };
 
   auto *match = [&]() -> decltype(&*synonyms) {
