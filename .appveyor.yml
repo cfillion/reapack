@@ -51,6 +51,7 @@ for:
       }
 
       sudo update-alternatives --set gcc /usr/bin/gcc-7
+      sudo apt-get install -qq --allow-downgrades libstdc++6=8.4.0-1ubuntu1~18.04 > /dev/null
 
       case $ARCH in
       x86_64)
