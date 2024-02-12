@@ -76,7 +76,7 @@ for:
     artifacts:
       - path: build/reaper_reapack*.so
 
-  - matrix: { only: [ appveyor_build_worker_image: macos, appveyor_build_worker_image: macos-mojave ] }
+  - matrix: { only: [ appveyor_build_worker_image: macos-bigsur, appveyor_build_worker_image: macos-mojave ] }
     cache:
       - build/vcpkg_installed -> vcpkg.json, cmake/vcpkg-triplets/arch-env.cmake
     install:
@@ -84,7 +84,7 @@ for:
         case $ARCH in
         arm64)
           DEPLOY_TARGET=11.0
-          sudo xcode-select -s /Applications/Xcode-12.3.app
+          sudo xcode-select -s /Applications/Xcode-13.2.1.app
           ;;
         *)
           DEPLOY_TARGET=10.9
@@ -141,7 +141,7 @@ environment:
       appveyor_build_worker_image: macos-mojave
       ARCH: i386
     - job_name: macOS ARM 64-bit
-      appveyor_build_worker_image: macos
+      appveyor_build_worker_image: macos-bigsur
       ARCH: arm64
     - job_name: Linux x86 64-bit
       appveyor_build_worker_image: *linux
