@@ -79,7 +79,7 @@ static void menuHook(const char *name, HMENU handle, const int f)
   if(strcmp(name, "Main extensions") || f != 0)
     return;
 
-  Menu menu = Menu(handle).addMenu("ReaPack");
+  Menu menu = Menu(handle).addMenu("Rea&Pack");
   menu.addAction("&Synchronize packages",   "_REAPACK_SYNC");
   menu.addAction("&Browse packages...",     "_REAPACK_BROWSE");
   menu.addAction("&Import repositories...", "_REAPACK_IMPORT");
