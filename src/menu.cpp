@@ -36,9 +36,6 @@ Menu::Menu(HMENU handle)
     m_handle = CreatePopupMenu();
 
   m_size = GetMenuItemCount(m_handle);
-
-  if(!empty())
-    addSeparator();
 }
 
 Menu::~Menu()
