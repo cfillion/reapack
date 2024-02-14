@@ -3,7 +3,7 @@
 This is **ReaPack v[[REAPACK_VERSION]]** [[REAPACK_REVISION]] built on [[REAPACK_BUILDTIME]]
 
 ```
-Copyright (C) 2015-2023  Christian Fillion
+Copyright (C) 2015-2024  Christian Fillion
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
