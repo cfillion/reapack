@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4.4
+@version 1.2.4.5
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -13,5 +13,6 @@
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Add 2nd/second, unpool/un-pool and spacer/separator to the filter synonyms to match REAPER v7.09
-  • Fix a crash when downloading or extracting filenames containing '%'
+  • Add a mnemonic to ReaPack's menu in Extensions and remove the separator above it
+  • Fix spurious selection when reloading the package browser on macOS
+  • Restore compatibility with Linux distributions shipping GCC 7-11 accidentally lost in v1.2.4.4 [t=288248]
