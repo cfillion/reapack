@@ -315,6 +315,11 @@ void ListView::endEdit()
 void ListView::clear()
 {
   ListView_DeleteAllItems(handle());
+#ifdef __APPLE__
+  // NSTableView preverves the previous selection when removing rows after
+  // beginUpdates is called (via WM_SETREDRAW=0 in SWELL)
+  unselectAll();
+#endif
 
   m_rows.clear();
 }
