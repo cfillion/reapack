@@ -135,3 +135,37 @@ void InstallTask::rollback()
 
   m_fail = true;
 }
+
+InstallFromIndexTask::InstallFromIndexTask(PackageFromIndex&& pkg_, Transaction *tx)
+  : Task(tx), pkg(std::move(pkg_)) { }
+
+bool InstallFromIndexTask::start()
+{
+  const IndexPtr index = tx()->loadIndex({pkg.remote});
+  if(!index) return false;
+
+  const ErrorInfo err = {
+    String::format("%s/%s/%s v%s",
+      pkg.remote.name().c_str(), pkg.category.c_str(), pkg.name.c_str(), pkg.version.c_str()),
+    "Package cannot be found or is incompatible with your operating system"};
+
+  const Package *const pkg_handle = [&]() -> const Package * {
+    for(const Package *other : index->packages())
+      if(other->name() == pkg.name && other->category()->name() == pkg.category)
+        return other;
+    return nullptr;
+  }();
+
+  if(!pkg_handle) {
+    tx()->receipt()->addError(err);
+    return false;
+  } else if(version = pkg_handle->findVersion({pkg.version}); !version) {
+    tx()->receipt()->addError(err);
+    return false;
+  }
+  return true;
+}
+
+void InstallFromIndexTask::commit() {
+  tx()->install(version, pkg.flags);
+}

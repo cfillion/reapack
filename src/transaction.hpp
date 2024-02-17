@@ -58,10 +58,12 @@ public:
   void install(const Version *, int flags = 0, const ArchiveReaderPtr & = nullptr);
   void install(const Version *, const Registry::Entry &oldEntry,
     int flags = false, const ArchiveReaderPtr & = nullptr);
+  void installFromIndex(PackageFromIndex&& pkg);
   void setFlags(const Registry::Entry &, int flags);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);
   void exportArchive(const std::string &path);
+  void exportIndex(std::string_view path);
   bool runTasks();
 
   bool isCancelled() const { return m_isCancelled; }
@@ -75,6 +77,7 @@ public:
 protected:
   friend SynchronizeTask;
   friend InstallTask;
+  friend InstallFromIndexTask;
   friend UninstallTask;
 
   IndexPtr loadIndex(const Remote &);
