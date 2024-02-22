@@ -44,13 +44,14 @@ public:
   static const char *displayType(Type);
   static const std::string &displayName(const std::string &name, const std::string &desc);
 
-  Package(const Type, const std::string &name, const Category *);
+  Package(const Type, const std::string &name, const Category *, const std::string &remote);
   ~Package();
 
   const Category *category() const { return m_category; }
   Type type() const { return m_type; }
   std::string displayType() const { return displayType(m_type); }
   const std::string &name() const { return m_name; }
+  const std::string &remote() const { return m_remote; }
   std::string fullName() const;
   void setDescription(const std::string &d) { m_desc = d; }
   const std::string &description() const { return m_desc; }
@@ -80,6 +81,7 @@ private:
   Type m_type;
   std::string m_name;
   std::string m_desc;
+  std::string m_remote;
   Metadata m_metadata;
   std::set<const Version *, CompareVersion> m_versions;
 
