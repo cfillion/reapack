@@ -27,6 +27,7 @@
 #include "transaction.hpp"
 
 #include <iomanip>
+#include <fstream>
 #include <sstream>
 
 static const Path ARCHIVE_TOC("toc");
@@ -54,16 +55,11 @@ bool ExportTask::start()
 
   std::vector<FileCompressor *> jobs;
 
-  for(const Remote &remote : g_reapack->config()->remotes.getEnabled()) {
-    bool addedRemote = false;
+  for(const Remote &remote : g_reapack->config()->remotes) {
+    toc << "REPO " << remote.toString() << '\n';
+    jobs.push_back(new FileCompressor(Index::pathFor(remote.name()), writer));
 
     for(const Registry::Entry &entry : tx()->registry()->getEntries(remote.name())) {
-      if(!addedRemote) {
-        toc << "REPO " << remote.toString() << '\n';
-        jobs.push_back(new FileCompressor(Index::pathFor(remote.name()), writer));
-        addedRemote = true;
-      }
-
       toc << "PACK "
         << quoted(entry.category) << '\x20'
         << quoted(entry.package) << '\x20'
@@ -106,4 +102,23 @@ void ExportTask::commit()
 void ExportTask::rollback()
 {
   FS::remove(m_path.temp());
+}
+
+void ExportIndexTask::commit()
+{
+  std::ofstream index{m_path, std::ios::out | std::ios::trunc};
+  if (!index.good())
+      return tx()->receipt()->addError({"Error opening index file", m_path});
+
+  for(const Remote &remote : g_reapack->config()->remotes) {
+    index << "REPO " << remote.toString() << '\n';
+
+    for(const Registry::Entry &entry : tx()->registry()->getEntries(remote.name())) {
+      index << "PACK "
+        << quoted(entry.category) << '\x20'
+        << quoted(entry.package) << '\x20'
+        << quoted(entry.version.toString()) << '\x20'
+        << entry.flags << '\n';
+    }
+  }
 }
