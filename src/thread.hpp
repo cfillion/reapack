@@ -109,7 +109,7 @@ public:
   Event<void()> onDone;
 
 private:
-  std::array<std::unique_ptr<WorkerThread>, 3> m_pool;
+  std::array<std::unique_ptr<WorkerThread>, 6> m_pool;
   std::unordered_set<ThreadTask *> m_running;
 };
 
