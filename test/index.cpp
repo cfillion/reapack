@@ -89,7 +89,7 @@ TEST_CASE("future version", M) {
 TEST_CASE("add a category", M) {
   Index ri("a");
   Category *cat = new Category("a", &ri);
-  Package *pack = new Package(Package::ScriptType, "name", cat);
+  Package *pack = new Package(Package::ScriptType, "name", cat, "remote");
   Version *ver = new Version("1", pack);
   Source *source = new Source({}, "google.com", ver);
 
@@ -134,7 +134,7 @@ TEST_CASE("drop empty category", M) {
 TEST_CASE("add a package", M) {
   Index ri("a");
   Category cat("a", &ri);
-  Package *pack = new Package(Package::ScriptType, "name", &cat);
+  Package *pack = new Package(Package::ScriptType, "name", &cat, "remote");
   Version *ver = new Version("1", pack);
   ver->addSource(new Source({}, "google.com", ver));
   pack->addVersion(ver);
@@ -151,7 +151,7 @@ TEST_CASE("add a package", M) {
 
 TEST_CASE("add owned package", M) {
   Category cat1("a", nullptr);
-  Package *pack = new Package(Package::ScriptType, "name", &cat1);
+  Package *pack = new Package(Package::ScriptType, "name", &cat1, "remote");
 
   try {
     Category cat2("b", nullptr);
@@ -166,14 +166,14 @@ TEST_CASE("add owned package", M) {
 
 TEST_CASE("drop empty package", M) {
   Category cat("a", nullptr);
-  const Package pkg(Package::ScriptType, "name", &cat);
+  const Package pkg(Package::ScriptType, "name", &cat, "remote");
   REQUIRE_FALSE(cat.addPackage(&pkg));
   REQUIRE(cat.packages().empty());
 }
 
 TEST_CASE("drop unknown package", M) {
   Category cat("a", nullptr);
-  const Package pkg(Package::UnknownType, "name", &cat);
+  const Package pkg(Package::UnknownType, "name", &cat, "remote");
   REQUIRE_FALSE(cat.addPackage(&pkg));
   REQUIRE(cat.packages().size() == 0);
 }
@@ -217,7 +217,7 @@ TEST_CASE("set index name", M) {
 TEST_CASE("find package", M) {
   Index ri("index name");
   Category *cat = new Category("cat", &ri);
-  Package *pack = new Package(Package::ScriptType, "pkg", cat);
+  Package *pack = new Package(Package::ScriptType, "pkg", cat, "remote");
   Version *ver = new Version("1", pack);
   Source *source = new Source({}, "google.com", ver);
 

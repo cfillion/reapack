@@ -382,7 +382,7 @@ void ReaPack::registerSelf()
   // hard-coding galore!
   Index ri("ReaPack");
   Category cat("Extensions", &ri);
-  Package pkg(Package::ExtensionType, "ReaPack.ext", &cat);
+  Package pkg(Package::ExtensionType, "ReaPack.ext", &cat, "ReaPack");
   Version ver(REAPACK_VERSION, &pkg);
   ver.setAuthor("cfillion");
   ver.addSource(new Source(REAPACK_FILENAME, "dummy url", &ver));

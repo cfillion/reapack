@@ -94,6 +94,7 @@ private:
   int m_flags;
   Registry::Entry m_oldEntry;
   ArchiveReaderPtr m_reader;
+  bool m_symlink;
 
   bool m_fail;
   IndexPtr m_index; // keep in memory

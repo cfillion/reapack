@@ -25,6 +25,7 @@
 
 #include <cassert>
 
+#include <boost/algorithm/string/replace.hpp>
 #include <reaper_plugin_functions.h>
 
 static const int DOWNLOAD_TIMEOUT = 15;
@@ -212,7 +213,13 @@ bool FileDownload::save()
     return FS::remove(m_path.temp());
 }
 
-std::ostream *FileDownload::openStream()
+CopyFileDownload::CopyFileDownload(const Path &target, const std::string &url,
+    const NetworkOpts &opts, int flags)
+  : FileDownload(target, url, opts, flags)
+{
+}
+
+std::ostream *CopyFileDownload::openStream()
 {
   if(FS::open(m_stream, m_path.temp()))
     return &m_stream;
@@ -222,7 +229,25 @@ std::ostream *FileDownload::openStream()
   }
 }
 
-void FileDownload::closeStream()
+void CopyFileDownload::closeStream()
 {
   m_stream.close();
+}
+
+SymlinkFileDownload::SymlinkFileDownload(const Path &target, const std::string &url,
+    const NetworkOpts &opts, int flags)
+  : FileDownload(target, url, opts, flags)
+{
+}
+
+bool SymlinkFileDownload::run()
+{
+  std::string local_path = m_url;
+  boost::algorithm::replace_all(local_path, "file://", "");
+  return FS::symlink(Path(local_path), m_path.temp());
+}
+
+std::ostream *SymlinkFileDownload::openStream()
+{
+  return nullptr;
 }

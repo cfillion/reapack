@@ -64,6 +64,8 @@ protected:
   virtual std::ostream *openStream() = 0;
   virtual void closeStream() {}
 
+  std::string m_url;
+
 private:
   struct WriteContext {
     std::ostream *stream;
@@ -77,7 +79,6 @@ private:
   static size_t WriteData(char *, size_t, size_t, void *);
   static int UpdateProgress(void *, double, double, double, double);
 
-  std::string m_url;
   std::string m_expectedChecksum;
   NetworkOpts m_opts;
   int m_flags;
@@ -105,12 +106,31 @@ public:
   bool save();
 
 protected:
+  TempPath m_path;
+};
+
+class CopyFileDownload : public FileDownload {
+public:
+  CopyFileDownload(const Path &target, const std::string &url,
+    const NetworkOpts &, int flags = 0);
+
+protected:
   std::ostream *openStream() override;
   void closeStream() override;
 
 private:
-  TempPath m_path;
   std::ofstream m_stream;
+};
+
+class SymlinkFileDownload : public FileDownload {
+public:
+  SymlinkFileDownload(const Path &target, const std::string &url,
+    const NetworkOpts &, int flags = 0);
+
+  bool run() override;
+
+protected:
+  std::ostream *openStream() override;
 };
 
 #endif

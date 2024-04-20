@@ -24,7 +24,7 @@
 
 static void LoadMetadataV1(XmlNode , Metadata *);
 static void LoadCategoryV1(XmlNode , Index *);
-static void LoadPackageV1(XmlNode , Category *);
+static void LoadPackageV1(XmlNode , Category *, Index *);
 static void LoadVersionV1(XmlNode , Package *);
 static void LoadSourceV1(XmlNode , Version *);
 
@@ -75,18 +75,18 @@ void LoadCategoryV1(XmlNode catNode, Index *ri)
 
   for(XmlNode packNode = catNode.firstChild("reapack");
       packNode; packNode = packNode.nextSibling("reapack"))
-    LoadPackageV1(packNode, cat);
+    LoadPackageV1(packNode, cat, ri);
 
   if(ri->addCategory(cat))
     ptr.release();
 }
 
-void LoadPackageV1(XmlNode packNode, Category *cat)
+void LoadPackageV1(XmlNode packNode, Category *cat, Index *ri)
 {
   const XmlString &type = packNode.attribute("type"),
                   &name = packNode.attribute("name");
 
-  Package *pack = new Package(Package::getType(type.value_or("")), name.value_or(""), cat);
+  Package *pack = new Package(Package::getType(type.value_or("")), name.value_or(""), cat, ri->name());
   std::unique_ptr<Package> ptr(pack);
 
   if(const XmlString &desc = packNode.attribute("desc"))
