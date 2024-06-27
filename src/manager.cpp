@@ -32,6 +32,8 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
+#include <algorithm>
+
 static const Win32::char_type *ARCHIVE_FILTER =
   L("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
 static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");

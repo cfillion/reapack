@@ -29,6 +29,8 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
+#include <algorithm>
+
 enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser()
