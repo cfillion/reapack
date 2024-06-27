@@ -174,6 +174,17 @@ int ListView::columnWidth(const int index) const
   return ListView_GetColumnWidth(handle(), index);
 }
 
+int ListView::columnCount() const
+{
+#ifdef __GNUC__
+  // workaround for Walloc-size-larger-than in GCC 14 when LTO is enabled
+  if(m_cols.size() > INT_MAX)
+    __builtin_unreachable();
+#endif
+
+  return static_cast<int>(m_cols.size());
+}
+
 void ListView::sort()
 {
   static const auto compare = [](LPARAM aRow, LPARAM bRow, LPARAM param)

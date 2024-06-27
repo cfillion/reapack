@@ -140,7 +140,7 @@ public:
   const Column &column(int index) const { return m_cols[index]; }
   void resizeColumn(int index, int width);
   int columnWidth(int index) const;
-  int columnCount() const { return static_cast<int>(m_cols.size()); }
+  int columnCount() const;
 
   void sortByColumn(int index, SortOrder order = AscendingOrder, bool user = false);
   void setFilter(const std::string &);
