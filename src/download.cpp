@@ -114,6 +114,14 @@ void Download::setName(const std::string &name)
   setSummary({ "Downloading", name });
 }
 
+#include <boost/preprocessor/stringize.hpp>
+
+#define C(__VA_ARGS__) { \
+  const CURLcode rv = __VA_ARGS__; \
+  if(rv != CURLE_OK) \
+    printf("[%d] %s\n\t-> %d\n", __LINE__, BOOST_PP_STRINGIZE(__VA_ARGS__), rv); \
+}
+
 bool Download::run()
 {
   WriteContext write;
@@ -135,27 +143,31 @@ bool Download::run()
 
   thread_local DownloadContext ctx;
 
-  curl_easy_setopt(ctx, CURLOPT_URL, m_url.c_str());
-  curl_easy_setopt(ctx, CURLOPT_PROXY, m_opts.proxy.c_str());
-  curl_easy_setopt(ctx, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
+  Dl_info info{};
+  dladdr(reinterpret_cast<const void *>(&curl_easy_setopt), &info);
+  printf("ReaPack using cURL %s at %s\n", curl_version(), info.dli_fname);
+
+  C(curl_easy_setopt(ctx, CURLOPT_URL, m_url.c_str()));
+  C(curl_easy_setopt(ctx, CURLOPT_PROXY, m_opts.proxy.c_str()));
+  C(curl_easy_setopt(ctx, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer));
 #ifdef __APPLE__
-  curl_easy_setopt(ctx, CURLOPT_CAINFO, nullptr);
+  C(curl_easy_setopt(ctx, CURLOPT_CAINFO, nullptr));
 #endif
 
-  curl_easy_setopt(ctx, CURLOPT_PROGRESSFUNCTION, UpdateProgress);
-  curl_easy_setopt(ctx, CURLOPT_PROGRESSDATA, this);
+  C(curl_easy_setopt(ctx, CURLOPT_PROGRESSFUNCTION, UpdateProgress));
+  C(curl_easy_setopt(ctx, CURLOPT_PROGRESSDATA, this));
 
-  curl_easy_setopt(ctx, CURLOPT_WRITEFUNCTION, WriteData);
-  curl_easy_setopt(ctx, CURLOPT_WRITEDATA, &write);
+  C(curl_easy_setopt(ctx, CURLOPT_WRITEFUNCTION, WriteData));
+  C(curl_easy_setopt(ctx, CURLOPT_WRITEDATA, &write));
 
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
-  curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers);
+  C(curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers));
 
   std::string errbuf = "No error message";
   errbuf.resize(CURL_ERROR_SIZE - 1, '\0');
-  curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf.data());
+  C(curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf.data()));
 
   const CURLcode res = curl_easy_perform(ctx);
   curl_slist_free_all(headers);
