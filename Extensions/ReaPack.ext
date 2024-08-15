@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4.5
+@version 1.2.4.6
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -13,6 +13,5 @@
   [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Add a mnemonic to ReaPack's menu in Extensions and remove the separator above it
-  • Fix spurious selection when reloading the package browser on macOS
-  • Restore compatibility with Linux distributions shipping GCC 7-11 accidentally lost in v1.2.4.4 [t=288248]
+  • Fix committing action list changes when the last file in a package is not a registered script
+  • Increase maximum concurrent downloads from 4 to 6
