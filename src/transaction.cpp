@@ -224,25 +224,21 @@ void Transaction::registerAll(const bool add, const Registry::Entry &entry)
     registerFile({add, entry, file});
 }
 
+void Transaction::registerFile(const HostTicket &reg)
+{
+  if(!AddRemoveReaScript)
+    return;
+  if(reg.file.type != Package::ScriptType || !reg.file.sections)
+    return;
+
+  m_regQueue.push(reg);
+}
+
 void Transaction::registerQueued()
 {
   while(!m_regQueue.empty()) {
     const HostTicket &reg = m_regQueue.front();
-
-    // don't register in host if the remote got disabled meanwhile
-    if(reg.add && m_inhibited.count(reg.entry.remote) > 0) {
-      m_regQueue.pop();
-      return;
-    }
-
-    switch(reg.file.type) {
-    case Package::ScriptType:
-      registerScript(reg, m_regQueue.size() == 1);
-      break;
-    default:
-      break;
-    }
-
+    registerScript(reg, m_regQueue.size() == 1);
     m_regQueue.pop();
   }
 }
@@ -256,9 +252,6 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
     {Source::MIDIInlineEditorSection,    32062},
     {Source::MediaExplorerSection,       32063},
   };
-
-  if(!AddRemoveReaScript || !reg.file.sections)
-    return; // do nothing if REAPER < v5.12 and skip non-main files
 
   const std::string &fullPath = reg.file.path.prependRoot().join();
 
@@ -295,14 +288,9 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
 void Transaction::inhibit(const Remote &remote)
 {
   // prevents index post-download callbacks from being called
-  // AND prevents files from this remote from being registered in REAPER
-  // (UNregistering is not affected)
-
   const auto &it = m_syncedRemotes.find(remote.name());
   if(it != m_syncedRemotes.end())
     m_syncedRemotes.erase(it);
-
-  m_inhibited.insert(remote.name());
 }
 
 void Transaction::promptObsolete()

@@ -80,7 +80,7 @@ protected:
   IndexPtr loadIndex(const Remote &);
   void addObsolete(const Registry::Entry &e) { m_obsolete.insert(e); }
   void registerAll(bool add, const Registry::Entry &);
-  void registerFile(const HostTicket &t) { m_regQueue.push(t); }
+  void registerFile(const HostTicket &);
 
 private:
   class CompareTask {
@@ -108,7 +108,6 @@ private:
 
   std::unordered_set<std::string> m_syncedRemotes;
   std::map<std::string, IndexPtr> m_indexes;
-  std::unordered_set<std::string> m_inhibited;
   std::unordered_set<Registry::Entry> m_obsolete;
 
   ThreadPool m_threadPool;
