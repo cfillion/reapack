@@ -23,13 +23,19 @@
 #include "filesystem.hpp"
 #include "index.hpp"
 #include "reapack.hpp"
+#include "remote.hpp"
 #include "transaction.hpp"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 InstallTask::InstallTask(const Version *ver, const int flags,
     const Registry::Entry &re, const ArchiveReaderPtr &reader, Transaction *tx)
   : Task(tx), m_version(ver), m_flags(flags), m_oldEntry(std::move(re)), m_reader(reader),
     m_fail(false), m_index(ver->package()->category()->index()->shared_from_this())
 {
+  Remote r = g_reapack->remote(ver->package()->remote());
+  this->m_symlink = boost::algorithm::starts_with(r.url(), "file://")
+    && boost::algorithm::ends_with(r.url(), "?symlink");
 }
 
 bool InstallTask::start()
@@ -71,8 +77,16 @@ bool InstallTask::start()
     }
     else {
       const NetworkOpts &opts = g_reapack->config()->network;
-      FileDownload *dl = new FileDownload(targetPath, src->url(), opts);
-      dl->setExpectedChecksum(src->checksum());
+      FileDownload *dl;
+
+      if(m_symlink) {
+        dl = new SymlinkFileDownload(targetPath, src->url(), opts);
+      }
+      else {
+        dl = new CopyFileDownload(targetPath, src->url(), opts);
+        dl->setExpectedChecksum(src->checksum());
+      }
+
       push(dl, dl->path());
     }
   }

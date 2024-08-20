@@ -50,7 +50,7 @@ TEST_CASE("package type to string", M) {
 TEST_CASE("invalid package name", M) {
   SECTION("empty") {
     try {
-      Package pack(Package::ScriptType, {}, nullptr);
+      Package pack(Package::ScriptType, {}, nullptr, "remote");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -60,7 +60,7 @@ TEST_CASE("invalid package name", M) {
 
   SECTION("slash") {
     try {
-      Package pack(Package::ScriptType, "hello/world", nullptr);
+      Package pack(Package::ScriptType, "hello/world", nullptr, "remote");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -70,7 +70,7 @@ TEST_CASE("invalid package name", M) {
 
   SECTION("backslash") {
     try {
-      Package pack(Package::ScriptType, "hello\\world", nullptr);
+      Package pack(Package::ScriptType, "hello\\world", nullptr, "remote");
       FAIL();
     }
     catch(const reapack_error &e) {
@@ -83,7 +83,7 @@ TEST_CASE("package versions are sorted", M) {
   Index ri("Remote Name");
   Category cat("Category Name", &ri);
 
-  Package pack(Package::ScriptType, "a", &cat);
+  Package pack(Package::ScriptType, "a", &cat, "remote");
   CHECK(pack.versions().size() == 0);
 
   Version *final = new Version("1", &pack);
@@ -107,7 +107,7 @@ TEST_CASE("package versions are sorted", M) {
 TEST_CASE("get latest stable version", M) {
   Index ri("Remote Name");
   Category cat("Category Name", &ri);
-  Package pack(Package::ScriptType, "a", &cat);
+  Package pack(Package::ScriptType, "a", &cat, "remote");
 
   Version *alpha = new Version("2.0-alpha", &pack);
   alpha->addSource(new Source({}, "google.com", alpha));
@@ -131,7 +131,7 @@ TEST_CASE("get latest stable version", M) {
 TEST_CASE("pre-release updates", M) {
   Index ri("Remote Name");
   Category cat("Category Name", &ri);
-  Package pack(Package::ScriptType, "a", &cat);
+  Package pack(Package::ScriptType, "a", &cat, "remote");
 
   Version *stable1 = new Version("0.9", &pack);
   stable1->addSource(new Source({}, "google.com", stable1));
@@ -166,7 +166,7 @@ TEST_CASE("pre-release updates", M) {
 }
 
 TEST_CASE("drop empty version", M) {
-  Package pack(Package::ScriptType, "a", nullptr);
+  Package pack(Package::ScriptType, "a", nullptr, "remote");
   const Version ver("1", &pack);
   REQUIRE_FALSE(pack.addVersion(&ver));
   REQUIRE(pack.versions().empty());
@@ -174,8 +174,8 @@ TEST_CASE("drop empty version", M) {
 }
 
 TEST_CASE("add owned version", M) {
-  Package pack1(Package::ScriptType, "a", nullptr);
-  Package pack2(Package::ScriptType, "a", nullptr);
+  Package pack1(Package::ScriptType, "a", nullptr, "remote");
+  Package pack2(Package::ScriptType, "a", nullptr, "remote");
 
   Version *ver = new Version("1", &pack1);
 
@@ -192,7 +192,7 @@ TEST_CASE("add owned version", M) {
 TEST_CASE("add duplicate version", M) {
   Index ri("r");
   Category cat("c", &ri);
-  Package pack(Package::ScriptType, "p", &cat);
+  Package pack(Package::ScriptType, "p", &cat, "remote");
 
   Version *ver = new Version("1", &pack);
   ver->addSource(new Source({}, "google.com", ver));
@@ -211,7 +211,7 @@ TEST_CASE("find matching version", M) {
   Index ri("Remote Name");
   Category cat("Category Name", &ri);
 
-  Package pack(Package::ScriptType, "a", &cat);
+  Package pack(Package::ScriptType, "a", &cat, "remote");
   CHECK(pack.versions().size() == 0);
 
   Version *ver = new Version("1", &pack);
@@ -229,7 +229,7 @@ TEST_CASE("find matching version", M) {
 TEST_CASE("package full name", M) {
   const Index ri("Index Name");
   const Category cat("Category Name", &ri);
-  Package pack(Package::ScriptType, "file.name", &cat);
+  Package pack(Package::ScriptType, "file.name", &cat, "remote");
 
   REQUIRE(pack.fullName() == "Index Name/Category Name/file.name");
 
@@ -238,7 +238,7 @@ TEST_CASE("package full name", M) {
 }
 
 TEST_CASE("package description", M) {
-  Package pack(Package::ScriptType, "test.lua", nullptr);
+  Package pack(Package::ScriptType, "test.lua", nullptr, "remote");
   REQUIRE(pack.description().empty());
 
   pack.setDescription("hello world");
@@ -246,7 +246,7 @@ TEST_CASE("package description", M) {
 }
 
 TEST_CASE("package display name", M) {
-  Package pack(Package::ScriptType, "test.lua", nullptr);
+  Package pack(Package::ScriptType, "test.lua", nullptr, "remote");
   REQUIRE(pack.displayName() == "test.lua");
 
   pack.setDescription("hello world");

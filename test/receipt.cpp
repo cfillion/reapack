@@ -16,7 +16,7 @@ TEST_CASE("non-empty receipt", M) {
   SECTION("install") {
     IndexPtr ri = std::make_shared<Index>("Index Name");
     Category cat("Category Name", ri.get());
-    Package pkg(Package::ScriptType, "Package Name", &cat);
+    Package pkg(Package::ScriptType, "Package Name", &cat, "remote");
     Version ver("1.0", &pkg);
     r.addInstall(&ver, {});
   }
@@ -41,7 +41,7 @@ TEST_CASE("set receipt flags", M) {
   SECTION("install") {
     IndexPtr ri = std::make_shared<Index>("Index Name");
     Category cat("Category Name", ri.get());
-    Package pkg(Package::ScriptType, "Package Name", &cat);
+    Package pkg(Package::ScriptType, "Package Name", &cat, "remote");
     Version ver("1.0", &pkg);
     r.addInstall(&ver, {});
 
@@ -77,8 +77,8 @@ TEST_CASE("set receipt flags", M) {
 TEST_CASE("set restart needed flag", M) {
   IndexPtr ri = std::make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
-  Package script(Package::ScriptType, "Package Name", &cat);
-  Package ext(Package::ExtensionType, "Package Name", &cat);
+  Package script(Package::ScriptType, "Package Name", &cat, "remote");
+  Package ext(Package::ExtensionType, "Package Name", &cat, "remote");
   Version scriptVer("1.0", &script);
   Version extVer("1.0", &ext);
 
@@ -147,7 +147,7 @@ TEST_CASE("format receipt page contents", M) {
 TEST_CASE("format install ticket", M) {
   IndexPtr ri = std::make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
-  Package pkg(Package::ScriptType, "Package Name", &cat);
+  Package pkg(Package::ScriptType, "Package Name", &cat, "remote");
 
   Version *v1 = new Version("1.0", &pkg);
   v1->addSource(new Source({}, "https://google.com", v1));
@@ -207,13 +207,13 @@ TEST_CASE("format install ticket", M) {
 TEST_CASE("sort InstallTickets (case insensitive)", M) {
   IndexPtr ri = std::make_shared<Index>("Index Name");
   Category cat("Category Name", ri.get());
-  Package pkg1(Package::ScriptType, "a test", &cat);
+  Package pkg1(Package::ScriptType, "a test", &cat, "remote");
   Version ver1("1.0", &pkg1);
 
-  Package pkg2(Package::ScriptType, "Uppercase Name", &cat);
+  Package pkg2(Package::ScriptType, "Uppercase Name", &cat, "remote");
   Version ver2("1.0", &pkg2);
 
-  Package pkg3(Package::ScriptType, "unused name", &cat);
+  Package pkg3(Package::ScriptType, "unused name", &cat, "remote");
   pkg3.setDescription("z is the last letter");
   Version ver3("1.0", &pkg3);
 

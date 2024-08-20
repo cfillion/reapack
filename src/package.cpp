@@ -84,8 +84,8 @@ const std::string &Package::displayName(const std::string &name, const std::stri
   return desc.empty() ? name : desc;
 }
 
-Package::Package(const Type type, const std::string &name, const Category *cat)
-  : m_category(cat), m_type(type), m_name(name)
+Package::Package(const Type type, const std::string &name, const Category *cat, const std::string &remote)
+  : m_category(cat), m_type(type), m_name(name), m_remote(remote)
 {
   if(m_name.empty())
     throw reapack_error("empty package name");

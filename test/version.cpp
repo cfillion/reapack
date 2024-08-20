@@ -11,7 +11,7 @@
 #define MAKE_PACKAGE \
   Index ri("Index Name"); \
   Category cat("Category Name", &ri); \
-  Package pkg(Package::ScriptType, "Package Name", &cat); \
+  Package pkg(Package::ScriptType, "Package Name", &cat, "remote"); \
 
 static const char *M = "[version]";
 

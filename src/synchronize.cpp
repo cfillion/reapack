@@ -42,7 +42,7 @@ bool SynchronizeTask::start()
   if(!m_stale && mtime && (!threshold || mtime > now - threshold))
     return true;
 
-  auto dl = new FileDownload(m_indexPath, m_remote.url(),
+  auto dl = new CopyFileDownload(m_indexPath, m_remote.url(),
     netConfig, Download::NoCacheFlag);
   dl->setName(m_remote.name());
 
