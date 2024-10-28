@@ -57,7 +57,7 @@ public:
     const std::optional<bool> &forceAutoInstall = std::nullopt);
   void install(const Version *, int flags = 0, const ArchiveReaderPtr & = nullptr);
   void install(const Version *, const Registry::Entry &oldEntry,
-    int flags = false, const ArchiveReaderPtr & = nullptr);
+    int flags = 0, const ArchiveReaderPtr & = nullptr);
   void setFlags(const Registry::Entry &, int flags);
   void uninstall(const Remote &);
   void uninstall(const Registry::Entry &);

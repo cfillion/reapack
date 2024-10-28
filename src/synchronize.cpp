@@ -96,5 +96,5 @@ void SynchronizeTask::synchronize(const Package *pkg)
   else if(entry.test(Registry::Entry::PinnedFlag) || latest->name() < entry.version)
     return;
 
-  tx()->install(latest, entry);
+  tx()->install(latest, entry, entry.flags);
 }
