@@ -20,9 +20,11 @@ TEST_CASE("platform from string", M) {
     REQUIRE(Platform("all") == Platform::Generic);
 
   SECTION("windows") {
-    REQUIRE(Platform("windows") == Platform::Windows_Any);
-    REQUIRE(Platform("win32")   == Platform::Windows_x86);
-    REQUIRE(Platform("win64")   == Platform::Windows_x64);
+    REQUIRE(Platform("windows")         == Platform::Windows_Any);
+    REQUIRE(Platform("win32")           == Platform::Windows_x86);
+    REQUIRE(Platform("win64")           == Platform::Windows_x64);
+    REQUIRE(Platform("win64", false)    == Platform::Windows_x64_arm64ec);
+    REQUIRE(Platform("windows-arm64ec") == Platform::Windows_arm64ec);
   }
 
   SECTION("macOS") {
@@ -47,84 +49,92 @@ TEST_CASE("test platform", M) {
     {Platform::Generic,       true },
 
 #ifdef __APPLE__
-    {Platform::Linux_Any,     false},
-    {Platform::Linux_x86_64,  false},
-    {Platform::Linux_i686,    false},
-    {Platform::Linux_armv7l,  false},
-    {Platform::Linux_aarch64, false},
-    {Platform::Windows_Any,   false},
-    {Platform::Windows_x64,   false},
-    {Platform::Windows_x86,   false},
+    {Platform::Linux_Any,       false},
+    {Platform::Linux_x86_64,    false},
+    {Platform::Linux_i686,      false},
+    {Platform::Linux_armv7l,    false},
+    {Platform::Linux_aarch64,   false},
+    {Platform::Windows_Any,     false},
+    {Platform::Windows_x64,     false},
+    {Platform::Windows_x86,     false},
+    {Platform::Windows_arm64ec, false},
 
-    {Platform::Darwin_Any,    true },
+    {Platform::Darwin_Any,      true },
 #  ifdef __x86_64__
-    {Platform::Darwin_i386,   false},
-    {Platform::Darwin_x86_64, true },
-    {Platform::Darwin_arm64,  false},
+    {Platform::Darwin_i386,     false},
+    {Platform::Darwin_x86_64,   true },
+    {Platform::Darwin_arm64,    false},
 #  elif __i386__
-    {Platform::Darwin_i386,   true },
-    {Platform::Darwin_x86_64, false},
-    {Platform::Darwin_arm64,  false},
+    {Platform::Darwin_i386,     true },
+    {Platform::Darwin_x86_64,   false},
+    {Platform::Darwin_arm64,    false},
 #  elif __arm64__
-    {Platform::Darwin_i386,   false},
-    {Platform::Darwin_x86_64, false},
-    {Platform::Darwin_arm64,  true },
+    {Platform::Darwin_i386,     false},
+    {Platform::Darwin_x86_64,   false},
+    {Platform::Darwin_arm64,    true },
 #  else
 #    error Untested architecture
 #  endif
 
 #elif __linux__
-    {Platform::Darwin_Any,    false},
-    {Platform::Darwin_i386,   false},
-    {Platform::Darwin_x86_64, false},
-    {Platform::Darwin_arm64,  false},
-    {Platform::Windows_Any,   false},
-    {Platform::Windows_x86,   false},
-    {Platform::Windows_x64,   false},
+    {Platform::Darwin_Any,      false},
+    {Platform::Darwin_i386,     false},
+    {Platform::Darwin_x86_64,   false},
+    {Platform::Darwin_arm64,    false},
+    {Platform::Windows_Any,     false},
+    {Platform::Windows_x86,     false},
+    {Platform::Windows_x64,     false},
+    {Platform::Windows_arm64ec, false},
 
-    {Platform::Linux_Any,     true },
+    {Platform::Linux_Any,       true },
 #  ifdef __x86_64__
-    {Platform::Linux_i686,    false},
-    {Platform::Linux_x86_64,  true },
-    {Platform::Linux_armv7l,  false},
-    {Platform::Linux_aarch64, false},
+    {Platform::Linux_i686,      false},
+    {Platform::Linux_x86_64,    true },
+    {Platform::Linux_armv7l,    false},
+    {Platform::Linux_aarch64,   false},
 #  elif __i686__
-    {Platform::Linux_i686,    true },
-    {Platform::Linux_x86_64,  false},
-    {Platform::Linux_armv7l,  false},
-    {Platform::Linux_aarch64, false},
+    {Platform::Linux_i686,      true },
+    {Platform::Linux_x86_64,    false},
+    {Platform::Linux_armv7l,    false},
+    {Platform::Linux_aarch64,   false},
 #  elif __ARM_ARCH_7A__
-    {Platform::Linux_i686,    false},
-    {Platform::Linux_x86_64,  false},
-    {Platform::Linux_armv7l,  true },
-    {Platform::Linux_aarch64, false},
+    {Platform::Linux_i686,      false},
+    {Platform::Linux_x86_64,    false},
+    {Platform::Linux_armv7l,    true },
+    {Platform::Linux_aarch64,   false},
 #  elif __aarch64__
-    {Platform::Linux_i686,    false},
-    {Platform::Linux_x86_64,  false},
-    {Platform::Linux_armv7l,  false},
-    {Platform::Linux_aarch64, true },
+    {Platform::Linux_i686,      false},
+    {Platform::Linux_x86_64,    false},
+    {Platform::Linux_armv7l,    false},
+    {Platform::Linux_aarch64,   true },
 #  else
 #    error Untested architecture
 #  endif
 
 #elif _WIN32
-    {Platform::Darwin_Any,    false},
-    {Platform::Darwin_i386,   false},
-    {Platform::Darwin_x86_64, false},
-    {Platform::Darwin_arm64,  false},
-    {Platform::Linux_Any,     false},
-    {Platform::Linux_x86_64,  false},
-    {Platform::Linux_i686,    false},
-    {Platform::Linux_armv7l,  false},
-    {Platform::Linux_aarch64, false},
+    {Platform::Darwin_Any,      false},
+    {Platform::Darwin_i386,     false},
+    {Platform::Darwin_x86_64,   false},
+    {Platform::Darwin_arm64,    false},
+    {Platform::Linux_Any,       false},
+    {Platform::Linux_x86_64,    false},
+    {Platform::Linux_i686,      false},
+    {Platform::Linux_armv7l,    false},
+    {Platform::Linux_aarch64,   false},
 
-    {Platform::Windows_Any,   true },
-#  ifdef _WIN64
-    {Platform::Windows_x86,   false},
-    {Platform::Windows_x64,   true },
+    {Platform::Windows_Any,     true },
+#  ifdef _M_ARM64EC
+    {Platform::Windows_x86,     false},
+    {Platform::Windows_x64,     false},
+    {Platform::Windows_arm64ec, true },
+#  elif _M_X64
+    {Platform::Windows_x86,     false},
+    {Platform::Windows_x64,     true },
+    {Platform::Windows_arm64ec, false},
 #  else
-    {Platform::Windows_x86,   true },
-    {Platform::Windows_x64,   false},
+    {Platform::Windows_x86,     true },
+    {Platform::Windows_x64,     false},
+    {Platform::Windows_arm64ec, false},
 #  endif
 
 #else
