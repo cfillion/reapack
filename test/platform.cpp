@@ -23,6 +23,7 @@ TEST_CASE("platform from string", M) {
     REQUIRE(Platform("windows")         == Platform::Windows_Any);
     REQUIRE(Platform("win32")           == Platform::Windows_x86);
     REQUIRE(Platform("win64")           == Platform::Windows_x64);
+    REQUIRE(Platform("win64", false)    == Platform::Windows_x64_arm64ec);
     REQUIRE(Platform("windows-arm64ec") == Platform::Windows_arm64ec);
   }
 

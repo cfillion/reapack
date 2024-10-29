@@ -22,11 +22,11 @@
 
 #include <sstream>
 
-static void LoadMetadataV1(XmlNode , Metadata *);
-static void LoadCategoryV1(XmlNode , Index *);
-static void LoadPackageV1(XmlNode , Category *);
-static void LoadVersionV1(XmlNode , Package *);
-static void LoadSourceV1(XmlNode , Version *);
+static void LoadMetadataV1(XmlNode, Metadata *);
+static void LoadCategoryV1(XmlNode, Index *);
+static void LoadPackageV1(XmlNode, Category *);
+static void LoadVersionV1(XmlNode, Package *);
+static void LoadSourceV1(XmlNode, Version *, bool hasArm64Ec);
 
 void Index::loadV1(XmlNode root, Index *ri)
 {
@@ -117,8 +117,21 @@ void LoadVersionV1(XmlNode verNode, Package *pkg)
 
   XmlNode node = verNode.firstChild("source");
 
+  bool hasArm64Ec = false;
+#if defined(_WIN32) && defined(_M_ARM64EC)
   while(node) {
-    LoadSourceV1(node, ver);
+    const char *platform = *node.attribute("platform");
+    if(platform && Platform(platform) == Platform::Windows_arm64ec) {
+      hasArm64Ec = true;
+      break;
+    }
+    node = node.nextSibling("source");
+  }
+  node = verNode.firstChild("source");
+#endif
+
+  while(node) {
+    LoadSourceV1(node, ver, hasArm64Ec);
     node = node.nextSibling("source");
   }
 
@@ -133,7 +146,7 @@ void LoadVersionV1(XmlNode verNode, Package *pkg)
     ptr.release();
 }
 
-void LoadSourceV1(XmlNode node, Version *ver)
+void LoadSourceV1(XmlNode node, Version *ver, const bool hasArm64Ec)
 {
   const XmlString &platform = node.attribute("platform"),
                   &type     = node.attribute("type"),
@@ -146,7 +159,7 @@ void LoadSourceV1(XmlNode node, Version *ver)
   std::unique_ptr<Source> ptr(src);
 
   src->setChecksum(checksum.value_or(""));
-  src->setPlatform(platform.value_or("all"));
+  src->setPlatform(Platform(platform.value_or("all"), hasArm64Ec));
   src->setTypeOverride(Package::getType(type.value_or("")));
 
   int sections = 0;

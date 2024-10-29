@@ -62,7 +62,7 @@ const Platform::Enum Platform::Current = Platform::
 static_assert(Platform::Current != Platform::Unknown,
   "The current operating system or architecture is not supported.");
 
-auto Platform::parse(const char *platform) -> Enum
+auto Platform::parse(const char *platform, const bool hasArm64Ec) -> Enum
 {
   constexpr std::pair<const char *, Enum> map[] {
     { "all",           Generic       },
@@ -85,8 +85,11 @@ auto Platform::parse(const char *platform) -> Enum
   };
 
   for(auto &[key, value] : map) {
-    if(!strcmp(platform, key))
+    if(!strcmp(platform, key)) {
+      if(!hasArm64Ec && value == Windows_x64)
+        return Windows_x64_arm64ec;
       return value;
+    }
   }
 
   return Unknown;

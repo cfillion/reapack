@@ -38,6 +38,7 @@ public:
     Windows_x64     = 1<<8,
     Windows_arm64ec = 1<<9,
     Windows_Any     = Windows_x86 | Windows_x64 | Windows_arm64ec,
+    Windows_x64_arm64ec = Windows_x64 | Windows_arm64ec,
 
     Generic = Darwin_Any | Linux_Any | Windows_Any,
   };
@@ -46,7 +47,7 @@ public:
 
   Platform() : m_value(Generic) {}
   Platform(Enum val) : m_value(val) {}
-  Platform(const char *str) : m_value(parse(str)) {}
+  Platform(const char *str, bool hasArm64Ec = true) : m_value(parse(str, hasArm64Ec)) {}
 
   Enum value() const { return m_value; }
   bool test() const;
@@ -55,7 +56,7 @@ public:
   Platform &operator=(Enum n) { m_value = n; return *this; }
 
 private:
-  static Enum parse(const char *);
+  static Enum parse(const char *, bool hasArm64Ec);
 
   Enum m_value;
 };
