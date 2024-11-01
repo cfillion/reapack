@@ -1,17 +1,19 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.4.6
+@version 1.2.5
 @author cfillion
 @donation https://reapack.com/donate
 @provides
-  [darwin32     ] reaper_reapack-i386.dylib   https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [darwin64     ] reaper_reapack-x86_64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [darwin-arm64 ] reaper_reapack-arm64.dylib  https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [linux32      ] reaper_reapack-i686.so      https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [linux64      ] reaper_reapack-x86_64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [linux-armv7l ] reaper_reapack-armv7l.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [linux-aarch64] reaper_reapack-aarch64.so   https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [win32        ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
-  [win64        ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [darwin32       ] reaper_reapack-i386.dylib   https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [darwin64       ] reaper_reapack-x86_64.dylib https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [darwin-arm64   ] reaper_reapack-arm64.dylib  https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [linux32        ] reaper_reapack-i686.so      https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [linux64        ] reaper_reapack-x86_64.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [linux-armv7l   ] reaper_reapack-armv7l.so    https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [linux-aarch64  ] reaper_reapack-aarch64.so   https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [win32          ] reaper_reapack-x86.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [win64          ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
+  [windows-arm64ec] reaper_reapack-arm64ec.dll  https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Fix committing action list changes when the last file in a package is not a registered script
-  • Increase maximum concurrent downloads from 4 to 6
+  • Add Windows ARM64EC builds (Windows 11+) [#88]
+  • Fix per-package pre-release option being reset when synchronizing
+  • Silently install x86_64 binaries when packages don't provide any ARM64EC-specific files
