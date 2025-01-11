@@ -24,6 +24,8 @@
 #  define widen_cstr(cstr) cstr
 #endif
 
+#include <vector>
+
 #ifdef _WIN32
 std::wstring Win32::widen(const char *input, const UINT codepage)
 {
@@ -55,10 +57,16 @@ int Win32::messageBox(const HWND handle, const char *text,
 
 std::string Win32::getWindowText(const HWND handle)
 {
-  char_type buffer[4096];
-  GetWindowText(handle, buffer, static_cast<int>(std::size(buffer)));
+  int buffer_len = GetWindowTextLength(handle);
+  if(buffer_len)
+    ++buffer_len; // null terminator
+  else // REAPER <6.09 on non-Windows, before SWELL a34caf91
+    buffer_len = 8192;
 
-  return narrow(buffer);
+  std::vector<char_type> buffer(buffer_len, 0);
+  GetWindowText(handle, buffer.data(), buffer_len);
+
+  return narrow(buffer.data());
 }
 
 void Win32::setWindowText(const HWND handle, const char *text)
