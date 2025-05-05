@@ -82,6 +82,9 @@ DownloadContext::DownloadContext()
   curl_easy_setopt(m_curl, CURLOPT_FAILONERROR, true);
   curl_easy_setopt(m_curl, CURLOPT_SHARE, g_curlShare);
   curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, false);
+#ifdef CURLSSLOPT_REVOKE_BEST_EFFORT
+  curl_easy_setopt(m_curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_REVOKE_BEST_EFFORT);
+#endif
 }
 
 DownloadContext::~DownloadContext()
