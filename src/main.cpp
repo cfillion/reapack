@@ -19,6 +19,7 @@
 #include "buildinfo.hpp"
 #include "errors.hpp"
 #include "filesystem.hpp"
+#include "loadlib.hpp"
 #include "menu.hpp"
 #include "reapack.hpp"
 #include "win32.hpp"
@@ -135,7 +136,7 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int REAPER_PLUGIN_ENTRYPOINT(
     return 0;
   }
   else if(rec->caller_version != REAPER_PLUGIN_VERSION
-      || !loadAPI(rec->GetFunc) || !checkLocation(instance))
+      || !loadAPI(rec->GetFunc) || !checkLocation(instance) || !LoadLib::loaded())
     return 0;
 
   new ReaPack(instance, rec->hwnd_main);
