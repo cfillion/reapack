@@ -32,6 +32,7 @@ for:
         $3 = "http://ports.ubuntu.com/ubuntu-ports/"
       } 1' /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/ports.list > /dev/null
       sudo sed -i 's/apt.postgresql.org/apt-archive.postgresql.org/' /etc/apt/sources.list
+      sudo rm /etc/apt/sources.list.d/google-chrome.list
 
       # downgrade Catch2 to 3.3.1 for successfully compiling with GCC 7
       git -C ~/vcpkg fetch origin b28cddc45f5832fb46afaab11d61c9ccce50470a
