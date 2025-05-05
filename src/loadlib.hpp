@@ -18,7 +18,9 @@
 #ifndef REAPACK_LOADLIB_HPP
 #define REAPACK_LOADLIB_HPP
 
-#ifndef _WIN32
+#ifdef _WIN32
+#  include <windows.h>
+#else
 #  include <dlfcn.h>
 #endif
 
@@ -28,27 +30,41 @@
 
 class LoadLib {
 public:
+  static constexpr bool Optional {false};
+
   static bool loaded() { return g_ok; }
 
   template<typename... SoNames>
   LoadLib(SoNames... sonames)
+    : LoadLib {true, sonames...}
+  {}
+
+  template<typename... SoNames>
+  LoadLib(const bool required, SoNames... sonames)
+    : m_required {required}
   {
     static_assert(sizeof...(sonames) > 0);
 
-#ifndef _WIN32
+#ifdef _WIN32
+    assert(!required && "error reporting not implemented");
+    for(const wchar_t *soname : {sonames...}) {
+      if((m_so = LoadLibrary(soname)))
+#else
     for(const char *soname : {sonames...}) {
       if((m_so = dlopen(soname, RTLD_LAZY)))
+#endif
         return;
     }
-#endif
 
     fail();
   }
 
   ~LoadLib()
   {
-#ifndef _WIN32
     if(m_so)
+#ifdef _WIN32
+      FreeLibrary(m_so);
+#else
       dlclose(m_so);
 #endif
   }
@@ -59,10 +75,14 @@ public:
     if(!m_so)
       return nullptr;
 
-#ifndef _WIN32
-    if(const T func { reinterpret_cast<T>(dlsym(m_so, name)) })
-      return func;
+    if(const T func {reinterpret_cast<T>(
+#ifdef _WIN32
+        GetProcAddress(m_so, func)
+#else
+        dlsym(m_so, name)
 #endif
+        )})
+      return func;
 
     fail();
     return nullptr;
@@ -71,6 +91,9 @@ public:
 private:
   void fail()
   {
+    if(!m_required)
+      return;
+
 #ifndef _WIN32
     fprintf(stderr, "reapack: %s\n", dlerror());
 #endif
@@ -78,7 +101,13 @@ private:
   }
 
   inline static bool g_ok { true };
+
+#ifdef _WIN32
+  HINSTANCE m_so;
+#else
   void *m_so;
+#endif
+  bool m_required;
 };
 
 #ifdef LOADLIB_ENABLE
@@ -86,15 +115,15 @@ private:
   static auto name { g_##ns.get<decltype(&::name)>(BOOST_PP_STRINGIZE(name)) };
 #define LOADLIB(ns, names, ...) \
   static LoadLib g_##ns names;  \
-  namespace ns { \
+  namespace { namespace ns { \
     BOOST_PP_SEQ_FOR_EACH(_LOADLIB_IMPORT, ns, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__)) \
-  }
+  }}
 #else
 #  define _LOADLIB_IMPORT(r, ns, name) static auto name { &::name };
 #define LOADLIB(ns, names, ...) \
-  namespace ns { \
+  namespace { namespace ns { \
     BOOST_PP_SEQ_FOR_EACH(_LOADLIB_IMPORT, ns, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__)) \
-  }
+  }}
 #endif
 
 #endif

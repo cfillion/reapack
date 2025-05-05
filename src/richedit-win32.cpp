@@ -20,12 +20,17 @@
 // This is the Win32 implementation of RichEdit
 // The macOS implementation is in richedit.mm, Linux is in richedit-generic.cpp
 
-#include "dllimport.hpp"
+#include "loadlib.hpp"
 #include "win32.hpp"
 
 #include <memory>
 #include <richedit.h>
 #include <sstream>
+
+LOADLIB(Win32Opt, (LoadLib::Optional, L"user32.dll"),
+  // available since Windows 10 version 1703
+  SetDialogControlDpiChangeBehavior
+);
 
 static void HandleLink(ENLINK *info, HWND handle)
 {
@@ -53,13 +58,8 @@ RichEdit::RichEdit(HWND handle)
   SendMessage(handle, EM_SETEDITSTYLE,
     SES_HYPERLINKTOOLTIPS, SES_HYPERLINKTOOLTIPS);
 
-  // available since Windows 10 version 1703
-  static DllImport<decltype(SetDialogControlDpiChangeBehavior)>
-    _SetDialogControlDpiChangeBehavior
-    {L"user32.dll", "SetDialogControlDpiChangeBehavior"};
-
-  if(_SetDialogControlDpiChangeBehavior) {
-    _SetDialogControlDpiChangeBehavior(handle,
+  if(Win32Opt::SetDialogControlDpiChangeBehavior) {
+    Win32Opt::SetDialogControlDpiChangeBehavior(handle,
       DCDC_DISABLE_FONT_UPDATE, DCDC_DISABLE_FONT_UPDATE);
   }
 }
