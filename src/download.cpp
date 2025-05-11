@@ -117,7 +117,20 @@ void Download::setName(const std::string &name)
   setSummary({ "Downloading", name });
 }
 
-bool Download::run()
+static bool isGitHub(const std::string &url)
+{
+  constexpr std::string_view patterns[] {
+    "https://github.com/",
+    "https://raw.githubusercontent.com/",
+  };
+  for(const std::string_view &pattern : patterns) {
+    if(url.rfind(pattern, 0) == 0)
+      return true;
+  }
+  return false;
+}
+
+bool Download::run(const bool proxy)
 {
   WriteContext write;
 
@@ -138,7 +151,11 @@ bool Download::run()
 
   thread_local DownloadContext ctx;
 
-  curl_easy_setopt(ctx, CURLOPT_URL, m_url.c_str());
+  std::string url = m_url;
+  if(proxy)
+    url.insert(0, "https://raw.reapack.com/usercontent?");
+
+  curl_easy_setopt(ctx, CURLOPT_URL, url.c_str());
   curl_easy_setopt(ctx, CURLOPT_PROXY, m_opts.proxy.c_str());
   curl_easy_setopt(ctx, CURLOPT_SSL_VERIFYPEER, m_opts.verifyPeer);
 #ifdef __APPLE__
@@ -154,6 +171,8 @@ bool Download::run()
   curl_slist *headers = nullptr;
   if(has(Download::NoCacheFlag))
     headers = curl_slist_append(headers, "Cache-Control: no-cache");
+  if(proxy)
+    headers = curl_slist_append(headers, "X-ReaPack-Proxy: 1");
   curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers);
 
   std::string errbuf = "No error message";
@@ -165,12 +184,20 @@ bool Download::run()
   closeStream();
 
   if(res != CURLE_OK) {
+    if(!proxy && isGitHub(m_url)) {
+      long status = 0;
+      curl_easy_getinfo(ctx, CURLINFO_RESPONSE_CODE, &status);
+      if(status == 429)
+        return run(true);
+    }
+
 #ifdef _WIN32
     errbuf = Win32::ansi2utf8(errbuf);
 #endif
 
     const std::string &err = String::format(
-      "%s (%d): %s", curl_easy_strerror(res), res, errbuf.c_str());
+      "%s (%d): %s%s", curl_easy_strerror(res), res, errbuf.c_str(),
+      proxy ? " [proxied]" : "");
     setError({err, m_url});
     return false;
   }

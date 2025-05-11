@@ -58,7 +58,8 @@ public:
   const std::string &url() const { return m_url; }
 
   bool concurrent() const override { return true; }
-  bool run() override;
+  bool run() override { return run(false); }
+  bool run(bool proxy);
 
 protected:
   virtual std::ostream *openStream() = 0;
