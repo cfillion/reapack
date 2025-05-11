@@ -107,6 +107,7 @@ private:
   HWND m_proxy;
   HWND m_staleThreshold;
   HWND m_verifyPeer;
+  HWND m_fallbackProxy;
 };
 
 #endif

@@ -696,6 +696,12 @@ void NetworkConfig::onInit()
 
   m_staleThreshold = getControl(IDC_STALETHRSH);
   setChecked(m_opts->staleThreshold > 0, m_staleThreshold);
+
+  m_fallbackProxy = getControl(IDC_FALLBCKPXY);
+  if(boost::logic::indeterminate(m_opts->fallbackProxy))
+    hide(m_fallbackProxy);
+  else
+    setChecked(static_cast<bool>(m_opts->fallbackProxy), m_fallbackProxy);
 }
 
 void NetworkConfig::onCommand(const int id, int)
@@ -716,4 +722,6 @@ void NetworkConfig::apply()
   m_opts->verifyPeer = isChecked(m_verifyPeer);
   m_opts->staleThreshold = isChecked(m_staleThreshold)
     ? NetworkOpts::OneWeekThreshold : NetworkOpts::NoThreshold;
+  if(isVisible(m_fallbackProxy))
+    m_opts->fallbackProxy = isChecked(m_fallbackProxy);
 }

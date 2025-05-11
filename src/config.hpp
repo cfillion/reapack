@@ -45,6 +45,7 @@ struct NetworkOpts {
   std::string proxy;
   bool verifyPeer;
   time_t staleThreshold;
+  boost::logic::tribool fallbackProxy;
 };
 
 struct FilterOpts {

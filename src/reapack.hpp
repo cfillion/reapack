@@ -60,6 +60,7 @@ public:
   Browser *browsePackages();
   void refreshManager();
   void refreshBrowser();
+  bool requestProxy();
 
   void addSetRemote(const Remote &);
   Remote remote(const std::string &name) const;
