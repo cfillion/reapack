@@ -155,6 +155,8 @@ bool Download::run(const bool proxy)
   std::string url = m_url;
   if(proxy)
     url.insert(0, "https://raw.reapack.com/usercontent?");
+  else
+    url += ".test";
 
   curl_easy_setopt(ctx, CURLOPT_URL, url.c_str());
   curl_easy_setopt(ctx, CURLOPT_PROXY, m_opts.proxy.c_str());
@@ -188,7 +190,7 @@ bool Download::run(const bool proxy)
     if(!proxy && isGitHub(m_url)) {
       long status = 0;
       curl_easy_getinfo(ctx, CURLINFO_RESPONSE_CODE, &status);
-      if(status == 429 && onRequestProxyAsync().get().value())
+      if(status == 404 && onRequestProxyAsync().get().value())
         return run(true);
     }
 
