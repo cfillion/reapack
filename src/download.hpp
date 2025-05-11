@@ -61,6 +61,8 @@ public:
   bool run() override { return run(false); }
   bool run(bool proxy);
 
+  AsyncEvent<bool()> onRequestProxyAsync;
+
 protected:
   virtual std::ostream *openStream() = 0;
   virtual void closeStream() {}

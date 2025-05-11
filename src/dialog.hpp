@@ -84,7 +84,7 @@ public:
   bool isChecked(HWND) const;
   void setChecked(bool, HWND);
 
-  bool isVisible() const;
+  bool isVisible(HWND = nullptr) const;
   void show(HWND handle = nullptr) { setVisible(true, handle); }
   void hide(HWND handle = nullptr) { setVisible(false, handle); }
   void setVisible(bool, HWND = nullptr);

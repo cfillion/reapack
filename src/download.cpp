@@ -110,6 +110,7 @@ int Download::UpdateProgress(void *ptr, const double, const double,
 Download::Download(const std::string &url, const NetworkOpts &opts, const int flags)
   : m_url(url), m_opts(opts), m_flags(flags)
 {
+  onRequestProxyAsync >> std::bind(&ReaPack::requestProxy, g_reapack);
 }
 
 void Download::setName(const std::string &name)
@@ -187,7 +188,7 @@ bool Download::run(const bool proxy)
     if(!proxy && isGitHub(m_url)) {
       long status = 0;
       curl_easy_getinfo(ctx, CURLINFO_RESPONSE_CODE, &status);
-      if(status == 429)
+      if(status == 429 && onRequestProxyAsync().get().value())
         return run(true);
     }
 

@@ -21,6 +21,8 @@
 #include "win32.hpp"
 
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
+#include <boost/logic/tribool_io.hpp> // required to get correct tribool casts
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -47,6 +49,7 @@ static const char *NETWORK_GRP = "network";
 static const char *PROXY_KEY = "proxy";
 static const char *VERIFYPEER_KEY = "verifypeer";
 static const char *STALETHRSH_KEY = "stalethreshold";
+static const char *FALLBACK_PROXY_KEY = "fallbackproxy";
 
 static const char *SIZE_KEY = "size";
 
@@ -73,7 +76,7 @@ Config::~Config()
 void Config::resetOptions()
 {
   install = {false, false, true};
-  network = {"", true, NetworkOpts::OneWeekThreshold};
+  network = {"", true, NetworkOpts::OneWeekThreshold, boost::logic::indeterminate};
   filter  = {true};
   windowState = {};
 }
@@ -152,6 +155,8 @@ void Config::read()
   network.verifyPeer = getBool(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
   network.staleThreshold = static_cast<time_t>(getUInt(NETWORK_GRP,
     STALETHRSH_KEY, static_cast<unsigned int>(network.staleThreshold)));
+  network.fallbackProxy = boost::lexical_cast<boost::logic::tribool>(getUInt(
+    NETWORK_GRP, FALLBACK_PROXY_KEY, 2));
 
   filter.expandSynonyms = getBool(BROWSER_GRP, SYNONYMS_KEY, filter.expandSynonyms);
 
@@ -175,6 +180,10 @@ void Config::write()
   setString(NETWORK_GRP, PROXY_KEY, network.proxy);
   setUInt(NETWORK_GRP, VERIFYPEER_KEY, network.verifyPeer);
   setUInt(NETWORK_GRP, STALETHRSH_KEY, static_cast<unsigned int>(network.staleThreshold));
+  if(!boost::logic::indeterminate(network.fallbackProxy)) {
+    setUInt(NETWORK_GRP, FALLBACK_PROXY_KEY,
+      boost::lexical_cast<unsigned int>(network.fallbackProxy));
+  }
 
   setUInt(BROWSER_GRP, SYNONYMS_KEY, filter.expandSynonyms);
 

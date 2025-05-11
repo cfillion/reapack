@@ -331,6 +331,31 @@ void ReaPack::teardownTransaction()
     refreshBrowser();
 }
 
+bool ReaPack::requestProxy()
+{
+  if(boost::logic::indeterminate(m_config.network.fallbackProxy)) {
+    LockDialog aboutLock(m_about.get());
+    LockDialog browserLock(m_browser.get());
+    LockDialog managerLock(m_manager.get());
+    LockDialog progressLock(m_progress.get());
+
+    m_config.network.fallbackProxy = IDRETRY == Win32::messageBox(m_mainWindow,
+      "GitHub has temporarily rate-limited file download requests from ReaPack."
+      "\r\n\r\n"
+      "Click on Retry to authorize ReaPack to automatically download from "
+      "reapack.com instead of directly from github.com when this occurs."
+      "\r\n\r\n"
+      "Click on Cancel to disable this feature (any download attempts blocked "
+      "by GitHub will fail with a 429 error code)."
+      "\r\n\r\n"
+      "This setting can be changed at any time in "
+      "ReaPack > Manage repositories > Network settings.",
+      "ReaPack", MB_RETRYCANCEL | MB_ICONQUESTION);
+  }
+
+  return static_cast<bool>(m_config.network.fallbackProxy);
+}
+
 void ReaPack::commitConfig(bool refresh)
 {
   if(m_tx) {

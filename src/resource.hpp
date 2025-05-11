@@ -71,5 +71,6 @@
 #define IDC_CHANGELOG  233
 #define IDC_DISCOVER   234
 #define IDC_STALETHRSH 235
+#define IDC_FALLBCKPXY 236
 
 #endif
