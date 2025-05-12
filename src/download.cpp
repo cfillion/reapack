@@ -121,7 +121,7 @@ void Download::setName(const std::string &name)
 static bool isGitHub(const std::string &url)
 {
   constexpr std::string_view patterns[] {
-    "https://github.com/",
+    "https://github.com/", "https://www.github.com/",
     "https://raw.githubusercontent.com/",
   };
   for(const std::string_view &pattern : patterns) {
