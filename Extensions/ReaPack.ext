@@ -1,5 +1,5 @@
 @description ReaPack: Package manager for REAPER
-@version 1.2.5
+@version 1.2.5.1
 @author cfillion
 @donation https://reapack.com/donate
 @provides
@@ -14,6 +14,7 @@
   [win64          ] reaper_reapack-x64.dll      https://github.com/cfillion/reapack/releases/download/v$version/$path
   [windows-arm64ec] reaper_reapack-arm64ec.dll  https://github.com/cfillion/reapack/releases/download/v$version/$path
 @changelog
-  • Add Windows ARM64EC builds (Windows 11+) [#88]
-  • Fix per-package pre-release option being reset when synchronizing
-  • Silently install x86_64 binaries when packages don't provide any ARM64EC-specific files
+  • Check SSL certificate revocation servers on a best-efforts basis instead of strictly failing downloads on Windows [#90]
+  • Lift 4096 character limit from user input when importing repositories
+  • Make the official Linux binaries compatible with libxml2 2.14 and newer [#94]
+  • Propose to automatically download files from reapack.com for users impacted by GitHub's updated rate limits (error 429)
