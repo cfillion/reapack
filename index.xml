@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="0bf35238477d8224b19c49a46f7f6f48221b02f6" name="ReaPack">
+<index version="1" commit="d93c19ef986197368982c3d55850ab8b256d964e" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -913,6 +913,22 @@ Changed:
         <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.5/reaper_reapack-x64.dll</source>
         <source platform="windows-arm64ec" file="reaper_reapack-arm64ec.dll">https://github.com/cfillion/reapack/releases/download/v1.2.5/reaper_reapack-arm64ec.dll</source>
       </version>
+      <version name="1.2.5.1" author="cfillion" time="2025-05-12T21:12:01Z">
+        <changelog><![CDATA[• Check SSL certificate revocation servers on a best-efforts basis instead of strictly failing downloads on Windows [#90]
+• Lift 4096 character limit from user input when importing repositories
+• Make the official Linux binaries compatible with libxml2 2.14 and newer [#94]
+• Propose to automatically download files from reapack.com for users impacted by GitHub's updated rate limits (error 429)]]></changelog>
+        <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-i386.dylib</source>
+        <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-x86_64.dylib</source>
+        <source platform="darwin-arm64" file="reaper_reapack-arm64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-arm64.dylib</source>
+        <source platform="linux32" file="reaper_reapack-i686.so">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-i686.so</source>
+        <source platform="linux64" file="reaper_reapack-x86_64.so">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_reapack-armv7l.so">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_reapack-aarch64.so">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-aarch64.so</source>
+        <source platform="win32" file="reaper_reapack-x86.dll">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-x86.dll</source>
+        <source platform="win64" file="reaper_reapack-x64.dll">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-x64.dll</source>
+        <source platform="windows-arm64ec" file="reaper_reapack-arm64ec.dll">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-arm64ec.dll</source>
+      </version>
     </reapack>
   </category>
   <metadata>
@@ -922,7 +938,7 @@ Changed:
 
 {\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel0 \b \fs36 ReaPack: Package Manager for REAPER\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 This is {\b ReaPack v[[REAPACK_VERSION]]} [[REAPACK_REVISION]] built on [[REAPACK_BUILDTIME]]\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2024  Christian Fillion\line
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 Copyright (C) 2015-2025  Christian Fillion\line
 \line
 This program is free software: you can redistribute it and/or modify\line
 it under the terms of the GNU Lesser General Public License as published by\line
