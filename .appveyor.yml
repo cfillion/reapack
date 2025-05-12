@@ -75,6 +75,8 @@ for:
                TOOLCHAIN_PREFIX=aarch64-linux-gnu
         ;;
       esac
+    after_build:
+      - sed -i 's/libxml2.so.2/libxml2.so\x0\x0/' build/reaper_reapack-*.so
     artifacts:
       - path: build/reaper_reapack*.so
 
