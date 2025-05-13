@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="d93c19ef986197368982c3d55850ab8b256d964e" name="ReaPack">
+<index version="1" commit="0ec0593391557de9b9a795b64981596cf7f7a902" name="ReaPack">
   <category name="Extensions">
     <reapack name="ReaPack.ext" type="extension" desc="ReaPack: Package manager for REAPER">
       <metadata>
@@ -916,7 +916,6 @@ Changed:
       <version name="1.2.5.1" author="cfillion" time="2025-05-12T21:12:01Z">
         <changelog><![CDATA[• Check SSL certificate revocation servers on a best-efforts basis instead of strictly failing downloads on Windows [#90]
 • Lift 4096 character limit from user input when importing repositories
-• Make the official Linux binaries compatible with libxml2 2.14 and newer [#94]
 • Propose to automatically download files from reapack.com for users impacted by GitHub's updated rate limits (error 429)]]></changelog>
         <source platform="darwin32" file="reaper_reapack-i386.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-i386.dylib</source>
         <source platform="darwin64" file="reaper_reapack-x86_64.dylib">https://github.com/cfillion/reapack/releases/download/v1.2.5.1/reaper_reapack-x86_64.dylib</source>
