@@ -16,5 +16,4 @@
 @changelog
   • Check SSL certificate revocation servers on a best-efforts basis instead of strictly failing downloads on Windows [#90]
   • Lift 4096 character limit from user input when importing repositories
-  • Make the official Linux binaries compatible with libxml2 2.14 and newer [#94]
   • Propose to automatically download files from reapack.com for users impacted by GitHub's updated rate limits (error 429)
