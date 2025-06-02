@@ -218,7 +218,7 @@ void Browser::onCommand(const int id, const int event)
 
 bool Browser::onKeyDown(const int key, const int mods)
 {
-  if(GetFocus() != m_list->handle()) {
+  if(GetFocus() != m_list->handle() && GetFocus() != m_view) {
     if(mods == 0 && (key == VK_UP || key == VK_DOWN))
       SetFocus(m_list->handle());
 
