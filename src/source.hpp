@@ -34,6 +34,7 @@ public:
     MIDIInlineEditorSection    = 1<<2,
     MIDIEventListEditorSection = 1<<3,
     MediaExplorerSection       = 1<<4,
+    CrossfadeEditorSection     = 1<<5,
 
     ImplicitSection = -1, // for compatibility with v1.0
   };

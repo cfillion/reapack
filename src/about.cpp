@@ -568,6 +568,7 @@ void AboutPackageDelegate::updateList(const int index)
     {Source::MIDIInlineEditorSection,    "MIDI Inline Editor"},
     {Source::MIDIEventListEditorSection, "MIDI Event List Editor"},
     {Source::MediaExplorerSection,       "Media Explorer"},
+    {Source::CrossfadeEditorSection,     "Crossfade Editor"},
   };
 
   if(index < 0)

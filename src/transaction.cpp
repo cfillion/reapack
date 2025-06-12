@@ -251,6 +251,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
     {Source::MIDIEventListEditorSection, 32061},
     {Source::MIDIInlineEditorSection,    32062},
     {Source::MediaExplorerSection,       32063},
+    {Source::CrossfadeEditorSection,     32065},
   };
 
   const std::string &fullPath = reg.file.path.prependRoot().join();

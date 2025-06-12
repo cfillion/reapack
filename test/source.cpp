@@ -59,6 +59,7 @@ TEST_CASE("parse file section", M) {
   REQUIRE(Source::getSection("midi_inlineeditor") == Source::MIDIInlineEditorSection);
   REQUIRE(Source::getSection("midi_eventlisteditor") == Source::MIDIEventListEditorSection);
   REQUIRE(Source::getSection("mediaexplorer") == Source::MediaExplorerSection);
+  REQUIRE(Source::getSection("crossfade_editor") == Source::CrossfadeEditorSection);
 }
 
 TEST_CASE("explicit source section", M) {

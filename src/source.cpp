@@ -30,6 +30,7 @@ auto Source::getSection(const char *name) -> Section
     {"midi_inlineeditor",    MIDIInlineEditorSection},
     {"midi_eventlisteditor", MIDIEventListEditorSection},
     {"mediaexplorer",        MediaExplorerSection},
+    {"crossfade_editor",     CrossfadeEditorSection},
     {"true",                 ImplicitSection},
   };
 
