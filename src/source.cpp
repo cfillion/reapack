@@ -129,6 +129,9 @@ Path Source::targetPath() const
   case Package::AutomationItemType:
     path += "AutomationItems";
     break;
+  case Package::KeymapType:
+    path += "KeyMaps";
+    break;
   case Package::UnknownType:
     // The package has an unsupported type, so we make an empty path.
     // The empty path won't be used because the category will reject
@@ -142,7 +145,8 @@ Path Source::targetPath() const
   switch(type) {
   case Package::ScriptType:
   case Package::EffectType:
-  case Package::AutomationItemType: {
+  case Package::AutomationItemType:
+  case Package::KeymapType: {
     const Category *cat = m_version->package()->category();
     path += cat->index()->name();
 

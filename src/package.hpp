@@ -38,6 +38,7 @@ public:
     TrackTemplateType,
     MIDINoteNamesType,
     AutomationItemType,
+    KeymapType,
   };
 
   static Type getType(const char *);

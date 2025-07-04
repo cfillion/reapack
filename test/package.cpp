@@ -20,6 +20,7 @@ TEST_CASE("package type from string", M) {
     {"tracktpl", Package::TrackTemplateType},
     {"midinotenames", Package::MIDINoteNamesType},
     {"autoitem", Package::AutomationItemType},
+    {"keymap", Package::KeymapType},
   };
 
   for(const auto &[typeString, typeId] : tests)
@@ -40,6 +41,7 @@ TEST_CASE("package type to string", M) {
     {Package::TrackTemplateType,     "Track Template"},
     {Package::MIDINoteNamesType,     "MIDI Note Names"},
     {Package::AutomationItemType,    "Automation Item"},
+    {Package::KeymapType,            "Key Map"},
     {static_cast<Package::Type>(-1), "Unknown"},
   };
 

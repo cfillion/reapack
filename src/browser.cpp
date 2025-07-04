@@ -324,6 +324,7 @@ void Browser::displayButton()
     {"&Automation Items",  Package::AutomationItemType},
     {"&Effects",           Package::EffectType},
     {"E&xtensions",        Package::ExtensionType},
+    {"&Key Maps",          Package::KeymapType},
     {"&Language Packs",    Package::LangPackType},
     {"&MIDI Note Names",   Package::MIDINoteNamesType},
     {"&Project Templates", Package::ProjectTemplateType},
@@ -374,6 +375,7 @@ bool Browser::isFiltered(Package::Type type) const
 
   switch(type) {
   case Package::UnknownType:
+  // user-selectable types
   case Package::ScriptType:
   case Package::EffectType:
   case Package::ExtensionType:
@@ -384,7 +386,9 @@ bool Browser::isFiltered(Package::Type type) const
   case Package::TrackTemplateType:
   case Package::MIDINoteNamesType:
   case Package::AutomationItemType:
+  case Package::KeymapType:
     break;
+  // "other packages"
   case Package::DataType:
     type = Package::UnknownType;
     break;

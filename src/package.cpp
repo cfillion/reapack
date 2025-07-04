@@ -37,6 +37,7 @@ Package::Type Package::getType(const char *type)
     {"tracktpl",      TrackTemplateType},
     {"midinotenames", MIDINoteNamesType},
     {"autoitem",      AutomationItemType},
+    {"keymap",        KeymapType},
   };
 
   for(auto &[key, value] : map) {
@@ -74,6 +75,8 @@ const char *Package::displayType(const Type type)
     return "MIDI Note Names";
   case AutomationItemType:
     return "Automation Item";
+  case KeymapType:
+    return "Key Map";
   }
 
   return "Unknown";
