@@ -25,6 +25,7 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 #include "win32.hpp"
+#include <WDL/localize/localize.h>
 
 #include <fstream>
 #include <iomanip>
@@ -78,7 +79,7 @@ void Archive::import(const std::string &path)
   std::stringstream toc;
   if(const int err = state.m_reader->extractFile(ARCHIVE_TOC, toc))
     throw reapack_error(String::format(
-      "Cannot locate the table of contents (%d)", err));
+      __LOCALIZE("Cannot locate the table of contents (%d)", "reapack_error_msg"), err));
 
   // starting import, do not abort process (eg. by throwing) at this point
   if(!(state.m_tx = g_reapack->setupTransaction()))
@@ -100,7 +101,7 @@ void Archive::import(const std::string &path)
         state.importPackage(data);
         break;
       default:
-        throw reapack_error(String::format("Unknown token '%s' (skipping)",
+        throw reapack_error(String::format(__LOCALIZE("Unknown token '%s' (skipping)", "reapack_error_msg"),
           line.substr(0, 4).c_str()));
       }
     }
@@ -119,7 +120,7 @@ void ImportArchive::importRemote(const std::string &data)
   Remote remote = Remote::fromString(data);
 
   if(const int err = m_reader->extractFile(Index::pathFor(remote.name()))) {
-    throw reapack_error(String::format("Failed to extract index of %s (%d)",
+    throw reapack_error(String::format(__LOCALIZE("Failed to extract index of %s (%d)", "reapack_error_msg"),
       remote.name().c_str(), err));
   }
 
@@ -153,7 +154,7 @@ void ImportArchive::importPackage(const std::string &data)
 
   if(!ver) {
     throw reapack_error(String::format(
-      "%s/%s/%s v%s cannot be found or is incompatible with your operating system.",
+      __LOCALIZE("%s/%s/%s v%s cannot be found or is incompatible with your operating system.", "reapack_error_msg"),
       m_lastIndex->name().c_str(), categoryName.c_str(),
       packageName.c_str(), versionName.c_str()));
   }
@@ -236,7 +237,7 @@ bool FileExtractor::run()
   stream.close();
 
   if(error) {
-    setError({String::format("Failed to extract file (%d)", error),
+    setError({String::format(__LOCALIZE("Failed to extract file (%d)", "reapack_error_msg"), error),
       m_path.target().join()});
     return false;
   }
@@ -303,7 +304,7 @@ int ArchiveWriter::addFile(const Path &path, std::istream &stream) noexcept
 FileCompressor::FileCompressor(const Path &target, const ArchiveWriterPtr &writer)
   : m_path(target), m_writer(writer)
 {
-  setSummary({ "Compressing", target.join() });
+  setSummary({ __LOCALIZE("Compressing", "reapack_archive"), target.join() });
 }
 
 bool FileCompressor::run()
@@ -311,7 +312,7 @@ bool FileCompressor::run()
   std::ifstream stream;
   if(!FS::open(stream, m_path)) {
     setError({
-      String::format("Could not open file for export (%s)", FS::lastError()),
+      String::format(__LOCALIZE("Could not open file for export (%s)", "reapack_error_msg"), FS::lastError()),
       m_path.join()});
     return false;
   }
@@ -320,7 +321,7 @@ bool FileCompressor::run()
   stream.close();
 
   if(error) {
-    setError({String::format("Failed to compress file (%d)", error), m_path.join()});
+    setError({String::format(__LOCALIZE("Failed to compress file (%d)", "reapack_error_msg"), error), m_path.join()});
     return false;
   }
 

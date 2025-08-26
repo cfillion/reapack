@@ -19,6 +19,8 @@
 
 #include "errors.hpp"
 #include "index.hpp"
+#include "win32.hpp"
+#include <WDL/localize/localize.h>
 
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
@@ -91,10 +93,10 @@ Package::Package(const Type type, const std::string &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
-    throw reapack_error("empty package name");
+    throw reapack_error(__LOCALIZE("empty package name", "reapack_error_msg"));
   else if(m_name.find_first_of("/\\") != std::string::npos) {
     throw reapack_error(
-      String::format("invalid package name '%s'", m_name.c_str()));
+      String::format(__LOCALIZE("invalid package name '%s'", "reapack_error_msg"), m_name.c_str()));
   }
 }
 
@@ -116,7 +118,7 @@ bool Package::addVersion(const Version *ver)
   else if(ver->sources().empty())
     return false;
   else if(m_versions.count(ver)) {
-    throw reapack_error(String::format("duplicate version '%s'",
+    throw reapack_error(String::format(__LOCALIZE("duplicate version '%s'", "reapack_error_msg"),
       ver->fullName().c_str()));
   }
 

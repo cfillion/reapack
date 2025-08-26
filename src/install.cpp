@@ -25,6 +25,8 @@
 #include "reapack.hpp"
 #include "transaction.hpp"
 
+#include <WDL/localize/localize.h>
+
 InstallTask::InstallTask(const Version *ver, const int flags,
     const Registry::Entry &re, const ArchiveReaderPtr &reader, Transaction *tx)
   : Task(tx), m_version(ver), m_flags(flags), m_oldEntry(std::move(re)), m_reader(reader),
@@ -44,8 +46,8 @@ bool InstallTask::start()
 
     if(!conflicts.empty()) {
       for(const Path &path : conflicts) {
-        tx()->receipt()->addError({"Conflict: " + path.join() +
-          " is already owned by another package", m_version->fullName()});
+        tx()->receipt()->addError({__LOCALIZE("Conflict: ", "reapack_error_msg") + path.join() +
+          __LOCALIZE(" is already owned by another package", "reapack_error_msg"), m_version->fullName()});
       }
 
       return false;
@@ -102,7 +104,7 @@ void InstallTask::commit()
   for(const TempPath &paths : m_newFiles) {
     if(!FS::rename(paths)) {
       tx()->receipt()->addError({
-        String::format("Cannot rename to target: %s", FS::lastError()),
+        String::format(__LOCALIZE("Cannot rename to target: %s", "reapack_error_msg"), FS::lastError()),
         paths.target().join()});
 
       // it's a bit late to rollback here as some files might already have been

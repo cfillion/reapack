@@ -28,6 +28,8 @@
 #include "transaction.hpp"
 #include "win32.hpp"
 
+#include <WDL/localize/localize.h>
+
 #include <boost/algorithm/string/trim.hpp>
 
 static const char *TITLE = "Import repositories";
@@ -138,7 +140,7 @@ void Import::fetch()
         break;
       case ThreadTask::Failure:
         Win32::messageBox(handle(), String::format(
-          "Download failed: %s\n%s", dl->error().message.c_str(), url.c_str()
+          __LOCALIZE("Download failed: %s\n%s", "reapack_error_msg"), dl->error().message.c_str(), url.c_str()
         ).c_str(), TITLE, MB_OK);
         m_pool->abort();
         break;
@@ -165,15 +167,15 @@ try {
   if(exists && remote.url() != dl->url()) {
     if(remote.isProtected()) {
       Win32::messageBox(handle(), String::format(
-        "The repository %s is protected and cannot be overwritten.",
+        __LOCALIZE("The repository %s is protected and cannot be overwritten.", "reapack_error_msg"),
         index->name().c_str()
       ).c_str(), TITLE, MB_OK);
       return false;
     }
     else {
       const auto answer = Win32::messageBox(handle(), String::format(
-        "%s is already configured with a different URL.\n"
-        "Do you want to overwrite it?", index->name().c_str()
+        __LOCALIZE("%s is already configured with a different URL.\n"
+        "Do you want to overwrite it?", "reapack_import"), index->name().c_str()
       ).c_str(), TITLE, MB_YESNO);
 
       if(answer != IDYES)
@@ -192,7 +194,7 @@ try {
 }
 catch(const reapack_error &e) {
   Win32::messageBox(handle(), String::format(
-    "The received file is invalid: %s\n%s", e.what(), dl->url().c_str()
+    __LOCALIZE("The received file is invalid: %s\n%s", "reapack_error_msg"), e.what(), dl->url().c_str()
   ).c_str(), TITLE, MB_OK);
   return false;
 }

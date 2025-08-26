@@ -20,6 +20,8 @@
 #include "errors.hpp"
 #include "package.hpp"
 #include "source.hpp"
+#include "win32.hpp"
+#include <WDL/localize/localize.h>
 
 #include <boost/lexical_cast.hpp>
 #include <cctype>
@@ -84,7 +86,7 @@ std::ostream &operator<<(std::ostream &os, const Version &ver)
   os << "\r\n";
 
   const std::string &changelog = ver.changelog();
-  os << String::indent(changelog.empty() ? "No changelog" : changelog);
+  os << String::indent(changelog.empty() ? __LOCALIZE("No changelog", "reapack") : changelog);
 
   return os;
 }
