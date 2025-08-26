@@ -27,6 +27,10 @@
 #include <reaper_plugin_functions.h>
 #include <reaper_plugin_secrets.h>
 
+#define LOCALIZE_IMPORT_PREFIX "reapack_"
+#include <WDL/localize/localize-import.h>
+#include <WDL/localize/localize.h>
+
 #define REQUIRED_API(name) {reinterpret_cast<void **>(&name), #name, true}
 #define OPTIONAL_API(name) {reinterpret_cast<void **>(&name), #name, false}
 
@@ -57,14 +61,20 @@ static bool loadAPI(void *(*getFunc)(const char *))
 
     if(func.required && *func.ptr == nullptr) {
       Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr, String::format(
-        "ReaPack v%s is incompatible with this version of REAPER.\n\n"
-        "(Unable to import the following API function: %s)",
+        __LOCALIZE("ReaPack v%s is incompatible with this version of REAPER.\n\n"
+        "(Unable to import the following API function: %s)", "reapack_error_msg"),
         REAPACK_VERSION, func.name
-      ).c_str(), "ReaPack: Missing REAPER feature", MB_OK);
+      ).c_str(), __LOCALIZE("ReaPack: Missing REAPER feature", "reapack_error_msg"), MB_OK);
 
       return false;
     }
   }
+
+  // Import WDL localization functions
+  *(void **)&importedLocalizeFunc = getFunc("__localizeFunc");
+  *(void **)&importedLocalizePrepareDialog = getFunc("__localizePrepareDialog");
+  *(void **)&importedLocalizeMenu = getFunc("__localizeMenu");
+  *(void **)&importedLocalizeInitializeDialog = getFunc("__localizeInitializeDialog");
 
   return true;
 }
@@ -79,13 +89,13 @@ static void menuHook(const char *name, HMENU handle, const int f)
   if(strcmp(name, "Main extensions") || f != 0)
     return;
 
-  Menu menu = Menu(handle).addMenu("Rea&Pack");
-  menu.addAction("&Synchronize packages",   "_REAPACK_SYNC");
-  menu.addAction("&Browse packages...",     "_REAPACK_BROWSE");
-  menu.addAction("&Import repositories...", "_REAPACK_IMPORT");
-  menu.addAction("&Manage repositories...", "_REAPACK_MANAGE");
+  Menu menu = Menu(handle).addMenu(__LOCALIZE("Rea&Pack", "reapack_main_menu"));
+  menu.addAction(__LOCALIZE("&Synchronize packages", "reapack_main_menu"),   "_REAPACK_SYNC");
+  menu.addAction(__LOCALIZE("&Browse packages...", "reapack_main_menu"),     "_REAPACK_BROWSE");
+  menu.addAction(__LOCALIZE("&Import repositories...", "reapack_main_menu"), "_REAPACK_IMPORT");
+  menu.addAction(__LOCALIZE("&Manage repositories...", "reapack_main_menu"), "_REAPACK_MANAGE");
   menu.addSeparator();
-  menu.addAction(String::format("&About ReaPack v%s", REAPACK_VERSION), "_REAPACK_ABOUT");
+  menu.addAction(String::format(__LOCALIZE("&About ReaPack v%s", "reapack_main_menu"), REAPACK_VERSION), "_REAPACK_ABOUT");
 }
 
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
@@ -113,12 +123,12 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
     return true;
 
   Win32::messageBox(Splash_GetWnd(), String::format(
-    "ReaPack was not loaded from the standard extension path"
+    __LOCALIZE("ReaPack was not loaded from the standard extension path"
     " or its filename was altered.\n"
     "Move or rename it to the expected location and retry.\n\n"
-    "Current: %s\n\nExpected: %s",
+    "Current: %s\n\nExpected: %s", "reapack_error_msg"),
     current.join().c_str(), expected.join().c_str()
-  ).c_str(), "ReaPack: Installation path mismatch", MB_OK);
+  ).c_str(), __LOCALIZE("ReaPack: Installation path mismatch", "reapack_error_msg"), MB_OK);
 
   return false;
 }

@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
 #include <reaper_plugin_functions.h>
+#include <WDL/localize/localize.h>
 
 #ifdef _WIN32
 #  include <windowsx.h>

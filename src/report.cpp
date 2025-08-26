@@ -22,6 +22,8 @@
 #include "tabbar.hpp"
 #include "win32.hpp"
 
+#include <WDL/localize/localize.h>
+
 Report::Report(const Receipt *receipt)
   : Dialog(IDD_REPORT_DIALOG), m_receipt(receipt), m_empty(true)
 {
@@ -59,8 +61,8 @@ void Report::onTimer(int timer)
   stopTimer(timer);
 
   Win32::messageBox(handle(),
-    "One or more native REAPER extensions were installed.\n"
-    "These newly installed files won't be loaded until REAPER is restarted.",
+    __LOCALIZE("One or more native REAPER extensions were installed.\n"
+    "These newly installed files won't be loaded until REAPER is restarted.", "reapack_report_msg"),
     "ReaPack Notice", MB_OK);
 }
 
@@ -69,13 +71,13 @@ void Report::updateLabel()
   const char *label;
 
   if(m_receipt->flags() == Receipt::ErrorFlag)
-    label = "Operation failed. The following error(s) occured:";
+    label = __LOCALIZE("Operation failed. The following error(s) occured:", "reapack_report_msg");
   else if(m_receipt->test(Receipt::ErrorFlag))
-    label = "The operation was partially completed (one or more errors occured):";
+    label = __LOCALIZE("The operation was partially completed (one or more errors occured):", "reapack_report_msg");
   else if(m_receipt->test(Receipt::InstalledOrRemoved))
-    label = "All done! Description of the changes:";
+    label = __LOCALIZE("All done! Description of the changes:", "reapack_report_msg");
   else
-    label = "Operation completed successfully!";
+    label = __LOCALIZE("Operation completed successfully!", "reapack_report_msg");
 
   Win32::setWindowText(getControl(IDC_LABEL), label);
 }

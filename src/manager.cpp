@@ -34,6 +34,8 @@
 
 #include <algorithm>
 
+#include <WDL/localize/localize.h>
+
 static const Win32::char_type *ARCHIVE_FILTER =
   L("ReaPack Offline Archive (*.ReaPackArchive)\0*.ReaPackArchive\0");
 static const Win32::char_type *ARCHIVE_EXT = L("ReaPackArchive");
@@ -67,8 +69,8 @@ void Manager::onInit()
   disable(m_apply);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Name", 155},
-    {"Index URL", 435},
+    {__LOCALIZE("Name", "reapack_manager_column"), 155},
+    {__LOCALIZE("Index URL", "reapack_manager_column"), 435},
   });
 
   m_list->enableIcons();
@@ -211,28 +213,28 @@ bool Manager::fillContextMenu(Menu &menu, const int index) const
   const Remote &remote = getRemote(index);
 
   if(!remote) {
-    menu.addAction("&Select all", ACTION_SELECT);
-    menu.addAction("&Unselect all", ACTION_UNSELECT);
+    menu.addAction(__LOCALIZE("&Select all", "reapack_manager_menu"), ACTION_SELECT);
+    menu.addAction(__LOCALIZE("&Unselect all", "reapack_manager_menu"), ACTION_UNSELECT);
     return true;
   }
 
-  menu.addAction("&Refresh", ACTION_REFRESH);
-  menu.addAction("&Copy URL", ACTION_COPYURL);
+  menu.addAction(__LOCALIZE("&Refresh", "reapack_manager_menu"), ACTION_REFRESH);
+  menu.addAction(__LOCALIZE("&Copy URL", "reapack_manager_menu"), ACTION_COPYURL);
 
-  Menu autoInstallMenu = menu.addMenu("&Install new packages");
+  Menu autoInstallMenu = menu.addMenu(__LOCALIZE("&Install new packages", "reapack_manager_menu"));
   const UINT autoInstallGlobal = autoInstallMenu.addAction(
-    "Use &global setting", ACTION_AUTOINSTALL_GLOBAL);
+    __LOCALIZE("Use &global setting", "reapack_manager_menu"), ACTION_AUTOINSTALL_GLOBAL);
   const UINT autoInstallOff = autoInstallMenu.addAction(
-    "Manually", ACTION_AUTOINSTALL_OFF);
+    __LOCALIZE("Manually", "reapack_manager_menu"), ACTION_AUTOINSTALL_OFF);
   const UINT autoInstallOn = autoInstallMenu.addAction(
-    "When synchronizing", ACTION_AUTOINSTALL_ON);
+    __LOCALIZE("When synchronizing", "reapack_manager_menu"), ACTION_AUTOINSTALL_ON);
 
   const UINT uninstallAction =
-    menu.addAction("&Uninstall", ACTION_UNINSTALL);
+    menu.addAction(__LOCALIZE("&Uninstall", "reapack_manager_menu"), ACTION_UNINSTALL);
 
   menu.addSeparator();
 
-  menu.addAction(String::format("&About %s", remote.name().c_str()),
+  menu.addAction(String::format(__LOCALIZE("&About %s", "reapack_manager_menu"), remote.name().c_str()),
     index | (ACTION_ABOUT << 8));
 
   bool allProtected = true;
@@ -470,10 +472,10 @@ void Manager::aboutRepo(const bool focus)
 void Manager::importExport()
 {
   Menu menu;
-  menu.addAction("Import &repositories...", ACTION_IMPORT_REPO);
+  menu.addAction(__LOCALIZE("Import &repositories...", "reapack_manager_import"), ACTION_IMPORT_REPO);
   menu.addSeparator();
-  menu.addAction("Import offline archive...", ACTION_IMPORT_ARCHIVE);
-  menu.addAction("&Export offline archive...", ACTION_EXPORT_ARCHIVE);
+  menu.addAction(__LOCALIZE("Import offline archive...", "reapack_manager_import"), ACTION_IMPORT_ARCHIVE);
+  menu.addAction(__LOCALIZE("&Export offline archive...", "reapack_manager_import"), ACTION_EXPORT_ARCHIVE);
 
   menu.show(getControl(IDC_IMPORT), handle());
 }
@@ -492,7 +494,7 @@ bool Manager::importRepo()
 
 void Manager::importArchive()
 {
-  const char *title = "Import offline archive";
+  const char *title = __LOCALIZE("Import offline archive", "reapack_manager_import");
 
   const std::string &path = FileDialog::getOpenFileName(handle(), instance(),
     title, Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
@@ -505,7 +507,7 @@ void Manager::importArchive()
   }
   catch(const reapack_error &e) {
     Win32::messageBox(handle(), String::format(
-      "An error occured while reading %s.\n\n%s.", path.c_str(), e.what()
+      __LOCALIZE("An error occured while reading %s.\n\n%s.", "reapack_manager_error_msg"), path.c_str(), e.what()
     ).c_str(), title, MB_OK);
   }
 }
@@ -513,7 +515,7 @@ void Manager::importArchive()
 void Manager::exportArchive()
 {
   const std::string &path = FileDialog::getSaveFileName(handle(), instance(),
-    "Export offline archive", Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
+    __LOCALIZE("Export offline archive", "reapack_manager_error_msg"), Path::DATA.prependRoot(), ARCHIVE_FILTER, ARCHIVE_EXT);
 
   if(!path.empty()) {
     if(Transaction *tx = g_reapack->setupTransaction()) {
@@ -526,7 +528,7 @@ void Manager::exportArchive()
 void Manager::launchBrowser()
 {
   const auto promptApply = [this] {
-    return IDYES == Win32::messageBox(handle(), "Apply unsaved changes?", "ReaPack Query", MB_YESNO);
+    return IDYES == Win32::messageBox(handle(), __LOCALIZE("Apply unsaved changes?", "reapack_manager_msg"), __LOCALIZE("ReaPack Query", "reapack_manager_msg"), MB_YESNO);
   };
 
   if(m_changes && promptApply())
@@ -540,30 +542,30 @@ void Manager::options()
   Menu menu;
 
   UINT index = menu.addAction(
-    "&Install new packages when synchronizing", ACTION_AUTOINSTALL);
+    __LOCALIZE("&Install new packages when synchronizing", "reapack_manager_menu"), ACTION_AUTOINSTALL);
   if(m_autoInstall.value_or(g_reapack->config()->install.autoInstall))
     menu.check(index);
 
   index = menu.addAction(
-    "Enable &pre-releases globally (bleeding edge)", ACTION_BLEEDINGEDGE);
+    __LOCALIZE("Enable &pre-releases globally (bleeding edge)", "reapack_manager_menu"), ACTION_BLEEDINGEDGE);
   if(m_bleedingEdge.value_or(g_reapack->config()->install.bleedingEdge))
     menu.check(index);
 
   index = menu.addAction(
-    "Prompt to uninstall obsolete packages", ACTION_PROMPTOBSOLETE);
+    __LOCALIZE("Prompt to uninstall obsolete packages", "reapack_manager_menu"), ACTION_PROMPTOBSOLETE);
   if(m_promptObsolete.value_or(g_reapack->config()->install.promptObsolete))
     menu.check(index);
 
   index = menu.addAction(
-    "Search for synonyms of common words", ACTION_SYNONYMS);
+    __LOCALIZE("Search for synonyms of common words", "reapack_manager_menu"), ACTION_SYNONYMS);
   if(m_expandSynonyms.value_or(g_reapack->config()->filter.expandSynonyms))
     menu.check(index);
 
-  menu.addAction("&Network settings...", ACTION_NETCONFIG);
+  menu.addAction(__LOCALIZE("&Network settings...", "reapack_manager_menu"), ACTION_NETCONFIG);
 
   menu.addSeparator();
 
-  menu.addAction("&Restore default settings", ACTION_RESETCONFIG);
+  menu.addAction(__LOCALIZE("&Restore default settings", "reapack_manager_menu"), ACTION_RESETCONFIG);
 
   menu.show(getControl(IDC_OPTIONS), handle());
 }
@@ -582,10 +584,10 @@ bool Manager::confirm() const
     return true;
 
   return IDYES == Win32::messageBox(handle(), String::format(
-    "Uninstall %zu %s?\n"
-    "Every file they contain will be removed from your computer.",
-    uninstallCount, uninstallCount == 1 ? "repository" : "repositories"
-  ).c_str(), "ReaPack Query", MB_YESNO);
+    __LOCALIZE("Uninstall %zu %s?\n"
+    "Every file they contain will be removed from your computer.", "reapack_manager_msg"),
+    uninstallCount, uninstallCount == 1 ? __LOCALIZE("repository", "reapack_manager_menu") : __LOCALIZE("repositories", "reapack_manager_menu")
+  ).c_str(), __LOCALIZE("ReaPack Query", "reapack_manager_menu"), MB_YESNO);
 }
 
 bool Manager::apply()

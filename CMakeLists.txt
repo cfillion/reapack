@@ -112,6 +112,11 @@ set_target_properties(reaper_reapack PROPERTIES
 add_subdirectory(src)
 target_link_libraries(reaper_reapack reapack)
 
+# Add langpack target
+add_executable(buildlangpack src/buildlangpack.cpp)
+target_include_directories(buildlangpack PRIVATE ${CMAKE_SOURCE_DIR}/vendor)
+target_link_libraries(buildlangpack WDL::WDL)
+
 add_subdirectory(test)
 add_custom_target(test
   COMMAND $<TARGET_FILE:tests>
