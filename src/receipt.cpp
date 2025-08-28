@@ -69,22 +69,22 @@ void Receipt::addError(const ErrorInfo &err)
 
 ReceiptPage Receipt::installedPage() const
 {
-  return {m_installs, __LOCALIZE("Installed", "reapack_receipt_tab")};
+  return {m_installs, __LOCALIZE("Installed", "reapack_receipt")};
 }
 
 ReceiptPage Receipt::removedPage() const
 {
-  return {m_removals, __LOCALIZE("Removed", "reapack_receipt_tab")};
+  return {m_removals, __LOCALIZE("Removed", "reapack_receipt")};
 }
 
 ReceiptPage Receipt::exportedPage() const
 {
-  return {m_exports, __LOCALIZE("Exported", "reapack_receipt_tab")};
+  return {m_exports, __LOCALIZE("Exported", "reapack_receipt")};
 }
 
 ReceiptPage Receipt::errorPage() const
 {
-  return {m_errors, __LOCALIZE("Error", "reapack_receipt_tab"), __LOCALIZE("Errors", "reapack_receipt_tab")};
+  return {m_errors, __LOCALIZE("Error", "reapack_receipt"), __LOCALIZE("Errors", "reapack_receipt")};
 }
 
 void ReceiptPage::setTitle(const char *title)

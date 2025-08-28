@@ -28,6 +28,7 @@
 
 #include <iomanip>
 #include <sstream>
+#include <WDL/localize/localize.h>
 
 static const Path ARCHIVE_TOC("toc");
 
@@ -46,7 +47,7 @@ bool ExportTask::start()
   }
   catch(const reapack_error &e) {
     tx()->receipt()->addError({
-      String::format("Could not open archive for writing: %s", e.what()),
+      String::format(__LOCALIZE("Could not open archive for writing: %s", "reapack_archive_tasks"), e.what()),
       m_path.temp().join()
     });
     return false;
@@ -97,7 +98,7 @@ void ExportTask::commit()
 {
   if(!FS::rename(m_path)) {
     tx()->receipt()->addError({
-      String::format("Could not move to permanent location: %s", FS::lastError()),
+      String::format(__LOCALIZE("Could not move to permanent location: %s", "reapack_archive_tasks"), FS::lastError()),
       m_path.target().prependRoot().join()
     });
   }

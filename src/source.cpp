@@ -62,7 +62,7 @@ Source::Source(const std::string &file, const std::string &url, const Version *v
     m_version(ver)
 {
   if(m_url.empty())
-    throw reapack_error(__LOCALIZE("empty source url", "reapack_error_msg"));
+    throw reapack_error(__LOCALIZE("empty source url", "reapack_source"));
 }
 
 Package::Type Source::type() const

@@ -140,7 +140,7 @@ void Import::fetch()
         break;
       case ThreadTask::Failure:
         Win32::messageBox(handle(), String::format(
-          __LOCALIZE("Download failed: %s\n%s", "reapack_error_msg"), dl->error().message.c_str(), url.c_str()
+          __LOCALIZE("Download failed: %s\n%s", "reapack_import"), dl->error().message.c_str(), url.c_str()
         ).c_str(), TITLE, MB_OK);
         m_pool->abort();
         break;
@@ -167,7 +167,7 @@ try {
   if(exists && remote.url() != dl->url()) {
     if(remote.isProtected()) {
       Win32::messageBox(handle(), String::format(
-        __LOCALIZE("The repository %s is protected and cannot be overwritten.", "reapack_error_msg"),
+        __LOCALIZE("The repository %s is protected and cannot be overwritten.", "reapack_import"),
         index->name().c_str()
       ).c_str(), TITLE, MB_OK);
       return false;
@@ -194,7 +194,7 @@ try {
 }
 catch(const reapack_error &e) {
   Win32::messageBox(handle(), String::format(
-    __LOCALIZE("The received file is invalid: %s\n%s", "reapack_error_msg"), e.what(), dl->url().c_str()
+    __LOCALIZE("The received file is invalid: %s\n%s", "reapack_import"), e.what(), dl->url().c_str()
   ).c_str(), TITLE, MB_OK);
   return false;
 }

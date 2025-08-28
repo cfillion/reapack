@@ -608,7 +608,7 @@ void ListView::headerMenu(const int x, const int y)
   enum { ACTION_RESTORE = 800 };
 
   Menu menu;
-  menu.disable(menu.addAction(__LOCALIZE("Visible columns:", "reapack_listview_menu"), 0));
+  menu.disable(menu.addAction(__LOCALIZE("Visible columns:", "reapack_listview"), 0));
 
   for(int i = 0; i < columnCount(); i++) {
     const auto id = menu.addAction(m_cols[i].label.c_str(), i | (1 << 8));
@@ -618,7 +618,7 @@ void ListView::headerMenu(const int x, const int y)
   }
 
   menu.addSeparator();
-  menu.addAction(__LOCALIZE("Reset columns", "reapack_listview_menu"), ACTION_RESTORE);
+  menu.addAction(__LOCALIZE("Reset columns", "reapack_listview"), ACTION_RESTORE);
 
   const int cmd = menu.show(x, y, handle());
 

@@ -62,9 +62,9 @@ static bool loadAPI(void *(*getFunc)(const char *))
     if(func.required && *func.ptr == nullptr) {
       Win32::messageBox(Splash_GetWnd ? Splash_GetWnd() : nullptr, String::format(
         __LOCALIZE("ReaPack v%s is incompatible with this version of REAPER.\n\n"
-        "(Unable to import the following API function: %s)", "reapack_error_msg"),
+        "(Unable to import the following API function: %s)", "reapack_main"),
         REAPACK_VERSION, func.name
-      ).c_str(), __LOCALIZE("ReaPack: Missing REAPER feature", "reapack_error_msg"), MB_OK);
+      ).c_str(), __LOCALIZE("ReaPack: Missing REAPER feature", "reapack_main"), MB_OK);
 
       return false;
     }
@@ -89,13 +89,13 @@ static void menuHook(const char *name, HMENU handle, const int f)
   if(strcmp(name, "Main extensions") || f != 0)
     return;
 
-  Menu menu = Menu(handle).addMenu(__LOCALIZE("Rea&Pack", "reapack_main_menu"));
-  menu.addAction(__LOCALIZE("&Synchronize packages", "reapack_main_menu"),   "_REAPACK_SYNC");
-  menu.addAction(__LOCALIZE("&Browse packages...", "reapack_main_menu"),     "_REAPACK_BROWSE");
-  menu.addAction(__LOCALIZE("&Import repositories...", "reapack_main_menu"), "_REAPACK_IMPORT");
-  menu.addAction(__LOCALIZE("&Manage repositories...", "reapack_main_menu"), "_REAPACK_MANAGE");
+  Menu menu = Menu(handle).addMenu(__LOCALIZE("Rea&Pack", "reapack_main"));
+  menu.addAction(__LOCALIZE("&Synchronize packages", "reapack_main"),   "_REAPACK_SYNC");
+  menu.addAction(__LOCALIZE("&Browse packages...", "reapack_main"),     "_REAPACK_BROWSE");
+  menu.addAction(__LOCALIZE("&Import repositories...", "reapack_main"), "_REAPACK_IMPORT");
+  menu.addAction(__LOCALIZE("&Manage repositories...", "reapack_main"), "_REAPACK_MANAGE");
   menu.addSeparator();
-  menu.addAction(String::format(__LOCALIZE("&About ReaPack v%s", "reapack_main_menu"), REAPACK_VERSION), "_REAPACK_ABOUT");
+  menu.addAction(String::format(__LOCALIZE("&About ReaPack v%s", "reapack_main"), REAPACK_VERSION), "_REAPACK_ABOUT");
 }
 
 static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
@@ -126,9 +126,9 @@ static bool checkLocation(REAPER_PLUGIN_HINSTANCE module)
     __LOCALIZE("ReaPack was not loaded from the standard extension path"
     " or its filename was altered.\n"
     "Move or rename it to the expected location and retry.\n\n"
-    "Current: %s\n\nExpected: %s", "reapack_error_msg"),
+    "Current: %s\n\nExpected: %s", "reapack_main"),
     current.join().c_str(), expected.join().c_str()
-  ).c_str(), __LOCALIZE("ReaPack: Installation path mismatch", "reapack_error_msg"), MB_OK);
+  ).c_str(), __LOCALIZE("ReaPack: Installation path mismatch", "reapack_main"), MB_OK);
 
   return false;
 }

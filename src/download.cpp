@@ -177,7 +177,7 @@ bool Download::run(const bool proxy)
     headers = curl_slist_append(headers, "X-ReaPack-Proxy: 1");
   curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers);
 
-  std::string errbuf = __LOCALIZE("No error message", "reapack_download_msg");
+  std::string errbuf = __LOCALIZE("No error message", "reapack_download");
   errbuf.resize(CURL_ERROR_SIZE - 1, '\0');
   curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf.data());
 
@@ -205,7 +205,7 @@ bool Download::run(const bool proxy)
   }
   else if(write.hash && write.hash->digest() != m_expectedChecksum) {
     const std::string &err = String::format(
-      __LOCALIZE("Checksum mismatch.\nExpected: %s\nActual: %s", "reapack_download_msg"),
+      __LOCALIZE("Checksum mismatch.\nExpected: %s\nActual: %s", "reapack_download"),
       m_expectedChecksum.c_str(), write.hash->digest().c_str()
     );
     setError({err, m_url});

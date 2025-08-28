@@ -106,9 +106,9 @@ Remote::Remote(const std::string &name, const std::string &url,
 void Remote::setName(const std::string &name)
 {
   if(name.empty())
-    throw reapack_error(__LOCALIZE("empty repository name", "reapack_error_msg"));
+    throw reapack_error(__LOCALIZE("empty repository name", "reapack_remote"));
   if(!validateName(name)) // also checks for emptyness
-    throw reapack_error(String::format(__LOCALIZE("invalid repository name '%s'", "reapack_error_msg"), name.c_str()));
+    throw reapack_error(String::format(__LOCALIZE("invalid repository name '%s'", "reapack_remote"), name.c_str()));
 
   m_name = name;
 }
@@ -116,9 +116,9 @@ void Remote::setName(const std::string &name)
 void Remote::setUrl(const std::string &url)
 {
   if(!validateUrl(url))
-    throw reapack_error(__LOCALIZE("invalid url", "reapack_error_msg"));
+    throw reapack_error(__LOCALIZE("invalid url", "reapack_remote"));
   else if(m_protected && url != m_url)
-    throw reapack_error(__LOCALIZE("cannot change the URL of a protected repository", "reapack_error_msg"));
+    throw reapack_error(__LOCALIZE("cannot change the URL of a protected repository", "reapack_remote"));
 
   m_url = url;
 }

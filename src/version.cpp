@@ -86,7 +86,7 @@ std::ostream &operator<<(std::ostream &os, const Version &ver)
   os << "\r\n";
 
   const std::string &changelog = ver.changelog();
-  os << String::indent(changelog.empty() ? __LOCALIZE("No changelog", "reapack") : changelog);
+  os << String::indent(changelog.empty() ? __LOCALIZE("No changelog", "reapack_version") : changelog);
 
   return os;
 }

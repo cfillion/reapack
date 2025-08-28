@@ -97,7 +97,7 @@ IndexPtr Transaction::loadIndex(const Remote &remote)
   }
   catch(const reapack_error &e) {
     m_receipt.addError({
-      String::format(__LOCALIZE("Could not load repository: %s", "reapack_error_msg"), e.what()), remote.name()});
+      String::format(__LOCALIZE("Could not load repository: %s", "reapack_transaction"), e.what()), remote.name()});
     return nullptr;
   }
 }
@@ -278,7 +278,7 @@ void Transaction::registerScript(const HostTicket &reg, const bool isLastCall)
       isLastCall && isLastSection);
 
     if(!id && enableError) {
-      m_receipt.addError({__LOCALIZE("This script could not be registered in REAPER.", "reapack_error_msg"),
+      m_receipt.addError({__LOCALIZE("This script could not be registered in REAPER.", "reapack_transaction"),
         reg.file.path.join()});
       enableError = false;
     }

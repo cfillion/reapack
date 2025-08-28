@@ -40,13 +40,13 @@ void ObsoleteQuery::onInit()
   m_okBtn = getControl(IDOK);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {__LOCALIZE("Package", "reapack_obsolete_column"), 550}
+    {__LOCALIZE("Package", "reapack_obsquery"), 550}
   });
 
   m_list->onSelect >> [=] { setEnabled(m_list->hasSelection(), m_okBtn); };
   m_list->onFillContextMenu >> [=] (Menu &menu, int) {
-    menu.addAction(__LOCALIZE("Select &all", "reapack_obsolete_menu"), ACTION_SELECT_ALL);
-    menu.addAction(__LOCALIZE("&Unselect all", "reapack_obsolete_menu"), ACTION_UNSELECT_ALL);
+    menu.addAction(__LOCALIZE("Select &all", "reapack_obsquery"), ACTION_SELECT_ALL);
+    menu.addAction(__LOCALIZE("&Unselect all", "reapack_obsquery"), ACTION_UNSELECT_ALL);
     return true;
   };
 

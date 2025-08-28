@@ -190,11 +190,11 @@ void About::setMetadata(const Metadata *metadata, const bool substitution)
   }
 
   if(aboutText.empty())
-    m_desc->setPlainText(__LOCALIZE("This package or repository does not provide any documentation.", "reapack_about_error_msg"));
+    m_desc->setPlainText(__LOCALIZE("This package or repository does not provide any documentation.", "reapack_about"));
   else if(!m_desc->setRichText(aboutText))
-    m_desc->setPlainText(__LOCALIZE("Could not load RTF document.", "reapack_about_error_msg"));
+    m_desc->setPlainText(__LOCALIZE("Could not load RTF document.", "reapack_about"));
 
-  m_tabs->addTab({__LOCALIZE("About", "reapack"), {m_desc->handle()}});
+  m_tabs->addTab({__LOCALIZE("About", "reapack_about"), {m_desc->handle()}});
 
   const auto &getLinkControl = [](const Metadata::LinkType type) {
     switch(type) {
@@ -294,24 +294,24 @@ void AboutIndexDelegate::init(About *dialog)
 
   dialog->setTitle(m_index->name());
   dialog->setMetadata(m_index->metadata(), m_index->name() == "ReaPack");
-  dialog->setAction(__LOCALIZE("Install/update ", "reapack_about_button" ) + m_index->name());
+  dialog->setAction(__LOCALIZE("Install/update ", "reapack_about" ) + m_index->name());
 
-  dialog->tabs()->addTab({__LOCALIZE("Packages", "reapack_about_tab"),
+  dialog->tabs()->addTab({__LOCALIZE("Packages", "reapack_about"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
-  dialog->tabs()->addTab({__LOCALIZE("Installed Files", "reapack_about_tab"),
+  dialog->tabs()->addTab({__LOCALIZE("Installed Files", "reapack_about"),
     {dialog->getControl(IDC_REPORT)}});
 
-  dialog->menu()->addColumn({__LOCALIZE("Category", "reapack_about_column"), 142});
+  dialog->menu()->addColumn({__LOCALIZE("Category", "reapack_about"), 142});
 
   dialog->menu()->reserveRows(m_index->categories().size() + 1);
-  dialog->menu()->createRow()->setCell(0, __LOCALIZE("<All Packages>", "reapack_about_menu"));
+  dialog->menu()->createRow()->setCell(0, __LOCALIZE("<All Packages>", "reapack_about"));
 
   for(const Category *cat : m_index->categories())
     dialog->menu()->createRow()->setCell(0, cat->name());
 
-  dialog->list()->addColumn({__LOCALIZE("Package", "reapack_about_column"), 382});
-  dialog->list()->addColumn({__LOCALIZE("Version", "reapack_about_column"), 80, 0, ListView::VersionType});
-  dialog->list()->addColumn({__LOCALIZE("Author", "reapack_about_column"), 90});
+  dialog->list()->addColumn({__LOCALIZE("Package", "reapack_about"), 382});
+  dialog->list()->addColumn({__LOCALIZE("Version", "reapack_about"), 80, 0, ListView::VersionType});
+  dialog->list()->addColumn({__LOCALIZE("Author", "reapack_about"), 90});
 
   initInstalledFiles();
 }
@@ -333,7 +333,7 @@ void AboutIndexDelegate::initInstalledFiles()
     Win32::setWindowText(report, String::format(
       __LOCALIZE("The file list is currently unavailable.\x20"
       "Retry later when all installation task are completed.\r\n"
-      "\r\nError description: %s", "reapack_about_error_msg"), e.what()
+      "\r\nError description: %s", "reapack_about"), e.what()
     ).c_str());
     return;
   }
@@ -389,8 +389,8 @@ bool AboutIndexDelegate::fillContextMenu(Menu &menu, const int index) const
   if(index < 0)
     return false;
 
-  menu.addAction(__LOCALIZE("Find in the &browser", "reapack_about_menu"), ACTION_FIND_IN_BROWSER);
-  menu.addAction(__LOCALIZE("About this &package", "reapack_about_menu"), ACTION_ABOUT_PKG);
+  menu.addAction(__LOCALIZE("Find in the &browser", "reapack_about"), ACTION_FIND_IN_BROWSER);
+  menu.addAction(__LOCALIZE("About this &package", "reapack_about"), ACTION_ABOUT_PKG);
 
   return true;
 }
@@ -459,9 +459,9 @@ void AboutIndexDelegate::install()
   enum { INSTALL_ALL = 80, UPDATE_ONLY, OPEN_BROWSER };
 
   Menu menu;
-  menu.addAction(__LOCALIZE("Install all packages in this repository", "reapack_about_menu"), INSTALL_ALL);
-  menu.addAction(__LOCALIZE("Install individual packages in this repository", "reapack_about_menu"), OPEN_BROWSER);
-  menu.addAction(__LOCALIZE("Update installed packages only", "reapack_about_menu"), UPDATE_ONLY);
+  menu.addAction(__LOCALIZE("Install all packages in this repository", "reapack_about"), INSTALL_ALL);
+  menu.addAction(__LOCALIZE("Install individual packages in this repository", "reapack_about"), OPEN_BROWSER);
+  menu.addAction(__LOCALIZE("Update installed packages only", "reapack_about"), UPDATE_ONLY);
 
   const int choice = menu.show(m_dialog->getControl(IDC_ACTION), m_dialog->handle());
 
@@ -473,7 +473,7 @@ void AboutIndexDelegate::install()
   if(!remote) {
     // In case the user uninstalled the repository while this dialog was opened
     Win32::messageBox(m_dialog->handle(),
-      __LOCALIZE("This repository cannot be found in your current configuration.", "reapack_about_error_msg"),
+      __LOCALIZE("This repository cannot be found in your current configuration.", "reapack_about"),
       "ReaPack", MB_OK);
     return;
   }
@@ -496,8 +496,8 @@ void AboutIndexDelegate::install()
       __LOCALIZE("Do you want ReaPack to install new packages from this repository"
       " when synchronizing in the future?\n\nThis setting can also be"
       " customized globally or on a per-repository basis in"
-      " ReaPack > Manage repositories.", "reapack_about_msg"),
-      __LOCALIZE("Install all packages in this repository", "reapack_about_msg"), MB_YESNOCANCEL);
+      " ReaPack > Manage repositories.", "reapack_about"),
+      __LOCALIZE("Install all packages in this repository", "reapack_about"), MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -535,16 +535,16 @@ void AboutPackageDelegate::init(About *dialog)
   dialog->setMetadata(m_package->metadata());
   dialog->setAction("About " + m_index->name());
 
-  dialog->tabs()->addTab({__LOCALIZE("History", "reapack_about_tab"),
+  dialog->tabs()->addTab({__LOCALIZE("History", "reapack_about"),
     {dialog->menu()->handle(), dialog->getControl(IDC_CHANGELOG)}});
-  dialog->tabs()->addTab({__LOCALIZE("Contents", "reapack_about_tab"),
+  dialog->tabs()->addTab({__LOCALIZE("Contents", "reapack_about"),
     {dialog->menu()->handle(), dialog->list()->handle()}});
 
-  dialog->menu()->addColumn({__LOCALIZE("Version", "reapack_about_column"), 142, 0, ListView::VersionType});
+  dialog->menu()->addColumn({__LOCALIZE("Version", "reapack_about"), 142, 0, ListView::VersionType});
 
-  dialog->list()->addColumn({__LOCALIZE("File", "reapack_about_column"), 267});
-  dialog->list()->addColumn({__LOCALIZE("Path", "reapack_about_column"), 207});
-  dialog->list()->addColumn({__LOCALIZE("Action List", "reapack_about_column"), 84});
+  dialog->list()->addColumn({__LOCALIZE("File", "reapack_about"), 267});
+  dialog->list()->addColumn({__LOCALIZE("Path", "reapack_about"), 207});
+  dialog->list()->addColumn({__LOCALIZE("Action List", "reapack_about"), 84});
 
   dialog->menu()->reserveRows(m_package->versions().size());
 
@@ -565,12 +565,12 @@ void AboutPackageDelegate::init(About *dialog)
 void AboutPackageDelegate::updateList(const int index)
 {
   static const std::pair<Source::Section, const char *> sectionMap[] {
-    {Source::MainSection,                __LOCALIZE("Main", "reapack_about_source")},
-    {Source::MIDIEditorSection,          __LOCALIZE("MIDI Editor", "reapack_about_source")},
-    {Source::MIDIInlineEditorSection,    __LOCALIZE("MIDI Inline Editor", "reapack_about_source")},
-    {Source::MIDIEventListEditorSection, __LOCALIZE("MIDI Event List Editor", "reapack_about_source")},
-    {Source::MediaExplorerSection,       __LOCALIZE("Media Explorer", "reapack_about_source")},
-    {Source::CrossfadeEditorSection,     __LOCALIZE("Crossfade Editor", "reapack_about_source")},
+    {Source::MainSection,                __LOCALIZE("Main", "reapack_about")},
+    {Source::MIDIEditorSection,          __LOCALIZE("MIDI Editor", "reapack_about")},
+    {Source::MIDIInlineEditorSection,    __LOCALIZE("MIDI Inline Editor", "reapack_about")},
+    {Source::MIDIEventListEditorSection, __LOCALIZE("MIDI Event List Editor", "reapack_about")},
+    {Source::MediaExplorerSection,       __LOCALIZE("Media Explorer", "reapack_about")},
+    {Source::CrossfadeEditorSection,     __LOCALIZE("Crossfade Editor", "reapack_about")},
   };
 
   if(index < 0)
@@ -598,14 +598,14 @@ void AboutPackageDelegate::updateList(const int index)
       }
 
       if(sections) // In case we forgot to add a section to sectionMap!
-        sectionNames.push_back(__LOCALIZE("Other", "reapack_about_source"));
+        sectionNames.push_back(__LOCALIZE("Other", "reapack_about"));
 
-      actionList = __LOCALIZE("Yes", "reapack") + std::string(" (");
+      actionList = __LOCALIZE("Yes", "reapack_about") + std::string(" (");
       actionList += boost::algorithm::join(sectionNames, ", ");
       actionList += ')';
     }
     else
-      actionList = __LOCALIZE("No", "reapack");
+      actionList = __LOCALIZE("No", "reapack_about");
 
     int c = 0;
     auto row = m_dialog->list()->createRow((void *)src);
@@ -622,9 +622,9 @@ bool AboutPackageDelegate::fillContextMenu(Menu &menu, const int index) const
 
   auto src = static_cast<const Source *>(m_dialog->list()->row(index)->userData);
 
-  menu.addAction(__LOCALIZE("Copy source URL", "reapack_about_menu"), ACTION_COPY_URL);
+  menu.addAction(__LOCALIZE("Copy source URL", "reapack_about"), ACTION_COPY_URL);
   menu.setEnabled(m_current.size() > 0 && FS::exists(src->targetPath()),
-    menu.addAction(__LOCALIZE("Locate in explorer/finder", "reapack_about_menu"), ACTION_LOCATE));
+    menu.addAction(__LOCALIZE("Locate in explorer/finder", "reapack_about"), ACTION_LOCATE));
 
   return true;
 }

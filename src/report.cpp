@@ -62,7 +62,7 @@ void Report::onTimer(int timer)
 
   Win32::messageBox(handle(),
     __LOCALIZE("One or more native REAPER extensions were installed.\n"
-    "These newly installed files won't be loaded until REAPER is restarted.", "reapack_report_msg"),
+    "These newly installed files won't be loaded until REAPER is restarted.", "reapack_report"),
     "ReaPack Notice", MB_OK);
 }
 
@@ -71,13 +71,13 @@ void Report::updateLabel()
   const char *label;
 
   if(m_receipt->flags() == Receipt::ErrorFlag)
-    label = __LOCALIZE("Operation failed. The following error(s) occured:", "reapack_report_msg");
+    label = __LOCALIZE("Operation failed. The following error(s) occured:", "reapack_report");
   else if(m_receipt->test(Receipt::ErrorFlag))
-    label = __LOCALIZE("The operation was partially completed (one or more errors occured):", "reapack_report_msg");
+    label = __LOCALIZE("The operation was partially completed (one or more errors occured):", "reapack_report");
   else if(m_receipt->test(Receipt::InstalledOrRemoved))
-    label = __LOCALIZE("All done! Description of the changes:", "reapack_report_msg");
+    label = __LOCALIZE("All done! Description of the changes:", "reapack_report");
   else
-    label = __LOCALIZE("Operation completed successfully!", "reapack_report_msg");
+    label = __LOCALIZE("Operation completed successfully!", "reapack_report");
 
   Win32::setWindowText(getControl(IDC_LABEL), label);
 }

@@ -93,10 +93,10 @@ Package::Package(const Type type, const std::string &name, const Category *cat)
   : m_category(cat), m_type(type), m_name(name)
 {
   if(m_name.empty())
-    throw reapack_error(__LOCALIZE("empty package name", "reapack_error_msg"));
+    throw reapack_error(__LOCALIZE("empty package name", "reapack_package"));
   else if(m_name.find_first_of("/\\") != std::string::npos) {
     throw reapack_error(
-      String::format(__LOCALIZE("invalid package name '%s'", "reapack_error_msg"), m_name.c_str()));
+      String::format(__LOCALIZE("invalid package name '%s'", "reapack_package"), m_name.c_str()));
   }
 }
 
@@ -118,7 +118,7 @@ bool Package::addVersion(const Version *ver)
   else if(ver->sources().empty())
     return false;
   else if(m_versions.count(ver)) {
-    throw reapack_error(String::format(__LOCALIZE("duplicate version '%s'", "reapack_error_msg"),
+    throw reapack_error(String::format(__LOCALIZE("duplicate version '%s'", "reapack_package"),
       ver->fullName().c_str()));
   }
 
