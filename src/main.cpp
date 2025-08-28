@@ -28,7 +28,7 @@
 #include <reaper_plugin_secrets.h>
 
 #define LOCALIZE_IMPORT_PREFIX "reapack_"
-#include <WDL/localize/localize-import.h>
+#include "localize-import.h"
 #include <WDL/localize/localize.h>
 
 #define REQUIRED_API(name) {reinterpret_cast<void **>(&name), #name, true}
