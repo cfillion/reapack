@@ -192,6 +192,9 @@ bool Filter::Group::pushSynonyms(const std::string_view &buf, int *flags)
     { "2nd", "second" },
     { "unpool", "un-pool" },
     { "spacer", "separator" },
+    { "uprank", "up-rank", "upranked", "up-ranked", "like", "happy" },
+    { "downrank", "down-rank", "downranked", "down-ranked", "dislike", "sad" },
+    { "duplicate", "copy", "version" },
   };
 
   auto *match = [&]() -> decltype(&*synonyms) {
