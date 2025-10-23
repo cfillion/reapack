@@ -297,8 +297,12 @@ const std::string &Hash::digest()
 
   m_value.resize(multihash.size() * 2);
 
-  for(size_t i = 0; i < multihash.size(); ++i)
-    sprintf(&m_value[i * 2], "%02x", multihash[i]);
+  for(size_t i = 0; i < multihash.size(); ++i) {
+      char buf[3];
+      snprintf(buf, sizeof(buf), "%02x", multihash[i]);
+      m_value[i * 2] = buf[0];
+      m_value[i * 2 + 1] = buf[1];
+  }
 
   return m_value;
 }

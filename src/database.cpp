@@ -85,7 +85,7 @@ void Database::setVersion(const Version &version)
   int32_t value = version.minor | static_cast<int32_t>(version.major) << 16;
 
   char sql[255];
-  sprintf(sql, "PRAGMA user_version = %" PRId32, value);
+  snprintf(sql, 255, "PRAGMA user_version = %" PRId32, value);
   exec(sql);
 }
 
@@ -110,7 +110,7 @@ void Database::commit()
 void Database::savepoint()
 {
   char sql[64];
-  sprintf(sql, "SAVEPOINT sp%zu", m_savePoint++);
+  snprintf(sql, sizeof(sql), "SAVEPOINT sp%zu", m_savePoint++);
 
   exec(sql);
 }
@@ -118,7 +118,7 @@ void Database::savepoint()
 void Database::restore()
 {
   char sql[64];
-  sprintf(sql, "ROLLBACK TO SAVEPOINT sp%zu", --m_savePoint);
+  snprintf(sql, sizeof(sql), "ROLLBACK TO SAVEPOINT sp%zu", --m_savePoint);
 
   exec(sql);
 }
@@ -126,7 +126,7 @@ void Database::restore()
 void Database::release()
 {
   char sql[64];
-  sprintf(sql, "RELEASE SAVEPOINT sp%zu", --m_savePoint);
+  snprintf(sql, sizeof(sql), "RELEASE SAVEPOINT sp%zu", --m_savePoint);
 
   exec(sql);
 }
