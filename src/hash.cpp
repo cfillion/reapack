@@ -297,11 +297,11 @@ const std::string &Hash::digest()
 
   m_value.resize(multihash.size() * 2);
 
+  static const char hex[] = "0123456789abcdef";
+
   for(size_t i = 0; i < multihash.size(); ++i) {
-      char buf[3];
-      snprintf(buf, sizeof(buf), "%02x", multihash[i]);
-      m_value[i * 2] = buf[0];
-      m_value[i * 2 + 1] = buf[1];
+    m_value[i * 2] = hex[multihash[i] >> 4];
+    m_value[i * 2 + 1] = hex[multihash[i] & 0xf];
   }
 
   return m_value;
