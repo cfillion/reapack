@@ -85,7 +85,7 @@ void Database::setVersion(const Version &version)
   int32_t value = version.minor | static_cast<int32_t>(version.major) << 16;
 
   char sql[255];
-  snprintf(sql, 255, "PRAGMA user_version = %" PRId32, value);
+  snprintf(sql, sizeof(sql), "PRAGMA user_version = %" PRId32, value);
   exec(sql);
 }
 
