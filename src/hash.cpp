@@ -297,8 +297,12 @@ const std::string &Hash::digest()
 
   m_value.resize(multihash.size() * 2);
 
-  for(size_t i = 0; i < multihash.size(); ++i)
-    sprintf(&m_value[i * 2], "%02x", multihash[i]);
+  static const char hex[] = "0123456789abcdef";
+
+  for(size_t i = 0; i < multihash.size(); ++i) {
+    m_value[i * 2] = hex[multihash[i] >> 4];
+    m_value[i * 2 + 1] = hex[multihash[i] & 0xf];
+  }
 
   return m_value;
 }
