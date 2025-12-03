@@ -10,7 +10,8 @@
     { "name": "boost-range",        "platform": "!linux" },
     "catch2",
     { "name": "curl",     "platform": "windows", "features": [ "non-http" ] },
-    "sqlite3",
-    { "name": "tinyxml2", "platform": "windows" }
+    { "name": "sqlite3", "default-features": false },
+    { "name": "tinyxml2", "platform": "windows" },
+    { "name": "libxml2",  "platform": "linux", "default-features": false }
   ]
 }
