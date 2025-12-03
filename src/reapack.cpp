@@ -37,6 +37,8 @@
 
 #include <reaper_plugin_functions.h>
 
+#include <WDL/localize/localize.h>
+
 ReaPack *ReaPack::s_instance = nullptr;
 
 #ifdef _WIN32
@@ -107,22 +109,22 @@ ReaPack::~ReaPack()
 
 void ReaPack::setupActions()
 {
-  m_actions.add("REAPACK_SYNC", "ReaPack: Synchronize packages",
+  m_actions.add("REAPACK_SYNC", __LOCALIZE("ReaPack: Synchronize packages", "reapack_reapack"),
     std::bind(&ReaPack::synchronizeAll, this));
 
-  m_actions.add("REAPACK_BROWSE", "ReaPack: Browse packages...",
+  m_actions.add("REAPACK_BROWSE", __LOCALIZE("ReaPack: Browse packages...", "reapack_reapack"),
     std::bind(&ReaPack::browsePackages, this));
 
-  m_actions.add("REAPACK_UPLOAD", "ReaPack: Package editor",
+  m_actions.add("REAPACK_UPLOAD", __LOCALIZE("ReaPack: Package editor", "reapack_reapack"),
     std::bind(&ReaPack::uploadPackage, this));
 
-  m_actions.add("REAPACK_IMPORT", "ReaPack: Import repositories...",
+  m_actions.add("REAPACK_IMPORT", __LOCALIZE("ReaPack: Import repositories...", "reapack_reapack"),
     std::bind(&ReaPack::importRemote, this));
 
-  m_actions.add("REAPACK_MANAGE", "ReaPack: Manage repositories...",
+  m_actions.add("REAPACK_MANAGE", __LOCALIZE("ReaPack: Manage repositories...", "reapack_reapack"),
     std::bind(&ReaPack::manageRemotes, this));
 
-  m_actions.add("REAPACK_ABOUT", "ReaPack: About...",
+  m_actions.add("REAPACK_ABOUT", __LOCALIZE("ReaPack: About...", "reapack_reapack"),
     std::bind(&ReaPack::aboutSelf, this));
 }
 
@@ -146,7 +148,7 @@ void ReaPack::synchronizeAll()
   const std::vector<Remote> &remotes = m_config.remotes.getEnabled();
 
   if(remotes.empty()) {
-    ShowMessageBox("No repository enabled, nothing to do!", "ReaPack", MB_OK);
+    ShowMessageBox(__LOCALIZE("No repository enabled, nothing to do!", "reapack_reapack"), __LOCALIZE("ReaPack", "reapack_reapack"), MB_OK);
     return;
   }
 
@@ -240,7 +242,7 @@ void ReaPack::about(const Remote &repo, const bool focus)
 
 void ReaPack::aboutSelf()
 {
-  about(remote("ReaPack"));
+  about(remote(__LOCALIZE("ReaPack", "reapack_reapack")));
 }
 
 About *ReaPack::about(const bool instantiate)
@@ -282,9 +284,9 @@ Transaction *ReaPack::setupTransaction()
   }
   catch(const reapack_error &e) {
     Win32::messageBox(m_mainWindow, String::format(
-      "The following error occurred while creating a transaction:\n\n%s",
+      __LOCALIZE("The following error occurred while creating a transaction:\n\n%s", "reapack_reapack"),
       e.what()
-    ).c_str(), "ReaPack", MB_OK);
+    ).c_str(), __LOCALIZE("ReaPack", "reapack_reapack"), MB_OK);
     return nullptr;
   }
 
@@ -340,7 +342,7 @@ bool ReaPack::requestProxy()
     LockDialog progressLock(m_progress.get());
 
     m_config.network.fallbackProxy = IDRETRY == Win32::messageBox(m_mainWindow,
-      "GitHub has temporarily rate-limited file download requests from ReaPack."
+      __LOCALIZE("GitHub has temporarily rate-limited file download requests from ReaPack."
       "\r\n\r\n"
       "Click on Retry to authorize ReaPack to automatically download from "
       "reapack.com instead of directly from github.com when this occurs."
@@ -349,8 +351,8 @@ bool ReaPack::requestProxy()
       "by GitHub will fail with a 429 error code)."
       "\r\n\r\n"
       "This setting can be changed at any time in "
-      "ReaPack > Manage repositories > Options > Network settings.",
-      "ReaPack", MB_RETRYCANCEL | MB_ICONQUESTION);
+      "ReaPack > Manage repositories > Options > Network settings.", "reapack_reapack"),
+      __LOCALIZE("ReaPack", "reapack_reapack"), MB_RETRYCANCEL | MB_ICONQUESTION);
   }
 
   return static_cast<bool>(m_config.network.fallbackProxy);
@@ -395,11 +397,11 @@ void ReaPack::createDirectories()
     return;
 
   Win32::messageBox(Splash_GetWnd(), String::format(
-    "ReaPack could not create %s! "
+    __LOCALIZE("ReaPack could not create %s! "
     "Please investigate or report this issue.\n\n"
-    "Error description: %s",
+    "Error description: %s", "reapack_reapack"),
     path.prependRoot().join().c_str(), FS::lastError()
-  ).c_str(), "ReaPack", MB_OK);
+  ).c_str(), __LOCALIZE("ReaPack", "reapack_reapack"), MB_OK);
 }
 
 void ReaPack::registerSelf()

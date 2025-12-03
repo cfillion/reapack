@@ -23,6 +23,7 @@
 #include "resource.hpp"
 
 #include <sstream>
+#include <WDL/localize/localize.h>
 
 enum { ACTION_SELECT_ALL = 300, ACTION_UNSELECT_ALL };
 
@@ -39,13 +40,13 @@ void ObsoleteQuery::onInit()
   m_okBtn = getControl(IDOK);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Package", 550}
+    {__LOCALIZE("Package", "reapack_obsquery"), 550}
   });
 
   m_list->onSelect >> [=] { setEnabled(m_list->hasSelection(), m_okBtn); };
   m_list->onFillContextMenu >> [=] (Menu &menu, int) {
-    menu.addAction("Select &all", ACTION_SELECT_ALL);
-    menu.addAction("&Unselect all", ACTION_UNSELECT_ALL);
+    menu.addAction(__LOCALIZE("Select &all", "reapack_obsquery"), ACTION_SELECT_ALL);
+    menu.addAction(__LOCALIZE("&Unselect all", "reapack_obsquery"), ACTION_UNSELECT_ALL);
     return true;
   };
 

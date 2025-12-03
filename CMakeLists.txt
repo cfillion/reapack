@@ -13,6 +13,9 @@ if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
 endif()
 
 project(reapack LANGUAGES C CXX)
+if(MSVC)
+  add_compile_options(/utf-8)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -111,6 +114,11 @@ set_target_properties(reaper_reapack PROPERTIES
 )
 add_subdirectory(src)
 target_link_libraries(reaper_reapack reapack)
+
+# Add langpack target
+add_executable(buildlangpack src/buildlangpack.cpp)
+target_include_directories(buildlangpack PRIVATE ${CMAKE_SOURCE_DIR}/vendor)
+target_link_libraries(buildlangpack WDL::WDL)
 
 add_subdirectory(test)
 add_custom_target(test

@@ -23,6 +23,9 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 
+#include "win32.hpp"
+#include <WDL/localize/localize.h>
+
 Receipt::Receipt()
   : m_flags(NoFlag)
 {
@@ -66,22 +69,22 @@ void Receipt::addError(const ErrorInfo &err)
 
 ReceiptPage Receipt::installedPage() const
 {
-  return {m_installs, "Installed"};
+  return {m_installs, __LOCALIZE("Installed", "reapack_receipt")};
 }
 
 ReceiptPage Receipt::removedPage() const
 {
-  return {m_removals, "Removed"};
+  return {m_removals, __LOCALIZE("Removed", "reapack_receipt")};
 }
 
 ReceiptPage Receipt::exportedPage() const
 {
-  return {m_exports, "Exported"};
+  return {m_exports, __LOCALIZE("Exported", "reapack_receipt")};
 }
 
 ReceiptPage Receipt::errorPage() const
 {
-  return {m_errors, "Error", "Errors"};
+  return {m_errors, __LOCALIZE("Error", "reapack_receipt"), __LOCALIZE("Errors", "reapack_receipt")};
 }
 
 void ReceiptPage::setTitle(const char *title)

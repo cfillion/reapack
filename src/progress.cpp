@@ -21,6 +21,7 @@
 #include "win32.hpp"
 
 #include <sstream>
+#include <WDL/localize/localize.h>
 
 Progress::Progress(ThreadPool *pool)
   : Dialog(IDD_PROGRESS_DIALOG),
@@ -86,7 +87,7 @@ void Progress::addTask(ThreadTask *task)
 
 void Progress::updateProgress()
 {
-  Win32::setWindowText(m_label, String::format("%s %s of %s: %s",
+  Win32::setWindowText(m_label, String::format(__LOCALIZE("%s %s of %s: %s", "reapack_progress"),
     m_current.step,
     String::number(std::min(m_done + 1, m_total)).c_str(),
     String::number(m_total).c_str(),
@@ -99,6 +100,6 @@ void Progress::updateProgress()
 
   SendMessage(m_progress, PBM_SETPOS, percent, 0);
   Win32::setWindowText(handle(), String::format(
-    "ReaPack: Operation in progress (%d%%)", percent
+    __LOCALIZE("ReaPack: Operation in progress (%d%%)", "reapack_progress"), percent
   ).c_str());
 }

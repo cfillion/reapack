@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+#include <WDL/localize/localize.h>
+
 enum Timers { TIMER_FILTER = 1, TIMER_ABOUT };
 
 Browser::Browser()
@@ -50,23 +52,23 @@ void Browser::onInit()
   disable(m_actionsBtn);
 
   // don't forget to update order of enum View in header file
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("All"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Queued"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Installed"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Out of date"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Obsolete"));
-  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)L("Uninstalled"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)__LOCALIZE("All", "reapack_browser"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)__LOCALIZE("Queued", "reapack_browser"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)__LOCALIZE("Installed", "reapack_browser"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)__LOCALIZE("Out of date", "reapack_browser"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)__LOCALIZE("Obsolete", "reapack_browser"));
+  SendMessage(m_view, CB_ADDSTRING, 0, (LPARAM)__LOCALIZE("Uninstalled", "reapack_browser"));
   SendMessage(m_view, CB_SETCURSEL, 0, 0);
 
   m_list = createControl<ListView>(IDC_LIST, ListView::Columns{
-    {"Status",       23, ListView::NoLabelFlag},
-    {"Package",     345, ListView::FilterFlag},
-    {"Category",    105, ListView::FilterFlag},
-    {"Version",      55, 0, ListView::VersionType},
-    {"Author",       95, ListView::FilterFlag},
-    {"Type",         70},
-    {"Repository",  120, ListView::CollapseFlag | ListView::FilterFlag},
-    {"Last Update", 105, 0, ListView::TimeType},
+    {__LOCALIZE("Status", "reapack_browser"),       23, ListView::NoLabelFlag},
+    {__LOCALIZE("Package", "reapack_browser"),     345, ListView::FilterFlag},
+    {__LOCALIZE("Category", "reapack_browser"),    105, ListView::FilterFlag},
+    {__LOCALIZE("Version", "reapack_browser"),      55, 0, ListView::VersionType},
+    {__LOCALIZE("Author", "reapack_browser"),       95, ListView::FilterFlag},
+    {__LOCALIZE("Type", "reapack_browser"),         70},
+    {__LOCALIZE("Repository", "reapack_browser"),  120, ListView::CollapseFlag | ListView::FilterFlag},
+    {__LOCALIZE("Last Update", "reapack_browser"), 105, 0, ListView::TimeType},
   });
 
   m_list->onActivate >> [=] { aboutPackage(m_list->itemUnderMouse()); };
@@ -264,8 +266,8 @@ bool Browser::fillContextMenu(Menu &menu, const int index)
   m_currentIndex = index;
   fillMenu(menu);
 
-  menu.addAction("&Select all", IDC_SELECT);
-  menu.addAction("&Unselect all", IDC_UNSELECT);
+  menu.addAction(__LOCALIZE("&Select all", "reapack_browser"), IDC_SELECT);
+  menu.addAction(__LOCALIZE("&Unselect all", "reapack_browser"), IDC_UNSELECT);
 
   return true;
 }
@@ -279,7 +281,7 @@ void Browser::fillMenu(Menu &menu)
 
     if(entry) {
       menu.addSeparator();
-      Menu pkgMenu = menu.addMenu("Package under cursor");
+      Menu pkgMenu = menu.addMenu(__LOCALIZE("Package under cursor", "reapack_browser"));
       entry->fillMenu(pkgMenu);
     }
   }
@@ -290,7 +292,7 @@ void Browser::fillMenu(Menu &menu)
     menu.addSeparator();
 
   if(m_list->hasSelection())
-    menu.addAction("&Copy package name", ACTION_COPY);
+    menu.addAction(__LOCALIZE("&Copy package name", "reapack_browser"), ACTION_COPY);
 }
 
 void Browser::fillSelectionMenu(Menu &menu)
@@ -301,18 +303,18 @@ void Browser::fillSelectionMenu(Menu &menu)
     selFlags |= getEntry(index)->possibleActions(false);
 
   menu.setEnabled(selFlags & Entry::CanInstallLatest,
-    menu.addAction("&Install/update selection", ACTION_LATEST_ALL));
+    menu.addAction(__LOCALIZE("&Install/update selection", "reapack_browser"), ACTION_LATEST_ALL));
   menu.setEnabled(selFlags & Entry::CanReinstall,
-    menu.addAction("&Reinstall selection", ACTION_REINSTALL_ALL));
+    menu.addAction(__LOCALIZE("&Reinstall selection", "reapack_browser"), ACTION_REINSTALL_ALL));
   menu.setEnabled(selFlags & Entry::CanUninstall,
-    menu.addAction("&Uninstall selection", ACTION_UNINSTALL_ALL));
+    menu.addAction(__LOCALIZE("&Uninstall selection", "reapack_browser"), ACTION_UNINSTALL_ALL));
   menu.setEnabled(selFlags & Entry::CanClearQueued,
-    menu.addAction("&Clear queued actions", ACTION_RESET_ALL));
+    menu.addAction(__LOCALIZE("&Clear queued actions", "reapack_browser"), ACTION_RESET_ALL));
 }
 
 void Browser::updateDisplayLabel()
 {
-  Win32::setWindowText(m_displayBtn, String::format("%s/%s package%s...",
+  Win32::setWindowText(m_displayBtn, String::format(__LOCALIZE("%s/%s package%s...", "reapack_browser"), 
     String::number(m_list->visibleRowCount()).c_str(),
     String::number(m_entries.size()).c_str(), m_entries.size() == 1 ? "" : "s"
   ).c_str());
@@ -320,25 +322,25 @@ void Browser::updateDisplayLabel()
 
 void Browser::displayButton()
 {
-  constexpr std::pair<const char *, Package::Type> types[] {
-    {"&Automation Items",  Package::AutomationItemType},
-    {"&Effects",           Package::EffectType},
-    {"E&xtensions",        Package::ExtensionType},
-    {"&Key Maps",          Package::KeymapType},
-    {"&Language Packs",    Package::LangPackType},
-    {"&MIDI Note Names",   Package::MIDINoteNamesType},
-    {"&Project Templates", Package::ProjectTemplateType},
-    {"&Scripts",           Package::ScriptType},
-    {"&Themes",            Package::ThemeType},
-    {"&Track Templates",   Package::TrackTemplateType},
-    {"&Web Interfaces",    Package::WebInterfaceType},
+  static const std::pair<const char *, Package::Type> types[] {
+    {__LOCALIZE("&Automation Items", "reapack_browser"),  Package::AutomationItemType},
+    {__LOCALIZE("&Effects", "reapack_browser"),           Package::EffectType},
+    {__LOCALIZE("E&xtensions", "reapack_browser"),        Package::ExtensionType},
+    {__LOCALIZE("&Key Maps", "reapack_browser"),          Package::KeymapType},
+    {__LOCALIZE("&Language Packs", "reapack_browser"),    Package::LangPackType},
+    {__LOCALIZE("&MIDI Note Names", "reapack_browser"),   Package::MIDINoteNamesType},
+    {__LOCALIZE("&Project Templates", "reapack_browser"), Package::ProjectTemplateType},
+    {__LOCALIZE("&Scripts", "reapack_browser"),           Package::ScriptType},
+    {__LOCALIZE("&Themes", "reapack_browser"),            Package::ThemeType},
+    {__LOCALIZE("&Track Templates", "reapack_browser"),   Package::TrackTemplateType},
+    {__LOCALIZE("&Web Interfaces", "reapack_browser"),    Package::WebInterfaceType},
 
-    {"&Other packages",    Package::UnknownType},
+    {__LOCALIZE("&Other packages", "reapack_browser"),    Package::UnknownType},
   };
 
   Menu menu;
 
-  auto index = menu.addAction("&All packages", ACTION_FILTERTYPE);
+  auto index = menu.addAction(__LOCALIZE("&All packages", "reapack_browser"), ACTION_FILTERTYPE);
   if(!m_typeFilter)
     menu.checkRadio(index);
 
@@ -351,10 +353,10 @@ void Browser::displayButton()
 
   menu.addSeparator();
 
-  menu.addAction("&Synchronize packages", ACTION_SYNCHRONIZE);
-  menu.addAction("&Refresh repositories", ACTION_REFRESH);
-  menu.addAction("Package &editor", ACTION_UPLOAD);
-  menu.addAction("&Manage repositories...", ACTION_MANAGE);
+  menu.addAction(__LOCALIZE("&Synchronize packages", "reapack_browser"), ACTION_SYNCHRONIZE);
+  menu.addAction(__LOCALIZE("&Refresh repositories", "reapack_browser"), ACTION_REFRESH);
+  menu.addAction(__LOCALIZE("Package &editor", "reapack_browser"), ACTION_UPLOAD);
+  menu.addAction(__LOCALIZE("&Manage repositories...", "reapack_browser"), ACTION_MANAGE);
 
   menu.show(m_displayBtn, handle());
 }
@@ -445,9 +447,9 @@ void Browser::refresh(const bool stale)
     if(!isVisible() || stale) {
       show();
 
-      Win32::messageBox(handle(), "No repository enabled!\n"
-        "Enable or import repositories from Extensions > ReaPack > Manage repositories.",
-        "Browse packages", MB_OK);
+      Win32::messageBox(handle(), __LOCALIZE("No repository enabled!\n"
+        "Enable or import repositories from Extensions > ReaPack > Manage repositories.", "reapack_browser"),
+        __LOCALIZE("Browse packages", "reapack_browser"), MB_OK);
     }
 
     // Clear the list if it were previously filled.
@@ -655,11 +657,11 @@ void Browser::installLatestAll()
   const bool isEverything = static_cast<size_t>(m_list->selectionSize()) == m_entries.size();
 
   if(isEverything && !installOpts.autoInstall) {
-    const int btn = Win32::messageBox(handle(), "Do you want ReaPack to install"
+    const int btn = Win32::messageBox(handle(), __LOCALIZE("Do you want ReaPack to install"
       " new packages automatically when synchronizing in the future?\n\nThis"
       " setting can also be customized globally or on a per-repository basis"
-      " in ReaPack > Manage repositories.",
-      "Install every available packages", MB_YESNOCANCEL);
+      " in ReaPack > Manage repositories.", "reapack_browser"),
+      __LOCALIZE("Install every available packages", "reapack_browser"), MB_YESNOCANCEL);
 
     switch(btn) {
     case IDYES:
@@ -853,10 +855,10 @@ bool Browser::confirm() const
     return true;
 
   return IDYES == Win32::messageBox(handle(), String::format(
-    "Are you sure to uninstall %zu package%s?\nThe files and settings will"
-    " be permanently deleted from this computer.",
+    __LOCALIZE("Are you sure to uninstall %zu package%s?\nThe files and settings will"
+    " be permanently deleted from this computer.", "reapack_browser"),
     count, count == 1 ? "" : "s"
-  ).c_str(), "ReaPack Query", MB_YESNO);
+  ).c_str(), __LOCALIZE("ReaPack Query", "reapack_browser"), MB_YESNO);
 }
 
 bool Browser::apply()

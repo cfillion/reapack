@@ -26,6 +26,7 @@
 #include <cassert>
 
 #include <reaper_plugin_functions.h>
+#include <WDL/localize/localize.h>
 
 static const int DOWNLOAD_TIMEOUT = 15;
 // to set the amount of concurrent downloads, change the size of
@@ -115,7 +116,7 @@ Download::Download(const std::string &url, const NetworkOpts &opts, const int fl
 
 void Download::setName(const std::string &name)
 {
-  setSummary({ "Downloading", name });
+  setSummary({ __LOCALIZE("Downloading", "reapack_download"), name });
 }
 
 static bool isGitHub(const std::string &url)
@@ -176,7 +177,7 @@ bool Download::run(const bool proxy)
     headers = curl_slist_append(headers, "X-ReaPack-Proxy: 1");
   curl_easy_setopt(ctx, CURLOPT_HTTPHEADER, headers);
 
-  std::string errbuf = "No error message";
+  std::string errbuf = __LOCALIZE("No error message", "reapack_download");
   errbuf.resize(CURL_ERROR_SIZE - 1, '\0');
   curl_easy_setopt(ctx, CURLOPT_ERRORBUFFER, errbuf.data());
 
@@ -204,7 +205,7 @@ bool Download::run(const bool proxy)
   }
   else if(write.hash && write.hash->digest() != m_expectedChecksum) {
     const std::string &err = String::format(
-      "Checksum mismatch.\nExpected: %s\nActual: %s",
+      __LOCALIZE("Checksum mismatch.\nExpected: %s\nActual: %s", "reapack_download"),
       m_expectedChecksum.c_str(), write.hash->digest().c_str()
     );
     setError({err, m_url});

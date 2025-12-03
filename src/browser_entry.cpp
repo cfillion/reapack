@@ -24,6 +24,7 @@
 #include "string.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
+#include <WDL/localize/localize.h>
 
 Browser::Entry::Entry(const Package *pkg, const Registry::Entry &re, const IndexPtr &i)
   : m_flags(0), regEntry(re), package(pkg), index(i), current(nullptr)
@@ -176,14 +177,14 @@ void Browser::Entry::fillMenu(Menu &menu) const
 {
   if(test(InstalledFlag)) {
     if(test(OutOfDateFlag)) {
-      const UINT actionIndex = menu.addAction(String::format("U&pdate to v%s",
+      const UINT actionIndex = menu.addAction(String::format(__LOCALIZE("U&pdate to v%s", "reapack_browser_entry"),
         latest->name().toString().c_str()), ACTION_LATEST);
 
       if(target && *target == latest)
         menu.check(actionIndex);
     }
 
-    const UINT actionIndex = menu.addAction(String::format("&Reinstall v%s",
+    const UINT actionIndex = menu.addAction(String::format(__LOCALIZE("&Reinstall v%s", "reapack_browser_entry"),
       regEntry.version.toString().c_str()), ACTION_REINSTALL);
 
     if(!current || test(ObsoleteFlag))
@@ -192,13 +193,13 @@ void Browser::Entry::fillMenu(Menu &menu) const
       menu.check(actionIndex);
   }
   else {
-    const UINT actionIndex = menu.addAction(String::format("&Install v%s",
+    const UINT actionIndex = menu.addAction(String::format(__LOCALIZE("&Install v%s", "reapack_browser_entry"),
       latest->name().toString().c_str()), ACTION_LATEST);
     if(target && *target == latest)
       menu.check(actionIndex);
   }
 
-  Menu versionMenu = menu.addMenu("Versions");
+  Menu versionMenu = menu.addMenu(__LOCALIZE("Versions", "reapack_browser_entry"));
   const UINT versionMenuIndex = menu.size() - 1;
   if(test(ObsoleteFlag))
     menu.disable(versionMenuIndex);
@@ -217,19 +218,19 @@ void Browser::Entry::fillMenu(Menu &menu) const
     }
   }
 
-  const UINT pinIndex = menu.addAction("&Pin current version", ACTION_PIN);
+  const UINT pinIndex = menu.addAction(__LOCALIZE("&Pin current version", "reapack_browser_entry"), ACTION_PIN);
   if(!test(CanToggleFlags))
     menu.disable(pinIndex);
   if(flags.value_or(regEntry.flags) & Registry::Entry::PinnedFlag)
     menu.check(pinIndex);
 
-  const UINT presIndex = menu.addAction("Enable pre-releases (&bleeding-edge)", ACTION_BLEEDINGEDGE);
+  const UINT presIndex = menu.addAction(__LOCALIZE("Enable pre-releases (&bleeding-edge)", "reapack_browser_entry"), ACTION_BLEEDINGEDGE);
   if(!test(CanToggleFlags))
     menu.disable(presIndex);
   if(flags.value_or(regEntry.flags) & Registry::Entry::BleedingEdgeFlag)
     menu.check(presIndex);
 
-  const UINT uninstallIndex = menu.addAction("&Uninstall", ACTION_UNINSTALL);
+  const UINT uninstallIndex = menu.addAction(__LOCALIZE("&Uninstall", "reapack_browser_entry"), ACTION_UNINSTALL);
   if(!test(InstalledFlag) || test(ProtectedFlag))
     menu.disable(uninstallIndex);
   else if(target && *target == nullptr)
@@ -238,9 +239,9 @@ void Browser::Entry::fillMenu(Menu &menu) const
   menu.addSeparator();
 
   menu.setEnabled(!test(ObsoleteFlag),
-    menu.addAction("About this &package", ACTION_ABOUT_PKG));
+    menu.addAction(__LOCALIZE("About this &package", "reapack_browser_entry"), ACTION_ABOUT_PKG));
 
-  menu.addAction(String::format("&About %s", indexName().c_str()), ACTION_ABOUT_REMOTE);
+  menu.addAction(String::format(__LOCALIZE("&About %s", "reapack_browser_entry"), indexName().c_str()), ACTION_ABOUT_REMOTE);
 }
 
 int Browser::Entry::possibleActions(bool allowToggle) const

@@ -22,6 +22,8 @@
 #include "path.hpp"
 #include "remote.hpp"
 #include "xml.hpp"
+#include "win32.hpp"
+#include <WDL/localize/localize.h>
 
 #include <cstring>
 #include <fstream>
@@ -51,13 +53,13 @@ IndexPtr Index::load(const std::string &name, const char *data)
   const XmlNode &root = doc.root();
 
   if(!root || strcmp(root.name(), "index"))
-    throw reapack_error("invalid index");
+    throw reapack_error(__LOCALIZE("invalid index", "reapack_index"));
 
   int version = 0;
   root.attribute("version", &version);
 
   if(!version)
-    throw reapack_error("index version not found");
+    throw reapack_error(__LOCALIZE("index version not found", "reapack_index"));
 
   Index *ri = new Index(name);
 
@@ -70,7 +72,7 @@ IndexPtr Index::load(const std::string &name, const char *data)
     loadV1(root, ri);
     break;
   default:
-    throw reapack_error("index version is unsupported");
+    throw reapack_error(__LOCALIZE("index version is unsupported", "reapack_index"));
   }
 
   ptr.release();

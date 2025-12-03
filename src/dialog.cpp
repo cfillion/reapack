@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
 #include <reaper_plugin_functions.h>
+#include <WDL/localize/localize.h>
 
 #ifdef _WIN32
 #  include <windowsx.h>
@@ -147,11 +148,11 @@ INT_PTR Dialog::init(REAPER_PLUGIN_HINSTANCE inst, HWND parent, Modality mode)
 
   switch(mode) {
   case Modeless:
-    CreateDialogParam(inst, MAKEINTRESOURCE(m_template),
+    CreateDialogParam(inst, reinterpret_cast<const char *>(MAKEINTRESOURCE(m_template)),
       m_parent, Proc, reinterpret_cast<LPARAM>(this));
     return true;
   case Modal:
-    return DialogBoxParam(inst, MAKEINTRESOURCE(m_template),
+    return DialogBoxParam(inst, reinterpret_cast<const char *>(MAKEINTRESOURCE(m_template)),
       m_parent, Proc, reinterpret_cast<LPARAM>(this));
   }
 
