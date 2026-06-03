@@ -1,3 +1,7 @@
+This repository now lives at https://codeberg.org/cfillion/reapack.
+
+Development of ReaPack v2 happens at https://codeberg.org/cfillion/reapack2.
+
 # ReaPack: Package manager for REAPER
 
 [![Build status](https://ci.appveyor.com/api/projects/status/hq0g2nleele3pqrl/branch/master?svg=true)](https://ci.appveyor.com/project/cfillion/reapack/branch/master)
